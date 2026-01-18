@@ -8,6 +8,8 @@ import { RulesVersionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { StaticDiceDisplay } from './StaticDiceDisplay';
 import { getUnitStats } from '@/lib/game-logic';
+import { Target } from 'lucide-react';
+import { Machine } from '@/lib/types';
 
 interface ParameterInputsProps {
   actionType: CombatActionType;
@@ -59,22 +61,33 @@ export function ParameterInputs({
     }
 
     if (unitStats) {
+      const isMachine = unit?.type === 'machine';
+      const weaponName = isMachine && parameters.weaponIndex !== undefined
+        ? (unit.data as Machine).weapons[parameters.weaponIndex].name
+        : null;
+
       return (
-        <div className="bg-gradient-to-br from-slate-800 to-slate-800/50 p-4 rounded-xl border border-slate-700 mb-4">
-          <div className="text-[10px] opacity-50 uppercase font-bold mb-3 tracking-wider text-center">
-            Ваше оружие
+        <div className="bg-gradient-to-br from-slate-800 to-slate-800/50 p-3 md:p-4 rounded-xl border border-slate-700 mb-4">
+          <div className="text-[10px] md:text-xs opacity-50 uppercase font-bold mb-2 md:mb-3 tracking-wider text-center flex items-center justify-center gap-2">
+            {isMachine && weaponName && (
+              <>
+                <Target className="w-3 h-3 md:w-4 md:h-4" />
+                <span>{weaponName}</span>
+              </>
+            )}
+            {!isMachine && 'Ваше оружие'}
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-slate-900/50 p-3 rounded-lg border border-blue-500/30">
-              <div className="text-[8px] opacity-40 uppercase font-bold mb-2 text-center">Дальность</div>
+          <div className="grid grid-cols-2 gap-2 md:gap-3">
+            <div className="bg-slate-900/50 p-2 md:p-3 rounded-lg border border-blue-500/30">
+              <div className="text-[8px] md:text-[10px] opacity-40 uppercase font-bold mb-1 md:mb-2 text-center">Дальность</div>
               <div className="flex justify-center">
-                <StaticDiceDisplay rollStr={unitStats.range} size="md" color="blue" showLabel />
+                <StaticDiceDisplay rollStr={unitStats.range} size="sm" color="blue" showLabel />
               </div>
             </div>
-            <div className="bg-slate-900/50 p-3 rounded-lg border border-orange-500/30">
-              <div className="text-[8px] opacity-40 uppercase font-bold mb-2 text-center">Мощность</div>
+            <div className="bg-slate-900/50 p-2 md:p-3 rounded-lg border border-orange-500/30">
+              <div className="text-[8px] md:text-[10px] opacity-40 uppercase font-bold mb-1 md:mb-2 text-center">Мощность</div>
               <div className="flex justify-center">
-                <StaticDiceDisplay rollStr={unitStats.power} size="md" color="orange" showLabel />
+                <StaticDiceDisplay rollStr={unitStats.power} size="sm" color="orange" showLabel />
               </div>
             </div>
           </div>

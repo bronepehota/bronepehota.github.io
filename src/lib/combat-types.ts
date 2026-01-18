@@ -87,7 +87,7 @@ export interface CombatFlowState {
  * Actions that can be dispatched to combat flow
  */
 export type CombatFlowAction =
-  | { type: 'START_COMBAT'; unit: any; soldierIndex?: number; weaponIndex?: number }
+  | { type: 'START_COMBAT'; unit: any; soldierIndex?: number; weaponIndex?: number; actionType?: CombatActionType }
   | { type: 'SELECT_ACTION'; actionType: CombatActionType }
   | { type: 'SET_PARAMETERS'; parameters: Partial<CombatParameters> }
   | { type: 'EXECUTE_ROLL' }
