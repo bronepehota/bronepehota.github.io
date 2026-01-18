@@ -268,10 +268,10 @@ export default function UnitCard({ unit, updateUnit, combatLog = [], onCombatLog
     <div
       onDoubleClick={handleOpenOriginal}
       className={cn(
-        "bg-slate-800 rounded-xl border-2 transition-all shadow-lg overflow-hidden relative cursor-default select-none",
+        "bg-slate-800 rounded-xl border-t-2 transition-all shadow-lg overflow-hidden relative cursor-default select-none",
         (isSquadDone || (isMachineDone && !isMachineDestroyed)) ? "opacity-70 grayscale-[0.3]" : "",
         isAllDead || isMachineDestroyed ? "opacity-40 grayscale" : "",
-        data.faction === 'polaris' ? "border-red-900/50" : data.faction === 'protectorate' ? "border-blue-900/50" : "border-green-900/50",
+        data.faction === 'polaris' ? "border-t-red-900/50" : data.faction === 'protectorate' ? "border-t-blue-900/50" : "border-t-green-900/50",
         !isSquad && machineImage ? "min-h-[600px]" : ""
       )}
       style={machineImage ? {
@@ -348,7 +348,7 @@ export default function UnitCard({ unit, updateUnit, combatLog = [], onCombatLog
           <div className="text-[9px] md:text-[10px] opacity-50 flex gap-1.5 md:gap-2 items-center">
             <span className="hidden sm:inline" style={{ color: faction?.color }}>{faction?.name || data.faction.toUpperCase()}</span>
             <span className="hidden sm:inline">•</span>
-            <span>{data.cost} ОЧК.</span>
+            <span className="hidden sm:inline">{data.cost} ОЧК.</span>
             {isSquadDone && !isAllDead && <span className="text-green-400 font-bold ml-auto flex items-center gap-1"><CheckCircle2 className="w-2.5 h-2.5 md:w-3 md:h-3" /> <span className="hidden sm:inline">ГОТОВ</span></span>}
             {isMachineDone && !isMachineDestroyed && <span className="text-green-400 font-bold ml-auto flex items-center gap-1"><CheckCircle2 className="w-2.5 h-2.5 md:w-3 md:h-3" /> <span className="hidden sm:inline">ГОТОВ</span></span>}
             {isMachineDestroyed && <div className="bg-red-600 text-white text-[7px] md:text-[8px] px-1 md:px-1.5 py-0.5 rounded font-black uppercase ml-auto"><UserX className="w-2.5 h-2.5 md:w-3 md:h-3 inline mr-0.5 md:mr-1" />УНИЧТОЖЕН</div>}

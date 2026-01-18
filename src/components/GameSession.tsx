@@ -205,8 +205,8 @@ export default function GameSession({ army, setArmy }: GameSessionProps) {
 
                   {/* Content */}
                   <div className="relative z-10 flex flex-col items-center justify-center h-full p-1 gap-0.5">
-                    {/* Unit number */}
-                    <div className="text-sm font-black leading-none text-slate-200">
+                    {/* Unit number - hidden on mobile */}
+                    <div className="text-sm font-black leading-none text-slate-200 hidden md:block">
                       {formatUnitNumber(unit, idx)}
                     </div>
 
@@ -291,7 +291,8 @@ export default function GameSession({ army, setArmy }: GameSessionProps) {
 
                   {/* Content */}
                   <div className="relative z-10 flex flex-col items-center justify-center h-full p-1 gap-0.5">
-                    <div className="text-sm font-black leading-none text-slate-200">
+                    {/* Unit number - hidden on mobile */}
+                    <div className="text-sm font-black leading-none text-slate-200 hidden md:block">
                       {formatUnitNumber(unit, idx)}
                     </div>
 
@@ -410,7 +411,7 @@ export default function GameSession({ army, setArmy }: GameSessionProps) {
       {/* New Turn FAB - Floating Action Button */}
       <button
         onClick={calculateInitiative}
-        className="fixed bottom-16 right-3 z-50 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white shadow-lg shadow-blue-900/50 rounded-2xl px-4 py-3 flex items-center gap-2 transition-all active:scale-95 min-h-[52px]"
+        className="fixed bottom-20 right-3 z-50 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white shadow-lg shadow-blue-900/50 rounded-2xl px-4 py-3 flex items-center gap-2 transition-all active:scale-95 min-h-[52px]"
       >
         <RotateCcw className="w-5 h-5" />
         <span className="text-sm font-black uppercase">Новый Тур</span>

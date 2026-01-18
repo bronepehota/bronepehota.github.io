@@ -5,13 +5,14 @@ import { Army, RulesVersionID } from '@/lib/types';
 import ArmyBuilder from '@/components/ArmyBuilder';
 import GameSession from '@/components/GameSession';
 import factionsData from '@/data/factions.json';
-import { Shield, Edit, ArrowLeft, Info, CheckCircle2 } from 'lucide-react';
+import { Shield, Edit, ArrowLeft, Info, CheckCircle2, MoreVertical } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { isValidRulesVersion, getAllRulesVersions } from '@/lib/rules-registry';
 
 export default function Home() {
   const router = useRouter();
   const [view, setView] = useState<'builder' | 'game'>('builder');
+  const [showEndMenu, setShowEndMenu] = useState(false);
   const [army, setArmy] = useState<Army>({
     name: 'Моя Армия',
     faction: 'polaris',
@@ -157,16 +158,27 @@ export default function Home() {
               </div>
             )}
 
-            {/* End Battle button */}
+            {/* End Battle button - replaced with dropdown menu */}
             {view === 'game' && army.isInBattle && (
-              <button
-                onClick={handleEndBattle}
-                className="flex items-center gap-1.5 px-2 md:px-3 py-1.5 md:py-2 rounded-lg text-[10px] md:text-xs font-black uppercase bg-red-600/20 text-red-400 border border-red-500/40 hover:bg-red-600/30 transition-all"
-              >
-                <CheckCircle2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                <span className="hidden sm:inline">Завершить бой</span>
-                <span className="sm:hidden">Завершить</span>
-              </button>
+              <div className="relative">
+                <button
+                  onClick={() => setShowEndMenu(!showEndMenu)}
+                  className="p-2 hover:bg-slate-800 rounded-lg transition-colors text-slate-400 hover:text-slate-200 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                >
+                  <MoreVertical className="w-5 h-5" />
+                </button>
+                {showEndMenu && (
+                  <div className="absolute right-0 top-12 bg-slate-800 border border-slate-700 rounded-xl shadow-xl py-1 min-w-[150px] z-50">
+                    <button
+                      onClick={() => { handleEndBattle(); setShowEndMenu(false); }}
+                      className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-red-950/30 flex items-center gap-2"
+                    >
+                      <CheckCircle2 className="w-4 h-4" />
+                      Завершить бой
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
 
             {view === 'game' && !army.isInBattle && (
