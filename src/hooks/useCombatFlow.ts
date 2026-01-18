@@ -47,7 +47,8 @@ function combatFlowReducer(
     case 'START_COMBAT':
       return {
         ...initialCombatFlowState,
-        phase: 'ACTION_SELECT',
+        phase: action.actionType ? 'PARAMETERS' : 'ACTION_SELECT',
+        actionType: action.actionType || null,
         unit: action.unit,
         unitType: action.unit.type,
         soldierIndex: action.soldierIndex ?? null,
@@ -142,8 +143,8 @@ export function useCombatFlow(config?: Partial<CombatConfig>) {
   /**
    * Start combat for a unit
    */
-  const startCombat = useCallback((unit: any, soldierIndex?: number, weaponIndex?: number) => {
-    dispatch({ type: 'START_COMBAT', unit, soldierIndex, weaponIndex });
+  const startCombat = useCallback((unit: any, soldierIndex?: number, weaponIndex?: number, actionType?: CombatActionType) => {
+    dispatch({ type: 'START_COMBAT', unit, soldierIndex, weaponIndex, actionType });
   }, []);
 
   /**

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ArmyUnit, Squad, Machine, RulesVersionID } from '@/lib/types';
 import factionsData from '@/data/factions.json';
 import { Shield, Sword, Move, Target, Heart, Zap, RotateCcw, ExternalLink, CheckCircle2, Bomb, ChevronDown, ChevronUp, UserX, Dices } from 'lucide-react';
@@ -25,6 +25,8 @@ export default function UnitCard({ unit, updateUnit, combatLog = [], onCombatLog
   const [rulesVersion, setRulesVersion] = useState<RulesVersionID>(getDefaultRulesVersion());
 
   const combatController = useCombatFlowController();
+  // Track last processed result to prevent duplicate processing
+  const lastProcessedResultRef = useRef<number | null>(null);
 
   // Load rules version from localStorage
   useEffect(() => {
@@ -93,6 +95,39 @@ export default function UnitCard({ unit, updateUnit, combatLog = [], onCombatLog
     return sector ? sector.speed : 0;
   };
 
+  const getDurabilityZone = () => {
+    const m = data as Machine;
+    const current = unit.currentDurability || 0;
+    const max = m.durability_max;
+
+    // Check if custom zones are defined
+    if (m.durabilityZones && m.durabilityZones.length > 0) {
+      const zone = m.durabilityZones.find(zone => current > zone.max) || m.durabilityZones[m.durabilityZones.length - 1];
+      // For green zone, use durability_max as the displayed value
+      if (zone.color === 'green') {
+        return { ...zone, max };
+      }
+      return zone;
+    }
+
+    // Default zones calculation (2/3 and 1/3)
+    const greenThreshold = Math.ceil(max * 2 / 3);
+    const yellowThreshold = Math.ceil(max / 3);
+
+    if (current > greenThreshold) return { max, color: 'green' as const, damagePerDie: { D6: 1, D12: 2, D20: 3 } };
+    if (current > yellowThreshold) return { max: greenThreshold, color: 'yellow' as const, damagePerDie: { D6: 1, D12: 2, D20: 3 } };
+    return { max: yellowThreshold, color: 'red' as const, damagePerDie: { D6: 1, D12: 2, D20: 3 } };
+  };
+
+  const getZoneColor = (color: 'green' | 'yellow' | 'red') => {
+    const colors = {
+      green: { bar: 'bg-green-500', text: 'text-green-400' },
+      yellow: { bar: 'bg-yellow-500', text: 'text-yellow-400' },
+      red: { bar: 'bg-red-500', text: 'text-red-400' }
+    };
+    return colors[color];
+  };
+
   const handleOpenOriginal = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     if (data.originalUrl) {
@@ -107,17 +142,33 @@ export default function UnitCard({ unit, updateUnit, combatLog = [], onCombatLog
     combatController.startCombat(unit, soldierIndex);
   };
 
+  const handleSoldierShotAction = (soldierIndex: number) => {
+    combatController.startCombat(unit, soldierIndex, undefined, 'shot');
+  };
+
+  const handleSoldierMeleeAction = (soldierIndex: number) => {
+    combatController.startCombat(unit, soldierIndex, undefined, 'melee');
+  };
+
+  const handleSoldierGrenadeAction = (soldierIndex: number) => {
+    combatController.startCombat(unit, soldierIndex, undefined, 'grenade');
+  };
+
   const handleVehicleAttack = (weaponIndex: number) => {
-    combatController.startCombat(unit);
-    combatController.setParameters({ weaponIndex });
+    combatController.startCombat(unit, undefined, weaponIndex, 'shot');
   };
 
   // Handle combat completion
   useEffect(() => {
     if (combatController.state.phase === 'RESULTS' && combatController.state.result) {
-      // Update unit state based on combat result
       const result = combatController.state.result;
 
+      // Skip if we've already processed this result
+      if (lastProcessedResultRef.current === result.timestamp) {
+        return;
+      }
+
+      // Update unit state based on combat result
       if (result.actionType === 'shot' || result.actionType === 'grenade') {
         if (result.unitType === 'squad' && result.soldierIndex !== undefined) {
           const newActions = [...(unit.actionsUsed || [])];
@@ -131,9 +182,14 @@ export default function UnitCard({ unit, updateUnit, combatLog = [], onCombatLog
             updateUnit({ ...unit, grenadesUsed: true });
           }
         } else if (result.unitType === 'machine') {
-          const newAmmo = Math.max(0, (unit.currentAmmo || 0) - 1);
-          const newShotsUsed = (unit.machineShotsUsed || 0) + 1;
           const weaponIndex = result.parameters.weaponIndex || 0;
+          const weapon = (unit.data as Machine).weapons[weaponIndex];
+          const isMeleeWeapon = weapon?.range === 'ББ';
+
+          const newAmmo = isMeleeWeapon
+            ? (unit.currentAmmo || 0)  // Не списываем для ББ
+            : Math.max(0, (unit.currentAmmo || 0) - 1);
+          const newShotsUsed = (unit.machineShotsUsed || 0) + 1;
           const newWeaponShots = {
             ...(unit.machineWeaponShots || {}),
             [weaponIndex]: (unit.machineWeaponShots?.[weaponIndex] || 0) + 1
@@ -158,6 +214,9 @@ export default function UnitCard({ unit, updateUnit, combatLog = [], onCombatLog
           updateUnit({ ...unit, isMachineMelee: true });
         }
       }
+
+      // Mark this result as processed
+      lastProcessedResultRef.current = result.timestamp;
     }
   }, [combatController.state.phase, combatController.state.result, unit, updateUnit]);
 
@@ -310,7 +369,15 @@ export default function UnitCard({ unit, updateUnit, combatLog = [], onCombatLog
               if (isSquad) {
                 updateUnit({ ...unit, grenadesUsed: false, actionsUsed: Array((data as Squad).soldiers.length).fill({ moved: false, shot: false, melee: false, done: false }) });
               } else {
-                updateUnit({ ...unit, isMachineMoved: false, isMachineShot: false, isMachineMelee: false, isMachineDone: false });
+                updateUnit({
+                  ...unit,
+                  isMachineMoved: false,
+                  isMachineShot: false,
+                  isMachineMelee: false,
+                  isMachineDone: false,
+                  machineShotsUsed: 0,
+                  machineWeaponShots: undefined
+                });
               }
             }}
             className="p-1.5 md:p-1 hover:bg-white/10 rounded transition-colors min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center"
@@ -353,23 +420,65 @@ export default function UnitCard({ unit, updateUnit, combatLog = [], onCombatLog
 
                     <div className="flex-1 flex flex-col justify-between min-w-0">
                       <div className="flex justify-between items-start gap-1">
-                        {/* Combat Action Button */}
-                        <button
-                          disabled={isDone || isDead}
-                          onClick={() => handleSoldierAction(idx)}
-                          className={cn(
-                            "p-1.5 md:p-2 rounded-lg transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center gap-1",
-                            "text-slate-800 border-2 border-slate-700 text-white hover:bg-slate-700 active:scale-95",
+                        {/* Action Buttons - Left Side */}
+                        <div className="flex gap-0.5 md:gap-1 flex-1 min-w-0">
+                          {/* Shot Button - Orange */}
+                          <button
+                            disabled={isDone || isDead || actions.shot}
+                            onClick={() => handleSoldierShotAction(idx)}
+                            className={cn(
+                              "p-1.5 md:p-2 rounded-lg transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center gap-1",
+                              "text-white border-2 text-xs font-bold",
+                              !unit.grenadesUsed ? "flex-1" : "flex-1 sm:flex-1",
+                              actions.shot
+                                ? "bg-orange-900/40 border-orange-700/50 text-orange-700"
+                                : "bg-orange-600 hover:bg-orange-500 border-orange-500 active:scale-95"
+                            )}
+                            title="Выстрел"
+                          >
+                            <Target className="w-4 h-4 md:w-5 md:h-5" />
+                            <span className="hidden sm:inline">ВЫСТРЕЛ</span>
+                          </button>
+
+                          {/* Melee Button - Red */}
+                          <button
+                            disabled={isDone || isDead || actions.melee}
+                            onClick={() => handleSoldierMeleeAction(idx)}
+                            className={cn(
+                              "p-1.5 md:p-2 rounded-lg transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center gap-1",
+                              "text-white border-2 text-xs font-bold",
+                              !unit.grenadesUsed ? "flex-1" : "flex-1 sm:flex-1",
+                              actions.melee
+                                ? "bg-red-900/40 border-red-700/50 text-red-700"
+                                : "bg-red-600 hover:bg-red-500 border-red-500 active:scale-95"
+                            )}
+                            title="Ближний бой"
+                          >
+                            <Sword className="w-4 h-4 md:w-5 md:h-5" />
+                            <span className="hidden sm:inline">БЛИЖНИЙ БОЙ</span>
+                          </button>
+
+                          {/* Action Button - For Grenade */}
+                          {!unit.grenadesUsed && (
+                            <button
+                              disabled={isDone || isDead}
+                              onClick={() => handleSoldierGrenadeAction(idx)}
+                              className={cn(
+                                "p-1.5 md:p-2 rounded-lg transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center gap-1",
+                                "text-slate-800 border-2 border-slate-700 text-white hover:bg-slate-700 active:scale-95",
+                                "flex-1"
+                              )}
+                              style={{
+                                backgroundColor: `${faction?.color}20`,
+                                borderColor: `${faction?.color}40`
+                              }}
+                              title="Граната"
+                            >
+                              <Bomb className="w-4 h-4 md:w-5 md:h-5" />
+                              <span className="hidden sm:inline text-xs font-bold">ГРАНАТА</span>
+                            </button>
                           )}
-                          style={{
-                            backgroundColor: `${faction?.color}20`,
-                            borderColor: `${faction?.color}40`
-                          }}
-                          title="Действие"
-                        >
-                          <Dices className="w-5 h-5" />
-                          <span className="hidden sm:inline text-xs font-bold">ДЕЙСТВИЕ</span>
-                        </button>
+                        </div>
 
                         <div className="flex gap-0.5 md:gap-1 flex-shrink-0">
                           <button
@@ -423,20 +532,50 @@ export default function UnitCard({ unit, updateUnit, combatLog = [], onCombatLog
           ) : (
             <div className="space-y-2">
               {/* Machine Stats Header */}
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 {/* Durability */}
                 <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-700">
                   <div className="flex justify-between items-center mb-1">
                     <span className="text-[8px] md:text-[9px] opacity-50 uppercase font-bold">Прочность</span>
-                    <span className="text-xs md:text-sm font-black text-red-400">
-                      {unit.currentDurability}/{(data as Machine).durability_max}
-                    </span>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => updateMachineStat('durability', -1)}
+                        disabled={unit.currentDurability === 0}
+                        className={cn(
+                          "w-5 h-5 md:w-6 md:h-6 rounded bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed text-xs font-bold flex items-center justify-center transition-colors min-w-[32px] min-h-[32px] md:min-w-0 md:min-h-0",
+                          getZoneColor(getDurabilityZone().color).text
+                        )}
+                      >-</button>
+                      <span className={cn("text-xs md:text-sm font-black min-w-[24px] text-center", getZoneColor(getDurabilityZone().color).text)}>
+                        {unit.currentDurability}
+                      </span>
+                      <button
+                        onClick={() => updateMachineStat('durability', 1)}
+                        disabled={unit.currentDurability === (data as Machine).durability_max}
+                        className={cn(
+                          "w-5 h-5 md:w-6 md:h-6 rounded bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed text-xs font-bold flex items-center justify-center transition-colors min-w-[32px] min-h-[32px] md:min-w-0 md:min-h-0",
+                          getZoneColor(getDurabilityZone().color).text
+                        )}
+                      >+</button>
+                    </div>
                   </div>
                   <div className="h-1.5 bg-slate-950 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-red-500 transition-all"
+                      className={cn("h-full transition-all", getZoneColor(getDurabilityZone().color).bar)}
                       style={{ width: `${(unit.currentDurability! / (data as Machine).durability_max) * 100}%` }}
                     />
+                  </div>
+                  {/* Zone boundary markers with prominent max value */}
+                  <div className="flex justify-between items-center mt-1">
+                    <span className={cn("text-[8px] md:text-[9px] font-black", getZoneColor(getDurabilityZone().color).text)}>
+                      МАКС: {getDurabilityZone().max}
+                    </span>
+                    <div className="flex gap-1 text-[6px] md:text-[7px]">
+                      <span className="text-green-500/60">{(data as Machine).durability_max}</span>
+                      <span className="text-yellow-500/60">{Math.ceil((data as Machine).durability_max * 2 / 3)}</span>
+                      <span className="text-yellow-500/60">{Math.ceil((data as Machine).durability_max / 3)}</span>
+                      <span className="text-red-500/60">0</span>
+                    </div>
                   </div>
                 </div>
 
@@ -456,6 +595,22 @@ export default function UnitCard({ unit, updateUnit, combatLog = [], onCombatLog
                   </div>
                 </div>
 
+                {/* Shots / Fire Rate */}
+                <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-700">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-[8px] md:text-[9px] opacity-50 uppercase font-bold">Выстрелы</span>
+                    <span className="text-xs md:text-sm font-black text-orange-400">
+                      {unit.machineShotsUsed || 0}/{(data as Machine).fire_rate}
+                    </span>
+                  </div>
+                  <div className="h-1.5 bg-slate-950 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-orange-500 transition-all"
+                      style={{ width: `${Math.min(100, ((unit.machineShotsUsed || 0) / (data as Machine).fire_rate) * 100)}%` }}
+                    />
+                  </div>
+                </div>
+
                 {/* Speed */}
                 <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-700 flex flex-col items-center justify-center">
                   <span className="text-[8px] md:text-[9px] opacity-50 uppercase font-bold mb-0.5">Скорость</span>
@@ -469,10 +624,12 @@ export default function UnitCard({ unit, updateUnit, combatLog = [], onCombatLog
                   const weaponShots = unit.machineWeaponShots?.[weaponIdx] || 0;
                   const totalShotsUsed = unit.machineShotsUsed || 0;
                   const fireRate = (data as Machine).fire_rate;
+                  const isMeleeWeapon = weapon.range === 'ББ';
                   const canShoot = !isMachineDone && !isMachineDestroyed &&
                                   (unit.currentAmmo || 0) > 0 &&
                                   totalShotsUsed < fireRate &&
-                                  weaponShots === 0;
+                                  weaponShots === 0 &&
+                                  !isMeleeWeapon;
 
                   return (
                     <div
@@ -495,22 +652,24 @@ export default function UnitCard({ unit, updateUnit, combatLog = [], onCombatLog
                       <div className="flex-1 flex flex-col justify-between min-w-0">
                         {/* Top row: Action button + controls */}
                         <div className="flex justify-between items-start gap-2">
-                          {/* Combat Action Button */}
-                          <button
-                            disabled={!canShoot}
-                            onClick={() => handleVehicleAttack(weaponIdx)}
-                            className={cn(
-                              "px-2 md:px-3 py-1.5 md:py-2 rounded-lg transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center gap-1.5",
-                              "text-white font-bold text-xs md:text-sm border-2",
-                              canShoot
-                                ? "bg-orange-600 hover:bg-orange-500 border-orange-500 shadow-lg shadow-orange-900/50 active:scale-95"
-                                : "bg-slate-800 text-slate-600 border-slate-700 cursor-not-allowed opacity-50"
-                            )}
-                            title="Атака с этим оружием"
-                          >
-                            <Dices className="w-4 h-4 md:w-5 md:h-5" />
-                            <span className="hidden sm:inline">ВЫСТРЕЛ</span>
-                          </button>
+                          {/* Combat Action Button - only show for non-melee weapons */}
+                          {!isMeleeWeapon && (
+                            <button
+                              disabled={!canShoot}
+                              onClick={() => handleVehicleAttack(weaponIdx)}
+                              className={cn(
+                                "px-2 md:px-3 py-1.5 md:py-2 rounded-lg transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center gap-1.5",
+                                "text-white font-bold text-xs md:text-sm border-2",
+                                canShoot
+                                  ? "bg-orange-600 hover:bg-orange-500 border-orange-500 shadow-lg shadow-orange-900/50 active:scale-95"
+                                  : "bg-slate-800 text-slate-600 border-slate-700 cursor-not-allowed opacity-50"
+                              )}
+                              title="Атака с этим оружием"
+                            >
+                              <Dices className="w-4 h-4 md:w-5 md:h-5" />
+                              <span className="hidden sm:inline">ВЫСТРЕЛ</span>
+                            </button>
+                          )}
 
                           <div className="flex gap-0.5 md:gap-1 flex-shrink-0">
                             {/* Done button */}
@@ -523,8 +682,7 @@ export default function UnitCard({ unit, updateUnit, combatLog = [], onCombatLog
                                 updateUnit({
                                   ...unit,
                                   machineWeaponShots: newWeaponShots,
-                                  machineShotsUsed: (unit.machineShotsUsed || 0) + 1,
-                                  currentAmmo: Math.max(0, (unit.currentAmmo || 0) - 1)
+                                  machineShotsUsed: (unit.machineShotsUsed || 0) + 1
                                 });
                               }}
                               disabled={weaponShots > 0 || isMachineDone || isMachineDestroyed}
@@ -593,17 +751,6 @@ export default function UnitCard({ unit, updateUnit, combatLog = [], onCombatLog
 
               {/* Machine Actions Footer */}
               <div className="flex gap-1 md:gap-1.5 mt-2 pt-2 border-t border-slate-700">
-                <button
-                  disabled={isMachineDone || isMachineDestroyed}
-                  onClick={() => updateUnit({ ...unit, isMachineMoved: !unit.isMachineMoved })}
-                  className={cn(
-                    "flex-1 p-2 md:p-2.5 rounded-lg transition-colors min-h-[44px] md:min-h-0 flex items-center justify-center gap-1.5 text-xs font-bold",
-                    unit.isMachineMoved ? "bg-blue-600 text-white" : "bg-slate-800 text-slate-400 border border-slate-700"
-                  )}
-                >
-                  <Move className="w-4 h-4" />
-                  <span className="hidden sm:inline">Движение</span>
-                </button>
                 <button
                   disabled={isMachineDone || isMachineDestroyed}
                   onClick={() => {

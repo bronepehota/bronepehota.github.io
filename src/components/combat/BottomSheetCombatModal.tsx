@@ -95,7 +95,7 @@ export function BottomSheetCombatModal({
       <div
         ref={sheetRef}
         {...touchHandlers}
-        className="w-full md:w-[600px] bg-slate-900 rounded-t-3xl md:rounded-3xl border-t-2 md:border-2 border-slate-700 shadow-2xl max-h-[85vh] overflow-hidden flex flex-col"
+        className="w-full md:w-[600px] bg-slate-900 rounded-t-3xl md:rounded-3xl border-t-2 md:border-2 border-slate-700 shadow-2xl max-h-[90vh] md:max-h-[85vh] overflow-hidden flex flex-col"
       >
         {/* Drag Handle */}
         <div className="flex justify-center pt-3 pb-2 shrink-0">
@@ -126,7 +126,7 @@ export function BottomSheetCombatModal({
         </div>
 
         {/* Content - Scrollable */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-4">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-3 md:p-4">
           {state.phase === 'ACTION_SELECT' && (
             <ActionSelector
               onSelect={(action) => onSelectAction(action)}
@@ -149,7 +149,7 @@ export function BottomSheetCombatModal({
               <button
                 onClick={onExecuteAction}
                 className={cn(
-                  "w-full py-4 rounded-xl font-bold text-lg shadow-lg active:scale-95 transition-all min-h-[56px]",
+                  "w-full py-3 md:py-4 rounded-xl font-bold text-base md:text-lg shadow-lg active:scale-95 transition-all min-h-[52px] md:min-h-[56px]",
                   state.actionType === 'shot' ? "bg-orange-600 hover:bg-orange-500" :
                   state.actionType === 'melee' ? "bg-red-600 hover:bg-red-500" :
                   "bg-green-700 hover:bg-green-600"
