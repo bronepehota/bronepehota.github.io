@@ -9,7 +9,7 @@ function readMachines(): Machine[] {
   try {
     const data = readFileSync(MACHINES_FILE, 'utf-8');
     return JSON.parse(data);
-  } catch (error) {
+  } catch {
     return [];
   }
 }
@@ -22,7 +22,7 @@ export async function GET() {
   try {
     const machines = readMachines();
     return NextResponse.json(machines);
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Ошибка чтения данных' },
       { status: 500 }
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     writeMachines(machines);
 
     return NextResponse.json({ success: true, machine });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Ошибка сохранения данных' },
       { status: 500 }
@@ -89,7 +89,7 @@ export async function DELETE(request: NextRequest) {
     writeMachines(filtered);
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Ошибка удаления' },
       { status: 500 }

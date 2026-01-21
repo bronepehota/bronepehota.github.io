@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import Image from 'next/image';
 import type { Faction, Squad, Machine, ArmyUnit, FactionID } from '@/lib/types';
 import { Check, X, Plus, ArrowLeft, Info, RotateCcw, Users, Zap } from 'lucide-react';
 import { UnitDetailsModal } from './UnitDetailsModal';
@@ -241,11 +242,14 @@ export function UnitSelector({
               >
                 {/* Unit image */}
                 {unit.data.image && (
-                  <img
+                  <Image
                     src={unit.data.image}
                     alt={unit.data.name}
+                    width={200}
+                    height={120}
                     className="w-full h-[120px] object-cover rounded mb-3 min-w-[120px]"
                     loading="lazy"
+                    unoptimized
                   />
                 )}
 

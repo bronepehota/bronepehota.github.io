@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import ArmlistEditor from '@/components/ArmlistEditor';
 import { Squad, Machine } from '@/lib/types';
 import { ArrowLeft, Plus, Edit, Trash2 } from 'lucide-react';
@@ -174,9 +175,11 @@ export default function EditorPage() {
                   </div>
                 </div>
                 {squad.image && (
-                  <img
+                  <Image
                     src={squad.image}
                     alt={squad.name}
+                    width={300}
+                    height={128}
                     className="w-full h-32 object-cover rounded mb-2"
                   />
                 )}
@@ -222,9 +225,11 @@ export default function EditorPage() {
                   </div>
                 </div>
                 {machine.image && (
-                  <img
+                  <Image
                     src={machine.image}
                     alt={machine.name}
+                    width={300}
+                    height={128}
                     className="w-full h-32 object-cover rounded mb-2"
                   />
                 )}

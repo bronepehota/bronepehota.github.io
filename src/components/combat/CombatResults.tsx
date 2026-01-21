@@ -1,7 +1,7 @@
 'use client';
 
 import { CombatResult, CombatParameters } from '@/lib/combat-types';
-import { RulesVersionID, FortificationType } from '@/lib/types';
+import { RulesVersionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
 interface CombatResultsProps {

@@ -9,7 +9,7 @@ function readFactions(): Faction[] {
   try {
     const data = readFileSync(FACTIONS_FILE, 'utf-8');
     return JSON.parse(data);
-  } catch (error) {
+  } catch {
     return [];
   }
 }
@@ -22,7 +22,7 @@ export async function GET() {
   try {
     const factions = readFactions();
     return NextResponse.json(factions);
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Ошибка чтения данных' },
       { status: 500 }
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     writeFactions(factions);
 
     return NextResponse.json({ success: true, faction });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Ошибка сохранения данных' },
       { status: 500 }
@@ -89,7 +89,7 @@ export async function DELETE(request: NextRequest) {
     writeFactions(filtered);
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Ошибка удаления' },
       { status: 500 }

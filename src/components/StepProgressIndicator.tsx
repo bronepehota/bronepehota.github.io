@@ -40,8 +40,8 @@ interface StepProgressIndicatorProps {
 export function StepProgressIndicator({
   currentStep,
   selectedFaction,
-  selectedBudget,
-  selectedRules,
+  selectedBudget: _selectedBudget,
+  selectedRules: _selectedRules,
 }: StepProgressIndicatorProps) {
   const getStepIndex = (): number => {
     switch (currentStep) {
@@ -73,7 +73,7 @@ export function StepProgressIndicator({
         {steps.map((step, index) => {
           const isActive = index === activeIndex;
           const isCompleted = index < activeIndex;
-          const isPending = index > activeIndex;
+          const _isPending = index > activeIndex;
           const StepIcon = step.icon;
 
           return (

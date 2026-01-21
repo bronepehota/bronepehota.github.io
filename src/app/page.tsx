@@ -5,7 +5,7 @@ import { Army, RulesVersionID } from '@/lib/types';
 import ArmyBuilder from '@/components/ArmyBuilder';
 import GameSession from '@/components/GameSession';
 import factionsData from '@/data/factions.json';
-import { Shield, Edit, ArrowLeft, Info, CheckCircle2, MoreVertical } from 'lucide-react';
+import { Shield, Edit, ArrowLeft, CheckCircle2, MoreVertical } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { isValidRulesVersion, getAllRulesVersions } from '@/lib/rules-registry';
 

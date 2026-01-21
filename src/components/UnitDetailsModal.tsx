@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { X, Shield, Sword, Zap, Target, Gauge, ShieldCheck, Info, Cpu, Crosshair, Flame, Activity, Users, Sparkles } from 'lucide-react';
+import Image from 'next/image';
+import { X, Shield, Sword, Zap, Target, Gauge, ShieldCheck, Info, Cpu, Crosshair, Activity, Users, Sparkles } from 'lucide-react';
 import type { Squad, Machine, Faction, Soldier, Weapon, SpeedSector } from '@/lib/types';
 import { useBottomSheet } from '@/hooks/useBottomSheet';
 
@@ -46,13 +47,16 @@ function SoldierStats({ soldier, index, factionColor }: SoldierStatsProps) {
         </h4>
         {/* T018: Implement soldier image display alongside stats */}
         {soldier.image && (
-          <img
+          <Image
             src={soldier.image}
             alt={`Боец ${index + 1}`}
+            width={48}
+            height={48}
             className="w-12 h-12 rounded-lg object-cover"
             onError={(e) => {
               (e.target as HTMLImageElement).style.display = 'none';
             }}
+            unoptimized
           />
         )}
       </div>
@@ -255,7 +259,7 @@ interface WeaponCardProps {
   index: number;
 }
 
-function WeaponCard({ weapon, index }: WeaponCardProps) {
+function WeaponCard({ weapon, index: _index }: WeaponCardProps) {
   return (
     <div className="bg-slate-700/40 rounded-xl p-3 border border-slate-600/50 hover:border-slate-500/50 transition-all">
       <h4 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
@@ -351,28 +355,6 @@ function KeyStatsCard({ unit, unitType, factionColor }: KeyStatsCardProps) {
 }
 
 // Compact stat row for mobile-friendly display
-interface CompactStatRowProps {
-  icon: React.ReactNode;
-  label: string;
-  value: string | number;
-  color?: string;
-  monospace?: boolean;
-}
-
-function CompactStatRow({ icon, label, value, color, monospace = false }: CompactStatRowProps) {
-  return (
-    <div className="flex items-center gap-2 bg-slate-800/50 rounded-lg p-2 min-w-0">
-      <div className="flex-shrink-0">{icon}</div>
-      <div className="min-w-0 flex-1">
-        <div className="text-[10px] uppercase text-slate-500 font-bold truncate">{label}</div>
-        <div className={`text-sm font-bold truncate ${color || 'text-white'} ${monospace ? 'font-mono' : ''}`}>
-          {value}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export function UnitDetailsModal({
   unit,
   unitType,
@@ -466,13 +448,16 @@ export function UnitDetailsModal({
         <div className="relative px-4 pt-2 pb-4 md:p-6 md:pb-4 border-b border-slate-700">
           {unit.image && (
             <div className="flex justify-center mb-4 md:absolute md:right-16 md:top-1/2 md:-translate-y-1/2 md:mb-0 md:opacity-20">
-              <img
+              <Image
                 src={unit.image}
                 alt={unit.name}
+                width={128}
+                height={128}
                 className="w-24 h-24 md:w-32 md:h-32 object-cover rounded-xl shadow-lg"
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.display = 'none';
                 }}
+                unoptimized
               />
             </div>
           )}

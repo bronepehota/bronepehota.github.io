@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Army, ArmyUnit, Squad, Machine } from '@/lib/types';
 import UnitCard from './UnitCard';
-import { Dices, RotateCcw, Users, ChevronLeft, ChevronRight, CheckCircle2, Heart, UserX, History } from 'lucide-react';
+import { RotateCcw, ChevronLeft, ChevronRight, Heart, UserX, History } from 'lucide-react';
 import { rollDie } from '@/lib/game-logic';
 import { formatUnitNumber } from '@/lib/unit-utils';
 import { clsx, type ClassValue } from 'clsx';
@@ -93,8 +93,8 @@ export default function GameSession({ army, setArmy }: GameSessionProps) {
     return (unit.currentDurability || 0) > 0;
   }).length;
 
-  const nextUnit = () => setFocusedUnitIdx((prev) => (prev + 1) % army.units.length);
-  const prevUnit = () => setFocusedUnitIdx((prev) => (prev - 1 + army.units.length) % army.units.length);
+  const nextUnit = useCallback(() => setFocusedUnitIdx((prev) => (prev + 1) % army.units.length), [army.units.length]);
+  const prevUnit = useCallback(() => setFocusedUnitIdx((prev) => (prev - 1 + army.units.length) % army.units.length), [army.units.length]);
 
   // Helper to get unit status for summary
   const getUnitStatus = (unit: ArmyUnit) => {
@@ -117,7 +117,7 @@ export default function GameSession({ army, setArmy }: GameSessionProps) {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [nextUnit, prevUnit]);
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-b from-slate-950 to-slate-900 relative overflow-hidden">

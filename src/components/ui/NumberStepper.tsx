@@ -73,7 +73,7 @@ export function NumberStepper({
   const canDecrement = value > min;
   const canIncrement = value < max;
 
-  const sizeClasses = {
+  const _sizeClasses = {
     sm: 'h-10 text-sm',
     md: 'h-12 text-base',
     lg: 'h-14 text-lg',

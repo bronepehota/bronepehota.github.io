@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { X, ChevronLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useBottomSheet } from '@/hooks/useBottomSheet';
-import { CombatPhase, CombatFlowState, CombatActionType, CombatParameters } from '@/lib/combat-types';
+import { CombatFlowState, CombatActionType, CombatParameters } from '@/lib/combat-types';
 import { ActionSelector } from './ActionSelector';
 import { ParameterInputs } from './ParameterInputs';
 import { DiceAnimation } from './DiceAnimation';
@@ -34,7 +34,7 @@ export function BottomSheetCombatModal({
   onExecuteAction,
   onApplyResult,
   grenadesAvailable = true,
-  unitDisplayName,
+  unitDisplayName: _unitDisplayName,
 }: BottomSheetCombatModalProps) {
   const { sheetRef, touchHandlers } = useBottomSheet({
     onClose,

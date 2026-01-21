@@ -1,12 +1,5 @@
 import { Machine, ArmyUnit } from '@/lib/types';
 
-// Mock the combat result type to test ammo deduction logic
-interface CombatResult {
-  actionType: 'shot' | 'melee' | 'grenade';
-  unitType: 'squad' | 'machine';
-  weaponIndex?: number;
-}
-
 /**
  * Test helper to simulate the ammo deduction logic from UnitCard.tsx
  * This mirrors the logic in the useEffect that handles combat completion
@@ -23,9 +16,11 @@ function calculateAmmoAfterShot(unit: ArmyUnit, weaponIndex: number): number {
 
 describe('Machine Ammo Deduction', () => {
   const mockMachine: Machine = {
+    id: 'test_tank',
     name: 'Test Tank',
     cost: 100,
     faction: 'polaris',
+    rank: 5,
     durability_max: 10,
     ammo_max: 20,
     fire_rate: 2,
@@ -43,6 +38,7 @@ describe('Machine Ammo Deduction', () => {
   describe('Ranged Weapons - should deduct ammo', () => {
     test('Cannon shot (D12 range) deducts 1 ammo', () => {
       const unit: ArmyUnit = {
+        instanceId: 'test-machine-1',
         type: 'machine',
         data: mockMachine,
         instanceNumber: 1,
@@ -56,6 +52,7 @@ describe('Machine Ammo Deduction', () => {
 
     test('Machine gun shot (D6 range) deducts 1 ammo', () => {
       const unit: ArmyUnit = {
+        instanceId: 'test-machine-2',
         type: 'machine',
         data: mockMachine,
         instanceNumber: 1,
@@ -69,6 +66,7 @@ describe('Machine Ammo Deduction', () => {
 
     test('Multiple ranged shots deduct correct ammo', () => {
       const unit: ArmyUnit = {
+        instanceId: 'test-machine-3',
         type: 'machine',
         data: mockMachine,
         instanceNumber: 1,
@@ -88,6 +86,7 @@ describe('Machine Ammo Deduction', () => {
 
     test('Ammo never goes below 0', () => {
       const unit: ArmyUnit = {
+        instanceId: 'test-machine-4',
         type: 'machine',
         data: mockMachine,
         instanceNumber: 1,
@@ -103,6 +102,7 @@ describe('Machine Ammo Deduction', () => {
   describe('Melee Weapons (ББ) - should NOT deduct ammo', () => {
     test('Melee weapon shot (ББ range) does NOT deduct ammo', () => {
       const unit: ArmyUnit = {
+        instanceId: 'test-machine-5',
         type: 'machine',
         data: mockMachine,
         instanceNumber: 1,
@@ -116,6 +116,7 @@ describe('Machine Ammo Deduction', () => {
 
     test('Multiple melee attacks do not deduct ammo', () => {
       const unit: ArmyUnit = {
+        instanceId: 'test-machine-6',
         type: 'machine',
         data: mockMachine,
         instanceNumber: 1,
@@ -134,6 +135,7 @@ describe('Machine Ammo Deduction', () => {
 
     test('Mixed ranged and melee attacks - only ranged deducts ammo', () => {
       const unit: ArmyUnit = {
+        instanceId: 'test-machine-7',
         type: 'machine',
         data: mockMachine,
         instanceNumber: 1,
@@ -166,6 +168,7 @@ describe('Machine Ammo Deduction', () => {
       };
 
       const unit: ArmyUnit = {
+        instanceId: 'test-machine-8',
         type: 'machine',
         data: machineWithUndefined,
         instanceNumber: 1,

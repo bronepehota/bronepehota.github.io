@@ -1,6 +1,6 @@
 'use client';
 
-import { CombatFlowState, CombatActionType } from '@/lib/combat-types';
+import { CombatFlowState } from '@/lib/combat-types';
 import { cn } from '@/lib/utils';
 
 interface DiceAnimationProps {

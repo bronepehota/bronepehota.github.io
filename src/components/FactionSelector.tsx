@@ -141,7 +141,7 @@ export function FactionSelector({
 
               {/* Motto - always visible */}
               <p className="text-sm italic text-slate-400 mb-2" style={{ color: isSelected ? faction.color : undefined }}>
-                "{faction.motto}"
+                &ldquo;{faction.motto}&rdquo;
               </p>
 
               {/* Color indicator bar */}

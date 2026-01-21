@@ -1,4 +1,4 @@
-import { setWorldConstructor, World, IWorldOptions } from '@cucumber/cucumber';
+import { setWorldConstructor, World } from '@cucumber/cucumber';
 import { Page, Browser, BrowserContext } from 'playwright';
 
 export interface BronepehotaWorld {
@@ -16,17 +16,13 @@ export interface BronepehotaWorld {
   setInLocalStorage: (key: string, value: any) => Promise<void>;
 }
 
-class CustomWorld implements World, BronepehotaWorld {
+class CustomWorld extends World implements BronepehotaWorld {
   page!: Page;
   browser!: Browser;
   context!: BrowserContext;
   currentFaction: string | null = null;
   currentRulesVersion: string | null = null;
   armyState: any = null;
-
-  constructor(options: IWorldOptions) {
-    super(options);
-  }
 
   async gotoHome(): Promise<void> {
     await this.page.goto('http://localhost:3000');
