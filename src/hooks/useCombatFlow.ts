@@ -241,6 +241,53 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
       );
 
       finalDisplay.power = damageResult.rolls;
+
+      // Armor Test and Pilot Survival Test for machines with pilots
+      if (state.unitType === 'machine' && damageResult.damage > 0) {
+        const machine = state.unit;
+        if (machine.pilotInfo && machine.pilotInfo.alive) {
+          // Get machine's current durability zone max value (for armor test)
+          const currentDurability = machine.currentDurability || (machine.data as any).durability_max;
+          const durabilityMax = (machine.data as any).durability_max;
+          let machineArmor = durabilityMax; // Default to max
+
+          // Calculate current zone max for armor value
+          const greenThreshold = Math.ceil(durabilityMax * 2 / 3);
+          const yellowThreshold = Math.ceil(durabilityMax / 3);
+
+          if (currentDurability > greenThreshold) {
+            machineArmor = durabilityMax;
+          } else if (currentDurability > yellowThreshold) {
+            machineArmor = greenThreshold;
+          } else {
+            machineArmor = yellowThreshold;
+          }
+
+          // ARMOR TEST (Тест брони)
+          const armorTestRoll = rollDie(12);
+
+          // Animate armor test roll
+          await animateDiceRoll(() => {});
+
+          // Armor test: roll > machine armor means armor is penetrated
+          if (armorTestRoll > machineArmor) {
+            // Armor failed - run PILOT SURVIVAL TEST
+            const survivalTestRoll = rollDie(6);
+            const pilotArmor = machine.pilotInfo.pilotArmor;
+
+            // Critical hit: roll of 6 always kills pilot
+            // Otherwise, pilot dies if roll > pilot armor
+            const pilotDied = survivalTestRoll === 6 || survivalTestRoll > pilotArmor;
+
+            damageResult.pilotDied = pilotDied;
+            damageResult.armorTestRoll = armorTestRoll;
+            damageResult.survivalTestRoll = survivalTestRoll;
+          } else {
+            // Armor held - pilot survives
+            damageResult.armorTestRoll = armorTestRoll;
+          }
+        }
+      }
     }
 
     const result: CombatResult = {
@@ -253,6 +300,9 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
       unitName: unit.data.name,
       unitId: unit.instanceId,
       soldierIndex: soldierIndex ?? undefined,
+      pilotDied: damageResult.pilotDied,
+      armorTestRoll: damageResult.armorTestRoll,
+      survivalTestRoll: damageResult.survivalTestRoll,
     };
 
     dispatch({ type: 'ROLL_COMPLETE', result, diceDisplay: finalDisplay });
