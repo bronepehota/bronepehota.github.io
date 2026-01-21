@@ -204,6 +204,16 @@ export function UnitSelector({
         )}
       </div>
 
+      {/* Budget display */}
+      <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
+        <div className="flex justify-between items-center">
+          <span className="text-sm text-slate-400">Осталось очков:</span>
+          <span className="text-lg font-bold text-slate-200">
+            {remainingPoints} / {pointBudget}
+          </span>
+        </div>
+      </div>
+
       {/* Warning toast */}
       {showWarning && (
         <div
