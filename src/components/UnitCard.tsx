@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { ArmyUnit, Squad, Machine, RulesVersionID } from '@/lib/types';
 import factionsData from '@/data/factions.json';
-import { Shield, Sword, Target, Heart, Zap, RotateCcw, ExternalLink, CheckCircle2, Bomb, ChevronDown, ChevronUp, UserX, Dices, User, Plane } from 'lucide-react';
+import { Shield, Sword, Target, Heart, Zap, RotateCcw, ExternalLink, CheckCircle2, Bomb, ChevronDown, ChevronUp, UserX, Dices, Plane, Skull, Wrench } from 'lucide-react';
 import { formatUnitNumber } from '@/lib/unit-utils';
 import { getDefaultRulesVersion } from '@/lib/rules-registry';
 import { cn } from '@/lib/utils';
@@ -13,6 +13,7 @@ import { useCombatFlowController } from './combat/CombatFlowController';
 import { CombatLogEntry } from '@/lib/combat-types';
 import { PilotAssignmentModal } from './PilotAssignmentModal';
 import { PilotInfo } from '@/lib/types';
+import { PilotSurvivalTestModal } from './PilotSurvivalTestModal';
 
 interface UnitCardProps {
   unit: ArmyUnit;
@@ -30,6 +31,8 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
   const [isManualCollapsed, setIsManualCollapsed] = useState(false);
   const [rulesVersion, setRulesVersion] = useState<RulesVersionID>(getDefaultRulesVersion());
   const [showPilotModal, setShowPilotModal] = useState(false);
+  const [showSurvivalTestModal, setShowSurvivalTestModal] = useState(false);
+  const [pilotSurvivalTest, setPilotSurvivalTest] = useState<{ roll: number; survived: boolean; testedAt: number } | null>(null);
 
   const combatController = useCombatFlowController();
   // Track last processed result to prevent duplicate processing
@@ -178,6 +181,37 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
     }
   };
 
+  // Handle pilot survival test - just open modal
+  const handlePilotSurvivalTest = () => {
+    if (!unit.pilotInfo || !unit.pilotInfo.alive) return;
+    setShowSurvivalTestModal(true);
+  };
+
+  // Complete survival test with result from modal
+  const handleSurvivalTestComplete = (roll: number, survived: boolean) => {
+    setPilotSurvivalTest({
+      roll,
+      survived,
+      testedAt: Date.now()
+    });
+
+    if (!survived && unit.pilotInfo) {
+      // Pilot died - update the pilot info
+      const updatedPilotInfo: PilotInfo = {
+        squadInstanceId: unit.pilotInfo.squadInstanceId || '',
+        soldierIndex: unit.pilotInfo.soldierIndex || 0,
+        pilotArmor: unit.pilotInfo.pilotArmor || 0,
+        alive: false
+      };
+      updateUnit({ ...unit, pilotInfo: updatedPilotInfo });
+    }
+  };
+
+  // Reset survival test when pilot changes or durability increases
+  useEffect(() => {
+    setPilotSurvivalTest(null);
+  }, [unit.pilotInfo, unit.currentDurability]);
+
   // Handle combat completion
   useEffect(() => {
     if (combatController.state.phase === 'RESULTS' && combatController.state.result) {
@@ -262,6 +296,14 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
     return '/images/soldiers/empty.png';
   };
 
+  const getPilotImage = (): string | null => {
+    if (!unit.pilotInfo) return null;
+    const squad = allUnits.find(u => u.instanceId === unit.pilotInfo?.squadInstanceId);
+    if (!squad || squad.type !== 'squad') return null;
+    const soldier = (squad.data as Squad).soldiers[unit.pilotInfo.soldierIndex];
+    return soldier.image || null;
+  };
+
   const machineImage = !isSquad && !!(unit.data as Machine).image;
 
   return (
@@ -311,6 +353,16 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
           allUnits={allUnits}
           onAssignPilot={handlePilotAssign}
           onRemovePilot={handlePilotRemove}
+        />
+      )}
+
+      {/* Pilot Survival Test Modal */}
+      {!isSquad && unit.pilotInfo && showSurvivalTestModal && (
+        <PilotSurvivalTestModal
+          isOpen={showSurvivalTestModal}
+          pilotArmor={unit.pilotInfo.pilotArmor}
+          onComplete={handleSurvivalTestComplete}
+          onClose={() => setShowSurvivalTestModal(false)}
         />
       )}
 
@@ -572,165 +624,152 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
             </div>
           ) : (
             <div className="space-y-2">
-              {/* Machine Stats Header */}
-              <div className="grid grid-cols-2 gap-2">
-                {/* Durability */}
-                <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-700">
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-[8px] md:text-[9px] opacity-50 uppercase font-bold">Прочность</span>
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={() => updateMachineStat('durability', -1)}
-                        disabled={unit.currentDurability === 0}
-                        className={cn(
-                          "w-5 h-5 md:w-6 md:h-6 rounded bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed text-xs font-bold flex items-center justify-center transition-colors min-w-[32px] min-h-[32px] md:min-w-0 md:min-h-0",
-                          getZoneColor(getDurabilityZone().color).text
-                        )}
-                      >-</button>
-                      <span className={cn("text-xs md:text-sm font-black min-w-[24px] text-center", getZoneColor(getDurabilityZone().color).text)}>
-                        {unit.currentDurability}
-                      </span>
-                      <button
-                        onClick={() => updateMachineStat('durability', 1)}
-                        disabled={unit.currentDurability === (data as Machine).durability_max}
-                        className={cn(
-                          "w-5 h-5 md:w-6 md:h-6 rounded bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed text-xs font-bold flex items-center justify-center transition-colors min-w-[32px] min-h-[32px] md:min-w-0 md:min-h-0",
-                          getZoneColor(getDurabilityZone().color).text
-                        )}
-                      >+</button>
-                    </div>
-                  </div>
-                  <div className="h-1.5 bg-slate-950 rounded-full overflow-hidden">
-                    <div
-                      className={cn("h-full transition-all", getZoneColor(getDurabilityZone().color).bar)}
-                      style={{ width: `${(unit.currentDurability! / (data as Machine).durability_max) * 100}%` }}
-                    />
-                  </div>
-                  {/* Zone boundary markers with prominent max value */}
-                  <div className="flex justify-between items-center mt-1">
-                    <span className={cn("text-[8px] md:text-[9px] font-black", getZoneColor(getDurabilityZone().color).text)}>
-                      МАКС: {getDurabilityZone().max}
-                    </span>
-                    <div className="flex gap-1 text-[6px] md:text-[7px]">
-                      <span className="text-green-500/60">{(data as Machine).durability_max}</span>
-                      <span className="text-yellow-500/60">{Math.ceil((data as Machine).durability_max * 2 / 3)}</span>
-                      <span className="text-yellow-500/60">{Math.ceil((data as Machine).durability_max / 3)}</span>
-                      <span className="text-red-500/60">0</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Ammo */}
-                <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-700">
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-[8px] md:text-[9px] opacity-50 uppercase font-bold">Боезапас</span>
-                    <span className="text-xs md:text-sm font-black text-blue-400">
-                      {unit.currentAmmo}/{(data as Machine).ammo_max}
-                    </span>
-                  </div>
-                  <div className="h-1.5 bg-slate-950 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-blue-500 transition-all"
-                      style={{ width: `${(unit.currentAmmo! / (data as Machine).ammo_max) * 100}%` }}
-                    />
-                  </div>
-                </div>
-
-                {/* Shots / Fire Rate */}
-                <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-700">
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-[8px] md:text-[9px] opacity-50 uppercase font-bold">Выстрелы</span>
-                    <span className="text-xs md:text-sm font-black text-orange-400">
-                      {unit.machineShotsUsed || 0}/{(data as Machine).fire_rate}
-                    </span>
-                  </div>
-                  <div className="h-1.5 bg-slate-950 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-orange-500 transition-all"
-                      style={{ width: `${Math.min(100, ((unit.machineShotsUsed || 0) / (data as Machine).fire_rate) * 100)}%` }}
-                    />
-                  </div>
-                </div>
-
-                {/* Speed */}
-                <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-700 flex flex-col items-center justify-center">
-                  <span className="text-[8px] md:text-[9px] opacity-50 uppercase font-bold mb-0.5">Скорость</span>
-                  <span className="text-sm md:text-base font-black text-yellow-400">{getMachineSpeed()}</span>
-                </div>
-              </div>
-
-              {/* Pilot Section */}
-              <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-700">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <Plane className="w-4 h-4 text-blue-400" />
-                    <span className="text-[8px] md:text-[9px] opacity-50 uppercase font-bold">Пилот</span>
-                  </div>
-                  {unit.pilotInfo ? (
+              {/* Machine Stats Header - Redesigned */}
+              <div className="flex gap-2">
+                {/* Left column: Durability+Speed and Ammo+Shots stacked */}
+                <div className="flex-1 space-y-2 min-w-0">
+                  {/* Durability + Speed Combined */}
+                  <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-700">
                     <div className="flex items-center gap-2">
-                      {unit.pilotInfo.alive ? (
-                        <span className="text-[8px] md:text-[9px] px-1.5 py-0.5 rounded bg-green-900/30 text-green-400 font-bold uppercase flex items-center gap-1">
-                          <User className="w-2.5 h-2.5" />
-                          ЖИВ
-                        </span>
-                      ) : (
-                        <span className="text-[8px] md:text-[9px] px-1.5 py-0.5 rounded bg-red-900/30 text-red-400 font-bold uppercase flex items-center gap-1">
-                          <UserX className="w-2.5 h-2.5" />
-                          ПОГИБ
-                        </span>
-                      )}
-                    </div>
-                  ) : (
-                    <span className="text-[8px] md:text-[9px] text-slate-500 italic">Нет пилота</span>
-                  )}
-                </div>
-
-                {unit.pilotInfo ? (
-                  <div className={cn(
-                    "p-2 rounded-lg border flex items-center gap-3",
-                    unit.pilotInfo.alive
-                      ? "bg-green-900/10 border-green-700/30"
-                      : "bg-red-900/10 border-red-700/30"
-                  )}>
-                    <div className={cn(
-                      "w-10 h-10 rounded-full border flex items-center justify-center",
-                      unit.pilotInfo.alive
-                        ? "bg-green-900/30 border-green-700/50"
-                        : "bg-red-900/30 border-red-700/50"
-                    )}>
-                      {unit.pilotInfo.alive ? (
-                        <User className="w-5 h-5 text-green-400" />
-                      ) : (
-                        <UserX className="w-5 h-5 text-red-400" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs font-bold text-slate-300">
-                          Отряд #{allUnits.find((u) => u.instanceId === unit.pilotInfo?.squadInstanceId)?.instanceNumber || '?'}
-                        </span>
-                        <span className="text-slate-500">•</span>
-                        <span className="text-xs font-bold text-slate-300">
-                          Боец #{(unit.pilotInfo.soldierIndex || 0) + 1}
-                        </span>
+                      {/* Durability controls */}
+                      <div className="flex-1">
+                        <div className="flex items-center gap-1 mb-1">
+                          {/* Damage Button - larger for easier tapping */}
+                          <button
+                            onClick={() => updateMachineStat('durability', -1)}
+                            disabled={unit.currentDurability === 0}
+                            className={cn(
+                              "w-11 h-11 rounded bg-red-900/40 hover:bg-red-900/60 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors min-w-[44px] min-h-[44px] border border-red-800/50",
+                              getZoneColor(getDurabilityZone().color).text
+                            )}
+                            title="Нанести урон"
+                          >
+                            <Skull className="w-5 h-5" />
+                          </button>
+                          <span className={cn("text-sm md:text-base font-black min-w-[24px] text-center", getZoneColor(getDurabilityZone().color).text)}>
+                            {unit.currentDurability}
+                          </span>
+                          {/* Repair Button - larger for easier tapping */}
+                          <button
+                            onClick={() => updateMachineStat('durability', 1)}
+                            disabled={unit.currentDurability === (data as Machine).durability_max}
+                            className={cn(
+                              "w-11 h-11 rounded bg-green-900/40 hover:bg-green-900/60 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors min-w-[44px] min-h-[44px] border border-green-800/50",
+                              getZoneColor(getDurabilityZone().color).text
+                            )}
+                            title="Ремонт"
+                          >
+                            <Wrench className="w-5 h-5" />
+                          </button>
+                          {/* Speed display - inline with buttons */}
+                          <div className="ml-auto flex items-center gap-1">
+                            <Zap className="w-3.5 h-3.5 md:w-4 md:h-4 text-yellow-400 opacity-60" />
+                            <span className="text-sm md:text-base font-black text-yellow-400">
+                              {getMachineSpeed()}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="h-1.5 bg-slate-950 rounded-full overflow-hidden">
+                          <div
+                            className={cn("h-full transition-all", getZoneColor(getDurabilityZone().color).bar)}
+                            style={{ width: `${(unit.currentDurability! / (data as Machine).durability_max) * 100}%` }}
+                          />
+                        </div>
                       </div>
-                      <div className="flex items-center gap-3 text-xs text-slate-400">
-                        <span className="flex items-center gap-1">
-                          <Shield className="w-3 h-3" />
-                          Бр: {unit.pilotInfo.pilotArmor}
+                    </div>
+                  </div>
+
+                  {/* Ammo + Shots Combined */}
+                  <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-700">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-[8px] md:text-[9px] opacity-50 uppercase font-bold">Боезапас</span>
+                      <span className="text-[8px] md:text-[9px] opacity-50 uppercase font-bold">Выстрелы</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {/* Ammo progress bar */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1">
+                          <div className="h-1.5 bg-slate-950 rounded-full overflow-hidden flex-1">
+                            <div
+                              className="h-full bg-blue-500 transition-all"
+                              style={{ width: `${(unit.currentAmmo! / (data as Machine).ammo_max) * 100}%` }}
+                            />
+                          </div>
+                          <span className="text-[9px] md:text-xs font-black text-blue-400 min-w-[45px] text-right shrink-0">
+                            {unit.currentAmmo}/{(data as Machine).ammo_max}
+                          </span>
+                        </div>
+                      </div>
+                      {/* Shots count */}
+                      <div className="flex items-center gap-1 shrink-0">
+                        <div className="h-1.5 bg-slate-950 rounded-full overflow-hidden w-12">
+                          <div
+                            className="h-full bg-orange-500 transition-all"
+                            style={{ width: `${Math.min(100, ((unit.machineShotsUsed || 0) / (data as Machine).fire_rate) * 100)}%` }}
+                          />
+                        </div>
+                        <span className="text-[9px] md:text-xs font-black text-orange-400 min-w-[40px] text-right">
+                          {unit.machineShotsUsed || 0}/{(data as Machine).fire_rate}
                         </span>
                       </div>
                     </div>
                   </div>
-                ) : (
+                </div>
+
+                {/* Right column: Pilot Button + Survival Test stacked */}
+                <div className="flex flex-col gap-2">
+                  {/* Pilot Button - Simplified, just image + status */}
                   <button
                     onClick={() => setShowPilotModal(true)}
-                    className="w-full p-3 rounded-lg border-2 border-dashed border-slate-700 hover:border-blue-600/50 hover:bg-blue-900/10 transition-colors flex items-center justify-center gap-2 text-slate-500 hover:text-blue-400 min-h-[60px]"
+                    className="w-32 h-32 shrink-0 rounded-lg border border-slate-700 overflow-hidden bg-slate-900/80 relative"
                   >
-                    <Plane className="w-5 h-5" />
-                    <span className="text-sm font-bold">НАЗНАЧИТЬ ПИЛОТА</span>
+                    {unit.pilotInfo ? (
+                      <>
+                        <Image
+                          src={getPilotImage() || '/images/soldiers/empty.png'}
+                          width={128}
+                          height={128}
+                          className="w-full h-full object-cover"
+                          unoptimized
+                          alt="Пилот"
+                        />
+                        {/* Status overlay */}
+                        <div className={cn(
+                          "absolute bottom-0 left-0 right-0 text-[8px] font-bold text-center py-1",
+                          unit.pilotInfo.alive
+                            ? "bg-green-900/80 text-green-300"
+                            : "bg-red-900/80 text-red-300"
+                        )}>
+                          {unit.pilotInfo.alive ? 'ЖИВ' : 'ПОГИБ'}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-slate-600 gap-1">
+                        <Plane className="w-8 h-8" />
+                        <span className="text-[10px] font-bold">ПИЛОТ</span>
+                      </div>
+                    )}
                   </button>
-                )}
+
+                  {/* Pilot Survival Test Button */}
+                  {unit.pilotInfo && unit.pilotInfo.alive && (
+                    <button
+                      onClick={handlePilotSurvivalTest}
+                      className={cn(
+                        "w-32 h-11 shrink-0 rounded-lg flex items-center justify-center gap-1.5 transition-colors min-w-[44px] min-h-[44px] font-bold text-xs md:text-sm",
+                        pilotSurvivalTest
+                          ? pilotSurvivalTest.survived
+                            ? "bg-green-900/40 hover:bg-green-900/60 text-green-400 border border-green-700/50"
+                            : "bg-red-900/40 hover:bg-red-900/60 text-red-400 border border-red-700/50"
+                          : "bg-purple-900/60 hover:bg-purple-900/80 text-purple-300 border border-purple-700"
+                      )}
+                      title={pilotSurvivalTest ? `Повторить тест (последний: ${pilotSurvivalTest.survived ? 'ВЫЖИЛ' : 'ПОГИБ'})` : "Тест выживаемости пилота (D6)"}
+                    >
+                      <Skull className="w-5 h-5" />
+                      <span>{pilotSurvivalTest ? (pilotSurvivalTest.survived ? 'ВЫЖИЛ' : 'ПОГИБ') : 'ТЕСТ БРОНИ'}</span>
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* Weapons List - like soldier cards */}
