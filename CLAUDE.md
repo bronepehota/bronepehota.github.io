@@ -14,18 +14,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 # Development
-npm run dev          # Start Next.js dev server (http://localhost:3000)
+npm run dev              # Start Next.js dev server (http://localhost:3000)
 
 # Building
-npm run build        # Production build
-npm run start        # Run production server
+npm run build            # Production build
+npm run start            # Run production server
 
 # Code Quality
-npm run lint         # Run ESLint
+npm run lint             # Run ESLint
+npm run type-check       # TypeScript type check
+npm run validate         # Run type-check + lint + unit tests
 
 # Testing
-npm run test         # Run all Jest tests
-npm run test:watch   # Run tests in watch mode
+npm run test             # Run all Jest unit tests
+npm run test:watch       # Run tests in watch mode
+npm run test:ci          # Run tests with coverage (CI mode)
+
+# E2E Testing (requires running app on http://localhost:3000)
+npm run test:e2e         # Run Cucumber E2E tests (headless)
+npm run test:e2e:headed  # Run E2E tests with visible browser
+npm run test:e2e:debug   # Run E2E tests in slow motion for debugging
 ```
 
 ## Architecture
@@ -157,7 +165,29 @@ The editor uses nested components:
 
 ### Testing
 
-Jest with jsdom environment. Tests focus on game logic utilities (`game-logic.ts`). Test files go in `src/__tests__/`.
+**Unit Tests (Jest)**:
+- Focus on game logic utilities (`game-logic.ts`, `unit-utils.ts`)
+- Test files location: `src/__tests__/`
+- Run with: `npm run test`
+
+**E2E Tests (Cucumber + Playwright)**:
+- BDD-style tests with Russian Gherkin syntax
+- Test files location: `e2e/features/`
+- Step definitions: `e2e/step-definitions/`
+- Configuration: `e2e/cucumber.yaml`
+- **Requires running application** on `http://localhost:3000`
+- Run with: `npm run test:e2e`
+
+**Test Structure**:
+- `e2e/features/rules-selection.feature` - Rules version selection scenarios
+- `e2e/features/army-building.feature` - Army creation and unit management
+- `e2e/features/game-session.feature` - Combat gameplay mechanics
+- `e2e/features/armlist-editor.feature` - Squad/machine editor functionality
+
+**CI/CD Pipeline**:
+- Unit tests run on every commit (fast, ~30s)
+- E2E tests run only in CI after deployment (slow, ~2-5min)
+- See `.github/workflows/test.yml` for pipeline configuration
 
 ## Important Notes
 
@@ -184,12 +214,15 @@ Jest with jsdom environment. Tests focus on game logic utilities (`game-logic.ts
 - JSON files in `src/data/` (factions.json, squads.json, machines.json)
 
 **Testing**:
-- Jest with jsdom environment
+- Jest with jsdom environment (unit tests)
+- Cucumber 10.9.0 + Playwright (E2E tests, BDD with Russian Gherkin)
 
 **Utilities**:
 - clsx, tailwind-merge for conditional styling
 
 ## Recent Changes
+- **E2E Testing**: Added Cucumber + Playwright BDD tests with Russian Gherkin syntax (43 scenarios, 318 steps)
+- **CI/CD Pipeline**: GitHub Actions workflow with parallel quality checks and E2E tests
 - **Bottom Sheet Redesign**: `UnitDetailsModal` redesigned as mobile bottom sheet with swipe-to-close gesture (`useBottomSheet` hook)
 - **Rules System**: Added multi-version rules support with `rules-registry.ts` and rule implementations (fan, tehno)
 - **Rules Selector**: `RulesSelector`, `RulesVersionSelector`, `RulesInfoModal` components

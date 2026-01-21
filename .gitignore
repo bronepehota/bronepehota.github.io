@@ -18,6 +18,8 @@
 
 # Testing
 /coverage/
+/e2e/reports/
+/e2e/screenshots/
 
 # Production
 *.log
