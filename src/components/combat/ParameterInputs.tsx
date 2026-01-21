@@ -1,7 +1,6 @@
 'use client';
 
 import { CombatParameters, CombatActionType } from '@/lib/combat-types';
-import { FortificationType } from '@/lib/types';
 import { NumberStepper } from '@/components/ui/NumberStepper';
 import { FortificationSelector } from '@/components/FortificationSelector';
 import { RulesVersionID } from '@/lib/types';

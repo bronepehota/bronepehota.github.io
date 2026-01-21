@@ -1,16 +1,16 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { ArmyUnit, Squad, Machine, RulesVersionID } from '@/lib/types';
 import factionsData from '@/data/factions.json';
-import { Shield, Sword, Move, Target, Heart, Zap, RotateCcw, ExternalLink, CheckCircle2, Bomb, ChevronDown, ChevronUp, UserX, Dices } from 'lucide-react';
+import { Shield, Sword, Target, Heart, Zap, RotateCcw, ExternalLink, CheckCircle2, Bomb, ChevronDown, ChevronUp, UserX, Dices } from 'lucide-react';
 import { formatUnitNumber } from '@/lib/unit-utils';
 import { getDefaultRulesVersion } from '@/lib/rules-registry';
 import { cn } from '@/lib/utils';
 import { BottomSheetCombatModal } from './combat/BottomSheetCombatModal';
-import { CombatLog } from './combat/CombatLog';
 import { useCombatFlowController } from './combat/CombatFlowController';
-import { CombatLogEntry, CombatResult } from '@/lib/combat-types';
+import { CombatLogEntry } from '@/lib/combat-types';
 
 interface UnitCardProps {
   unit: ArmyUnit;
@@ -19,7 +19,7 @@ interface UnitCardProps {
   onCombatLogEntry?: (entry: CombatLogEntry) => void;
 }
 
-export default function UnitCard({ unit, updateUnit, combatLog = [], onCombatLogEntry }: UnitCardProps) {
+export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [], onCombatLogEntry }: UnitCardProps) {
   const [showImage, setShowImage] = useState(false);
   const [isManualCollapsed, setIsManualCollapsed] = useState(false);
   const [rulesVersion, setRulesVersion] = useState<RulesVersionID>(getDefaultRulesVersion());
@@ -80,7 +80,7 @@ export default function UnitCard({ unit, updateUnit, combatLog = [], onCombatLog
     }
   };
 
-  const toggleMachineDestroyed = () => {
+  const _toggleMachineDestroyed = () => {
     if (unit.currentDurability === 0) {
       updateUnit({ ...unit, currentDurability: 1, isMachineDone: false });
     } else {
@@ -138,7 +138,7 @@ export default function UnitCard({ unit, updateUnit, combatLog = [], onCombatLog
   };
 
   // Handle combat actions
-  const handleSoldierAction = (soldierIndex: number) => {
+  const _handleSoldierAction = (soldierIndex: number) => {
     combatController.startCombat(unit, soldierIndex);
   };
 
@@ -313,7 +313,7 @@ export default function UnitCard({ unit, updateUnit, combatLog = [], onCombatLog
             <button className="text-[10px] bg-slate-800 px-2 py-1 rounded font-mono">X</button>
           </div>
           <div className="flex-1 overflow-auto rounded border border-slate-700 custom-scrollbar">
-            <img src={data.image} alt={data.name} className="max-w-none w-[400%]" />
+            <Image src={data.image} alt={data.name} width={800} height={600} className="max-w-none w-[400%]" unoptimized />
           </div>
           <p className="text-[9px] text-center opacity-40 mt-1">Прокрутите, чтобы увидеть характеристики</p>
         </div>
@@ -408,10 +408,13 @@ export default function UnitCard({ unit, updateUnit, combatLog = [], onCombatLog
                   >
                     <div className="w-12 h-12 md:w-16 md:h-16 rounded-md border border-slate-600 overflow-hidden flex-shrink-0 bg-slate-900 relative">
                       {getSoldierImage(idx) ? (
-                        <img
+                        <Image
                           src={getSoldierImage(idx)!}
                           alt={`Солдат ${idx + 1}`}
+                          width={64}
+                          height={64}
                           className="w-full h-full object-cover object-center"
+                          unoptimized
                         />
                       ) : (
                         <div className="w-full h-full" style={getSoldierStyle(idx)} />
@@ -793,10 +796,13 @@ export default function UnitCard({ unit, updateUnit, combatLog = [], onCombatLog
                 {(data as Squad).soldiers.slice(0, 3).map((_, idx) => (
                   <div key={idx} className="w-6 h-6 rounded-full border border-slate-700 overflow-hidden bg-slate-900 ring-2 ring-slate-800 relative">
                     {getSoldierImage(idx) ? (
-                      <img
+                      <Image
                         src={getSoldierImage(idx)!}
                         alt={`Солдат ${idx + 1}`}
+                        width={24}
+                        height={24}
                         className="w-full h-full object-cover object-center scale-150"
+                        unoptimized
                       />
                     ) : (
                       <div className="w-full h-full scale-150" style={getSoldierStyle(idx)} />

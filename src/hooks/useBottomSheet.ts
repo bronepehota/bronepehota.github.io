@@ -70,7 +70,7 @@ export function useBottomSheet({
     }
   }, [isDragging, isEnabled]);
 
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+  const handleTouchEnd = useCallback((_e: React.TouchEvent) => {
     if (!isDragging || !isEnabled) return;
 
     const deltaY = currentYRef.current;

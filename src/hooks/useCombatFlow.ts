@@ -4,9 +4,7 @@ import { useReducer, useCallback, useEffect, useState } from 'react';
 import {
   CombatFlowState,
   CombatFlowAction,
-  CombatPhase,
   CombatActionType,
-  CombatUnitType,
   CombatParameters,
   DiceDisplay,
   CombatResult,
@@ -128,7 +126,7 @@ function combatFlowReducer(
 /**
  * Hook for managing combat flow state machine
  */
-export function useCombatFlow(config?: Partial<CombatConfig>) {
+export function useCombatFlow(_config?: Partial<CombatConfig>) {
   const [state, dispatch] = useReducer(combatFlowReducer, initialCombatFlowState);
   const [rulesVersion, setRulesVersion] = useState(getDefaultRulesVersion());
 
@@ -212,7 +210,7 @@ export function useCombatFlow(config?: Partial<CombatConfig>) {
     }
 
     // Animate hit roll
-    await animateDiceRoll((display) => {});
+    await animateDiceRoll((_display) => {});
 
     const hitResult = rules.calculateHit(
       range,
@@ -221,12 +219,12 @@ export function useCombatFlow(config?: Partial<CombatConfig>) {
     );
 
     let damageResult: any = { damage: 0, rolls: [] };
-    let finalDisplay: DiceDisplay = { hit: hitResult.roll };
+    const finalDisplay: DiceDisplay = { hit: hitResult.roll };
 
     if (hitResult.success) {
       // Determine dice type from power string
       const diceMatch = power.match(/(\d*)D(\d+)/);
-      const sides = diceMatch?.[2] === '12' ? 12 : diceMatch?.[2] === '20' ? 20 : 6;
+      const _sides = diceMatch?.[2] === '12' ? 12 : diceMatch?.[2] === '20' ? 20 : 6;
       const diceCount = parseInt(diceMatch?.[1] || '1');
 
       // Animate damage rolls

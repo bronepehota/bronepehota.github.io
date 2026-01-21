@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import Image from 'next/image';
 import type { Faction, Squad, Machine, ArmyUnit, FactionID } from '@/lib/types';
 import { Check, X, Plus, ArrowLeft, Info, RotateCcw, Users, Zap } from 'lucide-react';
 import { UnitDetailsModal } from './UnitDetailsModal';
@@ -203,6 +204,16 @@ export function UnitSelector({
         )}
       </div>
 
+      {/* Budget display */}
+      <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
+        <div className="flex justify-between items-center">
+          <span className="text-sm text-slate-400">Осталось очков:</span>
+          <span className="text-lg font-bold text-slate-200">
+            {remainingPoints} / {pointBudget}
+          </span>
+        </div>
+      </div>
+
       {/* Warning toast */}
       {showWarning && (
         <div
@@ -241,11 +252,14 @@ export function UnitSelector({
               >
                 {/* Unit image */}
                 {unit.data.image && (
-                  <img
+                  <Image
                     src={unit.data.image}
                     alt={unit.data.name}
+                    width={200}
+                    height={120}
                     className="w-full h-[120px] object-cover rounded mb-3 min-w-[120px]"
                     loading="lazy"
+                    unoptimized
                   />
                 )}
 

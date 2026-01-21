@@ -5,7 +5,7 @@
  * If following TDD, uncomment and implement these tests before implementation.
  */
 
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { FactionSelector } from '@/components/FactionSelector';
 import { PointBudgetInput } from '@/components/PointBudgetInput';

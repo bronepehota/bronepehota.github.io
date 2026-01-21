@@ -4,7 +4,6 @@ import { useState, useMemo } from 'react';
 import { CombatLogEntry, CombatResult } from '@/lib/combat-types';
 import { History, Download, Trash2, ChevronDown, ChevronUp, Target, Sword, Bomb } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { formatUnitNumber } from '@/lib/unit-utils';
 
 interface CombatLogProps {
   entries: CombatLogEntry[];

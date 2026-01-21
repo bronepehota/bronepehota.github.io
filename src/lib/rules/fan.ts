@@ -81,17 +81,6 @@ function getDurabilityZone(
   return zones.find(zone => currentDurability > zone.max) || zones[2];
 }
 
-/**
- * Get damage per die based on die sides
- * D6 = 1, D12 = 2, D20 = 3
- */
-function getDamagePerDie(sides: number): number {
-  if (sides === 6) return 1;
-  if (sides === 12) return 2;
-  if (sides === 20) return 3;
-  return 1; // Default fallback
-}
-
 export const fanRules: RulesVersion = {
   id: 'fan',
   name: 'Фанатская Редакция',

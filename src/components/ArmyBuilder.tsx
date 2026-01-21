@@ -1,16 +1,14 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
-import { Army, ArmyUnit, FactionID, Faction, Squad, Machine, RulesVersionID } from '@/lib/types';
-import { countByUnitType, validateAddUnit } from '@/lib/unit-utils';
+import { useState, useEffect } from 'react';
+import { Army, ArmyUnit, Faction, Squad, Machine, RulesVersionID } from '@/lib/types';
 import squadsData from '@/data/squads.json';
 import machinesData from '@/data/machines.json';
 import factionsData from '@/data/factions.json';
-import { Plus, Trash2, Shield, Sword, Cpu, Box, Search, Download, Upload, Info, Globe, Quote, Users, Zap, Skull, ArrowLeft, LucideIcon } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { FactionSelector } from './FactionSelector';
 import { PointBudgetInput } from './PointBudgetInput';
 import { UnitSelector } from './UnitSelector';
-import { UnitDetailsModal } from './UnitDetailsModal';
 import { RulesSelector } from './RulesSelector';
 import { StepProgressIndicator } from './StepProgressIndicator';
 import { getAllRulesVersions } from '@/lib/rules-registry';
@@ -28,15 +26,7 @@ interface ArmyBuilderProps {
   onRulesVersionChange: (version: RulesVersionID) => void;
 }
 
-const factionIcons: Record<string, LucideIcon> = {
-  Shield,
-  Zap,
-  Skull
-};
-
 export default function ArmyBuilder({ army, setArmy, onEnterBattle, rulesVersion, onRulesVersionChange }: ArmyBuilderProps) {
-  const [filterFaction, setFilterFaction] = useState<FactionID | 'all'>('all');
-  const [searchTerm, setSearchTerm] = useState('');
 
   // Setup step state for guided flow
   const [setupStep, setSetupStep] = useState<'faction' | 'budget' | 'rules' | 'units'>('faction');
@@ -46,108 +36,6 @@ export default function ArmyBuilder({ army, setArmy, onEnterBattle, rulesVersion
     ? army.currentStep
     : 'faction-select';
 
-  // Modal state management (selectedUnit, isModalOpen)
-  const [selectedUnit, setSelectedUnit] = useState<Squad | Machine | null>(null);
-  const [selectedUnitType, setSelectedUnitType] = useState<'squad' | 'machine'>('squad');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // Unit count badges and error state
-  const [addError, setAddError] = useState<string | null>(null);
-  const unitCounts = useMemo(() => {
-    return countByUnitType(army.units);
-  }, [army.units]);
-
-  const selectedFactionData = typedFactions.find(f => f.id === army.faction) as Faction & { symbol: string } | undefined;
-
-  const exportArmy = () => {
-    const data = JSON.stringify(army, null, 2);
-    const blob = new Blob([data], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `army-${army.faction}-${Date.now()}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const importArmy = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      try {
-        const imported = JSON.parse(ev.target?.result as string);
-        setArmy(imported);
-      } catch (err) {
-        alert('Ошибка при импорте файла');
-      }
-    };
-    reader.readAsText(file);
-  };
-
-  const addUnit = (unit: Squad | Machine, type: 'squad' | 'machine') => {
-    // Validate 99-unit limit
-    const validation = validateAddUnit(army, unit.id);
-    if (!validation.valid) {
-      setAddError(validation.error);
-      setTimeout(() => setAddError(null), 3000);
-      return;
-    }
-    setAddError(null);
-
-    // Calculate instance number for this unit type
-    const existingUnitsOfType = army.units.filter(u => u.data.id === unit.id);
-    const instanceNumber = existingUnitsOfType.length + 1;
-
-    const newUnit: ArmyUnit = {
-      instanceId: `${unit.id}-${Date.now()}`,
-      type,
-      data: unit,
-      instanceNumber,
-      currentDurability: type === 'machine' ? (unit as Machine).durability_max : undefined,
-      currentAmmo: type === 'machine' ? (unit as Machine).ammo_max : undefined,
-      deadSoldiers: [],
-      actionsUsed: type === 'squad'
-        ? Array((unit as Squad).soldiers.length).fill({ moved: false, shot: false, melee: false, done: false })
-        : [{ moved: false, shot: false, melee: false, done: false }],
-      machineShotsUsed: type === 'machine' ? 0 : undefined,
-      machineWeaponShots: type === 'machine' ? {} : undefined
-    };
-
-    setArmy({
-      ...army,
-      units: [...army.units, newUnit],
-      totalCost: army.totalCost + unit.cost
-    });
-  };
-
-  const removeUnit = (instanceId: string) => {
-    const unitToRemove = army.units.find(u => u.instanceId === instanceId);
-    if (!unitToRemove) return;
-
-    setArmy({
-      ...army,
-      units: army.units.filter(u => u.instanceId !== instanceId),
-      totalCost: army.totalCost - unitToRemove.data.cost
-    });
-  };
-
-  // T022: Add click handler to squad/machine cards to open modal with unit data
-  const handleUnitClick = (unit: Squad | Machine, type: 'squad' | 'machine') => {
-    setSelectedUnit(unit);
-    setSelectedUnitType(type);
-    setIsModalOpen(true);
-  };
-
-  const filteredSquads = typedSquads.filter(s =>
-    (filterFaction === 'all' || s.faction === filterFaction) &&
-    s.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const filteredMachines = typedMachines.filter(m =>
-    (filterFaction === 'all' || m.faction === filterFaction) &&
-    m.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   // Persist corrected step to localStorage if needed (migration from old versions)
   useEffect(() => {

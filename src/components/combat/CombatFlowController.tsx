@@ -1,8 +1,6 @@
 'use client';
 
-import { ReactNode } from 'react';
-import { ArmyUnit } from '@/lib/types';
-import { CombatResult, CombatLogEntry, CombatActionType } from '@/lib/combat-types';
+import { CombatResult, CombatLogEntry } from '@/lib/combat-types';
 import { useCombatFlow, UseCombatFlowReturn } from '@/hooks/useCombatFlow';
 
 /**

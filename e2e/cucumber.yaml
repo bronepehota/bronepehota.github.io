@@ -1,0 +1,37 @@
+# Cucumber configuration file
+# https://cucumber.io/docs/cucumber/configuration/
+
+default:
+  # Load support files (hooks, world, etc.)
+  require:
+    - e2e/support/hooks.ts
+    - e2e/step-definitions/**/*.ts
+
+  # Load TypeScript support
+  requireModule:
+    - ts-node/register
+
+  # Feature files location
+  spec:
+    - e2e/features/**/*.feature
+
+  # Test formatter
+  format:
+    - summary
+    - html:e2e/reports/cucumber-report.html
+    - json:e2e/reports/cucumber-report.json
+    - junit:e2e/reports/junit-report.xml
+
+  # Additional options
+  retry: 0
+  dryRun: false
+  failFast: false
+  parallel: 0
+  strict: true
+  publishQuiet: false
+
+  # Language
+  language: ru
+
+  # Tags for filtering scenarios
+  # tags: "@smoke and not @wip"

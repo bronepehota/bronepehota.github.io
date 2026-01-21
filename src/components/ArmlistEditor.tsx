@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { Squad, Machine, FactionID, Soldier, Weapon, SpeedSector } from '@/lib/types';
 import factionsData from '@/data/factions.json';
-import { Save, Plus, Trash2, Upload, Image as ImageIcon, X, FileImage } from 'lucide-react';
+import { Save, Plus, Trash2, X, FileImage } from 'lucide-react';
 
 type EditorMode = 'squad' | 'machine';
 
@@ -934,7 +935,7 @@ function ImageUploadField({ label, value, onChange, onPaste, onUpload, compact }
         <div className="flex flex-col items-center justify-center gap-2 text-center">
           {value ? (
             <>
-              <img src={value} alt="Preview" className="max-w-full max-h-48 rounded" />
+              <Image src={value} alt="Preview" width={200} height={192} className="max-w-full max-h-48 rounded" unoptimized />
               <button
                 onClick={() => onChange('')}
                 className="text-red-400 hover:text-red-300 text-sm"

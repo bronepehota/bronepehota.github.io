@@ -4,12 +4,12 @@ import { RulesVersionID } from '@/lib/types';
 
 interface RulesVersionSelectorProps {
   selectedVersion: RulesVersionID;
-  onVersionChange: (id: RulesVersionID) => void;
+  _onVersionChange: (id: RulesVersionID) => void;
 }
 
 export default function RulesVersionSelector({
   selectedVersion,
-  onVersionChange
+  _onVersionChange
 }: RulesVersionSelectorProps) {
   // Get version name for display
   const getVersionName = (id: RulesVersionID): string => {

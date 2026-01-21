@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { executeRoll } from '@/lib/game-logic';
-import { Dice6, Dice1, Dices } from 'lucide-react';
+import { Dices } from 'lucide-react';
 
 export default function DiceRoller() {
   const [lastRoll, setLastRoll] = useState<{ total: number, rolls: number[], type: string } | null>(null);
