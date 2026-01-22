@@ -16,7 +16,7 @@ export interface BronepehotaWorld {
   setInLocalStorage: (key: string, value: any) => Promise<void>;
 }
 
-class CustomWorld extends World implements BronepehotaWorld {
+class CustomWorld implements BronepehotaWorld {
   page!: Page;
   browser!: Browser;
   context!: BrowserContext;

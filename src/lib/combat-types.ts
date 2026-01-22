@@ -56,6 +56,9 @@ export interface CombatResult {
   unitName: string;
   unitId: string;
   soldierIndex?: number;      // For squads: which soldier
+  pilotDied?: boolean;        // Pilot died from armor/survival test
+  armorTestRoll?: number;     // Armor test roll (D12) for machines with pilots
+  survivalTestRoll?: number;  // Pilot survival test roll (D6)
 }
 
 /**

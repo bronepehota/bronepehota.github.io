@@ -22,6 +22,8 @@ export interface Soldier {
   props: string[];
   armor: number;
   image?: string;
+  isPilot?: boolean;        // Marks soldier as currently piloting a machine
+  pilotOfInstanceId?: string; // Which machine instance this soldier is piloting
 }
 
 export interface Squad {
@@ -109,6 +111,14 @@ export interface Machine {
   durabilityZones?: DurabilityZone[]; // Optional for fan rules vehicle damage
 }
 
+// Pilot information for machines
+export interface PilotInfo {
+  squadInstanceId: string;  // Which squad the pilot comes from
+  soldierIndex: number;     // Which soldier in that squad
+  pilotArmor: number;       // Armor value of the pilot (Бр)
+  alive: boolean;           // Is pilot alive
+}
+
 export interface ArmyUnit {
   instanceId: string;
   type: 'squad' | 'machine';
@@ -132,6 +142,7 @@ export interface ArmyUnit {
   isMachineDone?: boolean;
   machineShotsUsed?: number; // количество выстрелов в этом ходу
   machineWeaponShots?: { [weaponIndex: number]: number }; // количество выстрелов из каждого оружия
+  pilotInfo?: PilotInfo;     // Pilot information for machines
 }
 
 export interface Army {

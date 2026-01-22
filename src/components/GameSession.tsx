@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Army, ArmyUnit, Squad, Machine } from '@/lib/types';
+import { Army, ArmyUnit, Squad, Machine, PilotInfo } from '@/lib/types';
 import UnitCard from './UnitCard';
 import { RotateCcw, ChevronLeft, ChevronRight, Heart, UserX, History } from 'lucide-react';
 import { rollDie } from '@/lib/game-logic';
@@ -37,6 +37,63 @@ export default function GameSession({ army, setArmy }: GameSessionProps) {
       units: army.units.map(u => u.instanceId === updatedUnit.instanceId ? updatedUnit : u)
     });
   };
+
+  // Handle pilot assignment - updates both machine and squad
+  const handlePilotAssign = useCallback((machineInstanceId: string, pilotInfo: PilotInfo) => {
+    const updatedUnits = army.units.map((unit: ArmyUnit) => {
+      // Update the machine with pilot info
+      if (unit.instanceId === machineInstanceId) {
+        return { ...unit, pilotInfo };
+      }
+      // Update the squad soldier as pilot
+      if (unit.instanceId === pilotInfo.squadInstanceId && unit.type === 'squad') {
+        const updatedSoldiers = [...(unit.data as Squad).soldiers];
+        updatedSoldiers[pilotInfo.soldierIndex] = {
+          ...updatedSoldiers[pilotInfo.soldierIndex],
+          isPilot: true,
+          pilotOfInstanceId: machineInstanceId,
+        };
+        return { ...unit, data: { ...unit.data, soldiers: updatedSoldiers } };
+      }
+      return unit;
+    });
+    setArmy({ ...army, units: updatedUnits });
+  }, [army, setArmy]);
+
+  // Handle pilot removal - clears pilot from both machine and squad
+  const handlePilotRemove = useCallback((machineInstanceId: string) => {
+    // Find the machine to get pilot info before clearing
+    const machine = army.units.find((u: ArmyUnit) => u.instanceId === machineInstanceId);
+    if (!machine?.pilotInfo) return;
+
+    const updatedUnits = army.units.map((unit: ArmyUnit) => {
+      // Clear pilot info from machine
+      if (unit.instanceId === machineInstanceId) {
+        const { pilotInfo: _pilotInfo, ...unitWithoutPilot } = unit;
+        return unitWithoutPilot;
+      }
+      // Clear pilot status from squad soldier
+      if (unit.instanceId === machine.pilotInfo!.squadInstanceId && unit.type === 'squad') {
+        const updatedSoldiers = [...(unit.data as Squad).soldiers];
+        updatedSoldiers[machine.pilotInfo!.soldierIndex] = {
+          ...updatedSoldiers[machine.pilotInfo!.soldierIndex],
+          isPilot: false,
+          pilotOfInstanceId: undefined,
+        };
+        return { ...unit, data: { ...unit.data, soldiers: updatedSoldiers } };
+      }
+      return unit;
+    });
+    setArmy({ ...army, units: updatedUnits });
+  }, [army, setArmy]);
+
+  // Handle navigation to a specific unit
+  const handleNavigateToUnit = useCallback((unitInstanceId: string) => {
+    const targetIdx = army.units.findIndex((u: ArmyUnit) => u.instanceId === unitInstanceId);
+    if (targetIdx !== -1) {
+      setFocusedUnitIdx(targetIdx);
+    }
+  }, [army.units]);
 
   const handleCombatLogEntry = (entry: CombatLogEntry) => {
     setCombatLog(prev => [entry, ...prev]);
@@ -334,6 +391,10 @@ export default function GameSession({ army, setArmy }: GameSessionProps) {
               updateUnit={updateUnit}
               combatLog={combatLog}
               onCombatLogEntry={handleCombatLogEntry}
+              allUnits={army.units}
+              onPilotAssign={handlePilotAssign}
+              onPilotRemove={handlePilotRemove}
+              onNavigateToUnit={handleNavigateToUnit}
             />
           </div>
         )}

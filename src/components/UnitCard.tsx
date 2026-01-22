@@ -4,27 +4,38 @@ import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { ArmyUnit, Squad, Machine, RulesVersionID } from '@/lib/types';
 import factionsData from '@/data/factions.json';
-import { Shield, Sword, Target, Heart, Zap, RotateCcw, ExternalLink, CheckCircle2, Bomb, ChevronDown, ChevronUp, UserX, Dices } from 'lucide-react';
+import { Shield, Sword, Target, Heart, Zap, RotateCcw, ExternalLink, CheckCircle2, Bomb, ChevronDown, ChevronUp, UserX, Dices, Plane, Skull, Wrench } from 'lucide-react';
 import { formatUnitNumber } from '@/lib/unit-utils';
 import { getDefaultRulesVersion } from '@/lib/rules-registry';
 import { cn } from '@/lib/utils';
 import { BottomSheetCombatModal } from './combat/BottomSheetCombatModal';
 import { useCombatFlowController } from './combat/CombatFlowController';
 import { CombatLogEntry } from '@/lib/combat-types';
+import { PilotAssignmentModal } from './PilotAssignmentModal';
+import { PilotInfo } from '@/lib/types';
+import { PilotTestModal } from './combat/PilotTestModal';
+import { usePilotTestFlow } from '@/hooks/usePilotTestFlow';
 
 interface UnitCardProps {
   unit: ArmyUnit;
   updateUnit: (unit: ArmyUnit) => void;
   combatLog?: CombatLogEntry[];
   onCombatLogEntry?: (entry: CombatLogEntry) => void;
+  allUnits?: ArmyUnit[]; // All units in the army for pilot assignment
+  onPilotAssign?: (machineInstanceId: string, pilotInfo: PilotInfo) => void;
+  onPilotRemove?: (machineInstanceId: string) => void;
+  onNavigateToUnit?: (unitInstanceId: string) => void; // Navigate to unit card
 }
 
-export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [], onCombatLogEntry }: UnitCardProps) {
+export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [], onCombatLogEntry, allUnits = [], onPilotAssign, onPilotRemove, onNavigateToUnit }: UnitCardProps) {
   const [showImage, setShowImage] = useState(false);
   const [isManualCollapsed, setIsManualCollapsed] = useState(false);
   const [rulesVersion, setRulesVersion] = useState<RulesVersionID>(getDefaultRulesVersion());
+  const [showPilotModal, setShowPilotModal] = useState(false);
+  const [pilotSurvivalTest, setPilotSurvivalTest] = useState<{ roll: number; survived: boolean; testedAt: number } | null>(null);
 
   const combatController = useCombatFlowController();
+  const pilotTestFlow = usePilotTestFlow();
   // Track last processed result to prevent duplicate processing
   const lastProcessedResultRef = useRef<number | null>(null);
 
@@ -158,6 +169,51 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
     combatController.startCombat(unit, undefined, weaponIndex, 'shot');
   };
 
+  // Handle pilot assignment
+  const handlePilotAssign = (pilotInfo: PilotInfo) => {
+    if (onPilotAssign) {
+      onPilotAssign(unit.instanceId, pilotInfo);
+    }
+  };
+
+  const handlePilotRemove = () => {
+    if (onPilotRemove) {
+      onPilotRemove(unit.instanceId);
+    }
+  };
+
+  // Handle pilot survival test - start the modal flow
+  const handlePilotSurvivalTest = () => {
+    if (!unit.pilotInfo || !unit.pilotInfo.alive) return;
+
+    const pilotArmor = unit.pilotInfo.pilotArmor || 0;
+
+    pilotTestFlow.startTest(pilotArmor, (armorRoll, survivalRoll, survived) => {
+      // Store the result
+      setPilotSurvivalTest({
+        roll: survivalRoll ?? armorRoll,
+        survived,
+        testedAt: Date.now()
+      });
+
+      // Update pilot state if died
+      if (!survived && unit.pilotInfo) {
+        const updatedPilotInfo: PilotInfo = {
+          squadInstanceId: unit.pilotInfo.squadInstanceId || '',
+          soldierIndex: unit.pilotInfo.soldierIndex || 0,
+          pilotArmor: unit.pilotInfo.pilotArmor || 0,
+          alive: false
+        };
+        updateUnit({ ...unit, pilotInfo: updatedPilotInfo });
+      }
+    });
+  };
+
+  // Reset survival test when pilot changes or durability increases
+  useEffect(() => {
+    setPilotSurvivalTest(null);
+  }, [unit.pilotInfo, unit.currentDurability]);
+
   // Handle combat completion
   useEffect(() => {
     if (combatController.state.phase === 'RESULTS' && combatController.state.result) {
@@ -234,32 +290,20 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
   };
 
   const getSoldierImage = (idx: number) => {
-    if (!isSquad) return null;
+    if (!isSquad) return '/images/soldiers/empty.png';
     const soldier = (data as Squad).soldiers[idx];
     if (soldier.image) {
       return soldier.image;
     }
-    if (data.image) {
-      return null;
-    }
-    return null;
+    return '/images/soldiers/empty.png';
   };
 
-  const getSoldierStyle = (idx: number) => {
-    const soldierImg = getSoldierImage(idx);
-    if (soldierImg) return {};
-
-    if (!data.image) return {};
-    const isRightSide = idx % 2 === 1;
-    const row = Math.floor(idx / 2);
-    const xPos = isRightSide ? 94 : 6;
-    const yPos = 24 + (row * 36);
-    return {
-      backgroundImage: `url(${data.image})`,
-      backgroundSize: '550%',
-      backgroundPosition: `${xPos}% ${yPos}%`,
-      backgroundRepeat: 'no-repeat'
-    };
+  const getPilotImage = (): string | null => {
+    if (!unit.pilotInfo) return null;
+    const squad = allUnits.find(u => u.instanceId === unit.pilotInfo?.squadInstanceId);
+    if (!squad || squad.type !== 'squad') return null;
+    const soldier = (squad.data as Squad).soldiers[unit.pilotInfo.soldierIndex];
+    return soldier.image || null;
   };
 
   const machineImage = !isSquad && !!(unit.data as Machine).image;
@@ -299,6 +343,28 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
           onApplyResult={handleApplyResult}
           grenadesAvailable={isSquad && !unit.grenadesUsed}
           unitDisplayName={`${formatUnitNumber(unit)} - ${data.name}`}
+        />
+      )}
+
+      {/* Pilot Assignment Modal */}
+      {!isSquad && showPilotModal && (
+        <PilotAssignmentModal
+          isOpen={showPilotModal}
+          onClose={() => setShowPilotModal(false)}
+          machine={unit as ArmyUnit & { data: Machine }}
+          allUnits={allUnits}
+          onAssignPilot={handlePilotAssign}
+          onRemovePilot={handlePilotRemove}
+        />
+      )}
+
+      {/* Pilot Test Modal */}
+      {pilotTestFlow.isOpen && (
+        <PilotTestModal
+          isOpen={pilotTestFlow.isOpen}
+          state={pilotTestFlow.state}
+          onClose={pilotTestFlow.closeTest}
+          onApply={pilotTestFlow.onApply}
         />
       )}
 
@@ -397,27 +463,37 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                 const actions = unit.actionsUsed?.[idx] || { moved: false, shot: false, melee: false, done: false };
                 const isDone = actions.done;
 
+                // Check if this soldier is a pilot
+                const soldier = (data as Squad).soldiers[idx];
+                const isPilot = soldier.isPilot;
+                const pilotedMachine = isPilot
+                  ? allUnits.find((u) => u.instanceId === soldier.pilotOfInstanceId)
+                  : null;
+
                 return (
                   <div
                     key={idx}
                     className={cn(
                       "p-1.5 md:p-2 rounded-lg border flex gap-2 md:gap-3 transition-all relative overflow-hidden",
                       isDead ? "bg-slate-950 border-slate-800 opacity-40 grayscale" :
-                      isDone ? "bg-slate-900/50 border-slate-700 opacity-80" : "bg-slate-700/30 border-slate-600"
+                      isDone ? "bg-slate-900/50 border-slate-700 opacity-80" : "bg-slate-700/30 border-slate-600",
+                      isPilot && !isDead ? "border-blue-700/50" : ""
                     )}
                   >
                     <div className="w-12 h-12 md:w-16 md:h-16 rounded-md border border-slate-600 overflow-hidden flex-shrink-0 bg-slate-900 relative">
-                      {getSoldierImage(idx) ? (
-                        <Image
-                          src={getSoldierImage(idx)!}
-                          alt={`Солдат ${idx + 1}`}
-                          width={64}
-                          height={64}
-                          className="w-full h-full object-cover object-center"
-                          unoptimized
-                        />
-                      ) : (
-                        <div className="w-full h-full" style={getSoldierStyle(idx)} />
+                      <Image
+                        src={getSoldierImage(idx)}
+                        alt={`Солдат ${idx + 1}`}
+                        width={64}
+                        height={64}
+                        className="w-full h-full object-cover object-center"
+                        unoptimized
+                      />
+                      {/* Pilot Badge Overlay */}
+                      {isPilot && !isDead && (
+                        <div className="absolute bottom-0 left-0 right-0 bg-blue-900/90 text-[6px] md:text-[7px] font-bold text-center text-blue-200 py-0.5">
+                          ПИЛОТ
+                        </div>
                       )}
                     </div>
 
@@ -438,6 +514,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                                 : "bg-orange-600 hover:bg-orange-500 border-orange-500 active:scale-95"
                             )}
                             title="Выстрел"
+                            aria-label="Атаковать"
                           >
                             <Target className="w-4 h-4 md:w-5 md:h-5" />
                             <span className="hidden sm:inline">ВЫСТРЕЛ</span>
@@ -527,6 +604,22 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                           </div>
                         </div>
                       </div>
+
+                      {/* Pilot Badge - clickable to navigate to machine */}
+                      {isPilot && !isDead && pilotedMachine && (
+                        <button
+                          onClick={() => onNavigateToUnit?.(pilotedMachine.instanceId)}
+                          className="mt-1.5 md:mt-2 w-full flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-blue-900/30 border border-blue-700/50 hover:bg-blue-900/50 transition-colors group"
+                        >
+                          <Plane className="w-3 h-3 text-blue-400 group-hover:text-blue-300" />
+                          <span className="text-[9px] md:text-[10px] font-bold text-blue-300">
+                            МАШИНА #{pilotedMachine.instanceNumber}
+                          </span>
+                          <span className="text-[7px] md:text-[8px] text-blue-400/70 group-hover:text-blue-300/70 ml-auto">
+                            →
+                          </span>
+                        </button>
+                      )}
                     </div>
                   </div>
                 );
@@ -534,90 +627,163 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
             </div>
           ) : (
             <div className="space-y-2">
-              {/* Machine Stats Header */}
-              <div className="grid grid-cols-2 gap-2">
-                {/* Durability */}
-                <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-700">
+              {/* Machine Stats Header - Redesigned */}
+              {/* Mobile: Two rows (Durability+Speed + Pilot | Ammo+Shots) */}
+              {/* Desktop: Single row (Durability+Speed | Ammo+Shots | Pilot) */}
+              <div className="flex flex-col md:flex-row gap-2">
+                {/* Durability + Speed Combined */}
+                <div className="flex-1 bg-slate-900/80 p-2 rounded-lg border border-slate-700 min-w-0">
                   <div className="flex justify-between items-center mb-1">
-                    <span className="text-[8px] md:text-[9px] opacity-50 uppercase font-bold">Прочность</span>
-                    <div className="flex items-center gap-1">
+                    <span className="text-[8px] md:text-[9px] opacity-50 uppercase font-bold flex items-center gap-1">
+                      <Shield className="w-2.5 h-2.5 md:w-3 md:h-3" /> Прочность
+                    </span>
+                    <span className="text-[8px] md:text-[9px] opacity-50 uppercase font-bold flex items-center gap-1">
+                      <Zap className="w-2.5 h-2.5 md:w-3 md:h-3" /> Скорость
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {/* Durability controls */}
+                    <div className="flex-1 flex items-center gap-1">
+                      {/* Damage Button */}
                       <button
                         onClick={() => updateMachineStat('durability', -1)}
                         disabled={unit.currentDurability === 0}
                         className={cn(
-                          "w-5 h-5 md:w-6 md:h-6 rounded bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed text-xs font-bold flex items-center justify-center transition-colors min-w-[32px] min-h-[32px] md:min-w-0 md:min-h-0",
+                          "w-9 h-9 md:w-10 md:h-10 rounded bg-red-900/40 hover:bg-red-900/60 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors min-w-[40px] min-h-[40px] border border-red-800/50 shrink-0",
                           getZoneColor(getDurabilityZone().color).text
                         )}
-                      >-</button>
-                      <span className={cn("text-xs md:text-sm font-black min-w-[24px] text-center", getZoneColor(getDurabilityZone().color).text)}>
+                        title="Нанести урон"
+                      >
+                        <Skull className="w-4 h-4" />
+                      </button>
+                      <span className={cn("text-sm md:text-base font-black min-w-[20px] text-center shrink-0", getZoneColor(getDurabilityZone().color).text)}>
                         {unit.currentDurability}
                       </span>
+                      {/* Repair Button */}
                       <button
                         onClick={() => updateMachineStat('durability', 1)}
                         disabled={unit.currentDurability === (data as Machine).durability_max}
                         className={cn(
-                          "w-5 h-5 md:w-6 md:h-6 rounded bg-slate-800 hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed text-xs font-bold flex items-center justify-center transition-colors min-w-[32px] min-h-[32px] md:min-w-0 md:min-h-0",
+                          "w-9 h-9 md:w-10 md:h-10 rounded bg-green-900/40 hover:bg-green-900/60 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors min-w-[40px] min-h-[40px] border border-green-800/50 shrink-0",
                           getZoneColor(getDurabilityZone().color).text
                         )}
-                      >+</button>
+                        title="Ремонт"
+                      >
+                        <Wrench className="w-4 h-4" />
+                      </button>
+                      {/* Progress bar */}
+                      <div className="h-1.5 bg-slate-950 rounded-full overflow-hidden flex-1 min-w-[20px]">
+                        <div
+                          className={cn("h-full transition-all", getZoneColor(getDurabilityZone().color).bar)}
+                          style={{ width: `${(unit.currentDurability! / (data as Machine).durability_max) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                    {/* Speed display */}
+                    <div className="flex items-center gap-0.5 shrink-0">
+                      <Zap className="w-3 h-3 md:w-3.5 md:h-3.5 text-yellow-400 opacity-60" />
+                      <span className="text-sm md:text-base font-black text-yellow-400">
+                        {getMachineSpeed()}
+                      </span>
                     </div>
                   </div>
-                  <div className="h-1.5 bg-slate-950 rounded-full overflow-hidden">
-                    <div
-                      className={cn("h-full transition-all", getZoneColor(getDurabilityZone().color).bar)}
-                      style={{ width: `${(unit.currentDurability! / (data as Machine).durability_max) * 100}%` }}
-                    />
-                  </div>
-                  {/* Zone boundary markers with prominent max value */}
-                  <div className="flex justify-between items-center mt-1">
-                    <span className={cn("text-[8px] md:text-[9px] font-black", getZoneColor(getDurabilityZone().color).text)}>
-                      МАКС: {getDurabilityZone().max}
+                </div>
+
+                {/* Ammo + Shots Combined */}
+                <div className="flex-1 bg-slate-900/80 p-2 rounded-lg border border-slate-700 min-w-0">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-[8px] md:text-[9px] opacity-50 uppercase font-bold flex items-center gap-1">
+                      <Bomb className="w-2.5 h-2.5 md:w-3 md:h-3" /> Боезапас
                     </span>
-                    <div className="flex gap-1 text-[6px] md:text-[7px]">
-                      <span className="text-green-500/60">{(data as Machine).durability_max}</span>
-                      <span className="text-yellow-500/60">{Math.ceil((data as Machine).durability_max * 2 / 3)}</span>
-                      <span className="text-yellow-500/60">{Math.ceil((data as Machine).durability_max / 3)}</span>
-                      <span className="text-red-500/60">0</span>
+                    <span className="text-[8px] md:text-[9px] opacity-50 uppercase font-bold flex items-center gap-1">
+                      <Target className="w-2.5 h-2.5 md:w-3 md:h-3" /> Выстрелы
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {/* Ammo progress bar */}
+                    <div className="flex-1 min-w-0 flex items-center gap-1">
+                      <div className="h-1.5 bg-slate-950 rounded-full overflow-hidden flex-1">
+                        <div
+                          className="h-full bg-blue-500 transition-all"
+                          style={{ width: `${(unit.currentAmmo! / (data as Machine).ammo_max) * 100}%` }}
+                        />
+                      </div>
+                      <span className="text-[9px] md:text-xs font-black text-blue-400 min-w-[38px] text-right shrink-0">
+                        {unit.currentAmmo}/{(data as Machine).ammo_max}
+                      </span>
+                    </div>
+                    {/* Shots count */}
+                    <div className="flex items-center gap-1 shrink-0">
+                      <div className="h-1.5 bg-slate-950 rounded-full overflow-hidden w-10">
+                        <div
+                          className="h-full bg-orange-500 transition-all"
+                          style={{ width: `${Math.min(100, ((unit.machineShotsUsed || 0) / (data as Machine).fire_rate) * 100)}%` }}
+                        />
+                      </div>
+                      <span className="text-[9px] md:text-xs font-black text-orange-400 min-w-[35px] text-right">
+                        {unit.machineShotsUsed || 0}/{(data as Machine).fire_rate}
+                      </span>
                     </div>
                   </div>
                 </div>
 
-                {/* Ammo */}
-                <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-700">
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-[8px] md:text-[9px] opacity-50 uppercase font-bold">Боезапас</span>
-                    <span className="text-xs md:text-sm font-black text-blue-400">
-                      {unit.currentAmmo}/{(data as Machine).ammo_max}
-                    </span>
-                  </div>
-                  <div className="h-1.5 bg-slate-950 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-blue-500 transition-all"
-                      style={{ width: `${(unit.currentAmmo! / (data as Machine).ammo_max) * 100}%` }}
-                    />
-                  </div>
-                </div>
-
-                {/* Shots / Fire Rate */}
-                <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-700">
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-[8px] md:text-[9px] opacity-50 uppercase font-bold">Выстрелы</span>
-                    <span className="text-xs md:text-sm font-black text-orange-400">
-                      {unit.machineShotsUsed || 0}/{(data as Machine).fire_rate}
-                    </span>
-                  </div>
-                  <div className="h-1.5 bg-slate-950 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-orange-500 transition-all"
-                      style={{ width: `${Math.min(100, ((unit.machineShotsUsed || 0) / (data as Machine).fire_rate) * 100)}%` }}
-                    />
-                  </div>
-                </div>
-
-                {/* Speed */}
-                <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-700 flex flex-col items-center justify-center">
-                  <span className="text-[8px] md:text-[9px] opacity-50 uppercase font-bold mb-0.5">Скорость</span>
-                  <span className="text-sm md:text-base font-black text-yellow-400">{getMachineSpeed()}</span>
+                {/* Pilot Button - Compact, on the right with survival test integrated */}
+                <div className="w-14 h-14 md:w-16 md:h-16 shrink-0 relative">
+                  <button
+                    onClick={() => setShowPilotModal(true)}
+                    className="w-full h-full rounded-lg border border-slate-700 overflow-hidden bg-slate-900/80 relative"
+                  >
+                    {unit.pilotInfo ? (
+                      <>
+                        <Image
+                          src={getPilotImage() || '/images/soldiers/empty.png'}
+                          width={64}
+                          height={64}
+                          className="w-full h-full object-cover"
+                          unoptimized
+                          alt="Пилот"
+                        />
+                        {/* Status overlay */}
+                        <div className={cn(
+                          "absolute bottom-0 left-0 right-0 text-[7px] md:text-[8px] font-bold text-center py-0.5",
+                          unit.pilotInfo.alive
+                            ? "bg-green-900/90 text-green-300"
+                            : "bg-red-900/90 text-red-300"
+                        )}>
+                          {unit.pilotInfo.alive ? 'ЖИВ' : 'ПОГИБ'}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-slate-600 gap-0.5">
+                        <Plane className="w-5 h-5 md:w-6 md:h-6" />
+                        <span className="text-[8px] md:text-[9px] font-bold uppercase">Пилот</span>
+                      </div>
+                    )}
+                  </button>
+                  {/* Survival Test Button - Small overlay at bottom */}
+                  {unit.pilotInfo && unit.pilotInfo.alive && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePilotSurvivalTest();
+                      }}
+                      disabled={pilotTestFlow.isOpen}
+                      className={cn(
+                        "absolute -bottom-1 -right-1 w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center transition-transform border-2 min-w-[36px] min-h-[36px]",
+                        pilotTestFlow.isOpen && "animate-pulse",
+                        pilotSurvivalTest
+                          ? pilotSurvivalTest.survived
+                            ? "bg-green-600 border-green-900 text-white"
+                            : "bg-red-600 border-red-900 text-white"
+                          : pilotTestFlow.isOpen
+                          ? "bg-purple-600 border-purple-900 text-white animate-spin"
+                          : "bg-purple-900 border-purple-950 text-purple-300 hover:bg-purple-800 hover:scale-110"
+                      )}
+                      title={pilotSurvivalTest ? `Повторить тест (последний: ${pilotSurvivalTest.survived ? 'ВЫЖИЛ' : 'ПОГИБ'})` : "Тест выживаемости пилота (D12 + D6)"}
+                    >
+                      <Skull className="w-3 h-3 md:w-3.5 md:h-3.5" />
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -752,6 +918,40 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                 })}
               </div>
 
+              {/* Pilot Management Actions */}
+              {unit.pilotInfo && (
+                <div className="flex gap-1 md:gap-1.5 mt-2 pt-2 border-t border-slate-700">
+                  {unit.pilotInfo.alive && (
+                    <button
+                      onClick={() => {
+                        if (onPilotRemove) {
+                          onPilotRemove(unit.instanceId);
+                        }
+                      }}
+                      className={cn(
+                        "flex-1 p-2 md:p-2.5 rounded-lg transition-colors min-h-[44px] md:min-h-0 flex items-center justify-center gap-1.5 text-xs font-bold",
+                        "bg-blue-900/30 text-blue-400 border border-blue-700/50 hover:bg-blue-900/50"
+                      )}
+                      title="Выбросить пилота из машины"
+                    >
+                      <UserX className="w-4 h-4" />
+                      <span className="hidden sm:inline">ВЫБРОСИТЬСЯ</span>
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setShowPilotModal(true)}
+                    className={cn(
+                      "flex-1 p-2 md:p-2.5 rounded-lg transition-colors min-h-[44px] md:min-h-0 flex items-center justify-center gap-1.5 text-xs font-bold",
+                      "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700"
+                    )}
+                    title="Сменить пилота"
+                  >
+                    <Plane className="w-4 h-4" />
+                    <span className="hidden sm:inline">СМЕНИТЬ ПИЛОТА</span>
+                  </button>
+                </div>
+              )}
+
               {/* Machine Actions Footer */}
               <div className="flex gap-1 md:gap-1.5 mt-2 pt-2 border-t border-slate-700">
                 <button
@@ -795,18 +995,14 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
               <div className="flex -space-x-2">
                 {(data as Squad).soldiers.slice(0, 3).map((_, idx) => (
                   <div key={idx} className="w-6 h-6 rounded-full border border-slate-700 overflow-hidden bg-slate-900 ring-2 ring-slate-800 relative">
-                    {getSoldierImage(idx) ? (
-                      <Image
-                        src={getSoldierImage(idx)!}
-                        alt={`Солдат ${idx + 1}`}
-                        width={24}
-                        height={24}
-                        className="w-full h-full object-cover object-center scale-150"
-                        unoptimized
-                      />
-                    ) : (
-                      <div className="w-full h-full scale-150" style={getSoldierStyle(idx)} />
-                    )}
+                    <Image
+                      src={getSoldierImage(idx)}
+                      alt={`Солдат ${idx + 1}`}
+                      width={24}
+                      height={24}
+                      className="w-full h-full object-cover object-center scale-150"
+                      unoptimized
+                    />
                   </div>
                 ))}
                 {(data as Squad).soldiers.length > 3 && (

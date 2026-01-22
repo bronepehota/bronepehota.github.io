@@ -1,6 +1,9 @@
-import { Before, After, BeforeAll, AfterAll } from '@cucumber/cucumber';
+import { Before, After, BeforeAll, AfterAll, setDefaultTimeout } from '@cucumber/cucumber';
 import { chromium, Browser, BrowserContext, Page } from 'playwright';
 import { BronepehotaWorld } from './world';
+
+// Set default timeout for all steps (in milliseconds)
+setDefaultTimeout(10000);
 
 // Share browser instance between scenarios
 let browser: Browser;
@@ -37,15 +40,22 @@ Before(async function(this: BronepehotaWorld) {
   this.armyState = null;
 
   // Go to home page first to enable localStorage access
-  await page.goto('http://localhost:3000').catch(() => {});
-  // Clear localStorage at the start of each scenario
-  await page.evaluate(() => {
-    try {
-      localStorage.clear();
-    } catch {
-      // Ignore if localStorage is not available
-    }
-  });
+  try {
+    await page.goto('http://localhost:3000', { waitUntil: 'domcontentloaded', timeout: 10000 });
+    // Wait a bit for page to be ready
+    await page.waitForTimeout(200);
+    // Clear localStorage at the start of each scenario
+    await page.evaluate(() => {
+      try {
+        localStorage.clear();
+      } catch {
+        // Ignore if localStorage is not available
+      }
+    });
+  } catch (error) {
+    // If app is not running, just continue - tests will fail appropriately
+    console.warn('Warning: Could not navigate to app. Make sure it is running on http://localhost:3000');
+  }
 });
 
 After(async function(this: BronepehotaWorld, scenario) {
