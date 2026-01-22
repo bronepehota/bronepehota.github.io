@@ -65,7 +65,8 @@ Then('версия правил должна быть сохранена в loca
 Then('версия правил {string} должна остаться выбранной', async function(this: BronepehotaWorld, expectedVersion: string) {
   const rulesVersion = await this.page.evaluate(() => {
     const value = localStorage.getItem('bronepehota_rules_version');
-    return value ? JSON.parse(value) : null;
+    // Rules version is stored as plain string, not JSON
+    return value;
   });
   expect(rulesVersion).toBe(this.currentRulesVersion || expectedVersion);
 });
