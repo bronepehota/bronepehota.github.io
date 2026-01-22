@@ -34,4 +34,4 @@ default:
   language: ru
 
   # Tags for filtering scenarios
-  # tags: "@smoke and not @wip"
+  tags: "not @wip"

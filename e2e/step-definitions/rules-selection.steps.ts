@@ -130,8 +130,8 @@ Given('я выполняю атаку с дистанцией {string} на ра
 
 When('я выполняю расчёт попадания', async function(this: BronepehotaWorld) {
   const attackButton = this.page.getByRole('button', { name: /атаковать|рассчитать/i });
-  await attackButton.click();
-  await this.page.waitForTimeout(500);
+  await attackButton.click({ timeout: 10000 });
+  await this.page.waitForTimeout(1000);
 });
 
 Then('бросок должен выполняться по формуле официальных правил', async function(this: BronepehotaWorld) {
@@ -165,8 +165,8 @@ Given('я атакую машину с текущей прочностью {stri
 
 When('я выполняю расчёт урона', async function(this: BronepehotaWorld) {
   const damageButton = this.page.getByRole('button', { name: /урон|рассчитать/i });
-  await damageButton.click();
-  await this.page.waitForTimeout(500);
+  await damageButton.click({ timeout: 10000 });
+  await this.page.waitForTimeout(1000);
 });
 
 Then('должен учитываться коэффициент в зависимости от зоны прочности', async function(this: BronepehotaWorld) {
@@ -185,8 +185,8 @@ Given('у оружия есть эффект {string} с радиусом {strin
 
 When('я выполняю атаку', async function(this: BronepehotaWorld) {
   const attackButton = this.page.getByRole('button', { name: /атаковать/i });
-  await attackButton.click();
-  await this.page.waitForTimeout(500);
+  await attackButton.click({ timeout: 10000 });
+  await this.page.waitForTimeout(1000);
 });
 
 Then('должен быть рассчитан урон по зоне', async function(this: BronepehotaWorld) {

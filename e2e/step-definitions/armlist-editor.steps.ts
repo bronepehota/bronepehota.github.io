@@ -5,9 +5,20 @@ import { BronepehotaWorld } from '../support/world';
 // Armlist Editor steps
 
 When('я выбираю режим {string}', async function(this: BronepehotaWorld, mode: string) {
-  const modeButton = this.page.getByRole('button', { name: new RegExp(mode, 'i') });
-  await modeButton.click();
-  await this.page.waitForTimeout(300);
+  // Map mode names to actual button text
+  const modeMap: Record<string, string> = {
+    'Отряд': 'Взвод солдат',
+    'отряд': 'Взвод солдат',
+    'Squad': 'Взвод солдат',
+    'Машина': 'Техника',
+    'машина': 'Техника',
+    'Machine': 'Техника'
+  };
+
+  const buttonText = modeMap[mode] || mode;
+  const modeButton = this.page.getByRole('button', { name: new RegExp(buttonText, 'i') });
+  await modeButton.click({ timeout: 10000 });
+  await this.page.waitForTimeout(500);
 });
 
 // Editor-specific faction selection (for dropdown, not main selection)

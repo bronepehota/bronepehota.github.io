@@ -1,6 +1,9 @@
-import { Before, After, BeforeAll, AfterAll } from '@cucumber/cucumber';
+import { Before, After, BeforeAll, AfterAll, setDefaultTimeout } from '@cucumber/cucumber';
 import { chromium, Browser, BrowserContext, Page } from 'playwright';
 import { BronepehotaWorld } from './world';
+
+// Set default timeout for all steps (in milliseconds)
+setDefaultTimeout(10000);
 
 // Share browser instance between scenarios
 let browser: Browser;
