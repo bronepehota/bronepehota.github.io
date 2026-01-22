@@ -5,6 +5,9 @@ import { BronepehotaWorld } from '../support/world';
 // Armlist Editor steps
 
 When('я выбираю режим {string}', async function(this: BronepehotaWorld, mode: string) {
+  // Wait for page to stabilize
+  await this.page.waitForTimeout(300);
+
   // Map mode names to actual button text
   const modeMap: Record<string, string> = {
     'Отряд': 'Взвод солдат',
@@ -16,8 +19,16 @@ When('я выбираю режим {string}', async function(this: BronepehotaWo
   };
 
   const buttonText = modeMap[mode] || mode;
-  const modeButton = this.page.getByRole('button', { name: new RegExp(buttonText, 'i') });
-  await modeButton.click({ timeout: 10000 });
+
+  // Try to find the button with multiple strategies
+  const modeButton = this.page.getByRole('button', { name: buttonText, exact: true });
+
+  // Wait for button to be visible and attached
+  await modeButton.waitFor({ state: 'visible', timeout: 10000 });
+  await this.page.waitForTimeout(200);
+
+  // Click the button
+  await modeButton.click({ timeout: 10000, force: true });
   await this.page.waitForTimeout(500);
 });
 

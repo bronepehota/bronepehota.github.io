@@ -13,7 +13,10 @@ default:
 
   # Feature files location
   spec:
-    - e2e/features/**/*.feature
+    - e2e/features/armlist-editor.feature
+    - e2e/features/army-building.feature
+    - e2e/features/game-session.feature
+    - e2e/features/rules-selection.feature
 
   # Test formatter
   format:

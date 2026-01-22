@@ -514,6 +514,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                                 : "bg-orange-600 hover:bg-orange-500 border-orange-500 active:scale-95"
                             )}
                             title="Выстрел"
+                            aria-label="Атаковать"
                           >
                             <Target className="w-4 h-4 md:w-5 md:h-5" />
                             <span className="hidden sm:inline">ВЫСТРЕЛ</span>
