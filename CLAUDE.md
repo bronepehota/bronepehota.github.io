@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Бронепехота (Bronepehota) is a Next.js 14 web application for a tabletop wargame. The app allows players to build armies, manage game sessions, and edit game data (squads, machines, factions). All UI text is in Russian; code uses English conventions.
+Бронепехота (Bronepehota) is a Next.js 14 web application for a tabletop wargame. The app allows players to build armies and manage game sessions. All UI text is in Russian; code uses English conventions.
 
 **Primary Target Device**: Mobile phones (MOBILE FIRST design approach). All UI components should be designed with mobile touch interactions in mind first, then enhanced for desktop.
 
@@ -41,17 +41,19 @@ npm run test:e2e:debug   # Run E2E tests in slow motion for debugging
 ### Data Layer
 
 **File-based JSON storage** in `src/data/`:
-- `factions.json` - Faction definitions (3 factions)
-- `squads.json` - Squad/army list data
-- `machines.json` - Vehicle/machine data
-
-**API Routes** (`src/app/api/armlists/`):
-- `factions/route.ts` - GET/POST/DELETE factions
-- `squads/route.ts` - GET/POST/DELETE squads
-- `machines/route.ts` - GET/POST/DELETE machines
-- `upload-image/route.ts` - POST image uploads to `public/images/`
-
-All API routes use synchronous `readFileSync`/`writeFileSync` operations. The POST handler handles both create (new ID) and update (existing ID) operations.
+```
+src/data/
+├── factions.json    - Faction definitions (3 factions)
+├── polaris/         - Polaris faction units
+│   ├── squads.json  - Polaris squad data
+│   └── machines.json - Polaris vehicle data
+├── protectorate/    - Protectorate faction units
+│   ├── squads.json
+│   └── machines.json
+└── mercenaries/     - Mercenaries faction units
+    ├── squads.json
+    └── machines.json
+```
 
 ### State Management
 
@@ -77,7 +79,12 @@ ArmyUnit     // Runtime instance of Squad or Machine with game state
 Army         // Player's army with units, totalCost, faction
 ```
 
-**Adding a new faction**: Update `FactionID` type in `types.ts` and add entry to `factions.json`.
+**Adding a new faction**:
+1. Update `FactionID` type in `types.ts`
+2. Add entry to `factions.json`
+3. Create new directory `src/data/{faction}/`
+4. Add `squads.json` and `machines.json` files
+5. Update imports in `ArmyBuilder.tsx`
 
 ### Game Logic (`src/lib/game-logic.ts`)
 
@@ -106,7 +113,7 @@ Adding a new rules version:
 ### Component Structure
 
 **Main Page** (`src/app/page.tsx`):
-- Header with faction branding, view toggle (Штаб/В Бой), editor link
+- Header with faction branding, view toggle (Штаб/В Бой)
 - ArmyBuilder (construction) OR GameSession (gameplay)
 - Footer with army stats
 
@@ -114,7 +121,6 @@ Adding a new rules version:
 - `ArmyBuilder.tsx` - Filter/search units, add to army, export/import JSON
 - `GameSession.tsx` - Two tabs: "Войска" (units) and "Атака" (combat)
 - `UnitCard.tsx` - Individual unit display, combat modal, animated dice
-- `ArmlistEditor.tsx` - Create/edit squads and machines with nested sub-editors
 - `CombatAssistant.tsx` - Standalone combat calculator
 - `UnitDetailsModal.tsx` - Bottom sheet modal for unit details (mobile swipe-to-close)
 - `UnitSelector.tsx` - Unit selection interface with filters
@@ -132,16 +138,79 @@ Adding a new rules version:
 - `DiceRoller.tsx` - Animated dice rolling component
 - `SafeImage.tsx` - Image component with error handling
 
-### Editor Pattern
+### Adding New Units via JSON
 
-The editor uses nested components:
-- `ArmlistEditor` → toggle between Squad/Machine mode
-- `SquadEditor` → `SoldierEditor[]` (up to 6 soldiers)
-- `MachineEditor` → speed sectors + weapons
+**To add a new squad or machine:**
+
+1. Navigate to the faction's directory: `src/data/{faction}/`
+   - Available factions: `polaris`, `protectorate`, `mercenaries`
+
+2. Edit `squads.json` for infantry or `machines.json` for vehicles
+
+3. Add a new unit object with required fields:
+
+**Squad Structure:**
+```json
+{
+  "id": "{faction}_{slugified_name}",
+  "name": "Название на русском",
+  "shortName": "Краткое название",
+  "faction": "polaris|protectorate|mercenaries",
+  "cost": 100,
+  "image": "/images/squads/filename.jpg",
+  "soldiers": [
+    {
+      "rank": 7,
+      "speed": 4,
+      "range": "D6",
+      "power": "1D6",
+      "melee": 0,
+      "props": ["Г"],
+      "armor": 2
+    }
+    // ... up to 6 soldiers
+  ]
+}
+```
+
+**Machine Structure:**
+```json
+{
+  "id": "{faction}_{slugified_name}",
+  "name": "Название на русском",
+  "shortName": "Краткое название",
+  "faction": "polaris|protectorate|mercenaries",
+  "cost": 150,
+  "rank": 2,
+  "fire_rate": 2,
+  "ammo_max": 20,
+  "durability_max": 16,
+  "image": "/images/machines/filename.jpg",
+  "speed_sectors": [
+    {"min_durability": 9, "max_durability": 16, "speed": 2},
+    {"min_durability": 1, "max_durability": 8, "speed": 1}
+  ],
+  "weapons": [
+    {
+      "name": "Weapon Name",
+      "range": "D12",
+      "power": "2D20",
+      "special": "Optional special effect"
+    }
+  ]
+}
+```
 
 **ID Generation**: `{faction}_{slugified_name}` (e.g., `polaris_light_assault_clone`)
 
-**Image Upload**: Three methods - file picker, drag-drop, clipboard paste (Ctrl+V). Images saved to `public/images/squads/` or `public/images/machines/`.
+**Images**: Place in `public/images/squads/` or `public/images/machines/`
+
+**Dice Notation**:
+- Range: "D6", "D12", "D20", "D6+2"
+- Power: "1D6", "2D12", "ББ" (melee)
+- Props: ["Г"] for grenade, ["БЫ"] for medic, [] for none
+
+**Speed Sectors**: Must cover full range 1 to durability_max without gaps
 
 ### Custom Hooks (`src/hooks/`)
 
@@ -197,7 +266,7 @@ The editor uses nested components:
 4. **Dice notation**: "D6", "D12", "D20" for range; "1D6", "2D12" for power; "ББ" for melee
 5. **Speed sectors** must cover full range from 1 to `durability_max` without gaps
 6. **Props** are string arrays: `["Г"]` for grenade, `[]` for none
-7. **Images**: Max 10MB, saved with timestamp + random suffix for uniqueness
+7. **Images**: Place images in `public/images/squads/` or `public/images/machines/`
 
 ## Active Technologies
 
@@ -211,7 +280,7 @@ The editor uses nested components:
 **State & Storage**:
 - localStorage for army state (`bronepehota_army`)
 - localStorage for rules version (`bronepehota_rules_version`)
-- JSON files in `src/data/` (factions.json, squads.json, machines.json)
+- JSON files in `src/data/` (factions.json, and faction-specific squads/machines)
 
 **Testing**:
 - Jest with jsdom environment (unit tests)

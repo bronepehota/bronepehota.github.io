@@ -29,6 +29,7 @@ export interface Soldier {
 export interface Squad {
   id: string;
   name: string;
+  shortName?: string;
   faction: FactionID;
   cost: number;
   soldiers: Soldier[];
@@ -98,6 +99,7 @@ export interface Weapon {
 export interface Machine {
   id: string;
   name: string;
+  shortName?: string;
   faction: FactionID;
   cost: number;
   rank: number;

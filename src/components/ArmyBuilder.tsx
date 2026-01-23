@@ -2,8 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { Army, ArmyUnit, Faction, Squad, Machine, RulesVersionID } from '@/lib/types';
-import squadsData from '@/data/squads.json';
-import machinesData from '@/data/machines.json';
+import polairsSquads from '@/data/polaris/squads.json';
+import polairsMachines from '@/data/polaris/machines.json';
+import protectorateSquads from '@/data/protectorate/squads.json';
+import protectorateMachines from '@/data/protectorate/machines.json';
+import mercenariesSquads from '@/data/mercenaries/squads.json';
+import mercenariesMachines from '@/data/mercenaries/machines.json';
 import factionsData from '@/data/factions.json';
 import { ArrowLeft } from 'lucide-react';
 import { FactionSelector } from './FactionSelector';
@@ -15,8 +19,8 @@ import { getAllRulesVersions } from '@/lib/rules-registry';
 
 // Type assertions for JSON imports
 const typedFactions = factionsData as Faction[];
-const typedSquads = squadsData as Squad[];
-const typedMachines = machinesData as Machine[];
+const typedSquads = [...polairsSquads, ...protectorateSquads, ...mercenariesSquads] as Squad[];
+const typedMachines = [...polairsMachines, ...protectorateMachines, ...mercenariesMachines] as Machine[];
 
 interface ArmyBuilderProps {
   army: Army;

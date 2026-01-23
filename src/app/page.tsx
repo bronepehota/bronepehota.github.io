@@ -5,12 +5,10 @@ import { Army, RulesVersionID } from '@/lib/types';
 import ArmyBuilder from '@/components/ArmyBuilder';
 import GameSession from '@/components/GameSession';
 import factionsData from '@/data/factions.json';
-import { Shield, Edit, ArrowLeft, CheckCircle2, MoreVertical } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { Shield, ArrowLeft, CheckCircle2, MoreVertical } from 'lucide-react';
 import { isValidRulesVersion, getAllRulesVersions } from '@/lib/rules-registry';
 
 export default function Home() {
-  const router = useRouter();
   const [view, setView] = useState<'builder' | 'game'>('builder');
   const [showEndMenu, setShowEndMenu] = useState(false);
   const [army, setArmy] = useState<Army>({
@@ -185,15 +183,6 @@ export default function Home() {
               <span className="text-[9px] md:text-[10px] px-2 py-0.5 rounded-full bg-green-600/20 text-green-400 border border-green-600/30">
                 Бой
               </span>
-            )}
-            {view === 'builder' && army.currentStep === 'faction-select' && (
-              <button
-                onClick={() => router.push('/editor')}
-                className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-200 bg-slate-700/50 hover:bg-slate-600 text-slate-300 hover:text-white font-medium"
-              >
-                <Edit className="w-4 h-4" />
-                <span>Редактор</span>
-              </button>
             )}
           </nav>
         </div>
