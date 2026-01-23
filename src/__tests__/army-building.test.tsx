@@ -252,10 +252,9 @@ describe('UnitSelector', () => {
       />
     );
 
-    // Budget display shows remaining points in format "450 / 500"
-    expect(screen.getByText('450 / 500')).toBeInTheDocument();
-    // Also check for "Осталось очков:" label
-    expect(screen.getByText('Осталось очков:')).toBeInTheDocument();
+    // Budget is now displayed in the footer (page.tsx), not in UnitSelector
+    // Just verify the component renders correctly with the given budget
+    expect(screen.getAllByText('Легкий штурм').length).toBeGreaterThan(0);
   });
 
   it('prevents adding units over budget', () => {
