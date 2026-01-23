@@ -2,6 +2,7 @@
   {
     "id": "polaris_light_assault_clone",
     "name": "Легкая штурмовая клон-пехота",
+    "shortName": "Штурм. клоны",
     "faction": "polaris",
     "cost": 70,
     "image": "/images/squads/polaris_light_assault_clone.jpg",
@@ -67,6 +68,7 @@
   {
     "id": "polaris_line_clone",
     "name": "Линейная клон-пехота",
+    "shortName": "Лин. клоны",
     "faction": "polaris",
     "cost": 50,
     "image": "/images/squads/polaris_line_clone.jpg",
@@ -130,6 +132,7 @@
   {
     "id": "polaris_regime_clone",
     "name": "Режимная клон-пехота",
+    "shortName": "Режим. клоны",
     "faction": "polaris",
     "cost": 40,
     "image": "/images/squads/polaris_regime_clone.jpg",
@@ -195,6 +198,7 @@
   {
     "id": "polaris_tribunators",
     "name": "Трибунаторы",
+    "shortName": "Трибунаторы",
     "faction": "polaris",
     "cost": 140,
     "soldiers": [
@@ -254,194 +258,5 @@
       }
     ],
     "image": ""
-  },
-  {
-    "id": "protectorate_velian_militia",
-    "name": "Ополченцы планеты Велиан",
-    "faction": "protectorate",
-    "cost": 40,
-    "image": "",
-    "soldiers": [
-      {
-        "rank": 2,
-        "speed": 4,
-        "range": "D6",
-        "power": "1D6",
-        "melee": 0,
-        "props": [],
-        "armor": 2
-      },
-      {
-        "rank": 2,
-        "speed": 4,
-        "range": "D6",
-        "power": "1D6",
-        "melee": 0,
-        "props": [],
-        "armor": 2
-      },
-      {
-        "rank": 2,
-        "speed": 4,
-        "range": "D6",
-        "power": "1D6",
-        "melee": 0,
-        "props": [],
-        "armor": 2
-      },
-      {
-        "rank": 2,
-        "speed": 4,
-        "range": "D6",
-        "power": "1D6",
-        "melee": 0,
-        "props": [],
-        "armor": 2
-      },
-      {
-        "rank": 2,
-        "speed": 4,
-        "range": "D6",
-        "power": "1D6",
-        "melee": 0,
-        "props": [],
-        "armor": 2
-      },
-      {
-        "rank": 2,
-        "speed": 4,
-        "range": "D6",
-        "power": "1D6",
-        "melee": 0,
-        "props": [],
-        "armor": 2
-      }
-    ]
-  },
-  {
-    "id": "protectorate_heavy_cyber",
-    "name": "Тяжелая киберпехота",
-    "faction": "protectorate",
-    "cost": 100,
-    "image": "",
-    "soldiers": [
-      {
-        "rank": 206,
-        "speed": 3,
-        "range": "-",
-        "power": "1D6",
-        "melee": 3,
-        "props": [],
-        "armor": 2
-      },
-      {
-        "rank": 3,
-        "speed": 4,
-        "range": "-",
-        "power": "1D6",
-        "melee": 0,
-        "props": [],
-        "armor": 2
-      },
-      {
-        "rank": 2,
-        "speed": 4,
-        "range": "D6",
-        "power": "1D6",
-        "melee": 0,
-        "props": [],
-        "armor": 2
-      },
-      {
-        "rank": 2,
-        "speed": 4,
-        "range": "D6",
-        "power": "1D6",
-        "melee": 0,
-        "props": [],
-        "armor": 2
-      },
-      {
-        "rank": 2,
-        "speed": 4,
-        "range": "D6",
-        "power": "1D6",
-        "melee": 0,
-        "props": [],
-        "armor": 2
-      },
-      {
-        "rank": 2,
-        "speed": 4,
-        "range": "D6",
-        "power": "1D6",
-        "melee": 0,
-        "props": [],
-        "armor": 2
-      }
-    ]
-  },
-  {
-    "id": "protectorate_storm_spetsnaz",
-    "name": "Штурмовой спецназ",
-    "faction": "protectorate",
-    "cost": 120,
-    "image": "",
-    "soldiers": [
-      {
-        "rank": 2,
-        "speed": 4,
-        "range": "D6",
-        "power": "1D6",
-        "melee": 0,
-        "props": [],
-        "armor": 2
-      },
-      {
-        "rank": 2,
-        "speed": 4,
-        "range": "D6",
-        "power": "1D6",
-        "melee": 0,
-        "props": [],
-        "armor": 2
-      },
-      {
-        "rank": 2,
-        "speed": 4,
-        "range": "D6",
-        "power": "1D6",
-        "melee": 0,
-        "props": [],
-        "armor": 2
-      },
-      {
-        "rank": 2,
-        "speed": 4,
-        "range": "D6",
-        "power": "1D6",
-        "melee": 0,
-        "props": [],
-        "armor": 2
-      },
-      {
-        "rank": 2,
-        "speed": 4,
-        "range": "D6",
-        "power": "1D6",
-        "melee": 0,
-        "props": [],
-        "armor": 2
-      },
-      {
-        "rank": 2,
-        "speed": 4,
-        "range": "D6",
-        "power": "1D6",
-        "melee": 0,
-        "props": [],
-        "armor": 2
-      }
-    ]
   }
 ]
