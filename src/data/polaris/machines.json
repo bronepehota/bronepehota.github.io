@@ -1,0 +1,204 @@
+[
+  {
+    "id": "demolisher",
+    "name": "Demolisher",
+    "shortName": "Demolisher",
+    "faction": "polaris",
+    "cost": 160,
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 20,
+    "durability_max": 16,
+    "image": "",
+    "originalUrl": "https://vk.com/photo-233498256_457239120",
+    "speed_sectors": [
+      {
+        "min_durability": 9,
+        "max_durability": 16,
+        "speed": 2
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 8,
+        "speed": 1
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Энергетический гарпун",
+        "range": "D6+2",
+        "power": "6D20"
+      },
+      {
+        "name": "Тяжелая ракета",
+        "range": "D12",
+        "power": "4D20",
+        "special": "Взрыв 2ш - 1D20"
+      },
+      {
+        "name": "Двуствольный пулемет",
+        "range": "D12",
+        "power": "2D12"
+      },
+      {
+        "name": "Манипулятор Кулак",
+        "range": "ББ",
+        "power": "2"
+      },
+      {
+        "name": "Бронекотел",
+        "range": "ББ",
+        "power": "3"
+      },
+      {
+        "name": "Пушка Гатлинга",
+        "range": "D12",
+        "power": "3D20"
+      },
+      {
+        "name": "Двуствольная бронебойная пушка",
+        "range": "D20",
+        "power": "2D20"
+      }
+    ]
+  },
+  {
+    "id": "helix",
+    "name": "Helix",
+    "shortName": "Helix",
+    "faction": "polaris",
+    "cost": 90,
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 16,
+    "durability_max": 12,
+    "image": "",
+    "speed_sectors": [
+      {
+        "min_durability": 10,
+        "max_durability": 12,
+        "speed": 4
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 9,
+        "speed": 3
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Ракетная установка",
+        "range": "D6+3",
+        "power": "2D20"
+      },
+      {
+        "name": "Ремонтно-транспортная платформа",
+        "range": "ББ",
+        "power": "0",
+        "special": "Ремонт 2 повреждения"
+      }
+    ]
+  },
+  {
+    "id": "locust",
+    "name": "Locust",
+    "shortName": "Locust",
+    "faction": "polaris",
+    "cost": 90,
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 16,
+    "durability_max": 12,
+    "image": "",
+    "speed_sectors": [
+      {
+        "min_durability": 10,
+        "max_durability": 12,
+        "speed": 5
+      },
+      {
+        "min_durability": 7,
+        "max_durability": 9,
+        "speed": 4
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 6,
+        "speed": 3
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Автоматическая пушка",
+        "range": "D12",
+        "power": "2D20"
+      },
+      {
+        "name": "Скорострельная пушка",
+        "range": "D20",
+        "power": "2D12"
+      }
+    ]
+  },
+  {
+    "id": "mad_bull",
+    "name": "Mad Bull",
+    "shortName": "Mad Bull",
+    "faction": "polaris",
+    "cost": 150,
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 20,
+    "durability_max": 15,
+    "image": "",
+    "speed_sectors": [
+      {
+        "min_durability": 10,
+        "max_durability": 15,
+        "speed": 3
+      },
+      {
+        "min_durability": 7,
+        "max_durability": 9,
+        "speed": 2
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 6,
+        "speed": 1
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Тяжелая ракета",
+        "range": "D12",
+        "power": "4D20"
+      },
+      {
+        "name": "Импульсное орудие",
+        "range": "D12",
+        "power": "1D20"
+      },
+      {
+        "name": "Четырехствольный пулемет",
+        "range": "D20",
+        "power": "2D12"
+      },
+      {
+        "name": "Пушка Гатлинга",
+        "range": "D12",
+        "power": "3D20"
+      },
+      {
+        "name": "Энергетический гарпун",
+        "range": "D6+2",
+        "power": "6D20"
+      },
+      {
+        "name": "Механическая пила",
+        "range": "ББ",
+        "power": "2"
+      }
+    ]
+  }
+]

@@ -1,0 +1,126 @@
+[
+  {
+    "id": "gryphon",
+    "name": "Gryphon",
+    "shortName": "Gryphon",
+    "faction": "protectorate",
+    "cost": 70,
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 14,
+    "durability_max": 11,
+    "image": "",
+    "speed_sectors": [
+      {
+        "min_durability": 6,
+        "max_durability": 11,
+        "speed": 6
+      },
+      {
+        "min_durability": 4,
+        "max_durability": 5,
+        "speed": 5
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 3,
+        "speed": 4
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Ракетная установка",
+        "range": "D6+3",
+        "power": "2D20"
+      },
+      {
+        "name": "Строенный пулемет",
+        "range": "D6",
+        "power": "1D6",
+        "special": "3 выстрела в 3х направлениях"
+      },
+      {
+        "name": "Лазерная пушка",
+        "range": "D20",
+        "power": "1D12"
+      },
+      {
+        "name": "Плазменный излучатель",
+        "range": "D12",
+        "power": "2D12"
+      }
+    ]
+  },
+  {
+    "id": "t_rex",
+    "name": "T-Rex",
+    "shortName": "T-Rex",
+    "faction": "protectorate",
+    "cost": 100,
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 16,
+    "durability_max": 14,
+    "image": "",
+    "speed_sectors": [
+      {
+        "min_durability": 9,
+        "max_durability": 14,
+        "speed": 4
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 8,
+        "speed": 3
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Крупнокалиберный пулемет",
+        "range": "D12",
+        "power": "1D20"
+      },
+      {
+        "name": "Ракетная установка",
+        "range": "D6+3",
+        "power": "2D20"
+      }
+    ]
+  },
+  {
+    "id": "bronekhod",
+    "name": "Бронеход",
+    "shortName": "Бронеход",
+    "faction": "protectorate",
+    "cost": 60,
+    "rank": 1,
+    "fire_rate": 1,
+    "ammo_max": 12,
+    "durability_max": 10,
+    "image": "",
+    "speed_sectors": [
+      {
+        "min_durability": 7,
+        "max_durability": 10,
+        "speed": 4
+      },
+      {
+        "min_durability": 4,
+        "max_durability": 6,
+        "speed": 3
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 3,
+        "speed": 2
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Ракетная установка",
+        "range": "D6+3",
+        "power": "2D20"
+      }
+    ]
+  }
+]
