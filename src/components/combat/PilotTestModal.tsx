@@ -9,6 +9,7 @@ export type PilotTestPhase = 'ARMOR_ROLL' | 'SURVIVAL_ROLL' | 'RESULTS';
 
 export interface PilotTestState {
   phase: PilotTestPhase;
+  machineArmor: number;
   pilotArmor: number;
   armorRoll: number | null;
   survivalRoll: number | null;
@@ -149,11 +150,11 @@ export function PilotTestModal({
 
                 {/* Armor target */}
                 <div className="bg-slate-800 p-4 md:p-6 rounded-xl border-2 border-blue-500/50">
-                  <div className="text-[10px] opacity-50 uppercase mb-2 text-center">Броня пилота</div>
+                  <div className="text-[10px] opacity-50 uppercase mb-2 text-center">Броня машины</div>
                   <div className="flex justify-center">
                     <div className="w-16 h-16 md:w-20 md:h-20 bg-slate-900 rounded-xl flex items-center justify-center text-3xl md:text-4xl font-black text-blue-400 border-2 border-blue-500/30 flex flex-col">
                       <Shield className="w-6 h-6 md:w-8 md:h-8 mb-1" />
-                      <span>{state.pilotArmor}</span>
+                      <span>{state.machineArmor}</span>
                     </div>
                   </div>
                 </div>
@@ -161,9 +162,9 @@ export function PilotTestModal({
 
               {/* Explanation */}
               <div className="text-center text-sm text-slate-400 max-w-xs">
-                {state.pilotArmor === 0
+                {state.machineArmor === 0
                   ? 'Бросок D12. Если результат > 0, броня пробита.'
-                  : `Бросок D12. Если результат > ${state.pilotArmor}, броня пробита и пилот получает тест выживаемости.`
+                  : `Бросок D12. Если результат > ${state.machineArmor}, броня пробита и пилот получает тест выживаемости.`
                 }
               </div>
 
@@ -203,12 +204,12 @@ export function PilotTestModal({
                   </div>
                 </div>
 
-                {/* Target (≤4) */}
+                {/* Target (≤ pilotArmor) */}
                 <div className="bg-slate-800 p-4 md:p-6 rounded-xl border-2 border-green-500/50">
                   <div className="text-[10px] opacity-50 uppercase mb-2 text-center">Нужно ≤</div>
                   <div className="flex justify-center">
                     <div className="w-16 h-16 md:w-20 md:h-20 bg-slate-900 rounded-xl flex items-center justify-center text-3xl md:text-4xl font-black text-green-400 border-2 border-green-500/30">
-                      4
+                      {state.pilotArmor}
                     </div>
                   </div>
                 </div>
@@ -216,7 +217,10 @@ export function PilotTestModal({
 
               {/* Explanation */}
               <div className="text-center text-sm text-slate-400 max-w-xs">
-                Бросок D6. Если результат ≤ 4, пилот выживает.
+                {state.pilotArmor === 0
+                  ? 'Бросок D6. Если результат > 0, пилот погибает. Крит (6) всегда убивает.'
+                  : `Бросок D6. Если результат ≤ ${state.pilotArmor}, пилот выживает. Крит (6) всегда убивает.`
+                }
               </div>
 
               {/* Loading bar */}
@@ -270,8 +274,8 @@ export function PilotTestModal({
                   )}>
                     Бросок: <span className="font-black text-lg">{state.armorRoll}</span>
                     {state.armorBreached
-                      ? ` > ${state.pilotArmor} — Пробита!`
-                      : ` ≤ ${state.pilotArmor} — Удержала`
+                      ? ` > ${state.machineArmor} — Пробита!`
+                      : ` ≤ ${state.machineArmor} — Удержала`
                     }
                   </div>
                 </div>
@@ -284,7 +288,10 @@ export function PilotTestModal({
                       ? "border-green-500/50"
                       : "border-red-500/50"
                   )}>
-                    <div className="text-[10px] opacity-50 uppercase mb-2 text-center">Тест выживания (D6 ≤ 4)</div>
+                    <div className="text-[10px] opacity-50 uppercase mb-2 text-center">
+                      Тест выживания (D6 ≤ {state.pilotArmor})
+                      {state.survivalRoll === 6 && <span className="text-red-400 ml-1">КРИТ!</span>}
+                    </div>
                     <div className={cn(
                       "text-center text-sm",
                       state.survived ? "text-green-400" : "text-red-400"

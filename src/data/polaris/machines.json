@@ -109,7 +109,7 @@
     "fire_rate": 2,
     "ammo_max": 16,
     "durability_max": 12,
-    "image": "",
+    "image": "/images/machines/locust.jpg",
     "speed_sectors": [
       {
         "min_durability": 10,

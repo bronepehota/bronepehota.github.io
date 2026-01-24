@@ -7,6 +7,7 @@ export function usePilotTestFlow() {
   const [isOpen, setIsOpen] = useState(false);
   const [state, setState] = useState<PilotTestState>({
     phase: 'ARMOR_ROLL',
+    machineArmor: 0,
     pilotArmor: 0,
     armorRoll: null,
     survivalRoll: null,
@@ -17,11 +18,12 @@ export function usePilotTestFlow() {
 
   const onCompleteRef = useRef<((armorRoll: number, survivalRoll: number | null, survived: boolean) => void) | null>(null);
 
-  const startTest = (pilotArmor: number, onComplete: (armorRoll: number, survivalRoll: number | null, survived: boolean) => void) => {
+  const startTest = (machineArmor: number, pilotArmor: number, onComplete: (armorRoll: number, survivalRoll: number | null, survived: boolean) => void) => {
     onCompleteRef.current = onComplete;
     setIsOpen(true);
     setState({
       phase: 'ARMOR_ROLL',
+      machineArmor,
       pilotArmor,
       armorRoll: null,
       survivalRoll: null,
@@ -31,10 +33,10 @@ export function usePilotTestFlow() {
     });
 
     // Start the dice rolling sequence
-    runArmorTest(pilotArmor);
+    runArmorTest(machineArmor);
   };
 
-  const runArmorTest = async (pilotArmor: number) => {
+  const runArmorTest = async (machineArmor: number) => {
     // Animate dice rolling
     const iterations = 12;
     const delay = 80;
@@ -47,7 +49,7 @@ export function usePilotTestFlow() {
 
     // Final roll
     const armorRoll = Math.floor(Math.random() * 12) + 1;
-    const armorBreached = armorRoll > pilotArmor;
+    const armorBreached = armorRoll > machineArmor;
 
     setState(prev => ({
       ...prev,
@@ -88,9 +90,9 @@ export function usePilotTestFlow() {
       await new Promise(r => setTimeout(r, delay));
     }
 
-    // Final roll - survives on ≤4
+    // Final roll - survives on ≤ pilotArmor, but 6 is always a kill (critical hit)
     const survivalRoll = Math.floor(Math.random() * 6) + 1;
-    const survived = survivalRoll <= 4;
+    const survived = survivalRoll <= state.pilotArmor && survivalRoll !== 6;
 
     setState(prev => ({
       ...prev,
@@ -112,6 +114,7 @@ export function usePilotTestFlow() {
     setIsOpen(false);
     setState({
       phase: 'ARMOR_ROLL',
+      machineArmor: 0,
       pilotArmor: 0,
       armorRoll: null,
       survivalRoll: null,

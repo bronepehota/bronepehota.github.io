@@ -246,22 +246,9 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
       if (state.unitType === 'machine' && damageResult.damage > 0) {
         const machine = state.unit;
         if (machine.pilotInfo && machine.pilotInfo.alive) {
-          // Get machine's current durability zone max value (for armor test)
+          // Machine armor = current durability (where marker is on damage scale)
           const currentDurability = machine.currentDurability || (machine.data as any).durability_max;
-          const durabilityMax = (machine.data as any).durability_max;
-          let machineArmor = durabilityMax; // Default to max
-
-          // Calculate current zone max for armor value
-          const greenThreshold = Math.ceil(durabilityMax * 2 / 3);
-          const yellowThreshold = Math.ceil(durabilityMax / 3);
-
-          if (currentDurability > greenThreshold) {
-            machineArmor = durabilityMax;
-          } else if (currentDurability > yellowThreshold) {
-            machineArmor = greenThreshold;
-          } else {
-            machineArmor = yellowThreshold;
-          }
+          const machineArmor = currentDurability;
 
           // ARMOR TEST (Тест брони)
           const armorTestRoll = rollDie(12);
