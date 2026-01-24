@@ -91,9 +91,9 @@ describe('FactionSelector', () => {
       />
     );
 
-    expect(screen.getByText('Polaris')).toBeInTheDocument();
-    expect(screen.getByText('Протекторат')).toBeInTheDocument();
-    expect(screen.getByText('Наёмники')).toBeInTheDocument();
+    expect(screen.getByText('POLARIS')).toBeInTheDocument();
+    expect(screen.getByText('ПРОТЕКТОРАТ')).toBeInTheDocument();
+    expect(screen.getByText('НАЁМНИКИ')).toBeInTheDocument();
   });
 
   it('calls onFactionSelect when card is clicked', () => {
@@ -105,7 +105,7 @@ describe('FactionSelector', () => {
       />
     );
 
-    fireEvent.click(screen.getByText('Polaris'));
+    fireEvent.click(screen.getByText('POLARIS'));
     expect(mockSelect).toHaveBeenCalledWith('polaris');
   });
 
@@ -119,7 +119,7 @@ describe('FactionSelector', () => {
       />
     );
 
-    const polarisCard = screen.getByText('Polaris').closest('[role="button"]');
+    const polarisCard = screen.getByText('POLARIS').closest('[role="button"]');
     expect(polarisCard).toHaveAttribute('aria-pressed', 'true');
   });
 
@@ -136,7 +136,7 @@ describe('FactionSelector', () => {
     expect(screen.queryByText(/Элитные кибер-солдаты/)).not.toBeInTheDocument();
 
     // Click to expand
-    fireEvent.click(screen.getByText('Polaris'));
+    fireEvent.click(screen.getByText('POLARIS'));
     expect(screen.getByText(/Элитные кибер-солдаты/)).toBeInTheDocument();
   });
 });
@@ -179,7 +179,7 @@ describe('PointBudgetInput', () => {
       />
     );
 
-    const input = screen.getByPlaceholderText('Введите количество очков');
+    const input = screen.getByPlaceholderText('0000');
 
     // Invalid input
     fireEvent.change(input, { target: { value: '-10' } });
@@ -199,7 +199,7 @@ describe('PointBudgetInput', () => {
       />
     );
 
-    const input = screen.getByPlaceholderText('Введите количество очков');
+    const input = screen.getByPlaceholderText('0000');
     fireEvent.change(input, { target: { value: '15000' } });
 
     expect(screen.getByText('Максимум 10000 очков')).toBeInTheDocument();
@@ -226,8 +226,8 @@ describe('UnitSelector', () => {
       />
     );
 
-    expect(screen.getByText('Легкий штурм')).toBeInTheDocument();
-    expect(screen.getByText('Тяжелый штурм')).toBeInTheDocument();
+    expect(screen.getByText('ЛЕГКИЙ ШТУРМ')).toBeInTheDocument();
+    expect(screen.getByText('ТЯЖЕЛЫЙ ШТУРМ')).toBeInTheDocument();
   });
 
   it('calculates remaining points correctly', () => {
@@ -254,7 +254,7 @@ describe('UnitSelector', () => {
 
     // Budget is now displayed in the footer (page.tsx), not in UnitSelector
     // Just verify the component renders correctly with the given budget
-    expect(screen.getAllByText('Легкий штурм').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('ЛЕГКИЙ ШТУРМ').length).toBeGreaterThan(0);
   });
 
   it('prevents adding units over budget', () => {
@@ -271,8 +271,8 @@ describe('UnitSelector', () => {
       />
     );
 
-    // Find the add button for Легкий штурм (costs 50, budget is 30)
-    const addButton = screen.getAllByText('Добавить').find(
+    // Find the add button for Лёгкий штурм (costs 50, budget is 30)
+    const addButton = screen.getAllByText('В АРМИЮ').find(
       btn => btn.getAttribute('aria-label') === 'Добавить Легкий штурм'
     );
 
@@ -346,9 +346,9 @@ describe('UnitSelector', () => {
       />
     );
 
-    // Should display squads
-    expect(screen.getByText('Легкий штурм')).toBeInTheDocument();
-    expect(screen.getByText('Тяжелый штурм')).toBeInTheDocument();
+    // Should display squads (uppercase names now)
+    expect(screen.getByText('ЛЕГКИЙ ШТУРМ')).toBeInTheDocument();
+    expect(screen.getByText('ТЯЖЕЛЫЙ ШТУРМ')).toBeInTheDocument();
 
     // Should display machines (MachineCard shows uppercase names)
     expect(screen.getByText('ЛЕГКИЙ ТАНК')).toBeInTheDocument();
@@ -372,8 +372,8 @@ describe('UnitSelector', () => {
       />
     );
 
-    // Find the add button for Легкий танк
-    const addButton = screen.getAllByText('Добавить').find(
+    // Find the add button - squads use "ДОБАВИТЬ", machines use "В АРМИЮ"
+    const addButton = screen.getAllByText('В АРМИЮ').find(
       btn => btn.getAttribute('aria-label') === 'Добавить Легкий танк'
     );
 
@@ -410,7 +410,7 @@ describe('UnitSelector', () => {
     );
 
     // Open weapon selector
-    const addButton = screen.getAllByText('Добавить').find(
+    const addButton = screen.getAllByText('В АРМИЮ').find(
       btn => btn.getAttribute('aria-label') === 'Добавить Легкий танк'
     );
 
@@ -418,7 +418,7 @@ describe('UnitSelector', () => {
       fireEvent.click(addButton);
 
       // Click confirm button to add machine with all weapons
-      const confirmButton = screen.getByText(/Добавить 150 очков/);
+      const confirmButton = screen.getByText(/150 ОЧКОВ/);
       fireEvent.click(confirmButton);
 
       // onAddMachine should be called with machine and default weapon indices (all weapons)

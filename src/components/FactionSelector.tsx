@@ -2,6 +2,8 @@
 
 import React, { useState, KeyboardEvent, useEffect } from 'react';
 import type { Faction, FactionID } from '@/lib/types';
+import { Shield, Swords, Star } from 'lucide-react';
+import { clsx } from 'clsx';
 
 interface FactionSelectorProps {
   factions: Faction[];
@@ -87,14 +89,48 @@ export function FactionSelector({
 
   return (
     <div className="space-y-6">
-      <h2 className="text-3xl font-bold text-slate-200">Выберите фракцию</h2>
-      <p className="text-sm text-slate-400 -mt-4">Выберите одну из трех фракций для вашей армии</p>
+      {/* Header */}
+      <div className="text-center space-y-2">
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <Swords className="w-6 h-6 text-slate-500" />
+          <h2 className="text-3xl font-bold text-slate-200 font-mono tracking-wider">ВЫБЕРИТЕ ФРАКЦИЮ</h2>
+          <Swords className="w-6 h-6 text-slate-500" />
+        </div>
+        <p className="text-sm text-slate-400">Выберите сторону конфликта</p>
+      </div>
 
       {/* Faction cards grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {factions.map((faction) => {
           const isSelected = selectedFaction === faction.id;
           const isExpanded = expandedFaction === faction.id;
+
+          // Faction-specific styling
+          const factionStyles = {
+            polaris: {
+              border: 'border-red-500/50 hover:border-red-500',
+              bg: 'hover:bg-red-500/10',
+              accent: 'text-red-400',
+              glow: 'shadow-red-500/20',
+              corner: 'border-red-500'
+            },
+            protectorate: {
+              border: 'border-cyan-500/50 hover:border-cyan-500',
+              bg: 'hover:bg-cyan-500/10',
+              accent: 'text-cyan-400',
+              glow: 'shadow-cyan-500/20',
+              corner: 'border-cyan-500'
+            },
+            mercenaries: {
+              border: 'border-yellow-500/50 hover:border-yellow-500',
+              bg: 'hover:bg-yellow-500/10',
+              accent: 'text-yellow-400',
+              glow: 'shadow-yellow-500/20',
+              corner: 'border-yellow-500'
+            }
+          };
+
+          const styles = factionStyles[faction.id as keyof typeof factionStyles];
 
           return (
             <div
@@ -106,54 +142,89 @@ export function FactionSelector({
               aria-label={`Фракция ${faction.name}, ${isSelected ? 'выбрана' : 'не выбрана'}`}
               onKeyDown={(e) => handleKeyDown(e, faction.id)}
               onClick={() => handleFactionClick(faction.id)}
-              className={`
-                relative p-4 rounded-lg border-2 cursor-pointer transition-all
-                min-h-[80px] min-w-[44px] touch-manipulation
-                ${isSelected
-                  ? `border-${faction.color === '#ef4444' ? 'red' : faction.color === '#3b82f6' ? 'blue' : 'yellow'}-500 ring-2 ring-offset-2 ring-offset-slate-900`
-                  : 'border-slate-700 hover:border-slate-600'
-                }
-                ${isSelected ? 'scale-105' : 'hover:scale-102'}
-                active:scale-95
-              `}
+              className={clsx(
+                'relative group cursor-pointer transition-all duration-300',
+                'border bg-slate-800/80 backdrop-blur-sm overflow-hidden',
+                'min-h-[120px] min-w-[44px] touch-manipulation',
+                isSelected ? 'scale-105' : 'hover:scale-102',
+                'active:scale-95',
+                styles.border,
+                styles.bg,
+                isSelected && 'ring-2 ring-offset-2 ring-offset-slate-900'
+              )}
               style={{
-                borderColor: isSelected ? faction.color : undefined,
-                backgroundColor: isSelected ? `${faction.color}10` : undefined,
+                ...(isSelected && {
+                  boxShadow: `0 0 20px ${faction.color}40`,
+                  borderColor: faction.color
+                })
               }}
             >
+              {/* Corner accents */}
+              <div className={clsx(
+                'absolute top-0 left-0 w-3 h-3 border-l-2 border-t-2 transition-all duration-300',
+                styles.corner
+              )} />
+              <div className={clsx(
+                'absolute top-0 right-0 w-3 h-3 border-r-2 border-t-2 transition-all duration-300',
+                styles.corner
+              )} />
+              <div className={clsx(
+                'absolute bottom-0 left-0 w-3 h-3 border-l-2 border-b-2 transition-all duration-300',
+                styles.corner
+              )} />
+              <div className={clsx(
+                'absolute bottom-0 right-0 w-3 h-3 border-r-2 border-b-2 transition-all duration-300',
+                styles.corner
+              )} />
+
               {/* Recommended badge */}
               {!selectedFaction && faction.id === 'polaris' && (
-                <div className="absolute -top-2 -right-2 bg-yellow-500 text-slate-900 text-xs font-bold px-2 py-1 rounded-full shadow-lg z-10">
-                  Рекомендовано
+                <div className="absolute top-2 right-2 bg-yellow-500 text-slate-900 text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg z-10 flex items-center gap-1">
+                  <Star className="w-3 h-3" />
+                  РЕКОМЕНДОВАНО
                 </div>
               )}
-              {/* Faction name and color indicator */}
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-lg font-semibold text-slate-200 truncate">
-                  {faction.name}
-                </h3>
-                {isSelected && (
-                  <svg className="w-6 h-6 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                )}
+
+              {/* Shield icon */}
+              <div className="absolute top-3 left-3 opacity-20">
+                <Shield className={clsx('w-8 h-8', styles.accent)} />
               </div>
 
-              {/* Motto - always visible */}
-              <p className="text-sm italic text-slate-400 mb-2" style={{ color: isSelected ? faction.color : undefined }}>
-                &ldquo;{faction.motto}&rdquo;
-              </p>
+              {/* Content */}
+              <div className="relative z-10 p-4">
+                {/* Faction name and status */}
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className={clsx('font-mono font-bold text-sm tracking-wide', styles.accent)}>
+                    {faction.name.toUpperCase()}
+                  </h3>
+                  {isSelected && (
+                    <div className={clsx('w-6 h-6 rounded-full flex items-center justify-center bg-green-500/20 border border-green-500')}>
+                      <svg className="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
 
-              {/* Color indicator bar */}
-              <div className="h-1 rounded" style={{ backgroundColor: faction.color }}></div>
+                {/* Motto */}
+                <p className={clsx('text-xs italic mb-3 font-mono', isSelected ? styles.accent : 'text-slate-500')}>
+                  "{faction.motto}"
+                </p>
+
+                {/* Color indicator bar */}
+                <div className="h-0.5 rounded-full" style={{ backgroundColor: faction.color }}></div>
 
               {/* Expanded details */}
               {isExpanded && (
-                <div className="mt-4 space-y-2 text-sm text-slate-400">
-                  <p>{faction.description}</p>
-                  <p className="text-xs">Родной мир: {faction.homeWorld}</p>
+                <div className="mt-3 pt-3 border-t border-slate-700/50 space-y-2">
+                  <p className="text-xs text-slate-400 leading-relaxed">{faction.description}</p>
+                  <div className="flex items-center gap-1 text-[10px] text-slate-500 font-mono">
+                    <span>РОДНОЙ МИР:</span>
+                    <span className={clsx(isSelected && styles.accent)}>{faction.homeWorld}</span>
+                  </div>
                 </div>
               )}
+              </div>
             </div>
           );
         })}
@@ -161,14 +232,28 @@ export function FactionSelector({
 
       {/* Next button */}
       {onNext && (
-        <div className="pt-4">
+        <div className="pt-4 flex justify-center">
           <button
             onClick={onNext}
             disabled={nextDisabled || !selectedFaction}
             aria-disabled={!selectedFaction}
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors min-h-[48px] min-w-[44px]"
+            className={clsx(
+              'px-8 py-3 font-mono text-sm font-bold uppercase tracking-wider',
+              'border transition-all min-h-[48px] min-w-[44px]',
+              'hover:scale-105 active:scale-95',
+              'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100',
+              selectedFaction ? 'bg-opacity-10' : 'bg-slate-700',
+              selectedFaction && factions.find(f => f.id === selectedFaction)?.color
+                ? `border-[${factions.find(f => f.id === selectedFaction)?.color}]`
+                : 'border-slate-600'
+            )}
+            style={{
+              backgroundColor: selectedFaction ? `${factions.find(f => f.id === selectedFaction)?.color}20` : undefined,
+              borderColor: selectedFaction ? factions.find(f => f.id === selectedFaction)?.color : undefined,
+              color: selectedFaction ? factions.find(f => f.id === selectedFaction)?.color : undefined
+            }}
           >
-            Продолжить
+            ПРОДОЛЖИТЬ
           </button>
         </div>
       )}

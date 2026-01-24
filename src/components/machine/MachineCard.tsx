@@ -39,7 +39,6 @@ export default function MachineCard({ machine, onAdd, onViewDetails }: MachineCa
   };
 
   const colors = factionColors[machine.faction as keyof typeof factionColors];
-  const durabilityPercent = ((machine.currentDurability || machine.durability_max) / machine.durability_max) * 100;
 
   return (
     <div
@@ -122,45 +121,27 @@ export default function MachineCard({ machine, onAdd, onViewDetails }: MachineCa
             <span className={clsx('font-mono font-bold text-sm', colors.accent)}>
               {machine.cost}
             </span>
-            <span className="text-[10px] text-slate-500 block">pts</span>
-          </div>
-        </div>
-
-        {/* Durability bar */}
-        <div className="space-y-1">
-          <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono">
-            <span>DURABILITY</span>
-            <span className={clsx(colors.accent)}>
-              {machine.currentDurability || machine.durability_max}/{machine.durability_max}
-            </span>
-          </div>
-          <div className="relative h-1.5 bg-slate-700/50 rounded-full overflow-hidden">
-            <div
-              className={clsx(
-                'h-full rounded-full transition-all duration-500',
-                machine.faction === 'polaris' ? 'bg-gradient-to-r from-red-500 to-red-400' : 'bg-gradient-to-r from-cyan-500 to-cyan-400'
-              )}
-              style={{
-                width: `${durabilityPercent}%`,
-                boxShadow: machine.faction === 'polaris' ? '0 0 10px rgba(239, 68, 68, 0.5)' : '0 0 10px rgba(6, 182, 212, 0.5)'
-              }}
-            />
+            <span className="text-[10px] text-slate-500 block font-mono">очков</span>
           </div>
         </div>
 
         {/* Quick stats */}
-        <div className="flex items-center gap-3 text-[10px] text-slate-500 font-mono">
-          <div className="flex items-center gap-1">
-            <Zap className="w-3 h-3" />
-            <span>{machine.fire_rate}</span>
-          </div>
+        <div className="flex items-center gap-2 text-[10px] text-slate-500 font-mono flex-wrap">
           <div className="flex items-center gap-1">
             <Shield className="w-3 h-3" />
-            <span>{machine.ammo_max}</span>
+            <span>Прч {machine.durability_max}</span>
           </div>
-          <span className={clsx('ml-auto', colors.accent)}>
+          <div className="flex items-center gap-1">
+            <Zap className="w-3 h-3" />
+            <span>Скор {machine.speed_sectors[0]?.speed || 0}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span className="text-xs">🔥</span>
+            <span>{machine.fire_rate}</span>
+          </div>
+          <div className={clsx('ml-auto', colors.accent)}>
             {machine.weapons?.length || 0}×
-          </span>
+          </div>
         </div>
 
         {/* Add button */}
@@ -182,7 +163,7 @@ export default function MachineCard({ machine, onAdd, onViewDetails }: MachineCa
           )}
         >
           <Plus className={clsx('w-4 h-4', isPressed && 'rotate-90 transition-transform')} />
-          В армию
+          В АРМИЮ
         </button>
       </div>
     </div>

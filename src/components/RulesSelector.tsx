@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef, KeyboardEvent } from 'react';
+import { Book, Check } from 'lucide-react';
+import { clsx } from 'clsx';
 import type { RulesVersion, RulesVersionID } from '@/lib/types';
 
 interface RulesSelectorProps {
@@ -60,8 +62,15 @@ export function RulesSelector({
 
   return (
     <div id="rules-selector" className="space-y-6">
-      <h2 className="text-2xl font-bold text-slate-200">Подтвердите выбор правил</h2>
-      <p className="text-sm text-slate-400 -mt-4">Вы можете изменить версию правил в любой момент</p>
+      {/* Header */}
+      <div className="text-center space-y-2">
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <Book className="w-6 h-6 text-slate-500" />
+          <h2 className="text-2xl font-bold text-slate-200 font-mono tracking-wider">ПРАВИЛА ИГРЫ</h2>
+          <Book className="w-6 h-6 text-slate-500" />
+        </div>
+        <p className="text-sm text-slate-400">Выберите версию правил для вашей партии</p>
+      </div>
 
       {/* Responsive grid: single column mobile, 2-3 columns desktop */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -79,55 +88,73 @@ export function RulesSelector({
               aria-label={`Версия правил ${version.name}, ${isSelected ? 'выбрана' : 'не выбрана'}`}
               onKeyDown={(e) => handleKeyDown(e, version.id)}
               onClick={() => handleRulesClick(version.id)}
-              className={`
-                relative p-4 rounded-lg border-2 cursor-pointer transition-all
-                min-h-[80px] min-w-[44px] min-h-[44px] touch-manipulation
-                ${isSelected
-                  ? `scale-105`
-                  : 'hover:scale-102'
-                }
-                active:scale-95
-              `}
+              className={clsx(
+                'relative group cursor-pointer transition-all duration-300',
+                'border bg-slate-800/80 backdrop-blur-sm overflow-hidden',
+                'min-h-[120px] min-w-[44px] touch-manipulation',
+                isSelected ? 'scale-105' : 'hover:scale-102',
+                'active:scale-95'
+              )}
               style={{
-                borderColor: isSelected ? version.color : '#334155', // slate-700
-                backgroundColor: isSelected ? `${version.color}10` : 'rgba(51, 65, 85, 0.4)', // slate-700/40
+                borderColor: isSelected ? version.color : '#334155',
+                ...(isSelected && {
+                  boxShadow: `0 0 20px ${version.color}40`
+                })
               }}
             >
-              {/* Name and checkmark */}
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-lg font-semibold text-slate-200 truncate">
-                  {version.name}
-                </h3>
-                {isSelected && (
-                  <svg className="w-6 h-6 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                )}
+              {/* Corner accents for selected version */}
+              {isSelected && (
+                <>
+                  <div className="absolute top-0 left-0 w-3 h-3 border-l-2 border-t-2" style={{ borderColor: version.color }} />
+                  <div className="absolute top-0 right-0 w-3 h-3 border-r-2 border-t-2" style={{ borderColor: version.color }} />
+                  <div className="absolute bottom-0 left-0 w-3 h-3 border-l-2 border-b-2" style={{ borderColor: version.color }} />
+                  <div className="absolute bottom-0 right-0 w-3 h-3 border-r-2 border-b-2" style={{ borderColor: version.color }} />
+                </>
+              )}
+
+              {/* Book icon in background */}
+              <div className="absolute bottom-3 right-3 opacity-10">
+                <Book className="w-12 h-12" style={{ color: version.color }} />
               </div>
 
-              {/* Description (always shown briefly) */}
-              <p className="text-sm italic text-slate-400 mb-2" style={{ color: isSelected ? version.color : undefined }}>
-                {version.description || 'Описание недоступно'}
-              </p>
-
-              {/* Color indicator bar */}
-              <div className="h-1 rounded" style={{ backgroundColor: version.color || '#94a3b8' }}></div>
-
-              {/* Expanded details */}
-              {isExpanded && (
-                <div className="mt-4 space-y-2 text-sm text-slate-400">
-                  {version.description && (
-                    <p>{version.description}</p>
-                  )}
-                  {version.features && version.features.length > 0 && (
-                    <ul className="list-disc list-inside space-y-1">
-                      {version.features.map((feature, idx) => (
-                        <li key={idx}>{feature}</li>
-                      ))}
-                    </ul>
+              {/* Content */}
+              <div className="relative z-10 p-4">
+                {/* Name and status */}
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className={clsx('font-mono font-bold text-sm tracking-wide', isSelected ? 'text-slate-200' : 'text-slate-400')}>
+                    {version.name.toUpperCase()}
+                  </h3>
+                  {isSelected && (
+                    <div className="w-6 h-6 rounded-full flex items-center justify-center bg-green-500/20 border border-green-500">
+                      <Check className="w-4 h-4 text-green-400" />
+                    </div>
                   )}
                 </div>
-              )}
+
+                {/* Description */}
+                <p className={clsx('text-xs italic mb-3 font-mono', isSelected ? 'text-slate-400' : 'text-slate-500')}>
+                  {version.description || 'Описание недоступно'}
+                </p>
+
+                {/* Color indicator bar */}
+                <div className="h-0.5 rounded-full" style={{ backgroundColor: version.color }}></div>
+
+                {/* Expanded details */}
+                {isExpanded && (
+                  <div className="mt-3 pt-3 border-t border-slate-700/50 space-y-2">
+                    {version.description && (
+                      <p className="text-xs text-slate-400 leading-relaxed">{version.description}</p>
+                    )}
+                    {version.features && version.features.length > 0 && (
+                      <ul className="list-disc list-inside space-y-1 text-xs text-slate-500 font-mono">
+                        {version.features.map((feature, idx) => (
+                          <li key={idx}>{feature}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           );
         })}
@@ -135,12 +162,17 @@ export function RulesSelector({
 
       {/* Confirm button */}
       {onConfirm && (
-        <div className="pt-4">
+        <div className="pt-4 flex justify-center">
           <button
             onClick={onConfirm}
-            className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all min-h-[48px]"
+            className={clsx(
+              'px-8 py-3 font-mono text-sm font-bold uppercase tracking-wider',
+              'border transition-all min-h-[48px] min-w-[44px]',
+              'hover:scale-105 active:scale-95',
+              'border-blue-500 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20'
+            )}
           >
-            Начать игру
+            НАЧАТЬ ИГРУ
           </button>
         </div>
       )}

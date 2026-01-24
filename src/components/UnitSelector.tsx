@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
 import type { Faction, Squad, Machine, ArmyUnit, FactionID } from '@/lib/types';
-import { Check, X, Plus, ArrowLeft, Info, RotateCcw, Users, Zap } from 'lucide-react';
+import { Check, X, Plus, ArrowLeft, Info, RotateCcw, Users, Zap, Shield, Star } from 'lucide-react';
 import { UnitDetailsModal } from './UnitDetailsModal';
 import { WeaponSelectorModal } from './WeaponSelectorModal';
 import { countByUnitType } from '@/lib/unit-utils';
@@ -162,6 +162,19 @@ export function UnitSelector({
     return `${weaponCount} оруж.`;
   };
 
+  // Get squad max rank
+  const getSquadMaxRank = (squad: Squad): number => {
+    return Math.max(...squad.soldiers.map(s => s.rank));
+  };
+
+  // Get squad armor range
+  const getSquadArmorRange = (squad: Squad): string => {
+    const armors = squad.soldiers.map(s => s.armor);
+    const min = Math.min(...armors);
+    const max = Math.max(...armors);
+    return min === max ? `${min}` : `${min}-${max}`;
+  };
+
   // Loading state
   if (isLoading) {
     return (
@@ -277,22 +290,36 @@ export function UnitSelector({
             // Render squads with existing card format
             const typeBadge = getUnitTypeBadge(unit.type);
             const TypeIcon = typeBadge.icon;
+            const squad = unit.data as Squad;
 
             return (
               <div
                 key={unit.data.id}
                 onClick={() => handleUnitClick(unit)}
                 className={`
-                  relative p-4 rounded-lg border-2 cursor-pointer transition-all
+                  relative group cursor-pointer transition-all duration-300
+                  border bg-slate-800/80 backdrop-blur-sm overflow-hidden
                   min-h-[120px] min-w-[44px] touch-manipulation
                   ${affordable ? 'hover:scale-102' : ''}
                   active:scale-95
                 `}
                 style={{
                   borderColor: affordable && faction ? faction.color : '#334155',
-                  backgroundColor: affordable && faction ? `${faction.color}10` : 'rgba(51, 65, 85, 0.4)',
+                  ...(affordable && faction && {
+                    boxShadow: `0 0 10px ${faction.color}40`
+                  })
                 }}
               >
+                {/* Corner accents for selected faction */}
+                {affordable && faction && (
+                  <>
+                    <div className="absolute top-0 left-0 w-3 h-3 border-l-2 border-t-2" style={{ borderColor: faction.color }} />
+                    <div className="absolute top-0 right-0 w-3 h-3 border-r-2 border-t-2" style={{ borderColor: faction.color }} />
+                    <div className="absolute bottom-0 left-0 w-3 h-3 border-l-2 border-b-2" style={{ borderColor: faction.color }} />
+                    <div className="absolute bottom-0 right-0 w-3 h-3 border-r-2 border-b-2" style={{ borderColor: faction.color }} />
+                  </>
+                )}
+
                 {/* Unit image */}
                 {unit.data.image && (
                   <Image
@@ -300,39 +327,57 @@ export function UnitSelector({
                     alt={unit.data.name}
                     width={200}
                     height={120}
-                    className="w-full h-[120px] object-cover rounded mb-3 min-w-[120px]"
+                    className="w-full h-[120px] object-cover mb-3 min-w-[120px]"
                     loading="lazy"
                     unoptimized
                   />
                 )}
 
-                {/* Info badge in corner */}
-                <div className="absolute top-2 right-2 bg-slate-700/80 rounded-full p-1.5">
-                  <Info className="w-4 h-4 text-blue-400" />
-                </div>
-
-                {/* Type badge */}
-                <div className="absolute top-2 left-2 bg-slate-700/80 rounded-full p-1.5">
-                  <TypeIcon className={`w-4 h-4 ${typeBadge.color}`} />
-                </div>
-
-                {/* Header: Name + Cost + Type */}
-                <div className="flex items-center justify-between mb-2 mt-6">
-                  <h4 className="text-lg font-semibold text-slate-200 truncate">{unit.data.name}</h4>
-                  <span className={affordable ? 'text-green-400' : 'text-red-400'}>
-                    {unit.data.cost} очков
+                {/* Rank badge */}
+                <div className="absolute top-2 right-2 bg-slate-700/80 backdrop-blur-sm rounded-full px-2 py-0.5 flex items-center gap-1">
+                  <Star className="w-3 h-3 text-yellow-400" />
+                  <span className="text-[10px] font-mono font-bold text-yellow-400">
+                    R{getSquadMaxRank(squad)}
                   </span>
                 </div>
 
-                {/* Brief description/role */}
-                <p className="text-sm italic text-slate-400 mb-2">
-                  {getUnitRole(unit)}
-                </p>
+                {/* Type badge */}
+                <div className="absolute top-2 left-2 bg-slate-700/80 backdrop-blur-sm rounded-full p-1.5">
+                  <TypeIcon className={`w-4 h-4 ${typeBadge.color}`} />
+                </div>
 
-                {/* Color indicator bar */}
-                {faction && (
-                  <div className="h-1 rounded" style={{ backgroundColor: faction.color }}></div>
-                )}
+                {/* Content */}
+                <div className="p-3 space-y-2">
+                  {/* Header: Name + Cost */}
+                  <div className="flex items-start justify-between gap-2">
+                    <h4 className="font-mono font-bold text-sm tracking-wide truncate" style={{ color: affordable && faction ? faction.color : '#94a3b8' }}>
+                      {unit.data.name.toUpperCase()}
+                    </h4>
+                    <div className="text-right flex-shrink-0">
+                      <span className="font-mono font-bold text-sm" style={{ color: affordable ? '#22c55e' : '#ef4444' }}>
+                        {unit.data.cost}
+                      </span>
+                      <span className="text-[10px] text-slate-500 block font-mono">очков</span>
+                    </div>
+                  </div>
+
+                  {/* Quick stats */}
+                  <div className="flex items-center gap-2 text-[10px] text-slate-500 font-mono flex-wrap">
+                    <div className="flex items-center gap-1">
+                      <Users className="w-3 h-3" />
+                      <span>{squad.soldiers.length}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Shield className="w-3 h-3" />
+                      <span>Бр {getSquadArmorRange(squad)}</span>
+                    </div>
+                  </div>
+
+                  {/* Color indicator bar */}
+                  {faction && (
+                    <div className="h-0.5 rounded-full" style={{ backgroundColor: faction.color }}></div>
+                  )}
+                </div>
 
                 {/* Add button - stopPropagation to prevent opening modal when clicking add */}
                 <button
@@ -344,16 +389,19 @@ export function UnitSelector({
                   aria-disabled={!affordable}
                   aria-label={`Добавить ${unit.data.name}`}
                   className={`
-                    w-full mt-3 py-3 px-4 rounded-lg font-semibold transition-all
-                    flex items-center justify-center gap-2 min-h-[48px] min-w-[48px] touch-manipulation relative
-                    ${affordable
-                      ? 'bg-blue-600 hover:bg-blue-700 text-white active:scale-95'
-                      : 'bg-slate-700 text-slate-500 cursor-not-allowed opacity-50'
-                    }
+                    w-full py-2 flex items-center justify-center gap-2
+                    border font-mono text-xs font-bold uppercase tracking-wider
+                    transition-all duration-200
+                    touch-manipulation
                   `}
+                  style={{
+                    borderColor: affordable && faction ? faction.color : '#475569',
+                    color: affordable && faction ? faction.color : '#94a3b8',
+                    backgroundColor: affordable && faction ? `${faction.color}10` : 'rgba(51, 65, 85, 0.4)'
+                  }}
                 >
-                  <Plus size={20} />
-                  Добавить
+                  <Plus size={16} />
+                  В АРМИЮ
                 </button>
               </div>
             );
