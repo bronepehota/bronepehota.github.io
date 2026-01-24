@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { X, ChevronLeft } from 'lucide-react';
+import { X, ChevronLeft, Target, Sword, Bomb } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useBottomSheet } from '@/hooks/useBottomSheet';
 import { CombatFlowState, CombatActionType, CombatParameters } from '@/lib/combat-types';
@@ -23,6 +23,42 @@ interface BottomSheetCombatModalProps {
   grenadesAvailable?: boolean;
   unitDisplayName?: string;
 }
+
+// Action type colors for Military Tech Blueprint
+const getActionColors = (actionType: CombatActionType | null) => {
+  const colorMap = {
+    shot: {
+      primary: 'text-orange-400',
+      border: 'border-orange-500/50',
+      bg: 'bg-orange-500/10',
+      accent: 'border-orange-500',
+      button: 'border-orange-500 bg-orange-500/10 text-orange-400 hover:bg-orange-500/20'
+    },
+    melee: {
+      primary: 'text-red-400',
+      border: 'border-red-500/50',
+      bg: 'bg-red-500/10',
+      accent: 'border-red-500',
+      button: 'border-red-500 bg-red-500/10 text-red-400 hover:bg-red-500/20'
+    },
+    grenade: {
+      primary: 'text-green-400',
+      border: 'border-green-500/50',
+      bg: 'bg-green-500/10',
+      accent: 'border-green-500',
+      button: 'border-green-500 bg-green-500/10 text-green-400 hover:bg-green-500/20'
+    }
+  };
+  return colorMap[actionType as keyof typeof colorMap] || {
+    primary: 'text-slate-400',
+    border: 'border-slate-700',
+    bg: 'bg-slate-800',
+    accent: 'border-slate-600',
+    button: 'border-slate-600 text-slate-400'
+  };
+};
+
+const getPhaseTitle = () => 'БОЕВАЯ СИСТЕМА';
 
 export function BottomSheetCombatModal({
   state,
@@ -57,71 +93,58 @@ export function BottomSheetCombatModal({
     return () => window.removeEventListener('keydown', handleEscape);
   }, [state.phase, onApplyResult, onClose]);
 
-  const getPhaseTitle = () => {
-    switch (state.phase) {
-      case 'ACTION_SELECT':
-        return 'Выберите действие';
-      case 'PARAMETERS':
-        return state.actionType === 'shot' ? 'Выстрел' :
-               state.actionType === 'melee' ? 'Ближний бой' : 'Граната';
-      case 'ROLLING':
-        return 'Бросок кубиков...';
-      case 'RESULTS':
-        return 'Результат';
-      case 'APPLY':
-        return 'Применить результат';
-      default:
-        return '';
-    }
-  };
-
-  const getPhaseColor = () => {
-    switch (state.actionType) {
-      case 'shot':
-        return 'text-orange-500';
-      case 'melee':
-        return 'text-red-500';
-      case 'grenade':
-        return 'text-green-500';
-      default:
-        return 'text-slate-400';
-    }
-  };
-
   const canGoBack = state.phase === 'PARAMETERS' || state.phase === 'RESULTS';
+  const actionColors = getActionColors(state.actionType);
 
   return (
-    <div className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-4">
+    <div className="fixed inset-0 z-[100] bg-slate-950/90 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-4">
       <div
         ref={sheetRef}
         {...touchHandlers}
-        className="w-full md:w-[600px] bg-slate-900 rounded-t-3xl md:rounded-3xl border-t-2 md:border-2 border-slate-700 shadow-2xl max-h-[90vh] md:max-h-[85vh] overflow-hidden flex flex-col"
+        className={cn(
+          "w-full md:w-[600px] bg-slate-900/95 backdrop-blur-sm border-t-2 md:border-2 shadow-2xl max-h-[90vh] md:max-h-[85vh] overflow-hidden flex flex-col relative",
+          actionColors.border
+        )}
       >
+        {/* Corner accents */}
+        <div className={cn("absolute top-0 left-0 w-3 h-3 border-l-2 border-t-2 z-10", actionColors.accent)} />
+        <div className={cn("absolute top-0 right-0 w-3 h-3 border-r-2 border-t-2 z-10", actionColors.accent)} />
+        <div className={cn("absolute bottom-0 left-0 w-3 h-3 border-l-2 border-b-2 z-10", actionColors.accent)} />
+        <div className={cn("absolute bottom-0 right-0 w-3 h-3 border-r-2 border-b-2 z-10", actionColors.accent)} />
+
         {/* Drag Handle */}
-        <div className="flex justify-center pt-3 pb-2 shrink-0">
+        <div className="flex justify-center pt-3 pb-2 shrink-0 relative z-10">
           <div className="w-12 h-1.5 bg-slate-700 rounded-full" />
         </div>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 shrink-0">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800/50 shrink-0 relative z-10">
           <div className="flex items-center gap-3">
             {canGoBack && (
               <button
                 onClick={onGoBack}
-                className="p-2 hover:bg-slate-800 rounded-lg transition-colors text-slate-400 hover:text-white min-w-[44px] min-h-[44px] flex items-center justify-center"
+                className="p-2 hover:bg-slate-800 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center border border-slate-700"
               >
-                <ChevronLeft className="w-5 h-5" />
+                <ChevronLeft className="w-5 h-5 text-slate-400" />
               </button>
             )}
-            <h2 className={cn("text-sm font-black uppercase tracking-wider", getPhaseColor())}>
+            {/* Action type icon */}
+            {state.actionType && (
+              <div className={cn("p-1.5 rounded-lg border", actionColors.bg, actionColors.border)}>
+                {state.actionType === 'shot' && <Target className={cn("w-4 h-4", actionColors.primary)} />}
+                {state.actionType === 'melee' && <Sword className={cn("w-4 h-4", actionColors.primary)} />}
+                {state.actionType === 'grenade' && <Bomb className={cn("w-4 h-4", actionColors.primary)} />}
+              </div>
+            )}
+            <h2 className={cn("text-sm font-mono font-bold uppercase tracking-wider", actionColors.primary)}>
               {getPhaseTitle()}
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-slate-800 rounded-lg transition-colors text-slate-400 hover:text-white min-w-[44px] min-h-[44px] flex items-center justify-center"
+            className="p-2 hover:bg-slate-800 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center border border-slate-700"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5 text-slate-400" />
           </button>
         </div>
 
@@ -149,14 +172,13 @@ export function BottomSheetCombatModal({
               <button
                 onClick={onExecuteAction}
                 className={cn(
-                  "w-full py-3 md:py-4 rounded-xl font-bold text-base md:text-lg shadow-lg active:scale-95 transition-all min-h-[52px] md:min-h-[56px]",
-                  state.actionType === 'shot' ? "bg-orange-600 hover:bg-orange-500" :
-                  state.actionType === 'melee' ? "bg-red-600 hover:bg-red-500" :
-                  "bg-green-700 hover:bg-green-600"
+                  "w-full py-3 md:py-4 font-mono text-sm md:text-base font-bold uppercase tracking-wider border transition-all min-h-[52px] md:min-h-[56px]",
+                  actionColors.button,
+                  "hover:scale-102 active:scale-95"
                 )}
               >
-                {state.actionType === 'shot' ? 'ОГОНЬ!' :
-                 state.actionType === 'melee' ? 'АТАКОВАТЬ!' : 'БРОСОК!'}
+                {state.actionType === 'shot' ? 'ВЫСТРЕЛИТЬ' :
+                 state.actionType === 'melee' ? 'АТАКОВАТЬ' : 'БРОСИТЬ'}
               </button>
             </div>
           )}

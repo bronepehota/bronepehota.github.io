@@ -94,6 +94,8 @@ export interface Weapon {
   range: string;
   power: string;
   special?: WeaponSpecial;
+  description?: string;    // Описание оружия (история, характеристики)
+  manufacturer?: string;   // Производитель оружия
 }
 
 export interface Machine {
@@ -106,11 +108,22 @@ export interface Machine {
   fire_rate: number;
   ammo_max: number;
   durability_max: number;
+  currentDurability?: number; // Runtime durability state (for game sessions)
   speed_sectors: SpeedSector[];
   weapons: Weapon[];
   image?: string;
   originalUrl?: string;
   durabilityZones?: DurabilityZone[]; // Optional for fan rules vehicle damage
+  // New fields for lore and detailed descriptions
+  class?: string;           // Класс техники (например, "Линейная бронетехника", "Штурмовая бронетехника")
+  type?: string;            // Тип (например, "Шагающий танк", "Гусеничная машина", "Гравилет")
+  developer?: string;       // Разработчик/производитель
+  monoblock?: string;       // Тип моноблока (например, "РМ-1", "УМ-2")
+  mass?: string;            // Масса
+  crew?: string;            // Экипаж
+  description?: string;     // Краткое описание машины (1-2 предложения)
+  sourceUrl?: string;       // Ссылка на оригинальную статью с полным описанием
+  lore?: string;            // Полная история и лор (не используется, оставлен для совместимости)
 }
 
 // Pilot information for machines

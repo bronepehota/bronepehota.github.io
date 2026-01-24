@@ -76,7 +76,7 @@ export function WeaponSelectorModal({
       const saved = getSavedSelection(machine.id);
       setSelectedIndices(saved !== null ? saved : machine.weapons.map((_, i) => i));
     }
-  }, [machine.id, machine.weapons.length, isOpen]);
+  }, [machine.id, machine.weapons, isOpen]);
 
   // Bottom sheet hook for swipe-down gesture on mobile
   const { sheetRef, touchHandlers } = useBottomSheet({
@@ -276,7 +276,7 @@ interface WeaponCheckboxProps {
   factionColor: string;
 }
 
-function WeaponCheckbox({ weapon, index, isSelected, onToggle, factionColor }: WeaponCheckboxProps) {
+function WeaponCheckbox({ weapon, index: _index, isSelected, onToggle, factionColor }: WeaponCheckboxProps) {
   return (
     <button
       onClick={onToggle}

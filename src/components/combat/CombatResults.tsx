@@ -3,7 +3,6 @@
 import { CombatResult, CombatParameters } from '@/lib/combat-types';
 import { RulesVersionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { EyeOff } from 'lucide-react';
 
 interface CombatResultsProps {
   result: CombatResult;

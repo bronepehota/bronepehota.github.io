@@ -1,15 +1,23 @@
 [
   {
-    "id": "gryphon",
-    "name": "Gryphon",
-    "shortName": "Gryphon",
+    "id": "griffin",
+    "name": "Грифон",
+    "shortName": "Грифон",
     "faction": "protectorate",
     "cost": 70,
     "rank": 2,
     "fire_rate": 2,
     "ammo_max": 14,
     "durability_max": 11,
-    "image": "",
+    "image": "/images/machines/griffin.jpg",
+    "class": "Линейная бронетехника",
+    "type": "Линейный шагающий танк",
+    "developer": "Робогир Индастриз, планета Ангерран",
+    "monoblock": "прототип",
+    "mass": "3,8 тонны",
+    "crew": "1 человек",
+    "description": "Быстрый, лёгкий и в то же время хорошо вооружённый шагающий танк. Идеален для выполнения молниеносных рейдов в тыл врага.",
+    "sourceUrl": "https://vk.com/@age_of_robogear-bronetehnika",
     "speed_sectors": [
       {
         "min_durability": 6,
@@ -29,39 +37,55 @@
     ],
     "weapons": [
       {
-        "name": "Ракетная установка",
+        "name": "Спаренная пусковая установка Алебарда",
         "range": "D6+3",
-        "power": "2D20"
+        "power": "2D20",
+        "description": "Пусковая установка для неуправляемых ракет Мк12",
+        "manufacturer": "Дженерал Рокетри Тиранон Корпорейшн"
       },
       {
-        "name": "Строенный пулемет",
+        "name": "Легкий 3-х ствольный пулемет Триплет Mk56",
         "range": "D6",
         "power": "1D6",
-        "special": "3 выстрела в 3х направлениях"
+        "special": "3 выстрела в 3х направлениях",
+        "description": "Боевая система веерного огня с 3 разнесенными огневыми точками",
+        "manufacturer": "Смит энд Вессон Альтаир Компани"
       },
       {
-        "name": "Лазерная пушка",
+        "name": "Лазерная пушка Световой меч LG-25",
         "range": "D20",
-        "power": "1D12"
+        "power": "1D12",
+        "description": "Поражает цель высокоэнергетическим пучком когерентного света",
+        "manufacturer": "Центавр Энерго-Магнетик Текнолоджиз Ко"
       },
       {
-        "name": "Плазменный излучатель",
+        "name": "Плазменная пушка Драконье пламя PGM-13 Mk1",
         "range": "D12",
-        "power": "2D12"
+        "power": "2D12",
+        "description": "Стреляет сгустком высокотемпературной плазмы в магнитном коконе",
+        "manufacturer": "Стар Файер Индастриз"
       }
     ]
   },
   {
-    "id": "t_rex",
-    "name": "T-Rex",
-    "shortName": "T-Rex",
+    "id": "trex",
+    "name": "Ти-Рэкс",
+    "shortName": "Ти-Рэкс",
     "faction": "protectorate",
     "cost": 100,
     "rank": 2,
     "fire_rate": 2,
     "ammo_max": 16,
     "durability_max": 14,
-    "image": "",
+    "image": "/images/machines/trex.jpg",
+    "class": "Штурмовая бронетехника",
+    "type": "Штурмовой шагающий танк",
+    "developer": "Робогир Индастриз, планета Ангерран",
+    "monoblock": "РМ-2",
+    "mass": "5,4 тонн",
+    "crew": "1 человек",
+    "description": "Самый успешный шагающий танк периода имперских войн. Хорошо бронирован и вооружён до зубов.",
+    "sourceUrl": "https://vk.com/@age_of_robogear-bronetehnika",
     "speed_sectors": [
       {
         "min_durability": 9,
@@ -76,14 +100,32 @@
     ],
     "weapons": [
       {
-        "name": "Крупнокалиберный пулемет",
+        "name": "Автоматическая пушка Тайфун S&W Mk40",
         "range": "D12",
-        "power": "1D20"
+        "power": "2D20",
+        "description": "Автоматическая пушка с бронебойными снарядами с сердечником из обедненного урана",
+        "manufacturer": "Смит энд Вессон Альтаир Компани"
       },
       {
-        "name": "Ракетная установка",
+        "name": "Пусковая установка Гарпун для ракет Mk12",
         "range": "D6+3",
-        "power": "2D20"
+        "power": "2D20",
+        "description": "Пусковая установка для неуправляемых ракет Мк12",
+        "manufacturer": "Дженерал Рокетри Тиранон Корпорейшн"
+      },
+      {
+        "name": "Автоматическая пушка Тайфун S&W Mk40 (вторая)",
+        "range": "D12",
+        "power": "2D20",
+        "description": "Автоматическая пушка с бронебойными снарядами с сердечником из обедненного урана",
+        "manufacturer": "Смит энд Вессон Альтаир Компани"
+      },
+      {
+        "name": "Пусковая установка Гарпун для ракет Mk12 (вторая)",
+        "range": "D6+3",
+        "power": "2D20",
+        "description": "Пусковая установка для неуправляемых ракет Мк12",
+        "manufacturer": "Дженерал Рокетри Тиранон Корпорейшн"
       }
     ]
   },
@@ -97,7 +139,15 @@
     "fire_rate": 1,
     "ammo_max": 12,
     "durability_max": 10,
-    "image": "",
+    "image": "/images/machines/bronekhod.jpg",
+    "class": "Техника огневой поддержки",
+    "type": "Легкая самоходная ракетная установка",
+    "developer": "Лайт энд Хэви Кибернетикал Машинз",
+    "monoblock": "---",
+    "mass": "1,3 тонн",
+    "crew": "1 человек",
+    "description": "Самоходная ракетно-пусковая установка, ветеран боевых действий. Незаменима при поддержке пехоты в наступлении.",
+    "sourceUrl": "https://vk.com/@age_of_robogear-bronetehnika",
     "speed_sectors": [
       {
         "min_durability": 7,
@@ -117,9 +167,584 @@
     ],
     "weapons": [
       {
-        "name": "Ракетная установка",
+        "name": "Спаренная пусковая установка Алебарда",
         "range": "D6+3",
-        "power": "2D20"
+        "power": "2D20",
+        "description": "Пусковая установка для неуправляемых ракет Мк12",
+        "manufacturer": "Дженерал Рокетри Тиранон Корпорейшн"
+      }
+    ]
+  },
+  {
+    "id": "werewolf",
+    "name": "Вервольф",
+    "shortName": "Вервольф",
+    "faction": "protectorate",
+    "cost": 80,
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 14,
+    "durability_max": 12,
+    "image": "/images/machines/werewolf.jpg",
+    "class": "Штурмовая бронетехника",
+    "type": "Штурмовой шагающий танк",
+    "developer": "Робогир Индастриз, планета Ангерран",
+    "monoblock": "РМ-1",
+    "mass": "4,7 тонн",
+    "crew": "1 человек",
+    "description": "Ветеран Протектората, первый серийно выпускающийся шагающий танк общего назначения. Незаменим в штурмовых подразделениях.",
+    "sourceUrl": "https://vk.com/@age_of_robogear-bronetehnika",
+    "speed_sectors": [
+      {
+        "min_durability": 8,
+        "max_durability": 12,
+        "speed": 4
+      },
+      {
+        "min_durability": 4,
+        "max_durability": 7,
+        "speed": 3
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 3,
+        "speed": 2
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Шестиствольная автоматическая пушка Гатлинг Mk20",
+        "range": "D12",
+        "power": "2D20",
+        "description": "Автоматическая пушка калибра 20 мм",
+        "manufacturer": "Солар Ганз энд Кэннонз Индастриз"
+      },
+      {
+        "name": "Боевая клешня",
+        "range": "ББ",
+        "power": "2",
+        "description": "Боевой механизм для разбора завалов и резки конструкций",
+        "manufacturer": "Робогир Индастриз"
+      },
+      {
+        "name": "Боевой кулак-манипулятор",
+        "range": "ББ",
+        "power": "2",
+        "description": "Огромная гидравлическая кисть для ближнего боя",
+        "manufacturer": "Робогир Индастриз"
+      }
+    ]
+  },
+  {
+    "id": "tornado",
+    "name": "Торнадо",
+    "shortName": "Торнадо",
+    "faction": "protectorate",
+    "cost": 90,
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 16,
+    "durability_max": 13,
+    "image": "/images/machines/tornado.jpg",
+    "class": "Штурмовая бронетехника",
+    "type": "Штурмовая гусеничная машина",
+    "developer": "Робогир Индастриз, планета Ангерран",
+    "monoblock": "РМ-2",
+    "mass": "4,7 тонн",
+    "crew": "1 человек",
+    "description": "Гусеничная машина для ближнего боя и преодоления оборонительных укреплений. Обладает большей прочностью чем Вервольф.",
+    "sourceUrl": "https://vk.com/@age_of_robogear-bronetehnika",
+    "speed_sectors": [
+      {
+        "min_durability": 9,
+        "max_durability": 13,
+        "speed": 3
+      },
+      {
+        "min_durability": 5,
+        "max_durability": 8,
+        "speed": 2
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 4,
+        "speed": 1
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Спаренная шестиствольная автоматическая пушка Гатлинг Mk20",
+        "range": "D12",
+        "power": "3D20",
+        "description": "Две автоматические пушки калибра 20 мм на общей турели",
+        "manufacturer": "Солар Ганз энд Кэннонз Индастриз"
+      },
+      {
+        "name": "Боевая клешня",
+        "range": "ББ",
+        "power": "2",
+        "description": "Боевой механизм для разбора завалов",
+        "manufacturer": "Робогир Индастриз"
+      },
+      {
+        "name": "Циркулярная пила",
+        "range": "ББ",
+        "power": "2",
+        "description": "Боевая пила для ближнего боя",
+        "manufacturer": "Робогир Индастриз"
+      }
+    ]
+  },
+  {
+    "id": "salamander",
+    "name": "Саламандра",
+    "shortName": "Саламандра",
+    "faction": "protectorate",
+    "cost": 55,
+    "rank": 1,
+    "fire_rate": 1,
+    "ammo_max": 10,
+    "durability_max": 8,
+    "image": "/images/machines/salamander.jpg",
+    "class": "Линейная бронетехника",
+    "type": "Линейная шагающая танкетка",
+    "developer": "Лайт энд Хэви Кибернетикал Мэшинз",
+    "monoblock": "---",
+    "mass": "0,9 тонны",
+    "crew": "1 человек",
+    "description": "Преемник Бронехода. При той же огневой мощи обладает большей подвижностью и компактностью.",
+    "sourceUrl": "https://vk.com/@age_of_robogear-bronetehnika",
+    "speed_sectors": [
+      {
+        "min_durability": 6,
+        "max_durability": 8,
+        "speed": 5
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 5,
+        "speed": 4
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Пусковая установка Гарпун для ракет Mk12",
+        "range": "D6+2",
+        "power": "2D20",
+        "description": "Пусковая установка для неуправляемых ракет Мк12",
+        "manufacturer": "Дженерал Рокетри Тиранон Корпорейшн"
+      },
+      {
+        "name": "Пусковая установка Гарпун для ракет Mk12 (вторая)",
+        "range": "D6+2",
+        "power": "2D20",
+        "description": "Пусковая установка для неуправляемых ракет Мк12",
+        "manufacturer": "Дженерал Рокетри Тиранон Корпорейшн"
+      }
+    ]
+  },
+  {
+    "id": "hurricane",
+    "name": "Харрикейн",
+    "shortName": "Харрикейн",
+    "faction": "protectorate",
+    "cost": 120,
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 18,
+    "durability_max": 15,
+    "image": "/images/machines/hurricane.jpg",
+    "class": "Линейная бронетехника",
+    "type": "Линейная гусеничная машина",
+    "developer": "Робогир Индастриз, планета Ангерран",
+    "monoblock": "РМ-1",
+    "mass": "4,3 тонн",
+    "crew": "1 человек",
+    "description": "Гусеничная боевая машина с ошеломляющей боевой мощью. Часто используется как машина огневой поддержки.",
+    "sourceUrl": "https://vk.com/@age_of_robogear-bronetehnika",
+    "speed_sectors": [
+      {
+        "min_durability": 10,
+        "max_durability": 15,
+        "speed": 3
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 9,
+        "speed": 2
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Спаренная шестиствольная автоматическая пушка Гатлинг Mk20",
+        "range": "D12",
+        "power": "3D20",
+        "description": "Две автоматические пушки калибра 20 мм на общей турели",
+        "manufacturer": "Солар Ганз энд Кэннонз Индастриз"
+      },
+      {
+        "name": "Спаренная ракетная установка Длинный лук Mk25",
+        "range": "D12",
+        "power": "3D20",
+        "description": "Пусковая установка для управляемых ракет Арбалет Мк24",
+        "manufacturer": "Дженерал Рокетри Тиранон Корпорейшн"
+      },
+      {
+        "name": "Шестиствольный пулемет Вулкан Mk29",
+        "range": "D20",
+        "power": "2D12",
+        "description": "Шестиствольный пулемет калибра 7,62 мм",
+        "manufacturer": "Солар Ганз энд Кэннонз Индастриз"
+      }
+    ]
+  },
+  {
+    "id": "predator",
+    "name": "Предатор",
+    "shortName": "Предатор",
+    "faction": "protectorate",
+    "cost": 95,
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 14,
+    "durability_max": 12,
+    "image": "/images/machines/predator.jpg",
+    "class": "Линейная бронетехника",
+    "type": "Линейный шагающий танк",
+    "developer": "Робогир Индастриз, планета Ангерран",
+    "monoblock": "РМ-1",
+    "mass": "4,3 тонны",
+    "crew": "1 человек",
+    "description": "Шагающий танк с огромной огневой мощью и маневренностью. Оснащен арсеналом энергетического оружия.",
+    "sourceUrl": "https://vk.com/@age_of_robogear-bronetehnika",
+    "speed_sectors": [
+      {
+        "min_durability": 8,
+        "max_durability": 12,
+        "speed": 5
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 7,
+        "speed": 4
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Лазерная пушка Световой меч LG-25",
+        "range": "D20",
+        "power": "1D12",
+        "description": "Поражает цель высокоэнергетическим пучком когерентного света",
+        "manufacturer": "Центавр Энерго-Магнетик Текнолоджиз Ко"
+      },
+      {
+        "name": "Плазменная пушка Драконье пламя PGM-13 Mk1",
+        "range": "D12",
+        "power": "2D12",
+        "description": "Стреляет сгустком высокотемпературной плазмы в магнитном коконе",
+        "manufacturer": "Стар Файер Индастриз"
+      },
+      {
+        "name": "Спаренная пусковая установка Боевой пес для ракет Mk11",
+        "range": "D12",
+        "power": "3D20",
+        "description": "Пусковая установка для тяжелых самонаводящихся ракет Мк11",
+        "manufacturer": "Дженерал Рокетри Тиранон Корпорейшн"
+      }
+    ]
+  },
+  {
+    "id": "varan",
+    "name": "Варан",
+    "shortName": "Варан",
+    "faction": "protectorate",
+    "cost": 130,
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 16,
+    "durability_max": 16,
+    "image": "/images/machines/varan.jpg",
+    "class": "Техника огневой поддержки",
+    "type": "Самоходная гусеничная ракетная установка",
+    "developer": "Лайт энд Хэви Кибернетикал Машинз",
+    "monoblock": "---",
+    "mass": "5,0 тонн",
+    "crew": "1 человек",
+    "description": "Самоходная ракетная установка с комплексом дальнего действия. Серьёзно угрожает противнику ещё на дальнем подступе.",
+    "sourceUrl": "https://vk.com/@age_of_robogear-bronetehnika",
+    "speed_sectors": [
+      {
+        "min_durability": 9,
+        "max_durability": 16,
+        "speed": 2
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 8,
+        "speed": 1
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Спаренная пусковая установка MDB-17 Громовая стрела",
+        "range": "D20",
+        "power": "4D20",
+        "description": "Пусковая установка для ракет дальнего действия",
+        "manufacturer": "Дженерал Рокетри Тиранон Корпорейшн"
+      }
+    ]
+  },
+  {
+    "id": "carnivore",
+    "name": "Карнивор",
+    "shortName": "Карнивор",
+    "faction": "protectorate",
+    "cost": 85,
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 14,
+    "durability_max": 13,
+    "image": "/images/machines/carnivore.jpg",
+    "class": "Линейная бронетехника",
+    "type": "Линейный шагающий танк",
+    "developer": "Робогир Индастриз, планета Ангерран",
+    "monoblock": "РМ-1",
+    "mass": "4,5 тонн",
+    "crew": "1 человек",
+    "description": "Успешная попытка увеличить огневую мощь Вервольфа. Способен угрожать противнику на средней дистанции.",
+    "sourceUrl": "https://vk.com/@age_of_robogear-bronetehnika",
+    "speed_sectors": [
+      {
+        "min_durability": 9,
+        "max_durability": 13,
+        "speed": 4
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 8,
+        "speed": 3
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Спаренная пусковая установка Алебарда",
+        "range": "D6+3",
+        "power": "2D20",
+        "description": "Пусковая установка для неуправляемых ракет Мк12",
+        "manufacturer": "Дженерал Рокетри Тиранон Корпорейшн"
+      },
+      {
+        "name": "Легкая бронебойная пушка ApC-20S",
+        "range": "D12",
+        "power": "2D12",
+        "description": "Легкая бронебойная пушка калибра 20 мм",
+        "manufacturer": "Солар Ганз энд Кэннонз Индастриз"
+      },
+      {
+        "name": "Плазменная пушка Драконье пламя PGM-13 Mk1",
+        "range": "D12",
+        "power": "2D12",
+        "description": "Стреляет сгустком высокотемпературной плазмы в магнитном коконе",
+        "manufacturer": "Стар Файер Индастриз"
+      }
+    ]
+  },
+  {
+    "id": "octopus",
+    "name": "Спрут",
+    "shortName": "Спрут",
+    "faction": "protectorate",
+    "cost": 110,
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 16,
+    "durability_max": 13,
+    "image": "/images/machines/octopus.jpg",
+    "class": "Техника специального назначения",
+    "type": "Штурмовой гравилет",
+    "developer": "Корпорация Гравиген Инжиниринг",
+    "monoblock": "РМ-1",
+    "mass": "3,3 тонн",
+    "crew": "1 человек",
+    "description": "Гравилёт-штурмовик, исключительно эффективен в разведке и незаменим в открытых боевых действиях.",
+    "sourceUrl": "https://vk.com/@age_of_robogear-bronetehnika",
+    "speed_sectors": [
+      {
+        "min_durability": 9,
+        "max_durability": 13,
+        "speed": 6
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 8,
+        "speed": 5
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Импульсная пушка Огненный кинжал ImC-1 Mk1",
+        "range": "D12",
+        "power": "2D20",
+        "description": "Поражает цель иглой из радиоактивного изотопа кобальт-99",
+        "manufacturer": "Стар Файер Индастриз"
+      },
+      {
+        "name": "Двуствольный пулемет S&W Mk95",
+        "range": "D20",
+        "power": "2D12",
+        "description": "Двуствольный пулемет калибра 12,7 мм",
+        "manufacturer": "Смит энд Вессон Альтаир Компани"
+      },
+      {
+        "name": "4 управляемые ракеты Арбалет Mk24",
+        "range": "D12",
+        "power": "3D20",
+        "description": "Самонаводящиеся ракеты для штурмовых летательных аппаратов",
+        "manufacturer": "Дженерал Рокетри Тиранон Корпорейшн"
+      }
+    ]
+  },
+  {
+    "id": "condor",
+    "name": "Кондор",
+    "shortName": "Кондор",
+    "faction": "protectorate",
+    "cost": 100,
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 14,
+    "durability_max": 12,
+    "image": "/images/machines/condor.jpg",
+    "class": "Техника специального назначения",
+    "type": "Штурмовой гравилет",
+    "developer": "Корпорация Гравиген Инжиниринг",
+    "monoblock": "РМ-2",
+    "mass": "3,4 тонны",
+    "crew": "1 человек",
+    "description": "Быстрая и маневренная боевая машина с мощным вооружением. На малых и средних дистанциях не оставляет противнику шанса.",
+    "sourceUrl": "https://vk.com/@age_of_robogear-bronetehnika",
+    "speed_sectors": [
+      {
+        "min_durability": 8,
+        "max_durability": 12,
+        "speed": 6
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 7,
+        "speed": 5
+      }
+    ],
+    "weapons": [
+      {
+        "name": "4 пусковые установки Шип для ракет Mk14M",
+        "range": "D12",
+        "power": "3D20",
+        "description": "Пусковые установки для управляемых ракет Мк14М",
+        "manufacturer": "Дженерал Рокетри Тиранон Корпорейшн"
+      },
+      {
+        "name": "Спаренная пусковая установка Алебарда",
+        "range": "D6+3",
+        "power": "2D20",
+        "description": "Пусковая установка для неуправляемых ракет Мк12",
+        "manufacturer": "Дженерал Рокетри Тиранон Корпорейшн"
+      }
+    ]
+  },
+  {
+    "id": "puma",
+    "name": "Пума",
+    "shortName": "Пума",
+    "faction": "protectorate",
+    "cost": 60,
+    "rank": 1,
+    "fire_rate": 1,
+    "ammo_max": 10,
+    "durability_max": 9,
+    "image": "/images/machines/puma.jpg",
+    "class": "Линейная бронетехника",
+    "type": "Линейная шагающая танкетка",
+    "developer": "Сиам Хэви Инжиниринг Индастри, планета Фелиция",
+    "monoblock": "---",
+    "mass": "1,4 тонн",
+    "crew": "1 человек",
+    "description": "Танкетка на основе Саламандры с повышенной проходимостью, маневренностью и усиленной броней.",
+    "sourceUrl": "https://vk.com/@age_of_robogear-bronetehnika",
+    "speed_sectors": [
+      {
+        "min_durability": 6,
+        "max_durability": 9,
+        "speed": 5
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 5,
+        "speed": 4
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Пусковая установка Гарпун для ракет Mk12",
+        "range": "D6+2",
+        "power": "2D20",
+        "description": "Пусковая установка для неуправляемых ракет Мк12",
+        "manufacturer": "Дженерал Рокетри Тиранон Корпорейшн"
+      },
+      {
+        "name": "Пусковая установка Гарпун для ракет Mk12 (вторая)",
+        "range": "D6+2",
+        "power": "2D20",
+        "description": "Пусковая установка для неуправляемых ракет Мк12",
+        "manufacturer": "Дженерал Рокетри Тиранон Корпорейшн"
+      }
+    ]
+  },
+  {
+    "id": "viper",
+    "name": "Вайпер",
+    "shortName": "Вайпер",
+    "faction": "protectorate",
+    "cost": 65,
+    "rank": 1,
+    "fire_rate": 1,
+    "ammo_max": 10,
+    "durability_max": 8,
+    "image": "/images/machines/viper.jpg",
+    "class": "Линейная бронетехника",
+    "type": "Линейная шагающая танкетка",
+    "developer": "Рено Ле-Карн, планета Ле-Карн",
+    "monoblock": "---",
+    "mass": "1,2 тонн",
+    "crew": "1 человек",
+    "description": "Танкетка на основе Саламандры с повышенной проходимостью, маневренностью и непревзойденной скоростью.",
+    "sourceUrl": "https://vk.com/@age_of_robogear-bronetehnika",
+    "speed_sectors": [
+      {
+        "min_durability": 5,
+        "max_durability": 8,
+        "speed": 6
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 4,
+        "speed": 5
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Пусковая установка Гарпун для ракет Mk12",
+        "range": "D6+2",
+        "power": "2D20",
+        "description": "Пусковая установка для неуправляемых ракет Мк12",
+        "manufacturer": "Дженерал Рокетри Тиранон Корпорейшн"
+      },
+      {
+        "name": "Пусковая установка Гарпун для ракет Mk12 (вторая)",
+        "range": "D6+2",
+        "power": "2D20",
+        "description": "Пусковая установка для неуправляемых ракет Мк12",
+        "manufacturer": "Дженерал Рокетри Тиранон Корпорейшн"
       }
     ]
   }

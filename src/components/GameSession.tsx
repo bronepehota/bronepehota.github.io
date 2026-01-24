@@ -9,10 +9,42 @@ import { formatUnitNumber } from '@/lib/unit-utils';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { CombatLogEntry } from '@/lib/combat-types';
+import TechGridBackground from './machine/TechGridBackground';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+// Faction color system for battle interface
+const getFactionColors = (factionId: string) => {
+  const colorMap = {
+    polaris: {
+      primary: 'text-red-400',
+      border: 'border-red-500/50',
+      bg: 'bg-red-500/10',
+      glow: 'shadow-red-500/20',
+      accent: 'border-red-500',
+      progress: 'bg-red-500'
+    },
+    protectorate: {
+      primary: 'text-cyan-400',
+      border: 'border-cyan-500/50',
+      bg: 'bg-cyan-500/10',
+      glow: 'shadow-cyan-500/20',
+      accent: 'border-cyan-500',
+      progress: 'bg-cyan-500'
+    },
+    mercenaries: {
+      primary: 'text-yellow-400',
+      border: 'border-yellow-500/50',
+      bg: 'bg-yellow-500/10',
+      glow: 'shadow-yellow-500/20',
+      accent: 'border-yellow-500',
+      progress: 'bg-yellow-500'
+    }
+  };
+  return colorMap[factionId as keyof typeof colorMap] || colorMap.polaris;
+};
 
 interface GameSessionProps {
   army: Army;
@@ -176,28 +208,72 @@ export default function GameSession({ army, setArmy }: GameSessionProps) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [nextUnit, prevUnit]);
 
+  const factionColors = getFactionColors(army.faction);
+
   return (
     <div className="flex flex-col h-full bg-gradient-to-b from-slate-950 to-slate-900 relative overflow-hidden">
+      {/* Tech grid background */}
+      <TechGridBackground />
+
       {/* Initiative Modal */}
       {showInitiative && (
         <div className="fixed inset-0 z-[100] bg-slate-950/95 flex items-center justify-center p-2 md:p-4 backdrop-blur-xl animate-in fade-in duration-300">
-          <div className="glass-strong border-2 border-blue-500/20 rounded-2xl md:rounded-3xl p-4 md:p-6 lg:p-8 max-w-sm w-full shadow-2xl text-center space-y-4 md:space-y-6 animate-in zoom-in duration-300 mx-auto max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl md:text-2xl lg:text-3xl font-black uppercase tracking-tighter text-blue-400 leading-tight">Бросок Инициативы</h3>
+          <div className={cn(
+            "relative border-2 backdrop-blur-sm rounded-2xl md:rounded-3xl p-4 md:p-6 lg:p-8 max-w-sm w-full shadow-2xl text-center space-y-4 md:space-y-6 animate-in zoom-in duration-300 mx-auto max-h-[90vh] overflow-hidden",
+            factionColors.border,
+            factionColors.bg,
+            factionColors.glow
+          )}>
+            {/* Corner accents */}
+            <div className={cn("absolute top-0 left-0 w-3 h-3 border-l-2 border-t-2", factionColors.accent)} />
+            <div className={cn("absolute top-0 right-0 w-3 h-3 border-r-2 border-t-2", factionColors.accent)} />
+            <div className={cn("absolute bottom-0 left-0 w-3 h-3 border-l-2 border-b-2", factionColors.accent)} />
+            <div className={cn("absolute bottom-0 right-0 w-3 h-3 border-r-2 border-b-2", factionColors.accent)} />
+
+            {/* Header with gradient divider */}
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent"></div>
+              <h3 className={cn("text-lg md:text-xl font-mono font-bold tracking-wider", factionColors.primary)}>
+                ИНИЦИАТИВА
+              </h3>
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent"></div>
+            </div>
+
+            {/* Dice display */}
             <div className="flex justify-center">
               <div className={cn(
-                "w-20 h-20 md:w-28 md:h-28 bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl md:rounded-3xl border-4 border-blue-500/50 flex items-center justify-center text-4xl md:text-6xl font-black shadow-2xl transition-all",
-                isRolling ? "scale-110 rotate-12 shadow-blue-500/30" : "scale-100 rotate-0"
+                "relative w-20 h-20 md:w-28 md:h-28 bg-slate-900/80 rounded-2xl md:rounded-3xl border-4 flex items-center justify-center text-4xl md:text-6xl font-mono font-black shadow-2xl transition-all",
+                factionColors.border,
+                isRolling ? "scale-110 rotate-12" : "scale-100 rotate-0",
+                factionColors.primary
               )}>
                 {initRoll}
+                {/* Corner accents on dice */}
+                <div className={cn("absolute top-1 left-1 w-2 h-2 border-l border-t opacity-50", factionColors.accent)} />
+                <div className={cn("absolute bottom-1 right-1 w-2 h-2 border-r border-b opacity-50", factionColors.accent)} />
               </div>
             </div>
+
+            {/* Stats */}
             <div className="bg-slate-900/50 p-3 md:p-4 rounded-xl border border-slate-700/50 space-y-2">
-              <div className="flex justify-between items-center text-xs md:text-sm">
-                <span className="opacity-50 uppercase font-bold tracking-wider text-left">Боеспособных:</span>
-                <span className="text-blue-400 font-black text-base md:text-lg">{activeUnitsCount}</span>
+              <div className="flex justify-between items-center text-xs md:text-sm font-mono">
+                <span className="uppercase tracking-wider text-slate-500">БОЕСПОСОБНЫХ:</span>
+                <span className={cn("font-black text-base md:text-lg", factionColors.primary)}>{activeUnitsCount}</span>
               </div>
             </div>
-            <button onClick={startNewTurn} disabled={isRolling} className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 disabled:opacity-50 py-3 md:py-4 rounded-xl font-bold text-sm md:text-lg shadow-lg shadow-blue-900/50 transition-all active:scale-95">
+
+            {/* Start turn button */}
+            <button
+              onClick={startNewTurn}
+              disabled={isRolling}
+              className={cn(
+                "w-full py-3 md:py-4 font-mono text-sm md:text-lg font-bold uppercase tracking-wider border transition-all min-h-[52px] md:min-h-[56px]",
+                factionColors.border,
+                factionColors.bg,
+                factionColors.primary,
+                "hover:scale-102 active:scale-95 disabled:opacity-50"
+              )}
+            >
               НАЧАТЬ ТУР
             </button>
           </div>
@@ -472,10 +548,17 @@ export default function GameSession({ army, setArmy }: GameSessionProps) {
       {/* New Turn FAB - Floating Action Button */}
       <button
         onClick={calculateInitiative}
-        className="fixed bottom-20 right-3 z-50 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white shadow-lg shadow-blue-900/50 rounded-2xl px-4 py-3 flex items-center gap-2 transition-all active:scale-95 min-h-[52px]"
+        className={cn(
+          "fixed bottom-20 right-3 z-50 px-4 py-3 flex items-center gap-2 font-mono text-sm font-bold uppercase tracking-wider border transition-all min-h-[52px]",
+          factionColors.border,
+          factionColors.bg,
+          factionColors.primary,
+          factionColors.glow,
+          "hover:scale-105 active:scale-95"
+        )}
       >
         <RotateCcw className="w-5 h-5" />
-        <span className="text-sm font-black uppercase">Новый Тур</span>
+        НОВЫЙ ТУР
       </button>
     </div>
   );
