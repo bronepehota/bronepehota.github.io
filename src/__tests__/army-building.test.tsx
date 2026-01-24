@@ -306,7 +306,7 @@ describe('UnitSelector', () => {
       />
     );
 
-    const battleButton = screen.getByText('В бой');
+    const battleButton = screen.getByText('В БОЙ');
     expect(battleButton).toBeInTheDocument();
   });
 
@@ -324,8 +324,8 @@ describe('UnitSelector', () => {
       />
     );
 
-    // "В бой" button should not be in document when army is empty
-    expect(screen.queryByText('В бой')).not.toBeInTheDocument();
+    // "В БОЙ" button should not be in document when army is empty
+    expect(screen.queryByText('В БОЙ')).not.toBeInTheDocument();
   });
 
   it('displays both squads and machines when machines prop is provided', () => {
