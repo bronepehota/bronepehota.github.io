@@ -1,16 +1,23 @@
 [
   {
     "id": "demolisher",
-    "name": "Demolisher",
-    "shortName": "Demolisher",
+    "name": "Демолишер",
+    "shortName": "Демолишер",
     "faction": "polaris",
     "cost": 160,
     "rank": 2,
     "fire_rate": 2,
     "ammo_max": 20,
     "durability_max": 16,
-    "image": "",
-    "originalUrl": "https://vk.com/photo-233498256_457239120",
+    "image": "/images/machines/demolisher.jpg",
+    "class": "Штурмовая бронетехника",
+    "type": "Штурмовая гусеничная машина",
+    "developer": "Имперское Управление Бронетехники",
+    "monoblock": "УМ-1",
+    "mass": "6,0 тонн",
+    "crew": "1 человек",
+    "description": "Штурмовая гусеничная машина для прорыва укреплённых полос и контактного боя. Самая мощная в своём классе.",
+    "sourceUrl": "https://vk.com/@age_of_robogear-bronetehnika",
     "speed_sectors": [
       {
         "min_durability": 9,
@@ -25,54 +32,54 @@
     ],
     "weapons": [
       {
-        "name": "Энергетический гарпун",
-        "range": "D6+2",
-        "power": "6D20"
+        "name": "Шестиствольная автоматическая пушка ARC-20X6",
+        "range": "D12",
+        "power": "3D20",
+        "description": "Автоматическая пушка калибра 20 мм",
+        "manufacturer": "Солар Ганз энд Кэннонз Индастриз"
       },
       {
-        "name": "Тяжелая ракета",
+        "name": "Спаренная пусковая установка Шторм для ракет R-9",
         "range": "D12",
         "power": "4D20",
-        "special": "Взрыв 2ш - 1D20"
+        "description": "Пусковая установка для тяжелых самонаводящихся ракет R-9",
+        "manufacturer": "Имперское Управление Ракетного Вооружения"
       },
       {
-        "name": "Двуствольный пулемет",
-        "range": "D12",
-        "power": "2D12"
-      },
-      {
-        "name": "Манипулятор Кулак",
+        "name": "Боевой кулак-манипулятор",
         "range": "ББ",
-        "power": "2"
+        "power": "2",
+        "description": "Огромная гидравлическая кисть для ближнего боя",
+        "manufacturer": "Имперское Управление Бронетехники"
       },
       {
-        "name": "Бронекотел",
+        "name": "Бронированный бульдозерный отвал",
         "range": "ББ",
-        "power": "3"
-      },
-      {
-        "name": "Пушка Гатлинга",
-        "range": "D12",
-        "power": "3D20"
-      },
-      {
-        "name": "Двуствольная бронебойная пушка",
-        "range": "D20",
-        "power": "2D20"
+        "power": "3",
+        "description": "Средство преодоления заграждений",
+        "manufacturer": "Имперское Управление Бронетехники"
       }
     ]
   },
   {
     "id": "helix",
-    "name": "Helix",
-    "shortName": "Helix",
+    "name": "Хеликс",
+    "shortName": "Хеликс",
     "faction": "polaris",
     "cost": 90,
     "rank": 2,
     "fire_rate": 2,
     "ammo_max": 16,
     "durability_max": 12,
-    "image": "",
+    "image": "/images/machines/helix.jpg",
+    "class": "Техника огневой поддержки",
+    "type": "Универсальная самоходная установка",
+    "developer": "Особое Бюро Тяжелой Техники",
+    "monoblock": "УМ-2",
+    "mass": "3,2 тонны",
+    "crew": "1 человек",
+    "description": "Самоходная ракетная установка, послужившая основой для более успешных машин. Универсальна и проста в обслуживании.",
+    "sourceUrl": "https://vk.com/@age_of_robogear-bronetehnika",
     "speed_sectors": [
       {
         "min_durability": 10,
@@ -87,22 +94,29 @@
     ],
     "weapons": [
       {
-        "name": "Ракетная установка",
+        "name": "Спаренная пусковая установка Двойной Молот",
         "range": "D6+3",
-        "power": "2D20"
+        "power": "2D20",
+        "description": "Пусковая установка для неуправляемых ракет R-6",
+        "manufacturer": "Имперское Управление Ракетного Вооружения"
       },
       {
         "name": "Ремонтно-транспортная платформа",
         "range": "ББ",
         "power": "0",
-        "special": "Ремонт 2 повреждения"
+        "special": {
+          "type": "repair",
+          "amount": 2
+        },
+        "description": "Ремонт 2 повреждения",
+        "manufacturer": "Особое Бюро Тяжелой Техники"
       }
     ]
   },
   {
     "id": "locust",
-    "name": "Locust",
-    "shortName": "Locust",
+    "name": "Локуст",
+    "shortName": "Локуст",
     "faction": "polaris",
     "cost": 90,
     "rank": 2,
@@ -110,6 +124,14 @@
     "ammo_max": 16,
     "durability_max": 12,
     "image": "/images/machines/locust.jpg",
+    "class": "Линейная бронетехника",
+    "type": "Линейный шагающий танк",
+    "developer": "Особое Бюро Тяжелой Техники",
+    "monoblock": "УМ-2",
+    "mass": "4,5 тонн",
+    "crew": "1 человек",
+    "description": "Высокоэффективная боевая машина, удачно сочетающая современное вооружение и маневренность.",
+    "sourceUrl": "https://vk.com/@age_of_robogear-bronetehnika",
     "speed_sectors": [
       {
         "min_durability": 10,
@@ -129,28 +151,40 @@
     ],
     "weapons": [
       {
-        "name": "Автоматическая пушка",
+        "name": "Скорострельная автоматическая бронебойная пушка Бамбук ATC-40",
         "range": "D12",
-        "power": "2D20"
+        "power": "2D20",
+        "description": "Автоматическая бронебойная пушка калибра 40 мм",
+        "manufacturer": "Главное Имперское Артиллерийское Бюро"
       },
       {
-        "name": "Скорострельная пушка",
-        "range": "D20",
-        "power": "2D12"
+        "name": "Скорострельная автоматическая бронебойная пушка Бамбук ATC-40 (вторая)",
+        "range": "D12",
+        "power": "2D20",
+        "description": "Автоматическая бронебойная пушка калибра 40 мм",
+        "manufacturer": "Главное Имперское Артиллерийское Бюро"
       }
     ]
   },
   {
-    "id": "mad_bull",
-    "name": "Mad Bull",
-    "shortName": "Mad Bull",
+    "id": "madbull",
+    "name": "Мэд Булл",
+    "shortName": "Мэд Булл",
     "faction": "polaris",
     "cost": 150,
     "rank": 2,
     "fire_rate": 2,
     "ammo_max": 20,
     "durability_max": 15,
-    "image": "",
+    "image": "/images/machines/madbull.jpg",
+    "class": "Штурмовая бронетехника",
+    "type": "Штурмовой шагающий танк",
+    "developer": "Имперское Управление Бронетехники",
+    "monoblock": "УМ-1",
+    "mass": "5,0 тонн",
+    "crew": "1 человек",
+    "description": "Первый шагающий танк Империи. Имеет большой выбор оружия и прочную броню. Ему нет равных в ближнем бою.",
+    "sourceUrl": "https://vk.com/@age_of_robogear-bronetehnika",
     "speed_sectors": [
       {
         "min_durability": 10,
@@ -170,34 +204,554 @@
     ],
     "weapons": [
       {
-        "name": "Тяжелая ракета",
+        "name": "Шестиствольная автоматическая пушка ARC-20X6",
         "range": "D12",
-        "power": "4D20"
+        "power": "3D20",
+        "description": "Автоматическая пушка калибра 20 мм",
+        "manufacturer": "Солар Ганз энд Кэннонз Индастриз"
       },
       {
-        "name": "Импульсное орудие",
+        "name": "Спаренная пусковая установка Двойной Молот",
+        "range": "D6+3",
+        "power": "3D20",
+        "description": "Пусковая установка для неуправляемых ракет R-6",
+        "manufacturer": "Имперское Управление Ракетного Вооружения"
+      },
+      {
+        "name": "Импульсная пушка Power Dart IMG-1M",
         "range": "D12",
-        "power": "1D20"
+        "power": "2D20",
+        "description": "Поражает цель иглой из радиоактивного изотопа кобальт-99",
+        "manufacturer": "Имперский Институт Высокоэнергетических Технологий"
       },
       {
-        "name": "Четырехствольный пулемет",
-        "range": "D20",
-        "power": "2D12"
-      },
-      {
-        "name": "Пушка Гатлинга",
-        "range": "D12",
-        "power": "3D20"
-      },
-      {
-        "name": "Энергетический гарпун",
+        "name": "Энергетический гарпун Power Bolt PB-1M",
         "range": "D6+2",
-        "power": "6D20"
+        "power": "6D20",
+        "description": "Использует сверхвысоковольтный разряд для поражения цели",
+        "manufacturer": "Имперский Институт Высокоэнергетических Технологий"
       },
       {
         "name": "Механическая пила",
         "range": "ББ",
-        "power": "2"
+        "power": "2",
+        "description": "Боевая пила для ближнего боя",
+        "manufacturer": "Имперское Управление Бронетехники"
+      }
+    ]
+  },
+  {
+    "id": "raptor",
+    "name": "Раптор",
+    "shortName": "Раптор",
+    "faction": "polaris",
+    "cost": 50,
+    "rank": 1,
+    "fire_rate": 1,
+    "ammo_max": 10,
+    "durability_max": 8,
+    "image": "/images/machines/raptor.jpg",
+    "class": "Линейная бронетехника",
+    "type": "Линейная шагающая танкетка",
+    "developer": "Имперское Управление Бронетехники",
+    "monoblock": "---",
+    "mass": "1,0 тонн",
+    "crew": "1 человек",
+    "description": "Очень успешная шагающая танкетка. Проста в управлении, надёжна и маневренна.",
+    "sourceUrl": "https://vk.com/@age_of_robogear-bronetehnika",
+    "speed_sectors": [
+      {
+        "min_durability": 6,
+        "max_durability": 8,
+        "speed": 5
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 5,
+        "speed": 4
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Пусковая установка Молот для ракет R-6",
+        "range": "D6+2",
+        "power": "2D20",
+        "description": "Пусковая установка для неуправляемых ракет R-6",
+        "manufacturer": "Имперское Управление Ракетного Вооружения"
+      },
+      {
+        "name": "Пусковая установка Молот для ракет R-6 (вторая)",
+        "range": "D6+2",
+        "power": "2D20",
+        "description": "Пусковая установка для неуправляемых ракет R-6",
+        "manufacturer": "Имперское Управление Ракетного Вооружения"
+      }
+    ]
+  },
+  {
+    "id": "wildbear",
+    "name": "Вайлд Беар",
+    "shortName": "Вайлд Беар",
+    "faction": "polaris",
+    "cost": 120,
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 18,
+    "durability_max": 14,
+    "image": "/images/machines/wildbear.jpg",
+    "class": "Линейная бронетехника",
+    "type": "Линейный шагающий танк",
+    "developer": "Имперское Управление Ракетного Вооружения",
+    "monoblock": "УМ-1",
+    "mass": "5,3 тонн",
+    "crew": "1 человек",
+    "description": "Шагающий танк, созданный на основе Мэд Булла. Вооружение делает его смертельно опасным на любой дистанции.",
+    "sourceUrl": "https://vk.com/@age_of_robogear-bronetehnika",
+    "speed_sectors": [
+      {
+        "min_durability": 10,
+        "max_durability": 14,
+        "speed": 3
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 9,
+        "speed": 2
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Шестиствольная автоматическая пушка ARC-20X6",
+        "range": "D12",
+        "power": "3D20",
+        "description": "Автоматическая пушка калибра 20 мм",
+        "manufacturer": "Солар Ганз энд Кэннонз Индастриз"
+      },
+      {
+        "name": "Четырехствольный пулемет MG-442X4",
+        "range": "D20",
+        "power": "2D12",
+        "description": "Четырехствольный пулемет калибра 7,62 мм",
+        "manufacturer": "Имперское Управление Вооружений"
+      },
+      {
+        "name": "Спаренная пусковая установка Шторм для ракет R-9",
+        "range": "D12",
+        "power": "4D20",
+        "description": "Пусковая установка для тяжелых самонаводящихся ракет R-9",
+        "manufacturer": "Имперское Управление Ракетного Вооружения"
+      }
+    ]
+  },
+  {
+    "id": "ravingbeast",
+    "name": "Рэвинг Бист",
+    "shortName": "Рэвинг Бист",
+    "faction": "polaris",
+    "cost": 140,
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 16,
+    "durability_max": 13,
+    "image": "/images/machines/ravingbeast.jpg",
+    "class": "Штурмовая бронетехника",
+    "type": "Штурмовой шагающий танк",
+    "developer": "Имперское Управление Бронетехники",
+    "monoblock": "УМ-1",
+    "mass": "5,5 тонн",
+    "crew": "1 человек",
+    "description": "Дальнейшее развитие штурмового шагающего танка Мэд Булл. Опасен вблизи и может атаковать цели на средней и дальней дистанциях.",
+    "sourceUrl": "https://vk.com/@age_of_robogear-bronetehnika",
+    "speed_sectors": [
+      {
+        "min_durability": 9,
+        "max_durability": 13,
+        "speed": 3
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 8,
+        "speed": 2
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Спаренная пусковая установка Шторм для ракет R-9",
+        "range": "D12",
+        "power": "4D20",
+        "description": "Пусковая установка для тяжелых самонаводящихся ракет R-9",
+        "manufacturer": "Имперское Управление Ракетного Вооружения"
+      },
+      {
+        "name": "Импульсная пушка Power Dart IMG-1M",
+        "range": "D12",
+        "power": "2D20",
+        "description": "Поражает цель иглой из радиоактивного изотопа кобальт-99",
+        "manufacturer": "Имперский Институт Высокоэнергетических Технологий"
+      },
+      {
+        "name": "Энергетический гарпун Power Bolt PB-1M",
+        "range": "D6+2",
+        "power": "6D20",
+        "description": "Использует сверхвысоковольтный разряд для поражения цели",
+        "manufacturer": "Имперский Институт Высокоэнергетических Технологий"
+      }
+    ]
+  },
+  {
+    "id": "thunder",
+    "name": "Тандер",
+    "shortName": "Тандер",
+    "faction": "polaris",
+    "cost": 110,
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 16,
+    "durability_max": 13,
+    "image": "/images/machines/thunder.jpg",
+    "class": "Техника специального назначения",
+    "type": "Штурмовой гравилет",
+    "developer": "Управление Легкой Гравитационной Техники",
+    "monoblock": "УМ-1",
+    "mass": "3,5 тонн",
+    "crew": "1 человек",
+    "description": "Штурмовой гравилёт с мощной броней и неплохим комплексом вооружений. Угрожает машинам огневой поддержки противника.",
+    "sourceUrl": "https://vk.com/@age_of_robogear-bronetehnika",
+    "speed_sectors": [
+      {
+        "min_durability": 9,
+        "max_durability": 13,
+        "speed": 6
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 8,
+        "speed": 5
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Импульсная пушка Power Dart IMG-1M",
+        "range": "D12",
+        "power": "2D20",
+        "description": "Поражает цель иглой из радиоактивного изотопа кобальт-99",
+        "manufacturer": "Имперский Институт Высокоэнергетических Технологий"
+      },
+      {
+        "name": "4 управляемые ракеты Копье R-22",
+        "range": "D12",
+        "power": "3D20",
+        "description": "Самонаводящиеся ракеты для штурмовых летательных аппаратов",
+        "manufacturer": "Имперское Управление Ракетного Вооружения"
+      },
+      {
+        "name": "Двуствольный пулемет MG-127X2",
+        "range": "D20",
+        "power": "2D12",
+        "description": "Двуствольный пулемет калибра 12,7 мм",
+        "manufacturer": "Имперское Управление Вооружений"
+      }
+    ]
+  },
+  {
+    "id": "eraser",
+    "name": "Эрайзер",
+    "shortName": "Эрайзер",
+    "faction": "polaris",
+    "cost": 140,
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 18,
+    "durability_max": 14,
+    "image": "/images/machines/eraser.jpg",
+    "class": "Линейная бронетехника",
+    "type": "Линейная гусеничная машина",
+    "developer": "Имперское Управление Бронетехники",
+    "monoblock": "УМ-1",
+    "mass": "5,5 тонн",
+    "crew": "1 человек",
+    "description": "Штурмовая машина на базе Демолишер. На ближней дистанции имеет ураганную плотность огня.",
+    "sourceUrl": "https://vk.com/@age_of_robogear-bronetehnika",
+    "speed_sectors": [
+      {
+        "min_durability": 9,
+        "max_durability": 14,
+        "speed": 2
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 8,
+        "speed": 1
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Двуствольная бронебойная пушка АТС-35Х2",
+        "range": "D20",
+        "power": "3D20",
+        "description": "Бронебойная пушка калибра 35 мм",
+        "manufacturer": "Главное Имперское Артиллерийское Бюро"
+      },
+      {
+        "name": "Спаренная пусковая установка Двойной Молот",
+        "range": "D6+3",
+        "power": "3D20",
+        "description": "Пусковая установка для неуправляемых ракет R-6",
+        "manufacturer": "Имперское Управление Ракетного Вооружения"
+      },
+      {
+        "name": "Энергетический гарпун Power Bolt PB-1M",
+        "range": "D6+2",
+        "power": "6D20",
+        "description": "Использует сверхвысоковольтный разряд для поражения цели",
+        "manufacturer": "Имперский Институт Высокоэнергетических Технологий"
+      }
+    ]
+  },
+  {
+    "id": "devastator",
+    "name": "Девастатор",
+    "shortName": "Девастатор",
+    "faction": "polaris",
+    "cost": 130,
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 18,
+    "durability_max": 15,
+    "image": "/images/machines/devastator.jpg",
+    "class": "Линейная бронетехника",
+    "type": "Линейная гусеничная машина",
+    "developer": "Имперское Управление Бронетехники",
+    "monoblock": "УМ-1",
+    "mass": "5,5 тонн",
+    "crew": "1 человек",
+    "description": "Боевая гусеничная машина. Вместе с Вайлд Беар считается убийцей роботов.",
+    "sourceUrl": "https://vk.com/@age_of_robogear-bronetehnika",
+    "speed_sectors": [
+      {
+        "min_durability": 10,
+        "max_durability": 15,
+        "speed": 2
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 9,
+        "speed": 1
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Двуствольная бронебойная пушка АТС-35Х2",
+        "range": "D20",
+        "power": "3D20",
+        "description": "Бронебойная пушка калибра 35 мм",
+        "manufacturer": "Главное Имперское Артиллерийское Бюро"
+      },
+      {
+        "name": "Спаренная пусковая установка Шторм для ракет R-9",
+        "range": "D12",
+        "power": "4D20",
+        "description": "Пусковая установка для тяжелых самонаводящихся ракет R-9",
+        "manufacturer": "Имперское Управление Ракетного Вооружения"
+      },
+      {
+        "name": "Двуствольный пулемет MG-127X2",
+        "range": "D20",
+        "power": "2D12",
+        "description": "Двуствольный пулемет калибра 12,7 мм",
+        "manufacturer": "Имперское Управление Вооружений"
+      }
+    ]
+  },
+  {
+    "id": "spider",
+    "name": "Спайдер",
+    "shortName": "Спайдер",
+    "faction": "polaris",
+    "cost": 95,
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 14,
+    "durability_max": 11,
+    "image": "/images/machines/spider.jpg",
+    "class": "Линейная бронетехника",
+    "type": "Линейный шагающий танк",
+    "developer": "Особое Бюро Тяжелой Техники",
+    "monoblock": "УМ-2",
+    "mass": "3,5 тонн",
+    "crew": "1 человек",
+    "description": "Боевая машина на уникальном шести-конечностном шагающем шасси. Обладает высокой проходимостью и маневренностью.",
+    "sourceUrl": "https://vk.com/@age_of_robogear-bronetehnika",
+    "speed_sectors": [
+      {
+        "min_durability": 8,
+        "max_durability": 11,
+        "speed": 5
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 7,
+        "speed": 4
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Спаренная автоматическая бронебойная пушка АТС-56X2",
+        "range": "D12",
+        "power": "3D20",
+        "description": "Бронебойная пушка калибра 56 мм",
+        "manufacturer": "Главное Имперское Артиллерийское Бюро"
+      },
+      {
+        "name": "Легкий двуствольный пулемет MG-546X2",
+        "range": "D20",
+        "power": "1D12",
+        "description": "Двуствольный пулемет калибра 5,6 мм",
+        "manufacturer": "Особое Бюро Тяжелой Техники"
+      }
+    ]
+  },
+  {
+    "id": "superlocust",
+    "name": "Супер Локуст",
+    "shortName": "Супер Локуст",
+    "faction": "polaris",
+    "cost": 120,
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 16,
+    "durability_max": 14,
+    "image": "/images/machines/superlocust.jpg",
+    "class": "Штурмовая бронетехника",
+    "type": "Штурмовой шагающий танк",
+    "developer": "Особое Бюро Тяжелой Техники",
+    "monoblock": "УМ-2",
+    "mass": "5,0 тонн",
+    "crew": "1 человек",
+    "description": "Версия Локуста как машина ближнего боя с увеличенной броней и новыми автоматическими пушками.",
+    "sourceUrl": "https://vk.com/@age_of_robogear-bronetehnika",
+    "speed_sectors": [
+      {
+        "min_durability": 10,
+        "max_durability": 14,
+        "speed": 4
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 9,
+        "speed": 3
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Тяжелая бронебойная пушка АТС-76",
+        "range": "D12",
+        "power": "4D20",
+        "description": "Тяжелая бронебойная пушка калибра 76 мм",
+        "manufacturer": "Главное Имперское Артиллерийское Бюро"
+      },
+      {
+        "name": "Тяжелая бронебойная пушка АТС-76 (вторая)",
+        "range": "D12",
+        "power": "4D20",
+        "description": "Тяжелая бронебойная пушка калибра 76 мм",
+        "manufacturer": "Главное Имперское Артиллерийское Бюро"
+      }
+    ]
+  },
+  {
+    "id": "hunter",
+    "name": "Хантер",
+    "shortName": "Хантер",
+    "faction": "polaris",
+    "cost": 70,
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 14,
+    "durability_max": 10,
+    "image": "/images/machines/hunter.jpg",
+    "class": "Техника специального назначения",
+    "type": "Колёсная разведывательная машина",
+    "developer": "Имперское Управление Бронетехники",
+    "monoblock": "---",
+    "mass": "1,1 тонны",
+    "crew": "1 человек",
+    "description": "Скоростная боевая машина повышенной проходимости для разведывательных целей.",
+    "sourceUrl": "https://vk.com/@age_of_robogear-bronetehnika",
+    "speed_sectors": [
+      {
+        "min_durability": 7,
+        "max_durability": 10,
+        "speed": 6
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 6,
+        "speed": 5
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Скорострельная автоматическая пушка АТСМ-56д",
+        "range": "D12",
+        "power": "3D20",
+        "description": "Скорострельная автоматическая пушка калибра 56 мм",
+        "manufacturer": "Главное Имперское Артиллерийское Бюро"
+      }
+    ]
+  },
+  {
+    "id": "hornet",
+    "name": "Хорнет",
+    "shortName": "Хорнет",
+    "faction": "polaris",
+    "cost": 115,
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 16,
+    "durability_max": 13,
+    "image": "/images/machines/hornet.jpg",
+    "class": "Техника специального назначения",
+    "type": "Штурмовой гравилет",
+    "developer": "Управление Легкой Гравитационной Техники",
+    "monoblock": "УМ-2",
+    "mass": "3,4 тонны",
+    "crew": "1 человек",
+    "description": "Маневренный и быстрый штурмовой гравилет с устрашающей огневой мощью.",
+    "sourceUrl": "https://vk.com/@age_of_robogear-bronetehnika",
+    "speed_sectors": [
+      {
+        "min_durability": 9,
+        "max_durability": 13,
+        "speed": 6
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 8,
+        "speed": 5
+      }
+    ],
+    "weapons": [
+      {
+        "name": "2 скорострельные автоматические пушки АСТМ-58А",
+        "range": "D12",
+        "power": "3D20",
+        "description": "Скорострельная автоматическая пушка калибра 56 мм",
+        "manufacturer": "Главное Имперское Артиллерийское Бюро"
+      },
+      {
+        "name": "Легкий двуствольный пулемет MG-546X2A",
+        "range": "D20",
+        "power": "2D12",
+        "description": "Двуствольный пулемет калибра 5,6 мм",
+        "manufacturer": "Особое Бюро Тяжелой Техники"
+      },
+      {
+        "name": "4 управляемые ракеты Пламенный молот ALS-30",
+        "range": "D12",
+        "power": "3D20",
+        "description": "Управляемые ракеты для штурмовых летательных аппаратов",
+        "manufacturer": "Имперское Управление Ракетного Вооружения"
       }
     ]
   }
