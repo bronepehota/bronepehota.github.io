@@ -7,6 +7,9 @@ import { Check, X, Plus, ArrowLeft, Info, RotateCcw, Users, Zap } from 'lucide-r
 import { UnitDetailsModal } from './UnitDetailsModal';
 import { WeaponSelectorModal } from './WeaponSelectorModal';
 import { countByUnitType } from '@/lib/unit-utils';
+import MachineCard from './machine/MachineCard';
+import MachineBlueprintModal from './machine/MachineBlueprintModal';
+import TechGridBackground from './machine/TechGridBackground';
 
 interface UnitSelectorProps {
   factions: Faction[];
@@ -74,6 +77,10 @@ export function UnitSelector({
   // Weapon selector modal state for machines
   const [weaponSelectorMachine, setWeaponSelectorMachine] = useState<Machine | null>(null);
   const [isWeaponSelectorOpen, setIsWeaponSelectorOpen] = useState(false);
+
+  // Machine blueprint modal state
+  const [blueprintMachine, setBlueprintMachine] = useState<Machine | null>(null);
+  const [isBlueprintOpen, setIsBlueprintOpen] = useState(false);
 
   // Calculate remaining points
   const totalCost = army.reduce((sum, unit) => {
@@ -243,9 +250,33 @@ export function UnitSelector({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {availableUnits.map((unit) => {
             const affordable = canAffordUnit(unit.data.cost);
+            const count = unitCounts[unit.data.id] || 0;
+
+            // Render machines with MachineCard component
+            if (unit.type === 'machine') {
+              return (
+                <div key={unit.data.id} className="relative">
+                  <MachineCard
+                    machine={unit.data as Machine}
+                    onAdd={(machine) => handleAddUnit(unit)}
+                    onViewDetails={(machine) => {
+                      setBlueprintMachine(machine);
+                      setIsBlueprintOpen(true);
+                    }}
+                  />
+                  {/* Count badge */}
+                  {count > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full h-6 min-w-[24px] flex items-center justify-center border-2 border-slate-900 z-10">
+                      {count}
+                    </span>
+                  )}
+                </div>
+              );
+            }
+
+            // Render squads with existing card format
             const typeBadge = getUnitTypeBadge(unit.type);
             const TypeIcon = typeBadge.icon;
-            const count = unitCounts[unit.data.id] || 0;
 
             return (
               <div
@@ -298,24 +329,6 @@ export function UnitSelector({
                   {getUnitRole(unit)}
                 </p>
 
-                {/* Additional stats for machines */}
-                {unit.type === 'machine' && (
-                  <div className="flex gap-3 text-xs text-slate-500 mb-2">
-                    <span className="flex items-center gap-1">
-                      <span className="font-semibold">⚡</span>
-                      {(unit.data as Machine).speed_sectors[0]?.speed || 0}-{(unit.data as Machine).speed_sectors[(unit.data as Machine).speed_sectors.length - 1]?.speed || 0}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <span className="font-semibold">🛡️</span>
-                      {(unit.data as Machine).durability_max}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <span className="font-semibold">🔥</span>
-                      {(unit.data as Machine).fire_rate}
-                    </span>
-                  </div>
-                )}
-
                 {/* Color indicator bar */}
                 {faction && (
                   <div className="h-1 rounded" style={{ backgroundColor: faction.color }}></div>
@@ -341,12 +354,6 @@ export function UnitSelector({
                 >
                   <Plus size={20} />
                   Добавить
-                  {/* Count badge */}
-                  {count > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full h-6 min-w-[24px] flex items-center justify-center border-2 border-slate-900">
-                      {count}
-                    </span>
-                  )}
                 </button>
               </div>
             );
@@ -469,6 +476,28 @@ export function UnitSelector({
           onConfirm={handleWeaponSelectionConfirm}
         />
       )}
+
+      {/* Machine blueprint modal */}
+      {blueprintMachine && (
+        <MachineBlueprintModal
+          machine={blueprintMachine}
+          isOpen={isBlueprintOpen}
+          onClose={() => {
+            setIsBlueprintOpen(false);
+            setBlueprintMachine(null);
+          }}
+          onAdd={(machine) => {
+            if (onAddMachine) {
+              onAddMachine(machine);
+            }
+            setIsBlueprintOpen(false);
+            setBlueprintMachine(null);
+          }}
+        />
+      )}
+
+      {/* Tech grid background */}
+      <TechGridBackground />
     </div>
   );
 }

@@ -350,8 +350,8 @@ describe('UnitSelector', () => {
     expect(screen.getByText('Легкий штурм')).toBeInTheDocument();
     expect(screen.getByText('Тяжелый штурм')).toBeInTheDocument();
 
-    // Should display machines
-    expect(screen.getByText('Легкий танк')).toBeInTheDocument();
+    // Should display machines (MachineCard shows uppercase names)
+    expect(screen.getByText('ЛЕГКИЙ ТАНК')).toBeInTheDocument();
   });
 
   it('opens weapon selector modal when machine add button is clicked', () => {

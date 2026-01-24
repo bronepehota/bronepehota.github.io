@@ -108,6 +108,7 @@ export interface Machine {
   fire_rate: number;
   ammo_max: number;
   durability_max: number;
+  currentDurability?: number; // Runtime durability state (for game sessions)
   speed_sectors: SpeedSector[];
   weapons: Weapon[];
   image?: string;

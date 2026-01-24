@@ -9,10 +9,17 @@ interface SafeImageProps {
   className?: string;
   width?: number;
   height?: number;
+  fill?: boolean;
+  onError?: () => void;
 }
 
-export default function SafeImage({ src, alt, className, width = 400, height = 300 }: SafeImageProps) {
+export default function SafeImage({ src, alt, className, width = 400, height = 300, fill = false, onError }: SafeImageProps) {
   const [hasError, setHasError] = useState(false);
+
+  const handleError = () => {
+    setHasError(true);
+    onError?.();
+  };
 
   if (!src || hasError) {
     return null;
@@ -22,10 +29,11 @@ export default function SafeImage({ src, alt, className, width = 400, height = 3
     <Image
       src={src}
       alt={alt}
-      width={width}
-      height={height}
+      width={fill ? undefined : width}
+      height={fill ? undefined : height}
+      fill={fill}
       className={className}
-      onError={() => setHasError(true)}
+      onError={handleError}
       unoptimized
     />
   );
