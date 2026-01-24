@@ -28,6 +28,7 @@ const initialCombatFlowState: CombatFlowState = {
     targetArmor: 2,
     targetMelee: 2,
     fortification: 'none',
+    isSurpriseAttack: false,
   },
   diceDisplay: {},
   result: null,
@@ -212,6 +213,7 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
     // Animate hit roll
     await animateDiceRoll((_display) => {});
 
+    // Calculate hit (surprise attack doesn't affect hit roll)
     const hitResult = rules.calculateHit(
       range,
       state.parameters.distance,
@@ -232,13 +234,36 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
         finalDisplay.power = display.power?.slice(0, diceCount);
       });
 
-      damageResult = rules.calculateDamage(
-        power,
-        state.parameters.targetArmor,
-        state.parameters.fortification,
-        undefined,
-        state.unitType === 'machine'
-      );
+      // For surprise attack, roll damage twice and take best result
+      if (state.parameters.isSurpriseAttack) {
+        const damage1 = rules.calculateDamage(
+          power,
+          state.parameters.targetArmor,
+          state.parameters.fortification,
+          undefined,
+          state.unitType === 'machine'
+        );
+        const damage2 = rules.calculateDamage(
+          power,
+          state.parameters.targetArmor,
+          state.parameters.fortification,
+          undefined,
+          state.unitType === 'machine'
+        );
+
+        // Take the better damage result (more damage is better)
+        damageResult = damage1.damage >= damage2.damage ? damage1 : damage2;
+        damageResult.isSurpriseAttack = true;
+        damageResult.bothRolls = [damage1.rolls, damage2.rolls];
+      } else {
+        damageResult = rules.calculateDamage(
+          power,
+          state.parameters.targetArmor,
+          state.parameters.fortification,
+          undefined,
+          state.unitType === 'machine'
+        );
+      }
 
       finalDisplay.power = damageResult.rolls;
 
@@ -361,7 +386,33 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
     // Animate melee rolls
     await animateDiceRoll(() => {});
 
-    const meleeResult = rules.calculateMelee(attackerMelee, state.parameters.targetMelee);
+    // For surprise attack, attacker rolls twice and takes best (all rules versions)
+    let meleeResult;
+    if (state.parameters.isSurpriseAttack) {
+      const roll1a = rollDie(6);
+      const roll2a = rollDie(6);
+      const attackerRoll = Math.max(roll1a, roll2a);
+      const defenderRoll = rollDie(6);
+
+      const aTotal = attackerRoll + attackerMelee;
+      const dTotal = defenderRoll + state.parameters.targetMelee;
+
+      let winner: 'attacker' | 'defender' | 'draw' = 'draw';
+      if (aTotal > dTotal) winner = 'attacker';
+      else if (dTotal > aTotal) winner = 'defender';
+
+      meleeResult = {
+        attackerRoll,
+        attackerTotal: aTotal,
+        defenderRoll,
+        defenderTotal: dTotal,
+        winner,
+        isSurpriseAttack: true,
+        attackerRolls: [roll1a, roll2a]
+      };
+    } else {
+      meleeResult = rules.calculateMelee(attackerMelee, state.parameters.targetMelee);
+    }
 
     const result: CombatResult = {
       actionType: 'melee',

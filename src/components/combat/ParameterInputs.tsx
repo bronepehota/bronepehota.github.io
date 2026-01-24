@@ -7,7 +7,7 @@ import { RulesVersionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { StaticDiceDisplay } from './StaticDiceDisplay';
 import { getUnitStats } from '@/lib/game-logic';
-import { Target } from 'lucide-react';
+import { Target, EyeOff } from 'lucide-react';
 import { Machine } from '@/lib/types';
 
 interface ParameterInputsProps {
@@ -207,6 +207,28 @@ export function ParameterInputs({
               />
             </div>
           )}
+
+          {/* Surprise Attack Toggle - shot and melee only (all rules versions) */}
+          {(actionType === 'shot' || actionType === 'melee') && (
+            <div className="grid grid-cols-[100px_1fr] gap-3 items-center">
+              <label className="text-xs opacity-50 uppercase font-bold whitespace-nowrap">
+                Внезапная
+              </label>
+              <button
+                type="button"
+                onClick={() => onChange({ isSurpriseAttack: !parameters.isSurpriseAttack })}
+                className={cn(
+                  'flex items-center justify-start gap-2 p-2 rounded-lg border-2 transition-all duration-200 w-full',
+                  parameters.isSurpriseAttack
+                    ? 'bg-purple-600/20 text-purple-400 border-purple-500'
+                    : 'bg-slate-700/50 text-slate-400 border-slate-600 hover:bg-slate-700'
+                )}
+              >
+                <EyeOff size={18} />
+                <span className="text-xs font-medium">Атака с тыла</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -223,6 +245,18 @@ export function ParameterInputs({
         <div className="bg-slate-800/50 p-3 rounded-lg border border-slate-700">
           <div className="text-xs text-orange-400 font-medium">
             Официальные правила: укрытие добавляет {parameters.fortification === 'light' ? '+1' : '+2'} к броне цели
+          </div>
+        </div>
+      )}
+
+      {/* Surprise Attack hint */}
+      {parameters.isSurpriseAttack && (
+        <div className="bg-purple-900/20 p-3 rounded-lg border border-purple-700">
+          <div className="text-xs text-purple-300 font-medium">
+            {actionType === 'melee'
+              ? 'Внезапная атака: ваш бросок D6 дважды, лучший результат. Для машины установите ББ цели = 0'
+              : 'Внезапная атака: бросок урона дважды, выбираем лучший результат'
+            }
           </div>
         </div>
       )}
