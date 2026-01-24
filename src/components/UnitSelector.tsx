@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
 import type { Faction, Squad, Machine, ArmyUnit, FactionID } from '@/lib/types';
-import { Check, X, Plus, ArrowLeft, Info, RotateCcw, Users, Zap, Shield, Star } from 'lucide-react';
+import { Check, X, Plus, ArrowLeft, RotateCcw, Users, Zap, Shield } from 'lucide-react';
 import { UnitDetailsModal } from './UnitDetailsModal';
 import { WeaponSelectorModal } from './WeaponSelectorModal';
 import { countByUnitType } from '@/lib/unit-utils';
@@ -151,15 +151,15 @@ export function UnitSelector({
     return { icon: Zap, label: 'Машина', color: 'text-yellow-400' };
   };
 
-  // Get unit description/role
-  const getUnitRole = (unit: UnitDisplay): string => {
+  // Get unit description/role (unused)
+  const _getUnitRole = (unit: UnitDisplay): string => {
     if (unit.type === 'squad') {
       const squad = unit.data as Squad;
       const soldierCount = squad.soldiers.length;
       return `${soldierCount} бойцов`;
     }
-    const machine = unit.data as Machine;
-    const weaponCount = machine.weapons.length;
+    const _machine = unit.data as Machine;
+    const weaponCount = _machine.weapons.length;
     return `${weaponCount} оруж.`;
   };
 
@@ -310,7 +310,7 @@ export function UnitSelector({
                 <div key={unit.data.id} className="relative">
                   <MachineCard
                     machine={unit.data as Machine}
-                    onAdd={(machine) => handleAddUnit(unit)}
+                    onAdd={(_machine) => handleAddUnit(unit)}
                     onViewDetails={(machine) => {
                       setBlueprintMachine(machine);
                       setIsBlueprintOpen(true);

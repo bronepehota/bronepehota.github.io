@@ -11,7 +11,7 @@ interface WeaponCardProps {
   index: number;
 }
 
-export default function WeaponCard({ weapon, faction, index }: WeaponCardProps) {
+export default function WeaponCard({ weapon, faction, index: _index }: WeaponCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const factionColors = {

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import { Shield, Zap, Plus } from 'lucide-react';
 import { clsx } from 'clsx';
 import type { Machine } from '@/lib/types';

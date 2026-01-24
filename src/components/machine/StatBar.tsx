@@ -1,5 +1,4 @@
 import { clsx } from 'clsx';
-import { Shield, Zap, Target, LucideIcon } from 'lucide-react';
 import type { LucideIcon as LucideIconType } from 'lucide-react';
 
 interface StatBarProps {

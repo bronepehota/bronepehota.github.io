@@ -208,7 +208,7 @@ export function FactionSelector({
 
                 {/* Motto */}
                 <p className={clsx('text-xs italic mb-3 font-mono', isSelected ? styles.accent : 'text-slate-500')}>
-                  "{faction.motto}"
+                  &quot;{faction.motto}&quot;
                 </p>
 
                 {/* Color indicator bar */}

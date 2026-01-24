@@ -89,6 +89,7 @@ export default function MachineBlueprintModal({
         <div className="p-4 space-y-4">
           {/* Image with overlay */}
           <div className="relative h-48 sm:h-56 bg-slate-800/50 rounded-lg overflow-hidden border border-slate-700/50">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={machine.image}
               alt={machine.name}
@@ -101,7 +102,7 @@ export default function MachineBlueprintModal({
           {machine.description && (
             <div className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-3">
               <p className="text-sm text-slate-300 leading-relaxed italic">
-                "{machine.description}"
+                &quot;{machine.description}&quot;
               </p>
               {machine.sourceUrl && (
                 <a
