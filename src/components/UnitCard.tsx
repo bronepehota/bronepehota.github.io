@@ -186,9 +186,10 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
   const handlePilotSurvivalTest = () => {
     if (!unit.pilotInfo || !unit.pilotInfo.alive) return;
 
+    const machineArmor = unit.currentDurability || (unit.data as Machine).durability_max;
     const pilotArmor = unit.pilotInfo.pilotArmor || 0;
 
-    pilotTestFlow.startTest(pilotArmor, (armorRoll, survivalRoll, survived) => {
+    pilotTestFlow.startTest(machineArmor, pilotArmor, (armorRoll, survivalRoll, survived) => {
       // Store the result
       setPilotSurvivalTest({
         roll: survivalRoll ?? armorRoll,
@@ -306,7 +307,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
     return soldier.image || null;
   };
 
-  const machineImage = !isSquad && !!(unit.data as Machine).image;
+  const machineImage = !isSquad ? (unit.data as Machine).image : null;
 
   return (
     <div
@@ -419,6 +420,24 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
             {isMachineDone && !isMachineDestroyed && <span className="text-green-400 font-bold ml-auto flex items-center gap-1"><CheckCircle2 className="w-2.5 h-2.5 md:w-3 md:h-3" /> <span className="hidden sm:inline">ГОТОВ</span></span>}
             {isMachineDestroyed && <div className="bg-red-600 text-white text-[7px] md:text-[8px] px-1 md:px-1.5 py-0.5 rounded font-black uppercase ml-auto"><UserX className="w-2.5 h-2.5 md:w-3 md:h-3 inline mr-0.5 md:mr-1" />УНИЧТОЖЕН</div>}
           </div>
+
+          {/* Machine stats in header */}
+          {!isSquad && (
+            <div className="flex gap-2 md:gap-3 text-[9px] md:text-[10px] opacity-70 mt-1">
+              <span className="flex items-center gap-1 text-yellow-400">
+                <Zap className="w-2.5 h-2.5 md:w-3 md:h-3" />
+                {getMachineSpeed()}
+              </span>
+              <span className="flex items-center gap-1 text-green-400">
+                <Shield className="w-2.5 h-2.5 md:w-3 md:h-3" />
+                {(data as Machine).durability_max}
+              </span>
+              <span className="flex items-center gap-1 text-blue-400">
+                <Target className="w-2.5 h-2.5 md:w-3 md:h-3" />
+                {(data as Machine).weapons.length}
+              </span>
+            </div>
+          )}
         </div>
         <div className="flex gap-0.5 md:gap-1" onClick={e => e.stopPropagation()}>
           {(data.image || data.originalUrl) && (

@@ -276,6 +276,24 @@ export function UnitSelector({
                   {getUnitRole(unit)}
                 </p>
 
+                {/* Additional stats for machines */}
+                {unit.type === 'machine' && (
+                  <div className="flex gap-3 text-xs text-slate-500 mb-2">
+                    <span className="flex items-center gap-1">
+                      <span className="font-semibold">⚡</span>
+                      {(unit.data as Machine).speed_sectors[0]?.speed || 0}-{(unit.data as Machine).speed_sectors[(unit.data as Machine).speed_sectors.length - 1]?.speed || 0}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="font-semibold">🛡️</span>
+                      {(unit.data as Machine).durability_max}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="font-semibold">🔥</span>
+                      {(unit.data as Machine).fire_rate}
+                    </span>
+                  </div>
+                )}
+
                 {/* Color indicator bar */}
                 {faction && (
                   <div className="h-1 rounded" style={{ backgroundColor: faction.color }}></div>
@@ -335,27 +353,59 @@ export function UnitSelector({
                     backgroundColor: 'rgba(34, 197, 94, 0.1)', // green-500/10
                   }}
                 >
+                  {/* Unit image */}
+                  {unit.data.image && (
+                    <Image
+                      src={unit.data.image}
+                      alt={unit.data.name}
+                      width={200}
+                      height={120}
+                      className="w-full h-[120px] object-cover rounded mb-3 min-w-[120px]"
+                      loading="lazy"
+                      unoptimized
+                    />
+                  )}
+
                   {/* Type badge */}
                   <div className="absolute top-2 left-2 bg-slate-700/80 rounded-full p-1.5">
                     <TypeIcon className={`w-4 h-4 ${typeBadge.color}`} />
                   </div>
 
-                  <div className="flex justify-between items-start mt-6">
-                    <div className="flex-1">
-                      <h4 className="text-lg font-semibold text-slate-200">{unit.data.name}</h4>
-                      <p className="text-sm text-green-400 font-bold">{unit.data.cost} очков</p>
-                    </div>
-                    <button
-                      onClick={() => onRemoveUnit(unit.instanceId)}
-                      aria-label={`Удалить ${unit.data.name}`}
-                      className="p-2 text-red-400 hover:bg-red-900/30 rounded min-w-[48px] min-h-[48px] flex items-center justify-center touch-manipulation"
-                    >
-                      <X size={20} />
-                    </button>
-                  </div>
+                  {/* Remove button in top-right */}
+                  <button
+                    onClick={() => onRemoveUnit(unit.instanceId)}
+                    aria-label={`Удалить ${unit.data.name}`}
+                    className="absolute top-2 right-2 p-1.5 bg-red-900/80 hover:bg-red-800 rounded-full min-w-[36px] min-h-[36px] flex items-center justify-center touch-manipulation transition-colors"
+                  >
+                    <X size={16} className="text-red-400" />
+                  </button>
 
-                  {/* Color indicator bar */}
-                  <div className="h-1 rounded mt-3" style={{ backgroundColor: '#22c55e' }}></div>
+                  {/* Content - adjusted for image presence */}
+                  <div className={unit.data.image ? 'mt-2' : 'mt-6'}>
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <h4 className="text-lg font-semibold text-slate-200">{unit.data.name}</h4>
+                        <p className="text-sm text-green-400 font-bold">{unit.data.cost} очков</p>
+                      </div>
+                    </div>
+
+                    {/* Machine stats */}
+                    {unit.type === 'machine' && (
+                      <div className="flex gap-3 text-xs text-slate-500 mt-2">
+                        <span className="flex items-center gap-1">
+                          <span>⚡</span>
+                          {(unit.data as Machine).speed_sectors[0]?.speed || 0}-{(unit.data as Machine).speed_sectors[(unit.data as Machine).speed_sectors.length - 1]?.speed || 0}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <span>🛡️</span>
+                          {(unit.data as Machine).durability_max}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Color indicator bar */}
+                    <div className="h-1 rounded mt-3" style={{ backgroundColor: '#22c55e' }}></div>
+                  </div>
                 </div>
               );
             })}
