@@ -165,10 +165,13 @@ export default function ArmyBuilder({ army, setArmy, onEnterBattle, rulesVersion
                 totalCost: army.totalCost + squad.cost,
               });
             }}
-            onAddMachine={(machine) => {
+            onAddMachine={(machine, selectedWeaponIndices) => {
               // Calculate instance number for this unit type
               const existingUnitsOfType = army.units.filter(u => u.data.id === machine.id);
               const instanceNumber = existingUnitsOfType.length + 1;
+
+              // Store selected weapon indices (default to all if not provided)
+              const weaponIndices = selectedWeaponIndices ?? machine.weapons.map((_, i) => i);
 
               const newUnit: ArmyUnit = {
                 instanceId: `${machine.id}_${Date.now()}`,
@@ -181,6 +184,7 @@ export default function ArmyBuilder({ army, setArmy, onEnterBattle, rulesVersion
                 actionsUsed: [{ moved: false, shot: false, melee: false, done: false }],
                 machineShotsUsed: 0,
                 machineWeaponShots: {},
+                selectedWeaponIndices: weaponIndices,
               };
               setArmy({
                 ...army,

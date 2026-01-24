@@ -145,6 +145,11 @@ export interface ArmyUnit {
   machineShotsUsed?: number; // количество выстрелов в этом ходу
   machineWeaponShots?: { [weaponIndex: number]: number }; // количество выстрелов из каждого оружия
   pilotInfo?: PilotInfo;     // Pilot information for machines
+  // Selected weapon indices for machines (optional for backward compatibility)
+  // undefined = all weapons selected (backward compatible)
+  // [] = no weapons selected (unarmed variant)
+  // [0, 2, 4] = only weapons at indices 0, 2, 4 are equipped
+  selectedWeaponIndices?: number[]; // Indices into machine.weapons array
 }
 
 export interface Army {

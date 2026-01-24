@@ -354,7 +354,7 @@ describe('UnitSelector', () => {
     expect(screen.getByText('Легкий танк')).toBeInTheDocument();
   });
 
-  it('calls onAddMachine when machine add button is clicked', () => {
+  it('opens weapon selector modal when machine add button is clicked', () => {
     const mockAddMachine = jest.fn();
 
     render(
@@ -379,7 +379,53 @@ describe('UnitSelector', () => {
 
     if (addButton) {
       fireEvent.click(addButton);
-      expect(mockAddMachine).toHaveBeenCalledWith(mockMachines[0]);
+      // After weapon selection feature, clicking add should NOT directly call onAddMachine
+      // Instead, it opens the weapon selector modal
+      expect(mockAddMachine).not.toHaveBeenCalled();
+
+      // Verify that the weapon selector modal is now visible
+      // The modal contains the weapon selection heading
+      expect(screen.getByText('Выберите вооружение:')).toBeInTheDocument();
+      // Use getAllByText since "Легкий танк" appears both in the list and modal
+      expect(screen.getAllByText('Легкий танк')).toHaveLength(2);
+    }
+  });
+
+  it('adds machine with default weapons when weapon selector confirms', () => {
+    const mockAddMachine = jest.fn();
+
+    render(
+      <UnitSelector
+        factions={mockFactions}
+        squads={mockSquads}
+        machines={mockMachines}
+        selectedFaction="polaris"
+        pointBudget={500}
+        army={mockArmy}
+        onAddUnit={mockAdd}
+        onAddMachine={mockAddMachine}
+        onRemoveUnit={mockRemove}
+        onToBattle={mockToBattle}
+      />
+    );
+
+    // Open weapon selector
+    const addButton = screen.getAllByText('Добавить').find(
+      btn => btn.getAttribute('aria-label') === 'Добавить Легкий танк'
+    );
+
+    if (addButton) {
+      fireEvent.click(addButton);
+
+      // Click confirm button to add machine with all weapons
+      const confirmButton = screen.getByText(/Добавить 150 очков/);
+      fireEvent.click(confirmButton);
+
+      // onAddMachine should be called with machine and default weapon indices (all weapons)
+      expect(mockAddMachine).toHaveBeenCalledWith(
+        mockMachines[0],
+        [0] // Single weapon at index 0
+      );
     }
   });
 });

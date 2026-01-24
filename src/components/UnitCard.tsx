@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
-import { ArmyUnit, Squad, Machine, RulesVersionID } from '@/lib/types';
+import { ArmyUnit, Squad, Machine, RulesVersionID, Weapon } from '@/lib/types';
 import factionsData from '@/data/factions.json';
 import { Shield, Sword, Target, Heart, Zap, RotateCcw, CheckCircle2, Bomb, ChevronDown, ChevronUp, UserX, Dices, Plane, Skull, Wrench, Flame } from 'lucide-react';
 import { formatUnitNumber } from '@/lib/unit-utils';
@@ -309,6 +309,23 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
     if (!squad || squad.type !== 'squad') return null;
     const soldier = (squad.data as Squad).soldiers[unit.pilotInfo.soldierIndex];
     return soldier.image || null;
+  };
+
+  // Helper to get selected weapons for a machine
+  // Returns all weapons if selectedWeaponIndices is undefined (backward compatibility)
+  // Returns filtered weapons based on indices if provided
+  const getSelectedWeapons = (): Array<{ weapon: Weapon; originalIndex: number }> => {
+    if (isSquad) return [];
+    const machine = unit.data as Machine;
+    if (!unit.selectedWeaponIndices) {
+      // All weapons for backward compat
+      return machine.weapons.map((weapon, i) => ({ weapon, originalIndex: i }));
+    }
+    // Return only selected weapons with their original indices
+    return unit.selectedWeaponIndices.map(i => ({
+      weapon: machine.weapons[i],
+      originalIndex: i
+    }));
   };
 
   const machineImage = !isSquad ? (unit.data as Machine).image : null;
@@ -783,7 +800,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
 
               {/* Weapons List - like soldier cards */}
               <div className="space-y-1.5 md:space-y-2">
-                {(data as Machine).weapons.map((weapon, weaponIdx) => {
+                {getSelectedWeapons().map(({ weapon, originalIndex: weaponIdx }) => {
                   const weaponShots = unit.machineWeaponShots?.[weaponIdx] || 0;
                   const totalShotsUsed = unit.machineShotsUsed || 0;
                   const fireRate = (data as Machine).fire_rate;
