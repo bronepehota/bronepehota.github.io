@@ -5,6 +5,7 @@ import Image from 'next/image';
 import type { Faction, Squad, Machine, ArmyUnit, FactionID } from '@/lib/types';
 import { Check, X, Plus, ArrowLeft, Info, RotateCcw, Users, Zap } from 'lucide-react';
 import { UnitDetailsModal } from './UnitDetailsModal';
+import { WeaponSelectorModal } from './WeaponSelectorModal';
 import { countByUnitType } from '@/lib/unit-utils';
 
 interface UnitSelectorProps {
@@ -15,7 +16,7 @@ interface UnitSelectorProps {
   pointBudget: number;
   army: ArmyUnit[];
   onAddUnit: (squad: Squad) => void;
-  onAddMachine?: (machine: Machine) => void;
+  onAddMachine?: (machine: Machine, selectedWeaponIndices?: number[]) => void;
   onRemoveUnit: (instanceId: string) => void;
   onToBattle: () => void;
   onBackToFactionSelect?: () => void;
@@ -70,6 +71,10 @@ export function UnitSelector({
   const [selectedUnit, setSelectedUnit] = useState<UnitDisplay | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Weapon selector modal state for machines
+  const [weaponSelectorMachine, setWeaponSelectorMachine] = useState<Machine | null>(null);
+  const [isWeaponSelectorOpen, setIsWeaponSelectorOpen] = useState(false);
+
   // Calculate remaining points
   const totalCost = army.reduce((sum, unit) => {
     return sum + unit.data.cost;
@@ -102,8 +107,25 @@ export function UnitSelector({
     if (unit.type === 'squad') {
       onAddUnit(unit.data as Squad);
     } else if (unit.type === 'machine' && onAddMachine) {
-      onAddMachine(unit.data as Machine);
+      // Open weapon selector modal for machines
+      setWeaponSelectorMachine(unit.data as Machine);
+      setIsWeaponSelectorOpen(true);
     }
+  };
+
+  // Handle weapon selection confirmation
+  const handleWeaponSelectionConfirm = (selectedIndices: number[]) => {
+    if (weaponSelectorMachine && onAddMachine) {
+      onAddMachine(weaponSelectorMachine, selectedIndices);
+    }
+    setIsWeaponSelectorOpen(false);
+    setWeaponSelectorMachine(null);
+  };
+
+  // Handle weapon selection cancel
+  const handleWeaponSelectionCancel = () => {
+    setIsWeaponSelectorOpen(false);
+    setWeaponSelectorMachine(null);
   };
 
   // Handle unit card click
@@ -434,6 +456,17 @@ export function UnitSelector({
           faction={faction}
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
+        />
+      )}
+
+      {/* Weapon selector modal for machines */}
+      {weaponSelectorMachine && faction && (
+        <WeaponSelectorModal
+          machine={weaponSelectorMachine}
+          faction={faction}
+          isOpen={isWeaponSelectorOpen}
+          onClose={handleWeaponSelectionCancel}
+          onConfirm={handleWeaponSelectionConfirm}
         />
       )}
     </div>
