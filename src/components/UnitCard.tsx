@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { ArmyUnit, Squad, Machine, RulesVersionID } from '@/lib/types';
 import factionsData from '@/data/factions.json';
-import { Shield, Sword, Target, Heart, Zap, RotateCcw, ExternalLink, CheckCircle2, Bomb, ChevronDown, ChevronUp, UserX, Dices, Plane, Skull, Wrench } from 'lucide-react';
+import { Shield, Sword, Target, Heart, Zap, RotateCcw, CheckCircle2, Bomb, ChevronDown, ChevronUp, UserX, Dices, Plane, Skull, Wrench, Flame } from 'lucide-react';
 import { formatUnitNumber } from '@/lib/unit-utils';
 import { getDefaultRulesVersion } from '@/lib/rules-registry';
 import { cn } from '@/lib/utils';
@@ -141,7 +141,11 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
 
   const handleOpenOriginal = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    if (data.originalUrl) {
+    // For machines, always show the image overlay
+    // For squads, open external URL or show image
+    if (!isSquad) {
+      setShowImage(true);
+    } else if (data.originalUrl) {
       window.open(data.originalUrl, '_blank');
     } else {
       setShowImage(true);
@@ -379,10 +383,10 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
             <span className="text-[10px] font-bold opacity-50 uppercase tracking-widest truncate">{data.name}</span>
             <button className="text-[10px] bg-slate-800 px-2 py-1 rounded font-mono">X</button>
           </div>
-          <div className="flex-1 overflow-auto rounded border border-slate-700 custom-scrollbar">
-            <Image src={data.image} alt={data.name} width={800} height={600} className="max-w-none w-[400%]" unoptimized />
+          <div className="flex-1 overflow-hidden rounded border border-slate-700 custom-scrollbar flex items-center justify-center bg-slate-900">
+            <Image src={data.image} alt={data.name} width={800} height={600} className="w-full h-full object-contain" unoptimized />
           </div>
-          <p className="text-[9px] text-center opacity-40 mt-1">Прокрутите, чтобы увидеть характеристики</p>
+          <p className="text-[9px] text-center opacity-40 mt-1">Нажмите, чтобы закрыть</p>
         </div>
       )}
 
@@ -395,12 +399,13 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
         )}
       >
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 md:gap-2">
+          <div className="flex items-center gap-1.5 md:gap-2 flex-wrap">
             {isCollapsed ? (isManualCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />) : <ChevronUp className="w-4 h-4" />}
             {unit.instanceNumber && (
               <span className="text-lg font-bold text-slate-400">{formatUnitNumber(unit)}</span>
             )}
             <h3 className="font-bold text-xs md:text-sm uppercase tracking-wide truncate">{data.name}</h3>
+            <span className="text-[9px] md:text-[10px] opacity-50 font-medium">{data.cost} ОЧК.</span>
             {isSquad && (
               <div className={cn(
                 "flex items-center gap-0.5 md:gap-1 px-1 md:px-1.5 py-0.5 rounded text-[7px] md:text-[8px] font-black uppercase tracking-tighter",
@@ -413,42 +418,12 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
             {isAllDead && <div className="bg-red-600 text-white text-[7px] md:text-[8px] px-1 md:px-1.5 py-0.5 rounded font-black uppercase"><UserX className="w-2.5 h-2.5 md:w-3 md:h-3 inline mr-0.5 md:mr-1" />УНИЧТОЖЕН</div>}
           </div>
           <div className="text-[9px] md:text-[10px] opacity-50 flex gap-1.5 md:gap-2 items-center">
-            <span className="hidden sm:inline" style={{ color: faction?.color }}>{faction?.name || data.faction.toUpperCase()}</span>
-            <span className="hidden sm:inline">•</span>
-            <span className="hidden sm:inline">{data.cost} ОЧК.</span>
             {isSquadDone && !isAllDead && <span className="text-green-400 font-bold ml-auto flex items-center gap-1"><CheckCircle2 className="w-2.5 h-2.5 md:w-3 md:h-3" /> <span className="hidden sm:inline">ГОТОВ</span></span>}
             {isMachineDone && !isMachineDestroyed && <span className="text-green-400 font-bold ml-auto flex items-center gap-1"><CheckCircle2 className="w-2.5 h-2.5 md:w-3 md:h-3" /> <span className="hidden sm:inline">ГОТОВ</span></span>}
             {isMachineDestroyed && <div className="bg-red-600 text-white text-[7px] md:text-[8px] px-1 md:px-1.5 py-0.5 rounded font-black uppercase ml-auto"><UserX className="w-2.5 h-2.5 md:w-3 md:h-3 inline mr-0.5 md:mr-1" />УНИЧТОЖЕН</div>}
           </div>
-
-          {/* Machine stats in header */}
-          {!isSquad && (
-            <div className="flex gap-2 md:gap-3 text-[9px] md:text-[10px] opacity-70 mt-1">
-              <span className="flex items-center gap-1 text-yellow-400">
-                <Zap className="w-2.5 h-2.5 md:w-3 md:h-3" />
-                {getMachineSpeed()}
-              </span>
-              <span className="flex items-center gap-1 text-green-400">
-                <Shield className="w-2.5 h-2.5 md:w-3 md:h-3" />
-                {(data as Machine).durability_max}
-              </span>
-              <span className="flex items-center gap-1 text-blue-400">
-                <Target className="w-2.5 h-2.5 md:w-3 md:h-3" />
-                {(data as Machine).weapons.length}
-              </span>
-            </div>
-          )}
         </div>
         <div className="flex gap-0.5 md:gap-1" onClick={e => e.stopPropagation()}>
-          {(data.image || data.originalUrl) && (
-            <button
-              onClick={() => handleOpenOriginal()}
-              className="p-1.5 md:p-1 hover:bg-white/10 rounded transition-colors text-blue-400 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center"
-              title={data.originalUrl ? "Открыть оригинал в VK (двойной клик)" : "Показать оригинал армлиста"}
-            >
-              <ExternalLink className="w-4 h-4" />
-            </button>
-          )}
           <button
             onClick={() => {
               if (isSquad) {
@@ -646,12 +621,11 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
             </div>
           ) : (
             <div className="space-y-2">
-              {/* Machine Stats Header - Redesigned */}
-              {/* Mobile: Two rows (Durability+Speed + Pilot | Ammo+Shots) */}
-              {/* Desktop: Single row (Durability+Speed | Ammo+Shots | Pilot) */}
-              <div className="flex flex-col md:flex-row gap-2">
+              {/* Machine Stats Header - Unified 2-row layout for all screen sizes */}
+              <div className="grid grid-cols-[1fr_auto] gap-2">
+                {/* === ROW 1: Durability+Speed | PILOT (spans 2 rows) === */}
                 {/* Durability + Speed Combined */}
-                <div className="flex-1 bg-slate-900/80 p-2 rounded-lg border border-slate-700 min-w-0">
+                <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-700 min-w-0">
                   <div className="flex justify-between items-center mb-1">
                     <span className="text-[8px] md:text-[9px] opacity-50 uppercase font-bold flex items-center gap-1">
                       <Shield className="w-2.5 h-2.5 md:w-3 md:h-3" /> Прочность
@@ -663,7 +637,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                   <div className="flex items-center gap-2">
                     {/* Durability controls */}
                     <div className="flex-1 flex items-center gap-1">
-                      {/* Damage Button */}
+                      {/* Damage Button - Using Flame icon */}
                       <button
                         onClick={() => updateMachineStat('durability', -1)}
                         disabled={unit.currentDurability === 0}
@@ -673,7 +647,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                         )}
                         title="Нанести урон"
                       >
-                        <Skull className="w-4 h-4" />
+                        <Flame className="w-4 h-4" />
                       </button>
                       <span className={cn("text-sm md:text-base font-black min-w-[20px] text-center shrink-0", getZoneColor(getDurabilityZone().color).text)}>
                         {unit.currentDurability}
@@ -708,8 +682,68 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                   </div>
                 </div>
 
+                {/* Pilot Button - Spans 2 rows with survival test overlay */}
+                <div className="row-span-2 w-14 h-28 md:w-16 md:h-28 shrink-0 relative">
+                  <button
+                    onClick={() => setShowPilotModal(true)}
+                    className="w-full h-full rounded-lg border border-slate-700 overflow-hidden bg-slate-900/80 relative"
+                  >
+                    {unit.pilotInfo ? (
+                      <>
+                        <Image
+                          src={getPilotImage() || '/images/soldiers/empty.png'}
+                          width={64}
+                          height={128}
+                          className="w-full h-full object-cover"
+                          unoptimized
+                          alt="Пилот"
+                        />
+                        {/* Status overlay */}
+                        <div className={cn(
+                          "absolute bottom-0 left-0 right-0 text-[7px] md:text-[8px] font-bold text-center py-0.5",
+                          unit.pilotInfo.alive
+                            ? "bg-green-900/90 text-green-300"
+                            : "bg-red-900/90 text-red-300"
+                        )}>
+                          {unit.pilotInfo.alive ? 'ЖИВ' : 'ПОГИБ'}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-slate-600 gap-0.5">
+                        <Plane className="w-5 h-5 md:w-6 md:h-6" />
+                        <span className="text-[8px] md:text-[9px] font-bold uppercase">Пилот</span>
+                      </div>
+                    )}
+                  </button>
+                  {/* Survival Test Button - Overlay at bottom-right corner */}
+                  {unit.pilotInfo && unit.pilotInfo.alive && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePilotSurvivalTest();
+                      }}
+                      disabled={pilotTestFlow.isOpen}
+                      className={cn(
+                        "absolute -bottom-1 -right-1 w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-transform border-2 min-w-[36px] min-h-[36px]",
+                        pilotTestFlow.isOpen && "animate-pulse",
+                        pilotSurvivalTest
+                          ? pilotSurvivalTest.survived
+                            ? "bg-green-600 border-green-900 text-white"
+                            : "bg-red-600 border-red-900 text-white"
+                          : pilotTestFlow.isOpen
+                          ? "bg-purple-600 border-purple-900 text-white animate-spin"
+                          : "bg-purple-900 border-purple-950 text-purple-300 hover:bg-purple-800 hover:scale-110"
+                      )}
+                      title={pilotSurvivalTest ? `Повторить тест (последний: ${pilotSurvivalTest.survived ? 'ВЫЖИЛ' : 'ПОГИБ'})` : "Тест выживаемости пилота (D12 + D6)"}
+                    >
+                      <Skull className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                    </button>
+                  )}
+                </div>
+
+                {/* === ROW 2: Ammo+Shots | (pilot continues) === */}
                 {/* Ammo + Shots Combined */}
-                <div className="flex-1 bg-slate-900/80 p-2 rounded-lg border border-slate-700 min-w-0">
+                <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-700 min-w-0">
                   <div className="flex justify-between items-center mb-1">
                     <span className="text-[8px] md:text-[9px] opacity-50 uppercase font-bold flex items-center gap-1">
                       <Bomb className="w-2.5 h-2.5 md:w-3 md:h-3" /> Боезапас
@@ -744,65 +778,6 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                       </span>
                     </div>
                   </div>
-                </div>
-
-                {/* Pilot Button - Compact, on the right with survival test integrated */}
-                <div className="w-14 h-14 md:w-16 md:h-16 shrink-0 relative">
-                  <button
-                    onClick={() => setShowPilotModal(true)}
-                    className="w-full h-full rounded-lg border border-slate-700 overflow-hidden bg-slate-900/80 relative"
-                  >
-                    {unit.pilotInfo ? (
-                      <>
-                        <Image
-                          src={getPilotImage() || '/images/soldiers/empty.png'}
-                          width={64}
-                          height={64}
-                          className="w-full h-full object-cover"
-                          unoptimized
-                          alt="Пилот"
-                        />
-                        {/* Status overlay */}
-                        <div className={cn(
-                          "absolute bottom-0 left-0 right-0 text-[7px] md:text-[8px] font-bold text-center py-0.5",
-                          unit.pilotInfo.alive
-                            ? "bg-green-900/90 text-green-300"
-                            : "bg-red-900/90 text-red-300"
-                        )}>
-                          {unit.pilotInfo.alive ? 'ЖИВ' : 'ПОГИБ'}
-                        </div>
-                      </>
-                    ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center text-slate-600 gap-0.5">
-                        <Plane className="w-5 h-5 md:w-6 md:h-6" />
-                        <span className="text-[8px] md:text-[9px] font-bold uppercase">Пилот</span>
-                      </div>
-                    )}
-                  </button>
-                  {/* Survival Test Button - Small overlay at bottom */}
-                  {unit.pilotInfo && unit.pilotInfo.alive && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handlePilotSurvivalTest();
-                      }}
-                      disabled={pilotTestFlow.isOpen}
-                      className={cn(
-                        "absolute -bottom-1 -right-1 w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center transition-transform border-2 min-w-[36px] min-h-[36px]",
-                        pilotTestFlow.isOpen && "animate-pulse",
-                        pilotSurvivalTest
-                          ? pilotSurvivalTest.survived
-                            ? "bg-green-600 border-green-900 text-white"
-                            : "bg-red-600 border-red-900 text-white"
-                          : pilotTestFlow.isOpen
-                          ? "bg-purple-600 border-purple-900 text-white animate-spin"
-                          : "bg-purple-900 border-purple-950 text-purple-300 hover:bg-purple-800 hover:scale-110"
-                      )}
-                      title={pilotSurvivalTest ? `Повторить тест (последний: ${pilotSurvivalTest.survived ? 'ВЫЖИЛ' : 'ПОГИБ'})` : "Тест выживаемости пилота (D12 + D6)"}
-                    >
-                      <Skull className="w-3 h-3 md:w-3.5 md:h-3.5" />
-                    </button>
-                  )}
                 </div>
               </div>
 
@@ -936,40 +911,6 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                   );
                 })}
               </div>
-
-              {/* Pilot Management Actions */}
-              {unit.pilotInfo && (
-                <div className="flex gap-1 md:gap-1.5 mt-2 pt-2 border-t border-slate-700">
-                  {unit.pilotInfo.alive && (
-                    <button
-                      onClick={() => {
-                        if (onPilotRemove) {
-                          onPilotRemove(unit.instanceId);
-                        }
-                      }}
-                      className={cn(
-                        "flex-1 p-2 md:p-2.5 rounded-lg transition-colors min-h-[44px] md:min-h-0 flex items-center justify-center gap-1.5 text-xs font-bold",
-                        "bg-blue-900/30 text-blue-400 border border-blue-700/50 hover:bg-blue-900/50"
-                      )}
-                      title="Выбросить пилота из машины"
-                    >
-                      <UserX className="w-4 h-4" />
-                      <span className="hidden sm:inline">ВЫБРОСИТЬСЯ</span>
-                    </button>
-                  )}
-                  <button
-                    onClick={() => setShowPilotModal(true)}
-                    className={cn(
-                      "flex-1 p-2 md:p-2.5 rounded-lg transition-colors min-h-[44px] md:min-h-0 flex items-center justify-center gap-1.5 text-xs font-bold",
-                      "bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700"
-                    )}
-                    title="Сменить пилота"
-                  >
-                    <Plane className="w-4 h-4" />
-                    <span className="hidden sm:inline">СМЕНИТЬ ПИЛОТА</span>
-                  </button>
-                </div>
-              )}
 
               {/* Machine Actions Footer */}
               <div className="flex gap-1 md:gap-1.5 mt-2 pt-2 border-t border-slate-700">
