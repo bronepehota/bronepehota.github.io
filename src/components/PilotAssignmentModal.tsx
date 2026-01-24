@@ -271,23 +271,32 @@ export function PilotAssignmentModal({
         {/* Current Pilot Info (if assigned) */}
         {hasPilot && (
           <div className="px-4 py-3 border-b border-slate-700 bg-green-900/10 flex-shrink-0">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-green-900/30 border border-green-700/50 flex items-center justify-center">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="w-10 h-10 rounded-full bg-green-900/30 border border-green-700/50 flex items-center justify-center shrink-0">
                   <Shield className="w-5 h-5 text-green-400" />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <div className="text-sm font-bold text-green-400">Пилот назначен</div>
-                  <div className="text-xs text-slate-400">
+                  <div className="text-xs text-slate-400 truncate">
                     Отряд #{allUnits.find((u) => u.instanceId === machine.pilotInfo?.squadInstanceId)?.instanceNumber} - Боец #{(machine.pilotInfo?.soldierIndex || 0) + 1}
                   </div>
                 </div>
               </div>
-              {machine.pilotInfo?.alive ? (
-                <span className="text-xs font-bold text-green-400 bg-green-900/30 px-2 py-1 rounded">ЖИВ</span>
-              ) : (
-                <span className="text-xs font-bold text-red-400 bg-red-900/30 px-2 py-1 rounded">ПОГИБ</span>
-              )}
+              <div className="flex items-center gap-2 shrink-0">
+                {machine.pilotInfo?.alive ? (
+                  <span className="text-xs font-bold text-green-400 bg-green-900/30 px-2 py-1 rounded">ЖИВ</span>
+                ) : (
+                  <span className="text-xs font-bold text-red-400 bg-red-900/30 px-2 py-1 rounded">ПОГИБ</span>
+                )}
+                <button
+                  onClick={handleRemovePilot}
+                  className="p-2 bg-red-600 hover:bg-red-500 rounded-lg transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
+                  title="Убрать пилота"
+                >
+                  <UserX className="w-4 h-4 text-white" />
+                </button>
+              </div>
             </div>
           </div>
         )}
