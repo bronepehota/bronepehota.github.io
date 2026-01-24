@@ -30,6 +30,7 @@ export interface CombatParameters {
   targetMelee: number;        // Target's melee stat (for melee combat)
   fortification: FortificationType;  // Target's cover/fortification
   weaponIndex?: number;       // For machines: which weapon to use
+  isSurpriseAttack?: boolean; // Attack from behind (Fan rules: roll twice, take best; machine's BB ignored)
 }
 
 /**

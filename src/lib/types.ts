@@ -183,6 +183,8 @@ export interface DamageResult {
     additionalDamage?: number;
     targets?: string[];
   };
+  isSurpriseAttack?: boolean; // Surprise attack from behind (rolled twice)
+  bothRolls?: number[][]; // Both damage roll sets when surprise attack
 }
 
 export interface MeleeResult {
@@ -191,6 +193,8 @@ export interface MeleeResult {
   defenderRoll: number;
   defenderTotal: number;
   winner: 'attacker' | 'defender' | 'draw';
+  isSurpriseAttack?: boolean; // Fan rules: surprise attack from behind
+  attackerRolls?: number[]; // Fan rules: both attacker rolls when surprise attack
 }
 
 export type CalculateHitFn = (rangeStr: string, distanceSteps: number, fortification?: FortificationType) => HitResult;

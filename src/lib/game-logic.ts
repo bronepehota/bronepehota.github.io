@@ -2,6 +2,21 @@ export const rollDie = (sides: number): number => {
   return Math.floor(Math.random() * sides) + 1;
 };
 
+/**
+ * Roll twice and return the better result (Surprise Attack - Fan rules)
+ * @param sides - Number of sides on the die (6, 12, 20)
+ * @returns Object with both rolls and the better roll
+ */
+export const rollWithAdvantage = (sides: number): { roll1: number; roll2: number; best: number } => {
+  const roll1 = rollDie(sides);
+  const roll2 = rollDie(sides);
+  return {
+    roll1,
+    roll2,
+    best: Math.max(roll1, roll2)
+  };
+};
+
 export const parseRoll = (rollStr: string): { dice: number, sides: number, bonus: number } => {
   // Matches formats like "D6", "D6+2", "2D12", "D12+1", etc.
   const regex = /(?:(\d+))?D(\d+)(?:\+(\d+))?/;
@@ -76,6 +91,84 @@ export const calculateMelee = (attackerMelee: number, defenderMelee: number): {
     winner
   };
 };
+
+/**
+ * Calculate damage with surprise attack (Fan rules: roll twice, take best)
+ * @param powerStr - Dice notation for damage (e.g., "2D6", "D12")
+ * @param targetArmor - Target's armor value
+ * @returns DamageResult with both roll sets and best result
+ */
+export function calculateDamageWithSurpriseAttack(powerStr: string, targetArmor: number): {
+  rolls1: number[];
+  rolls2: number[];
+  bestRolls: number[];
+  damage: number;
+} {
+  const { dice, sides, bonus } = parseRoll(powerStr);
+  const rolls1: number[] = [];
+  const rolls2: number[] = [];
+
+  // First set of damage rolls
+  let damage1 = 0;
+  for (let i = 0; i < dice; i++) {
+    const r = rollDie(sides) + bonus;
+    rolls1.push(r);
+    if (r > targetArmor) damage1 += 1;
+  }
+
+  // Second set of damage rolls
+  let damage2 = 0;
+  for (let i = 0; i < dice; i++) {
+    const r = rollDie(sides) + bonus;
+    rolls2.push(r);
+    if (r > targetArmor) damage2 += 1;
+  }
+
+  // Take the better result (more damage is better)
+  const bestResult = damage1 >= damage2 ? { rolls: rolls1, damage: damage1 } : { rolls: rolls2, damage: damage2 };
+
+  return {
+    rolls1,
+    rolls2,
+    bestRolls: bestResult.rolls,
+    damage: bestResult.damage
+  };
+}
+
+/**
+ * Calculate melee with surprise attack (Fan rules: attacker rolls twice, takes best)
+ * @param attackerMelee - Attacker's melee stat
+ * @param defenderMelee - Defender's melee stat (use 0 for machine in surprise attack)
+ * @returns MeleeResult with both attacker rolls and best result
+ */
+export function calculateMeleeWithSurpriseAttack(attackerMelee: number, defenderMelee: number): {
+  attackerRoll1: number;
+  attackerRoll2: number;
+  attackerRoll: number;
+  attackerTotal: number;
+  defenderRoll: number;
+  defenderTotal: number;
+  winner: 'attacker' | 'defender' | 'draw';
+} {
+  const { roll1: aRoll1, roll2: aRoll2, best: aRoll } = rollWithAdvantage(6);
+  const dRoll = rollDie(6);
+  const aTotal = aRoll + attackerMelee;
+  const dTotal = dRoll + defenderMelee;
+
+  let winner: 'attacker' | 'defender' | 'draw' = 'draw';
+  if (aTotal > dTotal) winner = 'attacker';
+  else if (dTotal > aTotal) winner = 'defender';
+
+  return {
+    attackerRoll1: aRoll1,
+    attackerRoll2: aRoll2,
+    attackerRoll: aRoll,
+    attackerTotal: aTotal,
+    defenderRoll: dRoll,
+    defenderTotal: dTotal,
+    winner
+  };
+}
 
 /**
  * Combat flow validation utilities

@@ -3,6 +3,7 @@
 import { CombatResult, CombatParameters } from '@/lib/combat-types';
 import { RulesVersionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { EyeOff } from 'lucide-react';
 
 interface CombatResultsProps {
   result: CombatResult;
@@ -113,45 +114,100 @@ export function CombatResults({
           {/* Damage Rolls (if hit succeeded) */}
           {(result.hitResult.success || isGrenade) && result.damageResult && (
             <div className={cn(
-              "p-4 rounded-xl border-2",
+              "p-3 rounded-xl border-2",
               result.damageResult.damage > 0
                 ? "bg-orange-900/20 border-orange-500/50"
                 : "bg-slate-800 border-slate-600"
             )}>
-              <div className="text-[10px] opacity-50 uppercase font-bold mb-3 tracking-widest text-center">
-                Броски урона vs Броня
-              </div>
-              <div className="flex justify-center items-start gap-3 flex-wrap">
-                {result.damageResult.rolls.map((roll, i) => {
-                  const effectiveArmor = getEffectiveArmor();
-                  const penetrated = roll > effectiveArmor;
-                  return (
-                    <div key={i} className="flex flex-col items-center gap-1">
-                      <div className={cn(
-                        "w-14 h-14 bg-slate-800 rounded-lg border-2 flex items-center justify-center text-xl font-black shadow-lg",
-                        penetrated
-                          ? "text-orange-400 border-orange-400"
-                          : "text-slate-500 border-slate-600"
-                      )}>
-                        {roll}
-                      </div>
-                      <div className={cn("text-[10px] font-bold",
-                        penetrated ? "text-orange-400" : "text-slate-600"
-                      )}>
-                        {penetrated ? '>' : '≤'}{effectiveArmor}
-                      </div>
-                    </div>
-                  );
-                })}
+              <div className="text-[10px] opacity-50 uppercase font-bold mb-2 tracking-widest text-center">
+                Броски урона vs Броня {getEffectiveArmor()}
               </div>
 
-              {/* Damage Summary */}
-              <div className="mt-4 pt-3 border-t border-slate-700 text-center">
-                <div className="text-[10px] opacity-40 mb-1">
-                  Броня цели: {parameters.targetArmor}
-                  {getFortificationBonusDisplay()}
+              {/* Surprise Attack - Show both roll sets (compact for mobile) */}
+              {parameters.isSurpriseAttack && result.damageResult.isSurpriseAttack && (result.damageResult as any).bothRolls ? (
+                <div className="space-y-2">
+                  {(result.damageResult as any).bothRolls.map((rollSet: number[], setIndex: number) => {
+                    const isFirstSet = setIndex === 0;
+                    const firstSetDamage = (result.damageResult as any).bothRolls[0].filter((r: number) => r > getEffectiveArmor()).length;
+                    const secondSetDamage = (result.damageResult as any).bothRolls[1].filter((r: number) => r > getEffectiveArmor()).length;
+                    const thisSetDamage = isFirstSet ? firstSetDamage : secondSetDamage;
+                    const isWinner = thisSetDamage > (isFirstSet ? secondSetDamage : firstSetDamage);
+
+                    return (
+                      <div
+                        key={setIndex}
+                        className={cn(
+                          "flex items-center gap-2 p-2 rounded-lg border",
+                          isWinner
+                            ? "bg-purple-900/30 border-purple-500"
+                            : "bg-slate-800/50 border-slate-600"
+                        )}
+                      >
+                        <span className={cn("text-[9px] uppercase font-bold min-w-[40px]",
+                          isWinner ? "text-purple-300" : "text-slate-400"
+                        )}>
+                          Бросок {setIndex + 1}
+                        </span>
+                        <div className="flex gap-1 flex-wrap">
+                          {rollSet.map((roll, i) => {
+                            const penetrated = roll > getEffectiveArmor();
+                            return (
+                              <div key={i} className={cn(
+                                "w-9 h-9 bg-slate-900 rounded flex items-center justify-center text-sm font-black",
+                                penetrated
+                                  ? "text-orange-400"
+                                  : "text-slate-600"
+                              )}>
+                                {roll}
+                              </div>
+                            );
+                          })}
+                        </div>
+                        {isWinner && (
+                          <span className="text-[8px] bg-purple-600 text-white px-1.5 py-0.5 rounded font-bold ml-auto">
+                            ВЫБРАН
+                          </span>
+                        )}
+                        <span className={cn(
+                          "text-sm font-black",
+                          thisSetDamage > 0 ? "text-orange-400" : "text-slate-500"
+                        )}>
+                          {thisSetDamage}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
-                <div className={cn("text-2xl font-black",
+              ) : (
+                // Normal single roll display
+                <div className="flex justify-center items-start gap-2 flex-wrap">
+                  {result.damageResult.rolls.map((roll, i) => {
+                    const effectiveArmor = getEffectiveArmor();
+                    const penetrated = roll > effectiveArmor;
+                    return (
+                      <div key={i} className="flex flex-col items-center gap-1">
+                        <div className={cn(
+                          "w-12 h-12 bg-slate-800 rounded-lg border-2 flex items-center justify-center text-xl font-black shadow-lg",
+                          penetrated
+                            ? "text-orange-400 border-orange-400"
+                            : "text-slate-500 border-slate-600"
+                        )}>
+                          {roll}
+                        </div>
+                        <div className={cn("text-[10px] font-bold",
+                          penetrated ? "text-orange-400" : "text-slate-600"
+                        )}>
+                          {penetrated ? '>' : '≤'}{effectiveArmor}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Damage Summary */}
+              <div className="mt-3 pt-2 border-t border-slate-700 text-center">
+                <div className={cn("text-xl font-black",
                   result.damageResult.damage > 0
                     ? "text-orange-400"
                     : "text-slate-400"
@@ -176,68 +232,109 @@ export function CombatResults({
       )}
 
       {/* Melee Results */}
-      {isMelee && result.meleeResult && (
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            {/* Attacker */}
-            <div className="bg-slate-800 p-4 rounded-xl border-2 border-blue-500/50">
-              <div className="text-[10px] opacity-50 uppercase mb-2 text-center">Вы</div>
-              <div className="flex flex-col items-center">
-                <div className="w-16 h-16 bg-slate-900 rounded-xl flex items-center justify-center text-3xl font-black text-blue-400 border-2 border-blue-500/30 mb-1">
-                  {result.meleeResult.attackerRoll}
+      {isMelee && result.meleeResult && (() => {
+        const meleeResult = result.meleeResult!;
+        return (
+          <div className="space-y-3">
+            {/* Surprise Attack - Show both attacker rolls (compact for mobile) */}
+            {parameters.isSurpriseAttack && (meleeResult as any).attackerRolls ? (
+              <div className="bg-purple-900/20 p-2 rounded-lg border border-purple-700">
+                <div className="flex items-center justify-center gap-3">
+                  {(meleeResult as any).attackerRolls.map((roll: number, index: number) => {
+                    const isBest = roll === meleeResult.attackerRoll;
+                  return (
+                    <div key={index} className="flex items-center gap-1">
+                      <div className={cn(
+                        "w-10 h-10 bg-slate-900 rounded border flex items-center justify-center text-lg font-black",
+                        isBest
+                          ? "text-purple-400 border-purple-500"
+                          : "text-slate-500 border-slate-600"
+                      )}>
+                        {roll}
+                      </div>
+                      <span className={cn("text-[8px] font-bold",
+                        isBest ? "text-purple-400" : "text-slate-500"
+                      )}>
+                        {isBest ? '✓' : ''}
+                      </span>
+                    </div>
+                  );
+                })}
+                <div className="border-l border-slate-600 pl-2">
+                  <div className="text-sm font-black text-blue-400">
+                    {meleeResult.attackerTotal}
+                  </div>
+                  <div className="text-[8px] text-slate-400">
+                    Вы
+                  </div>
                 </div>
-                <div className="text-xl font-black text-blue-400">
-                  {result.meleeResult.attackerTotal}
-                </div>
-                <div className="text-[10px] opacity-30 mt-1">
-                  D6 + ББ
+                <div className="border-l border-slate-600 pl-2">
+                  <div className="text-sm font-black text-red-400">
+                    {meleeResult.defenderTotal}
+                  </div>
+                  <div className="text-[8px] text-slate-400">
+                    Цель
+                  </div>
                 </div>
               </div>
             </div>
+          ) : (
+            // Normal melee display
+            <div className="grid grid-cols-2 gap-3">
+              {/* Attacker */}
+              <div className="bg-slate-800 p-3 rounded-xl border-2 border-blue-500/50">
+                <div className="text-[10px] opacity-50 uppercase mb-1 text-center">Вы</div>
+                <div className="flex flex-col items-center">
+                  <div className="w-12 h-12 bg-slate-900 rounded-lg flex items-center justify-center text-2xl font-black text-blue-400 border-2 border-blue-500/30">
+                    {meleeResult.attackerRoll}
+                  </div>
+                  <div className="text-lg font-black text-blue-400">
+                    {meleeResult.attackerTotal}
+                  </div>
+                </div>
+              </div>
 
-            {/* Defender */}
-            <div className="bg-slate-800 p-4 rounded-xl border-2 border-red-500/50">
-              <div className="text-[10px] opacity-50 uppercase mb-2 text-center">Цель</div>
-              <div className="flex flex-col items-center">
-                <div className="w-16 h-16 bg-slate-900 rounded-xl flex items-center justify-center text-3xl font-black text-red-400 border-2 border-red-500/30 mb-1">
-                  {result.meleeResult.defenderRoll}
-                </div>
-                <div className="text-xl font-black text-red-400">
-                  {result.meleeResult.defenderTotal}
-                </div>
-                <div className="text-[10px] opacity-30 mt-1">
-                  D6 + ББ({parameters.targetMelee})
+              {/* Defender */}
+              <div className="bg-slate-800 p-3 rounded-xl border-2 border-red-500/50">
+                <div className="text-[10px] opacity-50 uppercase mb-1 text-center">Цель</div>
+                <div className="flex flex-col items-center">
+                  <div className="w-12 h-12 bg-slate-900 rounded-lg flex items-center justify-center text-2xl font-black text-red-400 border-2 border-red-500/30">
+                    {meleeResult.defenderRoll}
+                  </div>
+                  <div className="text-lg font-black text-red-400">
+                    {meleeResult.defenderTotal}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Melee Result */}
           <div className={cn(
-            "p-6 rounded-2xl border-2 flex flex-col items-center",
-            result.meleeResult.winner === 'attacker'
+            "p-3 rounded-xl border-2 flex items-center justify-center",
+            meleeResult.winner === 'attacker'
               ? "bg-green-900/20 border-green-500/50"
-              : result.meleeResult.winner === 'defender'
+              : meleeResult.winner === 'defender'
               ? "bg-red-900/20 border-red-500/50"
               : "bg-slate-800 border-slate-700"
           )}>
-            <div className="text-xs opacity-50 uppercase font-bold mb-1 tracking-widest">Итог</div>
-            <div className={cn("text-3xl font-black",
-              result.meleeResult.winner === 'attacker'
+            <div className={cn("text-xl font-black",
+              meleeResult.winner === 'attacker'
                 ? "text-green-400"
-                : result.meleeResult.winner === 'defender'
+                : meleeResult.winner === 'defender'
                 ? "text-red-400"
                 : "text-slate-400"
             )}>
-              {result.meleeResult.winner === 'attacker'
+              {meleeResult.winner === 'attacker'
                 ? 'ПОБЕДА'
-                : result.meleeResult.winner === 'defender'
+                : meleeResult.winner === 'defender'
                 ? 'КОНТРАТАКА'
                 : 'НИЧЬЯ'}
             </div>
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {/* Action Buttons */}
       <div className="flex gap-3 pt-4">
