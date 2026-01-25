@@ -916,8 +916,8 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
 
               {/* Weapons List - Tactical Weapon Cards */}
               <div className="flex gap-2">
-                {/* Machine Photo - Left side, 1/4 width */}
-                <div className="relative w-1/4 h-auto shrink-0">
+                {/* Machine Photo - Hidden on mobile, 1/4 width on desktop */}
+                <div className="relative w-1/4 h-auto shrink-0 hidden md:block">
                   <div
                     onClick={handleOpenOriginal}
                     className="w-full h-full rounded-sm border-2 border-slate-700/50 overflow-hidden bg-slate-900/60 relative cursor-pointer hover:border-slate-600/50 transition-colors"
@@ -962,7 +962,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                     <div
                       key={weaponIdx}
                       className={cn(
-                        "relative p-2 md:p-2.5 rounded-sm border flex gap-2 md:gap-3 transition-all overflow-hidden",
+                        "relative p-1.5 md:p-2.5 rounded-sm border flex gap-1.5 md:gap-3 transition-all overflow-hidden",
                         isMachineDestroyed ? "bg-slate-950/80 border-slate-800 opacity-40 grayscale" :
                         isMachineDone ? "bg-slate-900/40 border-slate-700/50 opacity-70" :
                         weaponShots > 0 ? "bg-amber-950/20 border-amber-700/40" : "bg-slate-800/30 border-slate-700/50"
@@ -985,8 +985,8 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                               disabled={!canShoot}
                               onClick={() => handleVehicleAttack(weaponIdx)}
                               className={cn(
-                                "relative p-2 md:p-2.5 rounded-sm transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center gap-1.5 overflow-hidden",
-                                "border-2 text-xs md:text-sm font-mono font-bold uppercase tracking-wider",
+                                "relative p-1.5 md:p-2.5 rounded-sm transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center gap-1 md:gap-1.5 overflow-hidden",
+                                "border-2 text-[10px] md:text-sm font-mono font-bold uppercase tracking-wider",
                                 weaponShots > 0
                                   ? "bg-amber-950/40 border-amber-800/50 text-amber-600"
                                   : canShoot
@@ -999,7 +999,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                                 <>
                                   <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-amber-700/50" />
                                   <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-amber-700/50" />
-                                  <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5" />
+                                  <CheckCircle2 className="w-3.5 h-3.5 md:w-5 md:h-5" />
                                   <span className="hidden sm:inline">ВЫСТРЕЛИЛ</span>
                                 </>
                               ) : (
@@ -1012,7 +1012,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                                       <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-amber-600/40" />
                                     </>
                                   )}
-                                  <Dices className="w-4 h-4 md:w-5 md:h-5" />
+                                  <Dices className="w-3.5 h-3.5 md:w-5 md:h-5" />
                                   <span className="hidden sm:inline">ВЫСТРЕЛ</span>
                                 </>
                               )}
@@ -1035,7 +1035,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                               }}
                               disabled={weaponShots > 0 || isMachineDone || isMachineDestroyed}
                               className={cn(
-                                "relative p-1.5 md:p-2 rounded-sm transition-all min-w-[40px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border-2 overflow-hidden",
+                                "relative p-1 md:p-2 rounded-sm transition-all min-w-[40px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border-2 overflow-hidden",
                                 weaponShots > 0 ? "bg-amber-950/30 border-amber-700/50 text-amber-400" : "bg-slate-900/60 border-slate-700 text-slate-500 hover:bg-slate-800/60 disabled:opacity-50"
                               )}
                               title="Ометить как выстреливший"
@@ -1046,7 +1046,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                                   <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-amber-600/40" />
                                 </>
                               )}
-                              <CheckCircle2 className="w-4 h-4" />
+                              <CheckCircle2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
                             </button>
 
                             {/* Reset Button */}
@@ -1062,36 +1062,36 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                               }}
                               disabled={weaponShots === 0}
                               className={cn(
-                                "relative p-1.5 md:p-2 rounded-sm transition-all min-w-[40px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border-2 overflow-hidden",
+                                "relative p-1 md:p-2 rounded-sm transition-all min-w-[40px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border-2 overflow-hidden",
                                 weaponShots === 0 ? "bg-slate-900/60 border-slate-700 text-slate-600 opacity-50" : "bg-slate-800/60 border-slate-600 text-slate-400 hover:bg-slate-700/60"
                               )}
                               title="Сбросить выстрел"
                             >
-                              <RotateCcw className="w-4 h-4" />
+                              <RotateCcw className="w-3.5 h-3.5 md:w-4 md:h-4" />
                             </button>
                           </div>
                         </div>
 
                         {/* Weapon Stats - Tactical Readout */}
-                        <div className="flex flex-col gap-1 mt-2 md:mt-1.5">
-                          {/* Weapon Name - Full width with truncate */}
-                          <h4 className="font-mono font-bold text-xs md:text-sm text-slate-200 truncate pr-2" title={weapon.name}>
+                        <div className="flex flex-col gap-0.5 md:gap-1 mt-1.5 md:mt-1.5">
+                          {/* Weapon Name - Full width with truncate, minimal font on mobile */}
+                          <h4 className="font-mono font-bold text-[10px] md:text-sm text-slate-200 truncate pr-1 leading-tight" title={weapon.name}>
                             {weapon.name}
                           </h4>
 
                           {/* Stats Row - Range and Power */}
-                          <div className="flex gap-1.5 md:gap-2">
+                          <div className="flex gap-1 md:gap-2">
                             {/* Range Stat */}
-                            <div className="relative bg-slate-950/60 px-2 py-1 rounded-sm border border-slate-700/50 flex items-center gap-1.5">
-                              <span className="text-[7px] opacity-30 font-mono leading-none uppercase">Д</span>
-                              <span className="text-[10px] font-mono font-bold text-amber-400">{weapon.range}</span>
+                            <div className="relative bg-slate-950/60 px-1.5 md:px-2 py-0.5 md:py-1 rounded-sm border border-slate-700/50 flex items-center gap-1 md:gap-1.5">
+                              <span className="text-[6px] md:text-[7px] opacity-30 font-mono leading-none uppercase">Д</span>
+                              <span className="text-[9px] md:text-[10px] font-mono font-bold text-amber-400">{weapon.range}</span>
                               <div className="absolute bottom-0 right-0 w-1 h-px bg-amber-600/20" />
                             </div>
 
                             {/* Power Stat */}
-                            <div className="relative bg-slate-950/60 px-2 py-1 rounded-sm border border-slate-700/50 flex items-center gap-1.5">
-                              <span className="text-[7px] opacity-30 font-mono leading-none uppercase">М</span>
-                              <span className="text-[10px] font-mono font-bold text-red-400">{weapon.power}</span>
+                            <div className="relative bg-slate-950/60 px-1.5 md:px-2 py-0.5 md:py-1 rounded-sm border border-slate-700/50 flex items-center gap-1 md:gap-1.5">
+                              <span className="text-[6px] md:text-[7px] opacity-30 font-mono leading-none uppercase">М</span>
+                              <span className="text-[9px] md:text-[10px] font-mono font-bold text-red-400">{weapon.power}</span>
                               <div className="absolute bottom-0 right-0 w-1 h-px bg-red-600/20" />
                             </div>
                           </div>
