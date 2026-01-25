@@ -1,7 +1,6 @@
 'use client';
 
 import { X, ExternalLink, Shield, Zap, Target, Wrench, ChevronLeft } from 'lucide-react';
-import { clsx } from 'clsx';
 import type { Machine } from '@/lib/types';
 import WeaponCard from './WeaponCard';
 import { cn } from '@/lib/utils';
@@ -10,7 +9,7 @@ interface MachineBlueprintModalProps {
   machine: Machine;
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (machine: Machine) => void;
+  onAdd?: (machine: Machine) => void;
 }
 
 export default function MachineBlueprintModal({
@@ -121,7 +120,7 @@ export default function MachineBlueprintModal({
               <div className="absolute top-0 left-0 w-1.5 h-1.5 border-l border-t border-slate-600/40" />
               <div className="absolute top-0 right-0 w-1.5 h-1.5 border-r border-t border-slate-600/40" />
               <p className="text-sm text-slate-300 leading-relaxed">
-                "{machine.description}"
+                &ldquo;{machine.description}&rdquo;
               </p>
               {machine.sourceUrl && (
                 <a
@@ -258,22 +257,27 @@ export default function MachineBlueprintModal({
         <div className="sticky bottom-0 bg-slate-900/95 backdrop-blur-sm border-t border-slate-700/50 px-3 py-2 sm:px-4 sm:py-3 flex gap-2 sm:gap-3 shrink-0">
           <button
             onClick={onClose}
-            className="flex-1 px-3 py-2.5 sm:px-4 sm:py-3 border border-slate-700 font-mono text-xs sm:text-sm hover:bg-slate-800/60 transition-colors rounded-sm min-h-[44px]"
+            className={cn(
+              "px-3 py-2.5 sm:px-4 sm:py-3 border border-slate-700 font-mono text-xs sm:text-sm hover:bg-slate-800/60 transition-colors rounded-sm min-h-[44px]",
+              onAdd ? "flex-1" : "w-full"
+            )}
           >
             ЗАКРЫТЬ
           </button>
-          <button
-            onClick={() => onAdd(machine)}
-            className={cn(
-              'flex-1 px-3 py-2.5 sm:px-4 sm:py-3 font-mono text-xs sm:text-sm font-bold uppercase tracking-wider',
-              'border-2 transition-all hover:scale-[1.02] active:scale-95 rounded-sm min-h-[44px]',
-              colors.border,
-              colors.bg,
-              colors.primary
-            )}
-          >
-            В АРМИЮ
-          </button>
+          {onAdd && (
+            <button
+              onClick={() => onAdd(machine)}
+              className={cn(
+                'flex-1 px-3 py-2.5 sm:px-4 sm:py-3 font-mono text-xs sm:text-sm font-bold uppercase tracking-wider',
+                'border-2 transition-all hover:scale-[1.02] active:scale-95 rounded-sm min-h-[44px]',
+                colors.border,
+                colors.bg,
+                colors.primary
+              )}
+            >
+              В АРМИЮ
+            </button>
+          )}
         </div>
       </div>
     </div>

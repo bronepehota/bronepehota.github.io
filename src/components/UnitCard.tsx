@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { ArmyUnit, Squad, Machine, RulesVersionID, Weapon } from '@/lib/types';
-import factionsData from '@/data/factions.json';
 import { Shield, Sword, Target, Heart, Zap, RotateCcw, CheckCircle2, Bomb, ChevronDown, ChevronUp, UserX, Dices, Plane, Skull, Wrench, Flame } from 'lucide-react';
 import { formatUnitNumber } from '@/lib/unit-utils';
 import { getDefaultRulesVersion } from '@/lib/rules-registry';
@@ -51,7 +50,6 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
 
   const isSquad = unit.type === 'squad';
   const data = unit.data;
-  const faction = factionsData.find(f => f.id === data.faction);
 
   const isSquadDone = isSquad && (data as Squad).soldiers.every((_, idx) => {
     const isDead = unit.deadSoldiers?.includes(idx);
@@ -1066,12 +1064,14 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                           <span className="font-mono font-bold text-sm md:text-sm truncate">{weapon.name}</span>
                           <div className="flex gap-1.5 md:gap-2 ml-auto">
                             {/* Range Stat */}
-                            <div className="relative bg-slate-950/60 px-2 py-1 rounded-sm border border-slate-700/50 flex items-center gap-1">
+                            <div className="relative bg-slate-950/60 px-1.5 md:px-2 py-0.5 rounded-sm border border-slate-700/50 flex items-center gap-1">
+                              <span className="text-[6px] md:text-[7px] opacity-30 font-mono leading-none hidden sm:inline">ДАЛЬН</span>
                               <span className="text-[9px] md:text-[10px] font-mono font-bold text-amber-400">{weapon.range}</span>
                               <div className="absolute bottom-0 right-0 w-1 h-px bg-amber-600/20" />
                             </div>
                             {/* Power Stat */}
-                            <div className="relative bg-slate-950/60 px-2 py-1 rounded-sm border border-slate-700/50 flex items-center gap-1">
+                            <div className="relative bg-slate-950/60 px-1.5 md:px-2 py-0.5 rounded-sm border border-slate-700/50 flex items-center gap-1">
+                              <span className="text-[6px] md:text-[7px] opacity-30 font-mono leading-none hidden sm:inline">МОЩН</span>
                               <span className="text-[9px] md:text-[10px] font-mono font-bold text-red-400">{weapon.power}</span>
                               <div className="absolute bottom-0 right-0 w-1 h-px bg-red-600/20" />
                             </div>
