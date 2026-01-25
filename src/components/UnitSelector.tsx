@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import Image from 'next/image';
+import { GitHubPagesImage as Image } from './GitHubPagesImage';
 import type { Faction, Squad, Machine, ArmyUnit, FactionID } from '@/lib/types';
 import { Check, X, Plus, ArrowLeft, RotateCcw, Users, Zap, Shield } from 'lucide-react';
 import { UnitDetailsModal } from './UnitDetailsModal';

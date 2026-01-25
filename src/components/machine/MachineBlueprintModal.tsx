@@ -1,7 +1,7 @@
 'use client';
 
 import { X, ExternalLink, Shield, Zap, Target, Wrench, ChevronLeft } from 'lucide-react';
-import Image from 'next/image';
+import { GitHubPagesImage as Image } from '../GitHubPagesImage';
 import type { Machine } from '@/lib/types';
 import WeaponCard from './WeaponCard';
 import { cn } from '@/lib/utils';

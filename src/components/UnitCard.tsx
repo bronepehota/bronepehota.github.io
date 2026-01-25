@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import Image from 'next/image';
+import { GitHubPagesImage as Image } from './GitHubPagesImage';
 import { ArmyUnit, Squad, Machine, RulesVersionID, Weapon } from '@/lib/types';
 import { Shield, Sword, Target, Heart, Zap, RotateCcw, CheckCircle2, Bomb, ChevronDown, ChevronUp, UserX, Dices, Plane, Skull, Wrench, Flame } from 'lucide-react';
 import { formatUnitNumber } from '@/lib/unit-utils';
