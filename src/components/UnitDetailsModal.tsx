@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import Image from 'next/image';
+import { GitHubPagesImage as Image } from './GitHubPagesImage';
 import { X, Shield, Sword, Zap, Target, Gauge, ShieldCheck, Info, Cpu, Crosshair, Activity, Users, Sparkles } from 'lucide-react';
 import type { Squad, Machine, Faction, Soldier, Weapon, SpeedSector } from '@/lib/types';
 import { useBottomSheet } from '@/hooks/useBottomSheet';
