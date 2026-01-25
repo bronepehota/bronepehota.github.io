@@ -987,22 +987,35 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                               className={cn(
                                 "relative p-2 md:p-2.5 rounded-sm transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center gap-1.5 overflow-hidden",
                                 "border-2 text-xs md:text-sm font-mono font-bold uppercase tracking-wider",
-                                canShoot
+                                weaponShots > 0
+                                  ? "bg-amber-950/40 border-amber-800/50 text-amber-600"
+                                  : canShoot
                                   ? "bg-amber-950/20 hover:bg-amber-950/40 border-amber-700/50 text-amber-400 shadow-lg shadow-amber-900/30 active:scale-95"
                                   : "bg-slate-900/60 text-slate-600 border-slate-700 cursor-not-allowed opacity-50"
                               )}
-                              title="Атака с этим оружием"
+                              title={weaponShots > 0 ? "Уже выстрелил" : "Атака с этим оружием"}
                             >
-                              {canShoot && (
+                              {weaponShots > 0 ? (
                                 <>
-                                  <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-amber-600/40" />
-                                  <div className="absolute top-0 right-0 w-1 h-1 border-r border-t border-amber-600/40" />
-                                  <div className="absolute bottom-0 left-0 w-1 h-1 border-l border-b border-amber-600/40" />
-                                  <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-amber-600/40" />
+                                  <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-amber-700/50" />
+                                  <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-amber-700/50" />
+                                  <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5" />
+                                  <span className="hidden sm:inline">ВЫСТРЕЛИЛ</span>
+                                </>
+                              ) : (
+                                <>
+                                  {canShoot && (
+                                    <>
+                                      <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-amber-600/40" />
+                                      <div className="absolute top-0 right-0 w-1 h-1 border-r border-t border-amber-600/40" />
+                                      <div className="absolute bottom-0 left-0 w-1 h-1 border-l border-b border-amber-600/40" />
+                                      <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-amber-600/40" />
+                                    </>
+                                  )}
+                                  <Dices className="w-4 h-4 md:w-5 md:h-5" />
+                                  <span className="hidden sm:inline">ВЫСТРЕЛ</span>
                                 </>
                               )}
-                              <Dices className="w-4 h-4 md:w-5 md:h-5" />
-                              <span className="hidden sm:inline">ВЫСТРЕЛ</span>
                             </button>
                           )}
 
@@ -1060,37 +1073,38 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                         </div>
 
                         {/* Weapon Stats - Tactical Readout */}
-                        <div className="flex items-center gap-2 md:gap-3 mt-2 md:mt-1.5 flex-wrap">
-                          <span className="font-mono font-bold text-sm md:text-sm truncate">{weapon.name}</span>
-                          <div className="flex gap-1.5 md:gap-2 ml-auto">
+                        <div className="flex flex-col gap-1 mt-2 md:mt-1.5">
+                          {/* Weapon Name - Full width with truncate */}
+                          <h4 className="font-mono font-bold text-xs md:text-sm text-slate-200 truncate pr-2" title={weapon.name}>
+                            {weapon.name}
+                          </h4>
+
+                          {/* Stats Row - Range and Power */}
+                          <div className="flex gap-1.5 md:gap-2">
                             {/* Range Stat */}
-                            <div className="relative bg-slate-950/60 px-1.5 md:px-2 py-0.5 rounded-sm border border-slate-700/50 flex items-center gap-1">
-                              <span className="text-[6px] md:text-[7px] opacity-30 font-mono leading-none hidden sm:inline">ДАЛЬН</span>
-                              <span className="text-[9px] md:text-[10px] font-mono font-bold text-amber-400">{weapon.range}</span>
+                            <div className="relative bg-slate-950/60 px-2 py-1 rounded-sm border border-slate-700/50 flex items-center gap-1.5">
+                              <span className="text-[7px] opacity-30 font-mono leading-none uppercase">Д</span>
+                              <span className="text-[10px] font-mono font-bold text-amber-400">{weapon.range}</span>
                               <div className="absolute bottom-0 right-0 w-1 h-px bg-amber-600/20" />
                             </div>
+
                             {/* Power Stat */}
-                            <div className="relative bg-slate-950/60 px-1.5 md:px-2 py-0.5 rounded-sm border border-slate-700/50 flex items-center gap-1">
-                              <span className="text-[6px] md:text-[7px] opacity-30 font-mono leading-none hidden sm:inline">МОЩН</span>
-                              <span className="text-[9px] md:text-[10px] font-mono font-bold text-red-400">{weapon.power}</span>
+                            <div className="relative bg-slate-950/60 px-2 py-1 rounded-sm border border-slate-700/50 flex items-center gap-1.5">
+                              <span className="text-[7px] opacity-30 font-mono leading-none uppercase">М</span>
+                              <span className="text-[10px] font-mono font-bold text-red-400">{weapon.power}</span>
                               <div className="absolute bottom-0 right-0 w-1 h-px bg-red-600/20" />
                             </div>
                           </div>
                         </div>
 
-                        {/* Weapon Status Badge */}
-                        <div className="flex items-center gap-2 mt-1">
-                          {weaponShots > 0 && (
-                            <span className="text-[8px] md:text-[9px] px-1.5 py-0.5 rounded-sm bg-amber-950/30 text-amber-400 font-mono font-bold uppercase border border-amber-700/50">
-                              ВЫСТРЕЛИЛ
-                            </span>
-                          )}
-                          {weapon.special && (
+                        {/* Weapon Special Badge - Only show special property badge */}
+                        {weapon.special && (
+                          <div className="flex items-center gap-2 mt-1">
                             <span className="text-[8px] md:text-[9px] px-1.5 py-0.5 rounded-sm bg-purple-950/30 text-purple-400 font-mono font-bold uppercase border border-purple-700/50 truncate">
                               {typeof weapon.special === 'string' ? weapon.special : 'Особый'}
                             </span>
-                          )}
-                        </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
