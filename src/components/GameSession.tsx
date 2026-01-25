@@ -342,6 +342,22 @@ export default function GameSession({ army, setArmy }: GameSessionProps) {
       {/* Military Tech Unit Dock - Unified Navigation */}
       <div className="bg-slate-900/95 border-b border-slate-700/50 shrink-0">
         <div className="flex overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-hide">
+          {/* Turn Counter - New Turn Button */}
+          <button
+            onClick={calculateInitiative}
+            data-testid="new-turn-button"
+            className={cn(
+              "relative shrink-0 snap-start rounded-sm border-2 transition-all overflow-hidden",
+              "hover:scale-105 active:scale-95 flex flex-col items-center justify-center",
+              "h-12 w-[60px] md:h-[52px] md:w-[70px]",
+              "bg-slate-800/50 border-slate-600/50 hover:bg-slate-700/50 hover:border-slate-500/50"
+            )}
+            title="Новый тур"
+          >
+            <div className="text-[8px] md:text-[9px] font-mono text-slate-500 uppercase tracking-wider">ТУР</div>
+            <div className={cn("text-lg md:text-xl font-mono font-black", factionColors.primary)}>{army.currentTurn || 1}</div>
+            <RotateCcw className={cn("absolute top-1 right-1 w-3 h-3 opacity-20", factionColors.primary)} />
+          </button>
           {army.units.map((unit, idx) => {
             const dockStyles = getUnitDockStyles(army.faction);
             const isActive = focusedUnitIdx === idx;
@@ -515,20 +531,6 @@ export default function GameSession({ army, setArmy }: GameSessionProps) {
           </div>
         )}
       </div>
-
-      {/* New Turn FAB - Floating Action Button - Subtle style */}
-      <button
-        onClick={calculateInitiative}
-        data-testid="new-turn-button"
-        className={cn(
-          "fixed bottom-20 right-3 z-40 px-3 py-2 flex items-center gap-1.5 font-mono text-[10px] font-semibold uppercase tracking-wide border transition-all min-h-[40px] opacity-70 hover:opacity-100",
-          "bg-slate-900/80 border-slate-700 text-slate-400 hover:text-slate-300 hover:border-slate-600",
-          "shadow-lg hover:shadow-xl"
-        )}
-      >
-        <RotateCcw className="w-3.5 h-3.5" />
-        <span className="hidden sm:inline">НОВЫЙ ТУР</span>
-      </button>
     </div>
   );
 }
