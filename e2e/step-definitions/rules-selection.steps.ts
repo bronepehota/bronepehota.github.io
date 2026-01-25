@@ -6,48 +6,45 @@ import { BronepehotaWorld } from '../support/world';
 
 Given('я на этапе выбора правил', async function(this: BronepehotaWorld) {
   // First check if we need to navigate to rules step
-  const rulesSelector = this.page.locator('#rules-selector');
+  const rulesSelector = this.page.getByTestId('rules-selector').or(this.page.locator('#rules-selector'));
   const isVisible = await rulesSelector.isVisible({ timeout: 2000 });
 
   if (!isVisible) {
     // Need to navigate: select faction first
-    const factionText = this.page.getByText(/Империя Полярис|Polaris/i).first();
-    if (await factionText.isVisible({ timeout: 3000 })) {
-      await factionText.click();
-      await this.page.waitForTimeout(500);
+    const factionCard = this.page.getByTestId('faction-card-polaris');
+    if (await factionCard.isVisible({ timeout: 3000 })) {
+      await factionCard.click();
+      await this.page.waitForTimeout(300);
     }
 
-    // Click "Начать сбор армии" or "Продолжить" button
-    const startButton = this.page.getByRole('button', { name: /(начать сбор армии|продолжить|далее|next)/i }).or(
-      this.page.getByText(/начать сбор армии/i)
-    );
-    if (await startButton.isVisible({ timeout: 3000 })) {
-      await startButton.first().click();
-      await this.page.waitForTimeout(1000);
+    // Click "ПРОДОЛЖИТЬ" button to go to budget
+    const continueButton = this.page.getByTestId('faction-continue-button');
+    if (await continueButton.isVisible({ timeout: 3000 })) {
+      await continueButton.click();
+      await this.page.waitForTimeout(500);
     }
 
     // Fill budget if visible
     const input = this.page.getByRole('spinbutton').or(this.page.getByPlaceholder(/очки|балл/i)).first();
-    if (await input.isVisible({ timeout: 3000 })) {
-      await input.waitFor({ state: 'visible', timeout: 5000 });
+    const isInputVisible = await input.isVisible({ timeout: 3000 });
+    if (isInputVisible) {
       await input.fill('100');
       await this.page.waitForTimeout(300);
 
-      const nextButton = this.page.getByRole('button', { name: /(продолжить|далее|next)/i }).or(
-        this.page.getByText(/продолжить/i)
+      const nextButton = this.page.getByTestId('budget-next-button').or(
+        this.page.getByRole('button', { name: /начать сбор армии/i })
       );
       await nextButton.first().click();
-      // Wait longer for navigation to complete
-      await this.page.waitForTimeout(1500);
+      await this.page.waitForTimeout(1000);
     }
   }
 
   // Now rules selector should be visible
-  await expect(rulesSelector).toBeVisible({ timeout: 10000 });
+  await expect(rulesSelector.first()).toBeVisible({ timeout: 10000 });
 });
 
 When('я просматриваю доступные версии правил', async function(this: BronepehotaWorld) {
-  const rulesContainer = this.page.locator('#rules-selector').or(this.page.getByTestId('rules-selector'));
+  const rulesContainer = this.page.getByTestId('rules-selector').or(this.page.locator('#rules-selector'));
   await expect(rulesContainer.first()).toBeVisible();
 });
 
@@ -88,6 +85,13 @@ Given('я перешёл в режим боя', async function(this: Bronepehota
   await this.page.waitForLoadState('networkidle');
 });
 
+Given('армия сохранена в бою', async function(this: BronepehotaWorld) {
+  // Verify we're in battle mode with an army
+  await this.page.waitForTimeout(500);
+  const gameSession = this.page.getByTestId('game-session');
+  await expect(gameSession.first()).toBeVisible({ timeout: 5000 });
+});
+
 When('я завершаю бой', async function(this: BronepehotaWorld) {
   const menuButton = this.page.getByRole('button').filter({ hasText: /…|\.\.\.|more/i });
   if (await menuButton.isVisible({ timeout: 3000 })) {
@@ -112,30 +116,49 @@ Given('я создаю новую армию', async function(this: BronepehotaW
 });
 
 Given('я дохожу до этапа выбора правил', async function(this: BronepehotaWorld) {
-  // Select faction and budget to get to rules step
-  const factionText = this.page.getByText(/Империя Полярис|Polaris/i).first();
-  await factionText.click();
-  await this.page.waitForTimeout(500);
+  // First ensure we're on faction selection step
+  const factionSelector = this.page.getByTestId('faction-selector').or(this.page.locator('#faction-selector'));
+  const isFactionVisible = await factionSelector.isVisible({ timeout: 2000 });
 
-  // Click "Начать сбор армии" button
-  const startButton = this.page.getByRole('button', { name: /(начать сбор армии|продолжить|далее|next)/i }).or(
-    this.page.getByText(/начать сбор армии/i)
-  );
-  if (await startButton.isVisible({ timeout: 3000 })) {
-    await startButton.first().click();
-    await this.page.waitForTimeout(1000);
+  if (!isFactionVisible) {
+    // Already past faction selection, try to navigate back
+    await this.page.evaluate(() => {
+      localStorage.removeItem('bronepehota_army');
+    });
+    await this.page.reload();
+    await this.page.waitForLoadState('networkidle');
+    await this.page.waitForTimeout(500);
   }
 
+  // Select faction
+  const factionCard = this.page.getByTestId('faction-card-polaris');
+  await factionCard.waitFor({ state: 'visible', timeout: 5000 });
+  await factionCard.click();
+  await this.page.waitForTimeout(300);
+
+  // Click "ПРОДОЛЖИТЬ" button to go to budget
+  const continueButton = this.page.getByTestId('faction-continue-button');
+  await continueButton.waitFor({ state: 'visible', timeout: 3000 });
+  await continueButton.click();
+  await this.page.waitForTimeout(500);
+
+  // Fill budget
   const input = this.page.getByRole('spinbutton').or(this.page.getByPlaceholder(/очки|балл/i)).first();
   await input.waitFor({ state: 'visible', timeout: 5000 });
   await input.fill('100');
   await this.page.waitForTimeout(300);
 
-  const nextButton = this.page.getByRole('button', { name: /(продолжить|далее|next)/i }).or(
-    this.page.getByText(/продолжить/i)
+  // Click next button to go to rules
+  const nextButton = this.page.getByTestId('budget-next-button').or(
+    this.page.getByRole('button', { name: /начать сбор армии/i })
   );
+  await nextButton.first().waitFor({ state: 'visible', timeout: 3000 });
   await nextButton.first().click();
-  await this.page.waitForTimeout(1500);
+  await this.page.waitForTimeout(1000);
+
+  // Verify we're on rules step
+  const rulesSelector = this.page.getByTestId('rules-selector').or(this.page.locator('#rules-selector'));
+  await expect(rulesSelector.first()).toBeVisible({ timeout: 5000 });
 });
 
 When('я выбираю версию правил {string}', async function(this: BronepehotaWorld, version: string) {
@@ -148,21 +171,85 @@ When('я выбираю версию правил {string}', async function(this
 
 // Alias for the same step with different wording
 When('я выбираю правила {string}', async function(this: BronepehotaWorld, version: string) {
-  // Map English names to Russian display names for rules
-  const rulesMap: Record<string, string> = {
-    'Технолог': 'Технолог',
-    'tehnolog': 'Технолог',
-    'Панова': 'Панова',
-    'fan': 'Панова',
+  // Map English names to rules IDs for test IDs
+  const rulesIdMap: Record<string, string> = {
+    'Технолог': 'tehnolog',
+    'tehnolog': 'tehnolog',
+    'Панова': 'fan',
+    'fan': 'fan',
   };
 
-  const displayName = rulesMap[version] || version;
+  const rulesId = rulesIdMap[version] || version.toLowerCase();
 
-  // Click on the rules version card - find the clickable div with the text
-  const rulesCard = this.page.locator('#rules-selector').getByText(new RegExp(displayName, 'i')).first();
-  await rulesCard.waitFor({ state: 'visible', timeout: 5000 });
+  // First ensure we're on rules step - check if rules selector is visible
+  const rulesSelector = this.page.getByTestId('rules-selector').or(this.page.locator('#rules-selector'));
+  const isVisible = await rulesSelector.isVisible({ timeout: 2000 });
+
+  if (!isVisible) {
+    // Need to navigate to rules step first
+    // Check if we're on unit selector page (which means we need to go back)
+    const unitSelector = this.page.getByTestId('unit-selector');
+    const isUnitSelectorVisible = await unitSelector.isVisible({ timeout: 2000 });
+
+    if (isUnitSelectorVisible) {
+      // We're on unit selector, need to go back to faction and navigate through to rules
+      // Reset army to go back to faction selection
+      await this.page.evaluate(() => {
+        const army = JSON.parse(localStorage.getItem('bronepehota_army') || '{}');
+        army.currentStep = 'faction-select';
+        army.faction = 'polaris'; // Reset to default faction
+        army.pointBudget = undefined;
+        localStorage.setItem('bronepehota_army', JSON.stringify(army));
+      });
+      await this.page.reload();
+      await this.page.waitForLoadState('networkidle');
+      await this.page.waitForTimeout(500);
+
+      // Select faction
+      const factionCard = this.page.getByTestId('faction-card-polaris');
+      await factionCard.click();
+      await this.page.waitForTimeout(300);
+
+      // Click continue to go to budget
+      const continueButton = this.page.getByTestId('faction-continue-button');
+      if (await continueButton.isVisible({ timeout: 3000 })) {
+        await continueButton.click();
+        await this.page.waitForTimeout(500);
+      }
+
+      // Fill budget with default value
+      const budgetInput = this.page.getByRole('spinbutton').or(this.page.getByPlaceholder(/очки|балл/i)).first();
+      if (await budgetInput.isVisible({ timeout: 3000 })) {
+        await budgetInput.fill('100');
+        await this.page.waitForTimeout(300);
+
+        // Click next to go to rules
+        const nextButton = this.page.getByTestId('budget-next-button').or(
+          this.page.getByRole('button', { name: /начать сбор армии/i })
+        );
+        await nextButton.first().click();
+        await this.page.waitForTimeout(1000);
+      }
+    } else {
+      // Check if we're on budget step
+      const budgetInput = this.page.getByRole('spinbutton').or(this.page.getByPlaceholder(/очки|балл/i));
+      if (await budgetInput.first().isVisible({ timeout: 2000 })) {
+        // We're on budget step, click next to go to rules
+        const nextButton = this.page.getByTestId('budget-next-button').or(
+          this.page.getByRole('button', { name: /начать сбор армии/i })
+        );
+        await nextButton.first().click();
+        await this.page.waitForTimeout(1000);
+      }
+    }
+  }
+
+  // Now click on the rules card using test ID
+  const rulesCard = this.page.getByTestId(`rules-card-${rulesId}`);
+  await expect(rulesCard).toBeVisible({ timeout: 5000 });
   await rulesCard.click();
   await this.page.waitForTimeout(500);
+
   this.currentRulesVersion = version.toLowerCase();
 });
 

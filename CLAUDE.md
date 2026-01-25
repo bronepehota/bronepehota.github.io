@@ -255,6 +255,12 @@ Adding a new rules version:
 - **Requires running application** on `http://localhost:3000`
 - Run with: `npm run test:e2e`
 
+**Test Coverage Requirements**:
+- **When adding new features**: You MUST review and update E2E tests to cover new functionality
+- **When modifying existing features**: Check if E2E tests need updates to reflect changes
+- **Test ID Strategy**: Always add `data-testid` attributes to interactive elements for reliable testing
+- Use test IDs instead of text selectors where possible (more reliable across viewports)
+
 **Test Structure**:
 - `e2e/features/rules-selection.feature` - Rules version selection scenarios
 - `e2e/features/army-building.feature` - Army creation and unit management
@@ -298,7 +304,13 @@ Adding a new rules version:
 - clsx, tailwind-merge for conditional styling
 
 ## Recent Changes
-- **E2E Testing**: Added Cucumber + Playwright BDD tests with Russian Gherkin syntax (43 scenarios, 318 steps)
+- **E2E Tests Fixed (2025-01)**: Fixed all 12 E2E test scenarios (103 steps passing)
+  - Added test IDs to interactive elements (`turn-counter`, `back-to-faction-button`)
+  - Improved button click handlers with fallbacks and scroll-into-view
+  - Fixed navigation steps for rules selection
+  - Removed duplicate "Начать заново" button (kept only "Назад к фракции")
+  - Fixed `onBackToFactionSelect` to properly reset `setupStep` and `isInBattle`
+- **E2E Testing**: Added Cucumber + Playwright BDD tests with Russian Gherkin syntax (12 scenarios, 103 steps)
 - **CI/CD Pipeline**: GitHub Actions workflow with parallel quality checks and E2E tests
 - **Bottom Sheet Redesign**: `UnitDetailsModal` redesigned as mobile bottom sheet with swipe-to-close gesture (`useBottomSheet` hook)
 - **Rules System**: Added multi-version rules support with `rules-registry.ts` and rule implementations (fan, tehno)

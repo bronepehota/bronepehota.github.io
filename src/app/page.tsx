@@ -184,11 +184,14 @@ export default function Home() {
           <nav className="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
             {/* Turn counter */}
             {view === 'game' && (
-              <div className={cn(
-                "relative px-2 md:px-2.5 py-1 rounded-sm border",
-                factionStyles.border,
-                "bg-slate-900/60"
-              )}>
+              <div
+                data-testid="turn-counter"
+                className={cn(
+                  "relative px-2 md:px-2.5 py-1 rounded-sm border",
+                  factionStyles.border,
+                  "bg-slate-900/60"
+                )}
+              >
                 <span className="text-[8px] md:text-[9px] font-mono uppercase opacity-40">ТУР</span>
                 <span className={cn("text-xs md:text-sm font-mono font-black", factionStyles.primary)}>
                   {army.currentTurn || 1}

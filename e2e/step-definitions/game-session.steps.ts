@@ -57,8 +57,8 @@ Given('я нахожусь в режиме боя', async function(this: Bronepe
 });
 
 Then('я должен увидеть навигационную панель с карточками юнитов', async function(this: BronepehotaWorld) {
-  // Look for unit navigation buttons with health counts (e.g., "3/6") in GameSession
-  const navPanel = this.page.locator('button').filter({ hasText: /\d+\/\d+/ });
+  // Unit navigation buttons have test IDs starting with "unit-nav-"
+  const navPanel = this.page.locator('[data-testid^="unit-nav-"]');
   await expect(navPanel.first()).toBeVisible({ timeout: 5000 });
 });
 
@@ -75,11 +75,12 @@ Then('я должен видеть номер текущего хода в ша�
 });
 
 When('я нажимаю на карточку юнита в навигации', async function(this: BronepehotaWorld) {
-  // Click on a unit navigation button with health count
-  const unitCards = this.page.locator('button').filter({ hasText: /\d+\/\d+/ });
-  if (await unitCards.count() > 1) {
+  // Click on a unit navigation button using test ID
+  const unitCards = this.page.locator('[data-testid^="unit-nav-"]');
+  const count = await unitCards.count();
+  if (count > 1) {
     await unitCards.nth(1).click();
-  } else {
+  } else if (count === 1) {
     await unitCards.first().click();
   }
   await this.page.waitForTimeout(300);
@@ -98,8 +99,8 @@ Then('должен отобразиться подробный экран выб
 });
 
 Given('выбран первый юнит', async function(this: BronepehotaWorld) {
-  // Click on first unit navigation button
-  const unitCards = this.page.locator('button').filter({ hasText: /\d+\/\d+/ });
+  // Click on first unit navigation button using test ID
+  const unitCards = this.page.locator('[data-testid^="unit-nav-"]');
   await unitCards.first().click();
   await this.page.waitForTimeout(300);
 });
@@ -132,6 +133,17 @@ Then('должен быть выбран предыдущий юнит', async f
   await expect(selectedCard.first()).toBeVisible({ timeout: 3000 });
 });
 
+When('я нажимаю на следующую карточку юнита в навигации', async function(this: BronepehotaWorld) {
+  // Click on the next unit navigation button (second button, after current one)
+  const unitCards = this.page.locator('[data-testid^="unit-nav-"]');
+  const count = await unitCards.count();
+  if (count > 1) {
+    // Click the second unit card (index 1)
+    await unitCards.nth(1).click();
+  }
+  await this.page.waitForTimeout(300);
+});
+
 // Note: "Новый Тур" button click is handled by generic button step in common.steps.ts
 
 Then('должно открыться модальное окно броска инициативы', async function(this: BronepehotaWorld) {
@@ -159,8 +171,8 @@ Given('я вижу результат броска инициативы', async 
 // Note: "НАЧАТЬ ТУР" button click is handled by generic button step in common.steps.ts
 
 Then('номер хода должен увеличиться на 1', async function(this: BronepehotaWorld) {
-  const turnCounter = this.page.getByText(/тур/i);
-  await expect(turnCounter).toBeVisible();
+  const turnCounter = this.page.getByTestId('turn-counter');
+  await expect(turnCounter).toBeVisible({ timeout: 5000 });
 });
 
 Then('все действия юнитов должны быть сброшены', async function(this: BronepehotaWorld) {
@@ -265,8 +277,8 @@ Then('изображение солдата должно измениться', 
 });
 
 Given('выбрана машина', async function(this: BronepehotaWorld) {
-  // Navigate to machine if exists
-  const unitCards = this.page.locator('button').filter({ hasText: /\d+\/\d+/ });
+  // Navigate to machine using test IDs
+  const unitCards = this.page.locator('[data-testid^="unit-nav-"]');
   const count = await unitCards.count();
   if (count > 0) {
     await unitCards.first().click();
@@ -293,8 +305,8 @@ Then('индикатор прочности должен измениться', 
 });
 
 Then('я должен вернуться к выбору фракции', async function(this: BronepehotaWorld) {
-  const factionSelector = this.page.getByText(/Polaris|Protectorate|Mercenaries/i);
-  await expect(factionSelector.first()).toBeVisible({ timeout: 5000 });
+  const factionSelector = this.page.getByTestId('faction-selector');
+  await expect(factionSelector).toBeVisible({ timeout: 5000 });
 });
 
 When('я нажимаю "Завершить бой"', async function(this: BronepehotaWorld) {

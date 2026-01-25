@@ -88,7 +88,7 @@ export function FactionSelector({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="faction-selector">
       {/* Header */}
       <div className="text-center space-y-2">
         <div className="flex items-center justify-center gap-2 mb-2">
@@ -142,6 +142,7 @@ export function FactionSelector({
               aria-label={`Фракция ${faction.name}, ${isSelected ? 'выбрана' : 'не выбрана'}`}
               onKeyDown={(e) => handleKeyDown(e, faction.id)}
               onClick={() => handleFactionClick(faction.id)}
+              data-testid={`faction-card-${faction.id}`}
               className={clsx(
                 'relative group cursor-pointer transition-all duration-300',
                 'border bg-slate-800/80 backdrop-blur-sm overflow-hidden',
@@ -237,6 +238,7 @@ export function FactionSelector({
             onClick={onNext}
             disabled={nextDisabled || !selectedFaction}
             aria-disabled={!selectedFaction}
+            data-testid="faction-continue-button"
             className={clsx(
               'px-8 py-3 font-mono text-sm font-bold uppercase tracking-wider',
               'border transition-all min-h-[48px] min-w-[44px]',

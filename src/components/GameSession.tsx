@@ -269,13 +269,13 @@ export default function GameSession({ army, setArmy }: GameSessionProps) {
   const factionColors = getFactionColors(army.faction);
 
   return (
-    <div className="flex flex-col h-full bg-gradient-to-b from-slate-950 to-slate-900 relative overflow-hidden">
+    <div className="flex flex-col h-full bg-gradient-to-b from-slate-950 to-slate-900 relative overflow-hidden" data-testid="game-session">
       {/* Tech grid background */}
       <TechGridBackground />
 
       {/* Initiative Modal */}
       {showInitiative && (
-        <div className="fixed inset-0 z-[100] bg-slate-950/95 flex items-center justify-center p-2 md:p-4 backdrop-blur-xl animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[100] bg-slate-950/95 flex items-center justify-center p-2 md:p-4 backdrop-blur-xl animate-in fade-in duration-300" data-testid="initiative-modal">
           <div className={cn(
             "relative border-2 backdrop-blur-sm rounded-2xl md:rounded-3xl p-4 md:p-6 lg:p-8 max-w-sm w-full shadow-2xl text-center space-y-4 md:space-y-6 animate-in zoom-in duration-300 mx-auto max-h-[90vh] overflow-hidden",
             factionColors.border,
@@ -323,6 +323,7 @@ export default function GameSession({ army, setArmy }: GameSessionProps) {
             {/* Start turn button */}
             <button
               onClick={startNewTurn}
+              data-testid="start-turn-button"
               disabled={isRolling}
               className={cn(
                 "w-full py-3 md:py-4 font-mono text-sm md:text-lg font-bold uppercase tracking-wider border transition-all min-h-[52px] md:min-h-[56px]",
@@ -351,6 +352,7 @@ export default function GameSession({ army, setArmy }: GameSessionProps) {
             return (
               <button
                 key={unit.instanceId}
+                data-testid={`unit-nav-${unit.instanceId}`}
                 onClick={() => setFocusedUnitIdx(idx)}
                 className={cn(
                   "relative shrink-0 snap-start rounded-sm border-2 transition-all overflow-hidden",
@@ -461,6 +463,7 @@ export default function GameSession({ army, setArmy }: GameSessionProps) {
             <div className="w-px h-4 bg-slate-700 hidden sm:block" />
             <button
               onClick={() => setShowCombatLog(true)}
+              data-testid="combat-log-toggle-button"
               className="text-slate-400 hover:text-slate-200 flex items-center gap-1 transition-colors"
             >
               <History className="w-3 h-3" />
@@ -516,6 +519,7 @@ export default function GameSession({ army, setArmy }: GameSessionProps) {
       {/* New Turn FAB - Floating Action Button */}
       <button
         onClick={calculateInitiative}
+        data-testid="new-turn-button"
         className={cn(
           "fixed bottom-20 right-3 z-50 px-4 py-3 flex items-center gap-2 font-mono text-sm font-bold uppercase tracking-wider border transition-all min-h-[52px]",
           factionColors.border,

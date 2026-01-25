@@ -179,6 +179,7 @@ export function PointBudgetInput({
         <div className="pt-2 flex justify-center">
           <button
             onClick={onNext}
+            data-testid="budget-next-button"
             disabled={disabled || !value || !!error}
             aria-disabled={!value || !!error}
             className={clsx(

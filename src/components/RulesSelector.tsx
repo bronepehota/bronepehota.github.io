@@ -88,6 +88,7 @@ export function RulesSelector({
               aria-label={`Версия правил ${version.name}, ${isSelected ? 'выбрана' : 'не выбрана'}`}
               onKeyDown={(e) => handleKeyDown(e, version.id)}
               onClick={() => handleRulesClick(version.id)}
+              data-testid={`rules-card-${version.id}`}
               className={clsx(
                 'relative group cursor-pointer transition-all duration-300',
                 'border bg-slate-800/80 backdrop-blur-sm overflow-hidden',
@@ -165,6 +166,7 @@ export function RulesSelector({
         <div className="pt-4 flex justify-center">
           <button
             onClick={onConfirm}
+            data-testid="rules-confirm-button"
             className={clsx(
               'px-8 py-3 font-mono text-sm font-bold uppercase tracking-wider',
               'border transition-all min-h-[48px] min-w-[44px]',

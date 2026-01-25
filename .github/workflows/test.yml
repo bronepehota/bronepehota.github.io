@@ -2,7 +2,7 @@ name: Test
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, cucumber-fixes]
   pull_request:
     branches: [main, develop]
 
@@ -31,49 +31,49 @@ jobs:
       - name: Unit tests
         run: npm run test:ci
 
-  # E2E тесты - отключены до дальнейшего уведомления
-  # e2e:
-  #   name: E2E Tests
-  #   runs-on: ubuntu-latest
-  #   needs: quality
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #
-  #     - name: Setup Node.js
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: '22'
-  #
-  #     - name: Install dependencies
-  #       run: npm ci
-  #
-  #     - name: Install Playwright browsers
-  #       run: npx playwright install chromium
-  #
-  #     - name: Build application
-  #       run: npm run build
-  #
-  #     - name: Start application in background
-  #       run: npm start &
-  #       env:
-  #         PORT: 3000
-  #
-  #     - name: Wait for app to be ready
-  #       run: npx wait-on http://localhost:3000 --timeout 60000
-  #
-  #     - name: Run E2E tests
-  #       run: npm run test:e2e:ci
-  #
-  #     - name: Upload Cucumber report
-  #       if: always()
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: cucumber-report
-  #         path: e2e/reports/
-  #
-  #     - name: Upload screenshots on failure
-  #       if: failure()
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: screenshots
-  #         path: e2e/screenshots/
+  # E2E тесты
+  e2e:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    needs: quality
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium
+
+      - name: Build application
+        run: npm run build
+
+      - name: Start application in background
+        run: npm run start &
+        env:
+          PORT: 3000
+
+      - name: Wait for app to be ready
+        run: npx wait-on http://localhost:3000 --timeout 60000
+
+      - name: Run E2E tests
+        run: npm run test:e2e:ci
+
+      - name: Upload Cucumber report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cucumber-report
+          path: e2e/reports/
+
+      - name: Upload screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: e2e/screenshots/
