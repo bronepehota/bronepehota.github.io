@@ -16,6 +16,27 @@ import { PilotTestModal } from './combat/PilotTestModal';
 import { usePilotTestFlow } from '@/hooks/usePilotTestFlow';
 import MachineBlueprintModal from './machine/MachineBlueprintModal';
 
+// Helper function to shorten weapon names for mobile
+const shortenWeaponName = (name: string): string => {
+  return name
+    .replace(/шестиствольная/gi, '6-ств.')
+    .replace(/четырехствольная/gi, '4-ств.')
+    .replace(/трехствольная/gi, '3-ств.')
+    .replace(/двуствольная/gi, '2-ств.')
+    .replace(/двуствольный/gi, '2-ств.')
+    .replace(/скорострельные/gi, 'скор.')
+    .replace(/автоматическая/gi, 'авт.')
+    .replace(/автоматический/gi, 'авт.')
+    .replace(/бронебойная/gi, 'бронеб.')
+    .replace(/бронебойный/gi, 'бронеб.')
+    .replace(/пусковые установки/gi, 'ПУ')
+    .replace(/управляемые ракеты/gi, 'УР')
+    .replace(/стандартный/gi, 'станд.')
+    // Clean up extra spaces
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
 interface UnitCardProps {
   unit: ArmyUnit;
   updateUnit: (unit: ArmyUnit) => void;
@@ -916,8 +937,8 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
 
               {/* Weapons List - Tactical Weapon Cards */}
               <div className="flex gap-2">
-                {/* Machine Photo - Left side, 1/4 width */}
-                <div className="relative w-1/4 h-auto shrink-0">
+                {/* Machine Photo - Hidden on mobile, 1/4 width on desktop */}
+                <div className="relative w-1/4 h-auto shrink-0 hidden md:block">
                   <div
                     onClick={handleOpenOriginal}
                     className="w-full h-full rounded-sm border-2 border-slate-700/50 overflow-hidden bg-slate-900/60 relative cursor-pointer hover:border-slate-600/50 transition-colors"
@@ -962,7 +983,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                     <div
                       key={weaponIdx}
                       className={cn(
-                        "relative p-2 md:p-2.5 rounded-sm border flex gap-2 md:gap-3 transition-all overflow-hidden",
+                        "relative p-1.5 md:p-2.5 rounded-sm border flex gap-1.5 md:gap-3 transition-all overflow-hidden",
                         isMachineDestroyed ? "bg-slate-950/80 border-slate-800 opacity-40 grayscale" :
                         isMachineDone ? "bg-slate-900/40 border-slate-700/50 opacity-70" :
                         weaponShots > 0 ? "bg-amber-950/20 border-amber-700/40" : "bg-slate-800/30 border-slate-700/50"
@@ -977,124 +998,68 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                       )}
 
                       <div className="flex-1 flex flex-col justify-between min-w-0">
-                        {/* Top row: Action button + controls */}
-                        <div className="flex justify-between items-start gap-2">
-                          {/* Fire Control Button */}
-                          {!isMeleeWeapon && (
+                        {/* Weapon Row - Name + Stats + Reset */}
+                        <div className="flex items-center gap-1.5 md:gap-2">
+                          {/* Weapon Name - Clickable to fire (for ranged weapons) */}
+                          {!isMeleeWeapon ? (
                             <button
                               disabled={!canShoot}
                               onClick={() => handleVehicleAttack(weaponIdx)}
                               className={cn(
-                                "relative p-2 md:p-2.5 rounded-sm transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center gap-1.5 overflow-hidden",
-                                "border-2 text-xs md:text-sm font-mono font-bold uppercase tracking-wider",
+                                "relative font-mono font-bold text-[10px] md:text-sm truncate flex-1 min-w-0 text-left px-1.5 py-1 md:px-2 md:py-1.5 rounded-sm transition-all",
+                                "border-2 min-h-[44px] md:min-h-0 flex items-center",
                                 weaponShots > 0
-                                  ? "bg-amber-950/40 border-amber-800/50 text-amber-600"
+                                  ? "bg-amber-950/30 border-amber-700/50 text-amber-500"
                                   : canShoot
-                                  ? "bg-amber-950/20 hover:bg-amber-950/40 border-amber-700/50 text-amber-400 shadow-lg shadow-amber-900/30 active:scale-95"
-                                  : "bg-slate-900/60 text-slate-600 border-slate-700 cursor-not-allowed opacity-50"
+                                  ? "bg-amber-950/10 hover:bg-amber-950/20 border-amber-700/30 text-slate-200"
+                                  : "bg-slate-900/40 border-slate-700/30 text-slate-600 cursor-not-allowed"
                               )}
-                              title={weaponShots > 0 ? "Уже выстрелил" : "Атака с этим оружием"}
+                              title={weapon.name}
                             >
-                              {weaponShots > 0 ? (
-                                <>
-                                  <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-amber-700/50" />
-                                  <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-amber-700/50" />
-                                  <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5" />
-                                  <span className="hidden sm:inline">ВЫСТРЕЛИЛ</span>
-                                </>
-                              ) : (
-                                <>
-                                  {canShoot && (
-                                    <>
-                                      <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-amber-600/40" />
-                                      <div className="absolute top-0 right-0 w-1 h-1 border-r border-t border-amber-600/40" />
-                                      <div className="absolute bottom-0 left-0 w-1 h-1 border-l border-b border-amber-600/40" />
-                                      <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-amber-600/40" />
-                                    </>
-                                  )}
-                                  <Dices className="w-4 h-4 md:w-5 md:h-5" />
-                                  <span className="hidden sm:inline">ВЫСТРЕЛ</span>
-                                </>
-                              )}
+                              <span className="md:hidden">{shortenWeaponName(weapon.name)}</span>
+                              <span className="hidden md:inline">{weapon.name}</span>
                             </button>
+                          ) : (
+                            <h4 className="font-mono font-bold text-[10px] md:text-sm text-slate-400 truncate flex-1 min-w-0 px-1.5 py-1 md:px-2 md:py-1.5" title={weapon.name}>
+                              <span className="md:hidden">{shortenWeaponName(weapon.name)}</span>
+                              <span className="hidden md:inline">{weapon.name}</span>
+                            </h4>
                           )}
 
-                          <div className="flex gap-0.5 md:gap-1 flex-shrink-0">
-                            {/* Done Button - Tech Toggle */}
-                            <button
-                              onClick={() => {
-                                const newWeaponShots = {
-                                  ...(unit.machineWeaponShots || {}),
-                                  [weaponIdx]: 1
-                                };
-                                updateUnit({
-                                  ...unit,
-                                  machineWeaponShots: newWeaponShots,
-                                  machineShotsUsed: (unit.machineShotsUsed || 0) + 1
-                                });
-                              }}
-                              disabled={weaponShots > 0 || isMachineDone || isMachineDestroyed}
-                              className={cn(
-                                "relative p-1.5 md:p-2 rounded-sm transition-all min-w-[40px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border-2 overflow-hidden",
-                                weaponShots > 0 ? "bg-amber-950/30 border-amber-700/50 text-amber-400" : "bg-slate-900/60 border-slate-700 text-slate-500 hover:bg-slate-800/60 disabled:opacity-50"
-                              )}
-                              title="Ометить как выстреливший"
-                            >
-                              {weaponShots > 0 && (
-                                <>
-                                  <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-amber-600/40" />
-                                  <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-amber-600/40" />
-                                </>
-                              )}
-                              <CheckCircle2 className="w-4 h-4" />
-                            </button>
-
-                            {/* Reset Button */}
-                            <button
-                              onClick={() => {
-                                const newWeaponShots = { ...(unit.machineWeaponShots || {}) };
-                                delete newWeaponShots[weaponIdx];
-                                updateUnit({
-                                  ...unit,
-                                  machineWeaponShots: newWeaponShots,
-                                  machineShotsUsed: Math.max(0, (unit.machineShotsUsed || 0) - 1)
-                                });
-                              }}
-                              disabled={weaponShots === 0}
-                              className={cn(
-                                "relative p-1.5 md:p-2 rounded-sm transition-all min-w-[40px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border-2 overflow-hidden",
-                                weaponShots === 0 ? "bg-slate-900/60 border-slate-700 text-slate-600 opacity-50" : "bg-slate-800/60 border-slate-600 text-slate-400 hover:bg-slate-700/60"
-                              )}
-                              title="Сбросить выстрел"
-                            >
-                              <RotateCcw className="w-4 h-4" />
-                            </button>
+                          {/* Range Stat */}
+                          <div className="relative bg-slate-950/60 px-1.5 md:px-2 py-0.5 md:py-1 rounded-sm border border-slate-700/50 flex items-center gap-1 md:gap-1.5 shrink-0">
+                            <span className="text-[6px] md:text-[7px] opacity-30 font-mono leading-none uppercase">Д</span>
+                            <span className="text-[9px] md:text-[10px] font-mono font-bold text-amber-400">{weapon.range}</span>
+                            <div className="absolute bottom-0 right-0 w-1 h-px bg-amber-600/20" />
                           </div>
-                        </div>
 
-                        {/* Weapon Stats - Tactical Readout */}
-                        <div className="flex flex-col gap-1 mt-2 md:mt-1.5">
-                          {/* Weapon Name - Full width with truncate */}
-                          <h4 className="font-mono font-bold text-xs md:text-sm text-slate-200 truncate pr-2" title={weapon.name}>
-                            {weapon.name}
-                          </h4>
-
-                          {/* Stats Row - Range and Power */}
-                          <div className="flex gap-1.5 md:gap-2">
-                            {/* Range Stat */}
-                            <div className="relative bg-slate-950/60 px-2 py-1 rounded-sm border border-slate-700/50 flex items-center gap-1.5">
-                              <span className="text-[7px] opacity-30 font-mono leading-none uppercase">Д</span>
-                              <span className="text-[10px] font-mono font-bold text-amber-400">{weapon.range}</span>
-                              <div className="absolute bottom-0 right-0 w-1 h-px bg-amber-600/20" />
-                            </div>
-
-                            {/* Power Stat */}
-                            <div className="relative bg-slate-950/60 px-2 py-1 rounded-sm border border-slate-700/50 flex items-center gap-1.5">
-                              <span className="text-[7px] opacity-30 font-mono leading-none uppercase">М</span>
-                              <span className="text-[10px] font-mono font-bold text-red-400">{weapon.power}</span>
-                              <div className="absolute bottom-0 right-0 w-1 h-px bg-red-600/20" />
-                            </div>
+                          {/* Power Stat */}
+                          <div className="relative bg-slate-950/60 px-1.5 md:px-2 py-0.5 md:py-1 rounded-sm border border-slate-700/50 flex items-center gap-1 md:gap-1.5 shrink-0">
+                            <span className="text-[6px] md:text-[7px] opacity-30 font-mono leading-none uppercase">М</span>
+                            <span className="text-[9px] md:text-[10px] font-mono font-bold text-red-400">{weapon.power}</span>
+                            <div className="absolute bottom-0 right-0 w-1 h-px bg-red-600/20" />
                           </div>
+
+                          {/* Reset Button */}
+                          <button
+                            onClick={() => {
+                              const newWeaponShots = { ...(unit.machineWeaponShots || {}) };
+                              delete newWeaponShots[weaponIdx];
+                              updateUnit({
+                                ...unit,
+                                machineWeaponShots: newWeaponShots,
+                                machineShotsUsed: Math.max(0, (unit.machineShotsUsed || 0) - 1)
+                              });
+                            }}
+                            disabled={weaponShots === 0}
+                            className={cn(
+                              "relative p-1 md:p-2 rounded-sm transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border-2 overflow-hidden shrink-0",
+                              weaponShots === 0 ? "bg-slate-900/60 border-slate-700 text-slate-600 opacity-50" : "bg-slate-800/60 border-slate-600 text-slate-400 hover:bg-slate-700/60"
+                            )}
+                            title="Сбросить выстрел"
+                          >
+                            <RotateCcw className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                          </button>
                         </div>
 
                         {/* Weapon Special Badge - Only show special property badge */}
