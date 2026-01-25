@@ -2,7 +2,8 @@
 
 import { forwardRef } from 'react';
 
-const BASE_PATH = '/bronepehota';
+// Use basePath only in production, empty in development
+const BASE_PATH = process.env.NODE_ENV === 'production' ? '/bronepehota' : '';
 
 interface GitHubPagesImageProps extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, 'src'> {
   src: string;

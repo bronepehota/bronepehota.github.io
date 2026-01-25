@@ -1,9 +1,11 @@
 /** @type {import('next').NextConfig} */
+const isProd = process.env.NODE_ENV === 'production';
+
 const nextConfig = {
   output: 'export',
-  // Base path for GitHub Pages deployment at https://luxor.github.io/bronepehota/
-  basePath: '/bronepehota',
-  assetPrefix: '/bronepehota',
+  // Base path only for GitHub Pages deployment in production
+  basePath: isProd ? '/bronepehota' : '',
+  assetPrefix: isProd ? '/bronepehota' : '',
   images: {
     unoptimized: true,
   },
