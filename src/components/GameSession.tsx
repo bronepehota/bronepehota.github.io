@@ -1,11 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Army, ArmyUnit, Squad, Machine, PilotInfo } from '@/lib/types';
+import { Army, ArmyUnit, Squad, PilotInfo } from '@/lib/types';
 import UnitCard from './UnitCard';
-import { RotateCcw, ChevronLeft, ChevronRight, Heart, UserX, History } from 'lucide-react';
+import { RotateCcw, ChevronRight, Heart, UserX, History, User, Bot } from 'lucide-react';
 import { rollDie } from '@/lib/game-logic';
-import { formatUnitNumber } from '@/lib/unit-utils';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { CombatLogEntry } from '@/lib/combat-types';
@@ -44,6 +43,65 @@ const getFactionColors = (factionId: string) => {
     }
   };
   return colorMap[factionId as keyof typeof colorMap] || colorMap.polaris;
+};
+
+// Faction styles for unit dock navigation
+const getUnitDockStyles = (factionId: string) => {
+  const styleMap = {
+    polaris: {
+      primary: 'border-red-400',
+      primaryBg: 'bg-red-400',
+      muted: 'border-red-700/60',
+      mutedBg: 'bg-red-700/60',
+      text: 'text-red-400',
+      activeGlow: 'shadow-red-500/30',
+      accent: 'border-red-400'
+    },
+    protectorate: {
+      primary: 'border-cyan-400',
+      primaryBg: 'bg-cyan-400',
+      muted: 'border-cyan-700/60',
+      mutedBg: 'bg-cyan-700/60',
+      text: 'text-cyan-400',
+      activeGlow: 'shadow-cyan-500/30',
+      accent: 'border-cyan-400'
+    },
+    mercenaries: {
+      primary: 'border-yellow-400',
+      primaryBg: 'bg-yellow-400',
+      muted: 'border-yellow-700/60',
+      mutedBg: 'bg-yellow-700/60',
+      text: 'text-yellow-400',
+      activeGlow: 'shadow-yellow-500/30',
+      accent: 'border-yellow-400'
+    }
+  };
+  return styleMap[factionId as keyof typeof styleMap] || styleMap.polaris;
+};
+
+// Get unit status bar classes based on state and faction
+const getUnitStatusBarClasses = (unit: ArmyUnit, dockStyles: ReturnType<typeof getUnitDockStyles>) => {
+  const { isDead, isDone } = (() => {
+    const isSquad = unit.type === 'squad';
+    const isDead = isSquad
+      ? (unit.deadSoldiers?.length || 0) === (unit.data as Squad).soldiers.length
+      : (unit.currentDurability || 0) === 0;
+    const isDone = isSquad
+      ? (unit.data as Squad).soldiers.every((_, idx) => unit.deadSoldiers?.includes(idx) || unit.actionsUsed?.[idx]?.done)
+      : unit.isMachineDone;
+    return { isDead, isDone };
+  })();
+
+  if (isDead) return 'bg-red-600 border-red-600';
+  if (isDone) return `${dockStyles.mutedBg} ${dockStyles.muted}`;
+  return `${dockStyles.primaryBg} ${dockStyles.primary}`;
+};
+
+// Get shortened unit name (2-3 letters)
+const getShortUnitName = (unit: ArmyUnit): string => {
+  const name = unit.data.name || '';
+  const fallback = unit.type === 'squad' ? 'ОТР' : 'МАШ';
+  return name.substring(0, 3).toUpperCase() || fallback;
 };
 
 interface GameSessionProps {
@@ -280,178 +338,88 @@ export default function GameSession({ army, setArmy }: GameSessionProps) {
         </div>
       )}
 
-      {/* Unit Navigation Header */}
-      <div className="bg-slate-900/90 border-b border-slate-800/50 shrink-0">
-        {/* Desktop Navigation with Arrows */}
-        <div className="hidden md:flex items-center gap-3 px-4 py-3">
-          <button
-            onClick={prevUnit}
-            className="p-2 bg-slate-800/80 hover:bg-slate-700 rounded-xl text-slate-300 active:scale-90 transition-all min-w-[44px] min-h-[44px] flex items-center justify-center border border-slate-700/50"
-            title="Предыдущий (←)"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
+      {/* Military Tech Unit Dock - Unified Navigation */}
+      <div className="bg-slate-900/95 border-b border-slate-700/50 shrink-0">
+        <div className="flex overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-hide">
+          {army.units.map((unit, idx) => {
+            const dockStyles = getUnitDockStyles(army.faction);
+            const isActive = focusedUnitIdx === idx;
+            const statusBarClasses = getUnitStatusBarClasses(unit, dockStyles);
+            const isMachine = unit.type === 'machine';
+            const shortName = getShortUnitName(unit);
 
-          <div className="flex-1 flex gap-2 overflow-x-auto overflow-y-hidden min-h-[52px] items-center justify-center">
-            {army.units.map((unit, idx) => {
-              const { isDead, isDone } = getUnitStatus(unit);
-              const isActive = focusedUnitIdx === idx;
-
-              // Calculate health for display
-              let currentHealth = 0;
-              let maxHealth = 0;
-              if (unit.type === 'squad') {
-                maxHealth = (unit.data as Squad).soldiers.length;
-                currentHealth = maxHealth - (unit.deadSoldiers?.length || 0);
-              } else {
-                maxHealth = (unit.data as Machine).durability_max;
-                currentHealth = unit.currentDurability || 0;
-              }
-
-              // Short name (first 2-3 letters)
-              const shortName = (unit.data.name || '').substring(0, 3).toUpperCase();
-
-              return (
-                <button
-                  key={unit.instanceId}
-                  onClick={() => setFocusedUnitIdx(idx)}
-                  className={cn(
-                    "shrink-0 rounded-xl border transition-all relative overflow-hidden",
-                    "min-w-[80px] w-20 h-14",
-                    isActive
-                      ? "border-blue-500 bg-blue-900/40 scale-105 shadow-lg shadow-blue-900/30"
-                      : "border-slate-700/50 bg-slate-800/50 opacity-70 hover:opacity-100",
-                    isDead ? "border-red-900/50 bg-red-950/30" : "",
-                    isDone && !isDead ? "border-green-900/50 bg-green-950/40" : ""
-                  )}
-                >
-                  {/* Background health bar */}
-                  <div className="absolute bottom-0 left-0 right-0 h-2 bg-slate-900/50">
-                    <div
-                      className="h-full transition-all duration-300"
-                      style={{
-                        width: `${Math.max(5, (currentHealth / maxHealth) * 100)}%`,
-                        backgroundColor: isDead ? '#ef4444' : isDone ? '#22c55e' : '#3b82f6'
-                      }}
-                    />
+            return (
+              <button
+                key={unit.instanceId}
+                onClick={() => setFocusedUnitIdx(idx)}
+                className={cn(
+                  "relative shrink-0 snap-start rounded-sm border-2 transition-all overflow-hidden",
+                  "hover:bg-slate-700/40 active:scale-95",
+                  // Responsive sizing: mobile 48px/52px, desktop 52px/60px
+                  "h-12 w-[52px] md:h-[52px] md:w-[60px]",
+                  isActive
+                    ? cn("bg-slate-700/50 scale-105 shadow-lg", dockStyles.activeGlow, dockStyles.primary)
+                    : "bg-slate-800/30 border-slate-700/50 opacity-70 hover:opacity-100"
+                )}
+              >
+                {/* Background pattern: tech grid for machines, solid for squads */}
+                {isMachine ? (
+                  <div className="absolute inset-0 opacity-10 pointer-events-none">
+                    <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                      <defs>
+                        <pattern id={`grid-${unit.instanceId}`} width="8" height="8" patternUnits="userSpaceOnUse">
+                          <path d="M 8 0 L 0 0 0 8" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-slate-400"/>
+                        </pattern>
+                      </defs>
+                      <rect width="100%" height="100%" fill={`url(#grid-${unit.instanceId})`} />
+                    </svg>
                   </div>
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-br from-slate-700/5 to-transparent pointer-events-none" />
+                )}
 
-                  {/* Content */}
-                  <div className="relative z-10 flex flex-col items-center justify-center h-full p-1 gap-0.5">
-                    {/* Unit number - hidden on mobile */}
-                    <div className="text-sm font-black leading-none text-slate-200 hidden md:block">
-                      {formatUnitNumber(unit, idx)}
-                    </div>
+                {/* Type-specific corner accent */}
+                <div className={cn(
+                  "absolute w-3 h-3 transition-all",
+                  isMachine ? "top-0 right-0" : "top-0 left-0",
+                  isMachine
+                    ? cn("border-r-2 border-b-2 opacity-40", dockStyles.accent || dockStyles.primary)
+                    : cn("border-l-2 border-b-2 opacity-30", dockStyles.muted)
+                )} />
 
-                    {/* Name or icon */}
-                    <div className="text-[10px] font-bold text-slate-400 leading-tight truncate max-w-full">
-                      {shortName || (unit.type === 'squad' ? 'ОТР' : 'МАШ')}
-                    </div>
+                {/* Tech corner brackets for active unit */}
+                {isActive && (
+                  <>
+                    <div className={cn("absolute top-0 left-0 w-2 h-2 border-l-2 border-t-2 z-10", dockStyles.primary)} />
+                    <div className={cn("absolute top-0 right-0 w-2 h-2 border-r-2 border-t-2 z-10", dockStyles.primary)} />
+                    <div className={cn("absolute bottom-0 left-0 w-2 h-2 border-l-2 border-b-2 z-10", dockStyles.primary)} />
+                    <div className={cn("absolute bottom-0 right-0 w-2 h-2 border-r-2 border-b-2 z-10", dockStyles.primary)} />
+                  </>
+                )}
 
-                    {/* Health badge */}
-                    <div className={cn(
-                      "text-[9px] font-black px-1 rounded",
-                      isDead ? "bg-red-900/50 text-red-300" :
-                      isDone ? "bg-green-900/50 text-green-300" :
-                      "bg-blue-900/50 text-blue-300"
-                    )}>
-                      {currentHealth}/{maxHealth}
-                    </div>
-                  </div>
-
-                  {/* Status indicator */}
+                {/* Content - monospace typography for military feel */}
+                <div className="relative z-10 flex flex-col items-center justify-center h-full gap-1">
+                  {/* Type icon indicator */}
                   <div className={cn(
-                    "absolute top-1 right-1 w-2 h-2 rounded-full border-2 border-slate-900",
-                    isDead ? "bg-red-500" : isDone ? "bg-green-500" : "bg-blue-500"
-                  )} />
-                </button>
-              );
-            })}
-          </div>
-
-          <button
-            onClick={nextUnit}
-            className="p-2 bg-slate-800/80 hover:bg-slate-700 rounded-xl text-slate-300 active:scale-90 transition-all min-w-[44px] min-h-[44px] flex items-center justify-center border border-slate-700/50"
-            title="Следующий (→)"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Mobile Horizontal Scroll */}
-        <div className="md:hidden px-2 pb-3">
-          <div className="flex gap-2 overflow-x-auto overflow-y-hidden min-h-[56px] items-center snap-x">
-            {army.units.map((unit, idx) => {
-              const { isDead, isDone } = getUnitStatus(unit);
-              const isActive = focusedUnitIdx === idx;
-
-              let currentHealth = 0;
-              let maxHealth = 0;
-              if (unit.type === 'squad') {
-                maxHealth = (unit.data as Squad).soldiers.length;
-                currentHealth = maxHealth - (unit.deadSoldiers?.length || 0);
-              } else {
-                maxHealth = (unit.data as Machine).durability_max;
-                currentHealth = unit.currentDurability || 0;
-              }
-
-              const shortName = (unit.data.name || '').substring(0, 2).toUpperCase();
-
-              return (
-                <button
-                  key={unit.instanceId}
-                  onClick={() => setFocusedUnitIdx(idx)}
-                  className={cn(
-                    "shrink-0 snap-start rounded-xl border transition-all relative overflow-hidden",
-                    "w-16 h-14 min-w-[64px]",
-                    isActive
-                      ? "border-blue-500 bg-blue-900/40 scale-105 shadow-lg shadow-blue-900/30"
-                      : "border-slate-700/50 bg-slate-800/50 opacity-70 hover:opacity-100",
-                    isDead ? "border-red-900/50 bg-red-950/30" : "",
-                    isDone && !isDead ? "border-green-900/50 bg-green-950/40" : ""
-                  )}
-                >
-                  {/* Background health bar */}
-                  <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-slate-900/50">
-                    <div
-                      className="h-full transition-all duration-300"
-                      style={{
-                        width: `${Math.max(5, (currentHealth / maxHealth) * 100)}%`,
-                        backgroundColor: isDead ? '#ef4444' : isDone ? '#22c55e' : '#3b82f6'
-                      }}
-                    />
+                    "opacity-70",
+                    isMachine ? "text-cyan-300/80" : "text-emerald-300/70"
+                  )}>
+                    {isMachine ? (
+                      <Bot className="w-4 h-4" strokeWidth={2} />
+                    ) : (
+                      <User className="w-4 h-4" strokeWidth={2} />
+                    )}
                   </div>
 
-                  {/* Content */}
-                  <div className="relative z-10 flex flex-col items-center justify-center h-full p-1 gap-0.5">
-                    {/* Unit number - hidden on mobile */}
-                    <div className="text-sm font-black leading-none text-slate-200 hidden md:block">
-                      {formatUnitNumber(unit, idx)}
-                    </div>
+                  {/* Shortened name */}
+                  <span className="font-mono text-[10px] font-bold text-slate-300 tracking-wide">{shortName}</span>
+                </div>
 
-                    <div className="text-[9px] font-bold text-slate-400 leading-tight">
-                      {shortName || (unit.type === 'squad' ? 'ОТР' : 'М')}
-                    </div>
-
-                    <div className={cn(
-                      "text-[8px] font-black px-1 rounded min-w-[20px] text-center",
-                      isDead ? "bg-red-900/50 text-red-300" :
-                      isDone ? "bg-green-900/50 text-green-300" :
-                      "bg-blue-900/50 text-blue-300"
-                    )}>
-                      {currentHealth}/{maxHealth}
-                    </div>
-                  </div>
-
-                  {/* Status indicator */}
-                  <div className={cn(
-                    "absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full border border-slate-900",
-                    isDead ? "bg-red-500" : isDone ? "bg-green-500" : "bg-blue-500"
-                  )} />
-                </button>
-              );
-            })}
-          </div>
+                {/* Status bar at bottom */}
+                <div className={cn("absolute bottom-0 left-0 right-0 h-1.5 border-t-2 z-20", statusBarClasses)} />
+              </button>
+            );
+          })}
         </div>
       </div>
 

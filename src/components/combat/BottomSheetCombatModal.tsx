@@ -28,25 +28,25 @@ interface BottomSheetCombatModalProps {
 const getActionColors = (actionType: CombatActionType | null) => {
   const colorMap = {
     shot: {
-      primary: 'text-orange-400',
-      border: 'border-orange-500/50',
-      bg: 'bg-orange-500/10',
-      accent: 'border-orange-500',
-      button: 'border-orange-500 bg-orange-500/10 text-orange-400 hover:bg-orange-500/20'
+      primary: 'text-amber-400',
+      border: 'border-amber-600/40',
+      bg: 'bg-amber-950/20',
+      accent: 'border-amber-500',
+      button: 'border-amber-600 bg-amber-950/30 text-amber-400 hover:bg-amber-950/50'
     },
     melee: {
       primary: 'text-red-400',
-      border: 'border-red-500/50',
-      bg: 'bg-red-500/10',
+      border: 'border-red-600/40',
+      bg: 'bg-red-950/20',
       accent: 'border-red-500',
-      button: 'border-red-500 bg-red-500/10 text-red-400 hover:bg-red-500/20'
+      button: 'border-red-600 bg-red-950/30 text-red-400 hover:bg-red-950/50'
     },
     grenade: {
-      primary: 'text-green-400',
-      border: 'border-green-500/50',
-      bg: 'bg-green-500/10',
-      accent: 'border-green-500',
-      button: 'border-green-500 bg-green-500/10 text-green-400 hover:bg-green-500/20'
+      primary: 'text-emerald-400',
+      border: 'border-emerald-600/40',
+      bg: 'bg-emerald-950/20',
+      accent: 'border-emerald-500',
+      button: 'border-emerald-600 bg-emerald-950/30 text-emerald-400 hover:bg-emerald-950/50'
     }
   };
   return colorMap[actionType as keyof typeof colorMap] || {
@@ -97,12 +97,12 @@ export function BottomSheetCombatModal({
   const actionColors = getActionColors(state.actionType);
 
   return (
-    <div className="fixed inset-0 z-[100] bg-slate-950/90 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-4">
+    <div className="fixed inset-0 z-[100] bg-slate-950/95 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-4">
       <div
         ref={sheetRef}
         {...touchHandlers}
         className={cn(
-          "w-full md:w-[600px] bg-slate-900/95 backdrop-blur-sm border-t-2 md:border-2 shadow-2xl max-h-[90vh] md:max-h-[85vh] overflow-hidden flex flex-col relative",
+          "w-full md:w-[600px] bg-slate-900/90 backdrop-blur-sm border-t-2 md:border-2 shadow-2xl max-h-[90vh] md:max-h-[85vh] overflow-hidden flex flex-col relative",
           actionColors.border
         )}
       >
@@ -114,35 +114,43 @@ export function BottomSheetCombatModal({
 
         {/* Drag Handle */}
         <div className="flex justify-center pt-3 pb-2 shrink-0 relative z-10">
-          <div className="w-12 h-1.5 bg-slate-700 rounded-full" />
+          <div className="w-16 h-1 bg-slate-700 rounded-full" />
         </div>
 
-        {/* Header */}
+        {/* Tech Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800/50 shrink-0 relative z-10">
           <div className="flex items-center gap-3">
             {canGoBack && (
               <button
                 onClick={onGoBack}
-                className="p-2 hover:bg-slate-800 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center border border-slate-700"
+                className="p-2 hover:bg-slate-800/80 rounded-sm transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center border border-slate-700"
               >
                 <ChevronLeft className="w-5 h-5 text-slate-400" />
               </button>
             )}
             {/* Action type icon */}
             {state.actionType && (
-              <div className={cn("p-1.5 rounded-lg border", actionColors.bg, actionColors.border)}>
+              <div className={cn("p-2 rounded-sm border-2", actionColors.bg, actionColors.border)}>
                 {state.actionType === 'shot' && <Target className={cn("w-4 h-4", actionColors.primary)} />}
                 {state.actionType === 'melee' && <Sword className={cn("w-4 h-4", actionColors.primary)} />}
                 {state.actionType === 'grenade' && <Bomb className={cn("w-4 h-4", actionColors.primary)} />}
               </div>
             )}
-            <h2 className={cn("text-sm font-mono font-bold uppercase tracking-wider", actionColors.primary)}>
-              {getPhaseTitle()}
-            </h2>
+            <div>
+              <h2 className={cn("text-sm font-mono font-bold uppercase tracking-wider", actionColors.primary)}>
+                {getPhaseTitle()}
+              </h2>
+              {/* Tech label */}
+              {state.actionType && (
+                <div className="text-[8px] font-mono text-slate-600 uppercase tracking-wider">
+                  {state.actionType.toUpperCase()} PROTOCOL
+                </div>
+              )}
+            </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-slate-800 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center border border-slate-700"
+            className="p-2 hover:bg-slate-800/80 rounded-sm transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center border border-slate-700"
           >
             <X className="w-5 h-5 text-slate-400" />
           </button>
@@ -168,15 +176,20 @@ export function BottomSheetCombatModal({
                 soldierIndex={state.soldierIndex}
               />
 
-              {/* Execute button */}
+              {/* Execute button - Tactical Control */}
               <button
                 onClick={onExecuteAction}
                 className={cn(
-                  "w-full py-3 md:py-4 font-mono text-sm md:text-base font-bold uppercase tracking-wider border transition-all min-h-[52px] md:min-h-[56px]",
+                  "relative w-full py-3 md:py-4 font-mono text-sm md:text-base font-bold uppercase tracking-wider border-2 transition-all min-h-[52px] md:min-h-[56px]",
                   actionColors.button,
-                  "hover:scale-102 active:scale-95"
+                  "hover:scale-[1.02] active:scale-95 overflow-hidden"
                 )}
               >
+                {/* Tech decoration */}
+                <div className="absolute top-0 left-0 w-2 h-2 border-l border-t opacity-30" />
+                <div className="absolute top-0 right-0 w-2 h-2 border-r border-t opacity-30" />
+                <div className="absolute bottom-0 left-0 w-2 h-2 border-l border-b opacity-30" />
+                <div className="absolute bottom-0 right-0 w-2 h-2 border-r border-b opacity-30" />
                 {state.actionType === 'shot' ? 'ВЫСТРЕЛИТЬ' :
                  state.actionType === 'melee' ? 'АТАКОВАТЬ' : 'БРОСИТЬ'}
               </button>

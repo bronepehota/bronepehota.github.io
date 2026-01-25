@@ -44,50 +44,107 @@ export function CombatResults({
     if (parameters.fortification === 'none') return null;
     const bonus = parameters.fortification === 'light' ? 1 : 2;
     return (
-      <span className="text-orange-400 text-sm">
-        +{bonus} (укрытие)
+      <span className="text-amber-400 text-sm font-mono">
+        +{bonus} <span className="text-[9px] opacity-60">(FORT)</span>
       </span>
     );
   };
 
   return (
     <div className="space-y-4 animate-in fade-in duration-300">
+      {/* Tech Header - After Action Report */}
+      <div className="relative">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="h-px flex-1 bg-emerald-600/30" />
+          <div className="w-1 h-1 bg-emerald-500 rotate-45" />
+          <div className="h-px flex-1 bg-emerald-600/30" />
+        </div>
+        <div className="text-center">
+          <div className="text-xs font-mono font-bold text-emerald-400 tracking-[0.2em] uppercase">
+            After Action Report
+          </div>
+          <div className="text-[8px] font-mono text-slate-600 uppercase tracking-wider">
+            MISSION RESULTS // {result.actionType.toUpperCase()}
+          </div>
+        </div>
+        <div className="flex items-center gap-2 mt-2">
+          <div className="h-px flex-1 bg-emerald-600/30" />
+          <div className="w-1 h-1 bg-emerald-500 rotate-45" />
+          <div className="h-px flex-1 bg-emerald-600/30" />
+        </div>
+      </div>
+
       {/* Shot/Grenade Results */}
       {(isShot || isGrenade) && result.hitResult && (
         <>
-          {/* Hit Comparison */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* Hit Comparison - Tactical Displays */}
+          <div className="grid grid-cols-2 gap-3">
             {/* Your Roll */}
             <div className={cn(
-              "bg-slate-800 p-4 rounded-xl border-2 transition-all",
-              result.hitResult.success ? "border-green-500/50" : "border-red-500/50"
+              "relative bg-slate-900/60 p-3 rounded-sm border-2 backdrop-blur-sm transition-all",
+              result.hitResult.success
+                ? "border-emerald-600/40 shadow-emerald-900/20"
+                : "border-red-600/40 shadow-red-900/20"
             )}>
-              <div className="text-[10px] opacity-50 uppercase mb-2 text-center">Ваш бросок</div>
+              {/* Tech frame corners */}
+              <div className={cn(
+                "absolute top-0 left-0 w-2 h-2 border-l-2 border-t-2",
+                result.hitResult.success ? "border-emerald-500" : "border-red-500"
+              )} />
+              <div className={cn(
+                "absolute top-0 right-0 w-2 h-2 border-r-2 border-t-2",
+                result.hitResult.success ? "border-emerald-500" : "border-red-500"
+              )} />
+              <div className={cn(
+                "absolute bottom-0 left-0 w-2 h-2 border-l-2 border-b-2",
+                result.hitResult.success ? "border-emerald-500" : "border-red-500"
+              )} />
+              <div className={cn(
+                "absolute bottom-0 right-0 w-2 h-2 border-r-2 border-b-2",
+                result.hitResult.success ? "border-emerald-500" : "border-red-500"
+              )} />
+
+              <div className="text-[8px] font-mono opacity-40 uppercase mb-2 text-center tracking-[0.15em]">YOUR ROLL</div>
               <div className="flex flex-col items-center">
                 <div className={cn(
-                  "w-16 h-16 bg-slate-900 rounded-xl flex items-center justify-center text-3xl font-black border-2 mb-1",
+                  "relative w-14 h-14 bg-slate-950/80 rounded-sm flex items-center justify-center text-3xl font-mono font-black border-2 mb-1",
                   result.hitResult.success
-                    ? "text-blue-400 border-blue-500/30"
+                    ? "text-emerald-400 border-emerald-500/30"
                     : "text-red-400 border-red-500/30"
                 )}>
                   {result.hitResult.total}
+                  {/* Tech decorations */}
+                  <div className={cn(
+                    "absolute top-1 left-1 w-1 h-1",
+                    result.hitResult.success ? "bg-emerald-500/40" : "bg-red-500/40"
+                  )} />
+                  <div className={cn(
+                    "absolute bottom-1 right-1 w-1 h-1",
+                    result.hitResult.success ? "bg-emerald-500/40" : "bg-red-500/40"
+                  )} />
                 </div>
-                <div className="text-sm font-black text-blue-400">
+                <div className={cn("text-xs font-mono font-black", result.hitResult.success ? "text-emerald-400" : "text-red-400")}>
                   {result.hitResult.roll}
                 </div>
               </div>
             </div>
 
             {/* Target Value */}
-            <div className="bg-slate-800 p-4 rounded-xl border-2 border-orange-500/50">
-              <div className="text-[10px] opacity-50 uppercase mb-2 text-center">
-                {isGrenade ? 'Цель (шагов)' : 'Дистанция цели'}
+            <div className="relative bg-slate-900/60 p-3 rounded-sm border-2 border-amber-600/40 backdrop-blur-sm shadow-amber-900/20">
+              {/* Tech frame corners */}
+              <div className="absolute top-0 left-0 w-2 h-2 border-l border-t border-amber-500" />
+              <div className="absolute top-0 right-0 w-2 h-2 border-r border-t border-amber-500" />
+              <div className="absolute bottom-0 left-0 w-2 h-2 border-l border-b border-amber-500" />
+              <div className="absolute bottom-0 right-0 w-2 h-2 border-r border-b border-amber-500" />
+
+              <div className="text-[8px] font-mono opacity-40 uppercase mb-2 text-center tracking-[0.15em]">
+                {isGrenade ? 'TARGET RANGE' : 'DISTANCE'}
               </div>
               <div className="flex flex-col items-center">
-                <div className="w-16 h-16 bg-slate-900 rounded-xl flex items-center justify-center text-3xl font-black text-orange-400 border-2 border-orange-500/30 mb-1">
+                <div className="w-14 h-14 bg-slate-950/80 rounded-sm flex items-center justify-center text-3xl font-mono font-black text-amber-400 border-2 border-amber-500/30 mb-1">
                   {isGrenade ? parameters.distance : getEffectiveDistance()}
                 </div>
-                <div className="text-sm font-black text-orange-400">
+                <div className="text-sm font-mono font-black text-amber-400">
                   {parameters.distance}
                   {getFortificationBonusDisplay()}
                 </div>
@@ -95,16 +152,34 @@ export function CombatResults({
             </div>
           </div>
 
-          {/* Hit Result */}
+          {/* Hit Result - Status Display */}
           <div className={cn(
-            "p-4 rounded-xl border-2 flex items-center justify-center gap-3",
+            "relative p-4 rounded-sm border-2 flex items-center justify-center gap-3",
             result.hitResult.success
-              ? "bg-green-900/20 border-green-500/50"
-              : "bg-red-900/20 border-red-500/50"
+              ? "bg-emerald-950/30 border-emerald-600/40 shadow-emerald-900/30"
+              : "bg-red-950/30 border-red-600/40 shadow-red-900/30"
           )}>
-            <div className="text-[10px] opacity-50 uppercase font-bold tracking-widest">Результат</div>
-            <div className={cn("text-2xl font-black",
-              result.hitResult.success ? "text-green-400" : "text-red-400"
+            {/* Tech frame */}
+            <div className={cn(
+              "absolute top-0 left-0 w-2 h-2 border-l-2 border-t-2",
+              result.hitResult.success ? "border-emerald-500" : "border-red-500"
+            )} />
+            <div className={cn(
+              "absolute top-0 right-0 w-2 h-2 border-r-2 border-t-2",
+              result.hitResult.success ? "border-emerald-500" : "border-red-500"
+            )} />
+            <div className={cn(
+              "absolute bottom-0 left-0 w-2 h-2 border-l-2 border-b-2",
+              result.hitResult.success ? "border-emerald-500" : "border-red-500"
+            )} />
+            <div className={cn(
+              "absolute bottom-0 right-0 w-2 h-2 border-r-2 border-b-2",
+              result.hitResult.success ? "border-emerald-500" : "border-red-500"
+            )} />
+
+            <div className="text-[8px] font-mono opacity-40 uppercase font-bold tracking-[0.2em]">STATUS</div>
+            <div className={cn("text-xl md:text-2xl font-mono font-black tracking-wider",
+              result.hitResult.success ? "text-emerald-400" : "text-red-400"
             )}>
               {isGrenade ? 'ВЗРЫВ!' : (result.hitResult.success ? 'ПОПАДАНИЕ' : 'ПРОМАХ')}
             </div>
@@ -113,13 +188,31 @@ export function CombatResults({
           {/* Damage Rolls (if hit succeeded) */}
           {(result.hitResult.success || isGrenade) && result.damageResult && (
             <div className={cn(
-              "p-3 rounded-xl border-2",
+              "relative p-3 rounded-sm border-2",
               result.damageResult.damage > 0
-                ? "bg-orange-900/20 border-orange-500/50"
-                : "bg-slate-800 border-slate-600"
+                ? "bg-amber-950/20 border-amber-600/40 shadow-amber-900/20"
+                : "bg-slate-900/60 border-slate-700"
             )}>
-              <div className="text-[10px] opacity-50 uppercase font-bold mb-2 tracking-widest text-center">
-                Броски урона vs Броня {getEffectiveArmor()}
+              {/* Tech frame corners */}
+              <div className={cn(
+                "absolute top-0 left-0 w-2 h-2 border-l border-t",
+                result.damageResult.damage > 0 ? "border-amber-500" : "border-slate-600"
+              )} />
+              <div className={cn(
+                "absolute top-0 right-0 w-2 h-2 border-r border-t",
+                result.damageResult.damage > 0 ? "border-amber-500" : "border-slate-600"
+              )} />
+              <div className={cn(
+                "absolute bottom-0 left-0 w-2 h-2 border-l border-b",
+                result.damageResult.damage > 0 ? "border-amber-500" : "border-slate-600"
+              )} />
+              <div className={cn(
+                "absolute bottom-0 right-0 w-2 h-2 border-r border-b",
+                result.damageResult.damage > 0 ? "border-amber-500" : "border-slate-600"
+              )} />
+
+              <div className="text-[8px] font-mono opacity-40 uppercase font-bold mb-3 tracking-[0.15em] text-center">
+                DAMAGE ROLLS vs ARMOR [{getEffectiveArmor()}]
               </div>
 
               {/* Surprise Attack - Show both roll sets (compact for mobile) */}
@@ -186,15 +279,20 @@ export function CombatResults({
                     return (
                       <div key={i} className="flex flex-col items-center gap-1">
                         <div className={cn(
-                          "w-12 h-12 bg-slate-800 rounded-lg border-2 flex items-center justify-center text-xl font-black shadow-lg",
+                          "relative w-12 h-12 bg-slate-950/80 rounded-sm border-2 flex items-center justify-center text-xl font-mono font-black shadow-lg",
                           penetrated
-                            ? "text-orange-400 border-orange-400"
-                            : "text-slate-500 border-slate-600"
+                            ? "text-amber-400 border-amber-500"
+                            : "text-slate-600 border-slate-700"
                         )}>
                           {roll}
+                          {/* Tech decoration */}
+                          <div className={cn(
+                            "absolute top-0.5 right-0.5 w-1 h-1",
+                            penetrated ? "bg-amber-500/40" : "bg-slate-600/30"
+                          )} />
                         </div>
-                        <div className={cn("text-[10px] font-bold",
-                          penetrated ? "text-orange-400" : "text-slate-600"
+                        <div className={cn("text-[9px] font-mono font-bold",
+                          penetrated ? "text-amber-400" : "text-slate-600"
                         )}>
                           {penetrated ? '>' : '≤'}{effectiveArmor}
                         </div>
@@ -205,15 +303,15 @@ export function CombatResults({
               )}
 
               {/* Damage Summary */}
-              <div className="mt-3 pt-2 border-t border-slate-700 text-center">
-                <div className={cn("text-xl font-black",
+              <div className="mt-3 pt-3 border-t border-slate-800 text-center">
+                <div className={cn("text-xl md:text-2xl font-mono font-black tracking-wider",
                   result.damageResult.damage > 0
-                    ? "text-orange-400"
-                    : "text-slate-400"
+                    ? "text-amber-400"
+                    : "text-slate-500"
                 )}>
                   {result.damageResult.damage > 0
-                    ? `-${result.damageResult.damage} ${result.unitType === 'machine' ? 'HP' : 'РАНЕНИЙ'}`
-                    : 'НЕ ПРОБИТО'}
+                    ? `-${result.damageResult.damage} ${result.unitType === 'machine' ? 'HP' : 'WOUNDS'}`
+                    : 'NO PENETRATION'}
                 </div>
               </div>
 
@@ -230,11 +328,17 @@ export function CombatResults({
         </>
       )}
 
-      {/* Melee Results */}
+      {/* Melee Results - Combat Display */}
       {isMelee && result.meleeResult && (() => {
         const meleeResult = result.meleeResult!;
         return (
           <div className="space-y-3">
+            {/* Tech header for melee */}
+            <div className="text-center">
+              <div className="text-[8px] font-mono text-cyan-400/60 uppercase tracking-[0.2em]">
+                CLOSE COMBAT ENGAGEMENT
+              </div>
+            </div>
             {/* Surprise Attack - Show both attacker rolls (compact for mobile) */}
             {parameters.isSurpriseAttack && (meleeResult as any).attackerRolls ? (
               <div className="bg-purple-900/20 p-2 rounded-lg border border-purple-700">
@@ -278,29 +382,41 @@ export function CombatResults({
               </div>
             </div>
           ) : (
-            // Normal melee display
+            // Normal melee display - Tactical
             <div className="grid grid-cols-2 gap-3">
               {/* Attacker */}
-              <div className="bg-slate-800 p-3 rounded-xl border-2 border-blue-500/50">
-                <div className="text-[10px] opacity-50 uppercase mb-1 text-center">Вы</div>
+              <div className="relative bg-slate-900/60 p-3 rounded-sm border-2 border-cyan-600/40 shadow-cyan-900/20">
+                {/* Tech frame */}
+                <div className="absolute top-0 left-0 w-1.5 h-1.5 border-l border-t border-cyan-500" />
+                <div className="absolute top-0 right-0 w-1.5 h-1.5 border-r border-t border-cyan-500" />
+                <div className="absolute bottom-0 left-0 w-1.5 h-1.5 border-l border-b border-cyan-500" />
+                <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-r border-b border-cyan-500" />
+
+                <div className="text-[8px] font-mono opacity-40 uppercase mb-2 text-center tracking-[0.15em]">ATTACKER</div>
                 <div className="flex flex-col items-center">
-                  <div className="w-12 h-12 bg-slate-900 rounded-lg flex items-center justify-center text-2xl font-black text-blue-400 border-2 border-blue-500/30">
+                  <div className="w-12 h-12 bg-slate-950/80 rounded-sm flex items-center justify-center text-2xl font-mono font-black text-cyan-400 border-2 border-cyan-500/30">
                     {meleeResult.attackerRoll}
                   </div>
-                  <div className="text-lg font-black text-blue-400">
+                  <div className="text-base font-mono font-black text-cyan-400">
                     {meleeResult.attackerTotal}
                   </div>
                 </div>
               </div>
 
               {/* Defender */}
-              <div className="bg-slate-800 p-3 rounded-xl border-2 border-red-500/50">
-                <div className="text-[10px] opacity-50 uppercase mb-1 text-center">Цель</div>
+              <div className="relative bg-slate-900/60 p-3 rounded-sm border-2 border-red-600/40 shadow-red-900/20">
+                {/* Tech frame */}
+                <div className="absolute top-0 left-0 w-1.5 h-1.5 border-l border-t border-red-500" />
+                <div className="absolute top-0 right-0 w-1.5 h-1.5 border-r border-t border-red-500" />
+                <div className="absolute bottom-0 left-0 w-1.5 h-1.5 border-l border-b border-red-500" />
+                <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-r border-b border-red-500" />
+
+                <div className="text-[8px] font-mono opacity-40 uppercase mb-2 text-center tracking-[0.15em]">DEFENDER</div>
                 <div className="flex flex-col items-center">
-                  <div className="w-12 h-12 bg-slate-900 rounded-lg flex items-center justify-center text-2xl font-black text-red-400 border-2 border-red-500/30">
+                  <div className="w-12 h-12 bg-slate-950/80 rounded-sm flex items-center justify-center text-2xl font-mono font-black text-red-400 border-2 border-red-500/30">
                     {meleeResult.defenderRoll}
                   </div>
-                  <div className="text-lg font-black text-red-400">
+                  <div className="text-base font-mono font-black text-red-400">
                     {meleeResult.defenderTotal}
                   </div>
                 </div>
@@ -308,53 +424,87 @@ export function CombatResults({
             </div>
           )}
 
-          {/* Melee Result */}
+          {/* Melee Result - Status Display */}
           <div className={cn(
-            "p-3 rounded-xl border-2 flex items-center justify-center",
+            "relative p-4 rounded-sm border-2 flex items-center justify-center",
             meleeResult.winner === 'attacker'
-              ? "bg-green-900/20 border-green-500/50"
+              ? "bg-emerald-950/30 border-emerald-600/40 shadow-emerald-900/20"
               : meleeResult.winner === 'defender'
-              ? "bg-red-900/20 border-red-500/50"
-              : "bg-slate-800 border-slate-700"
+              ? "bg-red-950/30 border-red-600/40 shadow-red-900/20"
+              : "bg-slate-900/60 border-slate-700"
           )}>
-            <div className={cn("text-xl font-black",
+            {/* Tech frame */}
+            <div className={cn(
+              "absolute top-0 left-0 w-2 h-2 border-l-2 border-t-2",
               meleeResult.winner === 'attacker'
-                ? "text-green-400"
+                ? "border-emerald-500"
+                : meleeResult.winner === 'defender'
+                ? "border-red-500"
+                : "border-slate-600"
+            )} />
+            <div className={cn(
+              "absolute top-0 right-0 w-2 h-2 border-r-2 border-t-2",
+              meleeResult.winner === 'attacker'
+                ? "border-emerald-500"
+                : meleeResult.winner === 'defender'
+                ? "border-red-500"
+                : "border-slate-600"
+            )} />
+            <div className={cn(
+              "absolute bottom-0 left-0 w-2 h-2 border-l-2 border-b-2",
+              meleeResult.winner === 'attacker'
+                ? "border-emerald-500"
+                : meleeResult.winner === 'defender'
+                ? "border-red-500"
+                : "border-slate-600"
+            )} />
+            <div className={cn(
+              "absolute bottom-0 right-0 w-2 h-2 border-r-2 border-b-2",
+              meleeResult.winner === 'attacker'
+                ? "border-emerald-500"
+                : meleeResult.winner === 'defender'
+                ? "border-red-500"
+                : "border-slate-600"
+            )} />
+
+            <div className={cn("text-xl md:text-2xl font-mono font-black tracking-wider",
+              meleeResult.winner === 'attacker'
+                ? "text-emerald-400"
                 : meleeResult.winner === 'defender'
                 ? "text-red-400"
                 : "text-slate-400"
             )}>
               {meleeResult.winner === 'attacker'
-                ? 'ПОБЕДА'
+                ? 'VICTORY'
                 : meleeResult.winner === 'defender'
-                ? 'КОНТРАТАКА'
-                : 'НИЧЬЯ'}
+                ? 'COUNTERATTACK'
+                : 'DRAW'}
             </div>
           </div>
         </div>
         );
       })()}
 
-      {/* Action Buttons */}
+      {/* Action Buttons - Tactical Controls */}
       <div className="flex gap-3 pt-4">
         <button
           onClick={onGoBack}
-          className="flex-1 py-3 bg-slate-700 hover:bg-slate-600 rounded-xl font-bold text-sm transition-all min-h-[48px]"
+          className="flex-1 py-3 bg-slate-800/80 hover:bg-slate-700/80 rounded-sm font-mono text-sm font-bold uppercase tracking-wider border border-slate-700 transition-all min-h-[48px] text-slate-400"
         >
-          Назад
+          НАЗАД
         </button>
         <button
           onClick={onApply}
           className={cn(
-            "flex-1 py-3 rounded-xl font-bold text-sm transition-all min-h-[48px]",
+            "flex-1 py-3 rounded-sm font-mono text-sm font-bold uppercase tracking-wider border-2 transition-all min-h-[48px]",
             (isShot || isGrenade) && result.hitResult?.success
-              ? "bg-green-600 hover:bg-green-500"
+              ? "bg-emerald-600 hover:bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-900/30"
               : isMelee && result.meleeResult?.winner === 'attacker'
-              ? "bg-green-600 hover:bg-green-500"
-              : "bg-blue-600 hover:bg-blue-500"
+              ? "bg-emerald-600 hover:bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-900/30"
+              : "bg-blue-600 hover:bg-blue-500 border-blue-500 text-white shadow-lg shadow-blue-900/30"
           )}
         >
-          Принять
+          ПРИНЯТЬ
         </button>
       </div>
     </div>
