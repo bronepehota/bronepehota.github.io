@@ -15,6 +15,7 @@ import { PilotAssignmentModal } from './PilotAssignmentModal';
 import { PilotInfo } from '@/lib/types';
 import { PilotTestModal } from './combat/PilotTestModal';
 import { usePilotTestFlow } from '@/hooks/usePilotTestFlow';
+import MachineBlueprintModal from './machine/MachineBlueprintModal';
 
 interface UnitCardProps {
   unit: ArmyUnit;
@@ -29,6 +30,7 @@ interface UnitCardProps {
 
 export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [], onCombatLogEntry, allUnits = [], onPilotAssign, onPilotRemove, onNavigateToUnit }: UnitCardProps) {
   const [showImage, setShowImage] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [isManualCollapsed, setIsManualCollapsed] = useState(false);
   const [rulesVersion, setRulesVersion] = useState<RulesVersionID>(getDefaultRulesVersion());
   const [showPilotModal, setShowPilotModal] = useState(false);
@@ -141,10 +143,10 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
 
   const handleOpenOriginal = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    // For machines, always show the image overlay
+    // For machines, show details modal
     // For squads, open external URL or show image
     if (!isSquad) {
-      setShowImage(true);
+      setShowDetailsModal(true);
     } else if (data.originalUrl) {
       window.open(data.originalUrl, '_blank');
     } else {
@@ -334,23 +336,20 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
     <div
       onDoubleClick={handleOpenOriginal}
       className={cn(
-        "bg-slate-800 rounded-xl border-t-2 transition-all shadow-lg overflow-hidden relative cursor-default select-none",
+        "bg-slate-900/80 rounded-sm border-2 border-slate-800 transition-all shadow-lg overflow-hidden relative cursor-default select-none",
         (isSquadDone || (isMachineDone && !isMachineDestroyed)) ? "opacity-70 grayscale-[0.3]" : "",
         isAllDead || isMachineDestroyed ? "opacity-40 grayscale" : "",
-        data.faction === 'polaris' ? "border-t-red-900/50" : data.faction === 'protectorate' ? "border-t-blue-900/50" : "border-t-green-900/50",
-        !isSquad && machineImage ? "min-h-[600px]" : ""
+        data.faction === 'polaris' ? "border-red-600/30" : data.faction === 'protectorate' ? "border-cyan-600/30" : "border-yellow-600/30"
       )}
-      style={machineImage ? {
-        backgroundImage: `url(${machineImage})`,
-        backgroundSize: 'contain',
-        backgroundPosition: 'top center',
-        backgroundRepeat: 'no-repeat'
-      } : {}}
     >
-      {/* Background overlay for machine cards */}
-      {machineImage && (
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-900/90 via-slate-900/80 to-slate-900/95 pointer-events-none z-0" />
-      )}
+      {/* Tech grid overlay - all cards */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{
+        backgroundImage: `
+          linear-gradient(rgba(148, 163, 184, 0.3) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(148, 163, 184, 0.3) 1px, transparent 1px)
+        `,
+        backgroundSize: '8px 8px'
+      }} />
 
       {/* Combat Modal */}
       {combatController.isOpen && (
@@ -390,6 +389,15 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
         />
       )}
 
+      {/* Machine Blueprint Modal */}
+      {showDetailsModal && !isSquad && (
+        <MachineBlueprintModal
+          machine={data as Machine}
+          isOpen={showDetailsModal}
+          onClose={() => setShowDetailsModal(false)}
+        />
+      )}
+
       {/* Image Overlay */}
       {showImage && data.image && (
         <div
@@ -407,37 +415,43 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
         </div>
       )}
 
-      {/* Unit Header */}
+      {/* Unit Header - Tactical Style */}
       <div
         onClick={() => setIsManualCollapsed(!isManualCollapsed)}
         className={cn(
-          "p-2 md:p-3 flex justify-between items-center cursor-pointer hover:bg-white/5 transition-colors relative z-10",
-          data.faction === 'polaris' ? "bg-red-900/20" : data.faction === 'protectorate' ? "bg-blue-900/20" : "bg-green-900/20"
+          "p-2 md:p-3 flex justify-between items-center cursor-pointer hover:bg-white/5 transition-colors relative z-10 border-b border-slate-800/50",
+          data.faction === 'polaris' ? "bg-red-950/20" : data.faction === 'protectorate' ? "bg-cyan-950/20" : "bg-yellow-950/20"
         )}
       >
+        {/* Tech decoration - top line */}
+        <div className={cn(
+          "absolute top-0 left-0 right-0 h-px",
+          data.faction === 'polaris' ? "bg-red-600/20" : data.faction === 'protectorate' ? "bg-cyan-600/20" : "bg-yellow-600/20"
+        )} />
+
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 md:gap-2 flex-wrap">
             {isCollapsed ? (isManualCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />) : <ChevronUp className="w-4 h-4" />}
             {unit.instanceNumber && (
-              <span className="text-lg font-bold text-slate-400">{formatUnitNumber(unit)}</span>
+              <span className="text-base md:text-lg font-mono font-bold text-slate-400">{formatUnitNumber(unit)}</span>
             )}
-            <h3 className="font-bold text-xs md:text-sm uppercase tracking-wide truncate">{data.name}</h3>
-            <span className="text-[9px] md:text-[10px] opacity-50 font-medium">{data.cost} ОЧК.</span>
+            <h3 className="font-mono font-bold text-xs md:text-sm uppercase tracking-wide truncate">{data.name}</h3>
+            <span className="text-[9px] md:text-[10px] opacity-50 font-mono">{data.cost} ОЧК.</span>
             {isSquad && (
               <div className={cn(
-                "flex items-center gap-0.5 md:gap-1 px-1 md:px-1.5 py-0.5 rounded text-[7px] md:text-[8px] font-black uppercase tracking-tighter",
-                unit.grenadesUsed ? "bg-red-900/40 text-red-400 border border-red-900/50" : "bg-green-900/40 text-green-400 border border-green-900/50"
+                "flex items-center gap-0.5 md:gap-1 px-1 md:px-1.5 py-0.5 rounded-sm text-[7px] md:text-[8px] font-mono font-black uppercase tracking-tighter border",
+                unit.grenadesUsed ? "bg-red-950/30 text-red-400 border-red-700/50" : "bg-emerald-950/30 text-emerald-400 border-emerald-700/50"
               )}>
                 <Bomb className="w-2 h-2 md:w-2.5 md:h-2.5" />
                 <span className="hidden sm:inline">{unit.grenadesUsed ? 'Пусто' : '1'}</span>
               </div>
             )}
-            {isAllDead && <div className="bg-red-600 text-white text-[7px] md:text-[8px] px-1 md:px-1.5 py-0.5 rounded font-black uppercase"><UserX className="w-2.5 h-2.5 md:w-3 md:h-3 inline mr-0.5 md:mr-1" />УНИЧТОЖЕН</div>}
+            {isAllDead && <div className="bg-red-950/50 text-red-400 border border-red-700 text-[7px] md:text-[8px] px-1 md:px-1.5 py-0.5 rounded-sm font-mono font-black uppercase"><UserX className="w-2.5 h-2.5 md:w-3 md:h-3 inline mr-0.5 md:mr-1" />УНИЧТОЖЕН</div>}
           </div>
-          <div className="text-[9px] md:text-[10px] opacity-50 flex gap-1.5 md:gap-2 items-center">
-            {isSquadDone && !isAllDead && <span className="text-green-400 font-bold ml-auto flex items-center gap-1"><CheckCircle2 className="w-2.5 h-2.5 md:w-3 md:h-3" /> <span className="hidden sm:inline">ГОТОВ</span></span>}
-            {isMachineDone && !isMachineDestroyed && <span className="text-green-400 font-bold ml-auto flex items-center gap-1"><CheckCircle2 className="w-2.5 h-2.5 md:w-3 md:h-3" /> <span className="hidden sm:inline">ГОТОВ</span></span>}
-            {isMachineDestroyed && <div className="bg-red-600 text-white text-[7px] md:text-[8px] px-1 md:px-1.5 py-0.5 rounded font-black uppercase ml-auto"><UserX className="w-2.5 h-2.5 md:w-3 md:h-3 inline mr-0.5 md:mr-1" />УНИЧТОЖЕН</div>}
+          <div className="text-[9px] md:text-[10px] opacity-50 flex gap-1.5 md:gap-2 items-center font-mono">
+            {isSquadDone && !isAllDead && <span className="text-emerald-400 font-bold ml-auto flex items-center gap-1"><CheckCircle2 className="w-2.5 h-2.5 md:w-3 md:h-3" /> <span className="hidden sm:inline">ГОТОВ</span></span>}
+            {isMachineDone && !isMachineDestroyed && <span className="text-emerald-400 font-bold ml-auto flex items-center gap-1"><CheckCircle2 className="w-2.5 h-2.5 md:w-3 md:h-3" /> <span className="hidden sm:inline">ГОТОВ</span></span>}
+            {isMachineDestroyed && <div className="bg-red-950/50 text-red-400 border border-red-700 text-[7px] md:text-[8px] px-1 md:px-1.5 py-0.5 rounded-sm font-mono font-black uppercase ml-auto"><UserX className="w-2.5 h-2.5 md:w-3 md:h-3 inline mr-0.5 md:mr-1" />УНИЧТОЖЕН</div>}
           </div>
         </div>
         <div className="flex gap-0.5 md:gap-1" onClick={e => e.stopPropagation()}>
@@ -457,7 +471,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                 });
               }
             }}
-            className="p-1.5 md:p-1 hover:bg-white/10 rounded transition-colors min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center"
+            className="p-1.5 md:p-1 hover:bg-white/10 rounded-sm transition-colors min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border border-slate-700/50"
             title="Сбросить ходы"
           >
             <RotateCcw className="w-4 h-4 opacity-50" />
@@ -485,13 +499,22 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                   <div
                     key={idx}
                     className={cn(
-                      "p-1.5 md:p-2 rounded-lg border flex gap-2 md:gap-3 transition-all relative overflow-hidden",
-                      isDead ? "bg-slate-950 border-slate-800 opacity-40 grayscale" :
-                      isDone ? "bg-slate-900/50 border-slate-700 opacity-80" : "bg-slate-700/30 border-slate-600",
-                      isPilot && !isDead ? "border-blue-700/50" : ""
+                      "relative p-1.5 md:p-2 rounded-sm border flex gap-2 md:gap-3 transition-all overflow-hidden",
+                      isDead ? "bg-slate-950/80 border-slate-800 opacity-40 grayscale" :
+                      isDone ? "bg-slate-900/40 border-slate-700/50 opacity-70" : "bg-slate-800/30 border-slate-700/50",
+                      isPilot && !isDead ? "border-cyan-700/40" : ""
                     )}
                   >
-                    <div className="w-12 h-12 md:w-16 md:h-16 rounded-md border border-slate-600 overflow-hidden flex-shrink-0 bg-slate-900 relative">
+                    {/* Tech corners for pilot */}
+                    {isPilot && !isDead && (
+                      <>
+                        <div className="absolute top-0 left-0 w-1.5 h-1.5 border-l border-t border-cyan-500/40" />
+                        <div className="absolute top-0 right-0 w-1.5 h-1.5 border-r border-t border-cyan-500/40" />
+                      </>
+                    )}
+
+                    {/* Soldier image with tactical frame */}
+                    <div className="relative w-12 h-12 md:w-16 md:h-16 rounded-sm border-2 border-slate-700 overflow-hidden flex-shrink-0 bg-slate-900">
                       <Image
                         src={getSoldierImage(idx)}
                         alt={`Солдат ${idx + 1}`}
@@ -500,33 +523,43 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                         className="w-full h-full object-cover object-center"
                         unoptimized
                       />
-                      {/* Pilot Badge Overlay */}
+                      {/* Pilot Badge Overlay - Tech Style */}
                       {isPilot && !isDead && (
-                        <div className="absolute bottom-0 left-0 right-0 bg-blue-900/90 text-[6px] md:text-[7px] font-bold text-center text-blue-200 py-0.5">
+                        <div className="absolute bottom-0 left-0 right-0 bg-cyan-950/90 text-[6px] md:text-[7px] font-mono font-bold text-center text-cyan-200 py-0.5 border-t border-cyan-700/50">
                           ПИЛОТ
                         </div>
                       )}
+                      {/* Tech decoration */}
+                      <div className="absolute top-0.5 left-0.5 w-1 h-1 bg-slate-700/30" />
+                      <div className="absolute bottom-0.5 right-0.5 w-1 h-1 bg-slate-700/30" />
                     </div>
 
                     <div className="flex-1 flex flex-col justify-between min-w-0">
                       <div className="flex justify-between items-start gap-1">
-                        {/* Action Buttons - Left Side */}
+                        {/* Action Buttons - Weapon System Controls */}
                         <div className="flex gap-0.5 md:gap-1 flex-1 min-w-0">
-                          {/* Shot Button - Orange */}
+                          {/* Shot Button - Amber */}
                           <button
                             disabled={isDone || isDead || actions.shot}
                             onClick={() => handleSoldierShotAction(idx)}
                             className={cn(
-                              "p-1.5 md:p-2 rounded-lg transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center gap-1",
-                              "text-white border-2 text-xs font-bold",
+                              "relative p-1.5 md:p-2 rounded-sm transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center gap-1 overflow-hidden",
+                              "border-2 text-xs font-mono font-bold uppercase tracking-wider",
                               !unit.grenadesUsed ? "flex-1" : "flex-1 sm:flex-1",
                               actions.shot
-                                ? "bg-orange-900/40 border-orange-700/50 text-orange-700"
-                                : "bg-orange-600 hover:bg-orange-500 border-orange-500 active:scale-95"
+                                ? "bg-amber-950/40 border-amber-800/50 text-amber-700"
+                                : "bg-amber-950/20 hover:bg-amber-950/40 border-amber-700/50 text-amber-400 active:scale-95"
                             )}
                             title="Выстрел"
                             aria-label="Атаковать"
                           >
+                            {/* Tech decoration */}
+                            {!actions.shot && !isDone && !isDead && (
+                              <>
+                                <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-amber-600/40" />
+                                <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-amber-600/40" />
+                              </>
+                            )}
                             <Target className="w-4 h-4 md:w-5 md:h-5" />
                             <span className="hidden sm:inline">ВЫСТРЕЛ</span>
                           </button>
@@ -536,97 +569,139 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                             disabled={isDone || isDead || actions.melee}
                             onClick={() => handleSoldierMeleeAction(idx)}
                             className={cn(
-                              "p-1.5 md:p-2 rounded-lg transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center gap-1",
-                              "text-white border-2 text-xs font-bold",
+                              "relative p-1.5 md:p-2 rounded-sm transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center gap-1 overflow-hidden",
+                              "border-2 text-xs font-mono font-bold uppercase tracking-wider",
                               !unit.grenadesUsed ? "flex-1" : "flex-1 sm:flex-1",
                               actions.melee
-                                ? "bg-red-900/40 border-red-700/50 text-red-700"
-                                : "bg-red-600 hover:bg-red-500 border-red-500 active:scale-95"
+                                ? "bg-red-950/40 border-red-800/50 text-red-700"
+                                : "bg-red-950/20 hover:bg-red-950/40 border-red-700/50 text-red-400 active:scale-95"
                             )}
                             title="Ближний бой"
                           >
+                            {/* Tech decoration */}
+                            {!actions.melee && !isDone && !isDead && (
+                              <>
+                                <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-red-600/40" />
+                                <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-red-600/40" />
+                              </>
+                            )}
                             <Sword className="w-4 h-4 md:w-5 md:h-5" />
-                            <span className="hidden sm:inline">БЛИЖНИЙ БОЙ</span>
+                            <span className="hidden sm:inline">БЛИЖНИЙ</span>
                           </button>
 
-                          {/* Action Button - For Grenade */}
+                          {/* Grenade Button - Emerald */}
                           {!unit.grenadesUsed && (
                             <button
                               disabled={isDone || isDead}
                               onClick={() => handleSoldierGrenadeAction(idx)}
                               className={cn(
-                                "p-1.5 md:p-2 rounded-lg transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center gap-1",
-                                "text-slate-800 border-2 border-slate-700 text-white hover:bg-slate-700 active:scale-95",
-                                "flex-1"
+                                "relative p-1.5 md:p-2 rounded-sm transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center gap-1 overflow-hidden",
+                                "border-2 text-xs font-mono font-bold uppercase tracking-wider",
+                                "flex-1 bg-emerald-950/20 hover:bg-emerald-950/40 border-emerald-700/50 text-emerald-400 active:scale-95"
                               )}
-                              style={{
-                                backgroundColor: `${faction?.color}20`,
-                                borderColor: `${faction?.color}40`
-                              }}
                               title="Граната"
                             >
+                              {/* Tech decoration */}
+                              <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-emerald-600/40" />
+                              <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-emerald-600/40" />
                               <Bomb className="w-4 h-4 md:w-5 md:h-5" />
-                              <span className="hidden sm:inline text-xs font-bold">ГРАНАТА</span>
+                              <span className="hidden sm:inline">ГРАНАТА</span>
                             </button>
                           )}
                         </div>
 
                         <div className="flex gap-0.5 md:gap-1 flex-shrink-0">
+                          {/* Done Button - Tech Toggle */}
                           <button
                             onClick={() => !isDead && toggleAction(idx, 'done')}
                             className={cn(
-                              "p-1.5 md:p-2 rounded-lg transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center",
-                              isDone ? "bg-green-600 text-white" : "bg-slate-800 text-slate-500 border border-slate-700"
+                              "relative p-1.5 md:p-2 rounded-sm transition-all min-w-[40px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border-2 overflow-hidden",
+                              isDone ? "bg-emerald-950/30 border-emerald-700/50 text-emerald-400" : "bg-slate-900/60 border-slate-700 text-slate-500 hover:bg-slate-800/60"
                             )}
                             title="Завершить ход бойца"
                           >
+                            {isDone && (
+                              <>
+                                <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-emerald-600/40" />
+                                <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-emerald-600/40" />
+                              </>
+                            )}
                             <CheckCircle2 className="w-4 h-4" />
                           </button>
+
+                          {/* KIA Button - Tech Toggle */}
                           <button
                             onClick={() => toggleDead(idx)}
-                            className={cn("text-[8px] md:text-[9px] px-1.5 md:px-2 py-1 md:py-0.5 rounded font-black uppercase tracking-tiller min-h-[44px] md:min-h-0 flex items-center justify-center", isDead ? "bg-red-900 text-red-100" : "bg-slate-800 text-slate-400 border border-slate-700")}
+                            className={cn("relative text-[8px] md:text-[9px] px-1.5 md:px-2 py-1 md:py-0.5 rounded-sm font-mono font-black uppercase tracking-wider min-h-[44px] md:min-h-0 flex items-center justify-center border-2 overflow-hidden transition-all",
+                              isDead ? "bg-red-950/40 border-red-700 text-red-300" : "bg-slate-900/60 border-slate-700 text-slate-500 hover:bg-slate-800/60"
+                            )}
                           >
+                            {isDead ? (
+                              <>
+                                <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-red-600/40" />
+                                <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-red-600/40" />
+                              </>
+                            ) : null}
                             {isDead ? 'УБИТ' : 'ЖИВ'}
                           </button>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 md:gap-4 mt-1.5 md:mt-2 flex-wrap">
-                        <div className="flex gap-2 md:gap-4 flex-1">
-                          <span className="flex items-center gap-0.5 md:gap-1 text-xs md:text-sm font-black text-yellow-500 bg-slate-900/50 px-1.5 md:px-2 py-0.5 rounded border border-yellow-900/30" title="Броня">
-                            <Shield className="w-3 h-3 md:w-4 md:h-4" /> {s.armor}
-                          </span>
-                          <span className="flex items-center gap-0.5 md:gap-1 text-xs md:text-sm font-black text-blue-400 bg-slate-900/50 px-1.5 md:px-2 py-0.5 rounded border border-blue-900/30" title="Скорость">
-                            <Zap className="w-3 h-3 md:w-4 md:h-4" /> {s.speed}
-                          </span>
-                        </div>
+                      {/* Stats Display - Tactical Readout */}
+                      <div className="flex items-center gap-2 md:gap-3 mt-1.5 md:mt-2 flex-wrap">
+                        {/* Armor Stat */}
+                        <span className="relative flex items-center gap-0.5 md:gap-1 text-xs md:text-sm font-mono font-black text-yellow-400 bg-slate-950/60 px-1.5 md:px-2 py-0.5 rounded-sm border border-yellow-900/30">
+                          <div className="absolute top-0 left-0 w-0.5 h-0.5 bg-yellow-600/40" />
+                          <Shield className="w-3 h-3 md:w-4 md:h-4" /> {s.armor}
+                        </span>
+
+                        {/* Speed Stat */}
+                        <span className="relative flex items-center gap-0.5 md:gap-1 text-xs md:text-sm font-mono font-black text-cyan-400 bg-slate-950/60 px-1.5 md:px-2 py-0.5 rounded-sm border border-cyan-900/30">
+                          <div className="absolute top-0 right-0 w-0.5 h-0.5 bg-cyan-600/40" />
+                          <Zap className="w-3 h-3 md:w-4 md:h-4" /> {s.speed}
+                        </span>
+
+                        {/* Dice Stats - Tech Display */}
                         <div className="flex gap-1.5 md:gap-2 ml-auto">
-                          <div className="bg-slate-900/80 px-1.5 md:px-2 py-0.5 rounded border border-slate-700 flex flex-col items-center">
-                            <span className="text-[6px] md:text-[7px] opacity-40 leading-none hidden sm:inline">ДАЛЬН</span>
-                            <span className="text-[9px] md:text-[10px] font-mono font-bold text-orange-400">{s.range}</span>
+                          {/* Range */}
+                          <div className="relative bg-slate-950/60 px-1.5 md:px-2 py-0.5 rounded-sm border border-slate-700/50 flex items-center gap-1">
+                            <span className="text-[6px] md:text-[7px] opacity-30 font-mono leading-none hidden sm:inline">ДАЛЬН</span>
+                            <span className="text-[9px] md:text-[10px] font-mono font-bold text-amber-400">{s.range}</span>
+                            <div className="absolute bottom-0 right-0 w-1 h-px bg-amber-600/20" />
                           </div>
-                          <div className="bg-slate-900/80 px-1.5 md:px-2 py-0.5 rounded border border-slate-700 flex flex-col items-center">
-                            <span className="text-[6px] md:text-[7px] opacity-40 leading-none hidden sm:inline">МОЩН</span>
+
+                          {/* Power */}
+                          <div className="relative bg-slate-950/60 px-1.5 md:px-2 py-0.5 rounded-sm border border-slate-700/50 flex items-center gap-1">
+                            <span className="text-[6px] md:text-[7px] opacity-30 font-mono leading-none hidden sm:inline">МОЩН</span>
                             <span className="text-[9px] md:text-[10px] font-mono font-bold text-red-400">{s.power}</span>
+                            <div className="absolute bottom-0 right-0 w-1 h-px bg-red-600/20" />
                           </div>
-                          <div className="bg-slate-900/80 px-1.5 md:px-2 py-0.5 rounded border border-slate-700 flex flex-col items-center">
-                            <span className="text-[6px] md:text-[7px] opacity-40 leading-none hidden sm:inline">БББ</span>
+
+                          {/* Melee */}
+                          <div className="relative bg-slate-950/60 px-1.5 md:px-2 py-0.5 rounded-sm border border-slate-700/50 flex items-center gap-1">
+                            <span className="text-[6px] md:text-[7px] opacity-30 font-mono leading-none hidden sm:inline">БББ</span>
                             <span className="text-[9px] md:text-[10px] font-mono font-bold text-red-400">{s.melee}</span>
+                            <div className="absolute bottom-0 right-0 w-1 h-px bg-red-600/20" />
                           </div>
                         </div>
                       </div>
 
-                      {/* Pilot Badge - clickable to navigate to machine */}
+                      {/* Pilot Badge - clickable to navigate to machine - Tech Style */}
                       {isPilot && !isDead && pilotedMachine && (
                         <button
                           onClick={() => onNavigateToUnit?.(pilotedMachine.instanceId)}
-                          className="mt-1.5 md:mt-2 w-full flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg bg-blue-900/30 border border-blue-700/50 hover:bg-blue-900/50 transition-colors group"
+                          className="relative mt-1.5 md:mt-2 w-full flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-sm bg-cyan-950/30 border-2 border-cyan-700/50 hover:bg-cyan-950/50 transition-colors group overflow-hidden"
                         >
-                          <Plane className="w-3 h-3 text-blue-400 group-hover:text-blue-300" />
-                          <span className="text-[9px] md:text-[10px] font-bold text-blue-300">
+                          {/* Tech decoration */}
+                          <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-cyan-600/40" />
+                          <div className="absolute top-0 right-0 w-1 h-1 border-r border-t border-cyan-600/40" />
+                          <div className="absolute bottom-0 left-0 w-1 h-1 border-l border-b border-cyan-600/40" />
+                          <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-cyan-600/40" />
+                          <Plane className="w-3 h-3 text-cyan-400" />
+                          <span className="text-[9px] md:text-[10px] font-mono font-bold text-cyan-300">
                             МАШИНА #{pilotedMachine.instanceNumber}
                           </span>
-                          <span className="text-[7px] md:text-[8px] text-blue-400/70 group-hover:text-blue-300/70 ml-auto">
+                          <span className="text-[7px] md:text-[8px] text-cyan-400/70 ml-auto font-mono">
                             →
                           </span>
                         </button>
@@ -638,73 +713,95 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
             </div>
           ) : (
             <div className="space-y-2">
-              {/* Machine Stats Header - Unified 2-row layout for all screen sizes */}
+              {/* Machine Stats Header - Tech Layout */}
               <div className="grid grid-cols-[1fr_auto] gap-2">
                 {/* === ROW 1: Durability+Speed | PILOT (spans 2 rows) === */}
-                {/* Durability + Speed Combined */}
-                <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-700 min-w-0">
+                {/* Durability + Speed Combined - Tactical Display */}
+                <div className="relative bg-slate-900/60 p-2 rounded-sm border border-slate-700/50">
+                  {/* Tech corners */}
+                  <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-slate-600/50" />
+                  <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-slate-600/50" />
+
                   <div className="flex justify-between items-center mb-1">
-                    <span className="text-[8px] md:text-[9px] opacity-50 uppercase font-bold flex items-center gap-1">
+                    <span className="text-[8px] md:text-[9px] font-mono opacity-40 uppercase flex items-center gap-1">
                       <Shield className="w-2.5 h-2.5 md:w-3 md:h-3" /> Прочность
                     </span>
-                    <span className="text-[8px] md:text-[9px] opacity-50 uppercase font-bold flex items-center gap-1">
+                    <span className="text-[8px] md:text-[9px] font-mono opacity-40 uppercase flex items-center gap-1">
                       <Zap className="w-2.5 h-2.5 md:w-3 md:h-3" /> Скорость
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    {/* Durability controls */}
+                    {/* Durability controls - Tech Style */}
                     <div className="flex-1 flex items-center gap-1">
-                      {/* Damage Button - Using Flame icon */}
+                      {/* Damage Button */}
                       <button
                         onClick={() => updateMachineStat('durability', -1)}
                         disabled={unit.currentDurability === 0}
                         className={cn(
-                          "w-9 h-9 md:w-10 md:h-10 rounded bg-red-900/40 hover:bg-red-900/60 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors min-w-[40px] min-h-[40px] border border-red-800/50 shrink-0",
+                          "relative w-9 h-9 md:w-10 md:h-10 rounded-sm bg-red-950/30 hover:bg-red-950/50 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors min-w-[40px] min-h-[40px] border-2 border-red-800/50 shrink-0 overflow-hidden",
                           getZoneColor(getDurabilityZone().color).text
                         )}
                         title="Нанести урон"
                       >
+                        <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-red-600/40" />
                         <Flame className="w-4 h-4" />
                       </button>
-                      <span className={cn("text-sm md:text-base font-black min-w-[20px] text-center shrink-0", getZoneColor(getDurabilityZone().color).text)}>
+
+                      {/* Durability Value */}
+                      <span className={cn("text-sm md:text-base font-mono font-black min-w-[20px] text-center shrink-0", getZoneColor(getDurabilityZone().color).text)}>
                         {unit.currentDurability}
                       </span>
+
                       {/* Repair Button */}
                       <button
                         onClick={() => updateMachineStat('durability', 1)}
                         disabled={unit.currentDurability === (data as Machine).durability_max}
                         className={cn(
-                          "w-9 h-9 md:w-10 md:h-10 rounded bg-green-900/40 hover:bg-green-900/60 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors min-w-[40px] min-h-[40px] border border-green-800/50 shrink-0",
+                          "relative w-9 h-9 md:w-10 md:h-10 rounded-sm bg-emerald-950/30 hover:bg-emerald-950/50 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors min-w-[40px] min-h-[40px] border-2 border-emerald-800/50 shrink-0 overflow-hidden",
                           getZoneColor(getDurabilityZone().color).text
                         )}
                         title="Ремонт"
                       >
+                        <div className="absolute top-0 right-0 w-1 h-1 border-r border-t border-emerald-600/40" />
                         <Wrench className="w-4 h-4" />
                       </button>
-                      {/* Progress bar */}
-                      <div className="h-1.5 bg-slate-950 rounded-full overflow-hidden flex-1 min-w-[20px]">
-                        <div
-                          className={cn("h-full transition-all", getZoneColor(getDurabilityZone().color).bar)}
-                          style={{ width: `${(unit.currentDurability! / (data as Machine).durability_max) * 100}%` }}
-                        />
+
+                      {/* Segmented Progress Bar - Military Style */}
+                      <div className="flex-1 flex items-center gap-px">
+                        {Array.from({ length: (data as Machine).durability_max }).map((_, i) => (
+                          <div
+                            key={i}
+                            className={cn(
+                              "h-2 rounded-sm transition-all flex-1",
+                              i < (unit.currentDurability || 0)
+                                ? getZoneColor(getDurabilityZone().color).bar
+                                : "bg-slate-800"
+                            )}
+                          />
+                        ))}
                       </div>
                     </div>
-                    {/* Speed display */}
+                    {/* Speed display - Tech Style */}
                     <div className="flex items-center gap-0.5 shrink-0">
-                      <Zap className="w-3 h-3 md:w-3.5 md:h-3.5 text-yellow-400 opacity-60" />
-                      <span className="text-sm md:text-base font-black text-yellow-400">
+                      <span className="text-sm md:text-base font-mono font-black text-yellow-400">
                         {getMachineSpeed()}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                {/* Pilot Button - Spans 2 rows with survival test overlay */}
-                <div className="row-span-2 w-14 h-28 md:w-16 md:h-28 shrink-0 relative">
+                {/* Pilot Button - Tech Frame with survival test overlay */}
+                <div className="row-span-2 w-12 h-28 md:w-14 md:h-28 shrink-0 relative">
                   <button
                     onClick={() => setShowPilotModal(true)}
-                    className="w-full h-full rounded-lg border border-slate-700 overflow-hidden bg-slate-900/80 relative"
+                    className="w-full h-full rounded-sm border-2 border-slate-700/50 overflow-hidden bg-slate-900/60 relative"
                   >
+                    {/* Tech corners */}
+                    <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-slate-600/40" />
+                    <div className="absolute top-0 right-0 w-1 h-1 border-r border-t border-slate-600/40" />
+                    <div className="absolute bottom-0 left-0 w-1 h-1 border-l border-b border-slate-600/40" />
+                    <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-slate-600/40" />
+
                     {unit.pilotInfo ? (
                       <>
                         <Image
@@ -715,12 +812,12 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                           unoptimized
                           alt="Пилот"
                         />
-                        {/* Status overlay */}
+                        {/* Status overlay - Tech Style */}
                         <div className={cn(
-                          "absolute bottom-0 left-0 right-0 text-[7px] md:text-[8px] font-bold text-center py-0.5",
+                          "absolute bottom-0 left-0 right-0 text-[7px] md:text-[8px] font-mono font-bold text-center py-0.5 border-t",
                           unit.pilotInfo.alive
-                            ? "bg-green-900/90 text-green-300"
-                            : "bg-red-900/90 text-red-300"
+                            ? "bg-emerald-950/90 text-emerald-300 border-emerald-700/50"
+                            : "bg-red-950/90 text-red-300 border-red-700/50"
                         )}>
                           {unit.pilotInfo.alive ? 'ЖИВ' : 'ПОГИБ'}
                         </div>
@@ -728,7 +825,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                     ) : (
                       <div className="w-full h-full flex flex-col items-center justify-center text-slate-600 gap-0.5">
                         <Plane className="w-5 h-5 md:w-6 md:h-6" />
-                        <span className="text-[8px] md:text-[9px] font-bold uppercase">Пилот</span>
+                        <span className="text-[8px] md:text-[9px] font-mono font-bold uppercase">Пилот</span>
                       </div>
                     )}
                   </button>
@@ -759,38 +856,59 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                 </div>
 
                 {/* === ROW 2: Ammo+Shots | (pilot continues) === */}
-                {/* Ammo + Shots Combined */}
-                <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-700 min-w-0">
+                {/* Ammo + Shots Combined - Tactical Display */}
+                <div className="relative bg-slate-900/60 p-2 rounded-sm border border-slate-700/50">
+                  {/* Tech corners */}
+                  <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-slate-600/50" />
+                  <div className="absolute top-0 right-0 w-1 h-1 border-r border-t border-slate-600/50" />
+                  <div className="absolute bottom-0 left-0 w-1 h-1 border-l border-b border-slate-600/50" />
+                  <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-slate-600/50" />
+
                   <div className="flex justify-between items-center mb-1">
-                    <span className="text-[8px] md:text-[9px] opacity-50 uppercase font-bold flex items-center gap-1">
+                    <span className="text-[8px] md:text-[9px] font-mono opacity-40 uppercase flex items-center gap-1">
                       <Bomb className="w-2.5 h-2.5 md:w-3 md:h-3" /> Боезапас
                     </span>
-                    <span className="text-[8px] md:text-[9px] opacity-50 uppercase font-bold flex items-center gap-1">
+                    <span className="text-[8px] md:text-[9px] font-mono opacity-40 uppercase flex items-center gap-1">
                       <Target className="w-2.5 h-2.5 md:w-3 md:h-3" /> Выстрелы
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    {/* Ammo progress bar */}
-                    <div className="flex-1 min-w-0 flex items-center gap-1">
-                      <div className="h-1.5 bg-slate-950 rounded-full overflow-hidden flex-1">
-                        <div
-                          className="h-full bg-blue-500 transition-all"
-                          style={{ width: `${(unit.currentAmmo! / (data as Machine).ammo_max) * 100}%` }}
-                        />
+                    {/* Ammo progress bar - Segmented */}
+                    <div className="flex-1 flex items-center gap-1">
+                      <div className="flex-1 flex items-center gap-px">
+                        {Array.from({ length: (data as Machine).ammo_max }).map((_, i) => (
+                          <div
+                            key={i}
+                            className={cn(
+                              "h-2 rounded-sm transition-all flex-1",
+                              i < (unit.currentAmmo || 0)
+                                ? "bg-blue-500"
+                                : "bg-slate-800"
+                            )}
+                          />
+                        ))}
                       </div>
-                      <span className="text-[9px] md:text-xs font-black text-blue-400 min-w-[38px] text-right shrink-0">
+                      <span className="text-[9px] md:text-xs font-mono font-black text-blue-400 min-w-[38px] text-right shrink-0">
                         {unit.currentAmmo}/{(data as Machine).ammo_max}
                       </span>
                     </div>
-                    {/* Shots count */}
+
+                    {/* Shots count - Segmented */}
                     <div className="flex items-center gap-1 shrink-0">
-                      <div className="h-1.5 bg-slate-950 rounded-full overflow-hidden w-10">
-                        <div
-                          className="h-full bg-orange-500 transition-all"
-                          style={{ width: `${Math.min(100, ((unit.machineShotsUsed || 0) / (data as Machine).fire_rate) * 100)}%` }}
-                        />
+                      <div className="flex gap-px">
+                        {Array.from({ length: (data as Machine).fire_rate }).map((_, i) => (
+                          <div
+                            key={i}
+                            className={cn(
+                              "h-2 rounded-sm transition-all flex-1",
+                              i < ((unit.machineShotsUsed || 0))
+                                ? "bg-amber-500"
+                                : "bg-slate-800"
+                            )}
+                          />
+                        ))}
                       </div>
-                      <span className="text-[9px] md:text-xs font-black text-orange-400 min-w-[35px] text-right">
+                      <span className="text-[9px] md:text-xs font-mono font-black text-amber-400 min-w-[35px] text-right">
                         {unit.machineShotsUsed || 0}/{(data as Machine).fire_rate}
                       </span>
                     </div>
@@ -798,9 +916,40 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                 </div>
               </div>
 
-              {/* Weapons List - like soldier cards */}
-              <div className="space-y-1.5 md:space-y-2">
-                {getSelectedWeapons().map(({ weapon, originalIndex: weaponIdx }) => {
+              {/* Weapons List - Tactical Weapon Cards */}
+              <div className="flex gap-2">
+                {/* Machine Photo - Left side, 1/4 width */}
+                <div className="relative w-1/4 h-auto shrink-0">
+                  <div
+                    onClick={handleOpenOriginal}
+                    className="w-full h-full rounded-sm border-2 border-slate-700/50 overflow-hidden bg-slate-900/60 relative cursor-pointer hover:border-slate-600/50 transition-colors"
+                  >
+                    {/* Tech corners */}
+                    <div className="absolute top-0 left-0 w-1.5 h-1.5 border-l border-t border-slate-600/40" />
+                    <div className="absolute top-0 right-0 w-1.5 h-1.5 border-r border-t border-slate-600/40" />
+                    <div className="absolute bottom-0 left-0 w-1.5 h-1.5 border-l border-b border-slate-600/40" />
+                    <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-r border-b border-slate-600/40" />
+
+                    {machineImage ? (
+                      <Image
+                        src={machineImage}
+                        alt={data.name}
+                        width={64}
+                        height={200}
+                        className="w-full h-auto object-cover object-center"
+                        unoptimized
+                      />
+                    ) : (
+                      <div className="w-full aspect-[3/10] flex items-center justify-center text-slate-700">
+                        <Plane className="w-6 h-6" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Weapons - Right side */}
+                <div className="flex-1 space-y-1.5 md:space-y-2">
+                  {getSelectedWeapons().map(({ weapon, originalIndex: weaponIdx }) => {
                   const weaponShots = unit.machineWeaponShots?.[weaponIdx] || 0;
                   const totalShotsUsed = unit.machineShotsUsed || 0;
                   const fireRate = (data as Machine).fire_rate;
@@ -815,44 +964,52 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                     <div
                       key={weaponIdx}
                       className={cn(
-                        "p-2 md:p-2.5 rounded-lg border flex gap-2 md:gap-3 transition-all relative overflow-hidden",
-                        isMachineDestroyed ? "bg-slate-950 border-slate-800 opacity-40 grayscale" :
-                        isMachineDone ? "bg-slate-900/50 border-slate-700 opacity-80" :
-                        weaponShots > 0 ? "bg-orange-900/20 border-orange-700/50" : "bg-slate-700/30 border-slate-600"
+                        "relative p-2 md:p-2.5 rounded-sm border flex gap-2 md:gap-3 transition-all overflow-hidden",
+                        isMachineDestroyed ? "bg-slate-950/80 border-slate-800 opacity-40 grayscale" :
+                        isMachineDone ? "bg-slate-900/40 border-slate-700/50 opacity-70" :
+                        weaponShots > 0 ? "bg-amber-950/20 border-amber-700/40" : "bg-slate-800/30 border-slate-700/50"
                       )}
                     >
-                      {/* Weapon Icon */}
-                      <div className="w-12 h-12 md:w-16 md:h-16 rounded-md border border-slate-600 overflow-hidden flex-shrink-0 bg-slate-900 flex items-center justify-center">
-                        <Target className={cn(
-                          "w-6 h-6 md:w-8 md:h-8",
-                          canShoot ? "text-orange-400" : weaponShots > 0 ? "text-orange-700" : "text-slate-600"
-                        )} />
-                      </div>
+                      {/* Tech corners for active weapon */}
+                      {canShoot && (
+                        <>
+                          <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-amber-600/30" />
+                          <div className="absolute top-0 right-0 w-1 h-1 border-r border-t border-amber-600/30" />
+                        </>
+                      )}
 
                       <div className="flex-1 flex flex-col justify-between min-w-0">
                         {/* Top row: Action button + controls */}
                         <div className="flex justify-between items-start gap-2">
-                          {/* Combat Action Button - only show for non-melee weapons */}
+                          {/* Fire Control Button */}
                           {!isMeleeWeapon && (
                             <button
                               disabled={!canShoot}
                               onClick={() => handleVehicleAttack(weaponIdx)}
                               className={cn(
-                                "px-2 md:px-3 py-1.5 md:py-2 rounded-lg transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center gap-1.5",
-                                "text-white font-bold text-xs md:text-sm border-2",
+                                "relative p-2 md:p-2.5 rounded-sm transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center gap-1.5 overflow-hidden",
+                                "border-2 text-xs md:text-sm font-mono font-bold uppercase tracking-wider",
                                 canShoot
-                                  ? "bg-orange-600 hover:bg-orange-500 border-orange-500 shadow-lg shadow-orange-900/50 active:scale-95"
-                                  : "bg-slate-800 text-slate-600 border-slate-700 cursor-not-allowed opacity-50"
+                                  ? "bg-amber-950/20 hover:bg-amber-950/40 border-amber-700/50 text-amber-400 shadow-lg shadow-amber-900/30 active:scale-95"
+                                  : "bg-slate-900/60 text-slate-600 border-slate-700 cursor-not-allowed opacity-50"
                               )}
                               title="Атака с этим оружием"
                             >
+                              {canShoot && (
+                                <>
+                                  <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-amber-600/40" />
+                                  <div className="absolute top-0 right-0 w-1 h-1 border-r border-t border-amber-600/40" />
+                                  <div className="absolute bottom-0 left-0 w-1 h-1 border-l border-b border-amber-600/40" />
+                                  <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-amber-600/40" />
+                                </>
+                              )}
                               <Dices className="w-4 h-4 md:w-5 md:h-5" />
                               <span className="hidden sm:inline">ВЫСТРЕЛ</span>
                             </button>
                           )}
 
                           <div className="flex gap-0.5 md:gap-1 flex-shrink-0">
-                            {/* Done button */}
+                            {/* Done Button - Tech Toggle */}
                             <button
                               onClick={() => {
                                 const newWeaponShots = {
@@ -867,14 +1024,21 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                               }}
                               disabled={weaponShots > 0 || isMachineDone || isMachineDestroyed}
                               className={cn(
-                                "p-1.5 md:p-2 rounded-lg transition-all min-w-[40px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center",
-                                weaponShots > 0 ? "bg-orange-600 text-white" : "bg-slate-800 text-slate-500 border border-slate-700"
+                                "relative p-1.5 md:p-2 rounded-sm transition-all min-w-[40px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border-2 overflow-hidden",
+                                weaponShots > 0 ? "bg-amber-950/30 border-amber-700/50 text-amber-400" : "bg-slate-900/60 border-slate-700 text-slate-500 hover:bg-slate-800/60 disabled:opacity-50"
                               )}
                               title="Ометить как выстреливший"
                             >
+                              {weaponShots > 0 && (
+                                <>
+                                  <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-amber-600/40" />
+                                  <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-amber-600/40" />
+                                </>
+                              )}
                               <CheckCircle2 className="w-4 h-4" />
                             </button>
-                            {/* Reset button */}
+
+                            {/* Reset Button */}
                             <button
                               onClick={() => {
                                 const newWeaponShots = { ...(unit.machineWeaponShots || {}) };
@@ -887,8 +1051,8 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                               }}
                               disabled={weaponShots === 0}
                               className={cn(
-                                "p-1.5 md:p-2 rounded-lg transition-all min-w-[40px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center",
-                                weaponShots === 0 ? "bg-slate-800 text-slate-600 border border-slate-700 opacity-50" : "bg-slate-700 text-slate-300 border border-slate-600"
+                                "relative p-1.5 md:p-2 rounded-sm transition-all min-w-[40px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border-2 overflow-hidden",
+                                weaponShots === 0 ? "bg-slate-900/60 border-slate-700 text-slate-600 opacity-50" : "bg-slate-800/60 border-slate-600 text-slate-400 hover:bg-slate-700/60"
                               )}
                               title="Сбросить выстрел"
                             >
@@ -897,15 +1061,19 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                           </div>
                         </div>
 
-                        {/* Weapon Stats */}
+                        {/* Weapon Stats - Tactical Readout */}
                         <div className="flex items-center gap-2 md:gap-3 mt-2 md:mt-1.5 flex-wrap">
-                          <span className="font-bold text-sm md:text-sm truncate">{weapon.name}</span>
+                          <span className="font-mono font-bold text-sm md:text-sm truncate">{weapon.name}</span>
                           <div className="flex gap-1.5 md:gap-2 ml-auto">
-                            <div className="bg-slate-900/80 px-2 py-1 rounded border border-slate-700 flex items-center gap-1">
-                              <span className="text-[9px] md:text-[10px] font-mono font-bold text-orange-400">{weapon.range}</span>
+                            {/* Range Stat */}
+                            <div className="relative bg-slate-950/60 px-2 py-1 rounded-sm border border-slate-700/50 flex items-center gap-1">
+                              <span className="text-[9px] md:text-[10px] font-mono font-bold text-amber-400">{weapon.range}</span>
+                              <div className="absolute bottom-0 right-0 w-1 h-px bg-amber-600/20" />
                             </div>
-                            <div className="bg-slate-900/80 px-2 py-1 rounded border border-slate-700 flex items-center gap-1">
+                            {/* Power Stat */}
+                            <div className="relative bg-slate-950/60 px-2 py-1 rounded-sm border border-slate-700/50 flex items-center gap-1">
                               <span className="text-[9px] md:text-[10px] font-mono font-bold text-red-400">{weapon.power}</span>
+                              <div className="absolute bottom-0 right-0 w-1 h-px bg-red-600/20" />
                             </div>
                           </div>
                         </div>
@@ -913,12 +1081,12 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                         {/* Weapon Status Badge */}
                         <div className="flex items-center gap-2 mt-1">
                           {weaponShots > 0 && (
-                            <span className="text-[8px] md:text-[9px] px-1.5 py-0.5 rounded bg-orange-900/50 text-orange-400 font-bold uppercase">
+                            <span className="text-[8px] md:text-[9px] px-1.5 py-0.5 rounded-sm bg-amber-950/30 text-amber-400 font-mono font-bold uppercase border border-amber-700/50">
                               ВЫСТРЕЛИЛ
                             </span>
                           )}
                           {weapon.special && (
-                            <span className="text-[8px] md:text-[9px] px-1.5 py-0.5 rounded bg-purple-900/50 text-purple-400 font-bold uppercase truncate">
+                            <span className="text-[8px] md:text-[9px] px-1.5 py-0.5 rounded-sm bg-purple-950/30 text-purple-400 font-mono font-bold uppercase border border-purple-700/50 truncate">
                               {typeof weapon.special === 'string' ? weapon.special : 'Особый'}
                             </span>
                           )}
@@ -927,9 +1095,10 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                     </div>
                   );
                 })}
+                </div>
               </div>
 
-              {/* Machine Actions Footer */}
+              {/* Machine Actions Footer - Tactical Controls */}
               <div className="flex gap-1 md:gap-1.5 mt-2 pt-2 border-t border-slate-700">
                 <button
                   disabled={isMachineDone || isMachineDestroyed}
@@ -938,21 +1107,34 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                     combatController.selectAction('melee');
                   }}
                   className={cn(
-                    "flex-1 p-2 md:p-2.5 rounded-lg transition-colors min-h-[44px] md:min-h-0 flex items-center justify-center gap-1.5 text-xs font-bold",
-                    unit.isMachineMelee ? "bg-red-600 text-white" : "bg-slate-800 text-slate-400 border border-slate-700"
+                    "relative flex-1 p-2 md:p-2.5 rounded-sm transition-colors min-h-[44px] md:min-h-0 flex items-center justify-center gap-1.5 text-xs font-mono font-bold uppercase tracking-wider border-2 overflow-hidden",
+                    unit.isMachineMelee ? "bg-red-950/30 border-red-700 text-red-400" : "bg-slate-900/60 border-slate-700 text-slate-500 hover:bg-slate-800/60"
                   )}
                 >
+                  {unit.isMachineMelee && (
+                    <>
+                      <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-red-600/40" />
+                      <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-red-600/40" />
+                    </>
+                  )}
                   <Sword className="w-4 h-4" />
                   <span className="hidden sm:inline">ТАРАН</span>
                 </button>
+
                 <button
                   onClick={() => !isMachineDestroyed && updateUnit({ ...unit, isMachineDone: !unit.isMachineDone })}
                   disabled={isMachineDestroyed}
                   className={cn(
-                    "flex-1 p-2 md:p-2.5 rounded-lg transition-colors min-h-[44px] md:min-h-0 flex items-center justify-center gap-1.5 text-xs font-bold",
-                    isMachineDone ? "bg-green-600 text-white" : "bg-slate-800 text-slate-400 border border-slate-700"
+                    "relative flex-1 p-2 md:p-2.5 rounded-sm transition-colors min-h-[44px] md:min-h-0 flex items-center justify-center gap-1.5 text-xs font-mono font-bold uppercase tracking-wider border-2 overflow-hidden",
+                    isMachineDone ? "bg-emerald-950/30 border-emerald-700 text-emerald-400" : "bg-slate-900/60 border-slate-700 text-slate-500 hover:bg-slate-800/60"
                   )}
                 >
+                  {isMachineDone && (
+                    <>
+                      <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-emerald-600/40" />
+                      <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-emerald-600/40" />
+                    </>
+                  )}
                   <CheckCircle2 className="w-4 h-4" />
                   <span className="hidden sm:inline">{isMachineDone ? 'ГОТОВО' : 'ЗАВЕРШИТЬ'}</span>
                 </button>
@@ -980,32 +1162,44 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                       className="w-full h-full object-cover object-center scale-150"
                       unoptimized
                     />
+                    {/* Tech decoration */}
+                    <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-slate-600/40" />
                   </div>
                 ))}
                 {(data as Squad).soldiers.length > 3 && (
-                  <div className="w-6 h-6 rounded-full border border-slate-700 bg-slate-900 flex items-center justify-center text-[8px] font-bold ring-2 ring-slate-800">
+                  <div className="w-6 h-6 rounded-full border border-slate-700 bg-slate-900 flex items-center justify-center text-[8px] font-mono font-bold ring-2 ring-slate-800">
                     +{(data as Squad).soldiers.length - 3}
                   </div>
                 )}
               </div>
-              <div className="text-[10px] font-bold opacity-60">
+              <div className="text-[10px] font-mono font-bold opacity-60">
                 ЖИВЫХ: <span className="text-white">{(data as Squad).soldiers.length - (unit.deadSoldiers?.length || 0)}/{(data as Squad).soldiers.length}</span>
               </div>
             </div>
           ) : (
             <div className="flex gap-4 items-center flex-1">
+              {/* Durability - Tech Display */}
               <div className="flex items-center gap-2">
-                <Heart className={cn("w-3 h-3", isMachineDestroyed ? "text-red-500" : "text-green-500")} />
-                <span className={cn("text-[10px] font-bold", isMachineDestroyed ? "text-red-400" : "text-white")}>
-                  {unit.currentDurability} HP
-                </span>
+                <div className="relative">
+                  <div className="absolute -top-0.5 -left-0.5 w-4 h-4 border border-slate-600/20" />
+                  <Heart className={cn("w-3 h-3", isMachineDestroyed ? "text-red-500" : "text-emerald-500")} />
+                  <span className={cn("text-[10px] font-mono font-bold", isMachineDestroyed ? "text-red-400" : "text-emerald-400")}>
+                    {unit.currentDurability} HP
+                  </span>
+                </div>
               </div>
+
+              {/* Ammo - Tech Display */}
               <div className="flex items-center gap-2">
-                <Bomb className="w-3 h-3 text-blue-400" />
-                <span className="text-[10px] font-bold text-white">{unit.currentAmmo} AMMO</span>
+                <div className="relative">
+                  <div className="absolute -top-0.5 -left-0.5 w-4 h-4 border border-slate-600/20" />
+                  <Bomb className="w-3 h-3 text-blue-400" />
+                  <span className="text-[10px] font-mono font-bold text-blue-400">{unit.currentAmmo} AMMO</span>
+                </div>
               </div>
+
               {isMachineDestroyed && (
-                <div className="ml-auto text-[8px] font-black uppercase text-red-400">
+                <div className="ml-auto text-[8px] font-mono font-black uppercase text-red-400 bg-red-950/50 border border-red-700 px-1 py-0.5 rounded-sm">
                   УНИЧТОЖЕН
                 </div>
               )}

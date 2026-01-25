@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## AI Model Rate Limits (GLM)
 
-**Important**: When using GLM model (glm-4.6), plan work according to rate limits:
+**Important**: When using GLM models (glm-4.6, glm-4.5, glm-4.7), plan work according to rate limits:
 - **Rate Limits**: See https://z.ai/manage-apikey/rate-limits#rate-limits
 - **Strategy**: Break large tasks into smaller chunks to avoid timeouts
 - **File Operations**: Edit files incrementally rather than rewriting entire files at once
