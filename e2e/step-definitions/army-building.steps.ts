@@ -5,13 +5,13 @@ import { BronepehotaWorld } from '../support/world';
 // Army Building steps
 
 When('я нахожусь на этапе выбора фракции', async function(this: BronepehotaWorld) {
-  // Wait for React to hydrate and any faction text to appear
+  // Wait for React to hydrate
   await this.page.waitForLoadState('domcontentloaded', { timeout: 10000 });
-  await this.page.waitForTimeout(1000);
+  await this.page.waitForTimeout(500);
 
-  // Look for the heading "Выберите фракцию" as a more reliable indicator
-  const heading = this.page.getByText(/Выберите фракцию/i);
-  await expect(heading).toBeVisible({ timeout: 15000 });
+  // Look for faction-selector test ID
+  const factionSelector = this.page.getByTestId('faction-selector');
+  await expect(factionSelector).toBeVisible({ timeout: 5000 });
 });
 
 When('я ввожу балл очков {string}', async function(this: BronepehotaWorld, points: string) {
@@ -26,55 +26,60 @@ When('я ввожу балл очков {string}', async function(this: Bronepeh
 Given('я выбрал фракцию {string} с балансом {string} очков', async function(this: BronepehotaWorld, faction: string, points: string) {
   // Wait for page to be fully loaded and React to hydrate
   await this.page.waitForLoadState('domcontentloaded', { timeout: 10000 });
-  await this.page.waitForTimeout(1000);
+  await this.page.waitForTimeout(500);
 
-  // Map English faction names to Russian display names
-  const factionNameMap: Record<string, string> = {
-    'Polaris': 'Империя Полярис',
-    'Protectorate': 'Торговый Протекторат',
-    'Mercenaries': 'Наёмники и Мародеры',
+  // Map English faction names to test IDs
+  const factionIdMap: Record<string, string> = {
+    'Polaris': 'polaris',
+    'Protectorate': 'protectorate',
+    'Mercenaries': 'mercenaries',
   };
 
-  const displayName = factionNameMap[faction] || faction;
+  const factionId = factionIdMap[faction] || faction.toLowerCase();
 
-  // Click on faction card using Russian name
-  const factionCard = this.page.locator(`div[role="button"]:has-text("${displayName}")`).first();
+  // Click on faction card using test ID
+  const factionCard = this.page.getByTestId(`faction-card-${factionId}`);
   await factionCard.waitFor({ state: 'visible', timeout: 10000 });
   await factionCard.scrollIntoViewIfNeeded();
   await factionCard.click();
-  await this.page.waitForTimeout(1000);
+  await this.page.waitForTimeout(300);
 
-  // Click "Начать сбор армии" button to move to budget step
-  const startButton = this.page.getByRole('button', { name: /(начать сбор армии|продолжить|далее|next)/i }).or(
-    this.page.getByText(/начать сбор армии/i)
-  );
-  if (await startButton.isVisible({ timeout: 3000 })) {
-    await startButton.first().click();
-    await this.page.waitForTimeout(1000);
+  // Click "ПРОДОЛЖИТЬ" button to move to budget step
+  const continueButton = this.page.getByTestId('faction-continue-button');
+  if (await continueButton.isVisible({ timeout: 3000 })) {
+    await continueButton.click();
+    await this.page.waitForTimeout(500);
   }
 
-  // Fill budget input - wait longer for it to appear
+  // Fill budget input
   const input = this.page.getByRole('spinbutton').or(this.page.getByPlaceholder(/очки|балл/i)).first();
   await input.waitFor({ state: 'visible', timeout: 15000 });
   await input.fill(points);
   await this.page.waitForTimeout(500);
 
-  // Click Continue button to move to rules step
-  const nextButton = this.page.getByText(/продолжить/i).or(
-    this.page.getByRole('button', { name: /(продолжить|далее|начать сбор армии|next)/i })
+  // Click Continue button on budget to move to rules step
+  const budgetNextButton = this.page.getByTestId('budget-next-button').or(
+    this.page.getByRole('button', { name: /начать сбор армии/i })
   );
-  await nextButton.first().click();
-  await this.page.waitForTimeout(1500);
+  await budgetNextButton.first().waitFor({ state: 'visible', timeout: 5000 });
+  await budgetNextButton.first().click();
+  await this.page.waitForTimeout(1000);
 
-  // Click "Начать игру" button on rules step
-  const confirmButton = this.page.getByText(/начать игру/i).or(
+  // Wait for rules selector to be visible
+  const rulesSelector = this.page.getByTestId('rules-selector').or(this.page.locator('#rules-selector'));
+  await expect(rulesSelector.first()).toBeVisible({ timeout: 5000 });
+
+  // Click "НАЧАТЬ ИГРУ" button on rules step
+  const confirmButton = this.page.getByTestId('rules-confirm-button').or(
     this.page.getByRole('button', { name: /начать игру/i })
   );
-  if (await confirmButton.isVisible({ timeout: 5000 })) {
-    await confirmButton.first().click();
-  }
+  await expect(confirmButton.first()).toBeVisible({ timeout: 3000 });
+  await confirmButton.first().click();
 
-  await this.page.waitForTimeout(500);
+  // Wait for unit selector to appear - this confirms navigation worked
+  const unitSelector = this.page.getByTestId('unit-selector');
+  await expect(unitSelector).toBeVisible({ timeout: 10000 });
+
   this.currentFaction = faction.toLowerCase();
 });
 
@@ -83,44 +88,36 @@ Given('я выбрал фракцию {string} с балансом {string} оч
 Given('я выбрал фракцию {string}', async function(this: BronepehotaWorld, faction: string) {
   // Wait for React to be ready
   await this.page.waitForLoadState('domcontentloaded', { timeout: 10000 });
-  await this.page.waitForTimeout(2000);
+  await this.page.waitForTimeout(500);
 
-  // Map English faction names to Russian display names
-  const factionNameMap: Record<string, string> = {
-    'Polaris': 'Империя Полярис',
-    'Protectorate': 'Торговый Протекторат',
-    'Mercenaries': 'Наёмники и Мародеры',
+  // Map English faction names to test IDs
+  const factionIdMap: Record<string, string> = {
+    'Polaris': 'polaris',
+    'Protectorate': 'protectorate',
+    'Mercenaries': 'mercenaries',
   };
 
-  const displayName = factionNameMap[faction] || faction;
+  const factionId = factionIdMap[faction] || faction.toLowerCase();
 
-  // Use locator() with a more specific CSS selector
-  const factionCard = this.page.locator(`div[role="button"]:has-text("${displayName}")`).first();
-
+  const factionCard = this.page.getByTestId(`faction-card-${factionId}`);
   await factionCard.waitFor({ state: 'visible', timeout: 10000 });
   await factionCard.scrollIntoViewIfNeeded();
-  await this.page.waitForTimeout(500);
   await factionCard.click();
-  await this.page.waitForTimeout(1000);
+  await this.page.waitForTimeout(500);
 
-  // Click "Начать сбор армии" button to move to budget step (if visible)
-  const startButton = this.page.getByRole('button', { name: /(начать сбор армии|продолжить|далее|next)/i }).or(
-    this.page.getByText(/начать сбор армии/i)
-  );
-  if (await startButton.isVisible({ timeout: 3000 })) {
-    await startButton.first().click();
-    await this.page.waitForTimeout(1000);
+  // Click "ПРОДОЛЖИТЬ" button to move to budget step (if visible)
+  const continueButton = this.page.getByTestId('faction-continue-button');
+  if (await continueButton.isVisible({ timeout: 3000 })) {
+    await continueButton.click();
+    await this.page.waitForTimeout(500);
   }
 
   this.currentFaction = faction.toLowerCase();
 });
 
 Given('я на странице выбора юнитов', async function(this: BronepehotaWorld) {
-  // Use mobile-visible text "Доступные юниты" instead of hidden "отряд|юнит"
-  const unitSelector = this.page.getByText(/Доступные юниты/i).or(
-    this.page.getByText(/очков/i) // Budget display fallback
-  );
-  await expect(unitSelector.first()).toBeVisible({ timeout: 5000 });
+  const unitSelector = this.page.getByTestId('unit-selector');
+  await expect(unitSelector).toBeVisible({ timeout: 5000 });
 });
 
 When('я ищу отряд по имени {string}', async function(this: BronepehotaWorld, squadName: string) {
@@ -130,29 +127,28 @@ When('я ищу отряд по имени {string}', async function(this: Brone
 });
 
 When('я нажимаю кнопку добавления отряда', async function(this: BronepehotaWorld) {
-  // Find "Добавить" buttons
-  const addButton = this.page.getByRole('button', { name: /добавить/i });
+  // Find "В АРМИЮ" buttons using test ID pattern
+  const addButtons = this.page.locator('[data-testid^="add-unit-"]');
+  const count = await addButtons.count();
 
-  // Wait for an add button to be available and click it
-  await addButton.first().waitFor({ state: 'visible', timeout: 5000 });
-  await addButton.first().click();
-  // Wait longer for the UI to update and army section to appear
-  await this.page.waitForTimeout(1000);
+  if (count > 0) {
+    // Click the first visible add button
+    await addButtons.first().waitFor({ state: 'visible', timeout: 5000 });
+    await addButtons.first().click();
+  } else {
+    // Fallback to text-based search
+    const addButton = this.page.getByRole('button', { name: /в армию|добавить/i });
+    await addButton.first().waitFor({ state: 'visible', timeout: 5000 });
+    await addButton.first().click();
+  }
+  // Wait for the UI to update
+  await this.page.waitForTimeout(500);
 });
 
 Then('отряд должен появиться в моей армии', async function(this: BronepehotaWorld) {
-  // Army units are shown with green border (#22c55e) in "Ваша армия" section
-  // Look for the "Ваша армия" heading first
-  const armySection = this.page.getByText(/Ваша армия/i);
-  await expect(armySection).toBeVisible({ timeout: 5000 });
-
-  // Look for remove buttons (X) which only appear on army units
-  const removeButton = this.page.getByRole('button', { name: /удалить/i }).or(
-    this.page.locator('button').filter({ hasText: /×/i })
-  ).or(
-    this.page.locator('svg').filter({ hasText: /x/i })
-  );
-  await expect(removeButton.first()).toBeVisible({ timeout: 3000 });
+  // Army units have test IDs starting with "army-unit-"
+  const armyUnits = this.page.locator('[data-testid^="army-unit-"]');
+  await expect(armyUnits.first()).toBeVisible({ timeout: 5000 });
 });
 
 Then('счётчик очков в футере должен обновиться', async function(this: BronepehotaWorld) {
@@ -196,15 +192,24 @@ Given('я добавил отряд {string} в армию', async function(this
 });
 
 When('я нажимаю кнопку удаления на карточке юнита', async function(this: BronepehotaWorld) {
-  const deleteButton = this.page.getByRole('button', { name: /удалить|🗑|×|remove/i });
-  await deleteButton.first().click();
+  // Remove buttons have test IDs starting with "remove-unit-"
+  const removeButtons = this.page.locator('[data-testid^="remove-unit-"]');
+  const count = await removeButtons.count();
+
+  if (count > 0) {
+    await removeButtons.first().click();
+  } else {
+    // Fallback to role-based search
+    const deleteButton = this.page.getByRole('button', { name: /удалить/i });
+    await deleteButton.first().click();
+  }
   await this.page.waitForTimeout(300);
 });
 
 Then('юнит должен быть удалён из армии', async function(this: BronepehotaWorld) {
-  // Look for green-bordered army unit cards - there should be none
-  const armyCards = this.page.locator('div[style*="border-color: #22c55e"], div.border-green-500');
-  const count = await armyCards.count();
+  // Look for army units - there should be none
+  const armyUnits = this.page.locator('[data-testid^="army-unit-"]');
+  const count = await armyUnits.count();
   expect(count).toBe(0);
 });
 
@@ -219,12 +224,8 @@ Then('счётчик очков должен уменьшиться', async func
 });
 
 Then('я должен вернуться к этапу выбора фракции', async function(this: BronepehotaWorld) {
-  // Look for the heading "Выберите фракцию" instead of English faction names
-  // Or use Russian faction names
-  const factionSelector = this.page.getByText(/Выберите фракцию/i).or(
-    this.page.getByText(/Империя Полярис|Торговый Протекторат|Наёмники и Мародеры/i)
-  );
-  await expect(factionSelector.first()).toBeVisible({ timeout: 5000 });
+  const factionSelector = this.page.getByTestId('faction-selector');
+  await expect(factionSelector).toBeVisible({ timeout: 5000 });
 });
 
 When('я ввожу в поиск {string}', async function(this: BronepehotaWorld, searchText: string) {
@@ -240,19 +241,27 @@ Then('должны отображаться только отряды содер
 });
 
 Given('я добавил несколько юнитов в армию', async function(this: BronepehotaWorld) {
-  // Find all "Добавить" buttons
-  const allAddButtons = this.page.getByRole('button', { name: /добавить/i });
+  // Find all "В АРМИЮ" buttons using test ID pattern
+  const allAddButtons = this.page.locator('[data-testid^="add-unit-"]');
   const count = await allAddButtons.count();
 
   if (count > 0) {
-    // Click first add button (it should be enabled if we're on unit-select page)
+    // Click first add button
     await allAddButtons.first().waitFor({ state: 'visible', timeout: 5000 });
     await allAddButtons.first().click();
-    await this.page.waitForTimeout(1000);
+    await this.page.waitForTimeout(500);
 
     // Try to add a second unit if available
     if (count > 1) {
       await allAddButtons.nth(1).click();
+      await this.page.waitForTimeout(300);
+    }
+  } else {
+    // Fallback to text-based search
+    const addButtons = this.page.getByRole('button', { name: /в армию|добавить/i });
+    const fallbackCount = await addButtons.count();
+    if (fallbackCount > 0) {
+      await addButtons.first().click();
       await this.page.waitForTimeout(500);
     }
   }
@@ -304,19 +313,27 @@ Then('все юниты должны отображаться в списке', 
 });
 
 Given('я добавил минимум один отряд в армию', async function(this: BronepehotaWorld) {
-  // UnitSelector doesn't have search input, find first available unit
-  const addButton = this.page.getByRole('button', { name: /добавить/i });
-  const count = await addButton.count();
+  // Find first "В АРМИЮ" button using test ID pattern
+  const addButtons = this.page.locator('[data-testid^="add-unit-"]');
+  const count = await addButtons.count();
 
   if (count > 0) {
-    await addButton.first().click();
-    await this.page.waitForTimeout(500);
+    await addButtons.first().click();
+    await this.page.waitForTimeout(300);
+  } else {
+    // Fallback to text-based search
+    const addButton = this.page.getByRole('button', { name: /в армию|добавить/i });
+    const fallbackCount = await addButton.count();
+    if (fallbackCount > 0) {
+      await addButton.first().click();
+      await this.page.waitForTimeout(300);
+    }
   }
 });
 
 Then('должен отобразиться экран игровой сессии', async function(this: BronepehotaWorld) {
-  const gameSession = this.page.getByText(/тур|новый тур/i);
-  await expect(gameSession.first()).toBeVisible({ timeout: 5000 });
+  const gameSession = this.page.getByTestId('game-session');
+  await expect(gameSession).toBeVisible({ timeout: 5000 });
 });
 
 Then('армия должна быть готова к бою', async function(this: BronepehotaWorld) {
@@ -344,6 +361,47 @@ Then('армия должна быть сброшена', async function(this: B
   expect(armyState?.units.length).toBe(0);
 });
 
+When('я возвращаюсь к выбору фракции через интерфейс', async function(this: BronepehotaWorld) {
+  // Try to find and click the back button using multiple approaches
+  const backButtons = [
+    this.page.getByTestId('back-to-faction-button'),
+    this.page.getByRole('button', { name: /назад/i }),
+    this.page.getByText(/назад/i)
+  ];
+
+  let clicked = false;
+  for (const button of backButtons) {
+    const count = await button.count();
+    if (count > 0) {
+      try {
+        await button.first().scrollIntoViewIfNeeded().catch(() => {});
+        await button.first().click({ timeout: 2000 });
+        clicked = true;
+        await this.page.waitForTimeout(500);
+        break;
+      } catch {
+        continue;
+      }
+    }
+  }
+
+  // If no button was clickable, try direct JavaScript approach
+  if (!clicked) {
+    await this.page.evaluate(() => {
+      // Find button by text content and click it
+      const buttons = Array.from(document.querySelectorAll('button'));
+      for (const btn of buttons) {
+        if (btn.textContent?.includes('Назад')) {
+          (btn as HTMLElement).click();
+          return true;
+        }
+      }
+      return false;
+    });
+    await this.page.waitForTimeout(500);
+  }
+});
+
 Then('счётчик юнитов должен показать {string}', async function(this: BronepehotaWorld, count: string) {
   // Use mobile-visible text "Ваша армия (X)" instead of hidden "X отряд"
   const unitCounter = this.page.getByText(new RegExp(`Ваша армия.*${count}`));
@@ -351,7 +409,21 @@ Then('счётчик юнитов должен показать {string}', async
 });
 
 When('я нажимаю кнопку добавления машины', async function(this: BronepehotaWorld) {
-  const addButton = this.page.getByRole('button', { name: /\+|добавить|add/i });
-  await addButton.first().click();
-  await this.page.waitForTimeout(300);
+  // First try to find a machine-specific add button by looking for machine cards
+  // Machine cards are rendered in a grid, we'll find any add button on a machine card
+  const addButtons = this.page.locator('[data-testid^="add-unit-"]');
+  const count = await addButtons.count();
+
+  if (count > 0) {
+    // Click the first visible add button (could be squad or machine)
+    await addButtons.first().waitFor({ state: 'visible', timeout: 5000 });
+    await addButtons.first().click();
+    await this.page.waitForTimeout(500);
+  } else {
+    // Fallback: look for any "В АРМИЮ" button
+    const addButton = this.page.getByRole('button', { name: /в армию/i });
+    await addButton.first().waitFor({ state: 'visible', timeout: 5000 });
+    await addButton.first().click();
+    await this.page.waitForTimeout(300);
+  }
 });

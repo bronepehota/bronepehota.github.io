@@ -10,9 +10,10 @@ interface MachineCardProps {
   machine: Machine;
   onAdd: (machine: Machine) => void;
   onViewDetails: (machine: Machine) => void;
+  testId?: string;
 }
 
-export default function MachineCard({ machine, onAdd, onViewDetails }: MachineCardProps) {
+export default function MachineCard({ machine, onAdd, onViewDetails, testId }: MachineCardProps) {
   const [imageError, setImageError] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
 
@@ -151,6 +152,7 @@ export default function MachineCard({ machine, onAdd, onViewDetails }: MachineCa
             setTimeout(() => setIsPressed(false), 200);
             onAdd(machine);
           }}
+          data-testid={testId}
           className={clsx(
             'w-full py-2 flex items-center justify-center gap-2',
             'border font-mono text-xs font-bold uppercase tracking-wider',

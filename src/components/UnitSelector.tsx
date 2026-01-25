@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { GitHubPagesImage as Image } from './GitHubPagesImage';
 import type { Faction, Squad, Machine, ArmyUnit, FactionID } from '@/lib/types';
-import { Check, X, Plus, ArrowLeft, RotateCcw, Users, Zap, Shield } from 'lucide-react';
+import { Check, X, Plus, ArrowLeft, Users, Zap, Shield } from 'lucide-react';
 import { UnitDetailsModal } from './UnitDetailsModal';
 import { WeaponSelectorModal } from './WeaponSelectorModal';
 import { countByUnitType } from '@/lib/unit-utils';
@@ -24,7 +24,6 @@ interface UnitSelectorProps {
   onRemoveUnit: (instanceId: string) => void;
   onToBattle: () => void;
   onBackToFactionSelect?: () => void;
-  onResetFully?: () => void;
   isLoading?: boolean;
   loadError?: string | null;
 }
@@ -59,7 +58,6 @@ export function UnitSelector({
   onRemoveUnit,
   onToBattle,
   onBackToFactionSelect,
-  onResetFully,
   isLoading = false,
   loadError = null,
 }: UnitSelectorProps) {
@@ -252,28 +250,18 @@ export function UnitSelector({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="unit-selector">
       {/* Back to faction select button */}
       <div className="flex gap-3 mb-6">
         {onBackToFactionSelect && (
           <button
+            data-testid="back-to-faction-button"
             onClick={onBackToFactionSelect}
             className="flex items-center gap-2 text-slate-400 hover:text-slate-300 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             <span className="hidden sm:inline">Назад к фракции</span>
             <span className="sm:hidden">Назад</span>
-          </button>
-        )}
-        {onResetFully && (
-          <button
-            onClick={onResetFully}
-            className="flex items-center gap-2 text-slate-400 hover:text-red-400 transition-colors"
-            title="Начать игру заново с выбора фракции"
-          >
-            <RotateCcw className="w-4 h-4" />
-            <span className="hidden sm:inline">Начать заново</span>
-            <span className="sm:hidden">Заново</span>
           </button>
         )}
       </div>
@@ -315,6 +303,7 @@ export function UnitSelector({
                       setBlueprintMachine(machine);
                       setIsBlueprintOpen(true);
                     }}
+                    testId={`add-unit-${unit.data.id}`}
                   />
                   {/* Count badge */}
                   {count > 0 && (
@@ -334,6 +323,7 @@ export function UnitSelector({
               <div key={unit.data.id} className="relative">
                 <div
                   onClick={() => handleUnitClick(unit)}
+                  data-testid={`unit-card-${unit.data.id}`}
                   className={clsx(
                     'relative group cursor-pointer transition-all duration-300',
                     'border bg-slate-800/80 backdrop-blur-sm overflow-hidden',
@@ -438,6 +428,7 @@ export function UnitSelector({
                         e.stopPropagation();
                         handleAddUnit(unit);
                       }}
+                      data-testid={`add-unit-${unit.data.id}`}
                       disabled={!affordable}
                       aria-disabled={!affordable}
                       aria-label={`Добавить ${unit.data.name}`}
@@ -486,6 +477,7 @@ export function UnitSelector({
               return (
                 <div
                   key={unit.instanceId}
+                  data-testid={`army-unit-${unit.instanceId}`}
                   className={clsx(
                     'relative group cursor-pointer transition-all duration-300',
                     'border bg-slate-800/80 backdrop-blur-sm overflow-hidden',
@@ -523,6 +515,7 @@ export function UnitSelector({
                   {/* Remove button in top-right */}
                   <button
                     onClick={() => onRemoveUnit(unit.instanceId)}
+                    data-testid={`remove-unit-${unit.instanceId}`}
                     aria-label={`Удалить ${unit.data.name}`}
                     className="absolute top-2 right-2 p-1.5 bg-red-900/80 hover:bg-red-800 rounded-full min-w-[36px] min-h-[36px] flex items-center justify-center touch-manipulation transition-colors border border-red-700"
                   >
@@ -592,6 +585,7 @@ export function UnitSelector({
         <div className="pt-4">
           <button
             onClick={onToBattle}
+            data-testid="to-battle-button"
             className={clsx(
               'w-full py-3 flex items-center justify-center gap-2',
               'border font-mono text-sm font-bold uppercase tracking-wider',

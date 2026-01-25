@@ -209,20 +209,9 @@ export default function ArmyBuilder({ army, setArmy, onEnterBattle, rulesVersion
               });
             })}
             onBackToFactionSelect={() => {
-              setArmy({
-                ...army,
-                units: [],
-                totalCost: 0,
-                pointBudget: undefined,
-                currentStep: 'faction-select',
-              });
-            }}
-            onResetFully={() => {
-              // Complete reset - also reset setup step
               setSetupStep('faction');
               setArmy({
-                name: 'Моя Армия',
-                faction: 'polaris',
+                ...army,
                 units: [],
                 totalCost: 0,
                 pointBudget: undefined,
