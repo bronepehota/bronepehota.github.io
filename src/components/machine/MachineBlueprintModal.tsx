@@ -1,6 +1,7 @@
 'use client';
 
 import { X, ExternalLink, Shield, Zap, Target, Wrench, ChevronLeft } from 'lucide-react';
+import Image from 'next/image';
 import type { Machine } from '@/lib/types';
 import WeaponCard from './WeaponCard';
 import { cn } from '@/lib/utils';
@@ -100,11 +101,13 @@ export default function MachineBlueprintModal({
         <div className="flex-1 overflow-y-auto custom-scrollbar p-3 sm:p-4 space-y-3 sm:space-y-4">
           {/* Image with tech frame */}
           <div className="relative h-40 sm:h-48 bg-slate-800/50 rounded-sm overflow-hidden border-2 border-slate-700/50">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={machine.image}
+            <Image
+              src={machine.image || '/images/soldiers/empty.png'}
               alt={machine.name}
+              width={400}
+              height={300}
               className="w-full h-full object-cover"
+              unoptimized
             />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent" />
             {/* Tech overlay corners */}
