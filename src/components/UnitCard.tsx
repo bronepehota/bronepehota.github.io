@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { GitHubPagesImage as Image } from './GitHubPagesImage';
 import { ArmyUnit, Squad, Machine, RulesVersionID, Weapon } from '@/lib/types';
-import { Shield, Sword, Target, Heart, Zap, RotateCcw, CheckCircle2, Bomb, ChevronDown, ChevronUp, UserX, Dices, Plane, Skull, Wrench, Flame } from 'lucide-react';
+import { Shield, Sword, Target, Heart, Zap, RotateCcw, CheckCircle2, Bomb, ChevronDown, ChevronUp, UserX, Plane, Skull, Wrench, Flame, Crosshair, X, Image as ImageIcon } from 'lucide-react';
 import { formatUnitNumber } from '@/lib/unit-utils';
 import { getDefaultRulesVersion } from '@/lib/rules-registry';
 import { cn } from '@/lib/utils';
@@ -17,7 +17,7 @@ import { usePilotTestFlow } from '@/hooks/usePilotTestFlow';
 import MachineBlueprintModal from './machine/MachineBlueprintModal';
 
 // Helper function to shorten weapon names for mobile
-const shortenWeaponName = (name: string): string => {
+const _shortenWeaponName = (name: string): string => {
   return name
     .replace(/шестиствольная/gi, '6-ств.')
     .replace(/четырехствольная/gi, '4-ств.')
@@ -55,6 +55,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
   const [rulesVersion, setRulesVersion] = useState<RulesVersionID>(getDefaultRulesVersion());
   const [showPilotModal, setShowPilotModal] = useState(false);
   const [pilotSurvivalTest, setPilotSurvivalTest] = useState<{ roll: number; survived: boolean; testedAt: number } | null>(null);
+  const [selectedWeaponInfo, setSelectedWeaponInfo] = useState<{ weapon: Weapon; weaponIdx: number } | null>(null);
 
   const combatController = useCombatFlowController();
   const pilotTestFlow = usePilotTestFlow();
@@ -417,6 +418,80 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
         />
       )}
 
+      {/* Weapon Info Modal */}
+      {selectedWeaponInfo && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-[200] flex items-center justify-center p-4"
+          onClick={() => setSelectedWeaponInfo(null)}
+        >
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-black/50" onClick={() => setSelectedWeaponInfo(null)} aria-hidden="true" />
+
+          {/* Modal */}
+          <div
+            className="relative bg-slate-900 rounded-2xl p-6 max-w-md w-full shadow-2xl border border-slate-700"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Crosshair className="w-5 h-5 text-blue-400" />
+                <h2 className="text-xl font-semibold">Информация об оружии</h2>
+              </div>
+              <button
+                onClick={() => setSelectedWeaponInfo(null)}
+                className="p-2 hover:bg-slate-700 rounded-full transition-colors"
+                aria-label="Закрыть"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="space-y-4">
+              {/* Weapon Name */}
+              <div>
+                <h3 className="font-mono font-bold text-lg text-white">{selectedWeaponInfo.weapon.name}</h3>
+              </div>
+
+              {/* Stats Grid */}
+              <div className="grid grid-cols-2 gap-3">
+                {/* Range */}
+                <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700">
+                  <div className="text-[10px] font-mono opacity-50 uppercase mb-1">Дальность</div>
+                  <div className="text-lg font-mono font-bold text-amber-400">{selectedWeaponInfo.weapon.range}</div>
+                </div>
+
+                {/* Power */}
+                <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700">
+                  <div className="text-[10px] font-mono opacity-50 uppercase mb-1">Мощность</div>
+                  <div className="text-lg font-mono font-bold text-red-400">{selectedWeaponInfo.weapon.power}</div>
+                </div>
+              </div>
+
+              {/* Special Rules */}
+              {selectedWeaponInfo.weapon.special && (
+                <div className="bg-purple-950/20 rounded-lg p-3 border border-purple-700/30">
+                  <div className="text-[10px] font-mono opacity-50 uppercase mb-1">Особые правила</div>
+                  <div className="text-sm font-mono text-purple-300">
+                    {typeof selectedWeaponInfo.weapon.special === 'string'
+                      ? selectedWeaponInfo.weapon.special
+                      : 'Особый'}
+                  </div>
+                </div>
+              )}
+
+              {/* Weapon Type */}
+              <div className="text-xs font-mono opacity-40 uppercase">
+                {selectedWeaponInfo.weapon.range === 'ББ' ? 'Ближний бой' : 'Дальнобойное оружие'}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Image Overlay */}
       {showImage && data.image && (
         <div
@@ -474,6 +549,17 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
           </div>
         </div>
         <div className="flex gap-0.5 md:gap-1" onClick={e => e.stopPropagation()}>
+          {/* Machine Photo Button - Mobile only */}
+          {!isSquad && (
+            <button
+              onClick={() => setShowImage(true)}
+              className="p-1.5 md:p-1 hover:bg-white/10 rounded-sm transition-colors min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border border-slate-700/50 md:hidden"
+              title="Показать фото"
+              aria-label="Показать фото машины"
+            >
+              <ImageIcon className="w-4 h-4 opacity-50" />
+            </button>
+          )}
           <button
             onClick={() => {
               if (isSquad) {
@@ -967,113 +1053,170 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                 </div>
 
                 {/* Weapons - Right side */}
-                <div className="flex-1 space-y-1.5 md:space-y-2">
-                  {getSelectedWeapons().map(({ weapon, originalIndex: weaponIdx }) => {
-                  const weaponShots = unit.machineWeaponShots?.[weaponIdx] || 0;
-                  const totalShotsUsed = unit.machineShotsUsed || 0;
-                  const fireRate = (data as Machine).fire_rate;
-                  const isMeleeWeapon = weapon.range === 'ББ';
-                  const canShoot = !isMachineDone && !isMachineDestroyed &&
-                                  (unit.currentAmmo || 0) > 0 &&
-                                  totalShotsUsed < fireRate &&
-                                  weaponShots === 0 &&
-                                  !isMeleeWeapon;
+                <div className="flex-1 space-y-2">
+                  {(() => {
+                    const allWeapons = getSelectedWeapons();
 
-                  return (
-                    <div
-                      key={weaponIdx}
-                      className={cn(
-                        "relative p-1.5 md:p-2.5 rounded-sm border flex gap-1.5 md:gap-3 transition-all overflow-hidden",
-                        isMachineDestroyed ? "bg-slate-950/80 border-slate-800 opacity-40 grayscale" :
-                        isMachineDone ? "bg-slate-900/40 border-slate-700/50 opacity-70" :
-                        weaponShots > 0 ? "bg-amber-950/20 border-amber-700/40" : "bg-slate-800/30 border-slate-700/50"
-                      )}
-                    >
-                      {/* Tech corners for active weapon */}
-                      {canShoot && (
-                        <>
-                          <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-amber-600/30" />
-                          <div className="absolute top-0 right-0 w-1 h-1 border-r border-t border-amber-600/30" />
-                        </>
-                      )}
+                    // Helper to check if weapon is non-ranged (melee/special)
+                    const isNonRangedWeapon = (weapon: Weapon) => {
+                      // Melee range (ББ)
+                      if (weapon.range === 'ББ') return true;
+                      // Power is a simple number (not dice notation like "2D6")
+                      const powerStr = String(weapon.power);
+                      if (/^\d+$/.test(powerStr)) return true;
+                      return false;
+                    };
 
-                      <div className="flex-1 flex flex-col justify-between min-w-0">
-                        {/* Weapon Row - Name + Stats + Reset */}
-                        <div className="flex items-center gap-1.5 md:gap-2">
-                          {/* Weapon Name - Clickable to fire (for ranged weapons) */}
-                          {!isMeleeWeapon ? (
-                            <button
-                              disabled={!canShoot}
-                              onClick={() => handleVehicleAttack(weaponIdx)}
+                    const rangedWeapons = allWeapons.filter(({ weapon }) => !isNonRangedWeapon(weapon));
+                    const meleeWeapons = allWeapons.filter(({ weapon }) => isNonRangedWeapon(weapon));
+
+                    return (
+                      <>
+                        {/* Ranged Weapons - Full cards */}
+                        {rangedWeapons.map(({ weapon, originalIndex: weaponIdx }) => {
+                          const weaponShots = unit.machineWeaponShots?.[weaponIdx] || 0;
+                          const totalShotsUsed = unit.machineShotsUsed || 0;
+                          const fireRate = (data as Machine).fire_rate;
+                          const canShoot = !isMachineDone && !isMachineDestroyed &&
+                                          (unit.currentAmmo || 0) > 0 &&
+                                          totalShotsUsed < fireRate &&
+                                          weaponShots === 0;
+
+                          return (
+                            <div
+                              key={weaponIdx}
                               className={cn(
-                                "relative font-mono font-bold text-[10px] md:text-sm truncate flex-1 min-w-0 text-left px-1.5 py-1 md:px-2 md:py-1.5 rounded-sm transition-all",
-                                "border-2 min-h-[44px] md:min-h-0 flex items-center",
-                                weaponShots > 0
-                                  ? "bg-amber-950/30 border-amber-700/50 text-amber-500"
-                                  : canShoot
-                                  ? "bg-amber-950/10 hover:bg-amber-950/20 border-amber-700/30 text-slate-200"
-                                  : "bg-slate-900/40 border-slate-700/30 text-slate-600 cursor-not-allowed"
+                                "relative p-1.5 md:p-2.5 rounded-sm border flex gap-1.5 md:gap-3 transition-all overflow-hidden",
+                                isMachineDestroyed ? "bg-slate-950/80 border-slate-800 opacity-40 grayscale" :
+                                isMachineDone ? "bg-slate-900/40 border-slate-700/50 opacity-70" :
+                                weaponShots > 0 ? "bg-amber-950/20 border-amber-700/40" : "bg-slate-800/30 border-slate-700/50"
                               )}
-                              title={weapon.name}
                             >
-                              <span className="md:hidden">{shortenWeaponName(weapon.name)}</span>
-                              <span className="hidden md:inline">{weapon.name}</span>
-                            </button>
-                          ) : (
-                            <h4 className="font-mono font-bold text-[10px] md:text-sm text-slate-400 truncate flex-1 min-w-0 px-1.5 py-1 md:px-2 md:py-1.5" title={weapon.name}>
-                              <span className="md:hidden">{shortenWeaponName(weapon.name)}</span>
-                              <span className="hidden md:inline">{weapon.name}</span>
-                            </h4>
-                          )}
+                              {/* Tech corners for active weapon */}
+                              {canShoot && (
+                                <>
+                                  <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-amber-600/30" />
+                                  <div className="absolute top-0 right-0 w-1 h-1 border-r border-t border-amber-600/30" />
+                                </>
+                              )}
 
-                          {/* Range Stat */}
-                          <div className="relative bg-slate-950/60 px-1.5 md:px-2 py-0.5 md:py-1 rounded-sm border border-slate-700/50 flex items-center gap-1 md:gap-1.5 shrink-0">
-                            <span className="text-[6px] md:text-[7px] opacity-30 font-mono leading-none uppercase">Д</span>
-                            <span className="text-[9px] md:text-[10px] font-mono font-bold text-amber-400">{weapon.range}</span>
-                            <div className="absolute bottom-0 right-0 w-1 h-px bg-amber-600/20" />
-                          </div>
+                              <div className="flex-1 flex flex-col min-w-0 gap-1.5">
+                                {/* Weapon Name Label - Small at top */}
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="text-[8px] md:text-[9px] font-mono opacity-40 uppercase flex items-center gap-1">
+                                    <Crosshair className="w-2.5 h-2.5 md:w-3 md:h-3" /> {weapon.name}
+                                  </span>
+                                </div>
 
-                          {/* Power Stat */}
-                          <div className="relative bg-slate-950/60 px-1.5 md:px-2 py-0.5 md:py-1 rounded-sm border border-slate-700/50 flex items-center gap-1 md:gap-1.5 shrink-0">
-                            <span className="text-[6px] md:text-[7px] opacity-30 font-mono leading-none uppercase">М</span>
-                            <span className="text-[9px] md:text-[10px] font-mono font-bold text-red-400">{weapon.power}</span>
-                            <div className="absolute bottom-0 right-0 w-1 h-px bg-red-600/20" />
-                          </div>
+                                {/* Weapon Actions Row - Following soldier card pattern */}
+                                <div className="flex gap-0.5 md:gap-1">
+                                  {/* Weapon Icon - Clickable for info */}
+                                  <button
+                                    onClick={() => setSelectedWeaponInfo({ weapon, weaponIdx })}
+                                    className="shrink-0 w-10 h-10 rounded-sm border border-slate-700/50 bg-slate-900/60 flex items-center justify-center min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 hover:bg-slate-800/60 hover:border-slate-600/50 transition-all"
+                                    title="Информация об оружии"
+                                  >
+                                    <Crosshair className="w-5 h-5 text-slate-600" />
+                                  </button>
 
-                          {/* Reset Button */}
-                          <button
-                            onClick={() => {
-                              const newWeaponShots = { ...(unit.machineWeaponShots || {}) };
-                              delete newWeaponShots[weaponIdx];
-                              updateUnit({
-                                ...unit,
-                                machineWeaponShots: newWeaponShots,
-                                machineShotsUsed: Math.max(0, (unit.machineShotsUsed || 0) - 1)
-                              });
-                            }}
-                            disabled={weaponShots === 0}
-                            className={cn(
-                              "relative p-1 md:p-2 rounded-sm transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border-2 overflow-hidden shrink-0",
-                              weaponShots === 0 ? "bg-slate-900/60 border-slate-700 text-slate-600 opacity-50" : "bg-slate-800/60 border-slate-600 text-slate-400 hover:bg-slate-700/60"
-                            )}
-                            title="Сбросить выстрел"
-                          >
-                            <RotateCcw className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                          </button>
-                        </div>
+                                  {/* Fire Button - Full width (flex-1) */}
+                                  <button
+                                    disabled={!canShoot}
+                                    onClick={() => handleVehicleAttack(weaponIdx)}
+                                    className={cn(
+                                      "relative p-1.5 md:p-2 rounded-sm transition-all flex-1 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center gap-1 overflow-hidden",
+                                      "border-2 text-xs font-mono font-bold uppercase tracking-wider",
+                                      weaponShots > 0
+                                        ? "bg-amber-950/40 border-amber-800/50 text-amber-700"
+                                        : canShoot
+                                        ? "bg-amber-950/20 hover:bg-amber-950/40 border-amber-700/50 text-amber-400 active:scale-95"
+                                        : "bg-slate-900/40 border-slate-700/30 text-slate-600 cursor-not-allowed"
+                                    )}
+                                    title="Выстрел"
+                                  >
+                                    {!weaponShots && !isMachineDone && !isMachineDestroyed && canShoot && (
+                                      <>
+                                        <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-amber-600/40" />
+                                        <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-amber-600/40" />
+                                      </>
+                                    )}
+                                    <Target className="w-4 h-4 md:w-5 md:h-5" />
+                                    <span className="hidden sm:inline">ВЫСТРЕЛ</span>
+                                  </button>
 
-                        {/* Weapon Special Badge - Only show special property badge */}
-                        {weapon.special && (
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className="text-[8px] md:text-[9px] px-1.5 py-0.5 rounded-sm bg-purple-950/30 text-purple-400 font-mono font-bold uppercase border border-purple-700/50 truncate">
-                              {typeof weapon.special === 'string' ? weapon.special : 'Особый'}
-                            </span>
+                                  {/* Range Stat Display */}
+                                  <div className="relative bg-slate-950/60 px-1.5 md:px-2 py-0.5 rounded-sm border border-slate-700/50 flex items-center gap-1 md:gap-1.5 shrink-0 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 justify-center">
+                                    <span className="text-[6px] md:text-[7px] opacity-30 font-mono leading-none uppercase hidden sm:inline">ДАЛЬН</span>
+                                    <span className="text-[9px] md:text-[10px] font-mono font-bold text-amber-400">{weapon.range}</span>
+                                    <div className="absolute bottom-0 right-0 w-1 h-px bg-amber-600/20" />
+                                  </div>
+
+                                  {/* Power Stat Display */}
+                                  <div className="relative bg-slate-950/60 px-1.5 md:px-2 py-0.5 rounded-sm border border-slate-700/50 flex items-center gap-1 md:gap-1.5 shrink-0 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 justify-center">
+                                    <span className="text-[6px] md:text-[7px] opacity-30 font-mono leading-none uppercase hidden sm:inline">МОЩН</span>
+                                    <span className="text-[9px] md:text-[10px] font-mono font-bold text-red-400">{weapon.power}</span>
+                                    <div className="absolute bottom-0 right-0 w-1 h-px bg-red-600/20" />
+                                  </div>
+                                </div>
+
+                                {/* Weapon Special Badge - Only show special property badge */}
+                                {weapon.special && (
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-[8px] md:text-[9px] px-1.5 py-0.5 rounded-sm bg-purple-950/30 text-purple-400 font-mono font-bold uppercase border border-purple-700/50 truncate">
+                                      {typeof weapon.special === 'string' ? weapon.special : 'Особый'}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+
+                        {/* Melee Weapons - Compact section at bottom */}
+                        {meleeWeapons.length > 0 && (
+                          <div className={cn(
+                            "relative p-2 rounded-sm border transition-all",
+                            isMachineDestroyed ? "bg-slate-950/80 border-slate-800 opacity-40 grayscale" :
+                            isMachineDone ? "bg-slate-900/40 border-slate-700/50 opacity-70" : "bg-red-950/10 border-red-800/30"
+                          )}>
+                            {/* Section Header */}
+                            <div className="flex items-center gap-1.5 mb-1.5">
+                              <Sword className="w-3 h-3 text-red-400" />
+                              <span className="text-[8px] font-mono font-bold uppercase tracking-wider text-red-400">Ближний бой</span>
+                            </div>
+
+                            {/* Melee weapons list - compact format */}
+                            <div className="space-y-1">
+                              {meleeWeapons.map(({ weapon, originalIndex: weaponIdx }) => (
+                                <div
+                                  key={weaponIdx}
+                                  className="flex items-center gap-2 text-[8px] md:text-[9px]"
+                                >
+                                  {/* Weapon name */}
+                                  <span className="font-mono text-slate-300 truncate flex-1">{weapon.name}</span>
+
+                                  {/* Power stat */}
+                                  <div className="flex items-center gap-1 shrink-0 bg-slate-950/60 px-1.5 py-0.5 rounded-sm border border-slate-700/50">
+                                    <span className="text-[7px] opacity-30 font-mono uppercase hidden sm:inline">МОЩН</span>
+                                    <span className="font-mono font-bold text-red-400">{weapon.power}</span>
+                                  </div>
+
+                                  {/* Info button */}
+                                  <button
+                                    onClick={() => setSelectedWeaponInfo({ weapon, weaponIdx })}
+                                    className="shrink-0 w-6 h-6 rounded border border-slate-700/50 bg-slate-900/60 flex items-center justify-center min-w-[36px] min-h-[36px] hover:bg-slate-800/60 transition-all"
+                                    title="Информация об оружии"
+                                  >
+                                    <Crosshair className="w-3 h-3 text-slate-500" />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         )}
-                      </div>
-                    </div>
-                  );
-                })}
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
 
