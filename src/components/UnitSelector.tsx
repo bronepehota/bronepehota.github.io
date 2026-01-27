@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { GitHubPagesImage as Image } from './GitHubPagesImage';
 import type { Faction, Squad, Machine, ArmyUnit, FactionID } from '@/lib/types';
 import { Check, X, Plus, ArrowLeft, Users, Zap, Shield } from 'lucide-react';
@@ -10,6 +10,12 @@ import { countByUnitType } from '@/lib/unit-utils';
 import MachineCard from './machine/MachineCard';
 import MachineBlueprintModal from './machine/MachineBlueprintModal';
 import TechGridBackground from './machine/TechGridBackground';
+import { TabBar } from './TabBar';
+import { ViewModeToggle } from './ViewModeToggle';
+import { DisplayModeToggle } from './DisplayModeToggle';
+import { UnitFilterBar } from './UnitFilterBar';
+import { ArmySummaryView } from './ArmySummaryView';
+import { CompactUnitCard } from './CompactUnitCard';
 import { clsx } from 'clsx';
 
 interface UnitSelectorProps {
@@ -61,6 +67,38 @@ export function UnitSelector({
   isLoading = false,
   loadError = null,
 }: UnitSelectorProps) {
+  // View mode state with localStorage persistence
+  const [viewMode, setViewMode] = useState<'browse' | 'army'>('browse');
+  const [displayMode, setDisplayMode] = useState<'detailed' | 'compact'>('detailed');
+  const [filterType, setFilterType] = useState<'all' | 'squad' | 'machine'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Load view mode from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('bronepehota_view_mode');
+    if (saved === 'browse' || saved === 'army') {
+      setViewMode(saved);
+    }
+  }, []);
+
+  // Persist view mode to localStorage
+  useEffect(() => {
+    localStorage.setItem('bronepehota_view_mode', viewMode);
+  }, [viewMode]);
+
+  // Load display mode from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('bronepehota_display_mode');
+    if (saved === 'detailed' || saved === 'compact') {
+      setDisplayMode(saved);
+    }
+  }, []);
+
+  // Persist display mode to localStorage
+  useEffect(() => {
+    localStorage.setItem('bronepehota_display_mode', displayMode);
+  }, [displayMode]);
+
   const [showWarning, setShowWarning] = useState(false);
   const [expandedUnitId, setExpandedUnitId] = useState<string | null>(null);
 
@@ -88,14 +126,31 @@ export function UnitSelector({
   const remainingPoints = pointBudget - totalCost;
 
   // Filter units by selected faction
-  const availableSquads = squads.filter(s => s.faction === selectedFaction);
-  const availableMachines = machines.filter(m => m.faction === selectedFaction);
+  const availableSquads = useMemo(() => squads.filter(s => s.faction === selectedFaction), [squads, selectedFaction]);
+  const availableMachines = useMemo(() => machines.filter(m => m.faction === selectedFaction), [machines, selectedFaction]);
 
   // Combine all available units
-  const availableUnits: UnitDisplay[] = [
+  const availableUnits: UnitDisplay[] = useMemo(() => [
     ...availableSquads.map(s => ({ type: 'squad' as const, data: s })),
     ...availableMachines.map(m => ({ type: 'machine' as const, data: m })),
-  ];
+  ], [availableSquads, availableMachines]);
+
+  // Apply type filter to available units
+  const filteredAvailableUnits = useMemo(() => {
+    let units = availableUnits;
+    if (filterType !== 'all') {
+      units = units.filter(u => u.type === filterType);
+    }
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      units = units.filter(u => {
+        const unit = u.data;
+        return unit.name.toLowerCase().includes(query) ||
+               (unit.shortName && unit.shortName.toLowerCase().includes(query));
+      });
+    }
+    return units;
+  }, [availableUnits, filterType, searchQuery]);
 
   // Check if unit can be afforded
   const canAffordUnit = (cost: number) => cost <= remainingPoints;
@@ -251,8 +306,8 @@ export function UnitSelector({
 
   return (
     <div className="space-y-6" data-testid="unit-selector">
-      {/* Back to faction select button */}
-      <div className="flex gap-3 mb-6">
+      {/* Header with view toggle (desktop) and back button */}
+      <div className="flex items-center gap-3 mb-6">
         {onBackToFactionSelect && (
           <button
             data-testid="back-to-faction-button"
@@ -264,6 +319,20 @@ export function UnitSelector({
             <span className="sm:hidden">Назад</span>
           </button>
         )}
+        <div className="flex-1" />
+        {viewMode === 'browse' && (
+          <DisplayModeToggle
+            mode={displayMode}
+            onChange={setDisplayMode}
+          />
+        )}
+        <ViewModeToggle
+          mode={viewMode}
+          onChange={setViewMode}
+          availableCount={availableUnits.length}
+          armyCount={army.length}
+          factionId={selectedFaction}
+        />
       </div>
 
       {/* Warning toast */}
@@ -280,15 +349,75 @@ export function UnitSelector({
         </div>
       )}
 
-      {/* Available units */}
-      <div className="space-y-4">
+      {/* Content based on view mode */}
+      {viewMode === 'browse' ? (
+        <>
+          {/* Unit Filter Bar */}
+          <UnitFilterBar
+            filterType={filterType}
+            onFilterChange={setFilterType}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            squadCount={availableSquads.length}
+            machineCount={availableMachines.length}
+          />
+
+          {/* Available units */}
+          <div className="space-y-4">
         <div className="flex items-center gap-3">
           <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent"></div>
-          <h3 className="text-xl font-mono font-bold text-slate-200 tracking-wider">ДОСТУПНЫЕ ЮНИТЫ</h3>
+          <h3 className="text-xl font-mono font-bold text-slate-200 tracking-wider">
+            ДОСТУПНЫЕ ЮНИТЫ
+            {filteredAvailableUnits.length !== availableUnits.length && (
+              <span className="text-slate-500 text-sm ml-2">({filteredAvailableUnits.length})</span>
+            )}
+          </h3>
           <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent"></div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {availableUnits.map((unit) => {
+        {filteredAvailableUnits.length === 0 ? (
+          <div className="text-center py-12 px-4 bg-slate-800/30 rounded-lg border border-slate-700/50">
+            <p className="text-slate-500 text-sm">
+              {searchQuery ? 'Ничего не найдено' : 'Нет юнитов выбранного типа'}
+            </p>
+            {(searchQuery || filterType !== 'all') && (
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                  setFilterType('all');
+                }}
+                className="mt-3 px-4 py-2 bg-slate-700/50 hover:bg-slate-700 rounded-lg text-sm text-slate-300 transition-colors"
+              >
+                Сбросить фильтры
+              </button>
+            )}
+          </div>
+        ) : (
+          <>
+            {displayMode === 'compact' ? (
+              /* Compact view - list of compact cards */
+              <div className="space-y-2">
+                {filteredAvailableUnits.map((unit) => {
+                  const affordable = canAffordUnit(unit.data.cost);
+                  const count = unitCounts[unit.data.id] || 0;
+
+                  return (
+                    <CompactUnitCard
+                      key={unit.data.id}
+                      unit={unit.data}
+                      type={unit.type}
+                      onAdd={() => handleAddUnit(unit)}
+                      onClick={() => handleUnitClick(unit)}
+                      factionId={selectedFaction}
+                      canAfford={affordable}
+                      countInArmy={count}
+                    />
+                  );
+                })}
+              </div>
+            ) : (
+              /* Detailed view - grid of full cards */
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredAvailableUnits.map((unit) => {
             const affordable = canAffordUnit(unit.data.cost);
             const count = unitCounts[unit.data.id] || 0;
 
@@ -457,11 +586,14 @@ export function UnitSelector({
                 )}
               </div>
             );
-          })}
-        </div>
+            })}
+          </div>
+            )}
+          </>
+        )}
       </div>
 
-      {/* Selected army */}
+      {/* Selected army (shown below available units in browse mode) */}
       {army.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center gap-3">
@@ -579,9 +711,28 @@ export function UnitSelector({
           </div>
         </div>
       )}
+        </>
+      ) : (
+        <>
+          {/* Army view mode */}
+          <ArmySummaryView
+            units={army}
+            onRemoveUnit={onRemoveUnit}
+            onUnitClick={(unit: ArmyUnit) => {
+              setSelectedUnit({ type: unit.type, data: unit.data });
+              setIsModalOpen(true);
+            }}
+            onAddUnits={() => setViewMode('browse')}
+            pointBudget={pointBudget}
+            totalCost={totalCost}
+            filterType={filterType}
+            factionId={selectedFaction}
+          />
+        </>
+      )}
 
-      {/* To Battle button */}
-      {army.length > 0 && (
+      {/* To Battle button (only in browse mode) */}
+      {viewMode === 'browse' && army.length > 0 && (
         <div className="pt-4">
           <button
             onClick={onToBattle}
@@ -644,6 +795,17 @@ export function UnitSelector({
 
       {/* Tech grid background */}
       <TechGridBackground />
+
+      {/* Tab bar (mobile only) */}
+      <TabBar
+        activeTab={viewMode}
+        onTabChange={setViewMode}
+        availableCount={availableUnits.length}
+        armyCount={army.length}
+        factionId={selectedFaction}
+        currentCost={totalCost}
+        pointBudget={pointBudget}
+      />
     </div>
   );
 }

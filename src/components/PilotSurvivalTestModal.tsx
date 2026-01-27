@@ -71,7 +71,7 @@ export function PilotSurvivalTestModal({
   const survived = finalRoll > 0 && finalRoll <= pilotArmor;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="w-full sm:max-w-md bg-slate-900 rounded-t-2xl sm:rounded-2xl border border-slate-700 shadow-2xl animate-in slide-in-from-bottom-4 sm:slide-in-from-bottom-8 duration-300 max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700 bg-slate-800/50">
