@@ -238,7 +238,7 @@ export default function Home() {
       </header>
 
       {/* Content */}
-      <div className={`flex-1 overflow-auto ${view === 'builder' && army.currentStep === 'unit-select' ? 'pb-20 md:pb-20' : ''}`}>
+      <div className={`flex-1 overflow-auto ${view === 'builder' && army.currentStep === 'unit-select' ? 'pb-20 md:pb-6' : ''}`}>
         {view === 'builder' ? (
           <ArmyBuilder
             army={army}

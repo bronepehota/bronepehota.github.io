@@ -414,7 +414,7 @@ export function UnitDetailsModal({
   return (
     <div
       ref={backdropRef}
-      className="fixed inset-0 z-50 md:flex md:items-center md:justify-center bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-[60] md:flex md:items-center md:justify-center bg-black/60 backdrop-blur-sm"
       onClick={handleBackdropClick}
       role="dialog"
       aria-modal="true"
