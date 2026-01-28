@@ -89,8 +89,8 @@ export function CompactUnitCard({
               <h4 className={cn(
                 'font-mono font-bold text-sm truncate leading-tight',
                 canAfford ? 'text-slate-100' : 'text-slate-500'
-              )}>
-                {unit.shortName || unit.name}
+              )} title={unit.name}>
+                {unit.name}
               </h4>
               {countInArmy > 0 && (
                 <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-green-600/80 text-white">

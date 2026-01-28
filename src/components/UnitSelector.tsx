@@ -2,18 +2,16 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { GitHubPagesImage as Image } from './GitHubPagesImage';
-import type { Faction, Squad, Machine, ArmyUnit, FactionID } from '@/lib/types';
-import { Check, X, Plus, ArrowLeft, Users, Zap, Shield } from 'lucide-react';
-import { UnitDetailsModal } from './UnitDetailsModal';
+import type { Faction, Squad, Machine, ArmyUnit, FactionID, FilterType } from '@/lib/types';
+import { Check, Plus, ArrowLeft, Users, Zap, Shield } from 'lucide-react';
 import { WeaponSelectorModal } from './WeaponSelectorModal';
+import MachineBlueprintModal from './machine/MachineBlueprintModal';
+import SquadBlueprintModal from './SquadBlueprintModal';
 import { countByUnitType } from '@/lib/unit-utils';
 import MachineCard from './machine/MachineCard';
-import MachineBlueprintModal from './machine/MachineBlueprintModal';
 import TechGridBackground from './machine/TechGridBackground';
 import { TabBar } from './TabBar';
-import { ViewModeToggle } from './ViewModeToggle';
-import { DisplayModeToggle } from './DisplayModeToggle';
-import { UnitFilterBar } from './UnitFilterBar';
+import { ArmyControlPanel } from './ArmyControlPanel';
 import { ArmySummaryView } from './ArmySummaryView';
 import { CompactUnitCard } from './CompactUnitCard';
 import { clsx } from 'clsx';
@@ -70,8 +68,7 @@ export function UnitSelector({
   // View mode state with localStorage persistence
   const [viewMode, setViewMode] = useState<'browse' | 'army'>('browse');
   const [displayMode, setDisplayMode] = useState<'detailed' | 'compact'>('detailed');
-  const [filterType, setFilterType] = useState<'all' | 'squad' | 'machine'>('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [filterType, setFilterType] = useState<FilterType>('all');
 
   // Load view mode from localStorage on mount
   useEffect(() => {
@@ -115,10 +112,6 @@ export function UnitSelector({
   const [weaponSelectorMachine, setWeaponSelectorMachine] = useState<Machine | null>(null);
   const [isWeaponSelectorOpen, setIsWeaponSelectorOpen] = useState(false);
 
-  // Machine blueprint modal state
-  const [blueprintMachine, setBlueprintMachine] = useState<Machine | null>(null);
-  const [isBlueprintOpen, setIsBlueprintOpen] = useState(false);
-
   // Calculate remaining points
   const totalCost = army.reduce((sum, unit) => {
     return sum + unit.data.cost;
@@ -129,28 +122,36 @@ export function UnitSelector({
   const availableSquads = useMemo(() => squads.filter(s => s.faction === selectedFaction), [squads, selectedFaction]);
   const availableMachines = useMemo(() => machines.filter(m => m.faction === selectedFaction), [machines, selectedFaction]);
 
-  // Combine all available units
-  const availableUnits: UnitDisplay[] = useMemo(() => [
-    ...availableSquads.map(s => ({ type: 'squad' as const, data: s })),
-    ...availableMachines.map(m => ({ type: 'machine' as const, data: m })),
-  ], [availableSquads, availableMachines]);
+  // All mercenaries squads - available to all factions
+  const allMercenaries = useMemo(() => squads.filter(s => s.faction === 'mercenaries'), [squads]);
+
+  // Combine all available units (including mercenaries for non-mercenaries factions)
+  const availableUnits: UnitDisplay[] = useMemo(() => {
+    const units: UnitDisplay[] = [
+      ...availableSquads.map(s => ({ type: 'squad' as const, data: s })),
+      ...availableMachines.map(m => ({ type: 'machine' as const, data: m })),
+    ];
+    // Add mercenaries if not playing as mercenaries faction (they're already included above)
+    if (selectedFaction !== 'mercenaries') {
+      units.push(...allMercenaries.map(s => ({ type: 'squad' as const, data: s })));
+    }
+    return units;
+  }, [availableSquads, availableMachines, allMercenaries, selectedFaction]);
 
   // Apply type filter to available units
   const filteredAvailableUnits = useMemo(() => {
     let units = availableUnits;
     if (filterType !== 'all') {
-      units = units.filter(u => u.type === filterType);
-    }
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      units = units.filter(u => {
-        const unit = u.data;
-        return unit.name.toLowerCase().includes(query) ||
-               (unit.shortName && unit.shortName.toLowerCase().includes(query));
-      });
+      if (filterType === 'mercenary') {
+        // Show only mercenaries squads
+        units = units.filter(u => u.type === 'squad' && (u.data as Squad).faction === 'mercenaries');
+      } else {
+        // Show squads or machines
+        units = units.filter(u => u.type === filterType);
+      }
     }
     return units;
-  }, [availableUnits, filterType, searchQuery]);
+  }, [availableUnits, filterType]);
 
   // Check if unit can be afforded
   const canAffordUnit = (cost: number) => cost <= remainingPoints;
@@ -196,8 +197,8 @@ export function UnitSelector({
     setIsModalOpen(true);
   };
 
-  // Get unit type badge
-  const getUnitTypeBadge = (type: 'squad' | 'machine') => {
+  // Get unit type badge (unused)
+  const _getUnitTypeBadge = (type: 'squad' | 'machine') => {
     if (type === 'squad') {
       return { icon: Users, label: 'Отряд', color: 'text-blue-400' };
     }
@@ -306,34 +307,19 @@ export function UnitSelector({
 
   return (
     <div className="space-y-6" data-testid="unit-selector">
-      {/* Header with view toggle (desktop) and back button */}
-      <div className="flex items-center gap-3 mb-6">
-        {onBackToFactionSelect && (
-          <button
-            data-testid="back-to-faction-button"
-            onClick={onBackToFactionSelect}
-            className="flex items-center gap-2 text-slate-400 hover:text-slate-300 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">Назад к фракции</span>
-            <span className="sm:hidden">Назад</span>
-          </button>
-        )}
-        <div className="flex-1" />
-        {viewMode === 'browse' && (
-          <DisplayModeToggle
-            mode={displayMode}
-            onChange={setDisplayMode}
-          />
-        )}
-        <ViewModeToggle
-          mode={viewMode}
-          onChange={setViewMode}
-          availableCount={availableUnits.length}
-          armyCount={army.length}
-          factionId={selectedFaction}
-        />
-      </div>
+      {/* Unified control panel */}
+      <ArmyControlPanel
+        viewMode={viewMode}
+        displayMode={displayMode}
+        filterType={filterType}
+        factionId={selectedFaction}
+        onViewModeChange={setViewMode}
+        onDisplayModeChange={setDisplayMode}
+        onFilterChange={setFilterType}
+        squadCount={availableSquads.length}
+        machineCount={availableMachines.length}
+        mercenaryCount={allMercenaries.length}
+      />
 
       {/* Warning toast */}
       {showWarning && (
@@ -351,367 +337,213 @@ export function UnitSelector({
 
       {/* Content based on view mode */}
       {viewMode === 'browse' ? (
-        <>
-          {/* Unit Filter Bar */}
-          <UnitFilterBar
-            filterType={filterType}
-            onFilterChange={setFilterType}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            squadCount={availableSquads.length}
-            machineCount={availableMachines.length}
-          />
+        /* Available units */
+        <div className="space-y-4">
+          {filteredAvailableUnits.length === 0 ? (
+            <div className="text-center py-12 px-4 bg-slate-800/30 rounded-lg border border-slate-700/50">
+              <p className="text-slate-500 text-sm">
+                Нет юнитов выбранного типа
+              </p>
+            </div>
+          ) : displayMode === 'compact' ? (
+            /* Compact view - list of compact cards */
+            <div className="space-y-2">
+              {filteredAvailableUnits.map((unit) => {
+                const affordable = canAffordUnit(unit.data.cost);
+                const count = unitCounts[unit.data.id] || 0;
 
-          {/* Available units */}
-          <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent"></div>
-          <h3 className="text-xl font-mono font-bold text-slate-200 tracking-wider">
-            ДОСТУПНЫЕ ЮНИТЫ
-            {filteredAvailableUnits.length !== availableUnits.length && (
-              <span className="text-slate-500 text-sm ml-2">({filteredAvailableUnits.length})</span>
-            )}
-          </h3>
-          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent"></div>
-        </div>
-        {filteredAvailableUnits.length === 0 ? (
-          <div className="text-center py-12 px-4 bg-slate-800/30 rounded-lg border border-slate-700/50">
-            <p className="text-slate-500 text-sm">
-              {searchQuery ? 'Ничего не найдено' : 'Нет юнитов выбранного типа'}
-            </p>
-            {(searchQuery || filterType !== 'all') && (
-              <button
-                onClick={() => {
-                  setSearchQuery('');
-                  setFilterType('all');
-                }}
-                className="mt-3 px-4 py-2 bg-slate-700/50 hover:bg-slate-700 rounded-lg text-sm text-slate-300 transition-colors"
-              >
-                Сбросить фильтры
-              </button>
-            )}
-          </div>
-        ) : (
-          <>
-            {displayMode === 'compact' ? (
-              /* Compact view - list of compact cards */
-              <div className="space-y-2">
-                {filteredAvailableUnits.map((unit) => {
-                  const affordable = canAffordUnit(unit.data.cost);
-                  const count = unitCounts[unit.data.id] || 0;
-
-                  return (
-                    <CompactUnitCard
-                      key={unit.data.id}
-                      unit={unit.data}
-                      type={unit.type}
-                      onAdd={() => handleAddUnit(unit)}
-                      onClick={() => handleUnitClick(unit)}
-                      factionId={selectedFaction}
-                      canAfford={affordable}
-                      countInArmy={count}
-                    />
-                  );
-                })}
-              </div>
-            ) : (
-              /* Detailed view - grid of full cards */
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredAvailableUnits.map((unit) => {
-            const affordable = canAffordUnit(unit.data.cost);
-            const count = unitCounts[unit.data.id] || 0;
-
-            // Render machines with MachineCard component
-            if (unit.type === 'machine') {
-              return (
-                <div key={unit.data.id} className="relative">
-                  <MachineCard
-                    machine={unit.data as Machine}
-                    onAdd={(_machine) => handleAddUnit(unit)}
-                    onViewDetails={(machine) => {
-                      setBlueprintMachine(machine);
-                      setIsBlueprintOpen(true);
-                    }}
-                    testId={`add-unit-${unit.data.id}`}
+                return (
+                  <CompactUnitCard
+                    key={unit.data.id}
+                    unit={unit.data}
+                    type={unit.type}
+                    onAdd={() => handleAddUnit(unit)}
+                    onClick={() => handleUnitClick(unit)}
+                    factionId={unit.type === 'squad' ? (unit.data as Squad).faction as FactionID : selectedFaction}
+                    canAfford={affordable}
+                    countInArmy={count}
                   />
-                  {/* Count badge */}
-                  {count > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full h-6 min-w-[24px] flex items-center justify-center border-2 border-slate-900 z-10">
-                      {count}
-                    </span>
-                  )}
-                </div>
-              );
-            }
+                );
+              })}
+            </div>
+          ) : (
+            /* Detailed view - grid of full cards */
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredAvailableUnits.map((unit) => {
+                const affordable = canAffordUnit(unit.data.cost);
+                const count = unitCounts[unit.data.id] || 0;
 
-            // Render squads with Military Tech Blueprint design matching MachineCard
-            const squad = unit.data as Squad;
-            const colors = getFactionColors(selectedFaction);
-
-            return (
-              <div key={unit.data.id} className="relative">
-                <div
-                  onClick={() => handleUnitClick(unit)}
-                  data-testid={`unit-card-${unit.data.id}`}
-                  className={clsx(
-                    'relative group cursor-pointer transition-all duration-300',
-                    'border bg-slate-800/80 backdrop-blur-sm overflow-hidden',
-                    affordable ? colors.border : colors.disabled,
-                    affordable ? colors.bg : ''
-                  )}
-                >
-                  {/* Corner accents */}
-                  <div className={clsx(
-                    'absolute top-0 left-0 w-3 h-3 border-l-2 border-t-2',
-                    'transition-all duration-300',
-                    affordable ? colors.corner : 'border-slate-700'
-                  )} />
-                  <div className={clsx(
-                    'absolute top-0 right-0 w-3 h-3 border-r-2 border-t-2',
-                    'transition-all duration-300',
-                    affordable ? colors.corner : 'border-slate-700'
-                  )} />
-                  <div className={clsx(
-                    'absolute bottom-0 left-0 w-3 h-3 border-l-2 border-b-2',
-                    'transition-all duration-300',
-                    affordable ? colors.corner : 'border-slate-700'
-                  )} />
-                  <div className={clsx(
-                    'absolute bottom-0 right-0 w-3 h-3 border-r-2 border-b-2',
-                    'transition-all duration-300',
-                    affordable ? colors.corner : 'border-slate-700'
-                  )} />
-
-                  {/* Image container */}
-                  <div className="relative aspect-[4/3] bg-slate-900/50 overflow-hidden">
-                    {unit.data.image ? (
-                      <Image
-                        src={unit.data.image}
-                        alt={unit.data.name}
-                        fill
-                        className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
-                        loading="lazy"
-                        unoptimized
+                // Render machines with MachineCard component
+                if (unit.type === 'machine') {
+                  return (
+                    <div key={unit.data.id} className="relative">
+                      <MachineCard
+                        machine={unit.data as Machine}
+                        onAdd={(_machine) => handleAddUnit(unit)}
+                        onViewDetails={(machine) => {
+                          setSelectedUnit({ type: 'machine', data: machine });
+                          setIsModalOpen(true);
+                        }}
+                        testId={`add-unit-${unit.data.id}`}
                       />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-slate-800">
-                        <Users className={clsx('w-16 h-16 opacity-20', affordable ? colors.accent : 'text-slate-600')} />
-                      </div>
-                    )}
-
-                    {/* Rank badge */}
-                    <div className={clsx(
-                      'absolute top-2 right-2 px-2 py-0.5 rounded-sm font-mono text-xs font-bold',
-                      'bg-slate-900/90 backdrop-blur-sm border',
-                      affordable ? colors.border : 'border-slate-700',
-                      affordable ? colors.accent : 'text-slate-500'
-                    )}>
-                      R{getSquadMaxRank(squad)}
-                    </div>
-
-                    {/* Holographic overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent pointer-events-none" />
-                  </div>
-
-                  {/* Content */}
-                  <div className="p-3 space-y-2">
-                    {/* Name and cost */}
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <h3 className={clsx(
-                          'font-bold text-sm font-mono tracking-wide truncate',
-                          affordable ? colors.accent : 'text-slate-500'
-                        )}>
-                          {squad.shortName || squad.name.toUpperCase()}
-                        </h3>
-                        <p className="text-[10px] text-slate-500 truncate font-mono">
-                          ОТРЯД
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <span className={clsx('font-mono font-bold text-sm', affordable ? colors.accent : 'text-slate-500')}>
-                          {squad.cost}
+                      {/* Count badge */}
+                      {count > 0 && (
+                        <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full h-6 min-w-[24px] flex items-center justify-center border-2 border-slate-900 z-10">
+                          {count}
                         </span>
-                        <span className="text-[10px] text-slate-500 block font-mono">очков</span>
-                      </div>
+                      )}
                     </div>
+                  );
+                }
 
-                    {/* Quick stats */}
-                    <div className="flex items-center gap-2 text-[10px] text-slate-500 font-mono flex-wrap">
-                      <div className="flex items-center gap-1">
-                        <Users className="w-3 h-3" />
-                        <span>{squad.soldiers.length}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Shield className="w-3 h-3" />
-                        <span>Бр {getSquadArmorRange(squad)}</span>
-                      </div>
-                      <div className={clsx('ml-auto', affordable ? colors.accent : 'text-slate-600')}>
-                        R{getSquadMaxRank(squad)}
-                      </div>
-                    </div>
+                // Render squads with Military Tech Blueprint design matching MachineCard
+                const squad = unit.data as Squad;
+                // Use squad's faction for colors (important for mercenaries)
+                const squadFaction = squad.faction as FactionID;
+                const colors = getFactionColors(squadFaction);
 
-                    {/* Add button */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleAddUnit(unit);
-                      }}
-                      data-testid={`add-unit-${unit.data.id}`}
-                      disabled={!affordable}
-                      aria-disabled={!affordable}
-                      aria-label={`Добавить ${unit.data.name}`}
+                return (
+                  <div key={unit.data.id} className="relative">
+                    <div
+                      onClick={() => handleUnitClick(unit)}
+                      data-testid={`unit-card-${unit.data.id}`}
                       className={clsx(
-                        'w-full py-2 flex items-center justify-center gap-2',
-                        'border font-mono text-xs font-bold uppercase tracking-wider',
-                        'transition-all duration-200',
-                        'touch-manipulation',
-                        affordable ? colors.border : 'border-slate-700',
-                        affordable ? colors.bg : '',
-                        affordable ? colors.accent : 'text-slate-500',
-                        !affordable && 'bg-slate-800/50 cursor-not-allowed opacity-50'
+                        'relative group cursor-pointer transition-all duration-300',
+                        'border bg-slate-800/80 backdrop-blur-sm overflow-hidden',
+                        affordable ? colors.border : colors.disabled,
+                        affordable ? colors.bg : ''
                       )}
                     >
-                      <Plus className="w-4 h-4" />
-                      В АРМИЮ
-                    </button>
-                  </div>
-                </div>
+                      {/* Corner accents */}
+                      <div className={clsx(
+                        'absolute top-0 left-0 w-3 h-3 border-l-2 border-t-2',
+                        'transition-all duration-300',
+                        affordable ? colors.corner : 'border-slate-700'
+                      )} />
+                      <div className={clsx(
+                        'absolute top-0 right-0 w-3 h-3 border-r-2 border-t-2',
+                        'transition-all duration-300',
+                        affordable ? colors.corner : 'border-slate-700'
+                      )} />
+                      <div className={clsx(
+                        'absolute bottom-0 left-0 w-3 h-3 border-l-2 border-b-2',
+                        'transition-all duration-300',
+                        affordable ? colors.corner : 'border-slate-700'
+                      )} />
+                      <div className={clsx(
+                        'absolute bottom-0 right-0 w-3 h-3 border-r-2 border-b-2',
+                        'transition-all duration-300',
+                        affordable ? colors.corner : 'border-slate-700'
+                      )} />
 
-                {/* Count badge */}
-                {count > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full h-6 min-w-[24px] flex items-center justify-center border-2 border-slate-900 z-10">
-                    {count}
-                  </span>
-                )}
-              </div>
-            );
-            })}
-          </div>
-            )}
-          </>
-        )}
-      </div>
+                      {/* Image container */}
+                      <div className="relative aspect-[4/3] bg-slate-900/50 overflow-hidden">
+                        {unit.data.image ? (
+                          <Image
+                            src={unit.data.image}
+                            alt={unit.data.name}
+                            fill
+                            className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
+                            loading="lazy"
+                            unoptimized
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-slate-800">
+                            <Users className={clsx('w-16 h-16 opacity-20', affordable ? colors.accent : 'text-slate-600')} />
+                          </div>
+                        )}
 
-      {/* Selected army (shown below available units in browse mode) */}
-      {army.length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-green-500/50 to-transparent"></div>
-            <h3 className="text-xl font-mono font-bold text-green-400 tracking-wider">ВАША АРМИЯ ({army.length})</h3>
-            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-green-500/50 to-transparent"></div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {army.map((unit) => {
-              const typeBadge = getUnitTypeBadge(unit.type);
-              const TypeIcon = typeBadge.icon;
+                        {/* Rank badge */}
+                        <div className={clsx(
+                          'absolute top-2 right-2 px-2 py-0.5 rounded-sm font-mono text-xs font-bold',
+                          'bg-slate-900/90 backdrop-blur-sm border',
+                          affordable ? colors.border : 'border-slate-700',
+                          affordable ? colors.accent : 'text-slate-500'
+                        )}>
+                          R{getSquadMaxRank(squad)}
+                        </div>
 
-              return (
-                <div
-                  key={unit.instanceId}
-                  data-testid={`army-unit-${unit.instanceId}`}
-                  className={clsx(
-                    'relative group cursor-pointer transition-all duration-300',
-                    'border bg-slate-800/80 backdrop-blur-sm overflow-hidden',
-                    'border-green-500/50 hover:border-green-500',
-                    'hover:bg-green-500/10'
-                  )}
-                >
-                  {/* Corner accents */}
-                  <div className="absolute top-0 left-0 w-3 h-3 border-l-2 border-t-2 border-green-500 transition-all duration-300" />
-                  <div className="absolute top-0 right-0 w-3 h-3 border-r-2 border-t-2 border-green-500 transition-all duration-300" />
-                  <div className="absolute bottom-0 left-0 w-3 h-3 border-l-2 border-b-2 border-green-500 transition-all duration-300" />
-                  <div className="absolute bottom-0 right-0 w-3 h-3 border-r-2 border-b-2 border-green-500 transition-all duration-300" />
+                        {/* Holographic overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent pointer-events-none" />
+                      </div>
 
-                  {/* Image container */}
-                  {unit.data.image && (
-                    <div className="relative aspect-[4/3] bg-slate-900/50 overflow-hidden">
-                      <Image
-                        src={unit.data.image}
-                        alt={unit.data.name}
-                        fill
-                        className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
-                        loading="lazy"
-                        unoptimized
-                      />
-                      {/* Holographic overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent pointer-events-none" />
+                      {/* Content */}
+                      <div className="p-3 space-y-2">
+                        {/* Name and cost */}
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <h3 className={clsx(
+                              'font-bold text-sm font-mono tracking-wide truncate',
+                              affordable ? colors.accent : 'text-slate-500'
+                            )} title={squad.name}>
+                              {squad.name.toUpperCase()}
+                            </h3>
+                            <p className="text-[10px] text-slate-500 truncate font-mono">
+                              ОТРЯД
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <span className={clsx('font-mono font-bold text-sm', affordable ? colors.accent : 'text-slate-500')}>
+                              {squad.cost}
+                            </span>
+                            <span className="text-[10px] text-slate-500 block font-mono">очков</span>
+                          </div>
+                        </div>
+
+                        {/* Quick stats */}
+                        <div className="flex items-center gap-2 text-[10px] text-slate-500 font-mono flex-wrap">
+                          <div className="flex items-center gap-1">
+                            <Users className="w-3 h-3" />
+                            <span>{squad.soldiers.length}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Shield className="w-3 h-3" />
+                            <span>Бр {getSquadArmorRange(squad)}</span>
+                          </div>
+                          <div className={clsx('ml-auto', affordable ? colors.accent : 'text-slate-600')}>
+                            R{getSquadMaxRank(squad)}
+                          </div>
+                        </div>
+
+                        {/* Add button */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAddUnit(unit);
+                          }}
+                          data-testid={`add-unit-${unit.data.id}`}
+                          disabled={!affordable}
+                          aria-disabled={!affordable}
+                          aria-label={`Добавить ${unit.data.name}`}
+                          className={clsx(
+                            'w-full py-2 flex items-center justify-center gap-2',
+                            'border font-mono text-xs font-bold uppercase tracking-wider',
+                            'transition-all duration-200',
+                            'touch-manipulation',
+                            affordable ? colors.border : 'border-slate-700',
+                            affordable ? colors.bg : '',
+                            affordable ? colors.accent : 'text-slate-500',
+                            !affordable && 'bg-slate-800/50 cursor-not-allowed opacity-50'
+                          )}
+                        >
+                          <Plus className="w-4 h-4" />
+                          В АРМИЮ
+                        </button>
+                      </div>
                     </div>
-                  )}
 
-                  {/* Type badge */}
-                  <div className="absolute top-2 left-2 bg-slate-900/90 backdrop-blur-sm rounded-full p-1.5 border border-slate-600">
-                    <TypeIcon className={clsx('w-4 h-4', typeBadge.color)} />
-                  </div>
-
-                  {/* Remove button in top-right */}
-                  <button
-                    onClick={() => onRemoveUnit(unit.instanceId)}
-                    data-testid={`remove-unit-${unit.instanceId}`}
-                    aria-label={`Удалить ${unit.data.name}`}
-                    className="absolute top-2 right-2 p-1.5 bg-red-900/80 hover:bg-red-800 rounded-full min-w-[36px] min-h-[36px] flex items-center justify-center touch-manipulation transition-colors border border-red-700"
-                  >
-                    <X size={16} className="text-red-400" />
-                  </button>
-
-                  {/* Content */}
-                  <div className="p-3 space-y-2">
-                    {/* Name and cost */}
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-mono font-bold text-sm tracking-wide truncate text-green-400">
-                          {unit.data.shortName || unit.data.name.toUpperCase()}
-                        </h4>
-                        <p className="text-[10px] text-slate-500 truncate font-mono">
-                          {unit.type === 'machine' ? 'МАШИНА' : 'ОТРЯД'}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <span className="font-mono font-bold text-sm text-green-400">
-                          {unit.data.cost}
-                        </span>
-                        <span className="text-[10px] text-slate-500 block font-mono">очков</span>
-                      </div>
-                    </div>
-
-                    {/* Squad stats */}
-                    {unit.type === 'squad' && (
-                      <div className="flex items-center gap-2 text-[10px] text-slate-500 font-mono">
-                        <div className="flex items-center gap-1">
-                          <Users className="w-3 h-3" />
-                          <span>{(unit.data as Squad).soldiers.length}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Shield className="w-3 h-3" />
-                          <span>Бр {getSquadArmorRange(unit.data as Squad)}</span>
-                        </div>
-                      </div>
+                    {/* Count badge */}
+                    {count > 0 && (
+                      <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full h-6 min-w-[24px] flex items-center justify-center border-2 border-slate-900 z-10">
+                        {count}
+                      </span>
                     )}
-
-                    {/* Machine stats */}
-                    {unit.type === 'machine' && (
-                      <div className="flex items-center gap-2 text-[10px] text-slate-500 font-mono">
-                        <div className="flex items-center gap-1">
-                          <Shield className="w-3 h-3" />
-                          <span>Прч {(unit.data as Machine).durability_max}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Zap className="w-3 h-3" />
-                          <span>Скор {(unit.data as Machine).speed_sectors[0]?.speed || 0}</span>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Color indicator bar */}
-                    <div className="h-0.5 rounded-full bg-green-500"></div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
-      )}
-        </>
       ) : (
         <>
           {/* Army view mode */}
@@ -723,9 +555,7 @@ export function UnitSelector({
               setIsModalOpen(true);
             }}
             onAddUnits={() => setViewMode('browse')}
-            pointBudget={pointBudget}
-            totalCost={totalCost}
-            filterType={filterType}
+            displayMode={displayMode}
             factionId={selectedFaction}
           />
         </>
@@ -753,11 +583,16 @@ export function UnitSelector({
       )}
 
       {/* Unit details modal */}
-      {selectedUnit && faction && (
-        <UnitDetailsModal
-          unit={selectedUnit.data}
-          unitType={selectedUnit.type}
-          faction={faction}
+      {selectedUnit && selectedUnit.type === 'squad' && (
+        <SquadBlueprintModal
+          squad={selectedUnit.data as any}
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
+      {selectedUnit && selectedUnit.type === 'machine' && (
+        <MachineBlueprintModal
+          machine={selectedUnit.data as any}
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
         />
@@ -771,25 +606,6 @@ export function UnitSelector({
           isOpen={isWeaponSelectorOpen}
           onClose={handleWeaponSelectionCancel}
           onConfirm={handleWeaponSelectionConfirm}
-        />
-      )}
-
-      {/* Machine blueprint modal */}
-      {blueprintMachine && (
-        <MachineBlueprintModal
-          machine={blueprintMachine}
-          isOpen={isBlueprintOpen}
-          onClose={() => {
-            setIsBlueprintOpen(false);
-            setBlueprintMachine(null);
-          }}
-          onAdd={(machine) => {
-            if (onAddMachine) {
-              onAddMachine(machine);
-            }
-            setIsBlueprintOpen(false);
-            setBlueprintMachine(null);
-          }}
         />
       )}
 

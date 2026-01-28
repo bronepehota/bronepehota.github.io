@@ -625,7 +625,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                         alt={`Солдат ${idx + 1}`}
                         width={64}
                         height={64}
-                        className="w-full h-full object-cover object-center"
+                        className="w-full h-full object-cover object-center scale-150"
                         unoptimized
                       />
                       {/* Pilot Badge Overlay - Tech Style */}
@@ -913,7 +913,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                           src={getPilotImage() || '/images/soldiers/empty.png'}
                           width={64}
                           height={128}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover scale-150"
                           unoptimized
                           alt="Пилот"
                         />

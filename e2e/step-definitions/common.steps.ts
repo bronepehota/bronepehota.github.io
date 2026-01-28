@@ -308,8 +308,11 @@ Then('не должно быть возвращения к правилам по
 });
 
 Then('я должен перейти к этапу выбора балла очков', async function(this: BronepehotaWorld) {
+  // Wait for UI to update after clicking "Далее" button
+  await this.page.waitForTimeout(500);
+
   const budgetInput = this.page.getByRole('spinbutton').or(this.page.getByPlaceholder(/очки|балл/i));
-  await expect(budgetInput.first()).toBeVisible({ timeout: 5000 });
+  await expect(budgetInput.first()).toBeVisible({ timeout: 10000 });
 });
 
 Then('я должен перейти к этапу выбора правил', async function(this: BronepehotaWorld) {

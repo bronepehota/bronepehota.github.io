@@ -61,8 +61,8 @@ export function CompactArmyCard({ unit, onRemove, onClick, factionId }: CompactA
       <div className="flex-1 min-w-0 px-3 py-2 flex flex-col justify-center">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <h4 className="font-mono font-bold text-sm text-slate-100 truncate leading-tight">
-              {unit.data.shortName || unit.data.name}
+            <h4 className="font-mono font-bold text-sm text-slate-100 truncate leading-tight" title={unit.data.name}>
+              {unit.data.name}
             </h4>
             <div className="flex items-center gap-2 mt-0.5">
               <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">

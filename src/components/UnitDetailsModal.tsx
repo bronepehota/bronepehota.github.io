@@ -52,7 +52,7 @@ function SoldierStats({ soldier, index, factionColor }: SoldierStatsProps) {
             alt={`Боец ${index + 1}`}
             width={48}
             height={48}
-            className="w-12 h-12 rounded-lg object-cover"
+            className="w-12 h-12 rounded-lg object-cover scale-150"
             onError={(e) => {
               (e.target as HTMLImageElement).style.display = 'none';
             }}
@@ -459,6 +459,15 @@ export function UnitDetailsModal({
                 }}
                 unoptimized
               />
+            </div>
+          )}
+
+          {/* For squads without main image, show a placeholder */}
+          {unitType === 'squad' && !unit.image && (
+            <div className="flex justify-center mb-4 md:absolute md:right-16 md:top-1/2 md:-translate-y-1/2 md:mb-0 md:opacity-20">
+              <div className="w-24 h-24 md:w-32 md:h-32 rounded-xl shadow-lg bg-slate-800 flex items-center justify-center">
+                <Shield className="w-12 h-12 text-slate-600" />
+              </div>
             </div>
           )}
 

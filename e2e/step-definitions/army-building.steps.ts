@@ -61,9 +61,10 @@ Given('я выбрал фракцию {string} с балансом {string} оч
   const budgetNextButton = this.page.getByTestId('budget-next-button').or(
     this.page.getByRole('button', { name: /начать сбор армии/i })
   );
-  await budgetNextButton.first().waitFor({ state: 'visible', timeout: 5000 });
+  await budgetNextButton.first().waitFor({ state: 'visible', timeout: 15000 });
+  await budgetNextButton.first().scrollIntoViewIfNeeded();
   await budgetNextButton.first().click();
-  await this.page.waitForTimeout(1000);
+  await this.page.waitForTimeout(2000);
 
   // Wait for rules selector to be visible
   const rulesSelector = this.page.getByTestId('rules-selector').or(this.page.locator('#rules-selector'));

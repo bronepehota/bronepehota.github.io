@@ -3,6 +3,11 @@ export type FactionID = 'polaris' | 'protectorate' | 'mercenaries';
 // Rules version selection
 export type RulesVersionID = 'tehnolog' | 'fan';
 
+// UI Control types
+export type ViewMode = 'browse' | 'army';
+export type DisplayMode = 'compact' | 'detailed';
+export type FilterType = 'all' | 'squad' | 'machine' | 'mercenary';
+
 export interface Faction {
   id: FactionID;
   name: string;
@@ -14,6 +19,7 @@ export interface Faction {
 }
 
 export interface Soldier {
+  num?: number;         // Soldier number in squad (from Excel)
   rank: number;
   speed: number;
   range: string;
