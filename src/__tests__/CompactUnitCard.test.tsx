@@ -3,23 +3,29 @@ import userEvent from '@testing-library/user-event';
 import { CompactUnitCard } from '@/components/CompactUnitCard';
 import type { Squad, Machine } from '@/lib/types';
 
+// Use real squad data from the Excel import
 const mockSquad: Squad = {
-  id: 'test_squad',
-  name: 'Test Squad',
-  shortName: 'TST SQUAD',
+  id: 'polaris_lineynaya_klon_pehota',
+  name: 'Линейная клон-пехота',
+  shortName: 'Линейная клон-пехота',
   faction: 'polaris',
-  cost: 100,
+  cost: 50,
   image: '/test.jpg',
   soldiers: [
-    { rank: 7, speed: 4, range: 'D6', power: '1D6', melee: 0, props: [], armor: 2 },
-    { rank: 6, speed: 4, range: 'D6', power: '1D6', melee: 0, props: [], armor: 3 },
+    { num: 1, rank: 2, speed: 5, range: 'D6', power: '2D6', melee: 3, props: [], armor: 2 },
+    { num: 2, rank: 2, speed: 5, range: 'D12', power: '2D6', melee: 3, props: [], armor: 2 },
+    { num: 3, rank: 2, speed: 5, range: 'D12', power: '2D6', melee: 3, props: [], armor: 2 },
+    { num: 4, rank: 2, speed: 5, range: 'D12', power: '2D6', melee: 3, props: [], armor: 2 },
+    { num: 5, rank: 2, speed: 5, range: 'D12', power: '2D6', melee: 3, props: [], armor: 2 },
+    { num: 6, rank: 2, speed: 5, range: 'D12', power: '2D6', melee: 3, props: [], armor: 2 },
   ],
 };
 
+// Use real machine data (existing from machines.json)
 const mockMachine: Machine = {
-  id: 'test_machine',
-  name: 'Test Machine',
-  shortName: 'TST MECH',
+  id: 'polaris_legkaya_shturmovaya_grin_bolter',
+  name: 'Лёгкая штурмовая "Грин-болтер"',
+  shortName: 'Грин-болтер лёг.',
   faction: 'polaris',
   cost: 150,
   rank: 2,
@@ -32,7 +38,7 @@ const mockMachine: Machine = {
     { min_durability: 1, max_durability: 8, speed: 1 },
   ],
   weapons: [
-    { name: 'Test Weapon', range: 'D12', power: '2D12', special: '' },
+    { name: 'Грин-болтер', range: 'D12', power: '2D12', special: '' },
   ],
 };
 
@@ -52,11 +58,11 @@ describe('CompactUnitCard', () => {
       />
     );
 
-    expect(screen.getByText('TST SQUAD')).toBeInTheDocument();
+    expect(screen.getByText('Линейная клон-пехота')).toBeInTheDocument();
     expect(screen.getByText('ОТРЯД')).toBeInTheDocument();
-    expect(screen.getByText('100')).toBeInTheDocument();
-    expect(screen.getByText(/R7/)).toBeInTheDocument();
-    expect(screen.getByText(/2 бойцов/)).toBeInTheDocument();
+    expect(screen.getByText('50')).toBeInTheDocument();
+    expect(screen.getByText(/R2/)).toBeInTheDocument();
+    expect(screen.getByText(/6 бойцов/)).toBeInTheDocument();
   });
 
   it('renders machine card with correct info', () => {
@@ -74,7 +80,7 @@ describe('CompactUnitCard', () => {
       />
     );
 
-    expect(screen.getByText('TST MECH')).toBeInTheDocument();
+    expect(screen.getByText('Лёгкая штурмовая "Грин-болтер"')).toBeInTheDocument();
     expect(screen.getByText('МАШИНА')).toBeInTheDocument();
     expect(screen.getByText('150')).toBeInTheDocument();
     expect(screen.getByText(/R2/)).toBeInTheDocument();
@@ -129,7 +135,7 @@ describe('CompactUnitCard', () => {
       />
     );
 
-    const card = screen.getByTestId('compact-unit-card-test_squad');
+    const card = screen.getByTestId('compact-unit-card-polaris_lineynaya_klon_pehota');
     await user.click(card);
 
     expect(handleClick).toHaveBeenCalledTimes(1);
@@ -150,7 +156,7 @@ describe('CompactUnitCard', () => {
       />
     );
 
-    const card = screen.getByTestId('compact-unit-card-test_squad');
+    const card = screen.getByTestId('compact-unit-card-polaris_lineynaya_klon_pehota');
     await user.click(card);
 
     expect(handleClick).not.toHaveBeenCalled();
@@ -171,7 +177,7 @@ describe('CompactUnitCard', () => {
       />
     );
 
-    const addButton = screen.getByTestId('add-compact-test_squad');
+    const addButton = screen.getByTestId('add-compact-polaris_lineynaya_klon_pehota');
     await user.click(addButton);
 
     expect(handleAdd).toHaveBeenCalledTimes(1);
@@ -192,7 +198,7 @@ describe('CompactUnitCard', () => {
       />
     );
 
-    const addButton = screen.getByTestId('add-compact-test_squad');
+    const addButton = screen.getByTestId('add-compact-polaris_lineynaya_klon_pehota');
     await user.click(addButton);
 
     expect(handleAdd).not.toHaveBeenCalled();
@@ -210,7 +216,7 @@ describe('CompactUnitCard', () => {
       />
     );
 
-    const card = screen.getByTestId('compact-unit-card-test_squad');
+    const card = screen.getByTestId('compact-unit-card-polaris_lineynaya_klon_pehota');
     expect(card).toHaveClass('cursor-pointer');
 
     rerender(

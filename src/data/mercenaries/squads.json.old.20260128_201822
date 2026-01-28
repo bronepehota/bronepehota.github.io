@@ -1,0 +1,546 @@
+[
+  {
+    "id": "mercenaries_aborigeny_kreposti_molodyh_rostkov",
+    "name": "Аборигены крепости Молодых Ростков",
+    "shortName": "Аборигены крепости",
+    "faction": "mercenaries",
+    "cost": 20,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 1,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 5,
+        "props": [],
+        "armor": 1
+      },
+      {
+        "num": 2,
+        "rank": 1,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 5,
+        "props": [],
+        "armor": 1
+      },
+      {
+        "num": 3,
+        "rank": 1,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 5,
+        "props": [],
+        "armor": 1
+      },
+      {
+        "num": 4,
+        "rank": 1,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 5,
+        "props": [],
+        "armor": 1
+      },
+      {
+        "num": 5,
+        "rank": 1,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 5,
+        "props": [],
+        "armor": 1
+      },
+      {
+        "num": 6,
+        "rank": 1,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 5,
+        "props": [],
+        "armor": 1
+      }
+    ]
+  },
+  {
+    "id": "mercenaries_piraty_markusa_novye",
+    "name": "Пираты Маркуса (новые)",
+    "shortName": "Пираты Маркуса новые",
+    "faction": "mercenaries",
+    "cost": 50,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 2,
+        "speed": 5,
+        "range": "D6+",
+        "power": "2D6+",
+        "melee": 2,
+        "props": [],
+        "armor": 1
+      },
+      {
+        "num": 2,
+        "rank": 2,
+        "speed": 5,
+        "range": "2D12+",
+        "power": "1D6+1",
+        "melee": 2,
+        "props": [],
+        "armor": 1
+      },
+      {
+        "num": 3,
+        "rank": 2,
+        "speed": 5,
+        "range": "2D6+-1",
+        "power": "2D6+1",
+        "melee": 2,
+        "props": [],
+        "armor": 1
+      },
+      {
+        "num": 4,
+        "rank": 2,
+        "speed": 5,
+        "range": "2D6+-1",
+        "power": "2D6+1",
+        "melee": 2,
+        "props": [],
+        "armor": 1
+      },
+      {
+        "num": 5,
+        "rank": 2,
+        "speed": 5,
+        "range": "2D12+",
+        "power": "1D6+1",
+        "melee": 2,
+        "props": [],
+        "armor": 1
+      },
+      {
+        "num": 6,
+        "rank": 2,
+        "speed": 5,
+        "range": "2D12+",
+        "power": "1D6+1",
+        "melee": 3,
+        "props": [],
+        "armor": 1
+      }
+    ]
+  },
+  {
+    "id": "mercenaries_reydery_pylnoy_zony",
+    "name": "Рейдеры пыльной зоны",
+    "shortName": "Рейдеры пыльной зоны",
+    "faction": "mercenaries",
+    "cost": 50,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 3,
+        "speed": 6,
+        "range": "D6+-1",
+        "power": "3D6+",
+        "melee": 2,
+        "props": [
+          "Рм"
+        ],
+        "armor": 1
+      },
+      {
+        "num": 2,
+        "rank": 3,
+        "speed": 6,
+        "range": "D6+-1",
+        "power": "3D6+",
+        "melee": 2,
+        "props": [
+          "Рм"
+        ],
+        "armor": 1
+      },
+      {
+        "num": 3,
+        "rank": 3,
+        "speed": 6,
+        "range": "D12+",
+        "power": "2D6+",
+        "melee": 2,
+        "props": [
+          "Рм"
+        ],
+        "armor": 1
+      },
+      {
+        "num": 4,
+        "rank": 3,
+        "speed": 6,
+        "range": "D12+",
+        "power": "2D6+",
+        "melee": 2,
+        "props": [
+          "Рм"
+        ],
+        "armor": 1
+      },
+      {
+        "num": 5,
+        "rank": 3,
+        "speed": 6,
+        "range": "D6+-1",
+        "power": "3D6+",
+        "melee": 2,
+        "props": [
+          "Рм"
+        ],
+        "armor": 1
+      },
+      {
+        "num": 6,
+        "rank": 3,
+        "speed": 6,
+        "range": "2D12+",
+        "power": "1D6+",
+        "melee": 3,
+        "props": [
+          "Рм"
+        ],
+        "armor": 1
+      }
+    ]
+  },
+  {
+    "id": "mercenaries_mutanty",
+    "name": "Мутанты",
+    "shortName": "Мутанты",
+    "faction": "mercenaries",
+    "cost": 50,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 2,
+        "speed": 5,
+        "range": "D6+",
+        "power": "2D6+",
+        "melee": 4,
+        "props": [],
+        "armor": 3
+      },
+      {
+        "num": 2,
+        "rank": 2,
+        "speed": 5,
+        "range": "2D12+",
+        "power": "1D20+",
+        "melee": 0,
+        "props": [],
+        "armor": 3
+      },
+      {
+        "num": 3,
+        "rank": 2,
+        "speed": 5,
+        "range": "D12+",
+        "power": "1D20+",
+        "melee": 0,
+        "props": [],
+        "armor": 3
+      },
+      {
+        "num": 4,
+        "rank": 2,
+        "speed": 5,
+        "range": "D6+",
+        "power": "2D6+",
+        "melee": 4,
+        "props": [],
+        "armor": 3
+      }
+    ]
+  },
+  {
+    "id": "mercenaries_piraty_tortugi",
+    "name": "Пираты Тортуги",
+    "shortName": "Пираты Тортуги",
+    "faction": "mercenaries",
+    "cost": 65,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 1,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 4,
+        "props": [],
+        "armor": 3
+      },
+      {
+        "num": 2,
+        "rank": 1,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 4,
+        "props": [],
+        "armor": 3
+      },
+      {
+        "num": 3,
+        "rank": 1,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 4,
+        "props": [],
+        "armor": 3
+      },
+      {
+        "num": 4,
+        "rank": 1,
+        "speed": 5,
+        "range": "D6+",
+        "power": "2D6+",
+        "melee": 2,
+        "props": [],
+        "armor": 3
+      },
+      {
+        "num": 5,
+        "rank": 1,
+        "speed": 5,
+        "range": "D6+",
+        "power": "2D6+",
+        "melee": 2,
+        "props": [],
+        "armor": 3
+      },
+      {
+        "num": 6,
+        "rank": 1,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 4,
+        "props": [],
+        "armor": 3
+      }
+    ]
+  },
+  {
+    "id": "mercenaries_kosari",
+    "name": "Косари",
+    "shortName": "Косари",
+    "faction": "mercenaries",
+    "cost": 75,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 1,
+        "speed": 4,
+        "range": "",
+        "power": "",
+        "melee": 4,
+        "props": [],
+        "armor": 4
+      },
+      {
+        "num": 2,
+        "rank": 1,
+        "speed": 4,
+        "range": "",
+        "power": "",
+        "melee": 4,
+        "props": [],
+        "armor": 4
+      },
+      {
+        "num": 3,
+        "rank": 1,
+        "speed": 4,
+        "range": "",
+        "power": "",
+        "melee": 4,
+        "props": [],
+        "armor": 4
+      },
+      {
+        "num": 4,
+        "rank": 1,
+        "speed": 4,
+        "range": "",
+        "power": "",
+        "melee": 4,
+        "props": [],
+        "armor": 4
+      },
+      {
+        "num": 5,
+        "rank": 1,
+        "speed": 4,
+        "range": "",
+        "power": "",
+        "melee": 4,
+        "props": [],
+        "armor": 4
+      },
+      {
+        "num": 6,
+        "rank": 1,
+        "speed": 4,
+        "range": "",
+        "power": "",
+        "melee": 4,
+        "props": [],
+        "armor": 4
+      }
+    ]
+  },
+  {
+    "id": "mercenaries_piraty_markusa_starye",
+    "name": "Пираты маркуса (старые)",
+    "shortName": "Пираты маркуса старые",
+    "faction": "mercenaries",
+    "cost": 80,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 2,
+        "speed": 5,
+        "range": "D12+2",
+        "power": "1D12+",
+        "melee": 2,
+        "props": [],
+        "armor": 3
+      },
+      {
+        "num": 2,
+        "rank": 2,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 5,
+        "props": [],
+        "armor": 3
+      },
+      {
+        "num": 3,
+        "rank": 2,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 4,
+        "props": [],
+        "armor": 3
+      },
+      {
+        "num": 4,
+        "rank": 2,
+        "speed": 5,
+        "range": "D6+",
+        "power": "2D6+",
+        "melee": 2,
+        "props": [],
+        "armor": 3
+      },
+      {
+        "num": 5,
+        "rank": 2,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 4,
+        "props": [],
+        "armor": 3
+      },
+      {
+        "num": 6,
+        "rank": 2,
+        "speed": 5,
+        "range": "2D6+",
+        "power": "1D6+1",
+        "melee": 4,
+        "props": [],
+        "armor": 3
+      }
+    ]
+  },
+  {
+    "id": "mercenaries_naytstalkery",
+    "name": "Найтсталкеры",
+    "shortName": "Найтсталкеры",
+    "faction": "mercenaries",
+    "cost": 95,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 3,
+        "speed": 5,
+        "range": "D12+",
+        "power": "2D6+",
+        "melee": 3,
+        "props": [],
+        "armor": 3
+      },
+      {
+        "num": 2,
+        "rank": 3,
+        "speed": 5,
+        "range": "D12+",
+        "power": "2D6+",
+        "melee": 3,
+        "props": [],
+        "armor": 3
+      },
+      {
+        "num": 3,
+        "rank": 3,
+        "speed": 5,
+        "range": "D6+-1",
+        "power": "2D6+",
+        "melee": 3,
+        "props": [],
+        "armor": 3
+      },
+      {
+        "num": 4,
+        "rank": 3,
+        "speed": 5,
+        "range": "D12+2",
+        "power": "1D12+",
+        "melee": 3,
+        "props": [],
+        "armor": 3
+      },
+      {
+        "num": 5,
+        "rank": 3,
+        "speed": 5,
+        "range": "D12+",
+        "power": "2D6+",
+        "melee": 3,
+        "props": [],
+        "armor": 3
+      },
+      {
+        "num": 6,
+        "rank": 3,
+        "speed": 5,
+        "range": "D12+",
+        "power": "2D12+",
+        "melee": 0,
+        "props": [],
+        "armor": 3
+      }
+    ]
+  }
+]

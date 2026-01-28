@@ -1,0 +1,1008 @@
+[
+  {
+    "id": "protectorate_opolchenie_planety_gelion",
+    "name": "Ополчение планеты Гелион",
+    "shortName": "Ополчение планеты Гелион",
+    "faction": "protectorate",
+    "cost": 40,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 2,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 5,
+        "props": [],
+        "armor": 2
+      },
+      {
+        "num": 2,
+        "rank": 2,
+        "speed": 5,
+        "range": "D6+",
+        "power": "2D6+",
+        "melee": 2,
+        "props": [],
+        "armor": 2
+      },
+      {
+        "num": 3,
+        "rank": 2,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 2,
+        "props": [],
+        "armor": 2
+      },
+      {
+        "num": 4,
+        "rank": 2,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 4,
+        "props": [],
+        "armor": 2
+      },
+      {
+        "num": 5,
+        "rank": 2,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 5,
+        "props": [],
+        "armor": 2
+      },
+      {
+        "num": 6,
+        "rank": 2,
+        "speed": 5,
+        "range": "D6+",
+        "power": "2D6+",
+        "melee": 2,
+        "props": [],
+        "armor": 2
+      }
+    ]
+  },
+  {
+    "id": "protectorate_felitsianskaya_gvardiya",
+    "name": "Фелицианская гвардия",
+    "shortName": "Фелицианская гвардия",
+    "faction": "protectorate",
+    "cost": 50,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 2,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 4,
+        "props": [],
+        "armor": 2
+      },
+      {
+        "num": 2,
+        "rank": 2,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 4,
+        "props": [],
+        "armor": 2
+      },
+      {
+        "num": 3,
+        "rank": 2,
+        "speed": 5,
+        "range": "D6+",
+        "power": "1D12+",
+        "melee": 2,
+        "props": [],
+        "armor": 2
+      },
+      {
+        "num": 4,
+        "rank": 2,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 4,
+        "props": [],
+        "armor": 2
+      },
+      {
+        "num": 5,
+        "rank": 2,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 4,
+        "props": [],
+        "armor": 2
+      },
+      {
+        "num": 6,
+        "rank": 2,
+        "speed": 5,
+        "range": "D6+",
+        "power": "1D6+",
+        "melee": 4,
+        "props": [],
+        "armor": 2
+      }
+    ]
+  },
+  {
+    "id": "protectorate_voyska_planety_ruteniya",
+    "name": "Войска планеты Рутения",
+    "shortName": "Войска планеты Рутения",
+    "faction": "protectorate",
+    "cost": 60,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 2,
+        "speed": 4,
+        "range": "D6+",
+        "power": "2D6+",
+        "melee": 2,
+        "props": [],
+        "armor": 1
+      },
+      {
+        "num": 2,
+        "rank": 2,
+        "speed": 4,
+        "range": "D12+",
+        "power": "2D12+",
+        "melee": 0,
+        "props": [],
+        "armor": 1
+      },
+      {
+        "num": 3,
+        "rank": 2,
+        "speed": 4,
+        "range": "D12+",
+        "power": "2D12+",
+        "melee": 0,
+        "props": [],
+        "armor": 1
+      },
+      {
+        "num": 4,
+        "rank": 2,
+        "speed": 4,
+        "range": "",
+        "power": "",
+        "melee": 4,
+        "props": [],
+        "armor": 1
+      },
+      {
+        "num": 5,
+        "rank": 2,
+        "speed": 4,
+        "range": "D12+",
+        "power": "2D12+",
+        "melee": 0,
+        "props": [],
+        "armor": 1
+      },
+      {
+        "num": 6,
+        "rank": 2,
+        "speed": 4,
+        "range": "D6+",
+        "power": "1D6+3",
+        "melee": 2,
+        "props": [],
+        "armor": 1
+      }
+    ]
+  },
+  {
+    "id": "protectorate_opolchenie_planety_velian",
+    "name": "Ополчение планеты Велиан",
+    "shortName": "Ополчение планеты Велиан",
+    "faction": "protectorate",
+    "cost": 75,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 2,
+        "speed": 5,
+        "range": "D6+",
+        "power": "2D6+",
+        "melee": 4,
+        "props": [],
+        "armor": 3
+      },
+      {
+        "num": 2,
+        "rank": 2,
+        "speed": 5,
+        "range": "D6+",
+        "power": "2D6+",
+        "melee": 2,
+        "props": [],
+        "armor": 3
+      },
+      {
+        "num": 3,
+        "rank": 2,
+        "speed": 5,
+        "range": "D6+",
+        "power": "2D6+",
+        "melee": 2,
+        "props": [],
+        "armor": 3
+      },
+      {
+        "num": 4,
+        "rank": 2,
+        "speed": 5,
+        "range": "D6+",
+        "power": "2D6+",
+        "melee": 2,
+        "props": [],
+        "armor": 3
+      },
+      {
+        "num": 5,
+        "rank": 2,
+        "speed": 5,
+        "range": "D6+",
+        "power": "2D6+",
+        "melee": 2,
+        "props": [],
+        "armor": 3
+      },
+      {
+        "num": 6,
+        "rank": 2,
+        "speed": 5,
+        "range": "D6+",
+        "power": "2D6+",
+        "melee": 2,
+        "props": [],
+        "armor": 3
+      }
+    ]
+  },
+  {
+    "id": "protectorate_lyogkaya_kiberpehota",
+    "name": "Лёгкая киберпехота",
+    "shortName": "Лёгкая киберпехота",
+    "faction": "protectorate",
+    "cost": 95,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 2,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 5,
+        "props": [
+          "Пр5"
+        ],
+        "armor": 3
+      },
+      {
+        "num": 2,
+        "rank": 2,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 5,
+        "props": [
+          "Пр5"
+        ],
+        "armor": 3
+      },
+      {
+        "num": 3,
+        "rank": 2,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 2,
+        "props": [
+          "Пр5"
+        ],
+        "armor": 3
+      },
+      {
+        "num": 4,
+        "rank": 2,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 5,
+        "props": [
+          "Пр5"
+        ],
+        "armor": 3
+      },
+      {
+        "num": 5,
+        "rank": 2,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 2,
+        "props": [
+          "Пр5"
+        ],
+        "armor": 3
+      },
+      {
+        "num": 6,
+        "rank": 2,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 2,
+        "props": [
+          "Пр5"
+        ],
+        "armor": 3
+      }
+    ]
+  },
+  {
+    "id": "protectorate_ruteniyskaya_gvardiya",
+    "name": "Рутенийская гвардия",
+    "shortName": "Рутенийская гвардия",
+    "faction": "protectorate",
+    "cost": 100,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 3,
+        "speed": 5,
+        "range": "2D6+",
+        "power": "1D6+1",
+        "melee": 2,
+        "props": [],
+        "armor": 3
+      },
+      {
+        "num": 2,
+        "rank": 3,
+        "speed": 5,
+        "range": "D12+",
+        "power": "2D6+",
+        "melee": 2,
+        "props": [],
+        "armor": 3
+      },
+      {
+        "num": 3,
+        "rank": 3,
+        "speed": 5,
+        "range": "D12+2",
+        "power": "1D12+",
+        "melee": 2,
+        "props": [],
+        "armor": 3
+      },
+      {
+        "num": 4,
+        "rank": 3,
+        "speed": 5,
+        "range": "D12+",
+        "power": "1D20+",
+        "melee": 0,
+        "props": [],
+        "armor": 3
+      },
+      {
+        "num": 5,
+        "rank": 3,
+        "speed": 5,
+        "range": "D6+",
+        "power": "1D20+",
+        "melee": 0,
+        "props": [],
+        "armor": 3
+      },
+      {
+        "num": 6,
+        "rank": 3,
+        "speed": 5,
+        "range": "D12+",
+        "power": "2D6+",
+        "melee": 2,
+        "props": [],
+        "armor": 3
+      }
+    ]
+  },
+  {
+    "id": "protectorate_kiberpehota",
+    "name": "Киберпехота",
+    "shortName": "Киберпехота",
+    "faction": "protectorate",
+    "cost": 105,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 2,
+        "speed": 4,
+        "range": "",
+        "power": "",
+        "melee": 5,
+        "props": [
+          "Рм"
+        ],
+        "armor": 4
+      },
+      {
+        "num": 2,
+        "rank": 2,
+        "speed": 4,
+        "range": "2D6+",
+        "power": "1D6+1",
+        "melee": 2,
+        "props": [
+          "Рм"
+        ],
+        "armor": 4
+      },
+      {
+        "num": 3,
+        "rank": 2,
+        "speed": 4,
+        "range": "2D6+",
+        "power": "1D6+1",
+        "melee": 2,
+        "props": [
+          "Рм"
+        ],
+        "armor": 4
+      },
+      {
+        "num": 4,
+        "rank": 2,
+        "speed": 4,
+        "range": "",
+        "power": "",
+        "melee": 5,
+        "props": [
+          "Рм"
+        ],
+        "armor": 4
+      },
+      {
+        "num": 5,
+        "rank": 2,
+        "speed": 4,
+        "range": "2D6+",
+        "power": "1D6+1",
+        "melee": 2,
+        "props": [
+          "Рм"
+        ],
+        "armor": 4
+      },
+      {
+        "num": 6,
+        "rank": 2,
+        "speed": 4,
+        "range": "",
+        "power": "",
+        "melee": 5,
+        "props": [
+          "Рм"
+        ],
+        "armor": 4
+      }
+    ]
+  },
+  {
+    "id": "protectorate_regulyary_planety_velian",
+    "name": "Регуляры планеты Велиан",
+    "shortName": "Регуляры планеты Велиан",
+    "faction": "protectorate",
+    "cost": 115,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 3,
+        "speed": 5,
+        "range": "D12+",
+        "power": "2D6+",
+        "melee": 2,
+        "props": [
+          "Пр5"
+        ],
+        "armor": 3
+      },
+      {
+        "num": 2,
+        "rank": 3,
+        "speed": 5,
+        "range": "D6+",
+        "power": "2D6+",
+        "melee": 2,
+        "props": [
+          "Пр5"
+        ],
+        "armor": 3
+      },
+      {
+        "num": 3,
+        "rank": 3,
+        "speed": 5,
+        "range": "D20+",
+        "power": "1D12+",
+        "melee": 0,
+        "props": [
+          "Пр5"
+        ],
+        "armor": 3
+      },
+      {
+        "num": 4,
+        "rank": 3,
+        "speed": 5,
+        "range": "2D6+",
+        "power": "1D6+1",
+        "melee": 2,
+        "props": [
+          "Пр5"
+        ],
+        "armor": 3
+      },
+      {
+        "num": 5,
+        "rank": 3,
+        "speed": 5,
+        "range": "2D12+",
+        "power": "1D6+1",
+        "melee": 2,
+        "props": [
+          "Пр5"
+        ],
+        "armor": 3
+      },
+      {
+        "num": 6,
+        "rank": 3,
+        "speed": 5,
+        "range": "D6+-1",
+        "power": "2D6+3",
+        "melee": 2,
+        "props": [
+          "Пр5"
+        ],
+        "armor": 3
+      }
+    ]
+  },
+  {
+    "id": "protectorate_tyazhyolaya_shturmovaya_pehota_veliana",
+    "name": "Тяжёлая штурмовая пехота Велиана",
+    "shortName": "Тяжёлая штурмовая пехота",
+    "faction": "protectorate",
+    "cost": 115,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 3,
+        "speed": 5,
+        "range": "D6+",
+        "power": "2D6+",
+        "melee": 3,
+        "props": [],
+        "armor": 6
+      },
+      {
+        "num": 2,
+        "rank": 3,
+        "speed": 5,
+        "range": "D12+",
+        "power": "2D6+",
+        "melee": 3,
+        "props": [],
+        "armor": 6
+      },
+      {
+        "num": 3,
+        "rank": 3,
+        "speed": 5,
+        "range": "D12+",
+        "power": "2D12+",
+        "melee": 3,
+        "props": [],
+        "armor": 6
+      },
+      {
+        "num": 4,
+        "rank": 3,
+        "speed": 5,
+        "range": "D12+",
+        "power": "2D12+",
+        "melee": 3,
+        "props": [],
+        "armor": 6
+      }
+    ]
+  },
+  {
+    "id": "protectorate_shturmovoy_spetsnaz_starye",
+    "name": "Штурмовой спецназ (старые)",
+    "shortName": "Штурмовой спецназ старые",
+    "faction": "protectorate",
+    "cost": 120,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 4,
+        "speed": 4,
+        "range": "D6+",
+        "power": "2D6+",
+        "melee": 3,
+        "props": [],
+        "armor": 5
+      },
+      {
+        "num": 2,
+        "rank": 4,
+        "speed": 4,
+        "range": "D6+",
+        "power": "1D12+",
+        "melee": 3,
+        "props": [],
+        "armor": 5
+      },
+      {
+        "num": 3,
+        "rank": 4,
+        "speed": 4,
+        "range": "D6+",
+        "power": "2D6+",
+        "melee": 4,
+        "props": [],
+        "armor": 5
+      },
+      {
+        "num": 4,
+        "rank": 4,
+        "speed": 4,
+        "range": "D6+-1",
+        "power": "2D6+3",
+        "melee": 3,
+        "props": [],
+        "armor": 5
+      },
+      {
+        "num": 5,
+        "rank": 4,
+        "speed": 4,
+        "range": "",
+        "power": "",
+        "melee": 7,
+        "props": [],
+        "armor": 5
+      },
+      {
+        "num": 6,
+        "rank": 4,
+        "speed": 4,
+        "range": "D12+2",
+        "power": "1D12+",
+        "melee": 3,
+        "props": [],
+        "armor": 5
+      }
+    ]
+  },
+  {
+    "id": "protectorate_shturmovoy_spetsnaz_novye",
+    "name": "Штурмовой спецназ (новые)",
+    "shortName": "Штурмовой спецназ новые",
+    "faction": "protectorate",
+    "cost": 120,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 4,
+        "speed": 4,
+        "range": "D6+-1",
+        "power": "2D6+3",
+        "melee": 3,
+        "props": [],
+        "armor": 5
+      },
+      {
+        "num": 2,
+        "rank": 4,
+        "speed": 4,
+        "range": "D6+-1",
+        "power": "2D6+3",
+        "melee": 3,
+        "props": [],
+        "armor": 5
+      },
+      {
+        "num": 3,
+        "rank": 4,
+        "speed": 4,
+        "range": "D6+-1",
+        "power": "2D6+3",
+        "melee": 3,
+        "props": [],
+        "armor": 5
+      },
+      {
+        "num": 4,
+        "rank": 4,
+        "speed": 4,
+        "range": "D12+",
+        "power": "1D6+3",
+        "melee": 3,
+        "props": [],
+        "armor": 5
+      },
+      {
+        "num": 5,
+        "rank": 4,
+        "speed": 4,
+        "range": "D12+",
+        "power": "1D6+3",
+        "melee": 3,
+        "props": [],
+        "armor": 5
+      },
+      {
+        "num": 6,
+        "rank": 4,
+        "speed": 4,
+        "range": "D12+",
+        "power": "2D6+",
+        "melee": 3,
+        "props": [],
+        "armor": 5
+      }
+    ]
+  },
+  {
+    "id": "protectorate_shturmovoy_otryad_\"stervyatniki\"",
+    "name": "Штурмовой отряд \"Стервятники\"",
+    "shortName": "Штурмовой отряд",
+    "faction": "protectorate",
+    "cost": 125,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 3,
+        "speed": 4,
+        "range": "D12+",
+        "power": "2D6+",
+        "melee": 2,
+        "props": [
+          "Пр5"
+        ],
+        "armor": 5
+      },
+      {
+        "num": 2,
+        "rank": 3,
+        "speed": 4,
+        "range": "D6+",
+        "power": "1D6+3",
+        "melee": 2,
+        "props": [
+          "Пр5"
+        ],
+        "armor": 5
+      },
+      {
+        "num": 3,
+        "rank": 3,
+        "speed": 4,
+        "range": "D6+",
+        "power": "2D6+",
+        "melee": 2,
+        "props": [
+          "Пр5"
+        ],
+        "armor": 5
+      },
+      {
+        "num": 4,
+        "rank": 3,
+        "speed": 4,
+        "range": "D12+",
+        "power": "2D12+",
+        "melee": 0,
+        "props": [
+          "Пр5"
+        ],
+        "armor": 5
+      },
+      {
+        "num": 5,
+        "rank": 3,
+        "speed": 4,
+        "range": "D6+",
+        "power": "2D6+",
+        "melee": 2,
+        "props": [
+          "Пр5"
+        ],
+        "armor": 5
+      },
+      {
+        "num": 6,
+        "rank": 3,
+        "speed": 4,
+        "range": "D6+",
+        "power": "2D6+",
+        "melee": 2,
+        "props": [
+          "Пр5"
+        ],
+        "armor": 5
+      }
+    ]
+  },
+  {
+    "id": "protectorate_spetsnaz_planety_felitsiya",
+    "name": "Спецназ планеты Фелиция",
+    "shortName": "Спецназ планеты Фелиция",
+    "faction": "protectorate",
+    "cost": 135,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 4,
+        "speed": 6,
+        "range": "D6+",
+        "power": "2D6+",
+        "melee": 3,
+        "props": [
+          "Рм"
+        ],
+        "armor": 3
+      },
+      {
+        "num": 2,
+        "rank": 4,
+        "speed": 6,
+        "range": "2D6+",
+        "power": "1D6+1",
+        "melee": 3,
+        "props": [
+          "Рм"
+        ],
+        "armor": 3
+      },
+      {
+        "num": 3,
+        "rank": 4,
+        "speed": 6,
+        "range": "D6+",
+        "power": "1D6+3",
+        "melee": 3,
+        "props": [
+          "Рм"
+        ],
+        "armor": 3
+      },
+      {
+        "num": 4,
+        "rank": 4,
+        "speed": 6,
+        "range": "D12+",
+        "power": "1D20+2",
+        "melee": 0,
+        "props": [
+          "Рм"
+        ],
+        "armor": 3
+      },
+      {
+        "num": 5,
+        "rank": 4,
+        "speed": 6,
+        "range": "D6+",
+        "power": "3D6+",
+        "melee": 3,
+        "props": [
+          "Рм"
+        ],
+        "armor": 3
+      },
+      {
+        "num": 6,
+        "rank": 4,
+        "speed": 6,
+        "range": "D12+",
+        "power": "2D12+",
+        "melee": 0,
+        "props": [
+          "Рм"
+        ],
+        "armor": 3
+      }
+    ]
+  },
+  {
+    "id": "protectorate_kiberspetsnaz",
+    "name": "Киберспецназ",
+    "shortName": "Киберспецназ",
+    "faction": "protectorate",
+    "cost": 135,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 4,
+        "speed": 4,
+        "range": "2D12+",
+        "power": "1D6+1",
+        "melee": 3,
+        "props": [],
+        "armor": 5
+      },
+      {
+        "num": 2,
+        "rank": 4,
+        "speed": 4,
+        "range": "2D12+",
+        "power": "1D6+1",
+        "melee": 3,
+        "props": [],
+        "armor": 5
+      },
+      {
+        "num": 3,
+        "rank": 4,
+        "speed": 4,
+        "range": "2D12+",
+        "power": "1D6+1",
+        "melee": 3,
+        "props": [],
+        "armor": 5
+      },
+      {
+        "num": 4,
+        "rank": 4,
+        "speed": 4,
+        "range": "",
+        "power": "",
+        "melee": 6,
+        "props": [],
+        "armor": 5
+      },
+      {
+        "num": 5,
+        "rank": 4,
+        "speed": 4,
+        "range": "",
+        "power": "",
+        "melee": 6,
+        "props": [],
+        "armor": 5
+      },
+      {
+        "num": 6,
+        "rank": 4,
+        "speed": 4,
+        "range": "",
+        "power": "",
+        "melee": 6,
+        "props": [],
+        "armor": 5
+      }
+    ]
+  }
+]

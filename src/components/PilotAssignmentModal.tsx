@@ -435,7 +435,7 @@ export function PilotAssignmentModal({
                             alt={`Боец ${candidate.soldierIndex + 1}`}
                             width={56}
                             height={56}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover scale-150"
                             unoptimized
                           />
                           {/* Rank Badge */}

@@ -1,262 +1,715 @@
 [
   {
-    "id": "polaris_light_assault_clone",
-    "name": "Легкая штурмовая клон-пехота",
-    "shortName": "Штурм. клоны",
-    "faction": "polaris",
-    "cost": 70,
-    "image": "/images/squads/polaris_light_assault_clone.jpg",
-    "soldiers": [
-      {
-        "rank": 7,
-        "speed": 4,
-        "range": "D6",
-        "power": "1D6",
-        "melee": 0,
-        "props": [
-          "Г"
-        ],
-        "armor": 2
-      },
-      {
-        "rank": 2,
-        "speed": 4,
-        "range": "D6",
-        "power": "1D6",
-        "melee": 0,
-        "props": [],
-        "armor": 2
-      },
-      {
-        "rank": 2,
-        "speed": 4,
-        "range": "D6",
-        "power": "1D6",
-        "melee": 0,
-        "props": [],
-        "armor": 2
-      },
-      {
-        "rank": 2,
-        "speed": 4,
-        "range": "D6",
-        "power": "1D6",
-        "melee": 0,
-        "props": [],
-        "armor": 2
-      },
-      {
-        "rank": 2,
-        "speed": 4,
-        "range": "D6",
-        "power": "1D6",
-        "melee": 0,
-        "props": [],
-        "armor": 2
-      },
-      {
-        "rank": 2,
-        "speed": 4,
-        "range": "D6",
-        "power": "1D6",
-        "melee": 0,
-        "props": [],
-        "armor": 2
-      }
-    ]
-  },
-  {
-    "id": "polaris_line_clone",
+    "id": "polaris_lineynaya_klon_pehota",
     "name": "Линейная клон-пехота",
-    "shortName": "Лин. клоны",
+    "shortName": "Линейная клон-пехота",
     "faction": "polaris",
     "cost": 50,
-    "image": "/images/squads/polaris_line_clone.jpg",
     "soldiers": [
       {
+        "num": 1,
         "rank": 2,
-        "speed": 4,
+        "speed": 5,
         "range": "D6",
-        "power": "1D6",
-        "melee": 0,
+        "power": "2D6",
+        "melee": 3,
         "props": [],
-        "armor": 2
+        "armor": 2,
+        "image": "/images/squads/polaris/lineynaya_klon_pehota/1.png"
       },
       {
+        "num": 2,
         "rank": 2,
-        "speed": 4,
-        "range": "D6",
-        "power": "1D6",
-        "melee": 0,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 3,
         "props": [],
-        "armor": 2
+        "armor": 2,
+        "image": "/images/squads/polaris/lineynaya_klon_pehota/2.png"
       },
       {
+        "num": 3,
         "rank": 2,
-        "speed": 4,
-        "range": "D6",
-        "power": "1D6",
-        "melee": 0,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 3,
         "props": [],
-        "armor": 2
+        "armor": 2,
+        "image": "/images/squads/polaris/lineynaya_klon_pehota/3.png"
       },
       {
+        "num": 4,
         "rank": 2,
-        "speed": 4,
-        "range": "D6",
-        "power": "1D6",
-        "melee": 0,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 3,
         "props": [],
-        "armor": 2
+        "armor": 2,
+        "image": "/images/squads/polaris/lineynaya_klon_pehota/4.png"
       },
       {
+        "num": 5,
         "rank": 2,
-        "speed": 4,
-        "range": "D6",
-        "power": "1D6",
-        "melee": 0,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 3,
         "props": [],
-        "armor": 2
+        "armor": 2,
+        "image": "/images/squads/polaris/lineynaya_klon_pehota/5.png"
       },
       {
+        "num": 6,
         "rank": 2,
-        "speed": 4,
-        "range": "D6",
-        "power": "1D6",
-        "melee": 0,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 3,
         "props": [],
-        "armor": 2
+        "armor": 2,
+        "image": "/images/squads/polaris/lineynaya_klon_pehota/6.png"
       }
     ]
   },
   {
-    "id": "polaris_regime_clone",
+    "id": "polaris_rezhimnaya_klon_pehota",
     "name": "Режимная клон-пехота",
-    "shortName": "Режим. клоны",
+    "shortName": "Режимная клон-пехота",
     "faction": "polaris",
-    "cost": 40,
-    "image": "/images/squads/polaris_regime_clone.jpg",
+    "cost": 60,
     "soldiers": [
       {
-        "rank": 55,
+        "num": 1,
+        "rank": 1,
+        "speed": 4,
+        "range": "",
+        "power": "",
+        "melee": 6,
+        "props": [
+          "Пр3"
+        ],
+        "armor": 4,
+        "image": "/images/squads/polaris/rezhimnaya_klon_pehota/1.png"
+      },
+      {
+        "num": 2,
+        "rank": 1,
+        "speed": 4,
+        "range": "",
+        "power": "",
+        "melee": 6,
+        "props": [
+          "Пр3"
+        ],
+        "armor": 4,
+        "image": "/images/squads/polaris/rezhimnaya_klon_pehota/2.png"
+      },
+      {
+        "num": 3,
+        "rank": 1,
+        "speed": 4,
+        "range": "",
+        "power": "",
+        "melee": 6,
+        "props": [
+          "Пр3"
+        ],
+        "armor": 4,
+        "image": "/images/squads/polaris/rezhimnaya_klon_pehota/3.png"
+      },
+      {
+        "num": 4,
+        "rank": 1,
+        "speed": 4,
+        "range": "",
+        "power": "",
+        "melee": 6,
+        "props": [
+          "Пр3"
+        ],
+        "armor": 4,
+        "image": "/images/squads/polaris/rezhimnaya_klon_pehota/4.png"
+      },
+      {
+        "num": 5,
+        "rank": 1,
+        "speed": 4,
+        "range": "",
+        "power": "",
+        "melee": 6,
+        "props": [
+          "Пр3"
+        ],
+        "armor": 4,
+        "image": "/images/squads/polaris/rezhimnaya_klon_pehota/5.png"
+      },
+      {
+        "num": 6,
+        "rank": 1,
+        "speed": 4,
+        "range": "",
+        "power": "",
+        "melee": 6,
+        "props": [
+          "Пр3"
+        ],
+        "armor": 4,
+        "image": "/images/squads/polaris/rezhimnaya_klon_pehota/6.png"
+      }
+    ]
+  },
+  {
+    "id": "polaris_lyogkaya_shturmovaya_klon_pehota",
+    "name": "Лёгкая штурмовая клон-пехота",
+    "shortName": "Лёгкая штурмовая",
+    "faction": "polaris",
+    "cost": 70,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 2,
+        "speed": 5,
+        "range": "D6",
+        "power": "1D6+3",
+        "melee": 5,
+        "props": [
+          "Пр4"
+        ],
+        "armor": 2,
+        "image": "/images/squads/polaris/lyogkaya_shturmovaya_klon_pehota/1.png"
+      },
+      {
+        "num": 2,
+        "rank": 2,
+        "speed": 5,
+        "range": "D6",
+        "power": "3D6",
+        "melee": 6,
+        "props": [
+          "Пр4"
+        ],
+        "armor": 2,
+        "image": "/images/squads/polaris/lyogkaya_shturmovaya_klon_pehota/2.png"
+      },
+      {
+        "num": 3,
+        "rank": 2,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 6,
+        "props": [
+          "Пр4"
+        ],
+        "armor": 2,
+        "image": "/images/squads/polaris/lyogkaya_shturmovaya_klon_pehota/3.png"
+      },
+      {
+        "num": 4,
+        "rank": 2,
+        "speed": 5,
+        "range": "D6",
+        "power": "2D6",
+        "melee": 4,
+        "props": [
+          "Пр4"
+        ],
+        "armor": 2,
+        "image": "/images/squads/polaris/lyogkaya_shturmovaya_klon_pehota/4.png"
+      },
+      {
+        "num": 5,
+        "rank": 2,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 6,
+        "props": [
+          "Пр4"
+        ],
+        "armor": 2,
+        "image": "/images/squads/polaris/lyogkaya_shturmovaya_klon_pehota/5.png"
+      },
+      {
+        "num": 6,
+        "rank": 2,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 6,
+        "props": [
+          "Пр4"
+        ],
+        "armor": 2,
+        "image": "/images/squads/polaris/lyogkaya_shturmovaya_klon_pehota/6.png"
+      }
+    ]
+  },
+  {
+    "id": "polaris_tyazhyolaya_klon_pehota",
+    "name": "Тяжёлая клон-пехота",
+    "shortName": "Тяжёлая клон-пехота",
+    "faction": "polaris",
+    "cost": 80,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 2,
+        "speed": 5,
+        "range": "D6",
+        "power": "1D12",
+        "melee": 3,
+        "props": [
+          "Рм"
+        ],
+        "armor": 2,
+        "image": "/images/squads/polaris/tyazhyolaya_klon_pehota/1.png"
+      },
+      {
+        "num": 2,
+        "rank": 2,
+        "speed": 5,
+        "range": "D12+2",
+        "power": "1D12",
+        "melee": 3,
+        "props": [
+          "Рм"
+        ],
+        "armor": 2,
+        "image": "/images/squads/polaris/tyazhyolaya_klon_pehota/2.png"
+      },
+      {
+        "num": 3,
+        "rank": 2,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D12",
+        "melee": 0,
+        "props": [
+          "Рм"
+        ],
+        "armor": 2,
+        "image": "/images/squads/polaris/tyazhyolaya_klon_pehota/3.png"
+      },
+      {
+        "num": 4,
+        "rank": 2,
+        "speed": 5,
+        "range": "D12",
+        "power": "1D20",
+        "melee": 0,
+        "props": [
+          "Рм"
+        ],
+        "armor": 2,
+        "image": "/images/squads/polaris/tyazhyolaya_klon_pehota/4.png"
+      },
+      {
+        "num": 5,
+        "rank": 2,
+        "speed": 5,
+        "range": "D6",
+        "power": "2D6",
+        "melee": 3,
+        "props": [
+          "Рм"
+        ],
+        "armor": 2,
+        "image": "/images/squads/polaris/tyazhyolaya_klon_pehota/5.png"
+      },
+      {
+        "num": 6,
+        "rank": 2,
+        "speed": 5,
+        "range": "D6",
+        "power": "2D6",
+        "melee": 7,
+        "props": [
+          "Рм"
+        ],
+        "armor": 2,
+        "image": "/images/squads/polaris/tyazhyolaya_klon_pehota/6.png"
+      }
+    ]
+  },
+  {
+    "id": "polaris_spetsnaz_planety_shidu",
+    "name": "Спецназ планеты Шиду",
+    "shortName": "Спецназ планеты Шиду",
+    "faction": "polaris",
+    "cost": 90,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 4,
+        "speed": 4,
+        "range": "D6",
+        "power": "2D6",
+        "melee": 3,
+        "props": [],
+        "armor": 5,
+        "image": "/images/squads/polaris/spetsnaz_planety_shidu/1.png"
+      },
+      {
+        "num": 2,
+        "rank": 4,
+        "speed": 4,
+        "range": "D12+2",
+        "power": "1D12",
+        "melee": 3,
+        "props": [],
+        "armor": 5,
+        "image": "/images/squads/polaris/spetsnaz_planety_shidu/2.png"
+      },
+      {
+        "num": 3,
+        "rank": 4,
+        "speed": 4,
+        "range": "D12",
+        "power": "2D12",
+        "melee": 0,
+        "props": [],
+        "armor": 5,
+        "image": "/images/squads/polaris/spetsnaz_planety_shidu/3.png"
+      },
+      {
+        "num": 4,
+        "rank": 4,
+        "speed": 4,
+        "range": "D20",
+        "power": "1D12",
+        "melee": 0,
+        "props": [],
+        "armor": 5,
+        "image": "/images/squads/polaris/spetsnaz_planety_shidu/4.png"
+      }
+    ]
+  },
+  {
+    "id": "polaris_lyogkiy_shturmovoy_desant",
+    "name": "Лёгкий штурмовой десант",
+    "shortName": "Лёгкий штурмовой десант",
+    "faction": "polaris",
+    "cost": 95,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 3,
         "speed": 5,
         "range": "D6",
         "power": "1D6",
-        "melee": 0,
-        "props": [],
-        "armor": 2
+        "melee": 2,
+        "props": [
+          "Рм"
+        ],
+        "armor": 3,
+        "image": "/images/squads/polaris/lyogkiy_shturmovoy_desant/1.png"
       },
       {
-        "rank": 4,
-        "speed": 2,
-        "range": "-",
-        "power": "1D6",
-        "melee": 5,
-        "props": [],
-        "armor": 2
-      },
-      {
+        "num": 2,
         "rank": 3,
-        "speed": 0,
-        "range": "D6",
-        "power": "1D6",
-        "melee": 0,
-        "props": [],
-        "armor": 2
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 2,
+        "props": [
+          "Рм"
+        ],
+        "armor": 3,
+        "image": "/images/squads/polaris/lyogkiy_shturmovoy_desant/2.png"
       },
       {
-        "rank": 2,
-        "speed": 3,
-        "range": "D6",
-        "power": "1D6",
-        "melee": 0,
-        "props": [],
-        "armor": 2
-      },
-      {
+        "num": 3,
         "rank": 3,
-        "speed": 4,
-        "range": "-",
-        "power": "1D6",
+        "speed": 5,
+        "range": "D12",
+        "power": "2D12",
         "melee": 0,
         "props": [
-          "БЫ"
+          "Рм"
         ],
-        "armor": 2
+        "armor": 3,
+        "image": "/images/squads/polaris/lyogkiy_shturmovoy_desant/3.png"
       },
       {
-        "rank": 2,
-        "speed": 4,
+        "num": 4,
+        "rank": 3,
+        "speed": 5,
         "range": "D6",
-        "power": "1D6",
-        "melee": 0,
-        "props": [],
-        "armor": 2
+        "power": "2D6",
+        "melee": 5,
+        "props": [
+          "Рм"
+        ],
+        "armor": 3,
+        "image": "/images/squads/polaris/lyogkiy_shturmovoy_desant/4.png"
+      },
+      {
+        "num": 5,
+        "rank": 3,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 2,
+        "props": [
+          "Рм"
+        ],
+        "armor": 3,
+        "image": "/images/squads/polaris/lyogkiy_shturmovoy_desant/5.png"
+      },
+      {
+        "num": 6,
+        "rank": 3,
+        "speed": 5,
+        "range": "D6",
+        "power": "2D6",
+        "melee": 2,
+        "props": [
+          "Рм"
+        ],
+        "armor": 3,
+        "image": "/images/squads/polaris/lyogkiy_shturmovoy_desant/6.png"
       }
     ]
   },
   {
-    "id": "polaris_tribunators",
-    "name": "Трибунаторы",
-    "shortName": "Трибунаторы",
+    "id": "polaris_tyazhyolyy_shturmovoy_desant",
+    "name": "Тяжёлый штурмовой десант",
+    "shortName": "Тяжёлый штурмовой десант",
     "faction": "polaris",
-    "cost": 140,
+    "cost": 105,
     "soldiers": [
       {
-        "rank": 1,
+        "num": 1,
+        "rank": 3,
         "speed": 4,
         "range": "D6",
-        "power": "1D6",
-        "melee": 0,
-        "props": [],
-        "armor": 2
+        "power": "2D6",
+        "melee": 2,
+        "props": [
+          "Рм"
+        ],
+        "armor": 4,
+        "image": "/images/squads/polaris/tyazhyolyy_shturmovoy_desant/1.png"
       },
       {
-        "rank": 2,
+        "num": 2,
+        "rank": 3,
         "speed": 4,
-        "range": "D6",
-        "power": "1D6",
-        "melee": 0,
-        "props": [],
-        "armor": 2
+        "range": "D12",
+        "power": "2D6",
+        "melee": 2,
+        "props": [
+          "Рм"
+        ],
+        "armor": 4,
+        "image": "/images/squads/polaris/tyazhyolyy_shturmovoy_desant/2.png"
       },
       {
-        "rank": 2,
+        "num": 3,
+        "rank": 3,
         "speed": 4,
         "range": "D6",
-        "power": "1D6",
-        "melee": 0,
-        "props": [],
-        "armor": 2
+        "power": "2D6",
+        "melee": 2,
+        "props": [
+          "Рм"
+        ],
+        "armor": 4,
+        "image": "/images/squads/polaris/tyazhyolyy_shturmovoy_desant/3.png"
       },
       {
-        "rank": 2,
+        "num": 4,
+        "rank": 3,
         "speed": 4,
-        "range": "D6",
-        "power": "1D6",
-        "melee": 0,
-        "props": [],
-        "armor": 2
+        "range": "D12",
+        "power": "2D6",
+        "melee": 2,
+        "props": [
+          "Рм"
+        ],
+        "armor": 4,
+        "image": "/images/squads/polaris/tyazhyolyy_shturmovoy_desant/4.png"
       },
       {
-        "rank": 2,
+        "num": 5,
+        "rank": 3,
         "speed": 4,
         "range": "D6",
-        "power": "1D6",
-        "melee": 0,
-        "props": [],
-        "armor": 2
+        "power": "2D6",
+        "melee": 2,
+        "props": [
+          "Рм"
+        ],
+        "armor": 4,
+        "image": "/images/squads/polaris/tyazhyolyy_shturmovoy_desant/5.png"
       },
       {
-        "rank": 2,
+        "num": 6,
+        "rank": 3,
         "speed": 4,
-        "range": "D6",
-        "power": "1D6",
+        "range": "D12",
+        "power": "2D12",
         "melee": 0,
-        "props": [],
-        "armor": 2
+        "props": [
+          "Рм"
+        ],
+        "armor": 4,
+        "image": "/images/squads/polaris/tyazhyolyy_shturmovoy_desant/6.png"
       }
-    ],
-    "image": ""
+    ]
+  },
+  {
+    "id": "polaris_tribunatory_novye",
+    "name": "Трибунаторы (новые)",
+    "shortName": "Трибунаторы новые",
+    "faction": "polaris",
+    "cost": 165,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 5,
+        "speed": 3,
+        "range": "D12",
+        "power": "1D6+3",
+        "melee": 3,
+        "props": [],
+        "armor": 6,
+        "image": "/images/squads/polaris/tribunatory_novye/1.png"
+      },
+      {
+        "num": 2,
+        "rank": 5,
+        "speed": 3,
+        "range": "D6",
+        "power": "1D6+3",
+        "melee": 3,
+        "props": [],
+        "armor": 6,
+        "image": "/images/squads/polaris/tribunatory_novye/2.png"
+      },
+      {
+        "num": 3,
+        "rank": 5,
+        "speed": 3,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 3,
+        "props": [],
+        "armor": 6,
+        "image": "/images/squads/polaris/tribunatory_novye/3.png"
+      },
+      {
+        "num": 4,
+        "rank": 5,
+        "speed": 3,
+        "range": "",
+        "power": "",
+        "melee": 6,
+        "props": [],
+        "armor": 6,
+        "image": "/images/squads/polaris/tribunatory_novye/4.png"
+      },
+      {
+        "num": 5,
+        "rank": 5,
+        "speed": 3,
+        "range": "D12",
+        "power": "2D12",
+        "melee": 3,
+        "props": [],
+        "armor": 6,
+        "image": "/images/squads/polaris/tribunatory_novye/5.png"
+      },
+      {
+        "num": 6,
+        "rank": 5,
+        "speed": 3,
+        "range": "D20",
+        "power": "1D12",
+        "melee": 3,
+        "props": [],
+        "armor": 6,
+        "image": "/images/squads/polaris/tribunatory_novye/6.png"
+      }
+    ]
+  },
+  {
+    "id": "polaris_tribunatory_starye",
+    "name": "Трибунаторы (старые)",
+    "shortName": "Трибунаторы старые",
+    "faction": "polaris",
+    "cost": 170,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 5,
+        "speed": 3,
+        "range": "",
+        "power": "",
+        "melee": 6,
+        "props": [],
+        "armor": 6,
+        "image": "/images/squads/polaris/tribunatory_starye/1.png"
+      },
+      {
+        "num": 2,
+        "rank": 5,
+        "speed": 3,
+        "range": "D6-1",
+        "power": "2D6+3",
+        "melee": 3,
+        "props": [],
+        "armor": 6,
+        "image": "/images/squads/polaris/tribunatory_starye/2.png"
+      },
+      {
+        "num": 3,
+        "rank": 5,
+        "speed": 3,
+        "range": "2D12",
+        "power": "1D20",
+        "melee": 3,
+        "props": [],
+        "armor": 6,
+        "image": "/images/squads/polaris/tribunatory_starye/3.png"
+      },
+      {
+        "num": 4,
+        "rank": 5,
+        "speed": 3,
+        "range": "",
+        "power": "",
+        "melee": 7,
+        "props": [],
+        "armor": 6,
+        "image": "/images/squads/polaris/tribunatory_starye/4.png"
+      },
+      {
+        "num": 5,
+        "rank": 5,
+        "speed": 3,
+        "range": "D12",
+        "power": "2D12",
+        "melee": 3,
+        "props": [],
+        "armor": 6,
+        "image": "/images/squads/polaris/tribunatory_starye/5.png"
+      },
+      {
+        "num": 6,
+        "rank": 5,
+        "speed": 3,
+        "range": "D12",
+        "power": "1D20",
+        "melee": 3,
+        "props": [],
+        "armor": 6,
+        "image": "/images/squads/polaris/tribunatory_starye/6.png"
+      }
+    ]
   }
 ]
