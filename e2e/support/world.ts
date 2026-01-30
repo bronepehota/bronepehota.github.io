@@ -25,7 +25,7 @@ class CustomWorld implements BronepehotaWorld {
   armyState: any = null;
 
   async gotoHome(): Promise<void> {
-    await this.page.goto('http://localhost:3000');
+    await this.page.goto('http://localhost:3001');
     await this.page.waitForLoadState('networkidle');
   }
 

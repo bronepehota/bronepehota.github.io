@@ -554,32 +554,11 @@ export function UnitSelector({
               setSelectedUnit({ type: unit.type, data: unit.data });
               setIsModalOpen(true);
             }}
-            onAddUnits={() => setViewMode('browse')}
+            onToBattle={onToBattle}
             displayMode={displayMode}
             factionId={selectedFaction}
           />
         </>
-      )}
-
-      {/* To Battle button (only in browse mode) */}
-      {viewMode === 'browse' && army.length > 0 && (
-        <div className="pt-4">
-          <button
-            onClick={onToBattle}
-            data-testid="to-battle-button"
-            className={clsx(
-              'w-full py-3 flex items-center justify-center gap-2',
-              'border font-mono text-sm font-bold uppercase tracking-wider',
-              'transition-all duration-200 min-h-[48px]',
-              'border-green-500 bg-green-500/10 text-green-400',
-              'hover:bg-green-500/20 hover:scale-102',
-              'active:scale-95'
-            )}
-          >
-            В БОЙ
-            <Check className="w-5 h-5" />
-          </button>
-        </div>
       )}
 
       {/* Unit details modal */}

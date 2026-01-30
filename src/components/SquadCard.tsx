@@ -157,6 +157,7 @@ export default function SquadCard({ squad, onAdd, onViewDetails, testId }: Squad
 
         {/* Add button */}
         <button
+          data-testid={`add-unit-${squad.id}`}
           onClick={(e) => {
             e.stopPropagation();
             setIsPressed(true);

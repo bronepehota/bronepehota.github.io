@@ -32,11 +32,13 @@ jobs:
       - name: Unit tests
         run: npm run test:ci
 
-  # E2E тесты - только для push, чтобы не запускать дважды
+  # E2E тесты - только для PR в main и push в main/develop
   e2e:
     name: E2E Tests
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
+    if: |
+      github.event_name == 'push' ||
+      (github.event_name == 'pull_request' && github.base_ref == 'main')
     needs: quality
     steps:
       - uses: actions/checkout@v4
@@ -55,14 +57,14 @@ jobs:
       - name: Start dev server in background with logging
         run: |
           mkdir -p logs
-          nohup npm run dev > logs/server.log 2>&1 &
+          nohup npm run dev:e2e > logs/server.log 2>&1 &
           echo $! > logs/server.pid
           echo "Server started with PID: $(cat logs/server.pid)"
 
       - name: Wait for app to be ready with retries
         run: |
           for i in {1..24}; do
-            if curl -s http://localhost:3000 > /dev/null; then
+            if curl -s http://localhost:3001 > /dev/null; then
               echo "Server is ready!"
               exit 0
             fi

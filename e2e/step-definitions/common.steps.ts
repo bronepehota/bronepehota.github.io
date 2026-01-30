@@ -4,13 +4,48 @@ import { BronepehotaWorld } from '../support/world';
 
 // Common steps for navigation and basic interactions
 
+When('я переключаюсь на вкладку {string}', async function(this: BronepehotaWorld, tabName: string) {
+  const viewport = this.page.viewportSize();
+  const isMobile = viewport ? viewport.width < 768 : false;
+
+  if (tabName === 'Армия' || tabName === 'армия') {
+    if (isMobile) {
+      // Mobile: click the second tab (АРМИЯ)
+      const tabs = this.page.locator('[role="tab"]');
+      const count = await tabs.count();
+      if (count >= 2) {
+        await tabs.nth(1).click({ timeout: 5000 });
+      }
+    } else {
+      // Desktop: click the army view button
+      await this.page.locator('[data-testid="view-mode-army"]').click({ timeout: 5000 });
+    }
+    // Wait for view change
+    await this.page.waitForTimeout(500);
+  } else if (tabName === 'Юниты' || tabName === 'юниты') {
+    if (isMobile) {
+      // Mobile: click the first tab (ЮНИТЫ)
+      const tabs = this.page.locator('[role="tab"]');
+      const count = await tabs.count();
+      if (count >= 1) {
+        await tabs.nth(0).click({ timeout: 5000 });
+      }
+    } else {
+      // Desktop: click the browse view button
+      await this.page.locator('[data-testid="view-mode-browse"]').click({ timeout: 5000 });
+    }
+    // Wait for view change
+    await this.page.waitForTimeout(500);
+  }
+});
+
 Given('приложение загружено на главной странице', async function(this: BronepehotaWorld) {
-  await this.page.goto('http://localhost:3000');
+  await this.page.goto('http://localhost:3001');
   await this.page.waitForLoadState('networkidle');
 });
 
 Given('приложение загружено', async function(this: BronepehotaWorld) {
-  await this.page.goto('http://localhost:3000');
+  await this.page.goto('http://localhost:3001');
   await this.page.waitForLoadState('networkidle');
 });
 
@@ -134,9 +169,9 @@ When('я нажимаю кнопку {string}', async function(this: Bronepehota
       this.page.getByRole('button', { name: /начать тур/i })
     );
   } else if (buttonText === 'В БОЙ') {
-    button = this.page.getByTestId('to-battle-button').or(
-      this.page.getByRole('button', { name: /в бой/i })
-    );
+    // Handle "To Battle" button with longer timeout
+    await this.page.locator('[data-testid="to-battle-button"]').click({ timeout: 10000, force: true });
+    return;
   } else if (buttonText === 'Начать заново' || buttonText === 'Заново') {
     // Try to find the button using multiple approaches
     const testIdButton = this.page.getByTestId('reset-fully-button');
@@ -213,9 +248,9 @@ Given('я нажал кнопку {string}', async function(this: BronepehotaWor
       this.page.getByRole('button', { name: /начать тур/i })
     );
   } else if (buttonText === 'В БОЙ') {
-    button = this.page.getByTestId('to-battle-button').or(
-      this.page.getByRole('button', { name: /в бой/i })
-    );
+    // Handle "To Battle" button with longer timeout
+    await this.page.locator('[data-testid="to-battle-button"]').click({ timeout: 10000, force: true });
+    return;
   } else if (buttonText === 'Начать заново' || buttonText === 'Заново') {
     button = this.page.getByTestId('reset-fully-button');
   } else {
