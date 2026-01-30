@@ -274,6 +274,20 @@ Adding a new rules version:
 - **Test ID Strategy**: Always add `data-testid` attributes to interactive elements for reliable testing
 - Use test IDs instead of text selectors where possible (more reliable across viewports)
 
+**E2E Testing Best Practices**:
+- **Mobile/Desktop View Switching**: Add explicit step before army view actions: `И я переключаюсь на вкладку "Армия"`
+  - Mobile: TabBar with `role="tab"` elements (ЮНИТЫ/АРМИЯ)
+  - Desktop: `ArmyControlPanel` with `data-testid="view-mode-army"` button
+- **Selector Priority**: `data-testid` > CSS selectors > `role` > text content
+- **Timeout Management**: Use specific timeouts for slow operations: `await click({ timeout: 10000 })`
+- **Force Click**: Use `force: true` when element is visible but Playwright can't click due to overlays
+- **Avoid Early Returns**: Keep step definition flow simple; use `return` only for special cases
+- **Local Cleanup**: Always add `beforeEach` hooks to clear localStorage between tests
+- **Debugging**: Use `npm run test:e2e:debug` with SLOWMO for visual debugging
+- **Test Data**: Use `e2e/fixtures/` test fixtures for predictable costs (50, 75, 100, 150)
+
+
+
 **Test Structure**:
 - `e2e/features/rules-selection.feature` - Rules version selection scenarios
 - `e2e/features/army-building.feature` - Army creation and unit management
@@ -317,13 +331,18 @@ Adding a new rules version:
 - clsx, tailwind-merge for conditional styling
 
 ## Recent Changes
-- **E2E Tests Fixed (2025-01)**: Fixed all 12 E2E test scenarios (103 steps passing)
-  - Added test IDs to interactive elements (`turn-counter`, `back-to-faction-button`)
-  - Improved button click handlers with fallbacks and scroll-into-view
-  - Fixed navigation steps for rules selection
-  - Removed duplicate "Начать заново" button (kept only "Назад к фракции")
-  - Fixed `onBackToFactionSelect` to properly reset `setupStep` and `isInBattle`
-- **E2E Testing**: Added Cucumber + Playwright BDD tests with Russian Gherkin syntax (12 scenarios, 103 steps)
+- **E2E Tests Fixed (2025-01-30)**: Fixed all 17 E2E test scenarios (144 steps passing)
+  - Fixed mobile/desktop view switching - added explicit step `Когда я переключаюсь на вкладку {string}`
+  - Updated feature files to include army view switching before "В БОЙ" button
+  - Removed duplicate step definition in `army-building.steps.ts`
+  - Simplified step definitions - removed complex UIHelper class
+  - Increased default timeout to 15 seconds for better stability
+  - Created `e2e/support/ui-helpers.ts` for future Page Object Model pattern
+- **TypeScript Errors Fixed (2025-01-30)**: Fixed `ArmySummaryView.tsx`
+  - Added `Shield` and `Plus` to imports from `lucide-react`
+  - Added `onAddUnits` prop to interface and function parameters
+- **Unit Tests Enhanced (2025-01-30)**: Added `beforeEach` localStorage cleanup, fixed view switching test
+- **E2E Testing (2025-01)**: Cucumber + Playwright BDD tests with Russian Gherkin syntax (17 scenarios, 144 steps)
 - **CI/CD Pipeline**: GitHub Actions workflow with parallel quality checks and E2E tests
 - **Bottom Sheet Redesign**: `UnitDetailsModal` redesigned as mobile bottom sheet with swipe-to-close gesture (`useBottomSheet` hook)
 - **Rules System**: Added multi-version rules support with `rules-registry.ts` and rule implementations (fan, tehno)

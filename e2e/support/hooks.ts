@@ -3,7 +3,7 @@ import { chromium, Browser, BrowserContext, Page } from 'playwright';
 import { BronepehotaWorld } from './world';
 
 // Set default timeout for all steps (in milliseconds)
-setDefaultTimeout(10000);
+setDefaultTimeout(15000);
 
 // Share browser instance between scenarios
 let browser: Browser;

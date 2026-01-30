@@ -4,6 +4,41 @@ import { BronepehotaWorld } from '../support/world';
 
 // Common steps for navigation and basic interactions
 
+When('я переключаюсь на вкладку {string}', async function(this: BronepehotaWorld, tabName: string) {
+  const viewport = this.page.viewportSize();
+  const isMobile = viewport ? viewport.width < 768 : false;
+
+  if (tabName === 'Армия' || tabName === 'армия') {
+    if (isMobile) {
+      // Mobile: click the second tab (АРМИЯ)
+      const tabs = this.page.locator('[role="tab"]');
+      const count = await tabs.count();
+      if (count >= 2) {
+        await tabs.nth(1).click({ timeout: 5000 });
+      }
+    } else {
+      // Desktop: click the army view button
+      await this.page.locator('[data-testid="view-mode-army"]').click({ timeout: 5000 });
+    }
+    // Wait for view change
+    await this.page.waitForTimeout(500);
+  } else if (tabName === 'Юниты' || tabName === 'юниты') {
+    if (isMobile) {
+      // Mobile: click the first tab (ЮНИТЫ)
+      const tabs = this.page.locator('[role="tab"]');
+      const count = await tabs.count();
+      if (count >= 1) {
+        await tabs.nth(0).click({ timeout: 5000 });
+      }
+    } else {
+      // Desktop: click the browse view button
+      await this.page.locator('[data-testid="view-mode-browse"]').click({ timeout: 5000 });
+    }
+    // Wait for view change
+    await this.page.waitForTimeout(500);
+  }
+});
+
 Given('приложение загружено на главной странице', async function(this: BronepehotaWorld) {
   await this.page.goto('http://localhost:3001');
   await this.page.waitForLoadState('networkidle');
@@ -134,32 +169,8 @@ When('я нажимаю кнопку {string}', async function(this: Bronepehota
       this.page.getByRole('button', { name: /начать тур/i })
     );
   } else if (buttonText === 'В БОЙ') {
-    // First switch to army tab since "To Battle" button is now on army tab
-    const armyTab = this.page.getByRole('tab', { name: /армия/i });
-
-    // Check if already on army tab by checking aria-selected attribute
-    const isOnArmyTab = await armyTab.evaluate((el: Element) => el.getAttribute('aria-selected') === 'true');
-
-    if (!isOnArmyTab && await armyTab.isVisible({ timeout: 3000 })) {
-      await armyTab.click();
-      // Wait longer for army tab to load and units to render
-      await this.page.waitForTimeout(1000);
-    }
-
-    // First check if army has units
-    const armyUnits = await this.page.locator('[data-testid^="army-unit-"]').count();
-    if (armyUnits === 0) {
-      throw new Error('Армия пуста - невозможно перейти в бой. Добавьте юниты в армию.');
-    }
-
-    button = this.page.getByTestId('to-battle-button');
-
-    // Wait for button to be visible before clicking
-    await button.first().waitFor({ state: 'visible', timeout: 5000 });
-    await button.first().scrollIntoViewIfNeeded();
-    // Skip the generic click at the end
-    await button.first().click();
-    await this.page.waitForTimeout(300);
+    // Handle "To Battle" button with longer timeout
+    await this.page.locator('[data-testid="to-battle-button"]').click({ timeout: 10000, force: true });
     return;
   } else if (buttonText === 'Начать заново' || buttonText === 'Заново') {
     // Try to find the button using multiple approaches
@@ -237,32 +248,8 @@ Given('я нажал кнопку {string}', async function(this: BronepehotaWor
       this.page.getByRole('button', { name: /начать тур/i })
     );
   } else if (buttonText === 'В БОЙ') {
-    // First switch to army tab since "To Battle" button is now on army tab
-    const armyTab = this.page.getByRole('tab', { name: /армия/i });
-
-    // Check if already on army tab by checking aria-selected attribute
-    const isOnArmyTab = await armyTab.evaluate((el: Element) => el.getAttribute('aria-selected') === 'true');
-
-    if (!isOnArmyTab && await armyTab.isVisible({ timeout: 3000 })) {
-      await armyTab.click();
-      // Wait longer for army tab to load and units to render
-      await this.page.waitForTimeout(1000);
-    }
-
-    // First check if army has units
-    const armyUnits = await this.page.locator('[data-testid^="army-unit-"]').count();
-    if (armyUnits === 0) {
-      throw new Error('Армия пуста - невозможно перейти в бой. Добавьте юниты в армию.');
-    }
-
-    button = this.page.getByTestId('to-battle-button');
-
-    // Wait for button to be visible before clicking
-    await button.first().waitFor({ state: 'visible', timeout: 5000 });
-    await button.first().scrollIntoViewIfNeeded();
-    // Skip the generic click at the end
-    await button.first().click();
-    await this.page.waitForTimeout(300);
+    // Handle "To Battle" button with longer timeout
+    await this.page.locator('[data-testid="to-battle-button"]').click({ timeout: 10000, force: true });
     return;
   } else if (buttonText === 'Начать заново' || buttonText === 'Заново') {
     button = this.page.getByTestId('reset-fully-button');

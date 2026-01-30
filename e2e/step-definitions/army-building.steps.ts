@@ -165,12 +165,6 @@ Then('счётчик очков в футере должен обновитьс�
   await expect(costDisplay).toBeVisible();
 });
 
-When('я переключаюсь на вкладку {string}', async function(this: BronepehotaWorld, tabName: string) {
-  // UnitSelector doesn't have tabs - squads and machines are shown together in a grid
-  // This step does nothing for now
-  await this.page.waitForTimeout(100);
-});
-
 When('я ищу машину {string}', async function(this: BronepehotaWorld, machineName: string) {
   // UnitSelector doesn't have search input - units are displayed in a grid
   // This step does nothing for now
