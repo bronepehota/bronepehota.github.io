@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ArmyUnit, FactionID } from '@/lib/types';
-import { Sword } from 'lucide-react';
+import { Shield, Sword, Plus } from 'lucide-react';
 import { CompactArmyCard } from './CompactArmyCard';
 import SquadCard from './SquadCard';
 import MachineCard from './machine/MachineCard';
@@ -13,6 +13,7 @@ interface ArmySummaryViewProps {
   onRemoveUnit: (instanceId: string) => void;
   onUnitClick?: (unit: ArmyUnit) => void;
   onToBattle?: () => void;
+  onAddUnits?: () => void;
   displayMode: 'detailed' | 'compact';
   factionId: FactionID;
 }
@@ -49,6 +50,7 @@ export function ArmySummaryView({
   onRemoveUnit,
   onUnitClick,
   onToBattle,
+  onAddUnits,
   displayMode,
   factionId,
 }: ArmySummaryViewProps) {

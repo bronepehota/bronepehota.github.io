@@ -1,0 +1,50 @@
+[
+  {
+    "id": "test_machine_light",
+    "name": "Тестовая машина лёгкая",
+    "shortName": "Лёгкая",
+    "faction": "test-faction",
+    "cost": 75,
+    "rank": 1,
+    "fire_rate": 1,
+    "ammo_max": 10,
+    "durability_max": 8,
+    "image": "/images/machines/test-light.jpg",
+    "speed_sectors": [
+      {"min_durability": 5, "max_durability": 8, "speed": 2},
+      {"min_durability": 1, "max_durability": 4, "speed": 1}
+    ],
+    "weapons": [
+      {
+        "name": "Тестовое орудие",
+        "range": "D12",
+        "power": "2D12",
+        "special": null
+      }
+    ]
+  },
+  {
+    "id": "test_machine_heavy",
+    "name": "Тестовая машина тяжёлая",
+    "shortName": "Тяжёлая",
+    "faction": "test-faction",
+    "cost": 150,
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 20,
+    "durability_max": 16,
+    "image": "/images/machines/test-heavy.jpg",
+    "speed_sectors": [
+      {"min_durability": 11, "max_durability": 16, "speed": 2},
+      {"min_durability": 1, "max_durability": 10, "speed": 1}
+    ],
+    "weapons": [
+      {
+        "name": "Тестовое тяжелое орудие",
+        "range": "D20",
+        "power": "3D12",
+        "special": "Бронебойный"
+      }
+    ]
+  }
+]
