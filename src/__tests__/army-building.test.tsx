@@ -5,7 +5,7 @@
  * If following TDD, uncomment and implement these tests before implementation.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { FactionSelector } from '@/components/FactionSelector';
 import { PointBudgetInput } from '@/components/PointBudgetInput';
@@ -212,6 +212,11 @@ describe('UnitSelector', () => {
   const mockRemove = jest.fn();
   const mockToBattle = jest.fn();
 
+  beforeEach(() => {
+    // Clear localStorage before each test to avoid state pollution
+    localStorage.clear();
+  });
+
   it('filters units by selected faction', () => {
     render(
       <UnitSelector
@@ -284,7 +289,7 @@ describe('UnitSelector', () => {
     expect(mockAdd).not.toHaveBeenCalled();
   });
 
-  it('enables "В бой" button when army has units', () => {
+  it('enables "В бой" button when army has units', async () => {
     const armyWithUnits: ArmyUnit[] = [
       {
         instanceId: 'test1',
@@ -306,8 +311,14 @@ describe('UnitSelector', () => {
       />
     );
 
-    const battleButton = screen.getByText('В БОЙ');
-    expect(battleButton).toBeInTheDocument();
+    // Switch to army view
+    const armyViewButton = screen.getByTestId('view-mode-army');
+    armyViewButton.click();
+
+    await waitFor(() => {
+      const battleButton = screen.getByText('В БОЙ');
+      expect(battleButton).toBeInTheDocument();
+    });
   });
 
   it('hides "В бой" button when army is empty', () => {
