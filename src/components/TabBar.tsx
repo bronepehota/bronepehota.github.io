@@ -38,8 +38,8 @@ export function TabBar({ activeTab, onTabChange, availableCount, armyCount, fact
   const budgetColor = getBudgetColor();
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-slate-900/95 backdrop-blur-sm border-t border-slate-700/50 shadow-xl">
-      <div className="flex items-stretch h-16">
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-sm border-t border-slate-700/50 shadow-xl">
+      <div className="flex items-stretch h-16 md:h-20 max-w-4xl mx-auto md:border-x md:border-slate-700/50 md:rounded-t-xl">
         {/* Units tab */}
         <button
           onClick={() => onTabChange('browse')}

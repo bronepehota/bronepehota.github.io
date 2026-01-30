@@ -9,7 +9,6 @@ import MachineBlueprintModal from './machine/MachineBlueprintModal';
 import SquadBlueprintModal from './SquadBlueprintModal';
 import { countByUnitType } from '@/lib/unit-utils';
 import MachineCard from './machine/MachineCard';
-import TechGridBackground from './machine/TechGridBackground';
 import { TabBar } from './TabBar';
 import { ArmyControlPanel } from './ArmyControlPanel';
 import { ArmySummaryView } from './ArmySummaryView';
@@ -30,6 +29,8 @@ interface UnitSelectorProps {
   onBackToFactionSelect?: () => void;
   isLoading?: boolean;
   loadError?: string | null;
+  displayMode: 'detailed' | 'compact';
+  onDisplayModeChange: (mode: 'detailed' | 'compact') => void;
 }
 
 type UnitDisplay = {
@@ -64,10 +65,11 @@ export function UnitSelector({
   onBackToFactionSelect,
   isLoading = false,
   loadError = null,
+  displayMode,
+  onDisplayModeChange,
 }: UnitSelectorProps) {
   // View mode state with localStorage persistence
   const [viewMode, setViewMode] = useState<'browse' | 'army'>('browse');
-  const [displayMode, setDisplayMode] = useState<'detailed' | 'compact'>('detailed');
   const [filterType, setFilterType] = useState<FilterType>('all');
 
   // Load view mode from localStorage on mount
@@ -82,19 +84,6 @@ export function UnitSelector({
   useEffect(() => {
     localStorage.setItem('bronepehota_view_mode', viewMode);
   }, [viewMode]);
-
-  // Load display mode from localStorage on mount
-  useEffect(() => {
-    const saved = localStorage.getItem('bronepehota_display_mode');
-    if (saved === 'detailed' || saved === 'compact') {
-      setDisplayMode(saved);
-    }
-  }, []);
-
-  // Persist display mode to localStorage
-  useEffect(() => {
-    localStorage.setItem('bronepehota_display_mode', displayMode);
-  }, [displayMode]);
 
   const [showWarning, setShowWarning] = useState(false);
   const [expandedUnitId, setExpandedUnitId] = useState<string | null>(null);
@@ -310,11 +299,8 @@ export function UnitSelector({
       {/* Unified control panel */}
       <ArmyControlPanel
         viewMode={viewMode}
-        displayMode={displayMode}
         filterType={filterType}
         factionId={selectedFaction}
-        onViewModeChange={setViewMode}
-        onDisplayModeChange={setDisplayMode}
         onFilterChange={setFilterType}
         squadCount={availableSquads.length}
         machineCount={availableMachines.length}
@@ -587,9 +573,6 @@ export function UnitSelector({
           onConfirm={handleWeaponSelectionConfirm}
         />
       )}
-
-      {/* Tech grid background */}
-      <TechGridBackground />
 
       {/* Tab bar (mobile only) */}
       <TabBar

@@ -5,13 +5,17 @@ import { Army, RulesVersionID } from '@/lib/types';
 import ArmyBuilder from '@/components/ArmyBuilder';
 import GameSession from '@/components/GameSession';
 import factionsData from '@/data/factions.json';
-import { Shield, ArrowLeft, CheckCircle2, MoreVertical } from 'lucide-react';
-import { isValidRulesVersion, getAllRulesVersions } from '@/lib/rules-registry';
+import { Shield, ArrowLeft, CheckCircle2, MoreVertical, List, Grid } from 'lucide-react';
+import { isValidRulesVersion } from '@/lib/rules-registry';
 import { cn } from '@/lib/utils';
 
 export default function Home() {
   const [view, setView] = useState<'builder' | 'game'>('builder');
   const [showEndMenu, setShowEndMenu] = useState(false);
+
+  // Display mode state with localStorage persistence
+  const [displayMode, setDisplayMode] = useState<'detailed' | 'compact'>('detailed');
+
   const [army, setArmy] = useState<Army>({
     name: 'Моя Армия',
     faction: 'polaris',
@@ -31,12 +35,27 @@ export default function Home() {
     if (saved && isValidRulesVersion(saved)) {
       setRulesVersion(saved as RulesVersionID);
     }
+
+    // Load display mode from localStorage
+    const savedDisplayMode = localStorage.getItem('bronepehota_display_mode');
+    if (savedDisplayMode === 'compact' || savedDisplayMode === 'detailed') {
+      setDisplayMode(savedDisplayMode);
+    }
   }, []);
 
   // Persist rules version to localStorage on change
   useEffect(() => {
     localStorage.setItem('bronepehota_rules_version', rulesVersion);
   }, [rulesVersion]);
+
+  // Persist display mode to localStorage on change
+  useEffect(() => {
+    localStorage.setItem('bronepehota_display_mode', displayMode);
+    // Debug logging
+    if (typeof window !== 'undefined') {
+      console.log('[page.tsx] Display mode changed to:', displayMode);
+    }
+  }, [displayMode]);
 
   const activeFaction = factionsData.find(f => f.id === army.faction);
 
@@ -199,6 +218,46 @@ export default function Home() {
               </div>
             )}
 
+            {/* Display mode toggle - only in builder on unit-select step */}
+            {view === 'builder' && army.currentStep === 'unit-select' && (
+              <div className="flex bg-slate-900/50 rounded-lg p-0.5 border border-slate-700/30 relative z-50">
+                <button
+                  data-testid="display-mode-compact-header"
+                  onClick={() => {
+                    console.log('[Header] Clicking compact button');
+                    setDisplayMode('compact');
+                  }}
+                  className={cn(
+                    'p-1.5 rounded-md transition-all duration-200 touch-manipulation',
+                    'min-w-[32px] min-h-[32px] flex items-center justify-center',
+                    displayMode === 'compact'
+                      ? `${factionStyles.bg} ${factionStyles.primary} ${factionStyles.border} border shadow-lg`
+                      : 'text-slate-500 hover:text-slate-300'
+                  )}
+                  aria-label="Компактный вид"
+                >
+                  <List className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  data-testid="display-mode-detailed-header"
+                  onClick={() => {
+                    console.log('[Header] Clicking detailed button');
+                    setDisplayMode('detailed');
+                  }}
+                  className={cn(
+                    'p-1.5 rounded-md transition-all duration-200 touch-manipulation',
+                    'min-w-[32px] min-h-[32px] flex items-center justify-center',
+                    displayMode === 'detailed'
+                      ? `${factionStyles.bg} ${factionStyles.primary} ${factionStyles.border} border shadow-lg`
+                      : 'text-slate-500 hover:text-slate-300'
+                  )}
+                  aria-label="Подробный вид"
+                >
+                  <Grid className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+
             {/* End Battle button - dropdown menu */}
             {view === 'game' && army.isInBattle && (
               <div className="relative">
@@ -238,7 +297,7 @@ export default function Home() {
       </header>
 
       {/* Content */}
-      <div className={`flex-1 overflow-auto ${view === 'builder' && army.currentStep === 'unit-select' ? 'pb-20 md:pb-6' : ''}`}>
+      <div className={`flex-1 overflow-auto ${view === 'builder' && army.currentStep === 'unit-select' ? 'pb-20' : ''}`}>
         {view === 'builder' ? (
           <ArmyBuilder
             army={army}
@@ -246,6 +305,8 @@ export default function Home() {
             onEnterBattle={handleEnterBattle}
             rulesVersion={rulesVersion}
             onRulesVersionChange={setRulesVersion}
+            displayMode={displayMode}
+            onDisplayModeChange={setDisplayMode}
           />
         ) : (
           <GameSession
@@ -256,58 +317,6 @@ export default function Home() {
           />
         )}
       </div>
-
-      {/* Fixed footer for unit-select phase */}
-      {view === 'builder' && army.currentStep === 'unit-select' && army.pointBudget && (
-        <footer className="fixed bottom-0 left-0 right-0 z-40 glass-strong border-t border-slate-700/50 px-3 md:px-4 py-2.5 md:py-3 shadow-xl backdrop-blur-sm bg-slate-900/95">
-          <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 md:gap-4">
-            {/* Left part: budget with progress bar */}
-            <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
-              <span className="text-slate-400 text-sm md:text-base flex-shrink-0">💰</span>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-baseline gap-1.5 md:gap-2 mb-1">
-                  <span className="font-bold text-sm md:text-base">{army.totalCost}</span>
-                  <span className="text-slate-500 text-xs md:text-sm">/</span>
-                  <span className="text-slate-400 text-xs md:text-sm">{army.pointBudget}</span>
-                  <span className="text-slate-500 text-[10px] md:text-xs ml-0.5 hidden sm:inline">очков</span>
-                </div>
-                <div className="h-1 md:h-1.5 bg-slate-700 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full transition-all duration-300 ${
-                      (1 - army.totalCost / army.pointBudget) > 0.5
-                        ? 'bg-green-500'
-                        : (1 - army.totalCost / army.pointBudget) > 0.2
-                          ? 'bg-yellow-500'
-                          : 'bg-red-500'
-                    }`}
-                    style={{ width: `${Math.min(100, (army.totalCost / army.pointBudget) * 100)}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Middle: rules version */}
-            <div className="flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 rounded-lg bg-slate-800/50 flex-shrink-0">
-              <div
-                className="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full flex-shrink-0"
-                style={{ backgroundColor: getAllRulesVersions().find(v => v.id === rulesVersion)?.color }}
-              />
-              <span className="font-semibold text-xs md:text-sm hidden sm:inline">
-                {getAllRulesVersions().find(v => v.id === rulesVersion)?.name || ''}
-              </span>
-            </div>
-
-            {/* Right part: unit counter */}
-            <div className="flex items-center gap-1.5 md:gap-2 text-slate-400 flex-shrink-0">
-              <span className="text-sm md:text-base">👥</span>
-              <span className="font-semibold text-sm md:text-base">{army.units.length}</span>
-              <span className="text-[10px] md:text-xs text-slate-500 hidden sm:inline">
-                {army.units.length === 1 ? 'отряд' : army.units.length > 1 && army.units.length < 5 ? 'отряда' : 'отрядов'}
-              </span>
-            </div>
-          </div>
-        </footer>
-      )}
     </main>
   );
 }
