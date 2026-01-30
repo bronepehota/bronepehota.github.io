@@ -342,20 +342,20 @@ export default function GameSession({ army, setArmy }: GameSessionProps) {
       {/* Military Tech Unit Dock - Unified Navigation */}
       <div className="bg-slate-900/95 border-b border-slate-700/50 shrink-0">
         <div className="flex overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-hide">
-          {/* Turn Counter - New Turn Button */}
+          {/* Turn Counter - New Turn Button - Compact height */}
           <button
             onClick={calculateInitiative}
             data-testid="new-turn-button"
             className={cn(
               "relative shrink-0 snap-start rounded-sm border-2 transition-all overflow-hidden",
               "hover:scale-105 active:scale-95 flex flex-col items-center justify-center",
-              "h-12 w-[60px] md:h-[52px] md:w-[70px]",
+              "h-10 w-[56px] md:h-[52px] md:w-[70px]",
               "bg-slate-800/50 border-slate-600/50 hover:bg-slate-700/50 hover:border-slate-500/50"
             )}
             title="Новый тур"
           >
             <div className="text-[8px] md:text-[9px] font-mono text-slate-500 uppercase tracking-wider">ТУР</div>
-            <div className={cn("text-lg md:text-xl font-mono font-black", factionColors.primary)}>{army.currentTurn || 1}</div>
+            <div className={cn("text-base md:text-xl font-mono font-black", factionColors.primary)}>{army.currentTurn || 1}</div>
             <RotateCcw className={cn("absolute top-1 right-1 w-3 h-3 opacity-20", factionColors.primary)} />
           </button>
           {army.units.map((unit, idx) => {
@@ -373,8 +373,8 @@ export default function GameSession({ army, setArmy }: GameSessionProps) {
                 className={cn(
                   "relative shrink-0 snap-start rounded-sm border-2 transition-all overflow-hidden",
                   "hover:bg-slate-700/40 active:scale-95",
-                  // Responsive sizing: mobile 48px/52px, desktop 52px/60px
-                  "h-12 w-[52px] md:h-[52px] md:w-[60px]",
+                  // Responsive sizing: mobile 40px/48px, desktop 52px/60px
+                  "h-10 w-[48px] md:h-[52px] md:w-[60px]",
                   isActive
                     ? cn("bg-slate-700/50 scale-105 shadow-lg", dockStyles.activeGlow, dockStyles.primary)
                     : "bg-slate-800/30 border-slate-700/50 opacity-70 hover:opacity-100"

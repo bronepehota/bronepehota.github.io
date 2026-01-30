@@ -465,14 +465,22 @@ When('я переключаюсь в компактный вид', async functio
     await this.page.getByRole('button', { name: /компактный вид/i }).first().click();
   }
 
-  await this.page.waitForTimeout(1000);
+  // Wait for localStorage to be updated with the new display mode
+  await this.page.waitForFunction(
+    () => localStorage.getItem('bronepehota_display_mode') === 'compact',
+    { timeout: 3000 }
+  );
 });
 
 When('я переключаюсь в подробный вид', async function(this: BronepehotaWorld) {
   const detailedButton = this.page.getByTestId('display-mode-detailed-header');
   if (await detailedButton.isVisible({ timeout: 3000 })) {
     await detailedButton.click();
-    await this.page.waitForTimeout(300);
+    // Wait for localStorage to be updated with the new display mode
+    await this.page.waitForFunction(
+      () => localStorage.getItem('bronepehota_display_mode') === 'detailed',
+      { timeout: 3000 }
+    );
   }
 });
 

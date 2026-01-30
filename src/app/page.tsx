@@ -13,8 +13,12 @@ export default function Home() {
   const [view, setView] = useState<'builder' | 'game'>('builder');
   const [showEndMenu, setShowEndMenu] = useState(false);
 
-  // Display mode state with localStorage persistence
-  const [displayMode, setDisplayMode] = useState<'detailed' | 'compact'>('detailed');
+  // Display mode state with localStorage persistence - lazy init to avoid race condition
+  const [displayMode, setDisplayMode] = useState<'detailed' | 'compact'>(() => {
+    if (typeof window === 'undefined') return 'detailed';
+    const saved = localStorage.getItem('bronepehota_display_mode');
+    return (saved === 'compact' || saved === 'detailed') ? saved : 'detailed';
+  });
 
   const [army, setArmy] = useState<Army>({
     name: 'Моя Армия',
@@ -34,12 +38,6 @@ export default function Home() {
     const saved = localStorage.getItem('bronepehota_rules_version');
     if (saved && isValidRulesVersion(saved)) {
       setRulesVersion(saved as RulesVersionID);
-    }
-
-    // Load display mode from localStorage
-    const savedDisplayMode = localStorage.getItem('bronepehota_display_mode');
-    if (savedDisplayMode === 'compact' || savedDisplayMode === 'detailed') {
-      setDisplayMode(savedDisplayMode);
     }
   }, []);
 
@@ -141,18 +139,18 @@ export default function Home() {
 
   return (
     <main className="min-h-screen flex flex-col bg-slate-900 text-slate-100">
-      {/* Header - Tech Blueprint Style */}
-      <header className="bg-slate-900/90 backdrop-blur-sm border-b-2 border-slate-800/50 px-2 md:px-4 py-2 md:py-2.5 sticky top-0 z-50 shadow-lg relative">
+      {/* Header - Tech Blueprint Style - Optimized for mobile */}
+      <header className="bg-slate-900/90 backdrop-blur-sm border-b border-slate-800/50 px-2 md:px-3 py-1 md:py-2 sticky top-0 z-50 relative">
         {/* Tech corners - faction-colored */}
         <div className={cn("absolute top-0 left-0 w-2 h-2 border-l border-t z-10", factionStyles.accent)} />
         <div className={cn("absolute top-0 right-0 w-2 h-2 border-r border-t z-10", factionStyles.accent)} />
 
-        <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-1.5 md:gap-3">
           {/* Left section - Faction badge */}
-          <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+          <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
             <div
               className={cn(
-                "p-1.5 md:p-2 rounded-sm border-2 transition-all duration-300",
+                "p-1 md:p-1.5 rounded-sm border-2 transition-all duration-300",
                 factionStyles.border,
                 factionStyles.bg,
                 view === 'game' && !army.isInBattle
@@ -166,7 +164,7 @@ export default function Home() {
               }}
               title={view === 'game' && !army.isInBattle ? 'Вернуться в Штаб' : undefined}
             >
-              <Shield className={cn("w-5 h-5 md:w-6 md:h-6", factionStyles.primary)} />
+              <Shield className={cn("w-4 h-4 md:w-5 md:h-5", factionStyles.primary)} />
             </div>
             <div className={cn("relative group", view === 'game' && !army.isInBattle ? 'cursor-pointer' : '')}
               onClick={() => {
@@ -200,27 +198,23 @@ export default function Home() {
           <div className="flex-1" />
 
           {/* Right section - Actions */}
-          <nav className="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
-            {/* Turn counter */}
+          <nav className="flex items-center gap-1 md:gap-2 flex-shrink-0">
+            {/* Turn counter - simplified inline format */}
             {view === 'game' && (
-              <div
+              <span
                 data-testid="turn-counter"
                 className={cn(
-                  "relative px-2 md:px-2.5 py-1 rounded-sm border",
-                  factionStyles.border,
-                  "bg-slate-900/60"
+                  "text-xs md:text-sm font-mono font-black",
+                  factionStyles.primary
                 )}
               >
-                <span className="text-[8px] md:text-[9px] font-mono uppercase opacity-40">ТУР</span>
-                <span className={cn("text-xs md:text-sm font-mono font-black", factionStyles.primary)}>
-                  {army.currentTurn || 1}
-                </span>
-              </div>
+                {army.currentTurn || 1}
+              </span>
             )}
 
-            {/* Display mode toggle - only in builder on unit-select step */}
+            {/* Display mode toggle - only in builder on unit-select step - compact inline */}
             {view === 'builder' && army.currentStep === 'unit-select' && (
-              <div className="flex bg-slate-900/50 rounded-lg p-0.5 border border-slate-700/30 relative z-50">
+              <div className="flex items-center gap-0.5">
                 <button
                   data-testid="display-mode-compact-header"
                   onClick={() => {
@@ -228,11 +222,12 @@ export default function Home() {
                     setDisplayMode('compact');
                   }}
                   className={cn(
-                    'p-1.5 rounded-md transition-all duration-200 touch-manipulation',
-                    'min-w-[32px] min-h-[32px] flex items-center justify-center',
+                    'p-1 rounded transition-all duration-200 touch-manipulation',
+                    'min-w-[36px] min-h-[36px] flex items-center justify-center',
+                    'relative z-50',
                     displayMode === 'compact'
-                      ? `${factionStyles.bg} ${factionStyles.primary} ${factionStyles.border} border shadow-lg`
-                      : 'text-slate-500 hover:text-slate-300'
+                      ? `${factionStyles.bg} ${factionStyles.primary} ${factionStyles.border} border`
+                      : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/50'
                   )}
                   aria-label="Компактный вид"
                 >
@@ -245,11 +240,12 @@ export default function Home() {
                     setDisplayMode('detailed');
                   }}
                   className={cn(
-                    'p-1.5 rounded-md transition-all duration-200 touch-manipulation',
-                    'min-w-[32px] min-h-[32px] flex items-center justify-center',
+                    'p-1 rounded transition-all duration-200 touch-manipulation',
+                    'min-w-[36px] min-h-[36px] flex items-center justify-center',
+                    'relative z-50',
                     displayMode === 'detailed'
-                      ? `${factionStyles.bg} ${factionStyles.primary} ${factionStyles.border} border shadow-lg`
-                      : 'text-slate-500 hover:text-slate-300'
+                      ? `${factionStyles.bg} ${factionStyles.primary} ${factionStyles.border} border`
+                      : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/50'
                   )}
                   aria-label="Подробный вид"
                 >
