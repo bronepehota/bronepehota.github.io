@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { X, ChevronLeft, Target, Sword, Bomb } from 'lucide-react';
+import { X, ChevronLeft, Target, Sword, Bomb, EyeOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useBottomSheet } from '@/hooks/useBottomSheet';
 import { CombatFlowState, CombatActionType, CombatParameters } from '@/lib/combat-types';
@@ -25,21 +25,25 @@ interface BottomSheetCombatModalProps {
 }
 
 // Action type colors for Military Tech Blueprint
-const getActionColors = (actionType: CombatActionType | null) => {
+const getActionColors = (actionType: CombatActionType | null, isSurpriseAttack?: boolean) => {
+  const surpriseBase = isSurpriseAttack
+    ? 'border-purple-600 bg-purple-950/40 text-purple-300 hover:bg-purple-950/60 shadow-lg shadow-purple-900/20'
+    : '';
+
   const colorMap = {
     shot: {
       primary: 'text-amber-400',
       border: 'border-amber-600/40',
       bg: 'bg-amber-950/20',
       accent: 'border-amber-500',
-      button: 'border-amber-600 bg-amber-950/30 text-amber-400 hover:bg-amber-950/50'
+      button: surpriseBase || 'border-amber-600 bg-amber-950/30 text-amber-400 hover:bg-amber-950/50'
     },
     melee: {
       primary: 'text-red-400',
       border: 'border-red-600/40',
       bg: 'bg-red-950/20',
       accent: 'border-red-500',
-      button: 'border-red-600 bg-red-950/30 text-red-400 hover:bg-red-950/50'
+      button: surpriseBase || 'border-red-600 bg-red-950/30 text-red-400 hover:bg-red-950/50'
     },
     grenade: {
       primary: 'text-emerald-400',
@@ -94,7 +98,7 @@ export function BottomSheetCombatModal({
   }, [state.phase, onApplyResult, onClose]);
 
   const canGoBack = state.phase === 'PARAMETERS' || state.phase === 'RESULTS';
-  const actionColors = getActionColors(state.actionType);
+  const actionColors = getActionColors(state.actionType, state.parameters.isSurpriseAttack);
 
   return (
     <div className="fixed inset-0 z-[100] bg-slate-950/95 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-4">
@@ -176,23 +180,60 @@ export function BottomSheetCombatModal({
                 soldierIndex={state.soldierIndex}
               />
 
-              {/* Execute button - Tactical Control */}
-              <button
-                onClick={onExecuteAction}
-                className={cn(
-                  "relative w-full py-3 md:py-4 font-mono text-sm md:text-base font-bold uppercase tracking-wider border-2 transition-all min-h-[52px] md:min-h-[56px]",
-                  actionColors.button,
-                  "hover:scale-[1.02] active:scale-95 overflow-hidden"
+              {/* Execute button with surprise attack toggle */}
+              <div className="flex gap-3">
+                {/* Surprise Attack toggle - shot and melee only */}
+                {(state.actionType === 'shot' || state.actionType === 'melee') && (
+                  <button
+                    type="button"
+                    onClick={() => onSetParameters({ isSurpriseAttack: !state.parameters.isSurpriseAttack })}
+                    className={cn(
+                      'relative h-14 w-14 min-h-[56px] min-w-[56px] rounded-lg border-2 flex items-center justify-center shrink-0',
+                      'touch-manipulation active:scale-95 transition-all duration-200',
+                      state.parameters.isSurpriseAttack
+                        ? 'bg-purple-600/20 border-purple-500 shadow-lg shadow-purple-500/20'
+                        : 'bg-slate-700/50 border-slate-600 hover:bg-slate-700'
+                    )}
+                    aria-label={state.parameters.isSurpriseAttack ? 'Внезапная атака включена' : 'Внезапная атака выключена'}
+                  >
+                    <EyeOff
+                      className={cn('transition-colors duration-200', state.parameters.isSurpriseAttack ? 'text-purple-400' : 'text-slate-400')}
+                      size={22}
+                    />
+                    {/* Pulsing status indicator when active */}
+                    {state.parameters.isSurpriseAttack && (
+                      <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-purple-400 rounded-full animate-pulse" />
+                    )}
+                  </button>
                 )}
-              >
-                {/* Tech decoration */}
-                <div className="absolute top-0 left-0 w-2 h-2 border-l border-t opacity-30" />
-                <div className="absolute top-0 right-0 w-2 h-2 border-r border-t opacity-30" />
-                <div className="absolute bottom-0 left-0 w-2 h-2 border-l border-b opacity-30" />
-                <div className="absolute bottom-0 right-0 w-2 h-2 border-r border-b opacity-30" />
-                {state.actionType === 'shot' ? 'ВЫСТРЕЛИТЬ' :
-                 state.actionType === 'melee' ? 'АТАКОВАТЬ' : 'БРОСИТЬ'}
-              </button>
+
+                {/* Execute button - Tactical Control */}
+                <button
+                  onClick={onExecuteAction}
+                  className={cn(
+                    "relative flex-1 font-mono text-sm md:text-base font-bold uppercase tracking-wider border-2 transition-all min-h-[56px]",
+                    actionColors.button,
+                    "hover:scale-[1.02] active:scale-95 overflow-hidden"
+                  )}
+                >
+                  {/* Tech decoration */}
+                  <div className="absolute top-0 left-0 w-2 h-2 border-l border-t opacity-30" />
+                  <div className="absolute top-0 right-0 w-2 h-2 border-r border-t opacity-30" />
+                  <div className="absolute bottom-0 left-0 w-2 h-2 border-l border-b opacity-30" />
+                  <div className="absolute bottom-0 right-0 w-2 h-2 border-r border-b opacity-30" />
+                  <div className="flex items-center justify-center gap-2 py-3 md:py-4">
+                    <span>
+                      {state.actionType === 'shot' ? 'ВЫСТРЕЛИТЬ' :
+                       state.actionType === 'melee' ? 'АТАКОВАТЬ' : 'БРОСИТЬ'}
+                    </span>
+                    {state.parameters.isSurpriseAttack && (
+                      <span className="text-purple-300 text-[10px] opacity-80">
+                        с тыла x2
+                      </span>
+                    )}
+                  </div>
+                </button>
+              </div>
             </div>
           )}
 

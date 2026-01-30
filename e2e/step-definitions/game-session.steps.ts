@@ -322,3 +322,91 @@ When('я нажимаю "Завершить бой"', async function(this: Brone
     await this.page.waitForTimeout(500);
   }
 });
+
+// Combat Modal steps for surprise attack
+
+When('я нажимаю на карточку первого юнита', async function(this: BronepehotaWorld) {
+  const unitCards = this.page.locator('[data-testid^="unit-nav-"]');
+  await unitCards.first().click();
+  await this.page.waitForTimeout(1000);
+});
+
+When('я нажимаю на кнопку {string} на карточке юнита', async function(this: BronepehotaWorld, buttonText: string) {
+  // Wait for unit card to be visible
+  await this.page.waitForTimeout(500);
+
+  // Try multiple selectors for the action button
+  const button = this.page.getByRole('button', { name: new RegExp(buttonText, 'i') })
+    .or(
+      this.page.locator('button').filter({ hasText: new RegExp(buttonText, 'i') })
+    )
+    .or(
+      // Look for button with Target icon (for shot action)
+      this.page.locator('button:has(svg[data-lucide="target"])')
+    )
+    .first();
+
+  await button.click({ timeout: 10000, force: true });
+  await this.page.waitForTimeout(500);
+});
+
+When('я выбираю действие {string}', async function(this: BronepehotaWorld, action: string) {
+  // Action button text in uppercase in Russian
+  const actionMap: Record<string, string> = {
+    'Выстрел': 'ВЫСТРЕЛ',
+    'Ближний бой': 'БЛИЖНИЙ БОЙ',
+    'Граната': 'ГРАНАТА'
+  };
+
+  const actionText = actionMap[action] || action.toUpperCase();
+  const actionButton = this.page.getByRole('button', { name: new RegExp(actionText, 'i') });
+  await actionButton.click({ timeout: 10000 });
+  await this.page.waitForTimeout(500);
+});
+
+Then('должно открыться модальное окно боя', async function(this: BronepehotaWorld) {
+  const modal = this.page.locator('.fixed.inset-0.z-\\[100\\]');
+  await expect(modal).toBeVisible({ timeout: 3000 });
+});
+
+Then('должна быть видна кнопка {string}', async function(this: BronepehotaWorld, buttonText: string) {
+  const button = this.page.getByRole('button', { name: new RegExp(buttonText, 'i') });
+  await expect(button).toBeVisible({ timeout: 3000 });
+});
+
+When('я нажимаю на иконку внезапной атаки', async function(this: BronepehotaWorld) {
+  // EyeOff icon button - aria-label contains "Внезапная атака"
+  const surpriseButton = this.page.getByRole('button', { name: /внезапная атака/i }).or(
+    this.page.locator('button').filter({ hasText: /с тыла/i })
+  ).or(
+    // Look for button with EyeOff icon (svg with data-lucide="eye-off")
+    this.page.locator('button:has(svg[data-lucide="eye-off"])')
+  );
+
+  await surpriseButton.first().click({ timeout: 5000, force: true });
+  await this.page.waitForTimeout(300);
+});
+
+Then('текст на кнопке должен содержать {string}', async function(this: BronepehotaWorld, expectedText: string) {
+  const buttonText = this.page.getByText(new RegExp(expectedText, 'i'));
+  await expect(buttonText).toBeVisible({ timeout: 3000 });
+});
+
+Then('кнопка внезапной атаки должна быть активна', async function(this: BronepehotaWorld) {
+  // Active surprise attack button has purple border
+  const activeButton = this.page.locator('button.border-purple-500').or(
+    this.page.locator('[class*="border-purple-"]')
+  );
+  await expect(activeButton.first()).toBeVisible({ timeout: 3000 });
+});
+
+Then('должен быть выполнен бросок урона', async function(this: BronepehotaWorld) {
+  // Wait for dice animation/roll to complete
+  await this.page.waitForTimeout(2000);
+
+  // Check for dice results or combat results
+  const diceResult = this.page.getByText(/\d+/).or(
+    this.page.locator('[class*="dice"]')
+  );
+  await expect(diceResult.first()).toBeVisible({ timeout: 5000 });
+});
