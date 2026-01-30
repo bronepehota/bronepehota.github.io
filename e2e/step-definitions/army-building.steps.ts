@@ -160,9 +160,11 @@ Then('отряд должен появиться в моей армии', async 
 });
 
 Then('счётчик очков в футере должен обновиться', async function(this: BronepehotaWorld) {
-  // Look for budget display with "очков" text to avoid matching tab bar
-  const costDisplay = this.page.getByText(/\d+\/\d+очков/);
-  await expect(costDisplay).toBeVisible();
+  // Budget is now shown in TabBar (footer was removed)
+  // Look for budget display with 💰 emoji
+  const budgetDisplay = this.page.locator('button[role="tab"]').filter({ hasText: /💰/ }).first();
+  await expect(budgetDisplay).toBeVisible();
+  await expect(budgetDisplay).toContainText(/\d+\/\d+/);
 });
 
 When('я ищу машину {string}', async function(this: BronepehotaWorld, machineName: string) {
@@ -452,18 +454,33 @@ When('я нажимаю кнопку добавления машины', async f
 
 // Display mode toggle steps
 When('я переключаюсь в компактный вид', async function(this: BronepehotaWorld) {
-  const compactButton = this.page.getByTestId('display-mode-compact');
-  if (await compactButton.isVisible({ timeout: 3000 })) {
-    await compactButton.click();
-    await this.page.waitForTimeout(300);
+  // Try to find and click the display mode toggle button
+  // First check if the header toggle is visible (new location)
+  const headerToggle = this.page.locator('header').getByRole('button', { name: /компактный вид/i });
+
+  if (await headerToggle.isVisible({ timeout: 3000 }).catch(() => false)) {
+    await headerToggle.click();
+  } else {
+    // Fallback to any button with that name
+    await this.page.getByRole('button', { name: /компактный вид/i }).first().click();
   }
+
+  // Wait for localStorage to be updated with the new display mode
+  await this.page.waitForFunction(
+    () => localStorage.getItem('bronepehota_display_mode') === 'compact',
+    { timeout: 3000 }
+  );
 });
 
 When('я переключаюсь в подробный вид', async function(this: BronepehotaWorld) {
-  const detailedButton = this.page.getByTestId('display-mode-detailed');
+  const detailedButton = this.page.getByTestId('display-mode-detailed-header');
   if (await detailedButton.isVisible({ timeout: 3000 })) {
     await detailedButton.click();
-    await this.page.waitForTimeout(300);
+    // Wait for localStorage to be updated with the new display mode
+    await this.page.waitForFunction(
+      () => localStorage.getItem('bronepehota_display_mode') === 'detailed',
+      { timeout: 3000 }
+    );
   }
 });
 
@@ -494,13 +511,27 @@ Then('должны отображаться подробные карточки 
 });
 
 Then('должен остаться выбранным компактный вид', async function(this: BronepehotaWorld) {
-  // Wait for page to load and React to rehydrate with saved localStorage
-  await this.page.waitForTimeout(1000);
+  // Check localStorage IMMEDIATELY after click (before reload)
+  const savedModeBeforeReload = await this.page.evaluate(() => {
+    return localStorage.getItem('bronepehota_display_mode');
+  });
 
-  // Check localStorage to verify display mode was saved
+  console.log('BEFORE RELOAD - Saved display mode:', savedModeBeforeReload);
+
+  // First check: localStorage should be 'compact' before reload
+  expect(savedModeBeforeReload).toBe('compact');
+
+  // Now wait for page reload and check again
+  await this.page.waitForTimeout(1500);
+
+  // Check localStorage to verify display mode was saved after reload
   const savedMode = await this.page.evaluate(() => {
     return localStorage.getItem('bronepehota_display_mode');
   });
+
+  // Debug: log the actual value
+  console.log('AFTER RELOAD - Saved display mode:', savedMode);
+
   expect(savedMode).toBe('compact');
 
   // Check if we're in compact mode by looking for compact cards
@@ -650,7 +681,7 @@ When('я добавляю ещё отрядов на {string} очков', async
 });
 
 Given('я переключился в компактный вид', async function(this: BronepehotaWorld) {
-  const compactButton = this.page.getByTestId('display-mode-compact');
+  const compactButton = this.page.getByTestId('display-mode-compact-header');
   if (await compactButton.isVisible({ timeout: 3000 })) {
     await compactButton.click();
     await this.page.waitForTimeout(300);

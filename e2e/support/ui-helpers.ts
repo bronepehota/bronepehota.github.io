@@ -28,11 +28,9 @@ export function getDeviceType(page: Page): DeviceType {
  * UI Selectors - centralized selector definitions
  */
 export const Selectors = {
-  // View mode toggles
-  viewModeBrowse: '[data-testid="view-mode-browse"]',
-  viewModeArmy: '[data-testid="view-mode-army"]',
-  mobileTabBrowse: '[role="tab"][aria-label*="ЮНИТЫ"]',
-  mobileTabArmy: '[role="tab"][aria-label*="Армия"]',
+  // View mode tabs (unified TabBar for mobile and desktop)
+  tabBrowse: '[role="tab"][aria-label*="ЮНИТЫ"]',
+  tabArmy: '[role="tab"][aria-label*="Армия"]',
 
   // Battle button
   toBattleButton: '[data-testid="to-battle-button"]',
@@ -52,65 +50,32 @@ export class UIHelper {
   constructor(private page: Page) {}
 
   /**
-   * Switch to army view (works on both mobile and desktop)
+   * Switch to army view (unified TabBar for mobile and desktop)
    */
   async switchToArmyView(): Promise<void> {
-    const deviceType = getDeviceType(this.page);
-
-    if (deviceType === 'mobile') {
-      // Mobile: use TabBar
-      const armyTab = this.page.locator(Selectors.mobileTabArmy);
-      await armyTab.click({ timeout: 5000 });
-    } else {
-      // Desktop: use ArmyControlPanel
-      const armyButton = this.page.locator(Selectors.viewModeArmy);
-      await armyButton.click({ timeout: 5000 });
-    }
-
+    const armyTab = this.page.locator(Selectors.tabArmy);
+    await armyTab.click({ timeout: 5000 });
     // Wait for view to change
     await this.page.waitForTimeout(500);
   }
 
   /**
-   * Switch to browse view (works on both mobile and desktop)
+   * Switch to browse view (unified TabBar for mobile and desktop)
    */
   async switchToBrowseView(): Promise<void> {
-    const deviceType = getDeviceType(this.page);
-
-    if (deviceType === 'mobile') {
-      // Mobile: use TabBar
-      const browseTab = this.page.locator(Selectors.mobileTabBrowse);
-      await browseTab.click({ timeout: 5000 });
-    } else {
-      // Desktop: use ArmyControlPanel
-      const browseButton = this.page.locator(Selectors.viewModeBrowse);
-      await browseButton.click({ timeout: 5000 });
-    }
-
+    const browseTab = this.page.locator(Selectors.tabBrowse);
+    await browseTab.click({ timeout: 5000 });
     // Wait for view to change
     await this.page.waitForTimeout(500);
   }
 
   /**
-   * Get current view mode by checking which button is active
+   * Get current view mode by checking which tab is active
    */
   async getCurrentViewMode(): Promise<ViewMode> {
-    const deviceType = getDeviceType(this.page);
-
-    if (deviceType === 'mobile') {
-      const armyTab = this.page.locator(Selectors.mobileTabArmy);
-      const isSelected = await armyTab.getAttribute('aria-selected');
-      return isSelected === 'true' ? 'army' : 'browse';
-    } else {
-      // Desktop: check if army button has active styling
-      const armyButton = this.page.locator(Selectors.viewModeArmy);
-      const hasActiveClass = await armyButton.evaluate(el =>
-        el.classList.contains('bg-red-500/10') ||
-        el.classList.contains('bg-cyan-500/10') ||
-        el.classList.contains('bg-yellow-500/10')
-      ).catch(() => false);
-      return hasActiveClass ? 'army' : 'browse';
-    }
+    const armyTab = this.page.locator(Selectors.tabArmy);
+    const isSelected = await armyTab.getAttribute('aria-selected');
+    return isSelected === 'true' ? 'army' : 'browse';
   }
 
   /**

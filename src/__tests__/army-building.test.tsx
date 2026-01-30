@@ -211,6 +211,7 @@ describe('UnitSelector', () => {
   const mockAdd = jest.fn();
   const mockRemove = jest.fn();
   const mockToBattle = jest.fn();
+  const mockDisplayModeChange = jest.fn();
 
   beforeEach(() => {
     // Clear localStorage before each test to avoid state pollution
@@ -228,6 +229,8 @@ describe('UnitSelector', () => {
         onAddUnit={mockAdd}
         onRemoveUnit={mockRemove}
         onToBattle={mockToBattle}
+        displayMode="detailed"
+        onDisplayModeChange={mockDisplayModeChange}
       />
     );
 
@@ -254,6 +257,8 @@ describe('UnitSelector', () => {
         onAddUnit={mockAdd}
         onRemoveUnit={mockRemove}
         onToBattle={mockToBattle}
+        displayMode="detailed"
+        onDisplayModeChange={mockDisplayModeChange}
       />
     );
 
@@ -273,6 +278,8 @@ describe('UnitSelector', () => {
         onAddUnit={mockAdd}
         onRemoveUnit={mockRemove}
         onToBattle={mockToBattle}
+        displayMode="detailed"
+        onDisplayModeChange={mockDisplayModeChange}
       />
     );
 
@@ -308,11 +315,13 @@ describe('UnitSelector', () => {
         onAddUnit={mockAdd}
         onRemoveUnit={mockRemove}
         onToBattle={mockToBattle}
+        displayMode="detailed"
+        onDisplayModeChange={mockDisplayModeChange}
       />
     );
 
-    // Switch to army view
-    const armyViewButton = screen.getByTestId('view-mode-army');
+    // Switch to army view using TabBar
+    const armyViewButton = screen.getByRole('tab', { name: /армия/i });
     armyViewButton.click();
 
     await waitFor(() => {
@@ -332,6 +341,8 @@ describe('UnitSelector', () => {
         onAddUnit={mockAdd}
         onRemoveUnit={mockRemove}
         onToBattle={mockToBattle}
+        displayMode="detailed"
+        onDisplayModeChange={mockDisplayModeChange}
       />
     );
 
@@ -354,6 +365,8 @@ describe('UnitSelector', () => {
         onAddMachine={mockAddMachine}
         onRemoveUnit={mockRemove}
         onToBattle={mockToBattle}
+        displayMode="detailed"
+        onDisplayModeChange={mockDisplayModeChange}
       />
     );
 
@@ -380,6 +393,8 @@ describe('UnitSelector', () => {
         onAddMachine={mockAddMachine}
         onRemoveUnit={mockRemove}
         onToBattle={mockToBattle}
+        displayMode="detailed"
+        onDisplayModeChange={mockDisplayModeChange}
       />
     );
 
@@ -417,6 +432,8 @@ describe('UnitSelector', () => {
         onAddMachine={mockAddMachine}
         onRemoveUnit={mockRemove}
         onToBattle={mockToBattle}
+        displayMode="detailed"
+        onDisplayModeChange={mockDisplayModeChange}
       />
     );
 

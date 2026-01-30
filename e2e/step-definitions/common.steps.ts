@@ -5,34 +5,22 @@ import { BronepehotaWorld } from '../support/world';
 // Common steps for navigation and basic interactions
 
 When('я переключаюсь на вкладку {string}', async function(this: BronepehotaWorld, tabName: string) {
-  const viewport = this.page.viewportSize();
-  const isMobile = viewport ? viewport.width < 768 : false;
-
+  // TabBar is now unified for both mobile and desktop
   if (tabName === 'Армия' || tabName === 'армия') {
-    if (isMobile) {
-      // Mobile: click the second tab (АРМИЯ)
-      const tabs = this.page.locator('[role="tab"]');
-      const count = await tabs.count();
-      if (count >= 2) {
-        await tabs.nth(1).click({ timeout: 5000 });
-      }
-    } else {
-      // Desktop: click the army view button
-      await this.page.locator('[data-testid="view-mode-army"]').click({ timeout: 5000 });
+    // Click the second tab (АРМИЯ)
+    const tabs = this.page.locator('[role="tab"]');
+    const count = await tabs.count();
+    if (count >= 2) {
+      await tabs.nth(1).click({ timeout: 5000 });
     }
     // Wait for view change
     await this.page.waitForTimeout(500);
   } else if (tabName === 'Юниты' || tabName === 'юниты') {
-    if (isMobile) {
-      // Mobile: click the first tab (ЮНИТЫ)
-      const tabs = this.page.locator('[role="tab"]');
-      const count = await tabs.count();
-      if (count >= 1) {
-        await tabs.nth(0).click({ timeout: 5000 });
-      }
-    } else {
-      // Desktop: click the browse view button
-      await this.page.locator('[data-testid="view-mode-browse"]').click({ timeout: 5000 });
+    // Click the first tab (ЮНИТЫ)
+    const tabs = this.page.locator('[role="tab"]');
+    const count = await tabs.count();
+    if (count >= 1) {
+      await tabs.nth(0).click({ timeout: 5000 });
     }
     // Wait for view change
     await this.page.waitForTimeout(500);

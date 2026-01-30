@@ -28,9 +28,11 @@ interface ArmyBuilderProps {
   onEnterBattle?: () => void;
   rulesVersion: RulesVersionID;
   onRulesVersionChange: (version: RulesVersionID) => void;
+  displayMode: 'detailed' | 'compact';
+  onDisplayModeChange: (mode: 'detailed' | 'compact') => void;
 }
 
-export default function ArmyBuilder({ army, setArmy, onEnterBattle, rulesVersion, onRulesVersionChange }: ArmyBuilderProps) {
+export default function ArmyBuilder({ army, setArmy, onEnterBattle, rulesVersion, onRulesVersionChange, displayMode, onDisplayModeChange }: ArmyBuilderProps) {
 
   // Setup step state for guided flow
   const [setupStep, setSetupStep] = useState<'faction' | 'budget' | 'rules' | 'units'>('faction');
@@ -219,6 +221,8 @@ export default function ArmyBuilder({ army, setArmy, onEnterBattle, rulesVersion
                 isInBattle: false,
               });
             }}
+            displayMode={displayMode}
+            onDisplayModeChange={onDisplayModeChange}
           />
           </>
         )}
