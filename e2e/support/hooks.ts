@@ -41,7 +41,7 @@ Before(async function(this: BronepehotaWorld) {
 
   // Go to home page first to enable localStorage access
   try {
-    await page.goto('http://localhost:3000', { waitUntil: 'domcontentloaded', timeout: 10000 });
+    await page.goto('http://localhost:3001', { waitUntil: 'domcontentloaded', timeout: 10000 });
     // Wait a bit for page to be ready
     await page.waitForTimeout(200);
     // Clear localStorage at the start of each scenario
@@ -54,7 +54,7 @@ Before(async function(this: BronepehotaWorld) {
     });
   } catch (error) {
     // If app is not running, just continue - tests will fail appropriately
-    console.warn('Warning: Could not navigate to app. Make sure it is running on http://localhost:3000');
+    console.warn('Warning: Could not navigate to app. Make sure it is running on http://localhost:3001');
   }
 });
 

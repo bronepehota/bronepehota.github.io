@@ -27,6 +27,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 # Development
 npm run dev              # Start Next.js dev server (http://localhost:3000)
+npm run dev:e2e          # Start dev server on port 3001 for E2E tests
 
 # Building
 npm run build            # Production build
@@ -256,8 +257,16 @@ Adding a new rules version:
 - Test files location: `e2e/features/`
 - Step definitions: `e2e/step-definitions/`
 - Configuration: `e2e/cucumber.yaml`
-- **Requires running application** on `http://localhost:3000`
+- **Requires running application** on `http://localhost:3001` (use `npm run dev:e2e`)
 - Run with: `npm run test:e2e`
+
+**Test Data Fixtures**:
+- E2E tests use dedicated test data to avoid dependency on production data changes
+- Test fixtures location: `e2e/fixtures/`
+  - `test-factions.json` - Test faction definitions
+  - `test-squads.json` - Test squad data with predictable costs (50, 100)
+  - `test-machines.json` - Test machine data with predictable costs (75, 150)
+- Use test fixtures when writing new E2E tests to ensure stability
 
 **Test Coverage Requirements**:
 - **When adding new features**: You MUST review and update E2E tests to cover new functionality

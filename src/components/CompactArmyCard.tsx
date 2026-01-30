@@ -11,9 +11,10 @@ interface CompactArmyCardProps {
   onRemove: (instanceId: string) => void;
   onClick?: (unit: ArmyUnit) => void;
   factionId: FactionID;
+  dataTestId?: string;
 }
 
-export function CompactArmyCard({ unit, onRemove, onClick, factionId }: CompactArmyCardProps) {
+export function CompactArmyCard({ unit, onRemove, onClick, factionId, dataTestId }: CompactArmyCardProps) {
   const factionColors = {
     polaris: 'bg-red-500',
     protectorate: 'bg-cyan-500',
@@ -48,7 +49,7 @@ export function CompactArmyCard({ unit, onRemove, onClick, factionId }: CompactA
         borderColor
       )}
       onClick={handleCardClick}
-      data-testid={`compact-army-card-${unit.instanceId}`}
+      data-testid={dataTestId || `compact-army-card-${unit.instanceId}`}
     >
       {/* Type icon zone */}
       <div className="w-11 flex items-center justify-center flex-shrink-0 bg-slate-900/50">
@@ -93,7 +94,7 @@ export function CompactArmyCard({ unit, onRemove, onClick, factionId }: CompactA
             e.stopPropagation();
             onRemove(unit.instanceId);
           }}
-          data-testid={`remove-compact-${unit.instanceId}`}
+          data-testid={dataTestId ? dataTestId.replace('army-unit-', 'remove-unit-') : `remove-compact-${unit.instanceId}`}
           aria-label={`Удалить ${unit.data.name}`}
           className={cn(
             'w-9 h-9 rounded-full flex items-center justify-center',

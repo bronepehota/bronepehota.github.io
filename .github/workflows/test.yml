@@ -32,11 +32,13 @@ jobs:
       - name: Unit tests
         run: npm run test:ci
 
-  # E2E тесты - только для push, чтобы не запускать дважды
+  # E2E тесты - только для PR в main и push в main/develop
   e2e:
     name: E2E Tests
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
+    if: |
+      github.event_name == 'push' ||
+      (github.event_name == 'pull_request' && github.base_ref == 'main')
     needs: quality
     steps:
       - uses: actions/checkout@v4
