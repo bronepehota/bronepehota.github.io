@@ -370,7 +370,9 @@ Then('должно открыться модальное окно боя', async
 });
 
 Then('должна быть видна кнопка {string}', async function(this: BronepehotaWorld, buttonText: string) {
-  const button = this.page.getByRole('button', { name: new RegExp(buttonText, 'i') });
+  // Look for button inside combat modal only
+  const modal = this.page.locator('.fixed.inset-0.z-\\[100\\]');
+  const button = modal.getByRole('button', { name: new RegExp(buttonText, 'i') });
   await expect(button).toBeVisible({ timeout: 3000 });
 });
 

@@ -159,15 +159,6 @@ export function ActionSelector({ onSelect, grenadesAvailable = true, className }
                   </>
                 )}
 
-                {/* Tech grid overlay */}
-                <div className="absolute inset-0 opacity-[0.03]" style={{
-                  backgroundImage: `
-                    linear-gradient(rgba(148, 163, 184, 0.3) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(148, 163, 184, 0.3) 1px, transparent 1px)
-                  `,
-                  backgroundSize: '8px 8px'
-                }} />
-
                 {/* Content */}
                 <div className="relative flex items-center gap-4">
                   {/* Tech icon badge */}

@@ -101,12 +101,12 @@ export function BottomSheetCombatModal({
   const actionColors = getActionColors(state.actionType, state.parameters.isSurpriseAttack);
 
   return (
-    <div className="fixed inset-0 z-[100] bg-slate-950/95 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-4">
+    <div className="fixed inset-0 z-[100] bg-slate-950/95 backdrop-blur-sm flex items-center justify-center p-4">
       <div
         ref={sheetRef}
         {...touchHandlers}
         className={cn(
-          "w-full md:w-[600px] bg-slate-900/90 backdrop-blur-sm border-t-2 md:border-2 shadow-2xl max-h-[90vh] md:max-h-[85vh] overflow-hidden flex flex-col relative",
+          "w-full max-w-[600px] bg-slate-900/90 backdrop-blur-sm border-2 shadow-2xl max-h-[85vh] overflow-hidden flex flex-col relative",
           actionColors.border
         )}
       >

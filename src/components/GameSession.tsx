@@ -8,7 +8,6 @@ import { rollDie } from '@/lib/game-logic';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { CombatLogEntry } from '@/lib/combat-types';
-import TechGridBackground from './machine/TechGridBackground';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -270,8 +269,6 @@ export default function GameSession({ army, setArmy }: GameSessionProps) {
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-b from-slate-950 to-slate-900 relative overflow-hidden" data-testid="game-session">
-      {/* Tech grid background */}
-      <TechGridBackground />
 
       {/* Initiative Modal */}
       {showInitiative && (
@@ -380,21 +377,8 @@ export default function GameSession({ army, setArmy }: GameSessionProps) {
                     : "bg-slate-800/30 border-slate-700/50 opacity-70 hover:opacity-100"
                 )}
               >
-                {/* Background pattern: tech grid for machines, solid for squads */}
-                {isMachine ? (
-                  <div className="absolute inset-0 opacity-10 pointer-events-none">
-                    <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-                      <defs>
-                        <pattern id={`grid-${unit.instanceId}`} width="8" height="8" patternUnits="userSpaceOnUse">
-                          <path d="M 8 0 L 0 0 0 8" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-slate-400"/>
-                        </pattern>
-                      </defs>
-                      <rect width="100%" height="100%" fill={`url(#grid-${unit.instanceId})`} />
-                    </svg>
-                  </div>
-                ) : (
-                  <div className="absolute inset-0 bg-gradient-to-br from-slate-700/5 to-transparent pointer-events-none" />
-                )}
+                {/* Background pattern */}
+                <div className="absolute inset-0 bg-gradient-to-br from-slate-700/5 to-transparent pointer-events-none" />
 
                 {/* Type-specific corner accent */}
                 <div className={cn(
@@ -445,7 +429,7 @@ export default function GameSession({ army, setArmy }: GameSessionProps) {
       <div className="flex-1 overflow-y-auto p-3 md:p-4 pb-24 custom-scrollbar">
         {army.units.length > 0 && (
           <div className={cn(
-            "w-full bg-slate-900/50 rounded-2xl border border-slate-800/50 shadow-xl p-2 md:p-3 mx-auto",
+            "w-full bg-transparent p-0.5 md:p-1 mx-auto",
             army.units[focusedUnitIdx]?.type === 'machine' ? "max-w-5xl" : "max-w-2xl"
           )}>
             <UnitCard
