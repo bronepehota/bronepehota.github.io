@@ -646,7 +646,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                           width={96}
                           height={128}
                           className="w-full h-full object-cover"
-                          style={{ objectPosition: '50% 40%', transform: 'scale(2) translateY(0%)' }}
+                          style={{ objectPosition: '50% 40%', transform: 'scale(2) translateY(10%)' }}
                           unoptimized
                         />
                       </div>
