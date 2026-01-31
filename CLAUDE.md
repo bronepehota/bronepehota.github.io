@@ -2,18 +2,6 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## AI Model Rate Limits (GLM)
-
-**Important**: When using GLM models (glm-4.6, glm-4.5, glm-4.7), plan work according to rate limits:
-- **Rate Limits**: See https://z.ai/manage-apikey/rate-limits#rate-limits
-- **Concurrency**: glm-4.5 (5 concurrent), glm-4.6 (1 concurrent), glm-4.7 (1 concurrent)
-- **Strategy**:
-  - Use glm-4.5 (Haiku) for fast operations, reads, Explore agent — supports parallelism
-  - Use glm-4.6 (Sonnet) for main development — sequence operations
-  - Use glm-4.7 (Opus) for complex planning — single-threaded is acceptable
-- **File Operations**: Edit files incrementally rather than rewriting entire files at once
-- **Parallel Tasks**: Sequence operations when using glm-4.6/4.7; glm-4.5 can handle more parallelism
-
 ## Project Overview
 
 Бронепехота (Bronepehota) is a Next.js 14 web application for a tabletop wargame. The app allows players to build armies and manage game sessions. All UI text is in Russian; code uses English conventions.
