@@ -94,15 +94,6 @@ export function DiceAnimation({ state }: DiceAnimationProps) {
             <div className={cn("absolute bottom-0 left-0 w-2 h-2 border-l-2 border-b-2", colors.accent)} />
             <div className={cn("absolute bottom-0 right-0 w-2 h-2 border-r-2 border-b-2", colors.accent)} />
 
-            {/* Tech grid overlay */}
-            <div className="absolute inset-0 opacity-[0.02]" style={{
-              backgroundImage: `
-                linear-gradient(rgba(148, 163, 184, 0.3) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(148, 163, 184, 0.3) 1px, transparent 1px)
-              `,
-              backgroundSize: '6px 6px'
-            }} />
-
             <div className="relative">
               <div className="text-[8px] font-mono opacity-40 uppercase mb-2 text-center tracking-[0.15em]">ROLL VALUE</div>
               <div className="flex justify-center">
