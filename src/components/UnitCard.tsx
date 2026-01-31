@@ -341,6 +341,13 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
 
   const machineImage = !isSquad ? (unit.data as Machine).image : null;
 
+  // Faction border color for tech corners
+  const factionBorderColor = data.faction === 'polaris'
+    ? 'rgba(220, 38, 38, 0.6)'
+    : data.faction === 'protectorate'
+    ? 'rgba(8, 145, 178, 0.6)'
+    : 'rgba(202, 138, 4, 0.6)';
+
   return (
     <div
       onDoubleClick={handleOpenOriginal}
@@ -351,14 +358,11 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
         data.faction === 'polaris' ? "border-red-600/30" : data.faction === 'protectorate' ? "border-cyan-600/30" : "border-yellow-600/30"
       )}
     >
-      {/* Tech grid overlay - all cards */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{
-        backgroundImage: `
-          linear-gradient(rgba(148, 163, 184, 0.3) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(148, 163, 184, 0.3) 1px, transparent 1px)
-        `,
-        backgroundSize: '8px 8px'
-      }} />
+      {/* Tech corners - faction colored */}
+      <div className="absolute top-0 left-0 w-3 h-3 border-l-2 border-t-2 -ml-px -mt-px pointer-events-none" style={{ borderColor: factionBorderColor }} />
+      <div className="absolute top-0 right-0 w-3 h-3 border-r-2 border-t-2 -mr-px -mt-px pointer-events-none" style={{ borderColor: factionBorderColor }} />
+      <div className="absolute bottom-0 left-0 w-3 h-3 border-l-2 border-b-2 -ml-px -mb-px pointer-events-none" style={{ borderColor: factionBorderColor }} />
+      <div className="absolute bottom-0 right-0 w-3 h-3 border-r-2 border-b-2 -mr-px -mb-px pointer-events-none" style={{ borderColor: factionBorderColor }} />
 
       {/* Combat Modal */}
       {combatController.isOpen && (
