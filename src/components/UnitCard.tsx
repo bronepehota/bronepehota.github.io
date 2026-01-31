@@ -638,7 +638,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                     )}
 
                     {/* Soldier image with tactical frame - compact portrait */}
-                    <div className="relative w-20 md:w-24 aspect-[3/4] rounded-sm border-2 border-slate-700 overflow-hidden flex-shrink-0 bg-slate-900 cursor-pointer hover:border-slate-600 transition-colors">
+                    <div className="relative w-20 md:w-24 aspect-[3/4] rounded-sm overflow-hidden flex-shrink-0 bg-slate-900 cursor-pointer shadow-md">
                       <div onClick={() => setShowSoldierImage(idx)} className="w-full h-full overflow-hidden">
                         <Image
                           src={getSoldierImage(idx)}
@@ -739,36 +739,31 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                       {/* Row 2: Stats - Tactical Grid Layout */}
                       <div className="grid grid-cols-5 gap-1 md:gap-1.5">
                         {/* Armor */}
-                        <div className="relative flex flex-col items-center justify-center p-1.5 md:p-2 rounded-sm bg-slate-900/40 border border-yellow-900/30">
-                          <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-yellow-600/30" />
+                        <div className="relative flex flex-col items-center justify-center p-1.5 md:p-2 rounded-full bg-slate-900/40">
                           <Shield className="w-4 h-4 md:w-5 md:h-5 text-yellow-400 mb-0.5" />
                           <span className="text-sm md:text-base font-mono font-black text-yellow-300">{s.armor}</span>
                         </div>
 
                         {/* Speed */}
-                        <div className="relative flex flex-col items-center justify-center p-1.5 md:p-2 rounded-sm bg-slate-900/40 border border-cyan-900/30">
-                          <div className="absolute top-0 right-0 w-1 h-1 border-r border-t border-cyan-600/30" />
+                        <div className="relative flex flex-col items-center justify-center p-1.5 md:p-2 rounded-full bg-slate-900/40">
                           <Zap className="w-4 h-4 md:w-5 md:h-5 text-cyan-400 mb-0.5" />
                           <span className="text-sm md:text-base font-mono font-black text-cyan-300">{s.speed}</span>
                         </div>
 
                         {/* Range */}
-                        <div className="relative flex flex-col items-center justify-center p-1.5 md:p-2 rounded-sm bg-slate-900/40 border border-amber-900/30">
-                          <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-amber-600/30" />
+                        <div className="relative flex flex-col items-center justify-center p-1.5 md:p-2 rounded-full bg-slate-900/40">
                           <Target className="w-4 h-4 md:w-5 md:h-5 text-amber-400 mb-0.5" />
                           <span className="text-sm md:text-base font-mono font-black text-amber-300">{s.range}</span>
                         </div>
 
                         {/* Power */}
-                        <div className="relative flex flex-col items-center justify-center p-1.5 md:p-2 rounded-sm bg-slate-900/40 border border-red-900/30">
-                          <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-red-600/30" />
+                        <div className="relative flex flex-col items-center justify-center p-1.5 md:p-2 rounded-full bg-slate-900/40">
                           <Flame className="w-4 h-4 md:w-5 md:h-5 text-red-400 mb-0.5" />
                           <span className="text-sm md:text-base font-mono font-black text-red-300">{s.power}</span>
                         </div>
 
                         {/* Melee */}
-                        <div className="relative flex flex-col items-center justify-center p-1.5 md:p-2 rounded-sm bg-slate-900/40 border border-red-900/30">
-                          <div className="absolute bottom-0 left-0 w-1 h-1 border-l border-b border-red-600/30" />
+                        <div className="relative flex flex-col items-center justify-center p-1.5 md:p-2 rounded-full bg-slate-900/40">
                           <Sword className="w-4 h-4 md:w-5 md:h-5 text-red-400 mb-0.5" />
                           <span className="text-sm md:text-base font-mono font-black text-red-300">{s.melee}</span>
                         </div>
@@ -784,7 +779,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
               <div className="grid grid-cols-[1fr_auto] gap-2">
                 {/* === ROW 1: Durability+Speed | PILOT (spans 2 rows) === */}
                 {/* Durability + Speed Combined - Tactical Display */}
-                <div className="relative bg-slate-900/60 p-2 rounded-sm border border-slate-700/50">
+                <div className="relative bg-slate-900/60 p-2 rounded-sm">
                   {/* Tech corners */}
                   <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-slate-600/50" />
                   <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-slate-600/50" />
@@ -924,7 +919,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
 
                 {/* === ROW 2: Ammo+Shots | (pilot continues) === */}
                 {/* Ammo + Shots Combined - Tactical Display */}
-                <div className="relative bg-slate-900/60 p-2 rounded-sm border border-slate-700/50">
+                <div className="relative bg-slate-900/60 p-2 rounded-sm">
                   {/* Tech corners */}
                   <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-slate-600/50" />
                   <div className="absolute top-0 right-0 w-1 h-1 border-r border-t border-slate-600/50" />
@@ -989,7 +984,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                 <div className="relative w-1/4 h-auto shrink-0 hidden md:block">
                   <div
                     onClick={handleOpenOriginal}
-                    className="w-full h-full rounded-sm border-2 border-slate-700/50 overflow-hidden bg-slate-900/60 relative cursor-pointer hover:border-slate-600/50 transition-colors"
+                    className="w-full h-full rounded-sm overflow-hidden bg-slate-900/60 relative cursor-pointer shadow-md"
                   >
                     {/* Tech corners */}
                     <div className="absolute top-0 left-0 w-1.5 h-1.5 border-l border-t border-slate-600/40" />
@@ -1048,10 +1043,10 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                             <div
                               key={weaponIdx}
                               className={cn(
-                                "relative p-1.5 md:p-2.5 rounded-sm border flex gap-1.5 md:gap-3 transition-all overflow-hidden",
-                                isMachineDestroyed ? "bg-slate-950/80 border-slate-800 opacity-40 grayscale" :
-                                isMachineDone ? "bg-slate-900/40 border-slate-700/50 opacity-70" :
-                                weaponShots > 0 ? "bg-amber-950/20 border-amber-700/40" : "bg-slate-800/30 border-slate-700/50"
+                                "relative p-1.5 md:p-2.5 rounded-sm flex gap-1.5 md:gap-3 transition-all overflow-hidden",
+                                isMachineDestroyed ? "bg-slate-950/80 opacity-40 grayscale" :
+                                isMachineDone ? "bg-slate-900/40 opacity-70" :
+                                weaponShots > 0 ? "bg-amber-950/20" : "bg-slate-800/30"
                               )}
                             >
                               {/* Tech corners for active weapon */}
@@ -1075,7 +1070,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                                   {/* Weapon Icon - Clickable for info */}
                                   <button
                                     onClick={() => setSelectedWeaponInfo({ weapon, weaponIdx })}
-                                    className="shrink-0 w-10 h-10 rounded-sm border border-slate-700/50 bg-slate-900/60 flex items-center justify-center min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 hover:bg-slate-800/60 hover:border-slate-600/50 transition-all"
+                                    className="shrink-0 w-10 h-10 rounded-full bg-slate-900/60 flex items-center justify-center min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 hover:bg-slate-800/60 transition-all"
                                     title="Информация об оружии"
                                   >
                                     <Crosshair className="w-5 h-5 text-slate-600" />
@@ -1107,17 +1102,15 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                                   </button>
 
                                   {/* Range Stat Display */}
-                                  <div className="relative bg-slate-950/60 px-1.5 md:px-2 py-0.5 rounded-sm border border-slate-700/50 flex items-center gap-1 md:gap-1.5 shrink-0 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 justify-center">
-                                    <span className="text-[6px] md:text-[7px] opacity-30 font-mono leading-none uppercase hidden sm:inline">ДАЛЬН</span>
-                                    <span className="text-[9px] md:text-[10px] font-mono font-bold text-amber-400">{weapon.range}</span>
-                                    <div className="absolute bottom-0 right-0 w-1 h-px bg-amber-600/20" />
+                                  <div className="relative flex flex-col items-center justify-center p-1.5 md:p-2 rounded-full bg-slate-900/40 shrink-0 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0">
+                                    <Target className="w-4 h-4 md:w-5 md:h-5 text-amber-400 mb-0.5" />
+                                    <span className="text-[9px] md:text-[10px] font-mono font-bold text-amber-300">{weapon.range}</span>
                                   </div>
 
                                   {/* Power Stat Display */}
-                                  <div className="relative bg-slate-950/60 px-1.5 md:px-2 py-0.5 rounded-sm border border-slate-700/50 flex items-center gap-1 md:gap-1.5 shrink-0 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 justify-center">
-                                    <span className="text-[6px] md:text-[7px] opacity-30 font-mono leading-none uppercase hidden sm:inline">МОЩН</span>
-                                    <span className="text-[9px] md:text-[10px] font-mono font-bold text-red-400">{weapon.power}</span>
-                                    <div className="absolute bottom-0 right-0 w-1 h-px bg-red-600/20" />
+                                  <div className="relative flex flex-col items-center justify-center p-1.5 md:p-2 rounded-full bg-slate-900/40 shrink-0 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0">
+                                    <Flame className="w-4 h-4 md:w-5 md:h-5 text-red-400 mb-0.5" />
+                                    <span className="text-[9px] md:text-[10px] font-mono font-bold text-red-300">{weapon.power}</span>
                                   </div>
                                 </div>
 
@@ -1137,9 +1130,9 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                         {/* Melee Weapons - Compact section at bottom */}
                         {meleeWeapons.length > 0 && (
                           <div className={cn(
-                            "relative p-2 rounded-sm border transition-all",
-                            isMachineDestroyed ? "bg-slate-950/80 border-slate-800 opacity-40 grayscale" :
-                            isMachineDone ? "bg-slate-900/40 border-slate-700/50 opacity-70" : "bg-red-950/10 border-red-800/30"
+                            "relative p-2 rounded-sm transition-all",
+                            isMachineDestroyed ? "bg-slate-950/80 opacity-40 grayscale" :
+                            isMachineDone ? "bg-slate-900/40 opacity-70" : "bg-red-950/10"
                           )}>
                             {/* Section Header */}
                             <div className="flex items-center gap-1.5 mb-1.5">
@@ -1158,7 +1151,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                                   <span className="font-mono text-slate-300 truncate flex-1">{weapon.name}</span>
 
                                   {/* Power stat */}
-                                  <div className="flex items-center gap-1 shrink-0 bg-slate-950/60 px-1.5 py-0.5 rounded-sm border border-slate-700/50">
+                                  <div className="flex items-center gap-1 shrink-0 bg-slate-950/60 px-1.5 py-0.5 rounded-full">
                                     <span className="text-[7px] opacity-30 font-mono uppercase hidden sm:inline">МОЩН</span>
                                     <span className="font-mono font-bold text-red-400">{weapon.power}</span>
                                   </div>
