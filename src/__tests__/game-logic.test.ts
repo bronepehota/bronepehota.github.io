@@ -11,9 +11,10 @@ describe('Game Logic - Dice Rolls', () => {
 
   test('executeRoll should return a total within expected range', () => {
     const result = executeRoll('2D6+2');
-    // Min: 1+1+2 = 4, Max: 6+6+2 = 14
-    expect(result.total).toBeGreaterThanOrEqual(4);
-    expect(result.total).toBeLessThanOrEqual(14);
+    // Takes maximum of rolls, then adds bonus: max(roll1, roll2) + 2
+    // Min: max(1,1) + 2 = 3, Max: max(6,6) + 2 = 8
+    expect(result.total).toBeGreaterThanOrEqual(3);
+    expect(result.total).toBeLessThanOrEqual(8);
     expect(result.rolls.length).toBe(2);
   });
 

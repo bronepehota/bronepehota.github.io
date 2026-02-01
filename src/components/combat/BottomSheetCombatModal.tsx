@@ -248,6 +248,7 @@ export function BottomSheetCombatModal({
               rulesVersion={rulesVersion}
               onApply={onApplyResult}
               onGoBack={onGoBack}
+              unitType={state.unitType}
             />
           )}
         </div>

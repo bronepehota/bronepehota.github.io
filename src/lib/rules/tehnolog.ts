@@ -15,11 +15,13 @@ export const tehnologRules: RulesVersion = {
   supportsSpecialEffects: false, // Технолог не поддерживает расширенные special-эффекты
 
   calculateHit: (rangeStr: string, distanceSteps: number, _fortification?: FortificationType): HitResult => {
-    const { total, rolls } = executeRoll(rangeStr);
+    const { total, rolls, bonus } = executeRoll(rangeStr);
     return {
       success: total >= distanceSteps,
       roll: rolls[0] || 0,
-      total
+      total,
+      rolls,
+      bonus
     };
   },
 

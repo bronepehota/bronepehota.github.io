@@ -30,18 +30,18 @@ export const parseRoll = (rollStr: string): { dice: number, sides: number, bonus
   };
 };
 
-export const executeRoll = (rollStr: string): { total: number, rolls: number[] } => {
-  if (rollStr === 'ББ') return { total: 0, rolls: [] }; // Special case for melee range
-  
+export const executeRoll = (rollStr: string): { total: number, rolls: number[], bonus: number } => {
+  if (rollStr === 'ББ') return { total: 0, rolls: [], bonus: 0 }; // Special case for melee range
+
   const { dice, sides, bonus } = parseRoll(rollStr);
   const rolls = [];
-  let total = 0;
   for (let i = 0; i < dice; i++) {
     const r = rollDie(sides);
     rolls.push(r);
-    total += r;
   }
-  return { total: total + bonus, rolls };
+  // Take maximum roll, not sum
+  const maxRoll = Math.max(...rolls);
+  return { total: maxRoll + bonus, rolls, bonus };
 };
 
 export const calculateHit = (rangeStr: string, distanceSteps: number): { success: boolean, roll: number, total: number } => {
@@ -55,8 +55,9 @@ export const calculateHit = (rangeStr: string, distanceSteps: number): { success
 
 export const calculateDamage = (powerStr: string, targetArmor: number): { damage: number, rolls: number[] } => {
   const { dice, sides, bonus } = parseRoll(powerStr);
-  let damage = 0;
   const rolls = [];
+  let damage = 0;
+  // Virtual fire: each die is an independent shot that can cause 1 damage
   for (let i = 0; i < dice; i++) {
     const r = rollDie(sides) + bonus;
     rolls.push(r);
@@ -108,21 +109,19 @@ export function calculateDamageWithSurpriseAttack(powerStr: string, targetArmor:
   const rolls1: number[] = [];
   const rolls2: number[] = [];
 
-  // First set of damage rolls
-  let damage1 = 0;
+  // First set of damage rolls - take max roll
   for (let i = 0; i < dice; i++) {
-    const r = rollDie(sides) + bonus;
-    rolls1.push(r);
-    if (r > targetArmor) damage1 += 1;
+    rolls1.push(rollDie(sides) + bonus);
   }
+  const maxRoll1 = Math.max(...rolls1);
+  const damage1 = maxRoll1 > targetArmor ? 1 : 0;
 
-  // Second set of damage rolls
-  let damage2 = 0;
+  // Second set of damage rolls - take max roll
   for (let i = 0; i < dice; i++) {
-    const r = rollDie(sides) + bonus;
-    rolls2.push(r);
-    if (r > targetArmor) damage2 += 1;
+    rolls2.push(rollDie(sides) + bonus);
   }
+  const maxRoll2 = Math.max(...rolls2);
+  const damage2 = maxRoll2 > targetArmor ? 1 : 0;
 
   // Take the better result (more damage is better)
   const bestResult = damage1 >= damage2 ? { rolls: rolls1, damage: damage1 } : { rolls: rolls2, damage: damage2 };

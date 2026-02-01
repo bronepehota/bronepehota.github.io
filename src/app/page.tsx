@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Army, RulesVersionID } from '@/lib/types';
 import ArmyBuilder from '@/components/ArmyBuilder';
 import GameSession from '@/components/GameSession';
@@ -54,6 +54,12 @@ export default function Home() {
       console.log('[page.tsx] Display mode changed to:', displayMode);
     }
   }, [displayMode]);
+
+  // Initiative trigger function from GameSession - use ref to persist across remounts
+  const triggerInitiativeRef = useRef<(() => void) | null>(null);
+  const handleInitiativeTrigger = useCallback(() => {
+    triggerInitiativeRef.current?.();
+  }, []);
 
   const activeFaction = factionsData.find(f => f.id === army.faction);
 
@@ -199,17 +205,19 @@ export default function Home() {
 
           {/* Right section - Actions */}
           <nav className="flex items-center gap-1 md:gap-2 flex-shrink-0">
-            {/* Turn counter - simplified inline format */}
+            {/* Turn counter - clickable button with distinct initiative color */}
             {view === 'game' && (
-              <span
-                data-testid="turn-counter"
-                className={cn(
-                  "text-xs md:text-sm font-mono font-black",
-                  factionStyles.primary
-                )}
+              <button
+                onClick={handleInitiativeTrigger}
+                data-testid="new-turn-button"
+                className="flex items-center gap-1.5 px-2.5 md:px-3.5 py-1 md:py-1.5 rounded-sm transition-all hover:scale-105 active:scale-95 min-h-[44px] bg-purple-950/60 border-2 border-purple-500/50 hover:bg-purple-950/80 hover:border-purple-400/70"
+                title="Новый тур"
               >
-                {army.currentTurn || 1}
-              </span>
+                <span className="text-[10px] md:text-xs font-mono text-purple-400 uppercase tracking-wider">ТУР</span>
+                <span data-testid="turn-counter" className="text-sm md:text-base font-mono font-black text-purple-300">
+                  {army.currentTurn || 1}
+                </span>
+              </button>
             )}
 
             {/* Display mode toggle - only in builder on unit-select step - compact inline */}
@@ -310,6 +318,7 @@ export default function Home() {
             setArmy={setArmy}
             isInBattle={army.isInBattle}
             onEndBattle={handleEndBattle}
+            onInitiativeTriggerRef={(fn) => { triggerInitiativeRef.current = fn; }}
           />
         )}
       </div>
