@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { GitHubPagesImage as Image } from './GitHubPagesImage';
 import { ArmyUnit, Squad, Machine, RulesVersionID, Weapon } from '@/lib/types';
-import { Shield, Sword, Target, Heart, Zap, RotateCcw, CheckCircle2, Bomb, ChevronDown, ChevronUp, UserX, Plane, Skull, Wrench, Flame, Crosshair, X, Image as ImageIcon } from 'lucide-react';
+import { Shield, Sword, Target, Heart, Zap, RotateCcw, CheckCircle2, Bomb, ChevronDown, ChevronUp, UserX, Plane, Skull, Wrench, Flame, Crosshair, X, Image as ImageIcon, Footprints } from 'lucide-react';
 import { formatUnitNumber } from '@/lib/unit-utils';
 import { getDefaultRulesVersion } from '@/lib/rules-registry';
 import { cn } from '@/lib/utils';
@@ -681,13 +681,13 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
 
                     <div className="flex-1 flex flex-col justify-between min-w-0 gap-1.5 md:gap-2">
                       {/* Row 1: Action buttons */}
-                      <div className="flex gap-0.5 md:gap-1 items-center">
+                      <div className="flex gap-2 md:gap-3 items-center">
                         {/* ДЕЙСТВИЕ button - fills available space */}
                         <button
                           disabled={isDone || isDead}
                           onClick={() => combatController.startCombat(unit, idx)}
                           className={cn(
-                            "relative flex-1 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 p-1 md:p-1.5 rounded-sm transition-all flex items-center justify-center gap-1 overflow-hidden",
+                            "relative flex-1 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 p-1.5 md:p-2 rounded-sm transition-all flex items-center justify-center gap-1.5 md:gap-2 overflow-hidden",
                             "border-2 text-xs font-mono font-bold uppercase tracking-wider",
                             "bg-purple-950/20 hover:bg-purple-950/40 border-purple-700/50 text-purple-400 active:scale-95"
                           )}
@@ -701,11 +701,14 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                           <span className="hidden sm:inline">ДЕЙСТВИЕ</span>
                         </button>
 
+                        {/* Visual separator - desktop only */}
+                        <div className="hidden md:block w-px h-8 bg-slate-700/50 mx-1" />
+
                         {/* Done button */}
                         <button
                           onClick={() => !isDead && toggleAction(idx, 'done')}
                           className={cn(
-                            "relative p-1 md:p-1.5 rounded-sm transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border-2 overflow-hidden",
+                            "relative p-1.5 md:p-2 rounded-sm transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border-2 overflow-hidden",
                             isDone ? "bg-emerald-950/30 border-emerald-700/50 text-emerald-400" : "bg-slate-900/60 border-slate-700 text-slate-500 hover:bg-slate-800/60"
                           )}
                           title="Завершить ход бойца"
@@ -716,13 +719,13 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                               <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-emerald-600/40" />
                             </>
                           )}
-                          <CheckCircle2 className="w-4 h-4" />
+                          <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5" />
                         </button>
 
-                        {/* KIA button */}
+                        {/* KIA button - with Skull icon */}
                         <button
                           onClick={() => toggleDead(idx)}
-                          className={cn("relative text-[8px] md:text-[9px] px-1 md:px-1.5 py-0.5 rounded-sm font-mono font-black uppercase tracking-wider min-w-[44px] min-h-[44px] md:min-h-0 flex items-center justify-center border-2 overflow-hidden transition-all",
+                          className={cn("relative p-1.5 md:p-2 rounded-sm font-mono font-black uppercase tracking-wider min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center gap-1 md:gap-1.5 border-2 overflow-hidden transition-all",
                             isDead ? "bg-red-950/40 border-red-700 text-red-300" : "bg-slate-900/60 border-slate-700 text-slate-500 hover:bg-slate-800/60"
                           )}
                         >
@@ -732,40 +735,71 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                               <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-red-600/40" />
                             </>
                           ) : null}
-                          {isDead ? 'УБИТ' : 'ЖИВ'}
+                          <Skull className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />
+                          <span className="hidden md:inline text-[10px] font-mono font-black uppercase ml-0.5">
+                            {isDead ? 'УБИТ' : 'ЖИВ'}
+                          </span>
                         </button>
                       </div>
 
-                      {/* Row 2: Stats - Tactical Grid Layout */}
-                      <div className="grid grid-cols-5 gap-1 md:gap-1.5">
+                      {/* Row 2: Stats - Left-aligned flex layout */}
+                      <div className="flex flex-wrap gap-1 md:gap-2">
                         {/* Armor */}
-                        <div className="relative flex flex-col items-center justify-center p-1.5 md:p-2 rounded-full bg-slate-900/40">
-                          <Shield className="w-4 h-4 md:w-5 md:h-5 text-yellow-400 mb-0.5" />
-                          <span className="text-sm md:text-base font-mono font-black text-yellow-300">{s.armor}</span>
+                        <div className="relative flex flex-col items-center justify-center p-1 md:p-2 rounded-lg md:rounded-full bg-slate-900/40 min-h-[44px] min-w-[42px] md:min-w-[56px]">
+                          <Shield className="w-3 md:w-4 h-3 md:h-4 text-yellow-400 mb-0 shrink-0" />
+                          <span className="text-xs md:text-sm font-mono font-black text-yellow-300 leading-none truncate w-full text-center" title={s.armor.toString()}>
+                            {s.armor}
+                          </span>
                         </div>
 
                         {/* Speed */}
-                        <div className="relative flex flex-col items-center justify-center p-1.5 md:p-2 rounded-full bg-slate-900/40">
-                          <Zap className="w-4 h-4 md:w-5 md:h-5 text-cyan-400 mb-0.5" />
-                          <span className="text-sm md:text-base font-mono font-black text-cyan-300">{s.speed}</span>
+                        <div className="relative flex flex-col items-center justify-center p-1 md:p-2 rounded-lg md:rounded-full bg-slate-900/40 min-h-[44px] min-w-[42px] md:min-w-[56px]">
+                          <Zap className="w-3 md:w-4 h-3 md:h-4 text-cyan-400 mb-0 shrink-0" />
+                          <span className="text-xs md:text-sm font-mono font-black text-cyan-300 leading-none truncate w-full text-center" title={s.speed.toString()}>
+                            {s.speed}
+                          </span>
                         </div>
 
-                        {/* Range */}
-                        <div className="relative flex flex-col items-center justify-center p-1.5 md:p-2 rounded-full bg-slate-900/40">
-                          <Target className="w-4 h-4 md:w-5 md:h-5 text-amber-400 mb-0.5" />
-                          <span className="text-sm md:text-base font-mono font-black text-amber-300">{s.range}</span>
+                        {/* Range - disabled if no ranged attack */}
+                        <div className={cn(
+                          "relative flex flex-col items-center justify-center p-1 md:p-2 rounded-lg md:rounded-full min-h-[44px] min-w-[42px] md:min-w-[56px]",
+                          (!s.range || s.range === '0') ? "bg-slate-800/30 opacity-40" : "bg-slate-900/40"
+                        )}>
+                          <Target className={cn("w-3 md:w-4 h-3 md:h-4 mb-0 shrink-0", (!s.range || s.range === '0') ? "text-slate-600" : "text-amber-400")} />
+                          <span className={cn(
+                            "text-[10px] md:text-xs font-mono font-black leading-none truncate w-full text-center",
+                            (!s.range || s.range === '0') ? "text-slate-600" : "text-amber-300"
+                          )} title={s.range}>
+                            {s.range && s.range !== '0' ? (s.range.length > 4 ? s.range.replace('D', '') : s.range) : '—'}
+                          </span>
                         </div>
 
-                        {/* Power */}
-                        <div className="relative flex flex-col items-center justify-center p-1.5 md:p-2 rounded-full bg-slate-900/40">
-                          <Flame className="w-4 h-4 md:w-5 md:h-5 text-red-400 mb-0.5" />
-                          <span className="text-sm md:text-base font-mono font-black text-red-300">{s.power}</span>
+                        {/* Power - disabled if no ranged attack */}
+                        <div className={cn(
+                          "relative flex flex-col items-center justify-center p-1 md:p-2 rounded-lg md:rounded-full min-h-[44px] min-w-[42px] md:min-w-[56px]",
+                          (!s.power || s.power === '0') ? "bg-slate-800/30 opacity-40" : "bg-slate-900/40"
+                        )}>
+                          <Flame className={cn("w-3 md:w-4 h-3 md:h-4 mb-0 shrink-0", (!s.power || s.power === '0') ? "text-slate-600" : "text-red-400")} />
+                          <span className={cn(
+                            "text-[10px] md:text-xs font-mono font-black leading-none truncate w-full text-center",
+                            (!s.power || s.power === '0') ? "text-slate-600" : "text-red-300"
+                          )} title={s.power}>
+                            {s.power && s.power !== '0' ? (s.power.length > 4 ? s.power.replace('D', '') : s.power) : '—'}
+                          </span>
                         </div>
 
-                        {/* Melee */}
-                        <div className="relative flex flex-col items-center justify-center p-1.5 md:p-2 rounded-full bg-slate-900/40">
-                          <Sword className="w-4 h-4 md:w-5 md:h-5 text-red-400 mb-0.5" />
-                          <span className="text-sm md:text-base font-mono font-black text-red-300">{s.melee}</span>
+                        {/* Melee - disabled if no melee attack */}
+                        <div className={cn(
+                          "relative flex flex-col items-center justify-center p-1 md:p-2 rounded-lg md:rounded-full min-h-[44px] min-w-[42px] md:min-w-[56px]",
+                          s.melee <= 0 ? "bg-slate-800/30 opacity-40" : "bg-slate-900/40"
+                        )}>
+                          <Sword className={cn("w-3 md:w-4 h-3 md:h-4 mb-0 shrink-0", s.melee <= 0 ? "text-slate-600" : "text-red-400")} />
+                          <span className={cn(
+                            "text-xs md:text-sm font-mono font-black leading-none truncate w-full text-center",
+                            s.melee <= 0 ? "text-slate-600" : "text-red-300"
+                          )} title={s.melee.toString()}>
+                            {s.melee > 0 ? s.melee : '—'}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -1102,15 +1136,19 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                                   </button>
 
                                   {/* Range Stat Display */}
-                                  <div className="relative flex flex-col items-center justify-center p-1.5 md:p-2 rounded-full bg-slate-900/40 shrink-0 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0">
-                                    <Target className="w-4 h-4 md:w-5 md:h-5 text-amber-400 mb-0.5" />
-                                    <span className="text-[9px] md:text-[10px] font-mono font-bold text-amber-300">{weapon.range}</span>
+                                  <div className="relative flex flex-col items-center justify-center p-1.5 md:p-2 rounded-lg md:rounded-full bg-slate-900/40 shrink-0 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0">
+                                    <Target className="w-3.5 h-3.5 md:w-4 md:h-4 text-amber-400 mb-0.5 shrink-0" />
+                                    <span className="text-[10px] md:text-xs font-mono font-bold text-amber-300 leading-tight truncate w-full text-center" title={weapon.range}>
+                                      {weapon.range.length > 4 ? weapon.range.replace('D', '') : weapon.range}
+                                    </span>
                                   </div>
 
                                   {/* Power Stat Display */}
-                                  <div className="relative flex flex-col items-center justify-center p-1.5 md:p-2 rounded-full bg-slate-900/40 shrink-0 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0">
-                                    <Flame className="w-4 h-4 md:w-5 md:h-5 text-red-400 mb-0.5" />
-                                    <span className="text-[9px] md:text-[10px] font-mono font-bold text-red-300">{weapon.power}</span>
+                                  <div className="relative flex flex-col items-center justify-center p-1.5 md:p-2 rounded-lg md:rounded-full bg-slate-900/40 shrink-0 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0">
+                                    <Flame className="w-3.5 h-3.5 md:w-4 md:h-4 text-red-400 mb-0.5 shrink-0" />
+                                    <span className="text-[10px] md:text-xs font-mono font-bold text-red-300 leading-tight truncate w-full text-center" title={weapon.power}>
+                                      {weapon.power.length > 4 ? weapon.power.replace('D', '') : weapon.power}
+                                    </span>
                                   </div>
                                 </div>
 
