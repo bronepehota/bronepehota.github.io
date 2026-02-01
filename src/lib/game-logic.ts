@@ -56,13 +56,15 @@ export const calculateHit = (rangeStr: string, distanceSteps: number): { success
 export const calculateDamage = (powerStr: string, targetArmor: number): { damage: number, rolls: number[] } => {
   const { dice, sides, bonus } = parseRoll(powerStr);
   const rolls = [];
+  let damage = 0;
+  // Virtual fire: each die is an independent shot that can cause 1 damage
   for (let i = 0; i < dice; i++) {
     const r = rollDie(sides) + bonus;
     rolls.push(r);
+    if (r > targetArmor) {
+      damage += 1;
+    }
   }
-  // Take maximum roll for damage comparison
-  const maxRoll = Math.max(...rolls);
-  const damage = maxRoll > targetArmor ? 1 : 0;
   return { damage, rolls };
 };
 

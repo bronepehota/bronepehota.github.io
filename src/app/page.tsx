@@ -209,12 +209,12 @@ export default function Home() {
             {view === 'game' && (
               <button
                 onClick={handleInitiativeTrigger}
-                data-testid="turn-counter"
+                data-testid="new-turn-button"
                 className="flex items-center gap-1.5 px-2.5 md:px-3.5 py-1 md:py-1.5 rounded-sm transition-all hover:scale-105 active:scale-95 min-h-[44px] bg-purple-950/60 border-2 border-purple-500/50 hover:bg-purple-950/80 hover:border-purple-400/70"
                 title="Новый тур"
               >
                 <span className="text-[10px] md:text-xs font-mono text-purple-400 uppercase tracking-wider">ТУР</span>
-                <span className="text-sm md:text-base font-mono font-black text-purple-300">
+                <span data-testid="turn-counter" className="text-sm md:text-base font-mono font-black text-purple-300">
                   {army.currentTurn || 1}
                 </span>
               </button>

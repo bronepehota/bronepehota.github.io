@@ -215,14 +215,15 @@ export const fanRules: RulesVersion = {
       return { damage, rolls };
     }
 
-    // Infantry attack uses standard calculation (virtual fire) - take max roll
+    // Infantry attack uses virtual fire - each die is an independent shot
+    let damage = 0;
     for (let i = 0; i < dice; i++) {
       const r = rollDie(sides) + bonus;
       rolls.push(r);
+      if (r > targetArmor) {
+        damage += 1;
+      }
     }
-    // Take maximum roll for damage comparison
-    const maxRoll = Math.max(...rolls);
-    const damage = maxRoll > targetArmor ? 1 : 0;
 
     return { damage, rolls };
   },
