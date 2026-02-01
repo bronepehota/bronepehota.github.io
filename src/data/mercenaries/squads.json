@@ -263,7 +263,7 @@
         "melee": 0,
         "props": [],
         "armor": 3,
-        "image": "/images/squads/mercenaries/mutanty/2.png"
+        "image": "/images/squads/mercenaries/mutanty/3.png"
       },
       {
         "num": 3,
@@ -274,7 +274,7 @@
         "melee": 0,
         "props": [],
         "armor": 3,
-        "image": "/images/squads/mercenaries/mutanty/3.png"
+        "image": "/images/squads/mercenaries/mutanty/4.png"
       },
       {
         "num": 4,
@@ -285,7 +285,7 @@
         "melee": 4,
         "props": [],
         "armor": 3,
-        "image": "/images/squads/mercenaries/mutanty/4.png"
+        "image": "/images/squads/mercenaries/mutanty/2.png"
       }
     ]
   },

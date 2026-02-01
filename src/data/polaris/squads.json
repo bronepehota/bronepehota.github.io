@@ -37,7 +37,7 @@
         "melee": 3,
         "props": [],
         "armor": 2,
-        "image": "/images/squads/polaris/lineynaya_klon_pehota/3.png"
+        "image": "/images/squads/polaris/lineynaya_klon_pehota/4.png"
       },
       {
         "num": 4,
@@ -48,7 +48,7 @@
         "melee": 3,
         "props": [],
         "armor": 2,
-        "image": "/images/squads/polaris/lineynaya_klon_pehota/4.png"
+        "image": "/images/squads/polaris/lineynaya_klon_pehota/3.png"
       },
       {
         "num": 5,
@@ -179,7 +179,7 @@
           "Пр4"
         ],
         "armor": 2,
-        "image": "/images/squads/polaris/lyogkaya_shturmovaya_klon_pehota/1.png"
+        "image": "/images/squads/polaris/lyogkaya_shturmovaya_klon_pehota/5.png"
       },
       {
         "num": 2,
@@ -192,7 +192,7 @@
           "Пр4"
         ],
         "armor": 2,
-        "image": "/images/squads/polaris/lyogkaya_shturmovaya_klon_pehota/2.png"
+        "image": "/images/squads/polaris/lyogkaya_shturmovaya_klon_pehota/1.png"
       },
       {
         "num": 3,
@@ -205,7 +205,7 @@
           "Пр4"
         ],
         "armor": 2,
-        "image": "/images/squads/polaris/lyogkaya_shturmovaya_klon_pehota/3.png"
+        "image": "/images/squads/polaris/lyogkaya_shturmovaya_klon_pehota/2.png"
       },
       {
         "num": 4,
@@ -218,7 +218,7 @@
           "Пр4"
         ],
         "armor": 2,
-        "image": "/images/squads/polaris/lyogkaya_shturmovaya_klon_pehota/4.png"
+        "image": "/images/squads/polaris/lyogkaya_shturmovaya_klon_pehota/3.png"
       },
       {
         "num": 5,
@@ -231,7 +231,7 @@
           "Пр4"
         ],
         "armor": 2,
-        "image": "/images/squads/polaris/lyogkaya_shturmovaya_klon_pehota/5.png"
+        "image": "/images/squads/polaris/lyogkaya_shturmovaya_klon_pehota/4.png"
       },
       {
         "num": 6,
