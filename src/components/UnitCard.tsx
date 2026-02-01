@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { GitHubPagesImage as Image } from './GitHubPagesImage';
 import { ArmyUnit, Squad, Machine, RulesVersionID, Weapon } from '@/lib/types';
-import { Shield, Sword, Target, Heart, Zap, RotateCcw, CheckCircle2, Bomb, ChevronDown, ChevronUp, UserX, Plane, Skull, Wrench, Flame, Crosshair, X, Image as ImageIcon, Footprints } from 'lucide-react';
+import { Shield, Sword, Target, Heart, Zap, CheckCircle2, Bomb, ChevronDown, ChevronUp, UserX, Plane, Skull, Wrench, Flame, Crosshair, X, Image as ImageIcon, Footprints } from 'lucide-react';
 import { formatUnitNumber } from '@/lib/unit-utils';
 import { getDefaultRulesVersion } from '@/lib/rules-registry';
 import { cn } from '@/lib/utils';
@@ -87,10 +87,22 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
 
   const toggleAction = (soldierIdx: number, action: 'moved' | 'shot' | 'melee' | 'done') => {
     const newActions = [...(unit.actionsUsed || [])];
-    newActions[soldierIdx] = {
-      ...newActions[soldierIdx],
-      [action]: !newActions[soldierIdx][action]
-    };
+    const currentDone = newActions[soldierIdx]?.done || false;
+
+    if (action === 'done' && currentDone) {
+      // Untoggling "done" - reset all actions to return to active state
+      newActions[soldierIdx] = {
+        moved: false,
+        shot: false,
+        melee: false,
+        done: false
+      };
+    } else {
+      newActions[soldierIdx] = {
+        ...newActions[soldierIdx],
+        [action]: !newActions[soldierIdx][action]
+      };
+    }
     updateUnit({ ...unit, actionsUsed: newActions });
   };
 
@@ -292,7 +304,18 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
     }
   }, [combatController.state.phase, combatController.state.result, unit, updateUnit]);
 
-  const handleApplyResult = () => {
+  const handleApplyResult = (markAsDone?: boolean) => {
+    // Mark soldier as done if requested and this is a squad action
+    if (markAsDone && isSquad && combatController.state.result?.soldierIndex !== undefined) {
+      const soldierIdx = combatController.state.result.soldierIndex;
+      const newActions = [...(unit.actionsUsed || [])];
+      newActions[soldierIdx] = {
+        ...newActions[soldierIdx],
+        done: true
+      };
+      updateUnit({ ...unit, actionsUsed: newActions });
+    }
+
     if (combatController.state.result && onCombatLogEntry) {
       const entry: CombatLogEntry = {
         id: `${combatController.state.result.unitId}-${combatController.state.result.timestamp}-${Math.random().toString(36).substr(2, 9)}`,
@@ -582,23 +605,23 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
           <button
             onClick={() => {
               if (isSquad) {
-                updateUnit({ ...unit, grenadesUsed: false, actionsUsed: Array((data as Squad).soldiers.length).fill({ moved: false, shot: false, melee: false, done: false }) });
+                // Mark all alive soldiers as done
+                const newActions = (unit.actionsUsed || Array((data as Squad).soldiers.length).fill({ moved: false, shot: false, melee: false, done: false }))
+                  .map((action, idx) => {
+                    const isDead = unit.deadSoldiers?.includes(idx);
+                    if (isDead) return action;
+                    return { ...action, done: true };
+                  });
+                updateUnit({ ...unit, actionsUsed: newActions });
               } else {
-                updateUnit({
-                  ...unit,
-                  isMachineMoved: false,
-                  isMachineShot: false,
-                  isMachineMelee: false,
-                  isMachineDone: false,
-                  machineShotsUsed: 0,
-                  machineWeaponShots: undefined
-                });
+                // Mark machine as done
+                updateUnit({ ...unit, isMachineDone: true });
               }
             }}
             className="p-1.5 md:p-1 hover:bg-white/10 rounded-sm transition-colors min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border border-slate-700/50"
-            title="Сбросить ходы"
+            title={isSquad ? "Завершить ход всех бойцов" : "Завершить ход машины"}
           >
-            <RotateCcw className="w-4 h-4 opacity-50" />
+            <CheckCircle2 className="w-4 h-4 opacity-50" />
           </button>
         </div>
       </div>
@@ -745,16 +768,16 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                       {/* Row 2: Stats - Left-aligned flex layout */}
                       <div className="flex flex-wrap gap-1 md:gap-2">
                         {/* Armor */}
-                        <div className="relative flex flex-col items-center justify-center p-1 md:p-2 rounded-lg md:rounded-full bg-slate-900/40 min-h-[44px] min-w-[42px] md:min-w-[56px]">
-                          <Shield className="w-3 md:w-4 h-3 md:h-4 text-yellow-400 mb-0 shrink-0" />
+                        <div className="relative flex flex-col items-center justify-center p-1 md:p-2 rounded-lg md:rounded-full min-h-[44px] min-w-[42px] md:min-w-[56px]">
+                          <Shield className="w-3 md:w-4 h-3 md:h-4 text-yellow-400 mb-1 md:mb-0 shrink-0" />
                           <span className="text-xs md:text-sm font-mono font-black text-yellow-300 leading-none truncate w-full text-center" title={s.armor.toString()}>
                             {s.armor}
                           </span>
                         </div>
 
                         {/* Speed */}
-                        <div className="relative flex flex-col items-center justify-center p-1 md:p-2 rounded-lg md:rounded-full bg-slate-900/40 min-h-[44px] min-w-[42px] md:min-w-[56px]">
-                          <Zap className="w-3 md:w-4 h-3 md:h-4 text-cyan-400 mb-0 shrink-0" />
+                        <div className="relative flex flex-col items-center justify-center p-1 md:p-2 rounded-lg md:rounded-full min-h-[44px] min-w-[42px] md:min-w-[56px]">
+                          <Footprints className="w-3 md:w-4 h-3 md:h-4 text-cyan-400 mb-1 md:mb-0 shrink-0" />
                           <span className="text-xs md:text-sm font-mono font-black text-cyan-300 leading-none truncate w-full text-center" title={s.speed.toString()}>
                             {s.speed}
                           </span>
@@ -763,9 +786,9 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                         {/* Range - disabled if no ranged attack */}
                         <div className={cn(
                           "relative flex flex-col items-center justify-center p-1 md:p-2 rounded-lg md:rounded-full min-h-[44px] min-w-[42px] md:min-w-[56px]",
-                          (!s.range || s.range === '0') ? "bg-slate-800/30 opacity-40" : "bg-slate-900/40"
+                          (!s.range || s.range === '0') && "opacity-40"
                         )}>
-                          <Target className={cn("w-3 md:w-4 h-3 md:h-4 mb-0 shrink-0", (!s.range || s.range === '0') ? "text-slate-600" : "text-amber-400")} />
+                          <Target className={cn("w-3 md:w-4 h-3 md:h-4 mb-1 md:mb-0 shrink-0", (!s.range || s.range === '0') ? "text-slate-600" : "text-amber-400")} />
                           <span className={cn(
                             "text-[10px] md:text-xs font-mono font-black leading-none truncate w-full text-center",
                             (!s.range || s.range === '0') ? "text-slate-600" : "text-amber-300"
@@ -777,9 +800,9 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                         {/* Power - disabled if no ranged attack */}
                         <div className={cn(
                           "relative flex flex-col items-center justify-center p-1 md:p-2 rounded-lg md:rounded-full min-h-[44px] min-w-[42px] md:min-w-[56px]",
-                          (!s.power || s.power === '0') ? "bg-slate-800/30 opacity-40" : "bg-slate-900/40"
+                          (!s.power || s.power === '0') && "opacity-40"
                         )}>
-                          <Flame className={cn("w-3 md:w-4 h-3 md:h-4 mb-0 shrink-0", (!s.power || s.power === '0') ? "text-slate-600" : "text-red-400")} />
+                          <Flame className={cn("w-3 md:w-4 h-3 md:h-4 mb-1 md:mb-0 shrink-0", (!s.power || s.power === '0') ? "text-slate-600" : "text-red-400")} />
                           <span className={cn(
                             "text-[10px] md:text-xs font-mono font-black leading-none truncate w-full text-center",
                             (!s.power || s.power === '0') ? "text-slate-600" : "text-red-300"
@@ -791,9 +814,9 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                         {/* Melee - disabled if no melee attack */}
                         <div className={cn(
                           "relative flex flex-col items-center justify-center p-1 md:p-2 rounded-lg md:rounded-full min-h-[44px] min-w-[42px] md:min-w-[56px]",
-                          s.melee <= 0 ? "bg-slate-800/30 opacity-40" : "bg-slate-900/40"
+                          s.melee <= 0 && "opacity-40"
                         )}>
-                          <Sword className={cn("w-3 md:w-4 h-3 md:h-4 mb-0 shrink-0", s.melee <= 0 ? "text-slate-600" : "text-red-400")} />
+                          <Sword className={cn("w-3 md:w-4 h-3 md:h-4 mb-1 md:mb-0 shrink-0", s.melee <= 0 ? "text-slate-600" : "text-red-400")} />
                           <span className={cn(
                             "text-xs md:text-sm font-mono font-black leading-none truncate w-full text-center",
                             s.melee <= 0 ? "text-slate-600" : "text-red-300"
@@ -823,7 +846,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                       <Shield className="w-2.5 h-2.5 md:w-3 md:h-3" /> Прочность
                     </span>
                     <span className="text-[8px] md:text-[9px] font-mono opacity-40 uppercase flex items-center gap-1">
-                      <Zap className="w-2.5 h-2.5 md:w-3 md:h-3" /> Скорость
+                      <Footprints className="w-2.5 h-2.5 md:w-3 md:h-3" /> Скорость
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -1237,7 +1260,21 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                 </button>
 
                 <button
-                  onClick={() => !isMachineDestroyed && updateUnit({ ...unit, isMachineDone: !unit.isMachineDone })}
+                  onClick={() => {
+                    if (isMachineDestroyed) return;
+                    if (unit.isMachineDone) {
+                      // Untoggling done - reset all actions to return to active state
+                      updateUnit({
+                        ...unit,
+                        isMachineMoved: false,
+                        isMachineShot: false,
+                        isMachineMelee: false,
+                        isMachineDone: false
+                      });
+                    } else {
+                      updateUnit({ ...unit, isMachineDone: true });
+                    }
+                  }}
                   disabled={isMachineDestroyed}
                   className={cn(
                     "relative flex-1 p-2 md:p-2.5 rounded-sm transition-colors min-h-[44px] md:min-h-0 flex items-center justify-center gap-1.5 text-xs font-mono font-bold uppercase tracking-wider border-2 overflow-hidden",

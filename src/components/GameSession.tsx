@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { Army, ArmyUnit, Squad, PilotInfo } from '@/lib/types';
 import UnitCard from './UnitCard';
-import { RotateCcw, ChevronRight, Heart, UserX, History, User, Bot } from 'lucide-react';
+import { RotateCcw, ChevronRight, Heart, UserX, History, User, Bot, X } from 'lucide-react';
 import { rollDie } from '@/lib/game-logic';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -108,13 +108,40 @@ interface GameSessionProps {
   setArmy: (army: Army) => void;
   isInBattle?: boolean;
   onEndBattle?: () => void;
+  onInitiativeTriggerRef?: (trigger: () => void) => void;
 }
 
-export default function GameSession({ army, setArmy }: GameSessionProps) {
+export default function GameSession({ army, setArmy, onInitiativeTriggerRef }: GameSessionProps) {
   const [showInitiative, setShowInitiative] = useState(false);
+  const [showTurnConfirmation, setShowTurnConfirmation] = useState(false);
   const [initRoll, setInitRoll] = useState(0);
   const [isRolling, setIsRolling] = useState(false);
   const [focusedUnitIdx, setFocusedUnitIdx] = useState(0);
+
+  const calculateInitiative = useCallback(() => {
+    setShowInitiative(true);
+    setIsRolling(true);
+
+    let count = 0;
+    const interval = setInterval(() => {
+      setInitRoll(rollDie(6));
+      count++;
+      if (count > 10) {
+        clearInterval(interval);
+        const final = rollDie(6);
+        setInitRoll(final);
+        setIsRolling(false);
+      }
+    }, 50);
+  }, []);
+
+  // Expose trigger function to parent via callback ref
+  useEffect(() => {
+    if (onInitiativeTriggerRef) {
+      onInitiativeTriggerRef(calculateInitiative);
+    }
+  }, [calculateInitiative, onInitiativeTriggerRef]);
+
   const [showCombatLog, setShowCombatLog] = useState(false);
 
   // Combat log state
@@ -188,24 +215,34 @@ export default function GameSession({ army, setArmy }: GameSessionProps) {
     setCombatLog(prev => [entry, ...prev]);
   };
 
-  const calculateInitiative = () => {
-    setIsRolling(true);
-    setShowInitiative(true);
-
-    let count = 0;
-    const interval = setInterval(() => {
-      setInitRoll(rollDie(6));
-      count++;
-      if (count > 10) {
-        clearInterval(interval);
-        const final = rollDie(6);
-        setInitRoll(final);
-        setIsRolling(false);
+  // Helper to count incomplete (active) units
+  const getIncompleteUnits = () => {
+    return army.units.filter(unit => {
+      if (unit.type === 'squad') {
+        const squad = unit.data as Squad;
+        // Check if any alive soldier is not done
+        return squad.soldiers.some((_, idx) => {
+          const isDead = unit.deadSoldiers?.includes(idx);
+          const isDone = unit.actionsUsed?.[idx]?.done;
+          return !isDead && !isDone;
+        });
+      } else {
+        // Machine is incomplete if not done
+        return !unit.isMachineDone && (unit.currentDurability || 0) > 0;
       }
-    }, 50);
+    });
   };
 
   const startNewTurn = () => {
+    const incompleteUnits = getIncompleteUnits();
+    if (incompleteUnits.length > 0) {
+      setShowTurnConfirmation(true);
+    } else {
+      confirmStartNewTurn();
+    }
+  };
+
+  const confirmStartNewTurn = () => {
     setArmy({
       ...army,
       currentTurn: (army.currentTurn || 1) + 1,
@@ -229,6 +266,7 @@ export default function GameSession({ army, setArmy }: GameSessionProps) {
       })
     });
     setShowInitiative(false);
+    setShowTurnConfirmation(false);
     setFocusedUnitIdx(0);
   };
 
@@ -285,13 +323,19 @@ export default function GameSession({ army, setArmy }: GameSessionProps) {
             <div className={cn("absolute bottom-0 left-0 w-3 h-3 border-l-2 border-b-2", factionColors.accent)} />
             <div className={cn("absolute bottom-0 right-0 w-3 h-3 border-r-2 border-b-2", factionColors.accent)} />
 
-            {/* Header with gradient divider */}
+            {/* Header with close button */}
             <div className="flex items-center gap-3">
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent"></div>
               <h3 className={cn("text-lg md:text-xl font-mono font-bold tracking-wider", factionColors.primary)}>
                 ИНИЦИАТИВА
               </h3>
-              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent"></div>
+              <button
+                onClick={() => setShowInitiative(false)}
+                className="p-1 hover:bg-slate-800/50 rounded-sm transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
+                title="Закрыть"
+              >
+                <X className="w-5 h-5 text-slate-500" />
+              </button>
             </div>
 
             {/* Dice display */}
@@ -317,21 +361,120 @@ export default function GameSession({ army, setArmy }: GameSessionProps) {
               </div>
             </div>
 
-            {/* Start turn button */}
-            <button
-              onClick={startNewTurn}
-              data-testid="start-turn-button"
-              disabled={isRolling}
-              className={cn(
-                "w-full py-3 md:py-4 font-mono text-sm md:text-lg font-bold uppercase tracking-wider border transition-all min-h-[52px] md:min-h-[56px]",
-                factionColors.border,
-                factionColors.bg,
-                factionColors.primary,
-                "hover:scale-102 active:scale-95 disabled:opacity-50"
-              )}
-            >
-              НАЧАТЬ ТУР
-            </button>
+            {/* Action buttons */}
+            <div className="flex gap-2">
+              {/* Reroll button */}
+              <button
+                onClick={calculateInitiative}
+                disabled={isRolling}
+                className={cn(
+                  "flex-1 py-3 md:py-4 font-mono text-sm md:text-base font-bold uppercase tracking-wider border transition-all min-h-[52px] md:min-h-[56px]",
+                  "bg-slate-800/50 border-slate-600/50 text-slate-400 hover:bg-slate-700/50 hover:border-slate-500/50 hover:text-slate-300",
+                  "disabled:opacity-50"
+                )}
+              >
+                ПЕРЕБРОС
+              </button>
+
+              {/* Start turn button */}
+              <button
+                onClick={startNewTurn}
+                data-testid="start-turn-button"
+                disabled={isRolling}
+                className={cn(
+                  "flex-[2] py-3 md:py-4 font-mono text-sm md:text-lg font-bold uppercase tracking-wider border transition-all min-h-[52px] md:min-h-[56px]",
+                  factionColors.border,
+                  factionColors.bg,
+                  factionColors.primary,
+                  "hover:scale-102 active:scale-95 disabled:opacity-50"
+                )}
+              >
+                НАЧАТЬ ТУР
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Turn Confirmation Modal */}
+      {showTurnConfirmation && (
+        <div className="fixed inset-0 z-[100] bg-slate-950/95 flex items-center justify-center p-2 md:p-4 backdrop-blur-xl animate-in fade-in duration-300">
+          <div className={cn(
+            "relative border-2 backdrop-blur-sm rounded-2xl md:rounded-3xl p-4 md:p-6 max-w-sm w-full shadow-2xl text-center space-y-4 md:space-y-6 animate-in zoom-in duration-300 mx-auto",
+            factionColors.border,
+            factionColors.bg,
+            factionColors.glow
+          )}>
+            {/* Corner accents */}
+            <div className={cn("absolute top-0 left-0 w-3 h-3 border-l-2 border-t-2", factionColors.accent)} />
+            <div className={cn("absolute top-0 right-0 w-3 h-3 border-r-2 border-t-2", factionColors.accent)} />
+            <div className={cn("absolute bottom-0 left-0 w-3 h-3 border-l-2 border-b-2", factionColors.accent)} />
+            <div className={cn("absolute bottom-0 right-0 w-3 h-3 border-r-2 border-b-2", factionColors.accent)} />
+
+            {/* Header */}
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent"></div>
+              <h3 className={cn("text-lg md:text-xl font-mono font-bold tracking-wider", factionColors.primary)}>
+                ЗАВЕРШИТЬ ТУР?
+              </h3>
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent"></div>
+            </div>
+
+            {/* Warning message */}
+            <div className="bg-amber-950/30 border border-amber-700/50 rounded-lg p-3 md:p-4">
+              <p className="text-sm md:text-base font-mono text-amber-300">
+                Активных отрядов: <span className="font-black">{getIncompleteUnits().length}</span>
+              </p>
+            </div>
+
+            {/* Incomplete units list */}
+            <div className="bg-slate-900/50 rounded-lg p-3 md:p-4 max-h-40 overflow-y-auto space-y-2">
+              {getIncompleteUnits().map(unit => {
+                const incompleteCount = unit.type === 'squad'
+                  ? (unit.data as Squad).soldiers.filter((_, idx) => {
+                      const isDead = unit.deadSoldiers?.includes(idx);
+                      const isDone = unit.actionsUsed?.[idx]?.done;
+                      return !isDead && !isDone;
+                    }).length
+                  : 1;
+
+                return (
+                  <div key={unit.instanceId} className="flex items-center justify-between text-xs md:text-sm font-mono">
+                    <span className="text-slate-300 truncate flex-1 text-left">
+                      {unit.instanceNumber ? `${unit.instanceNumber} — ` : ''}{unit.data.name}
+                    </span>
+                    <span className="text-amber-400 font-black ml-2">
+                      {incompleteCount} {unit.type === 'squad' ? 'бойцов' : 'машина'}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowTurnConfirmation(false)}
+                className={cn(
+                  "flex-1 py-3 md:py-4 font-mono text-sm md:text-base font-bold uppercase tracking-wider border transition-all min-h-[52px] md:min-h-[56px]",
+                  "bg-slate-800/50 border-slate-600/50 text-slate-400 hover:bg-slate-700/50 hover:border-slate-500/50 hover:text-slate-300"
+                )}
+              >
+                ОТМЕНИТЬ
+              </button>
+              <button
+                onClick={confirmStartNewTurn}
+                className={cn(
+                  "flex-[2] py-3 md:py-4 font-mono text-sm md:text-lg font-bold uppercase tracking-wider border transition-all min-h-[52px] md:min-h-[56px]",
+                  factionColors.border,
+                  factionColors.bg,
+                  factionColors.primary,
+                  "hover:scale-102 active:scale-95"
+                )}
+              >
+                ЗАВЕРШИТЬ
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -339,22 +482,6 @@ export default function GameSession({ army, setArmy }: GameSessionProps) {
       {/* Military Tech Unit Dock - Unified Navigation */}
       <div className="bg-slate-900/95 border-b border-slate-700/50 shrink-0">
         <div className="flex overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-hide">
-          {/* Turn Counter - New Turn Button - Compact height */}
-          <button
-            onClick={calculateInitiative}
-            data-testid="new-turn-button"
-            className={cn(
-              "relative shrink-0 snap-start rounded-sm border-2 transition-all overflow-hidden",
-              "hover:scale-105 active:scale-95 flex flex-col items-center justify-center",
-              "h-10 w-[56px] md:h-[52px] md:w-[70px]",
-              "bg-slate-800/50 border-slate-600/50 hover:bg-slate-700/50 hover:border-slate-500/50"
-            )}
-            title="Новый тур"
-          >
-            <div className="text-[8px] md:text-[9px] font-mono text-slate-500 uppercase tracking-wider">ТУР</div>
-            <div className={cn("text-base md:text-xl font-mono font-black", factionColors.primary)}>{army.currentTurn || 1}</div>
-            <RotateCcw className={cn("absolute top-1 right-1 w-3 h-3 opacity-20", factionColors.primary)} />
-          </button>
           {army.units.map((unit, idx) => {
             const dockStyles = getUnitDockStyles(army.faction);
             const isActive = focusedUnitIdx === idx;

@@ -98,11 +98,13 @@ export const fanRules: RulesVersion = {
     // Apply fortification modifier to distance (fan rules)
     const effectiveDistance = distanceSteps + FORTIFICATION_MODIFIERS[fortification].distance;
 
-    const { total, rolls } = executeRoll(rangeStr);
+    const { total, rolls, bonus } = executeRoll(rangeStr);
     return {
       success: total >= effectiveDistance,
       roll: rolls[0] || 0,
-      total
+      total,
+      rolls,
+      bonus
     };
   },
 
@@ -117,20 +119,20 @@ export const fanRules: RulesVersion = {
     vehicleData?: Machine
   ): DamageResult => {
     const { dice, sides, bonus } = parseRoll(powerStr);
-    let damage = 0;
     const rolls = [];
 
     // Handle special effects first (they override normal damage calculation)
     if (special) {
+      let specialDamage = 0;
       for (let i = 0; i < dice; i++) {
         const r = rollDie(sides) + bonus;
         rolls.push(r);
         if (r > targetArmor) {
-          damage += 1;
+          specialDamage += 1;
         }
       }
 
-      const result: DamageResult = { damage, rolls };
+      const result: DamageResult = { damage: specialDamage, rolls };
 
       // Обработка special-эффектов (Фанатская Редакция)
       if (typeof special === 'string') {
@@ -189,11 +191,12 @@ export const fanRules: RulesVersion = {
       return result;
     }
 
-    // Vehicle attack uses zone-based damage (fan rules)
+    // Vehicle attack uses zone-based damage (fan rules) - each die can add damage
     if (isVehicle && vehicleData && currentDurability !== undefined) {
       const zone = getDurabilityZone(vehicleData, currentDurability);
       const zoneMax = zone.max;
       const damagePerDie = zone.damagePerDie;
+      let damage = 0;
 
       for (let i = 0; i < dice; i++) {
         const r = rollDie(sides) + bonus;
@@ -212,14 +215,14 @@ export const fanRules: RulesVersion = {
       return { damage, rolls };
     }
 
-    // Infantry attack uses standard calculation (virtual fire)
+    // Infantry attack uses standard calculation (virtual fire) - take max roll
     for (let i = 0; i < dice; i++) {
       const r = rollDie(sides) + bonus;
       rolls.push(r);
-      if (r > targetArmor) {
-        damage += 1;
-      }
     }
+    // Take maximum roll for damage comparison
+    const maxRoll = Math.max(...rolls);
+    const damage = maxRoll > targetArmor ? 1 : 0;
 
     return { damage, rolls };
   },

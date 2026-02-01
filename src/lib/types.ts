@@ -190,6 +190,8 @@ export interface HitResult {
   success: boolean;
   roll: number;
   total: number;
+  rolls?: number[];  // All dice rolls for visualization (e.g., [4, 6] for "2D6+1")
+  bonus?: number;     // Bonus added to max roll (e.g., +1 for "2D6+1")
   isGrenade?: boolean; // For grenade throws, marks that this is a distance check
 }
 
