@@ -10,7 +10,12 @@ import { isValidRulesVersion } from '@/lib/rules-registry';
 import { cn } from '@/lib/utils';
 
 export default function Home() {
-  const [view, setView] = useState<'builder' | 'game'>('builder');
+  // View state with localStorage persistence - lazy init to avoid race condition
+  const [view, setView] = useState<'builder' | 'game'>(() => {
+    if (typeof window === 'undefined') return 'builder';
+    const saved = localStorage.getItem('bronepehota_view');
+    return (saved === 'builder' || saved === 'game') ? saved : 'builder';
+  });
   const [showEndMenu, setShowEndMenu] = useState(false);
 
   // Display mode state with localStorage persistence - lazy init to avoid race condition
@@ -54,6 +59,11 @@ export default function Home() {
       console.log('[page.tsx] Display mode changed to:', displayMode);
     }
   }, [displayMode]);
+
+  // Persist view state to localStorage on change
+  useEffect(() => {
+    localStorage.setItem('bronepehota_view', view);
+  }, [view]);
 
   // Initiative trigger function from GameSession - use ref to persist across remounts
   const triggerInitiativeRef = useRef<(() => void) | null>(null);

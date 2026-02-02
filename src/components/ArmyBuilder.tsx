@@ -37,23 +37,10 @@ export default function ArmyBuilder({ army, setArmy, onEnterBattle, rulesVersion
   // Setup step state for guided flow
   const [setupStep, setSetupStep] = useState<'faction' | 'budget' | 'rules' | 'units'>('faction');
 
-  // Validate and migrate currentStep from old versions
+  // Validate currentStep - only allow 'faction-select' or 'unit-select'
   const validStep = (army.currentStep === 'faction-select' || army.currentStep === 'unit-select')
     ? army.currentStep
     : 'faction-select';
-
-
-  // Persist corrected step to localStorage if needed (migration from old versions)
-  useEffect(() => {
-    if (validStep !== army.currentStep) {
-      setArmy({
-        ...army,
-        currentStep: validStep,
-        pointBudget: validStep === 'faction-select' ? undefined : army.pointBudget,
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // Always render new UI - old fallback removed
   return (

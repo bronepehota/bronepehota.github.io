@@ -16,6 +16,7 @@ default:
     - e2e/features/army-building.feature
     - e2e/features/game-session.feature
     - e2e/features/rules-selection.feature
+    - e2e/features/view-persistence.feature
 
   # Test formatter
   format:
