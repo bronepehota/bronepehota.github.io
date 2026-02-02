@@ -5,7 +5,7 @@ import { Army, RulesVersionID } from '@/lib/types';
 import ArmyBuilder from '@/components/ArmyBuilder';
 import GameSession from '@/components/GameSession';
 import factionsData from '@/data/factions.json';
-import { Shield, ArrowLeft, CheckCircle2, MoreVertical, List, Grid } from 'lucide-react';
+import { Shield, ArrowLeft, CheckCircle2, MoreVertical, List, Grid, History, Heart, UserX } from 'lucide-react';
 import { isValidRulesVersion } from '@/lib/rules-registry';
 import { cn } from '@/lib/utils';
 
@@ -17,6 +17,7 @@ export default function Home() {
     return (saved === 'builder' || saved === 'game') ? saved : 'builder';
   });
   const [showEndMenu, setShowEndMenu] = useState(false);
+const [showCombatLog, setShowCombatLog] = useState(false);
 
   // Display mode state with localStorage persistence - lazy init to avoid race condition
   const [displayMode, setDisplayMode] = useState<'detailed' | 'compact'>(() => {
@@ -125,8 +126,12 @@ export default function Home() {
     setView('builder');
   };
 
-  // Load army from localStorage on mount
+  // Track if component is mounted (client-side)
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Load army from localStorage on mount (client-side only)
   useEffect(() => {
+    setIsMounted(true);
     const saved = localStorage.getItem('bronepehota_army');
     if (saved) {
       try {
@@ -148,10 +153,12 @@ export default function Home() {
     }
   }, []);
 
-  // Save army to localStorage when it changes
+  // Save army to localStorage when it changes (only after mount)
   useEffect(() => {
-    localStorage.setItem('bronepehota_army', JSON.stringify(army));
-  }, [army]);
+    if (isMounted) {
+      localStorage.setItem('bronepehota_army', JSON.stringify(army));
+    }
+  }, [army, isMounted]);
 
   return (
     <main className="min-h-screen flex flex-col bg-slate-900 text-slate-100">
@@ -230,6 +237,30 @@ export default function Home() {
               </button>
             )}
 
+            {/* Stats - live and dead units - only in game view */}
+            {view === 'game' && (
+              <div className="flex flex-col items-end gap-0.5 px-1">
+                <span className="text-blue-400 flex items-center gap-1 text-[9px] md:text-[10px] font-bold uppercase leading-tight">
+                  <Heart className="w-2.5 h-2.5 md:w-3 md:h-3" />
+                  <span>{army.units.filter(u => {
+                    if (u.type === 'squad') {
+                      return (u.deadSoldiers?.length || 0) < (u.data as any).soldiers.length;
+                    }
+                    return (u.currentDurability || 0) > 0;
+                  }).length}</span>
+                </span>
+                <span className="text-red-400 flex items-center gap-1 text-[9px] md:text-[10px] font-bold uppercase leading-tight">
+                  <UserX className="w-2.5 h-2.5 md:w-3 md:h-3" />
+                  <span>{army.units.filter(u => {
+                    if (u.type === 'squad') {
+                      return (u.deadSoldiers?.length || 0) === (u.data as any).soldiers.length;
+                    }
+                    return (u.currentDurability || 0) === 0;
+                  }).length}</span>
+                </span>
+              </div>
+            )}
+
             {/* Display mode toggle - only in builder on unit-select step - compact inline */}
             {view === 'builder' && army.currentStep === 'unit-select' && (
               <div className="flex items-center gap-0.5">
@@ -284,6 +315,13 @@ export default function Home() {
                 {showEndMenu && (
                   <div className="absolute right-0 top-12 bg-slate-800 border border-slate-700 rounded-sm shadow-xl py-1 min-w-[150px] z-50">
                     <button
+                      onClick={() => { setShowCombatLog(true); setShowEndMenu(false); }}
+                      className="w-full px-4 py-2 text-left text-sm text-slate-300 hover:bg-slate-700 flex items-center gap-2 border-b border-slate-700/50"
+                    >
+                      <History className="w-4 h-4 text-blue-400" />
+                      История боя
+                    </button>
+                    <button
                       onClick={() => { handleEndBattle(); setShowEndMenu(false); }}
                       className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-red-950/30 flex items-center gap-2"
                     >
@@ -312,7 +350,12 @@ export default function Home() {
 
       {/* Content */}
       <div className={`flex-1 overflow-auto ${view === 'builder' && army.currentStep === 'unit-select' ? 'pb-20' : ''}`}>
-        {view === 'builder' ? (
+        {!isMounted ? (
+          // Loading placeholder during SSR/hydration
+          <div className="flex items-center justify-center h-full">
+            <div className="text-slate-500 text-sm">Загрузка...</div>
+          </div>
+        ) : view === 'builder' ? (
           <ArmyBuilder
             army={army}
             setArmy={setArmy}
@@ -329,6 +372,8 @@ export default function Home() {
             isInBattle={army.isInBattle}
             onEndBattle={handleEndBattle}
             onInitiativeTriggerRef={(fn) => { triggerInitiativeRef.current = fn; }}
+            showCombatLog={showCombatLog}
+            setShowCombatLog={setShowCombatLog}
           />
         )}
       </div>
