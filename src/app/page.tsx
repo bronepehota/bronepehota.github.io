@@ -111,6 +111,21 @@ const [showCombatLog, setShowCombatLog] = useState(false);
     setView('game');
   };
 
+  // Handle return to faction selection (resets army)
+  const handleReturnToFactionSelect = () => {
+    setArmy({
+      name: 'Моя Армия',
+      faction: 'polaris',
+      units: [],
+      totalCost: 0,
+      pointBudget: undefined,
+      currentStep: 'faction-select',
+      isInBattle: false,
+      currentTurn: 1,
+    });
+    setView('builder');
+  };
+
   // Handle ending battle phase (reset to fresh faction selection)
   const handleEndBattle = () => {
     setArmy({
@@ -182,17 +197,17 @@ const [showCombatLog, setShowCombatLog] = useState(false);
               )}
               onClick={() => {
                 if (view === 'game' && !army.isInBattle) {
-                  setView('builder');
+                  handleReturnToFactionSelect();
                 }
               }}
-              title={view === 'game' && !army.isInBattle ? 'Вернуться в Штаб' : undefined}
+              title={view === 'game' && !army.isInBattle ? 'Вернуться к выбору фракции' : undefined}
             >
               <Shield className={cn("w-4 h-4 md:w-5 md:h-5", factionStyles.primary)} />
             </div>
             <div className={cn("relative group", view === 'game' && !army.isInBattle ? 'cursor-pointer' : '')}
               onClick={() => {
                 if (view === 'game' && !army.isInBattle) {
-                  setView('builder');
+                  handleReturnToFactionSelect();
                 }
               }}
             >
