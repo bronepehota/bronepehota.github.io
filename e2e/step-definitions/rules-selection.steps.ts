@@ -5,6 +5,20 @@ import { BronepehotaWorld } from '../support/world';
 // Rules Selection steps
 
 Given('я на этапе выбора правил', async function(this: BronepehotaWorld) {
+  // Wait for page load
+  await this.page.waitForLoadState('domcontentloaded', { timeout: 10000 });
+  await this.page.waitForTimeout(500);
+
+  // Check if we're on the landing page and need to click "В ШТАБ" button first
+  const landingButton = this.page.getByTestId('landing-cta-button').or(this.page.getByTestId('final-cta-button')).first();
+  if (await landingButton.isVisible({ timeout: 3000 })) {
+    await landingButton.click();
+    // Wait for URL to change to /app (Next.js client-side navigation)
+    await this.page.waitForURL('**/app', { timeout: 5000 });
+    await this.page.waitForLoadState('domcontentloaded', { timeout: 5000 });
+    await this.page.waitForTimeout(500);
+  }
+
   // First check if we need to navigate to rules step
   const rulesSelector = this.page.getByTestId('rules-selector').or(this.page.locator('#rules-selector'));
   const isVisible = await rulesSelector.isVisible({ timeout: 2000 });

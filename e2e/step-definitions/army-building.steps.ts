@@ -9,9 +9,24 @@ When('я нахожусь на этапе выбора фракции', async fu
   await this.page.waitForLoadState('domcontentloaded', { timeout: 10000 });
   await this.page.waitForTimeout(500);
 
+  // Check if we're on the landing page - if so, we need to navigate first
+  const landingButton = this.page.getByTestId('landing-cta-button').or(this.page.getByTestId('final-cta-button')).first();
+  if (await landingButton.isVisible({ timeout: 3000 })) {
+    // We're on the landing page, navigate to the app
+    await landingButton.click();
+    // Wait for URL to change to /app (Next.js client-side navigation)
+    await this.page.waitForURL('**/app', { timeout: 5000 });
+    await this.page.waitForLoadState('domcontentloaded', { timeout: 5000 });
+    await this.page.waitForTimeout(500);
+  }
+
   // Look for faction-selector test ID
   const factionSelector = this.page.getByTestId('faction-selector');
   await expect(factionSelector).toBeVisible({ timeout: 5000 });
+
+  // Also wait for at least one faction card to be visible (async rendering)
+  const firstFactionCard = this.page.getByTestId('faction-card-polaris').first();
+  await expect(firstFactionCard).toBeVisible({ timeout: 5000 });
 });
 
 When('я ввожу балл очков {string}', async function(this: BronepehotaWorld, points: string) {
@@ -27,6 +42,17 @@ Given('я выбрал фракцию {string} с балансом {string} оч
   // Wait for page to be fully loaded and React to hydrate
   await this.page.waitForLoadState('domcontentloaded', { timeout: 10000 });
   await this.page.waitForTimeout(500);
+
+  // Check if we're on the landing page and need to click "В ШТАБ" button first
+  // Use data-testid for more reliable selection
+  const landingButton = this.page.getByTestId('landing-cta-button').or(this.page.getByTestId('final-cta-button')).first();
+  if (await landingButton.isVisible({ timeout: 3000 })) {
+    await landingButton.click();
+    // Wait for URL to change to /app (Next.js client-side navigation)
+    await this.page.waitForURL('**/app', { timeout: 5000 });
+    await this.page.waitForLoadState('domcontentloaded', { timeout: 5000 });
+    await this.page.waitForTimeout(500);
+  }
 
   // Map English faction names to test IDs
   const factionIdMap: Record<string, string> = {
