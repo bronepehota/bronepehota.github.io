@@ -23,6 +23,10 @@ When('я нахожусь на этапе выбора фракции', async fu
   // Look for faction-selector test ID
   const factionSelector = this.page.getByTestId('faction-selector');
   await expect(factionSelector).toBeVisible({ timeout: 5000 });
+
+  // Also wait for at least one faction card to be visible (async rendering)
+  const firstFactionCard = this.page.getByTestId('faction-card-polaris').first();
+  await expect(firstFactionCard).toBeVisible({ timeout: 5000 });
 });
 
 When('я ввожу балл очков {string}', async function(this: BronepehotaWorld, points: string) {
