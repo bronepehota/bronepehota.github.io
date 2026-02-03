@@ -107,9 +107,10 @@ When('я завершаю бой', async function(this: BronepehotaWorld) {
 });
 
 Given('я создаю новую армию', async function(this: BronepehotaWorld) {
-  // Reset to faction selection
+  // Reset to faction selection - clear army state AND view state
   await this.page.evaluate(() => {
     localStorage.removeItem('bronepehota_army');
+    localStorage.removeItem('bronepehota_view');
   });
   await this.page.reload();
   await this.page.waitForLoadState('networkidle');
@@ -127,12 +128,13 @@ Given('я дохожу до этапа выбора правил', async functio
     });
     await this.page.reload();
     await this.page.waitForLoadState('networkidle');
-    await this.page.waitForTimeout(500);
+    // Wait extra time for React to hydrate
+    await this.page.waitForTimeout(1500);
   }
 
-  // Select faction
+  // Select faction - wait longer for slower CI environments
   const factionCard = this.page.getByTestId('faction-card-polaris');
-  await factionCard.waitFor({ state: 'visible', timeout: 5000 });
+  await factionCard.waitFor({ state: 'visible', timeout: 10000 });
   await factionCard.click();
   await this.page.waitForTimeout(300);
 

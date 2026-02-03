@@ -34,26 +34,25 @@ interface ArmyBuilderProps {
 
 export default function ArmyBuilder({ army, setArmy, onEnterBattle, rulesVersion, onRulesVersionChange, displayMode, onDisplayModeChange }: ArmyBuilderProps) {
 
-  // Setup step state for guided flow
-  const [setupStep, setSetupStep] = useState<'faction' | 'budget' | 'rules' | 'units'>('faction');
+  // Setup step state for guided flow - sync with army.currentStep
+  const [setupStep, setSetupStep] = useState<'faction' | 'budget' | 'rules' | 'units'>(() => {
+    if (army.currentStep === 'unit-select') return 'units';
+    return 'faction';
+  });
 
-  // Validate and migrate currentStep from old versions
+  // Sync setupStep when army.currentStep changes (e.g., after returning to faction select)
+  useEffect(() => {
+    if (army.currentStep === 'faction-select' && (setupStep === 'units' || setupStep === 'rules' || setupStep === 'budget')) {
+      setSetupStep('faction');
+    } else if (army.currentStep === 'unit-select' && setupStep !== 'units') {
+      setSetupStep('units');
+    }
+  }, [army.currentStep]);
+
+  // Validate currentStep - only allow 'faction-select' or 'unit-select'
   const validStep = (army.currentStep === 'faction-select' || army.currentStep === 'unit-select')
     ? army.currentStep
     : 'faction-select';
-
-
-  // Persist corrected step to localStorage if needed (migration from old versions)
-  useEffect(() => {
-    if (validStep !== army.currentStep) {
-      setArmy({
-        ...army,
-        currentStep: validStep,
-        pointBudget: validStep === 'faction-select' ? undefined : army.pointBudget,
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // Always render new UI - old fallback removed
   return (

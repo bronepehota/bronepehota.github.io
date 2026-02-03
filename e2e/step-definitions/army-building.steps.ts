@@ -424,6 +424,12 @@ When('я возвращаюсь к выбору фракции через инт
     });
     await this.page.waitForTimeout(500);
   }
+
+  // Wait for confirmation modal and click confirm button
+  await this.page.waitForSelector('role=dialog', { timeout: 3000 });
+  const confirmButton = this.page.getByRole('button', { name: /сбросить/i });
+  await confirmButton.click({ timeout: 2000 });
+  await this.page.waitForTimeout(300);
 });
 
 Then('счётчик юнитов должен показать {string}', async function(this: BronepehotaWorld, count: string) {

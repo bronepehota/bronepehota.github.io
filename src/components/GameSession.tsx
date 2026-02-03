@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Army, ArmyUnit, Squad, PilotInfo } from '@/lib/types';
 import UnitCard from './UnitCard';
-import { RotateCcw, ChevronRight, Heart, UserX, History, User, Bot, X } from 'lucide-react';
+import { Heart, UserX, History, User, Bot, X, Check } from 'lucide-react';
 import { rollDie } from '@/lib/game-logic';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -109,9 +109,11 @@ interface GameSessionProps {
   isInBattle?: boolean;
   onEndBattle?: () => void;
   onInitiativeTriggerRef?: (trigger: () => void) => void;
+  showCombatLog?: boolean;
+  setShowCombatLog?: (show: boolean) => void;
 }
 
-export default function GameSession({ army, setArmy, onInitiativeTriggerRef }: GameSessionProps) {
+export default function GameSession({ army, setArmy, onInitiativeTriggerRef, showCombatLog, setShowCombatLog }: GameSessionProps) {
   const [showInitiative, setShowInitiative] = useState(false);
   const [showTurnConfirmation, setShowTurnConfirmation] = useState(false);
   const [initRoll, setInitRoll] = useState(0);
@@ -142,7 +144,10 @@ export default function GameSession({ army, setArmy, onInitiativeTriggerRef }: G
     }
   }, [calculateInitiative, onInitiativeTriggerRef]);
 
-  const [showCombatLog, setShowCombatLog] = useState(false);
+  // Combat log visibility - controlled by parent with stable fallback
+  const noOp = useMemo(() => () => {}, []);
+  const combatLogVisible = showCombatLog ?? false;
+  const setCombatLogVisible = setShowCombatLog ?? noOp;
 
   // Combat log state
   const [combatLog, setCombatLog] = useState<CombatLogEntry[]>([]);
@@ -277,9 +282,6 @@ export default function GameSession({ army, setArmy, onInitiativeTriggerRef }: G
     return (unit.currentDurability || 0) > 0;
   }).length;
 
-  const nextUnit = useCallback(() => setFocusedUnitIdx((prev) => (prev + 1) % army.units.length), [army.units.length]);
-  const prevUnit = useCallback(() => setFocusedUnitIdx((prev) => (prev - 1 + army.units.length) % army.units.length), [army.units.length]);
-
   // Helper to get unit status for summary
   const getUnitStatus = (unit: ArmyUnit) => {
     const isSquad = unit.type === 'squad';
@@ -292,6 +294,33 @@ export default function GameSession({ army, setArmy, onInitiativeTriggerRef }: G
 
     return { isDead, isDone };
   };
+
+  // Helper to check if unit is active (not done and not dead)
+  const isUnitActive = useCallback((unit: ArmyUnit) => {
+    const status = getUnitStatus(unit);
+    return !status.isDead && !status.isDone;
+  }, [getUnitStatus]);
+
+  // Get indices of active units only
+  const activeUnitIndices = useCallback(() => {
+    return army.units.map((u, idx) => isUnitActive(u) ? idx : -1).filter(idx => idx !== -1);
+  }, [army.units, isUnitActive]);
+
+  const nextUnit = useCallback(() => {
+    const activeIndices = activeUnitIndices();
+    if (activeIndices.length === 0) return;
+    const currentIdx = activeIndices.indexOf(focusedUnitIdx);
+    const nextIdx = currentIdx === -1 ? activeIndices[0] : activeIndices[(currentIdx + 1) % activeIndices.length];
+    setFocusedUnitIdx(nextIdx);
+  }, [focusedUnitIdx, activeUnitIndices]);
+
+  const prevUnit = useCallback(() => {
+    const activeIndices = activeUnitIndices();
+    if (activeIndices.length === 0) return;
+    const currentIdx = activeIndices.indexOf(focusedUnitIdx);
+    const prevIdx = currentIdx === -1 ? activeIndices[0] : activeIndices[(currentIdx - 1 + activeIndices.length) % activeIndices.length];
+    setFocusedUnitIdx(prevIdx);
+  }, [focusedUnitIdx, activeUnitIndices]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -479,81 +508,8 @@ export default function GameSession({ army, setArmy, onInitiativeTriggerRef }: G
         </div>
       )}
 
-      {/* Military Tech Unit Dock - Unified Navigation */}
-      <div className="bg-slate-900/95 border-b border-slate-700/50 shrink-0">
-        <div className="flex overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-hide">
-          {army.units.map((unit, idx) => {
-            const dockStyles = getUnitDockStyles(army.faction);
-            const isActive = focusedUnitIdx === idx;
-            const statusBarClasses = getUnitStatusBarClasses(unit, dockStyles);
-            const isMachine = unit.type === 'machine';
-            const shortName = getShortUnitName(unit);
-
-            return (
-              <button
-                key={unit.instanceId}
-                data-testid={`unit-nav-${unit.instanceId}`}
-                onClick={() => setFocusedUnitIdx(idx)}
-                className={cn(
-                  "relative shrink-0 snap-start rounded-sm border-2 transition-all overflow-hidden",
-                  "hover:bg-slate-700/40 active:scale-95",
-                  // Responsive sizing: mobile 40px/48px, desktop 52px/60px
-                  "h-10 w-[48px] md:h-[52px] md:w-[60px]",
-                  isActive
-                    ? cn("bg-slate-700/50 scale-105 shadow-lg", dockStyles.activeGlow, dockStyles.primary)
-                    : "bg-slate-800/30 border-slate-700/50 opacity-70 hover:opacity-100"
-                )}
-              >
-                {/* Background pattern */}
-                <div className="absolute inset-0 bg-gradient-to-br from-slate-700/5 to-transparent pointer-events-none" />
-
-                {/* Type-specific corner accent */}
-                <div className={cn(
-                  "absolute w-3 h-3 transition-all",
-                  isMachine ? "top-0 right-0" : "top-0 left-0",
-                  isMachine
-                    ? cn("border-r-2 border-b-2 opacity-40", dockStyles.accent || dockStyles.primary)
-                    : cn("border-l-2 border-b-2 opacity-30", dockStyles.muted)
-                )} />
-
-                {/* Tech corner brackets for active unit */}
-                {isActive && (
-                  <>
-                    <div className={cn("absolute top-0 left-0 w-2 h-2 border-l-2 border-t-2 z-10", dockStyles.primary)} />
-                    <div className={cn("absolute top-0 right-0 w-2 h-2 border-r-2 border-t-2 z-10", dockStyles.primary)} />
-                    <div className={cn("absolute bottom-0 left-0 w-2 h-2 border-l-2 border-b-2 z-10", dockStyles.primary)} />
-                    <div className={cn("absolute bottom-0 right-0 w-2 h-2 border-r-2 border-b-2 z-10", dockStyles.primary)} />
-                  </>
-                )}
-
-                {/* Content - monospace typography for military feel */}
-                <div className="relative z-10 flex flex-col items-center justify-center h-full gap-1">
-                  {/* Type icon indicator */}
-                  <div className={cn(
-                    "opacity-70",
-                    isMachine ? "text-cyan-300/80" : "text-emerald-300/70"
-                  )}>
-                    {isMachine ? (
-                      <Bot className="w-4 h-4" strokeWidth={2} />
-                    ) : (
-                      <User className="w-4 h-4" strokeWidth={2} />
-                    )}
-                  </div>
-
-                  {/* Shortened name */}
-                  <span className="font-mono text-[10px] font-bold text-slate-300 tracking-wide">{shortName}</span>
-                </div>
-
-                {/* Status bar at bottom */}
-                <div className={cn("absolute bottom-0 left-0 right-0 h-1.5 border-t-2 z-20", statusBarClasses)} />
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
       {/* Main Content */}
-      <div className="flex-1 overflow-y-auto p-3 md:p-4 pb-24 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto p-3 md:p-4 pb-32 custom-scrollbar">
         {army.units.length > 0 && (
           <div className={cn(
             "w-full bg-transparent p-0.5 md:p-1 mx-auto",
@@ -573,75 +529,223 @@ export default function GameSession({ army, setArmy, onInitiativeTriggerRef }: G
         )}
       </div>
 
-      {/* Status Bar - Fixed at bottom */}
-      <div className="fixed bottom-0 left-0 right-0 bg-slate-900/95 border-t border-slate-800/50 shadow-xl z-40">
-        {!showCombatLog ? (
-          <div className="flex items-center justify-center gap-2 md:gap-4 px-2 md:px-3 py-2 text-[10px] md:text-xs uppercase font-bold tracking-wider">
-            <span className="text-blue-400 flex items-center gap-1">
-              <Heart className="w-3 h-3" />
-              <span className="hidden sm:inline">Активен</span>
-              <span>{army.units.filter(u => !getUnitStatus(u).isDead && !getUnitStatus(u).isDone).length}</span>
-            </span>
-            <span className="text-red-400 flex items-center gap-1">
-              <UserX className="w-3 h-3" />
-              <span className="hidden sm:inline">Потерян</span>
-              <span>{army.units.filter(u => getUnitStatus(u).isDead).length}</span>
-            </span>
-            <div className="w-px h-4 bg-slate-700 hidden sm:block" />
+      {/* Military Tech Unit Dock - Unified Navigation - Fixed at bottom */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur-md border-t border-slate-700/50 shrink-0">
+        <div className="flex overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-hide items-center">
+          {(() => {
+            // Sort and group units: active first, then done/dead
+            const sortedUnits = army.units
+              .map((unit, idx) => ({ unit, idx, originalIndex: idx }))
+              .sort((a, b) => {
+                const getStatus = (u: ArmyUnit) => {
+                  if (u.type === 'squad') {
+                    const isDead = (u.deadSoldiers?.length || 0) === (u.data as Squad).soldiers.length;
+                    const isDone = (u.data as Squad).soldiers.every((_, idx) => {
+                      return u.deadSoldiers?.includes(idx) || u.actionsUsed?.[idx]?.done;
+                    });
+                    if (isDead) return 2; // Dead - last
+                    if (isDone) return 1;  // Done - middle
+                    return 0;              // Active - first
+                  } else {
+                    if (u.currentDurability === 0) return 2; // Dead - last
+                    if (u.isMachineDone) return 1;           // Done - middle
+                    return 0;                                // Active - first
+                  }
+                };
+                return getStatus(a.unit) - getStatus(b.unit) || a.originalIndex - b.originalIndex;
+              });
+
+            const elements: React.ReactNode[] = [];
+            let lastStatus = -1;
+
+            sortedUnits.forEach(({ unit, idx: originalIndex }, arrayIndex) => {
+              const dockStyles = getUnitDockStyles(army.faction);
+              const isActive = focusedUnitIdx === originalIndex;
+              const statusBarClasses = getUnitStatusBarClasses(unit, dockStyles);
+              const isMachine = unit.type === 'machine';
+              const shortName = getShortUnitName(unit);
+
+              // Calculate current unit status
+              const currentStatus = (() => {
+                if (unit.type === 'squad') {
+                  const isDead = (unit.deadSoldiers?.length || 0) === (unit.data as Squad).soldiers.length;
+                  const isDone = (unit.data as Squad).soldiers.every((_, idx) => {
+                    return unit.deadSoldiers?.includes(idx) || unit.actionsUsed?.[idx]?.done;
+                  });
+                  if (isDead) return 2;
+                  if (isDone) return 1;
+                  return 0;
+                } else {
+                  if (unit.currentDurability === 0) return 2;
+                  if (unit.isMachineDone) return 1;
+                  return 0;
+                }
+              })();
+
+              // Add spacer between active (0) and non-active (1, 2) units
+              if (lastStatus === 0 && currentStatus > 0) {
+                elements.push(
+                  <div key="spacer" className="w-2 md:w-3 flex-shrink-0" />
+                );
+              }
+              lastStatus = currentStatus;
+
+              // Calculate if unit is done
+              const isDone = (() => {
+                if (unit.type === 'squad') {
+                  const data = unit.data as Squad;
+                  return data.soldiers.every((_, soldierIdx) => {
+                    const isDead = unit.deadSoldiers?.includes(soldierIdx);
+                    const isActionDone = unit.actionsUsed?.[soldierIdx]?.done;
+                    return isDead || isActionDone;
+                  });
+                } else {
+                  return unit.isMachineDone || unit.currentDurability === 0;
+                }
+              })();
+
+              const isDead = (() => {
+                if (unit.type === 'squad') {
+                  return (unit.deadSoldiers?.length || 0) === (unit.data as Squad).soldiers.length;
+                } else {
+                  return (unit.currentDurability || 0) === 0;
+                }
+              })();
+
+              elements.push(
+                <button
+                  key={unit.instanceId}
+                  data-testid={`unit-nav-${unit.instanceId}`}
+                  onClick={() => setFocusedUnitIdx(originalIndex)}
+                  className={cn(
+                    "relative shrink-0 snap-start rounded-sm border-2 transition-all overflow-hidden",
+                    "hover:bg-slate-700/40 active:scale-95",
+                    // Responsive sizing: mobile 40px/48px, desktop 52px/60px
+                    "h-10 w-[48px] md:h-[52px] md:w-[60px]",
+                    isActive
+                      ? cn("bg-slate-700/50 scale-105 shadow-lg", dockStyles.activeGlow, dockStyles.primary)
+                      : "bg-slate-800/30 border-slate-700/50 opacity-70 hover:opacity-100"
+                  )}
+                >
+                  {/* Background pattern */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-slate-700/5 to-transparent pointer-events-none" />
+
+                  {/* Type-specific corner accent */}
+                  <div className={cn(
+                    "absolute w-3 h-3 transition-all",
+                    isMachine ? "top-0 right-0" : "top-0 left-0",
+                    isMachine
+                      ? cn("border-r-2 border-b-2 opacity-40", dockStyles.accent || dockStyles.primary)
+                      : cn("border-l-2 border-b-2 opacity-30", dockStyles.muted)
+                  )} />
+
+                  {/* Tech corner brackets for active unit */}
+                  {isActive && (
+                    <>
+                      <div className={cn("absolute top-0 left-0 w-2 h-2 border-l-2 border-t-2 z-10", dockStyles.primary)} />
+                      <div className={cn("absolute top-0 right-0 w-2 h-2 border-r-2 border-t-2 z-10", dockStyles.primary)} />
+                      <div className={cn("absolute bottom-0 left-0 w-2 h-2 border-l-2 border-b-2 z-10", dockStyles.primary)} />
+                      <div className={cn("absolute bottom-0 right-0 w-2 h-2 border-r-2 border-b-2 z-10", dockStyles.primary)} />
+                    </>
+                  )}
+
+                  {/* Content - monospace typography for military feel */}
+                  <div className="relative z-10 flex flex-col items-center justify-center h-full gap-1">
+                    {/* Type icon indicator */}
+                    <div className={cn(
+                      "opacity-70",
+                      isMachine ? "text-cyan-300/80" : "text-emerald-300/70"
+                    )}>
+                      {isMachine ? (
+                        <Bot className="w-4 h-4" strokeWidth={2} />
+                      ) : (
+                        <User className="w-4 h-4" strokeWidth={2} />
+                      )}
+                    </div>
+
+                    {/* Shortened name */}
+                    <span className="font-mono text-[10px] font-bold text-slate-300 tracking-wide">{shortName}</span>
+                  </div>
+
+                  {/* Done status badge - checkmark in corner */}
+                  {isDone && !isDead && (
+                    <div className="absolute -top-0.5 -right-0.5 w-4 h-4 md:w-5 md:h-5
+                                 bg-emerald-500 rounded-full
+                                 border-2 border-slate-900
+                                 flex items-center justify-center z-30
+                                 shadow-lg shadow-emerald-500/50">
+                      <Check className="w-2.5 h-2.5 md:w-3 md:h-3 text-white" strokeWidth={3.5} />
+                    </div>
+                  )}
+
+                  {/* Dead status badge - X icon in corner */}
+                  {isDead && (
+                    <div className="absolute -top-0.5 -right-0.5 w-4 h-4 md:w-5 md:h-5
+                                 bg-red-600 rounded-full
+                                 border-2 border-slate-900
+                                 flex items-center justify-center z-30
+                                 shadow-lg shadow-red-600/50">
+                      <X className="w-2.5 h-2.5 md:w-3 md:h-3 text-white" strokeWidth={3.5} />
+                    </div>
+                  )}
+
+                  {/* Status bar at bottom - enhanced with h-2 and emerald for done units */}
+                  <div className={cn("absolute bottom-0 left-0 right-0 h-2 border-t-2 z-20",
+                    isDone && "bg-emerald-500",
+                    statusBarClasses)} />
+                </button>
+              );
+            });
+
+            return elements;
+          })()}
+        </div>
+      </div>
+
+      {/* Combat Log Modal - Full screen overlay */}
+      {combatLogVisible && (
+        <div className="fixed inset-0 z-[100] bg-slate-950/95 flex flex-col backdrop-blur-xl animate-in fade-in duration-300">
+          <div className="flex items-center justify-between px-3 py-3 border-b border-slate-800 shrink-0">
+            <div className="flex items-center gap-2">
+              <History className="w-4 h-4 text-blue-400" />
+              <span className="text-xs font-black uppercase tracking-wider text-slate-300">
+                История боя ({combatLog.length})
+              </span>
+            </div>
             <button
-              onClick={() => setShowCombatLog(true)}
-              data-testid="combat-log-toggle-button"
-              className="text-slate-400 hover:text-slate-200 flex items-center gap-1 transition-colors"
+              onClick={() => setCombatLogVisible(false)}
+              className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white min-w-[44px] min-h-[44px] flex items-center justify-center"
             >
-              <History className="w-3 h-3" />
-              <span className="hidden sm:inline">История</span>
-              <span>({combatLog.length})</span>
+              <X className="w-5 h-5" />
             </button>
           </div>
-        ) : (
-          <div className="max-h-[40vh] flex flex-col">
-            <div className="flex items-center justify-between px-3 py-2 border-b border-slate-800 shrink-0">
-              <div className="flex items-center gap-2">
-                <History className="w-4 h-4 text-blue-400" />
-                <span className="text-xs font-black uppercase tracking-wider text-slate-300">
-                  История боя ({combatLog.length})
-                </span>
+          <div className="flex-1 overflow-y-auto p-3 custom-scrollbar">
+            {combatLog.length === 0 ? (
+              <div className="text-center py-8 text-slate-500 text-sm">
+                История пуста
               </div>
-              <button
-                onClick={() => setShowCombatLog(false)}
-                className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="flex-1 overflow-y-auto p-2 custom-scrollbar">
-              {combatLog.length === 0 ? (
-                <div className="text-center py-4 text-slate-500 text-xs">
-                  История пуста
-                </div>
-              ) : (
-                <div className="space-y-1">
-                  {combatLog.slice().reverse().map((entry) => (
-                    <div key={entry.id} className="bg-slate-800/50 rounded-lg p-2 text-xs">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="font-bold text-slate-300">{entry.result.unitName}</span>
-                        <span className="text-slate-500">
-                          {new Date(entry.timestamp).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                      </div>
-                      <div className="text-slate-400 mt-1">
-                        {entry.result.actionType === 'shot' && 'Выстрел'}
-                        {entry.result.actionType === 'melee' && 'Ближний бой'}
-                        {entry.result.actionType === 'grenade' && 'Граната'}
-                      </div>
+            ) : (
+              <div className="space-y-2 max-w-2xl mx-auto">
+                {combatLog.slice().reverse().map((entry) => (
+                  <div key={entry.id} className="bg-slate-800/50 rounded-lg p-3 text-sm border border-slate-700/50">
+                    <div className="flex items-center justify-between gap-3 mb-2">
+                      <span className="font-bold text-slate-200">{entry.result.unitName}</span>
+                      <span className="text-slate-500 text-xs">
+                        {new Date(entry.timestamp).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
+                      </span>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                    <div className="text-slate-400 text-xs">
+                      {entry.result.actionType === 'shot' && 'Выстрел'}
+                      {entry.result.actionType === 'melee' && 'Ближний бой'}
+                      {entry.result.actionType === 'grenade' && 'Граната'}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
