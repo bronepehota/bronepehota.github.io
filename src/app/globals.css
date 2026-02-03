@@ -133,3 +133,542 @@ button, a, input, select, textarea {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;  /* Chrome, Safari, Opera */
 }
+
+/* HUD Specific Styles */
+.scanline {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(16, 185, 129, 0.3),
+    rgba(16, 185, 129, 0.6),
+    rgba(16, 185, 129, 0.3),
+    transparent
+  );
+  animation: scan 3s linear infinite;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.grid-overlay {
+  background-image:
+    linear-gradient(rgba(16, 185, 129, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(16, 185, 129, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+  pointer-events: none;
+}
+
+.hud-text {
+  font-family: 'Orbitron', monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(16, 185, 129, 0.3),
+                0 0 10px rgba(16, 185, 129, 0.2),
+                0 0 15px rgba(16, 185, 129, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.5),
+                0 0 20px rgba(16, 185, 129, 0.3),
+                0 0 30px rgba(16, 185, 129, 0.2);
+  }
+}
+
+.hud-border {
+  position: relative;
+}
+
+.hud-border::before,
+.hud-border::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-color: rgba(16, 185, 129, 0.5);
+  border-style: solid;
+  transition: all 0.3s ease;
+}
+
+.hud-border::before {
+  top: -1px;
+  left: -1px;
+  border-width: 2px 0 0 2px;
+}
+
+.hud-border::after {
+  bottom: -1px;
+  right: -1px;
+  border-width: 0 2px 2px 0;
+}
+
+.hud-border:hover::before,
+.hud-border:hover::after {
+  width: 100%;
+  height: 100%;
+  border-color: rgba(16, 185, 129, 0.8);
+}
+
+.noise-overlay {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 5;
+}
+
+.typing-effect {
+  overflow: hidden;
+  border-right: 2px solid rgba(16, 185, 129, 0.7);
+  white-space: nowrap;
+  animation: typing 2s steps(30, end), blink-caret 0.75s step-end infinite;
+}
+
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+@keyframes blink-caret {
+  from, to { border-color: transparent }
+  50% { border-color: rgba(16, 185, 129, 0.7) }
+}
+
+.crt-flicker {
+  animation: crt-flicker 0.15s infinite;
+}
+
+@keyframes crt-flicker {
+  0% { opacity: 0.97; }
+  50% { opacity: 1; }
+  100% { opacity: 0.98; }
+}
+
+/* ========================================
+   MILITARY THEME ANIMATIONS
+   ======================================== */
+
+/* Film grain overlay effect */
+@keyframes film-grain {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-1%, -1%); }
+  20% { transform: translate(-2%, 1%); }
+  30% { transform: translate(1%, -2%); }
+  40% { transform: translate(-1%, 3%); }
+  50% { transform: translate(-2%, 1%); }
+  60% { transform: translate(3%, 0); }
+  70% { transform: translate(0, 2%); }
+  80% { transform: translate(-3%, 0); }
+  90% { transform: translate(2%, 1%); }
+}
+
+.film-grain {
+  animation: film-grain 0.5s steps(10) infinite;
+}
+
+/* Diagonal reveal animation */
+@keyframes diagonal-reveal {
+  0% {
+    clip-path: inset(0 100% 0 0);
+    opacity: 0;
+  }
+  100% {
+    clip-path: inset(0 0 0 0);
+    opacity: 1;
+  }
+}
+
+.diagonal-reveal {
+  animation: diagonal-reveal 1.5s ease-out forwards;
+}
+
+/* Military glitch effect - more subtle */
+@keyframes military-glitch {
+  0% { transform: translate(0); opacity: 1; }
+  20% { transform: translate(-2px, 1px); opacity: 0.9; }
+  40% { transform: translate(1px, -1px); opacity: 1; }
+  60% { transform: translate(-1px, 2px); opacity: 0.95; }
+  80% { transform: translate(2px, -2px); opacity: 1; }
+  100% { transform: translate(0); opacity: 1; }
+}
+
+.military-glitch {
+  animation: military-glitch 0.3s infinite;
+}
+
+/* Radar scan animation */
+@keyframes radar-scan {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.radar-scan {
+  animation: radar-scan 4s linear infinite;
+}
+
+/* Typewriter effect for text */
+@keyframes typewriter-cursor {
+  0%, 50% { border-color: rgba(234, 88, 12, 0.8); }
+  51%, 100% { border-color: transparent; }
+}
+
+.typewriter-text {
+  overflow: hidden;
+  border-right: 3px solid rgba(234, 88, 12, 0.8);
+  white-space: nowrap;
+  animation: typewriter-cursor 0.8s step-end infinite;
+}
+
+/* Fade in from bottom */
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fade-in-up 0.8s ease-out forwards;
+}
+
+/* Slide in from left */
+@keyframes slide-in-left {
+  0% {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.slide-in-left {
+  animation: slide-in-left 0.6s ease-out forwards;
+}
+
+/* Slide in from right */
+@keyframes slide-in-right {
+  0% {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.slide-in-right {
+  animation: slide-in-right 0.6s ease-out forwards;
+}
+
+/* Staggered animation delays */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }
+
+/* ========================================
+   MILITARY THEME UTILITIES
+   ======================================== */
+
+/* Folded paper effect for cards */
+.folded-paper {
+  position: relative;
+  background: linear-gradient(135deg, rgba(28, 25, 23, 0.95) 0%, rgba(12, 10, 9, 0.98) 100%);
+  border: 1px solid rgba(234, 88, 12, 0.2);
+}
+
+.folded-paper::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 30px;
+  height: 30px;
+  background: linear-gradient(135deg, transparent 50%, rgba(71, 85, 105, 0.3) 50%);
+}
+
+.folded-paper:hover {
+  border-color: rgba(234, 88, 12, 0.4);
+  box-shadow: 0 0 20px rgba(234, 88, 12, 0.1);
+}
+
+/* Military corner brackets */
+.military-corners {
+  position: relative;
+}
+
+.military-corners::before,
+.military-corners::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-color: rgba(234, 88, 12, 0.5);
+  border-style: solid;
+  transition: all 0.3s ease;
+}
+
+.military-corners::before {
+  top: -1px;
+  left: -1px;
+  border-width: 2px 0 0 2px;
+}
+
+.military-corners::after {
+  bottom: -1px;
+  right: -1px;
+  border-width: 0 2px 2px 0;
+}
+
+.military-corners:hover::before,
+.military-corners:hover::after {
+  width: 100%;
+  height: 100%;
+  border-color: rgba(234, 88, 12, 0.8);
+}
+
+/* Gradient text with military colors */
+.military-text-gradient {
+  background: linear-gradient(90deg, #EA580C 0%, #F59E0B 50%, #EA580C 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% auto;
+  animation: shimmer 3s linear infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+/* Diagonal stripe background */
+.diagonal-stripes {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    rgba(234, 88, 12, 0.03) 10px,
+    rgba(234, 88, 12, 0.03) 20px
+  );
+}
+
+/* Section divider with military style */
+.military-divider {
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(234, 88, 12, 0.5) 50%, transparent 100%);
+  position: relative;
+}
+
+.military-divider::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  background: #EA580C;
+  border-radius: 50%;
+}
+
+/* Responsive reduced animations */
+@media (prefers-reduced-motion: reduce) {
+  .film-grain,
+  .military-glitch,
+  .radar-scan,
+  .typewriter-text,
+  .fade-in-up,
+  .slide-in-left,
+  .slide-in-right,
+  .diagonal-reveal {
+    animation: none !important;
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .folded-paper::before {
+    width: 20px;
+    height: 20px;
+  }
+
+  .military-corners::before,
+  .military-corners::after {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+/* Military-themed keyframes */
+@keyframes typewriter {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+@keyframes film-grain {
+  0%, 100% { opacity: 0.03; }
+  50% { opacity: 0.08; }
+}
+
+@keyframes diagonal-reveal {
+  0% {
+    transform: rotate(-45deg) translateX(-100%);
+    opacity: 0;
+  }
+  100% {
+    transform: rotate(-45deg) translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes military-glitch {
+  0%, 100% {
+    transform: translate(0);
+    filter: hue-rotate(0deg);
+  }
+  20% {
+    transform: translate(-2px, 2px);
+    filter: hue-rotate(90deg);
+  }
+  40% {
+    transform: translate(-2px, -2px);
+    filter: hue-rotate(180deg);
+  }
+  60% {
+    transform: translate(2px, 2px);
+    filter: hue-rotate(270deg);
+  }
+  80% {
+    transform: translate(2px, -2px);
+    filter: hue-rotate(360deg);
+  }
+}
+
+@keyframes radar-scan {
+  0% {
+    transform: rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: rotate(360deg);
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in-left {
+  0% {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-in-right {
+  0% {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Film grain overlay utility */
+.film-grain-overlay {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+  animation: film-grain 0.5s steps(10) infinite;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0.15;
+}
+
+/* Diagonal reveal utility */
+.diagonal-reveal {
+  position: relative;
+  overflow: hidden;
+}
+
+.diagonal-reveal::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, transparent 0%, rgba(234, 88, 12, 0.1) 50%, transparent 100%);
+  animation: diagonal-reveal 1.5s ease-out forwards;
+  z-index: 1;
+}
+
+/* Military glitch utility */
+.military-glitch {
+  position: relative;
+}
+
+.military-glitch::before,
+.military-glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.military-glitch::before {
+  color: #EA580C;
+  animation: military-glitch 0.3s infinite;
+  animation-delay: 0.1s;
+}
+
+.military-glitch::after {
+  color: #DC2626;
+  animation: military-glitch 0.3s infinite;
+  animation-delay: 0.2s;
+}
+
+.military-glitch:hover::before,
+.military-glitch:hover::after {
+  opacity: 0.8;
+}
