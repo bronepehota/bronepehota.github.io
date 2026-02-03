@@ -13,8 +13,9 @@ Given('я на этапе выбора правил', async function(this: Brone
   const landingButton = this.page.getByTestId('landing-cta-button').or(this.page.getByTestId('final-cta-button')).first();
   if (await landingButton.isVisible({ timeout: 3000 })) {
     await landingButton.click();
-    // Wait for navigation to complete
-    await this.page.waitForLoadState('load', { timeout: 5000 });
+    // Wait for URL to change to /app (Next.js client-side navigation)
+    await this.page.waitForURL('**/app', { timeout: 5000 });
+    await this.page.waitForLoadState('domcontentloaded', { timeout: 5000 });
     await this.page.waitForTimeout(500);
   }
 

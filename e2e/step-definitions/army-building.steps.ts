@@ -12,10 +12,12 @@ When('я нахожусь на этапе выбора фракции', async fu
   // Check if we're on the landing page - if so, we need to navigate first
   const landingButton = this.page.getByTestId('landing-cta-button').or(this.page.getByTestId('final-cta-button')).first();
   if (await landingButton.isVisible({ timeout: 3000 })) {
-    // We're on the landing page, not on faction selection yet
-    // This is expected - the test should proceed to click buttons to navigate
-    await this.page.waitForTimeout(100);
-    return;
+    // We're on the landing page, navigate to the app
+    await landingButton.click();
+    // Wait for URL to change to /app (Next.js client-side navigation)
+    await this.page.waitForURL('**/app', { timeout: 5000 });
+    await this.page.waitForLoadState('domcontentloaded', { timeout: 5000 });
+    await this.page.waitForTimeout(500);
   }
 
   // Look for faction-selector test ID
@@ -42,8 +44,9 @@ Given('я выбрал фракцию {string} с балансом {string} оч
   const landingButton = this.page.getByTestId('landing-cta-button').or(this.page.getByTestId('final-cta-button')).first();
   if (await landingButton.isVisible({ timeout: 3000 })) {
     await landingButton.click();
-    // Wait for navigation to complete
-    await this.page.waitForLoadState('load', { timeout: 5000 });
+    // Wait for URL to change to /app (Next.js client-side navigation)
+    await this.page.waitForURL('**/app', { timeout: 5000 });
+    await this.page.waitForLoadState('domcontentloaded', { timeout: 5000 });
     await this.page.waitForTimeout(500);
   }
 
