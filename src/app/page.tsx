@@ -5,7 +5,7 @@ import { Army, RulesVersionID } from '@/lib/types';
 import ArmyBuilder from '@/components/ArmyBuilder';
 import GameSession from '@/components/GameSession';
 import factionsData from '@/data/factions.json';
-import { Shield, ArrowLeft, CheckCircle2, MoreVertical, List, Grid, History, Heart, UserX } from 'lucide-react';
+import { Shield, ArrowLeft, CheckCircle2, MoreVertical, List, Grid, History, Heart, UserX, AlertTriangle, X } from 'lucide-react';
 import { isValidRulesVersion } from '@/lib/rules-registry';
 import { cn } from '@/lib/utils';
 
@@ -17,7 +17,8 @@ export default function Home() {
     return (saved === 'builder' || saved === 'game') ? saved : 'builder';
   });
   const [showEndMenu, setShowEndMenu] = useState(false);
-const [showCombatLog, setShowCombatLog] = useState(false);
+  const [showCombatLog, setShowCombatLog] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   // Display mode state with localStorage persistence - lazy init to avoid race condition
   const [displayMode, setDisplayMode] = useState<'detailed' | 'compact'>(() => {
@@ -111,23 +112,18 @@ const [showCombatLog, setShowCombatLog] = useState(false);
     setView('game');
   };
 
-  // Handle return to faction selection (resets army)
+  // Handle return to faction selection (shows confirmation)
   const handleReturnToFactionSelect = () => {
-    setArmy({
-      name: 'Моя Армия',
-      faction: 'polaris',
-      units: [],
-      totalCost: 0,
-      pointBudget: undefined,
-      currentStep: 'faction-select',
-      isInBattle: false,
-      currentTurn: 1,
-    });
-    setView('builder');
+    setShowResetConfirm(true);
   };
 
-  // Handle ending battle phase (reset to fresh faction selection)
+  // Handle ending battle phase (shows confirmation)
   const handleEndBattle = () => {
+    setShowResetConfirm(true);
+  };
+
+  // Confirm and execute reset
+  const confirmReset = () => {
     setArmy({
       name: 'Моя Армия',
       faction: 'polaris',
@@ -139,6 +135,12 @@ const [showCombatLog, setShowCombatLog] = useState(false);
       currentTurn: 1,
     });
     setView('builder');
+    setShowResetConfirm(false);
+  };
+
+  // Cancel reset
+  const cancelReset = () => {
+    setShowResetConfirm(false);
   };
 
   // Track if component is mounted (client-side)
@@ -186,50 +188,79 @@ const [showCombatLog, setShowCombatLog] = useState(false);
         <div className="flex items-center gap-1.5 md:gap-3">
           {/* Left section - Faction badge */}
           <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
-            <div
-              className={cn(
-                "p-1 md:p-1.5 rounded-sm border-2 transition-all duration-300",
-                factionStyles.border,
-                factionStyles.bg,
-                view === 'game' && !army.isInBattle
-                  ? 'hover:scale-105 active:scale-95 cursor-pointer'
-                  : ''
-              )}
-              onClick={() => {
-                if (view === 'game' && !army.isInBattle) {
-                  handleReturnToFactionSelect();
-                }
-              }}
-              title={view === 'game' && !army.isInBattle ? 'Вернуться к выбору фракции' : undefined}
-            >
-              <Shield className={cn("w-4 h-4 md:w-5 md:h-5", factionStyles.primary)} />
-            </div>
-            <div className={cn("relative group", view === 'game' && !army.isInBattle ? 'cursor-pointer' : '')}
-              onClick={() => {
-                if (view === 'game' && !army.isInBattle) {
-                  handleReturnToFactionSelect();
-                }
-              }}
-            >
-              <div className="flex items-center gap-1.5">
-                {view === 'game' && !army.isInBattle && (
-                  <ArrowLeft className="w-3 h-3 text-slate-400" />
-                )}
-                <h1 className={cn(
-                  "text-sm md:text-base font-mono font-bold uppercase tracking-wider leading-none",
-                  factionStyles.primary
-                )}>
-                  <span className="hidden md:inline">БРОНЕПЕХОТА</span>
-                  <span className="md:hidden">БП</span>
-                </h1>
-              </div>
-              <span className={cn(
-                "text-[8px] md:text-[9px] font-mono font-black uppercase tracking-wider transition-colors duration-300",
-                factionStyles.primary
-              )}>
-                {activeFaction?.name}
-              </span>
-            </div>
+            {/* Can click to return to faction select from game view (not in battle) or builder unit-select */}
+            {((view === 'game' && !army.isInBattle) || (view === 'builder' && army.currentStep === 'unit-select')) ? (
+              <>
+                <button
+                  onClick={handleReturnToFactionSelect}
+                  data-testid="back-to-faction-button"
+                  className={cn(
+                    "p-1 md:p-1.5 rounded-sm border-2 transition-all duration-300",
+                    factionStyles.border,
+                    factionStyles.bg,
+                    "hover:scale-105 active:scale-95"
+                  )}
+                  title="Вернуться к выбору фракции"
+                >
+                  <Shield className={cn("w-4 h-4 md:w-5 md:h-5", factionStyles.primary)} />
+                </button>
+                <div
+                  className="relative group cursor-pointer"
+                  onClick={handleReturnToFactionSelect}
+                  role="button"
+                  tabIndex={0}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      handleReturnToFactionSelect();
+                    }
+                  }}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <ArrowLeft className="w-3 h-3 text-slate-400" />
+                    <h1 className={cn(
+                      "text-sm md:text-base font-mono font-bold uppercase tracking-wider leading-none",
+                      factionStyles.primary
+                    )}>
+                      <span className="hidden md:inline">БРОНЕПЕХОТА</span>
+                      <span className="md:hidden">БП</span>
+                    </h1>
+                  </div>
+                  <span className={cn(
+                    "text-[8px] md:text-[9px] font-mono font-black uppercase tracking-wider transition-colors duration-300",
+                    factionStyles.primary
+                  )}>
+                    {activeFaction?.name}
+                  </span>
+                </div>
+              </>
+            ) : (
+              <>
+                <div
+                  className={cn(
+                    "p-1 md:p-1.5 rounded-sm border-2",
+                    factionStyles.border,
+                    factionStyles.bg
+                  )}
+                >
+                  <Shield className={cn("w-4 h-4 md:w-5 md:h-5", factionStyles.primary)} />
+                </div>
+                <div className="relative group">
+                  <h1 className={cn(
+                    "text-sm md:text-base font-mono font-bold uppercase tracking-wider leading-none",
+                    factionStyles.primary
+                  )}>
+                    <span className="hidden md:inline">БРОНЕПЕХОТА</span>
+                    <span className="md:hidden">БП</span>
+                  </h1>
+                  <span className={cn(
+                    "text-[8px] md:text-[9px] font-mono font-black uppercase tracking-wider transition-colors duration-300",
+                    factionStyles.primary
+                  )}>
+                    {activeFaction?.name}
+                  </span>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Center section - spacer for balance */}
@@ -392,6 +423,73 @@ const [showCombatLog, setShowCombatLog] = useState(false);
           />
         )}
       </div>
+
+      {/* Reset confirmation modal */}
+      {showResetConfirm && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-[200] flex items-center justify-center p-4"
+          onClick={cancelReset}
+        >
+          {/* Overlay */}
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={cancelReset}
+            aria-hidden="true"
+          />
+
+          {/* Modal */}
+          <div
+            className="relative bg-slate-800 border border-slate-700 rounded-2xl p-6 max-w-md w-full shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-yellow-500/20 rounded-lg">
+                  <AlertTriangle className="w-6 h-6 text-yellow-400" />
+                </div>
+                <h2 className="text-xl font-semibold text-white">
+                  {army.isInBattle ? 'Завершить бой' : 'Сбросить армию'}
+                </h2>
+              </div>
+              <button
+                onClick={cancelReset}
+                className="p-2 hover:bg-slate-700 rounded-full transition-colors text-slate-400 hover:text-white"
+                aria-label="Отмена"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="mb-6">
+              <p className="text-slate-300">
+                {army.isInBattle
+                  ? 'Вы уверены, что хотите завершить бой? Весь прогресс боя будет потерян.'
+                  : 'Вы уверены, что хотите сбросить армию? Все добавленные юниты будут удалены.'}
+              </p>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3">
+              <button
+                onClick={cancelReset}
+                className="flex-1 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl font-semibold transition-all touch-manipulation min-h-[48px]"
+              >
+                Отмена
+              </button>
+              <button
+                onClick={confirmReset}
+                className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold transition-all touch-manipulation min-h-[48px]"
+              >
+                {army.isInBattle ? 'Завершить' : 'Сбросить'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
