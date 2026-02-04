@@ -6,6 +6,7 @@
 /out/
 /dist/
 /build/
+*.tsbuildinfo
 
 # Service Worker (generated)
 /public/sw.js
