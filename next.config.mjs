@@ -1,3 +1,5 @@
+import withSerwistInit from "@serwist/next";
+
 /** @type {import('next').NextConfig} */
 const isProd = process.env.NODE_ENV === 'production';
 
@@ -16,6 +18,10 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+export default withSerwistInit({
+  swSrc: "src/app/sw.ts",
+  swDest: "public/sw.js",
+  // Note: Serwist automatically handles basePath, so we don't need to specify swUrl/scope
+})(nextConfig);
 
 
