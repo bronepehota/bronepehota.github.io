@@ -6,6 +6,12 @@
 /out/
 /dist/
 /build/
+*.tsbuildinfo
+
+# Service Worker (generated)
+/public/sw.js
+/public/sw.js.map
+/public/workbox-*.js
 
 # Development
 /.claude/
