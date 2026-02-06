@@ -1,7 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { User, Zap, Plus } from 'lucide-react';
+import { GitHubPagesImage as Image } from './GitHubPagesImage';
+import { ImageModal } from './ImageModal';
 import type { Squad, Machine, FactionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
@@ -24,6 +26,9 @@ export function CompactUnitCard({
   canAfford,
   countInArmy = 0
 }: CompactUnitCardProps) {
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [modalImageSrc, setModalImageSrc] = useState('');
+  const [modalImageAlt, setModalImageAlt] = useState('');
   const factionColors = {
     polaris: 'bg-red-500',
     protectorate: 'bg-cyan-500',
@@ -62,6 +67,17 @@ export function CompactUnitCard({
 
   const quickStats = getQuickStats();
 
+  const handleImageClick = (e: React.MouseEvent, src: string, alt: string) => {
+    e.stopPropagation();
+    setModalImageSrc(src);
+    setModalImageAlt(alt);
+    setImageModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setImageModalOpen(false);
+  };
+
   return (
     <div
       className={cn(
@@ -74,11 +90,60 @@ export function CompactUnitCard({
       onClick={canAfford ? onClick : undefined}
       data-testid={`compact-unit-card-${unit.id}`}
     >
-      {/* Type icon zone */}
-      <div className="w-11 flex items-center justify-center flex-shrink-0 bg-slate-900/50">
-        <div className={cn('w-8 h-8 rounded-full flex items-center justify-center', accentColor, 'bg-opacity-20')}>
-          <Icon className={cn('w-4 h-4', accentColor.replace('bg-', 'text-'))} />
-        </div>
+      {/* Type icon zone - with image fallback */}
+      <div className="w-14 flex items-center justify-center flex-shrink-0 bg-slate-900/50">
+        {unit.image ? (
+          /* Unit has image - show it in circle */
+          (() => {
+            const unitImage = unit.image;
+            return (
+              <button
+                className="w-11 h-11 rounded-full overflow-hidden cursor-pointer hover:ring-2 hover:ring-white/30 transition-all active:scale-95"
+                onClick={(e) => handleImageClick(e, unitImage, unit.name)}
+                aria-label={`Увеличить изображение ${unit.name}`}
+                disabled={!canAfford}
+              >
+                <Image
+                  src={unitImage}
+                  alt={unit.name}
+                  width={32}
+                  height={32}
+                  className="w-full h-full object-cover"
+                  style={{ objectPosition: '50% 40%', transform: 'scale(2) translateY(10%)' }}
+                  unoptimized
+                />
+              </button>
+            );
+          })()
+        ) : !isMachine && (unit as Squad).soldiers[0]?.image ? (
+          /* Squad fallback: show first soldier thumbnail in circle */
+          (() => {
+            const soldierImage = (unit as Squad).soldiers[0].image!;
+            return (
+              <button
+                className="w-11 h-11 rounded-full overflow-hidden cursor-pointer hover:ring-2 hover:ring-white/30 transition-all active:scale-95"
+                onClick={(e) => handleImageClick(e, soldierImage, `${unit.name} - боец 1`)}
+                aria-label={`Увеличить изображение бойца`}
+                disabled={!canAfford}
+              >
+                <Image
+                  src={soldierImage}
+                  alt={`${unit.name} - боец 1`}
+                  width={32}
+                  height={32}
+                  className="w-full h-full object-cover"
+                  style={{ objectPosition: '50% 40%', transform: 'scale(2) translateY(10%)' }}
+                  unoptimized
+                />
+              </button>
+            );
+          })()
+        ) : (
+          /* Final fallback: icon */
+          <div className={cn('w-11 h-11 rounded-full flex items-center justify-center', accentColor, 'bg-opacity-20')}>
+            <Icon className={cn('w-5 h-5', accentColor.replace('bg-', 'text-'))} />
+          </div>
+        )}
       </div>
 
       {/* Content zone */}
@@ -119,7 +184,7 @@ export function CompactUnitCard({
       </div>
 
       {/* Add button zone */}
-      <div className="w-11 flex items-center justify-center flex-shrink-0">
+      <div className="w-14 flex items-center justify-center flex-shrink-0">
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -131,7 +196,7 @@ export function CompactUnitCard({
           disabled={!canAfford}
           aria-label={`Добавить ${unit.name}`}
           className={cn(
-            'w-9 h-9 rounded-full flex items-center justify-center',
+            'w-11 h-11 rounded-full flex items-center justify-center',
             'transition-all duration-200',
             'active:scale-95 touch-manipulation',
             canAfford
@@ -140,7 +205,7 @@ export function CompactUnitCard({
           )}
         >
           <Plus className={cn(
-            'w-4 h-4',
+            'w-5 h-5',
             canAfford ? accentColor.replace('bg-', 'text-') : 'text-slate-600'
           )} />
         </button>
@@ -148,9 +213,16 @@ export function CompactUnitCard({
 
       {/* Armor/durability indicator bar */}
       <div className={cn(
-        'absolute bottom-0 left-11 right-0 h-0.5',
+        'absolute bottom-0 left-14 right-0 h-0.5',
         canAfford ? accentColor : 'bg-slate-700'
       )} style={{ opacity: canAfford ? 0.5 : 0.3 }} />
+
+      <ImageModal
+        src={modalImageSrc}
+        alt={modalImageAlt}
+        isOpen={imageModalOpen}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 }
