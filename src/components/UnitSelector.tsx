@@ -433,7 +433,18 @@ export function UnitSelector({
                             loading="lazy"
                             unoptimized
                           />
+                        ) : squad.soldiers[0]?.image ? (
+                          /* Fallback: show first soldier thumbnail */
+                          <Image
+                            src={squad.soldiers[0].image}
+                            alt={`${squad.name} - боец 1`}
+                            fill
+                            className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
+                            loading="lazy"
+                            unoptimized
+                          />
                         ) : (
+                          /* Final fallback: placeholder icon */
                           <div className="w-full h-full flex items-center justify-center bg-slate-800">
                             <Users className={clsx('w-16 h-16 opacity-20', affordable ? colors.accent : 'text-slate-600')} />
                           </div>

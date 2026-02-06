@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { GitHubPagesImage as Image } from './GitHubPagesImage';
+import { ImageModal } from './ImageModal';
 import { X, Shield, Sword, Zap, Target, Gauge, ShieldCheck, Info, Cpu, Crosshair, Activity, Users, Sparkles } from 'lucide-react';
 import type { Squad, Machine, Faction, Soldier, Weapon, SpeedSector } from '@/lib/types';
 import { useBottomSheet } from '@/hooks/useBottomSheet';
@@ -19,9 +20,10 @@ interface SoldierStatsProps {
   soldier: Soldier;
   index: number;
   factionColor: string;
+  onImageClick?: (src: string, alt: string) => void;
 }
 
-function SoldierStats({ soldier, index, factionColor }: SoldierStatsProps) {
+function SoldierStats({ soldier, index, factionColor, onImageClick }: SoldierStatsProps) {
   // T017: Tooltip/popover for special property explanation
   const propDescriptions: Record<string, string> = {
     'Г': 'Граната',
@@ -47,17 +49,24 @@ function SoldierStats({ soldier, index, factionColor }: SoldierStatsProps) {
         </h4>
         {/* T018: Implement soldier image display alongside stats */}
         {soldier.image && (
-          <Image
-            src={soldier.image}
-            alt={`Боец ${index + 1}`}
-            width={48}
-            height={48}
-            className="w-12 h-12 rounded-lg object-cover scale-150"
-            onError={(e) => {
-              (e.target as HTMLImageElement).style.display = 'none';
-            }}
-            unoptimized
-          />
+          <button
+            className="w-16 h-16 rounded-lg overflow-hidden cursor-pointer hover:ring-2 hover:ring-white/30 transition-all active:scale-95"
+            onClick={() => onImageClick?.(soldier.image!, `Боец ${index + 1}`)}
+            aria-label={`Увеличить изображение бойца ${index + 1}`}
+          >
+            <Image
+              src={soldier.image}
+              alt={`Боец ${index + 1}`}
+              width={64}
+              height={64}
+              className="w-full h-full object-cover"
+              style={{ objectPosition: '50% 40%', transform: 'scale(2) translateY(10%)' }}
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+              unoptimized
+            />
+          </button>
         )}
       </div>
 
@@ -365,6 +374,21 @@ export function UnitDetailsModal({
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const backdropRef = useRef<HTMLDivElement>(null);
 
+  // Image modal state
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [modalImageSrc, setModalImageSrc] = useState('');
+  const [modalImageAlt, setModalImageAlt] = useState('');
+
+  const handleImageClick = (src: string, alt: string) => {
+    setModalImageSrc(src);
+    setModalImageAlt(alt);
+    setImageModalOpen(true);
+  };
+
+  const handleCloseImageModal = () => {
+    setImageModalOpen(false);
+  };
+
   // Bottom sheet hook for swipe-down gesture on mobile
   const { sheetRef, touchHandlers } = useBottomSheet({
     onClose,
@@ -446,7 +470,8 @@ export function UnitDetailsModal({
 
         {/* Hero section with image, name, cost */}
         <div className="relative px-4 pt-2 pb-4 md:p-6 md:pb-4 border-b border-slate-700">
-          {unit.image && (
+          {unit.image ? (
+            /* Squad has image - show single large image */
             <div className="flex justify-center mb-4 md:absolute md:right-16 md:top-1/2 md:-translate-y-1/2 md:mb-0 md:opacity-20">
               <Image
                 src={unit.image}
@@ -460,16 +485,49 @@ export function UnitDetailsModal({
                 unoptimized
               />
             </div>
-          )}
+          ) : unitType === 'squad' ? (
+            /* Squad fallback: show soldier grid */
+            (() => {
+              const squad = unit as Squad;
+              const soldiersWithImages = squad.soldiers.filter(s => s.image);
 
-          {/* For squads without main image, show a placeholder */}
-          {unitType === 'squad' && !unit.image && (
-            <div className="flex justify-center mb-4 md:absolute md:right-16 md:top-1/2 md:-translate-y-1/2 md:mb-0 md:opacity-20">
-              <div className="w-24 h-24 md:w-32 md:h-32 rounded-xl shadow-lg bg-slate-800 flex items-center justify-center">
-                <Shield className="w-12 h-12 text-slate-600" />
-              </div>
-            </div>
-          )}
+              if (soldiersWithImages.length === 0) {
+                /* No soldier images - show placeholder */
+                return (
+                  <div className="flex justify-center mb-4 md:absolute md:right-16 md:top-1/2 md:-translate-y-1/2 md:mb-0 md:opacity-20">
+                    <div className="w-24 h-24 md:w-32 md:h-32 rounded-xl shadow-lg bg-slate-800 flex items-center justify-center">
+                      <Shield className="w-12 h-12 text-slate-600" />
+                    </div>
+                  </div>
+                );
+              }
+
+              /* Show soldier images in tactical grid layout */
+              const displayCount = Math.min(soldiersWithImages.length, 4);
+              const gridClass = displayCount === 1 ? 'grid-cols-1' :
+                                displayCount === 2 ? 'grid-cols-2' :
+                                'grid-cols-2';
+
+              return (
+                <div className="flex justify-center mb-4 md:absolute md:right-16 md:top-1/2 md:-translate-y-1/2 md:mb-0 md:opacity-20">
+                  <div className={`w-24 h-24 md:w-32 md:h-32 rounded-xl shadow-lg bg-slate-800 overflow-hidden grid ${gridClass} gap-0.5`}>
+                    {soldiersWithImages.slice(0, 4).map((soldier, idx) => (
+                      <div key={idx} className="relative bg-slate-900 overflow-hidden">
+                        <Image
+                          src={soldier.image!}
+                          alt={`${squad.name} - боец ${soldier.num || idx + 1}`}
+                          width={64}
+                          height={64}
+                          className="w-full h-full object-cover"
+                          unoptimized
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()
+          ) : null}
 
           <div className="text-center md:text-left md:pr-12">
             <div className="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-2" style={{ backgroundColor: `${faction.color}20`, color: faction.color }}>
@@ -516,6 +574,7 @@ export function UnitDetailsModal({
                       soldier={soldier}
                       index={index}
                       factionColor={faction.color}
+                      onImageClick={handleImageClick}
                     />
                   ))}
                 </div>
@@ -552,6 +611,13 @@ export function UnitDetailsModal({
           )}
         </div>
       </div>
+
+      <ImageModal
+        src={modalImageSrc}
+        alt={modalImageAlt}
+        isOpen={imageModalOpen}
+        onClose={handleCloseImageModal}
+      />
     </div>
   );
 }

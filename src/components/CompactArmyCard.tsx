@@ -1,10 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { X, User, Zap } from 'lucide-react';
-import { ArmyUnit, FactionID } from '@/lib/types';
+import { ArmyUnit, FactionID, Squad } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { GitHubPagesImage as Image } from './GitHubPagesImage';
+import { ImageModal } from './ImageModal';
 
 interface CompactArmyCardProps {
   unit: ArmyUnit;
@@ -15,6 +16,9 @@ interface CompactArmyCardProps {
 }
 
 export function CompactArmyCard({ unit, onRemove, onClick, factionId, dataTestId }: CompactArmyCardProps) {
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [modalImageSrc, setModalImageSrc] = useState('');
+  const [modalImageAlt, setModalImageAlt] = useState('');
   const factionColors = {
     polaris: 'bg-red-500',
     protectorate: 'bg-cyan-500',
@@ -40,6 +44,25 @@ export function CompactArmyCard({ unit, onRemove, onClick, factionId, dataTestId
     }
   };
 
+  const handleImageClick = (e: React.MouseEvent, src: string, alt: string) => {
+    e.stopPropagation();
+    setModalImageSrc(src);
+    setModalImageAlt(alt);
+    setImageModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setImageModalOpen(false);
+  };
+
+  const getImageSrc = (): string | null => {
+    if (unit.data.image) return unit.data.image;
+    if (!isMachine && (unit.data as Squad).soldiers[0]?.image) {
+      return (unit.data as Squad).soldiers[0].image!;
+    }
+    return null;
+  };
+
   return (
     <div
       className={cn(
@@ -51,11 +74,58 @@ export function CompactArmyCard({ unit, onRemove, onClick, factionId, dataTestId
       onClick={handleCardClick}
       data-testid={dataTestId || `compact-army-card-${unit.instanceId}`}
     >
-      {/* Type icon zone */}
-      <div className="w-11 flex items-center justify-center flex-shrink-0 bg-slate-900/50">
-        <div className={cn('w-8 h-8 rounded-full flex items-center justify-center', accentColor, 'bg-opacity-20')}>
-          <Icon className={cn('w-4 h-4', accentColor.replace('bg-', 'text-'))} />
-        </div>
+      {/* Type icon zone - with image fallback */}
+      <div className="w-14 flex items-center justify-center flex-shrink-0 bg-slate-900/50">
+        {unit.data.image ? (
+          /* Unit has image - show it in circle */
+          (() => {
+            const unitImage = unit.data.image;
+            return (
+              <button
+                className="w-11 h-11 rounded-full overflow-hidden cursor-pointer hover:ring-2 hover:ring-white/30 transition-all active:scale-95"
+                onClick={(e) => handleImageClick(e, unitImage, unit.data.name)}
+                aria-label={`Увеличить изображение ${unit.data.name}`}
+              >
+                <Image
+                  src={unitImage}
+                  alt={unit.data.name}
+                  width={32}
+                  height={32}
+                  className="w-full h-full object-cover"
+                  style={{ objectPosition: '50% 40%', transform: 'scale(2) translateY(10%)' }}
+                  unoptimized
+                />
+              </button>
+            );
+          })()
+        ) : !isMachine && (unit.data as Squad).soldiers[0]?.image ? (
+          /* Squad fallback: show first soldier thumbnail in circle */
+          (() => {
+            const soldierImage = (unit.data as Squad).soldiers[0].image!;
+            return (
+              <button
+                className="w-11 h-11 rounded-full overflow-hidden cursor-pointer hover:ring-2 hover:ring-white/30 transition-all active:scale-95"
+                onClick={(e) => handleImageClick(e, soldierImage, `${unit.data.name} - боец 1`)}
+                aria-label={`Увеличить изображение бойца`}
+              >
+                <Image
+                  src={soldierImage}
+                  alt={`${unit.data.name} - боец 1`}
+                  width={32}
+                  height={32}
+                  className="w-full h-full object-cover"
+                  style={{ objectPosition: '50% 40%', transform: 'scale(2) translateY(10%)' }}
+                  unoptimized
+                />
+              </button>
+            );
+          })()
+        ) : (
+          /* Final fallback: icon */
+          <div className={cn('w-11 h-11 rounded-full flex items-center justify-center', accentColor, 'bg-opacity-20')}>
+            <Icon className={cn('w-5 h-5', accentColor.replace('bg-', 'text-'))} />
+          </div>
+        )}
       </div>
 
       {/* Content zone */}
@@ -88,7 +158,7 @@ export function CompactArmyCard({ unit, onRemove, onClick, factionId, dataTestId
       </div>
 
       {/* Remove button zone */}
-      <div className="w-11 flex items-center justify-center flex-shrink-0">
+      <div className="w-14 flex items-center justify-center flex-shrink-0">
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -97,29 +167,23 @@ export function CompactArmyCard({ unit, onRemove, onClick, factionId, dataTestId
           data-testid={dataTestId ? dataTestId.replace('army-unit-', 'remove-unit-') : `remove-compact-${unit.instanceId}`}
           aria-label={`Удалить ${unit.data.name}`}
           className={cn(
-            'w-9 h-9 rounded-full flex items-center justify-center',
+            'w-11 h-11 rounded-full flex items-center justify-center',
             'bg-red-900/20 hover:bg-red-900/40',
             'border border-red-700/50 hover:border-red-600',
             'transition-all duration-200',
             'active:scale-95 touch-manipulation'
           )}
         >
-          <X className={cn('w-4 h-4', accentColor.replace('bg-', 'text-').replace('red', 'text-red-400'))} />
+          <X className={cn('w-5 h-5', accentColor.replace('bg-', 'text-').replace('red', 'text-red-400'))} />
         </button>
       </div>
 
-      {/* Optional: small image preview on right edge */}
-      {unit.data.image && (
-        <div className="absolute right-12 top-0 bottom-0 w-12 overflow-hidden opacity-20">
-          <Image
-            src={unit.data.image}
-            alt=""
-            fill
-            className="object-cover"
-            unoptimized
-          />
-        </div>
-      )}
+      <ImageModal
+        src={modalImageSrc}
+        alt={modalImageAlt}
+        isOpen={imageModalOpen}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 }
