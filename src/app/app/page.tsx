@@ -8,6 +8,7 @@ import factionsData from '@/data/factions.json';
 import { Shield, ArrowLeft, CheckCircle2, MoreVertical, List, Grid, History, Heart, UserX, AlertTriangle, X } from 'lucide-react';
 import { isValidRulesVersion } from '@/lib/rules-registry';
 import { cn } from '@/lib/utils';
+import { CombatTargetProvider } from '@/contexts/CombatTargetContext';
 
 export default function Home() {
   // View state with localStorage persistence - lazy init to avoid race condition
@@ -178,7 +179,8 @@ export default function Home() {
   }, [army, isMounted]);
 
   return (
-    <main className="min-h-screen flex flex-col bg-slate-900 text-slate-100">
+    <CombatTargetProvider>
+      <main className="min-h-screen flex flex-col bg-slate-900 text-slate-100">
       {/* Header - Tech Blueprint Style - Optimized for mobile */}
       <header className="bg-slate-900/90 backdrop-blur-sm border-b border-slate-800/50 px-2 md:px-3 py-1 md:py-2 sticky top-0 z-50 relative">
         {/* Tech corners - faction-colored */}
@@ -490,7 +492,8 @@ export default function Home() {
           </div>
         </div>
       )}
-    </main>
+      </main>
+    </CombatTargetProvider>
   );
 }
 
