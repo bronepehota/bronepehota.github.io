@@ -59,7 +59,7 @@ export interface DistanceConverterProps {
  * - Fan rules: 1 step = 4 cm
  * - Tehnolog rules: 1 step = 5 cm
  *
- * Mobile-first design: compact single-row layout on mobile, side-by-side with equal sign on desktop.
+ * Unified design: same layout on mobile and desktop
  */
 export function DistanceConverter({
   steps,
@@ -91,26 +91,22 @@ export function DistanceConverter({
     setCm(newCm);
   };
 
-  const handleStepsFocus = () => setFocusedField('steps');
-  const handleCmFocus = () => setFocusedField('cm');
-  const handleBlur = () => setFocusedField(null);
-
   const conversionFactor = getConversionFactor(rulesVersion);
 
   return (
     <div className={cn('space-y-1', className)}>
-      {/* Distance Inputs - Mobile: compact single row, Desktop: side-by-side with equal sign */}
-      <div className="grid grid-cols-2 md:grid-cols-[1fr_auto_1fr] gap-2 md:gap-4 items-center">
+      {/* Distance Inputs - Unified layout for mobile and desktop */}
+      <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center">
         {/* Steps Input */}
         <div
           className={cn(
-            'p-2 md:p-3 rounded-xl border-2 transition-all',
+            'p-2 rounded-lg border-2 transition-all',
             focusedField === 'steps'
               ? 'bg-blue-900/20 border-blue-500'
               : 'bg-slate-800 border-slate-700'
           )}
         >
-          <label className="block text-[10px] uppercase font-bold opacity-50 mb-1 md:mb-2 tracking-wider">
+          <label className="block text-[10px] uppercase font-bold opacity-50 mb-1 tracking-wider">
             Шагов
           </label>
           <NumberStepper
@@ -125,21 +121,21 @@ export function DistanceConverter({
           />
         </div>
 
-        {/* Equal Sign (Desktop) */}
-        <div className="hidden md:flex items-center justify-center">
-          <Equal className="w-6 h-6 text-slate-600" />
+        {/* Equal Sign */}
+        <div className="flex items-center justify-center">
+          <Equal className="w-5 h-5 text-slate-600" />
         </div>
 
         {/* Centimeters Input */}
         <div
           className={cn(
-            'p-2 md:p-3 rounded-xl border-2 transition-all',
+            'p-2 rounded-lg border-2 transition-all',
             focusedField === 'cm'
               ? 'bg-orange-900/20 border-orange-500'
               : 'bg-slate-800 border-slate-700'
           )}
         >
-          <label className="block text-[10px] uppercase font-bold opacity-50 mb-1 md:mb-2 tracking-wider">
+          <label className="block text-[10px] uppercase font-bold opacity-50 mb-1 tracking-wider">
             Сантиметры
           </label>
           <NumberStepper
