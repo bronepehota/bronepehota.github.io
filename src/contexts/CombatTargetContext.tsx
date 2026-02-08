@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useCallback, useMemo } from 'react';
 
 export interface TargetMemory {
   distance: number | null;
@@ -40,16 +40,16 @@ export function CombatTargetProvider({ children }: CombatTargetProviderProps) {
     isDirty: false,
   });
 
-  const updateTargetMemory = (params: Partial<TargetMemory>) => {
+  const updateTargetMemory = useCallback((params: Partial<TargetMemory>) => {
     setTargetMemory((prev) => ({
       ...prev,
       ...params,
       lastUpdateTimestamp: Date.now(),
       isDirty: true,
     }));
-  };
+  }, []);
 
-  const resetTargetMemory = () => {
+  const resetTargetMemory = useCallback(() => {
     setTargetMemory({
       distance: null,
       targetArmor: null,
@@ -57,16 +57,16 @@ export function CombatTargetProvider({ children }: CombatTargetProviderProps) {
       lastUpdateTimestamp: 0,
       isDirty: false,
     });
-  };
+  }, []);
 
   const isMemoryDirty = targetMemory.isDirty;
 
-  const contextValue: CombatTargetContextType = {
+  const contextValue: CombatTargetContextType = useMemo(() => ({
     targetMemory,
     updateTargetMemory,
     resetTargetMemory,
     isMemoryDirty,
-  };
+  }), [targetMemory, updateTargetMemory, resetTargetMemory, isMemoryDirty]);
 
   return (
     <CombatTargetContext.Provider value={contextValue}>
