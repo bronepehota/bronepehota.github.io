@@ -692,16 +692,18 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
 
                       {/* Death overlay */}
                       {isDead && (
-                        <div className="absolute inset-0 bg-red-950/90 flex items-center justify-center">
-                          <Skull className="w-8 h-8 md:w-10 md:h-10 text-red-500" strokeWidth={2.5} />
+                        <div className="absolute inset-0 bg-red-950/30 flex items-center justify-center">
+                          <div className="relative">
+                            <Skull className="w-10 h-10 md:w-12 md:h-12 text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]" strokeWidth={3} />
+                          </div>
                         </div>
                       )}
 
                       {/* Done overlay - green checkmark in center */}
                       {isDone && !isDead && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                          <div className="bg-emerald-500 rounded-full p-1 md:p-1.5 shadow-lg shadow-emerald-500/50">
-                            <CheckCircle2 className="w-5 h-5 md:w-6 md:h-6 text-white" strokeWidth={3} />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="bg-emerald-500 rounded-full p-1.5 md:p-2 shadow-[0_0_12px_rgba(16,185,129,0.9)]">
+                            <CheckCircle2 className="w-6 h-6 md:w-7 md:h-7 text-white drop-shadow-md" strokeWidth={3} />
                           </div>
                         </div>
                       )}
