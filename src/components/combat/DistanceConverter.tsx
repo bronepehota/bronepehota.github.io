@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { NumberStepper } from '@/components/ui/NumberStepper';
 import { RulesVersionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { Equal } from 'lucide-react';
+import { Repeat } from 'lucide-react';
 
 /**
  * Gets the conversion factor based on rules version
@@ -48,18 +48,20 @@ export interface DistanceConverterProps {
   disabled?: boolean;
 }
 
+type DistanceMode = 'steps' | 'cm';
+
 /**
- * DistanceConverter - A bidirectional converter for steps and centimeters
+ * DistanceConverter - A compact bidirectional converter for steps and centimeters
  *
- * This component provides two synchronized inputs for distance:
- * - One in steps (game units)
- * - One in centimeters (physical distance)
+ * This component provides a single input field with a mode toggle:
+ * - Steps mode: edit steps, show centimeters as label
+ * - Centimeters mode: edit cm, show steps as label
  *
  * The conversion factor depends on the rules version:
  * - Fan rules: 1 step = 4 cm
  * - Tehnolog rules: 1 step = 5 cm
  *
- * Unified design: same layout on mobile and desktop
+ * Compact unified design: works well on mobile and desktop
  */
 export function DistanceConverter({
   steps,
@@ -68,92 +70,97 @@ export function DistanceConverter({
   className,
   disabled = false,
 }: DistanceConverterProps) {
-  const [focusedField, setFocusedField] = useState<'steps' | 'cm' | null>(null);
-  const [cm, setCm] = useState<number>(stepsToCm(steps, rulesVersion));
+  const [mode, setMode] = useState<DistanceMode>('steps');
+  const [cmValue, setCmValue] = useState<number>(stepsToCm(steps, rulesVersion));
+
+  const conversionFactor = getConversionFactor(rulesVersion);
 
   // Sync cm value when steps prop changes from parent
   useEffect(() => {
-    if (focusedField !== 'cm') {
-      setCm(stepsToCm(steps, rulesVersion));
-    }
-  }, [steps, rulesVersion, focusedField]);
+    setCmValue(stepsToCm(steps, rulesVersion));
+  }, [steps, rulesVersion]);
 
   const handleStepsChange = (newSteps: number) => {
     onChange(newSteps);
-    setFocusedField('steps');
-    setCm(stepsToCm(newSteps, rulesVersion));
+    setCmValue(stepsToCm(newSteps, rulesVersion));
   };
 
   const handleCmChange = (newCm: number) => {
     const newSteps = cmToSteps(newCm, rulesVersion);
     onChange(newSteps);
-    setFocusedField('cm');
-    setCm(newCm);
+    setCmValue(newCm);
   };
 
-  const conversionFactor = getConversionFactor(rulesVersion);
+  const toggleMode = () => {
+    setMode((prev) => (prev === 'steps' ? 'cm' : 'steps'));
+  };
+
+  const displaySteps = mode === 'steps' ? steps : cmToSteps(cmValue, rulesVersion);
+  const displayCm = mode === 'cm' ? cmValue : stepsToCm(steps, rulesVersion);
+  const isEditingSteps = mode === 'steps';
 
   return (
-    <div className={cn('space-y-1', className)}>
-      {/* Distance Inputs - Unified layout for mobile and desktop */}
-      <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center">
-        {/* Steps Input */}
-        <div
+    <div className={cn('space-y-2', className)}>
+      {/* Input Field with Mode Toggle */}
+      <div className="flex items-center gap-2">
+        {/* Mode Toggle Button */}
+        <button
+          type="button"
+          onClick={toggleMode}
+          disabled={disabled}
           className={cn(
-            'p-2 rounded-lg border-2 transition-all',
-            focusedField === 'steps'
-              ? 'bg-blue-900/20 border-blue-500'
-              : 'bg-slate-800 border-slate-700'
+            'px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all shrink-0 min-w-[50px]',
+            isEditingSteps
+              ? 'bg-blue-900/30 border-2 border-blue-500 text-blue-400'
+              : 'bg-orange-900/30 border-2 border-orange-500 text-orange-400'
           )}
+          title={isEditingSteps ? 'Переключить на сантиметры' : 'Переключить на шаги'}
         >
-          <label className="block text-[10px] uppercase font-bold opacity-50 mb-1 tracking-wider">
-            Шагов
-          </label>
+          {isEditingSteps ? 'ШАГИ' : 'СМ'}
+        </button>
+
+        {/* Input Field */}
+        <div className="flex-1 p-2 rounded-lg border-2 bg-slate-800 border-slate-700">
           <NumberStepper
-            value={steps}
-            onChange={handleStepsChange}
-            min={1}
-            max={20}
-            step={1}
+            value={isEditingSteps ? displaySteps : displayCm}
+            onChange={isEditingSteps ? handleStepsChange : handleCmChange}
+            min={isEditingSteps ? 1 : conversionFactor}
+            max={isEditingSteps ? 20 : 20 * conversionFactor}
+            step={isEditingSteps ? 1 : conversionFactor}
             size="md"
             disabled={disabled}
             className="w-full"
           />
         </div>
 
-        {/* Equal Sign */}
-        <div className="flex items-center justify-center">
-          <Equal className="w-5 h-5 text-slate-600" />
-        </div>
-
-        {/* Centimeters Input */}
-        <div
-          className={cn(
-            'p-2 rounded-lg border-2 transition-all',
-            focusedField === 'cm'
-              ? 'bg-orange-900/20 border-orange-500'
-              : 'bg-slate-800 border-slate-700'
-          )}
+        {/* Swap Button */}
+        <button
+          type="button"
+          onClick={toggleMode}
+          disabled={disabled}
+          className="p-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-400 hover:bg-slate-700 hover:text-slate-300 transition-all shrink-0"
+          title="Переключить единицы измерения"
         >
-          <label className="block text-[10px] uppercase font-bold opacity-50 mb-1 tracking-wider">
-            Сантиметры
-          </label>
-          <NumberStepper
-            value={cm}
-            onChange={handleCmChange}
-            min={conversionFactor}
-            max={20 * conversionFactor}
-            step={conversionFactor}
-            size="md"
-            disabled={disabled}
-            className="w-full"
-          />
-        </div>
+          <Repeat className="w-4 h-4" />
+        </button>
       </div>
 
-      {/* Conversion hint text */}
-      <div className="text-center text-[10px] text-slate-500 opacity-70">
-        1 шаг = {conversionFactor} см
+      {/* Conversion Info */}
+      <div className="flex items-center justify-center gap-2 text-[10px] text-slate-500">
+        <span className={cn(
+          'font-mono',
+          isEditingSteps ? 'text-white font-bold' : ''
+        )}>
+          {displaySteps} шагов
+        </span>
+        <span className="text-slate-600">=</span>
+        <span className={cn(
+          'font-mono',
+          !isEditingSteps ? 'text-white font-bold' : ''
+        )}>
+          {displayCm} см
+        </span>
+        <span className="text-slate-600">(1 шаг = {conversionFactor} см)</span>
       </div>
     </div>
   );
