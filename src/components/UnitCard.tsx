@@ -692,8 +692,8 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
 
                       {/* Death overlay */}
                       {isDead && (
-                        <div className="absolute inset-0 bg-red-950/60 flex items-center justify-center">
-                          <Skull className="w-6 h-6 md:w-8 md:h-8 text-red-500 opacity-50" />
+                        <div className="absolute inset-0 bg-red-950/90 flex items-center justify-center">
+                          <Skull className="w-8 h-8 md:w-10 md:h-10 text-red-500" strokeWidth={2.5} />
                         </div>
                       )}
 
