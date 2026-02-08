@@ -7,8 +7,10 @@ import { RulesVersionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { StaticDiceDisplay } from './StaticDiceDisplay';
 import { getUnitStats } from '@/lib/game-logic';
-import { Target, EyeOff, Shield } from 'lucide-react';
+import { Target, Shield } from 'lucide-react';
 import { Machine } from '@/lib/types';
+import { TargetMemory } from '@/contexts/CombatTargetContext';
+import { DistanceConverter } from './DistanceConverter';
 
 interface ParameterInputsProps {
   actionType: CombatActionType;
@@ -18,6 +20,8 @@ interface ParameterInputsProps {
   className?: string;
   unit?: any;
   soldierIndex?: number | null;
+  targetMemory?: TargetMemory;
+  onMemoryUpdate?: (params: Partial<TargetMemory>) => void;
 }
 
 export function ParameterInputs({
@@ -28,7 +32,21 @@ export function ParameterInputs({
   className,
   unit,
   soldierIndex,
+  targetMemory,
+  onMemoryUpdate,
 }: ParameterInputsProps) {
+  const effectiveDistance = targetMemory?.isDirty && targetMemory?.distance !== null
+    ? targetMemory.distance
+    : parameters.distance;
+
+  const effectiveTargetArmor = targetMemory?.isDirty && targetMemory?.targetArmor !== null
+    ? targetMemory.targetArmor
+    : parameters.targetArmor;
+
+  const effectiveTargetMelee = targetMemory?.isDirty && targetMemory?.targetMelee !== null
+    ? targetMemory.targetMelee
+    : parameters.targetMelee;
+
   // Get unit stats for preview
   const unitStats = unit ? getUnitStats(unit, soldierIndex, parameters.weaponIndex) : null;
 
@@ -117,13 +135,13 @@ export function ParameterInputs({
           <div className="bg-slate-900/50 p-3 rounded-lg border border-red-500/30">
             <div className="text-[8px] opacity-40 uppercase font-bold mb-2 text-center">Цель</div>
             <div className="flex flex-col items-center gap-2">
-              <div className="text-lg font-black text-red-400">ББ: {parameters.targetMelee}</div>
+              <div className="text-lg font-black text-red-400">ББ: {effectiveTargetMelee}</div>
               <StaticDiceDisplay rollStr="1D6" size="sm" color="red" />
             </div>
           </div>
         </div>
         <div className="mt-3 text-center text-xs opacity-60">
-          Ваш итог: D6 + {unitStats.melee} vs Цель: D6 + {parameters.targetMelee}
+          Ваш итог: D6 + {unitStats.melee} vs Цель: D6 + {effectiveTargetMelee}
         </div>
       </div>
     );
@@ -139,22 +157,16 @@ export function ParameterInputs({
         <div className="text-xs opacity-50 uppercase font-bold mb-4 tracking-wider">Параметры атаки</div>
 
         <div className="grid grid-cols-1 gap-4">
-          {/* Distance Input */}
+          {/* Distance Input with Converter */}
           {(actionType === 'shot' || actionType === 'grenade') && (
-            <div className="grid grid-cols-[100px_1fr] gap-3 items-center">
-              <label className="text-xs opacity-50 uppercase font-bold whitespace-nowrap">
-                {actionType === 'shot' ? 'Дистанция' : 'Цель (шагов)'}
-              </label>
-              <NumberStepper
-                value={parameters.distance}
-                onChange={(value) => onChange({ distance: value })}
-                min={1}
-                max={20}
-                step={1}
-                size="lg"
-                className="justify-start"
-              />
-            </div>
+            <DistanceConverter
+              steps={effectiveDistance}
+              onChange={(steps) => {
+                onChange({ distance: steps });
+                onMemoryUpdate?.({ distance: steps });
+              }}
+              rulesVersion={rulesVersion}
+            />
           )}
 
           {/* Target Armor Input */}
@@ -164,13 +176,16 @@ export function ParameterInputs({
                 Броня цели
               </label>
               <NumberStepper
-                value={parameters.targetArmor}
-                onChange={(value) => onChange({ targetArmor: value })}
+                value={effectiveTargetArmor}
+                onChange={(value) => {
+                  onChange({ targetArmor: value });
+                  onMemoryUpdate?.({ targetArmor: value });
+                }}
                 min={0}
-                max={10}
+                max={99}
                 step={1}
                 size="lg"
-                className="justify-start"
+                className="flex-1 justify-start"
               />
             </div>
           )}
@@ -182,13 +197,16 @@ export function ParameterInputs({
                 ББ цели
               </label>
               <NumberStepper
-                value={parameters.targetMelee}
-                onChange={(value) => onChange({ targetMelee: value })}
+                value={effectiveTargetMelee}
+                onChange={(value) => {
+                  onChange({ targetMelee: value });
+                  onMemoryUpdate?.({ targetMelee: value });
+                }}
                 min={0}
-                max={10}
+                max={99}
                 step={1}
                 size="lg"
-                className="justify-start"
+                className="flex-1 justify-start"
               />
             </div>
           )}

@@ -8,6 +8,7 @@ import { rollDie } from '@/lib/game-logic';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { CombatLogEntry } from '@/lib/combat-types';
+import { useCombatTargetContext } from '@/contexts/CombatTargetContext';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -119,6 +120,7 @@ export default function GameSession({ army, setArmy, onInitiativeTriggerRef, sho
   const [initRoll, setInitRoll] = useState(0);
   const [isRolling, setIsRolling] = useState(false);
   const [focusedUnitIdx, setFocusedUnitIdx] = useState(0);
+  const { resetTargetMemory } = useCombatTargetContext();
 
   const calculateInitiative = useCallback(() => {
     setShowInitiative(true);
@@ -248,6 +250,9 @@ export default function GameSession({ army, setArmy, onInitiativeTriggerRef, sho
   };
 
   const confirmStartNewTurn = () => {
+    // Сброс памяти параметров цели при начале нового тура
+    resetTargetMemory();
+
     setArmy({
       ...army,
       currentTurn: (army.currentTurn || 1) + 1,
