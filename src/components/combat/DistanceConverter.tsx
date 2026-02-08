@@ -93,14 +93,19 @@ export function DistanceConverter({
     <div className={cn('space-y-1', className)}>
       {/* Main input row - matches ParameterInputs style */}
       <div className="grid grid-cols-[100px_1fr] gap-3 items-center">
-        {/* Label with mode toggle */}
+        {/* Label with mode toggle and sublabel */}
         <button
           type="button"
           onClick={toggleMode}
           disabled={disabled}
-          className="text-xs opacity-50 uppercase font-bold whitespace-nowrap hover:opacity-80 transition-opacity text-left"
+          className="text-left"
         >
-          {isEditingSteps ? 'Дистанция' : 'Расстояние'}
+          <div className="text-xs opacity-50 uppercase font-bold whitespace-nowrap hover:opacity-80 transition-opacity">
+            {isEditingSteps ? 'Дистанция' : 'Расстояние'}
+          </div>
+          <div className="text-[9px] opacity-40 font-mono normal-case">
+            {isEditingSteps ? 'шагов' : 'сантиметров'}
+          </div>
         </button>
 
         {/* Input field */}
@@ -115,11 +120,6 @@ export function DistanceConverter({
             disabled={disabled}
             className="flex-1 justify-start"
           />
-
-          {/* Unit indicator */}
-          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-mono pointer-events-none">
-            {isEditingSteps ? 'шагов' : 'см'}
-          </span>
 
           {/* Other value hint */}
           <span className="absolute -bottom-4 left-0 text-[9px] text-slate-600 font-mono whitespace-nowrap">
