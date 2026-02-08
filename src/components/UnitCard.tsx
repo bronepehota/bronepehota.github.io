@@ -83,7 +83,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
   const isAllDead = isSquad && unit.deadSoldiers?.length === (data as Squad).soldiers.length;
   const isMachineDestroyed = !isSquad && (unit.currentDurability === 0);
   const isMachineDone = !isSquad && (unit.isMachineDone || isMachineDestroyed);
-  const isCollapsed = isManualCollapsed || isSquadDone || isMachineDone || isAllDead;
+  const isCollapsed = isManualCollapsed;
 
   const toggleAction = (soldierIdx: number, action: 'moved' | 'shot' | 'melee' | 'done') => {
     const newActions = [...(unit.actionsUsed || [])];
@@ -730,6 +730,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                         {/* Done button */}
                         <button
                           onClick={() => !isDead && toggleAction(idx, 'done')}
+                          disabled={isDone || isDead}
                           className={cn(
                             "relative p-1.5 md:p-2 rounded-sm transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border-2 overflow-hidden",
                             isDone ? "bg-emerald-950/30 border-emerald-700/50 text-emerald-400" : "bg-slate-900/60 border-slate-700 text-slate-500 hover:bg-slate-800/60"
@@ -1275,7 +1276,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                       updateUnit({ ...unit, isMachineDone: true });
                     }
                   }}
-                  disabled={isMachineDestroyed}
+                  disabled={isMachineDestroyed || isMachineDone}
                   className={cn(
                     "relative flex-1 p-2 md:p-2.5 rounded-sm transition-colors min-h-[44px] md:min-h-0 flex items-center justify-center gap-1.5 text-xs font-mono font-bold uppercase tracking-wider border-2 overflow-hidden",
                     isMachineDone ? "bg-emerald-950/30 border-emerald-700 text-emerald-400" : "bg-slate-900/60 border-slate-700 text-slate-500 hover:bg-slate-800/60"

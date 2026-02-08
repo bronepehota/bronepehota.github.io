@@ -8,6 +8,7 @@ import { rollDie } from '@/lib/game-logic';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { CombatLogEntry } from '@/lib/combat-types';
+import { useCombatTargetContext } from '@/contexts/CombatTargetContext';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -119,6 +120,7 @@ export default function GameSession({ army, setArmy, onInitiativeTriggerRef, sho
   const [initRoll, setInitRoll] = useState(0);
   const [isRolling, setIsRolling] = useState(false);
   const [focusedUnitIdx, setFocusedUnitIdx] = useState(0);
+  const { resetTargetMemory } = useCombatTargetContext();
 
   const calculateInitiative = useCallback(() => {
     setShowInitiative(true);
@@ -331,6 +333,26 @@ export default function GameSession({ army, setArmy, onInitiativeTriggerRef, sho
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [nextUnit, prevUnit]);
+
+  // Reset target memory when all units are marked as done (new turn)
+  useEffect(() => {
+    const allUnitsDone = army.units.every(unit => {
+      if (unit.type === 'squad') {
+        const squad = unit.data as Squad;
+        return squad.soldiers.every((_, idx) => {
+          const isDead = unit.deadSoldiers?.includes(idx);
+          const isDone = unit.actionsUsed?.[idx]?.done;
+          return isDead || isDone;
+        });
+      } else {
+        return unit.isMachineDone || unit.currentDurability === 0;
+      }
+    });
+
+    if (allUnitsDone && army.units.length > 0) {
+      resetTargetMemory();
+    }
+  }, [army.units, resetTargetMemory]);
 
   const factionColors = getFactionColors(army.faction);
 
