@@ -697,6 +697,15 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                         </div>
                       )}
 
+                      {/* Done overlay - green checkmark in center */}
+                      {isDone && !isDead && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                          <div className="bg-emerald-500 rounded-full p-1 md:p-1.5 shadow-lg shadow-emerald-500/50">
+                            <CheckCircle2 className="w-5 h-5 md:w-6 md:h-6 text-white" strokeWidth={3} />
+                          </div>
+                        </div>
+                      )}
+
                       {/* Tech decoration */}
                       <div className="absolute top-0.5 left-0.5 w-1 h-1 bg-slate-700/30" />
                       <div className="absolute bottom-0.5 right-0.5 w-1 h-1 bg-slate-700/30" />
