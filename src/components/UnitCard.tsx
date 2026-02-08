@@ -57,11 +57,17 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
   const [showPilotModal, setShowPilotModal] = useState(false);
   const [pilotSurvivalTest, setPilotSurvivalTest] = useState<{ roll: number; survived: boolean; testedAt: number } | null>(null);
   const [selectedWeaponInfo, setSelectedWeaponInfo] = useState<{ weapon: Weapon; weaponIdx: number } | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
 
   const combatController = useCombatFlowController();
   const pilotTestFlow = usePilotTestFlow();
   // Track last processed result to prevent duplicate processing
   const lastProcessedResultRef = useRef<number | null>(null);
+
+  // Prevent hydration mismatch by only rendering client-dependent UI after mount
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Load rules version from localStorage
   useEffect(() => {
@@ -674,8 +680,8 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                         />
                       </div>
 
-                      {/* Death overlay */}
-                      {isDead && (
+                      {/* Death overlay - only render after mount to prevent hydration mismatch */}
+                      {isMounted && isDead && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/40">
                           <Skull
                             className="w-8 h-8 md:w-10 md:h-10 text-red-500"
@@ -687,8 +693,8 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                         </div>
                       )}
 
-                      {/* Done overlay - green checkmark in center */}
-                      {isDone && !isDead && (
+                      {/* Done overlay - green checkmark in center - only render after mount to prevent hydration mismatch */}
+                      {isMounted && isDone && !isDead && (
                         <div className="absolute inset-0 flex items-center justify-center">
                           <div className="bg-emerald-500 rounded-full p-1 md:p-1.5 shadow-[0_0_8px_rgba(16,185,129,0.8)]">
                             <CheckCircle2 className="w-5 h-5 md:w-6 md:h-6 text-white" strokeWidth={3} />
@@ -767,18 +773,18 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                       </div>
 
                       {/* Row 2: Stats - Left-aligned flex layout */}
-                      <div className="flex flex-wrap gap-1 md:gap-2">
+                      <div className="flex flex-wrap gap-0.5 md:gap-1">
                         {/* Armor */}
-                        <div className="relative flex flex-col items-center justify-center p-1 md:p-2 rounded-lg md:rounded-full min-h-[44px] min-w-[42px] md:min-w-[56px]">
-                          <Shield className="w-3 md:w-4 h-3 md:h-4 text-yellow-400 mb-1 md:mb-0 shrink-0" />
+                        <div className="relative flex flex-col items-center justify-center p-0.5 md:p-1 rounded-lg md:rounded-full min-h-[44px] min-w-[42px] md:min-w-[56px]">
+                          <Shield className="w-[14px] md:w-[18px] h-[14px] md:h-[18px] text-yellow-400 mb-1 md:mb-0 shrink-0" />
                           <span className="text-xs md:text-sm font-mono font-black text-yellow-300 leading-none truncate w-full text-center" title={s.armor.toString()}>
                             {s.armor}
                           </span>
                         </div>
 
                         {/* Speed */}
-                        <div className="relative flex flex-col items-center justify-center p-1 md:p-2 rounded-lg md:rounded-full min-h-[44px] min-w-[42px] md:min-w-[56px]">
-                          <Footprints className="w-3 md:w-4 h-3 md:h-4 text-cyan-400 mb-1 md:mb-0 shrink-0" />
+                        <div className="relative flex flex-col items-center justify-center p-0.5 md:p-1 rounded-lg md:rounded-full min-h-[44px] min-w-[42px] md:min-w-[56px]">
+                          <Footprints className="w-[14px] md:w-[18px] h-[14px] md:h-[18px] text-cyan-400 mb-1 md:mb-0 shrink-0" />
                           <span className="text-xs md:text-sm font-mono font-black text-cyan-300 leading-none truncate w-full text-center" title={s.speed.toString()}>
                             {s.speed}
                           </span>
@@ -786,10 +792,10 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
 
                         {/* Range - disabled if no ranged attack */}
                         <div className={cn(
-                          "relative flex flex-col items-center justify-center p-1 md:p-2 rounded-lg md:rounded-full min-h-[44px] min-w-[42px] md:min-w-[56px]",
+                          "relative flex flex-col items-center justify-center p-0.5 md:p-1 rounded-lg md:rounded-full min-h-[44px] min-w-[42px] md:min-w-[56px]",
                           (!s.range || s.range === '0') && "opacity-40"
                         )}>
-                          <Target className={cn("w-3 md:w-4 h-3 md:h-4 mb-1 md:mb-0 shrink-0", (!s.range || s.range === '0') ? "text-slate-600" : "text-amber-400")} />
+                          <Target className={cn("w-[14px] md:w-[18px] h-[14px] md:h-[18px] mb-1 md:mb-0 shrink-0", (!s.range || s.range === '0') ? "text-slate-600" : "text-amber-400")} />
                           <span className={cn(
                             "text-[10px] md:text-xs font-mono font-black leading-none truncate w-full text-center",
                             (!s.range || s.range === '0') ? "text-slate-600" : "text-amber-300"
@@ -800,10 +806,10 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
 
                         {/* Power - disabled if no ranged attack */}
                         <div className={cn(
-                          "relative flex flex-col items-center justify-center p-1 md:p-2 rounded-lg md:rounded-full min-h-[44px] min-w-[42px] md:min-w-[56px]",
+                          "relative flex flex-col items-center justify-center p-0.5 md:p-1 rounded-lg md:rounded-full min-h-[44px] min-w-[42px] md:min-w-[56px]",
                           (!s.power || s.power === '0') && "opacity-40"
                         )}>
-                          <Flame className={cn("w-3 md:w-4 h-3 md:h-4 mb-1 md:mb-0 shrink-0", (!s.power || s.power === '0') ? "text-slate-600" : "text-red-400")} />
+                          <Flame className={cn("w-[14px] md:w-[18px] h-[14px] md:h-[18px] mb-1 md:mb-0 shrink-0", (!s.power || s.power === '0') ? "text-slate-600" : "text-red-400")} />
                           <span className={cn(
                             "text-[10px] md:text-xs font-mono font-black leading-none truncate w-full text-center",
                             (!s.power || s.power === '0') ? "text-slate-600" : "text-red-300"
@@ -814,10 +820,10 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
 
                         {/* Melee - disabled if no melee attack */}
                         <div className={cn(
-                          "relative flex flex-col items-center justify-center p-1 md:p-2 rounded-lg md:rounded-full min-h-[44px] min-w-[42px] md:min-w-[56px]",
+                          "relative flex flex-col items-center justify-center p-0.5 md:p-1 rounded-lg md:rounded-full min-h-[44px] min-w-[42px] md:min-w-[56px]",
                           s.melee <= 0 && "opacity-40"
                         )}>
-                          <Sword className={cn("w-3 md:w-4 h-3 md:h-4 mb-1 md:mb-0 shrink-0", s.melee <= 0 ? "text-slate-600" : "text-red-400")} />
+                          <Sword className={cn("w-[14px] md:w-[18px] h-[14px] md:h-[18px] mb-1 md:mb-0 shrink-0", s.melee <= 0 ? "text-slate-600" : "text-red-400")} />
                           <span className={cn(
                             "text-xs md:text-sm font-mono font-black leading-none truncate w-full text-center",
                             s.melee <= 0 ? "text-slate-600" : "text-red-300"
