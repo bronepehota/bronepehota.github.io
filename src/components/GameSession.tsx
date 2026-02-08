@@ -250,6 +250,9 @@ export default function GameSession({ army, setArmy, onInitiativeTriggerRef, sho
   };
 
   const confirmStartNewTurn = () => {
+    // Сброс памяти параметров цели при начале нового тура
+    resetTargetMemory();
+
     setArmy({
       ...army,
       currentTurn: (army.currentTurn || 1) + 1,
@@ -333,26 +336,6 @@ export default function GameSession({ army, setArmy, onInitiativeTriggerRef, sho
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [nextUnit, prevUnit]);
-
-  // Reset target memory when all units are marked as done (new turn)
-  useEffect(() => {
-    const allUnitsDone = army.units.every(unit => {
-      if (unit.type === 'squad') {
-        const squad = unit.data as Squad;
-        return squad.soldiers.every((_, idx) => {
-          const isDead = unit.deadSoldiers?.includes(idx);
-          const isDone = unit.actionsUsed?.[idx]?.done;
-          return isDead || isDone;
-        });
-      } else {
-        return unit.isMachineDone || unit.currentDurability === 0;
-      }
-    });
-
-    if (allUnitsDone && army.units.length > 0) {
-      resetTargetMemory();
-    }
-  }, [army.units, resetTargetMemory]);
 
   const factionColors = getFactionColors(army.faction);
 
