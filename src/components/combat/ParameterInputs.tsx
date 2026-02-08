@@ -7,9 +7,9 @@ import { RulesVersionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { StaticDiceDisplay } from './StaticDiceDisplay';
 import { getUnitStats } from '@/lib/game-logic';
-import { Target, EyeOff, Shield, RotateCcw } from 'lucide-react';
+import { Target, Shield, RotateCcw } from 'lucide-react';
 import { Machine } from '@/lib/types';
-import { useCombatTargetContext, TargetMemory } from '@/contexts/CombatTargetContext';
+import { TargetMemory } from '@/contexts/CombatTargetContext';
 import { DistanceConverter } from './DistanceConverter';
 
 interface ParameterInputsProps {

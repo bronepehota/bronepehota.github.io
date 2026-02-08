@@ -10,6 +10,7 @@ import { ParameterInputs } from './ParameterInputs';
 import { DiceAnimation } from './DiceAnimation';
 import { CombatResults } from './CombatResults';
 import { RulesVersionID } from '@/lib/types';
+import { useCombatTargetContext } from '@/contexts/CombatTargetContext';
 
 interface BottomSheetCombatModalProps {
   state: CombatFlowState;
@@ -81,6 +82,9 @@ export function BottomSheetCombatModal({
     closeThreshold: 100,
     isEnabled: true,
   });
+
+  // Access combat target context for memory
+  const { targetMemory, updateTargetMemory } = useCombatTargetContext();
 
   // Handle escape key
   useEffect(() => {
@@ -178,6 +182,8 @@ export function BottomSheetCombatModal({
                 rulesVersion={rulesVersion}
                 unit={state.unit}
                 soldierIndex={state.soldierIndex}
+                targetMemory={targetMemory}
+                onMemoryUpdate={updateTargetMemory}
               />
 
               {/* Execute button with surprise attack toggle */}
