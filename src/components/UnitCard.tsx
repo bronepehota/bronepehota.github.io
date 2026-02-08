@@ -660,8 +660,8 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                       </>
                     )}
 
-                    {/* Soldier image with tactical frame - compact portrait */}
-                    <div className="relative w-20 md:w-24 aspect-[3/4] rounded-sm overflow-hidden flex-shrink-0 bg-slate-900 cursor-pointer shadow-md">
+                    {/* Soldier image with tactical frame - moved to top-right */}
+                    <div className="relative w-16 md:w-20 aspect-[3/4] rounded-sm overflow-hidden flex-shrink-0 bg-slate-900 cursor-pointer shadow-md absolute top-0 right-0">
                       <div onClick={() => setShowSoldierImage(idx)} className="w-full h-full overflow-hidden">
                         <Image
                           src={getSoldierImage(idx)}
@@ -674,46 +674,35 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                         />
                       </div>
 
-                      {/* Soldier number badge - top-left corner */}
-                      <div className="absolute top-0 left-0 px-1.5 py-0.5 bg-slate-950/90 rounded-sm border border-slate-600/50">
-                        <span className="text-[10px] md:text-xs font-mono font-bold text-white">{idx + 1}</span>
-                      </div>
-
-                      {/* Pilot button - bottom-left corner overlay (if pilot) */}
-                      {isPilot && !isDead && (
-                        <button
-                          onClick={() => onNavigateToUnit?.(pilotedMachine?.instanceId || '')}
-                          className="absolute bottom-1.5 left-1.5 p-1 bg-cyan-950/90 rounded-sm border border-cyan-700/50 hover:bg-cyan-950 transition-colors min-w-[32px] min-h-[32px]"
-                          title={pilotedMachine ? `Перейти к машине #${pilotedMachine.instanceNumber}` : 'Пилот'}
-                        >
-                          <Plane className="w-3 h-3 text-cyan-300" />
-                        </button>
-                      )}
-
                       {/* Death overlay */}
                       {isDead && (
-                        <div className="absolute inset-0 bg-red-950/30 flex items-center justify-center">
-                          <div className="relative">
-                            <Skull className="w-10 h-10 md:w-12 md:h-12 text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]" strokeWidth={3} />
-                          </div>
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                          <Skull
+                            className="w-8 h-8 md:w-10 md:h-10 text-red-500"
+                            strokeWidth={2.5}
+                            style={{
+                              filter: 'drop-shadow(0 0 12px rgba(239,68,68,1))'
+                            }}
+                          />
                         </div>
                       )}
 
                       {/* Done overlay - green checkmark in center */}
                       {isDone && !isDead && (
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="bg-emerald-500 rounded-full p-1.5 md:p-2 shadow-[0_0_12px_rgba(16,185,129,0.9)]">
-                            <CheckCircle2 className="w-6 h-6 md:w-7 md:h-7 text-white drop-shadow-md" strokeWidth={3} />
+                          <div className="bg-emerald-500 rounded-full p-1 md:p-1.5 shadow-[0_0_8px_rgba(16,185,129,0.8)]">
+                            <CheckCircle2 className="w-5 h-5 md:w-6 md:h-6 text-white" strokeWidth={3} />
                           </div>
                         </div>
                       )}
-
-                      {/* Tech decoration */}
-                      <div className="absolute top-0.5 left-0.5 w-1 h-1 bg-slate-700/30" />
-                      <div className="absolute bottom-0.5 right-0.5 w-1 h-1 bg-slate-700/30" />
                     </div>
 
                     <div className="flex-1 flex flex-col justify-between min-w-0 gap-1.5 md:gap-2">
+                      {/* Soldier number label */}
+                      <div className="text-[10px] font-mono font-bold text-slate-500 opacity-60">
+                        #{idx + 1}
+                      </div>
+
                       {/* Row 1: Action buttons */}
                       <div className="flex gap-2 md:gap-3 items-center">
                         {/* ДЕЙСТВИЕ button - fills available space */}
