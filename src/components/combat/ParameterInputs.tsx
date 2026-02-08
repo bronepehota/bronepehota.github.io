@@ -7,7 +7,7 @@ import { RulesVersionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { StaticDiceDisplay } from './StaticDiceDisplay';
 import { getUnitStats } from '@/lib/game-logic';
-import { Target, Shield, RotateCcw } from 'lucide-react';
+import { Target, Shield } from 'lucide-react';
 import { Machine } from '@/lib/types';
 import { TargetMemory } from '@/contexts/CombatTargetContext';
 import { DistanceConverter } from './DistanceConverter';
@@ -35,33 +35,17 @@ export function ParameterInputs({
   targetMemory,
   onMemoryUpdate,
 }: ParameterInputsProps) {
-  // Memory value helper
-  const useMemoryValue = (
-    currentValue: number,
-    memoryValue: number | null,
-    isDirty: boolean
-  ): number => {
-    if (memoryValue !== null && isDirty && currentValue === 1) {
-      return memoryValue;
-    }
-    return currentValue;
-  };
+  const effectiveDistance = targetMemory?.isDirty && targetMemory?.distance !== null
+    ? targetMemory.distance
+    : parameters.distance;
 
-  const effectiveDistance = useMemoryValue(
-    parameters.distance,
-    targetMemory?.distance ?? null,
-    targetMemory?.isDirty ?? false
-  );
-  const effectiveTargetArmor = useMemoryValue(
-    parameters.targetArmor,
-    targetMemory?.targetArmor ?? null,
-    targetMemory?.isDirty ?? false
-  );
-  const effectiveTargetMelee = useMemoryValue(
-    parameters.targetMelee,
-    targetMemory?.targetMelee ?? null,
-    targetMemory?.isDirty ?? false
-  );
+  const effectiveTargetArmor = targetMemory?.isDirty && targetMemory?.targetArmor !== null
+    ? targetMemory.targetArmor
+    : parameters.targetArmor;
+
+  const effectiveTargetMelee = targetMemory?.isDirty && targetMemory?.targetMelee !== null
+    ? targetMemory.targetMelee
+    : parameters.targetMelee;
 
   // Get unit stats for preview
   const unitStats = unit ? getUnitStats(unit, soldierIndex, parameters.weaponIndex) : null;
@@ -175,24 +159,14 @@ export function ParameterInputs({
         <div className="grid grid-cols-1 gap-4">
           {/* Distance Input with Converter */}
           {(actionType === 'shot' || actionType === 'grenade') && (
-            <div className="space-y-2">
-              {/* Memory indicator */}
-              {targetMemory?.isDirty && targetMemory?.distance === parameters.distance && (
-                <div className="flex items-center gap-1.5 px-2 py-1 bg-green-900/20 border border-green-700/30 rounded text-[10px] text-green-400">
-                  <RotateCcw className="w-3 h-3" />
-                  <span>Загружено из памяти</span>
-                </div>
-              )}
-
-              <DistanceConverter
-                steps={effectiveDistance}
-                onChange={(steps) => {
-                  onChange({ distance: steps });
-                  onMemoryUpdate?.({ distance: steps });
-                }}
-                rulesVersion={rulesVersion}
-              />
-            </div>
+            <DistanceConverter
+              steps={effectiveDistance}
+              onChange={(steps) => {
+                onChange({ distance: steps });
+                onMemoryUpdate?.({ distance: steps });
+              }}
+              rulesVersion={rulesVersion}
+            />
           )}
 
           {/* Target Armor Input */}
@@ -201,26 +175,18 @@ export function ParameterInputs({
               <label className="text-xs opacity-50 uppercase font-bold whitespace-nowrap">
                 Броня цели
               </label>
-              <div className="flex items-center gap-2">
-                {targetMemory?.isDirty && targetMemory?.targetArmor === parameters.targetArmor && (
-                  <div className="px-2 py-1 bg-green-900/20 border border-green-700/30 rounded text-[10px] text-green-400">
-                    <RotateCcw className="w-3 h-3 inline mr-1" />
-                    <span>Память</span>
-                  </div>
-                )}
-                <NumberStepper
-                  value={effectiveTargetArmor}
-                  onChange={(value) => {
-                    onChange({ targetArmor: value });
-                    onMemoryUpdate?.({ targetArmor: value });
-                  }}
-                  min={0}
-                  max={99}
-                  step={1}
-                  size="lg"
-                  className="flex-1 justify-start"
-                />
-              </div>
+              <NumberStepper
+                value={effectiveTargetArmor}
+                onChange={(value) => {
+                  onChange({ targetArmor: value });
+                  onMemoryUpdate?.({ targetArmor: value });
+                }}
+                min={0}
+                max={99}
+                step={1}
+                size="lg"
+                className="flex-1 justify-start"
+              />
             </div>
           )}
 
@@ -230,26 +196,18 @@ export function ParameterInputs({
               <label className="text-xs opacity-50 uppercase font-bold whitespace-nowrap">
                 ББ цели
               </label>
-              <div className="flex items-center gap-2">
-                {targetMemory?.isDirty && targetMemory?.targetMelee === parameters.targetMelee && (
-                  <div className="px-2 py-1 bg-green-900/20 border border-green-700/30 rounded text-[10px] text-green-400">
-                    <RotateCcw className="w-3 h-3 inline mr-1" />
-                    <span>Память</span>
-                  </div>
-                )}
-                <NumberStepper
-                  value={effectiveTargetMelee}
-                  onChange={(value) => {
-                    onChange({ targetMelee: value });
-                    onMemoryUpdate?.({ targetMelee: value });
-                  }}
-                  min={0}
-                  max={99}
-                  step={1}
-                  size="lg"
-                  className="flex-1 justify-start"
-                />
-              </div>
+              <NumberStepper
+                value={effectiveTargetMelee}
+                onChange={(value) => {
+                  onChange({ targetMelee: value });
+                  onMemoryUpdate?.({ targetMelee: value });
+                }}
+                min={0}
+                max={99}
+                step={1}
+                size="lg"
+                className="flex-1 justify-start"
+              />
             </div>
           )}
 

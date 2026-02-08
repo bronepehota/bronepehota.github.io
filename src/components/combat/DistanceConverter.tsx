@@ -59,7 +59,7 @@ export interface DistanceConverterProps {
  * - Fan rules: 1 step = 4 cm
  * - Tehnolog rules: 1 step = 5 cm
  *
- * Mobile-first design: fields are stacked vertically on mobile, side-by-side on desktop.
+ * Mobile-first design: compact single-row layout on mobile, side-by-side with equal sign on desktop.
  */
 export function DistanceConverter({
   steps,
@@ -98,29 +98,19 @@ export function DistanceConverter({
   const conversionFactor = getConversionFactor(rulesVersion);
 
   return (
-    <div className={cn('space-y-3', className)}>
-      {/* Conversion Factor Indicator */}
-      <div className="flex items-center justify-center gap-2 px-3 py-2 bg-slate-800/50 border border-slate-700 rounded-lg">
-        <span className="text-[10px] uppercase font-bold opacity-60">
-          {rulesVersion === 'fan' ? 'ПАНОВ' : 'ТЕХНОЛОГ'}
-        </span>
-        <span className="text-sm font-bold text-slate-300">
-          1 шаг = {conversionFactor} см
-        </span>
-      </div>
-
-      {/* Distance Inputs */}
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-3 md:gap-4 items-center">
+    <div className={cn('space-y-1', className)}>
+      {/* Distance Inputs - Mobile: compact single row, Desktop: side-by-side with equal sign */}
+      <div className="grid grid-cols-2 md:grid-cols-[1fr_auto_1fr] gap-2 md:gap-4 items-center">
         {/* Steps Input */}
         <div
           className={cn(
-            'p-3 rounded-xl border-2 transition-all',
+            'p-2 md:p-3 rounded-xl border-2 transition-all',
             focusedField === 'steps'
               ? 'bg-blue-900/20 border-blue-500'
               : 'bg-slate-800 border-slate-700'
           )}
         >
-          <label className="block text-[10px] uppercase font-bold opacity-50 mb-2 tracking-wider">
+          <label className="block text-[10px] uppercase font-bold opacity-50 mb-1 md:mb-2 tracking-wider">
             Шагов
           </label>
           <NumberStepper
@@ -129,7 +119,7 @@ export function DistanceConverter({
             min={1}
             max={20}
             step={1}
-            size="lg"
+            size="md"
             disabled={disabled}
             className="w-full"
           />
@@ -143,13 +133,13 @@ export function DistanceConverter({
         {/* Centimeters Input */}
         <div
           className={cn(
-            'p-3 rounded-xl border-2 transition-all',
+            'p-2 md:p-3 rounded-xl border-2 transition-all',
             focusedField === 'cm'
               ? 'bg-orange-900/20 border-orange-500'
               : 'bg-slate-800 border-slate-700'
           )}
         >
-          <label className="block text-[10px] uppercase font-bold opacity-50 mb-2 tracking-wider">
+          <label className="block text-[10px] uppercase font-bold opacity-50 mb-1 md:mb-2 tracking-wider">
             Сантиметры
           </label>
           <NumberStepper
@@ -158,45 +148,16 @@ export function DistanceConverter({
             min={conversionFactor}
             max={20 * conversionFactor}
             step={conversionFactor}
-            size="lg"
+            size="md"
             disabled={disabled}
             className="w-full"
           />
         </div>
       </div>
 
-      {/* Focus Toggle Buttons (Mobile) */}
-      <div className="md:hidden flex items-center gap-2 justify-center">
-        <button
-          type="button"
-          onClick={() => handleStepsChange(steps)}
-          onFocus={handleStepsFocus}
-          onBlur={handleBlur}
-          disabled={disabled}
-          className={cn(
-            'px-4 py-2 rounded-lg text-sm font-bold transition-all',
-            focusedField === 'steps' || focusedField === null
-              ? 'bg-blue-600 text-white'
-              : 'bg-slate-700 text-slate-400'
-          )}
-        >
-          Шаги
-        </button>
-        <button
-          type="button"
-          onClick={() => handleCmChange(cm)}
-          onFocus={handleCmFocus}
-          onBlur={handleBlur}
-          disabled={disabled}
-          className={cn(
-            'px-4 py-2 rounded-lg text-sm font-bold transition-all',
-            focusedField === 'cm'
-              ? 'bg-orange-600 text-white'
-              : 'bg-slate-700 text-slate-400'
-          )}
-        >
-          См
-        </button>
+      {/* Conversion hint text */}
+      <div className="text-center text-[10px] text-slate-500 opacity-70">
+        1 шаг = {conversionFactor} см
       </div>
     </div>
   );
