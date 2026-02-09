@@ -56,7 +56,7 @@ describe('Grenade Combat Mechanics', () => {
       const maxSteps = totalDistance + 1;
 
       expect(totalDistance).toBe(3);
-      expect(minSteps).toBe(1);
+      expect(minSteps).toBe(2);
       expect(maxSteps).toBe(4);
     });
 

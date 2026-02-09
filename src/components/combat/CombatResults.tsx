@@ -382,12 +382,15 @@ export function CombatResults({
       {isGrenade && result.hitResult && result.grenadeBlastZone && (
         <>
           {/* Blast Zone Display */}
-          <div className={cn(
-            "relative p-4 rounded-sm border-2",
-            (result.hitResult.roll ?? 0) === 1
-              ? "bg-red-950/30 border-red-600/50 shadow-red-900/20"
-              : "bg-emerald-950/20 border-emerald-600/40 shadow-emerald-900/20"
-          )}>
+          <div
+            data-testid="grenade-blast-zone"
+            className={cn(
+              "relative p-4 rounded-sm border-2",
+              (result.hitResult.roll ?? 0) === 1
+                ? "bg-red-950/30 border-red-600/50 shadow-red-900/20"
+                : "bg-emerald-950/20 border-emerald-600/40 shadow-emerald-900/20"
+            )}
+          >
             {/* Tech frame corners */}
             <div className={cn(
               "absolute top-0 left-0 w-2 h-2 border-l-2 border-t-2",
@@ -537,7 +540,7 @@ export function CombatResults({
 
           {/* Grenade Target Check Input Section */}
           {isGrenade && onGrenadeCheckTarget && (
-            <div className="bg-slate-800 p-4 rounded-sm border border-slate-700">
+            <div data-testid="grenade-target-check-section" className="bg-slate-800 p-4 rounded-sm border border-slate-700">
               <div className="text-xs opacity-50 uppercase font-bold mb-4 tracking-wider">
                 ПРОВЕРИТЬ ЦЕЛЬ В ЗОНЕ ВЗРЫВА
               </div>
@@ -558,6 +561,7 @@ export function CombatResults({
                     </button>
                     <input
                       type="number"
+                      data-testid="grenade-armor-input"
                       value={grenadeTargetArmor}
                       onChange={(e) => setGrenadeTargetArmor(Math.max(0, parseInt(e.target.value) || 0))}
                       min={0}
@@ -584,6 +588,7 @@ export function CombatResults({
 
                 {/* Explode button */}
                 <button
+                  data-testid="grenade-explode-button"
                   onClick={() => onGrenadeCheckTarget(grenadeTargetArmor)}
                   className={cn(
                     "relative w-full py-4 rounded-sm font-mono text-base font-bold uppercase tracking-wider border-2 transition-all min-h-[56px]",
