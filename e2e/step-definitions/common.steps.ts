@@ -405,3 +405,26 @@ When('я бросаю инициативу', async function(this: BronepehotaWor
   await this.page.waitForTimeout(600);
   await this.page.waitForTimeout(300);
 });
+
+// Additional Then steps for battle preparation flow
+Then('я вижу экран подготовки к бою', async function(this: BronepehotaWorld) {
+  const screen = this.page.locator('[data-testid="battle-preparation-screen"]');
+  await expect(screen).toBeVisible({ timeout: 5000 });
+});
+
+Then('я вижу кнопку {string}', async function(this: BronepehotaWorld, buttonText: string) {
+  const button = this.page.getByRole('button', { name: new RegExp(`^${buttonText}$`, 'i') });
+  await expect(button.first()).toBeVisible({ timeout: 5000 });
+});
+
+Then('открывается модальное окно инициативы', async function(this: BronepehotaWorld) {
+  const modal = this.page.locator('[data-testid="initiative-modal"]');
+  await expect(modal).toBeVisible({ timeout: 5000 });
+  // Wait for dice roll animation to complete
+  await this.page.waitForTimeout(700);
+});
+
+Then('я перехожу к экрану игрового сеанса', async function(this: BronepehotaWorld) {
+  const gameSession = this.page.locator('[data-testid="game-session"]');
+  await expect(gameSession.first()).toBeVisible({ timeout: 5000 });
+});
