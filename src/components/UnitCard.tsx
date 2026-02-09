@@ -1100,8 +1100,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                           const fireRate = (data as Machine).fire_rate;
                           const canShoot = !isMachineDone && !isMachineDestroyed &&
                                           (unit.currentAmmo || 0) > 0 &&
-                                          totalShotsUsed < fireRate &&
-                                          weaponShots === 0;
+                                          totalShotsUsed < fireRate;
 
                           return (
                             <div
