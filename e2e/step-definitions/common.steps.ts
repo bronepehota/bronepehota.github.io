@@ -348,14 +348,31 @@ Then('я должен перейти к этапу выбора правил', a
 
 // Battle preparation screen steps
 
-When('я вижу экран подготовки к бою', async function(this: BronepehotaWorld) {
+// Helper function to check if battle preparation screen is visible
+async function verifyBattlePreparationScreen(this: BronepehotaWorld) {
   const screen = this.page.locator('[data-testid="battle-preparation-screen"]');
   await expect(screen).toBeVisible({ timeout: 5000 });
+}
+
+// Register for different Gherkin keywords (Russian: Допустим=Given, Когда=When, То=Then)
+// But register as separate When steps with regex to match any prefix
+When(/^(?:Допустим|Пусть)? я вижу экран подготовки к бою$/, async function(this: BronepehotaWorld) {
+  await verifyBattlePreparationScreen.call(this);
 });
 
-Then('я вижу экран подготовки к бою', async function(this: BronepehotaWorld) {
-  const screen = this.page.locator('[data-testid="battle-preparation-screen"]');
-  await expect(screen).toBeVisible({ timeout: 5000 });
+When(/^(?:Когда|И) я вижу экран подготовки к бою$/, async function(this: BronepehotaWorld) {
+  await verifyBattlePreparationScreen.call(this);
+});
+
+Then(/^То я вижу экран подготовки к бою$/, async function(this: BronepehotaWorld) {
+  await verifyBattlePreparationScreen.call(this);
+});
+
+Given('я вижу модальное окно инициативы', async function(this: BronepehotaWorld) {
+  const modal = this.page.locator('[data-testid="initiative-modal"]');
+  await expect(modal).toBeVisible({ timeout: 5000 });
+  // Wait for dice roll animation to complete
+  await this.page.waitForTimeout(700);
 });
 
 When('я нажимаю кнопку {string} в модальном окне', async function(this: BronepehotaWorld, buttonText: string) {
