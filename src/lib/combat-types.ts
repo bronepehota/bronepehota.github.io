@@ -9,7 +9,8 @@ export type CombatPhase =
   | 'PARAMETERS'        // Set distance, armor, cover
   | 'ROLLING'           // Dice animation in progress
   | 'RESULTS'           // Show combat results
-  | 'APPLY';            // Apply damage/effects to unit
+  | 'APPLY'             // Apply damage/effects to unit
+  | 'GRENADE_DISTANCE'; // Grenade: roll for explosion distance
 
 /**
  * Combat action types
@@ -44,6 +45,15 @@ export interface DiceDisplay {
 }
 
 /**
+ * Result of a single grenade blast check
+ */
+export interface GrenadeBlastResult {
+  armor: number;
+  roll: number;
+  hit: boolean;
+}
+
+/**
  * Complete combat result
  */
 export interface CombatResult {
@@ -60,6 +70,11 @@ export interface CombatResult {
   pilotDied?: boolean;        // Pilot died from armor/survival test
   armorTestRoll?: number;     // Armor test roll (D12) for machines with pilots
   survivalTestRoll?: number;  // Pilot survival test roll (D6)
+  // Grenade-specific fields
+  grenadeDistance?: number;   // D6 + rank = explosion distance
+  grenadeBlastZone?: { minSteps: number; maxSteps: number; minCm: number; maxCm: number };
+  grenadeBlastChecks?: GrenadeBlastResult[]; // Multiple target checks
+  soldierRank?: number;       // Soldier's army rank for grenade throw
 }
 
 /**
@@ -85,6 +100,14 @@ export interface CombatFlowState {
   diceDisplay: DiceDisplay;
   result: CombatResult | null;
   isRolling: boolean;
+  // Grenade-specific state
+  grenadeData?: {
+    distanceRoll: number;      // D6 roll for distance
+    soldierRank: number;       // Soldier's army rank
+    totalDistance: number;     // distanceRoll + soldierRank
+    blastZone: { minSteps: number; maxSteps: number; minCm: number; maxCm: number };
+    blastChecks: GrenadeBlastResult[];
+  };
 }
 
 /**
@@ -96,12 +119,15 @@ export type CombatFlowAction =
   | { type: 'SET_PARAMETERS'; parameters: Partial<CombatParameters> }
   | { type: 'EXECUTE_ROLL' }
   | { type: 'UPDATE_DICE'; diceDisplay?: DiceDisplay }
-  | { type: 'ROLL_COMPLETE'; result: CombatResult; diceDisplay?: DiceDisplay }
+  | { type: 'ROLL_COMPLETE'; result: CombatResult; diceDisplay?: DiceDisplay; grenadeData?: CombatFlowState['grenadeData'] }
   | { type: 'APPLY_RESULT' }
   | { type: 'GO_BACK_TO_ACTION_SELECT' }
   | { type: 'GO_BACK_TO_PARAMETERS' }
   | { type: 'CLOSE_COMBAT' }
-  | { type: 'CANCEL' };
+  | { type: 'CANCEL' }
+  // Grenade-specific actions
+  | { type: 'GRENADE_CHECK_TARGET'; armor: number }
+  | { type: 'GRENADE_SET_ARMOR'; armor: number };
 
 /**
  * Weapon selection for vehicle combat

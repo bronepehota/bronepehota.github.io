@@ -9,6 +9,7 @@ import {
   DiceDisplay,
   CombatResult,
   CombatConfig,
+  GrenadeBlastResult,
 } from '@/lib/combat-types';
 import { rollDie } from '@/lib/game-logic';
 import { rulesRegistry } from '@/lib/rules-registry';
@@ -107,6 +108,8 @@ function combatFlowReducer(
         isRolling: false,
         result: action.result,
         diceDisplay: action.diceDisplay || {},
+        // Preserve grenade data if present
+        grenadeData: action.grenadeData || state.grenadeData,
       };
 
     case 'APPLY_RESULT':
@@ -118,6 +121,36 @@ function combatFlowReducer(
     case 'CLOSE_COMBAT':
     case 'CANCEL':
       return initialCombatFlowState;
+
+    // Grenade-specific actions
+    case 'GRENADE_CHECK_TARGET':
+      if (!state.grenadeData) return state;
+
+      const d20Roll = rollDie(20);
+      const hit = d20Roll > action.armor;
+
+      const newCheck: GrenadeBlastResult = {
+        armor: action.armor,
+        roll: d20Roll,
+        hit,
+      };
+
+      return {
+        ...state,
+        grenadeData: {
+          ...state.grenadeData,
+          blastChecks: [...(state.grenadeData.blastChecks || []), newCheck],
+        },
+      };
+
+    case 'GRENADE_SET_ARMOR':
+      if (!state.grenadeData) return state;
+      return {
+        ...state,
+        grenadeData: {
+          ...state.grenadeData,
+        },
+      };
 
     default:
       return state;
@@ -322,48 +355,120 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
   }, [state, rulesVersion, animateDiceRoll]);
 
   /**
-   * Execute grenade attack
+   * Execute grenade attack - roll distance (D6 + soldier rank)
+   * Phase 1: Determine explosion location
    */
   const executeGrenade = useCallback(async (): Promise<CombatResult> => {
+    if (!state.unit || state.actionType !== 'grenade') {
+      throw new Error('Cannot execute grenade: invalid state');
+    }
+
     dispatch({ type: 'EXECUTE_ROLL' });
 
-    const rules = rulesRegistry[rulesVersion];
+    // Get soldier rank for grenade throw bonus
+    let soldierRank = 0;
+    if (state.unitType === 'squad' && state.soldierIndex !== null) {
+      const soldiers = (state.unit.data as any).soldiers;
+      if (soldiers && soldiers[state.soldierIndex]) {
+        soldierRank = soldiers[state.soldierIndex].rank || 0;
+      }
+    }
 
-    // Animate distance roll
+    // Animate distance roll (D6)
     await animateDiceRoll(() => {});
 
     const distanceRoll = rollDie(6);
+    const totalDistance = distanceRoll + soldierRank;
 
-    // Animate power roll (1D20)
-    await animateDiceRoll(() => {});
+    // Calculate blast zone (±1 step)
+    const minSteps = Math.max(1, totalDistance - 1);
+    const maxSteps = totalDistance + 1;
+    const minCm = minSteps * 4;
+    const maxCm = maxSteps * 4;
 
-    const damageResult = rules.calculateDamage(
-      '1D20',
-      state.parameters.targetArmor,
-      state.parameters.fortification,
-      undefined,
-      false
-    );
+    const blastZone = { minSteps, maxSteps, minCm, maxCm };
 
+    // Store grenade data in state for phase 2
+    dispatch({
+      type: 'UPDATE_DICE',
+      diceDisplay: { hit: distanceRoll }
+    } as any);
+
+    // Create result for phase 1 (distance roll)
     const result: CombatResult = {
       actionType: 'grenade',
       unitType: state.unitType,
       parameters: { ...state.parameters },
-      hitResult: { success: true, roll: distanceRoll, total: distanceRoll, isGrenade: true },
-      damageResult,
+      hitResult: {
+        success: true,
+        roll: distanceRoll,
+        total: totalDistance,
+        isGrenade: true
+      },
       timestamp: Date.now(),
-      unitName: state.unit?.data?.name || '',
-      unitId: state.unit?.instanceId || '',
+      unitName: state.unit.data.name,
+      unitId: state.unit.instanceId,
       soldierIndex: state.soldierIndex ?? undefined,
+      grenadeDistance: totalDistance,
+      grenadeBlastZone: blastZone,
+      soldierRank,
     };
 
-    dispatch({
+    // Store grenade-specific data for target checks
+    (dispatch as any)({
       type: 'ROLL_COMPLETE',
       result,
-      diceDisplay: { hit: distanceRoll, power: damageResult.rolls }
+      diceDisplay: { hit: distanceRoll },
+      grenadeData: {
+        distanceRoll,
+        soldierRank,
+        totalDistance,
+        blastZone,
+        blastChecks: [],
+      },
     });
+
     return result;
-  }, [state, rulesVersion, animateDiceRoll]);
+  }, [state, animateDiceRoll]);
+
+  /**
+   * Check a target in grenade blast zone (Phase 2)
+   * Roll 1D20 vs target armor
+   */
+  const checkGrenadeTarget = useCallback(async (armor: number): Promise<void> => {
+    if (!state.grenadeData) {
+      throw new Error('Cannot check grenade target: no grenade data');
+    }
+
+    dispatch({ type: 'GRENADE_CHECK_TARGET', armor } as any);
+
+    // Animate D20 roll
+    await animateDiceRoll(() => {});
+
+    const d20Roll = rollDie(20);
+    const hit = d20Roll > armor;
+
+    const blastCheck: GrenadeBlastResult = {
+      armor,
+      roll: d20Roll,
+      hit,
+    };
+
+    // Update state with new check
+    dispatch({
+      type: 'UPDATE_DICE',
+      diceDisplay: { hit: d20Roll }
+    });
+
+    // Update result with blast checks
+    if (state.result) {
+      const updatedResult: CombatResult = {
+        ...state.result,
+        grenadeBlastChecks: [...(state.result.grenadeBlastChecks || []), blastCheck],
+      };
+      dispatch({ type: 'ROLL_COMPLETE', result: updatedResult, diceDisplay: { hit: d20Roll } });
+    }
+  }, [state, animateDiceRoll]);
 
   /**
    * Execute melee attack
@@ -497,6 +602,7 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
     closeCombat,
     cancelCombat,
     goBack,
+    checkGrenadeTarget, // Grenade-specific: check target in blast zone
     // Derived state
     isOpen: state.phase !== 'IDLE',
     currentPhase: state.phase,

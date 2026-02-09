@@ -404,6 +404,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
           onSetParameters={combatController.setParameters}
           onExecuteAction={combatController.executeAction}
           onApplyResult={handleApplyResult}
+          onGrenadeCheckTarget={combatController.checkGrenadeTarget}
           grenadesAvailable={isSquad && !unit.grenadesUsed}
           unitDisplayName={`${formatUnitNumber(unit)} - ${data.name}`}
         />
