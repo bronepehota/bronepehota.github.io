@@ -384,30 +384,30 @@ export function CombatResults({
           {/* Blast Zone Display */}
           <div className={cn(
             "relative p-4 rounded-sm border-2",
-            result.hitResult.roll === 1
+            (result.hitResult.roll ?? 0) === 1
               ? "bg-red-950/30 border-red-600/50 shadow-red-900/20"
               : "bg-emerald-950/20 border-emerald-600/40 shadow-emerald-900/20"
           )}>
             {/* Tech frame corners */}
             <div className={cn(
               "absolute top-0 left-0 w-2 h-2 border-l-2 border-t-2",
-              result.hitResult.roll === 1 ? "border-red-500" : "border-emerald-500"
+              (result.hitResult.roll ?? 0) === 1 ? "border-red-500" : "border-emerald-500"
             )} />
             <div className={cn(
               "absolute top-0 right-0 w-2 h-2 border-r-2 border-t-2",
-              result.hitResult.roll === 1 ? "border-red-500" : "border-emerald-500"
+              (result.hitResult.roll ?? 0) === 1 ? "border-red-500" : "border-emerald-500"
             )} />
             <div className={cn(
               "absolute bottom-0 left-0 w-2 h-2 border-l-2 border-b-2",
-              result.hitResult.roll === 1 ? "border-red-500" : "border-emerald-500"
+              (result.hitResult.roll ?? 0) === 1 ? "border-red-500" : "border-emerald-500"
             )} />
             <div className={cn(
               "absolute bottom-0 right-0 w-2 h-2 border-r-2 border-b-2",
-              result.hitResult.roll === 1 ? "border-red-500" : "border-emerald-500"
+              (result.hitResult.roll ?? 0) === 1 ? "border-red-500" : "border-emerald-500"
             )} />
 
             {/* Danger warning if rolled 1 */}
-            {result.hitResult.roll === 1 && (
+            {(result.hitResult.roll ?? 0) === 1 && (
               <div className="flex items-center gap-2 mb-3 pb-3 border-b border-red-700/30">
                 <AlertTriangle className="w-5 h-5 text-red-400 shrink-0" />
                 <span className="text-red-400 font-bold font-mono text-sm uppercase tracking-wider">
@@ -419,7 +419,7 @@ export function CombatResults({
             <div className="text-center space-y-2">
               <div className={cn(
                 "text-2xl md:text-3xl font-mono font-black uppercase tracking-wider",
-                result.hitResult.roll === 1 ? "text-red-400" : "text-emerald-400"
+                (result.hitResult.roll ?? 0) === 1 ? "text-red-400" : "text-emerald-400"
               )}>
                 ВЗРЫВ
               </div>
@@ -441,24 +441,24 @@ export function CombatResults({
               </div>
               <div className={cn(
                 "relative w-14 h-14 bg-slate-950/80 rounded-sm flex items-center justify-center text-2xl font-mono font-black border-2",
-                result.hitResult.roll === 1 ? "border-red-600/50" : "border-emerald-600/50"
+                (result.hitResult.roll ?? 0) === 1 ? "border-red-600/50" : "border-emerald-600/50"
               )}>
-                {result.hitResult.roll}
+                {result.hitResult.roll ?? 0}
                 <div className={cn("absolute top-1 left-1 w-1 h-1",
-                  result.hitResult.roll === 1 ? "bg-red-500/40" : "bg-emerald-500/40"
+                  (result.hitResult.roll ?? 0) === 1 ? "bg-red-500/40" : "bg-emerald-500/40"
                 )} />
                 <div className={cn("absolute top-1 right-1 w-1 h-1",
-                  result.hitResult.roll === 1 ? "bg-red-500/40" : "bg-emerald-500/40"
+                  (result.hitResult.roll ?? 0) === 1 ? "bg-red-500/40" : "bg-emerald-500/40"
                 )} />
                 <div className={cn("absolute bottom-1 left-1 w-1 h-1",
-                  result.hitResult.roll === 1 ? "bg-red-500/40" : "bg-emerald-500/40"
+                  (result.hitResult.roll ?? 0) === 1 ? "bg-red-500/40" : "bg-emerald-500/40"
                 )} />
                 <div className={cn("absolute bottom-1 right-1 w-1 h-1",
-                  result.hitResult.roll === 1 ? "bg-red-500/40" : "bg-emerald-500/40"
+                  (result.hitResult.roll ?? 0) === 1 ? "bg-red-500/40" : "bg-emerald-500/40"
                 )} />
               </div>
               <div className={cn("text-xl font-mono font-black",
-                result.hitResult.roll === 1 ? "text-red-400" : "text-emerald-400"
+                (result.hitResult.roll ?? 0) === 1 ? "text-red-400" : "text-emerald-400"
               )}>
                 +{result.soldierRank || 0} = {result.grenadeDistance}
               </div>
