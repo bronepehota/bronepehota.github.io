@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Army, RulesVersionID } from '@/lib/types';
 import ArmyBuilder from '@/components/ArmyBuilder';
 import GameSession from '@/components/GameSession';
+import { BattlePreparationScreen } from '@/components/BattlePreparationScreen';
 import factionsData from '@/data/factions.json';
 import { Shield, ArrowLeft, CheckCircle2, MoreVertical, List, Grid, History, Heart, UserX, AlertTriangle, X } from 'lucide-react';
 import { isValidRulesVersion } from '@/lib/rules-registry';
@@ -12,10 +13,10 @@ import { CombatTargetProvider } from '@/contexts/CombatTargetContext';
 
 export default function Home() {
   // View state with localStorage persistence - lazy init to avoid race condition
-  const [view, setView] = useState<'builder' | 'game'>(() => {
+  const [view, setView] = useState<'builder' | 'preparation' | 'game'>(() => {
     if (typeof window === 'undefined') return 'builder';
     const saved = localStorage.getItem('bronepehota_view');
-    return (saved === 'builder' || saved === 'game') ? saved : 'builder';
+    return (saved === 'builder' || saved === 'game' || saved === 'preparation') ? saved : 'builder';
   });
   const [showEndMenu, setShowEndMenu] = useState(false);
   const [showCombatLog, setShowCombatLog] = useState(false);
@@ -107,10 +108,20 @@ export default function Home() {
   const handleEnterBattle = () => {
     setArmy({
       ...army,
-      isInBattle: true,
-      currentStep: 'battle',
+      isInBattle: false,
+      currentStep: 'battle-prep',
     });
+    setView('preparation');
+  };
+
+  // Handle starting actual battle from preparation screen
+  const handleStartBattleFromPrep = () => {
     setView('game');
+  };
+
+  // Handle return to builder from preparation screen
+  const handleReturnToBuilderFromPrep = () => {
+    setView('builder');
   };
 
   // Handle return to faction selection (shows confirmation)
@@ -412,6 +423,13 @@ export default function Home() {
             onRulesVersionChange={setRulesVersion}
             displayMode={displayMode}
             onDisplayModeChange={setDisplayMode}
+          />
+        ) : view === 'preparation' ? (
+          <BattlePreparationScreen
+            army={army}
+            setArmy={setArmy}
+            onStartBattle={handleStartBattleFromPrep}
+            onBackToBuilder={handleReturnToBuilderFromPrep}
           />
         ) : (
           <GameSession

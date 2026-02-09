@@ -171,6 +171,8 @@ export interface ArmyUnit {
   selectedWeaponIndices?: number[]; // Indices into machine.weapons array
 }
 
+export type ArmyCurrentStep = 'faction-select' | 'unit-select' | 'battle-prep' | 'battle';
+
 export interface Army {
   name: string;
   faction: FactionID;
@@ -178,7 +180,7 @@ export interface Army {
   totalCost: number;
   // Army Building Flow extensions
   pointBudget?: number;
-  currentStep?: 'faction-select' | 'unit-select' | 'battle';
+  currentStep?: ArmyCurrentStep;
   isInBattle?: boolean;
   isLoading?: boolean;
   loadError?: string;

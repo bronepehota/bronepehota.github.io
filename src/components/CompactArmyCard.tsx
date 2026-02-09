@@ -13,9 +13,10 @@ interface CompactArmyCardProps {
   onClick?: (unit: ArmyUnit) => void;
   factionId: FactionID;
   dataTestId?: string;
+  readonly?: boolean; // НОВОЕ
 }
 
-export function CompactArmyCard({ unit, onRemove, onClick, factionId, dataTestId }: CompactArmyCardProps) {
+export function CompactArmyCard({ unit, onRemove, onClick, factionId, dataTestId, readonly = false }: CompactArmyCardProps) {
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [modalImageSrc, setModalImageSrc] = useState('');
   const [modalImageAlt, setModalImageAlt] = useState('');
@@ -157,26 +158,28 @@ export function CompactArmyCard({ unit, onRemove, onClick, factionId, dataTestId
         </div>
       </div>
 
-      {/* Remove button zone */}
-      <div className="w-14 flex items-center justify-center flex-shrink-0">
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onRemove(unit.instanceId);
-          }}
-          data-testid={dataTestId ? dataTestId.replace('army-unit-', 'remove-unit-') : `remove-compact-${unit.instanceId}`}
-          aria-label={`Удалить ${unit.data.name}`}
-          className={cn(
-            'w-11 h-11 rounded-full flex items-center justify-center',
-            'bg-red-900/20 hover:bg-red-900/40',
-            'border border-red-700/50 hover:border-red-600',
-            'transition-all duration-200',
-            'active:scale-95 touch-manipulation'
-          )}
-        >
-          <X className={cn('w-5 h-5', accentColor.replace('bg-', 'text-').replace('red', 'text-red-400'))} />
-        </button>
-      </div>
+      {/* Remove button zone - скрыть в readonly */}
+      {!readonly && (
+        <div className="w-14 flex items-center justify-center flex-shrink-0">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemove(unit.instanceId);
+            }}
+            data-testid={dataTestId ? dataTestId.replace('army-unit-', 'remove-unit-') : `remove-compact-${unit.instanceId}`}
+            aria-label={`Удалить ${unit.data.name}`}
+            className={cn(
+              'w-11 h-11 rounded-full flex items-center justify-center',
+              'bg-red-900/20 hover:bg-red-900/40',
+              'border border-red-700/50 hover:border-red-600',
+              'transition-all duration-200',
+              'active:scale-95 touch-manipulation'
+            )}
+          >
+            <X className={cn('w-5 h-5', accentColor.replace('bg-', 'text-').replace('red', 'text-red-400'))} />
+          </button>
+        </div>
+      )}
 
       <ImageModal
         src={modalImageSrc}
