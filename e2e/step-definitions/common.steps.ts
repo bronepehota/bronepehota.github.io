@@ -345,3 +345,46 @@ Then('я должен перейти к этапу выбора правил', a
   );
   await expect(rulesSelector.first()).toBeVisible({ timeout: 5000 });
 });
+
+// Battle preparation screen steps
+
+When('я вижу экран подготовки к бою', async function(this: BronepehotaWorld) {
+  const screen = this.page.locator('[data-testid="battle-preparation-screen"]');
+  await expect(screen).toBeVisible({ timeout: 5000 });
+});
+
+Then('я вижу экран подготовки к бою', async function(this: BronepehotaWorld) {
+  const screen = this.page.locator('[data-testid="battle-preparation-screen"]');
+  await expect(screen).toBeVisible({ timeout: 5000 });
+});
+
+When('я нажимаю кнопку {string} в модальном окне', async function(this: BronepehotaWorld, buttonText: string) {
+  // Handle button clicks in modal
+  if (buttonText === 'Начать бой' || buttonText === 'НАЧАТЬ БОЙ') {
+    const button = this.page.locator('[data-testid="confirm-initiative-button"]');
+    await button.click({ timeout: 10000 });
+  } else if (buttonText === 'Начать тур' || buttonText === 'НАЧАТЬ ТУР') {
+    const button = this.page.locator('[data-testid="confirm-initiative-button"]');
+    await button.click({ timeout: 10000 });
+  } else if (buttonText === 'Переброс') {
+    const button = this.page.locator('[data-testid="reroll-button"]');
+    await button.click({ timeout: 5000 });
+  } else {
+    // Fallback to text-based search
+    const button = this.page.getByRole('button', { name: new RegExp(`^${buttonText}$`, 'i') });
+    await button.first().click({ timeout: 5000 });
+  }
+  await this.page.waitForTimeout(300);
+});
+
+When('я бросаю инициативу', async function(this: BronepehotaWorld) {
+  // Wait for modal to appear
+  const modal = this.page.locator('[data-testid="initiative-modal"]');
+  await expect(modal).toBeVisible({ timeout: 5000 });
+
+  // Wait for dice roll animation to complete (button becomes enabled)
+  const confirmButton = this.page.locator('[data-testid="confirm-initiative-button"]');
+  // Wait a bit for animation to complete
+  await this.page.waitForTimeout(600);
+  await this.page.waitForTimeout(300);
+});
