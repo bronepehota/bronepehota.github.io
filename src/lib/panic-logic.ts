@@ -20,11 +20,6 @@ export function checkPanicTrigger(
     }
   }
 
-  // Only fan rules have automatic panic trigger
-  if (rulesVersion !== 'fan') {
-    return false;
-  }
-
   // Only squads can panic
   if (unit.type !== 'squad') {
     return false;
@@ -39,23 +34,29 @@ export function checkPanicTrigger(
     return false;
   }
 
-  // Check if 50% losses reached
-  const halfThreshold = Math.floor(totalSoldiers / 2);
-  if (deadCount < halfThreshold) {
-    return false;
-  }
-
-  // Check if panic already triggered this turn
-  if (currentTurn !== undefined && unit.panicState) {
-    const triggeredThisTurn = unit.panicState.some(
-      p => p.triggeredAtTurn === currentTurn
-    );
-    if (triggeredThisTurn) {
+  // Fan rules: automatic panic trigger at 50% losses
+  if (rulesVersion === 'fan') {
+    const halfThreshold = Math.floor(totalSoldiers / 2);
+    if (deadCount < halfThreshold) {
       return false;
     }
+
+    // Check if panic already triggered this turn
+    if (currentTurn !== undefined && unit.panicState) {
+      const triggeredThisTurn = unit.panicState.some(
+        p => p.triggeredAtTurn === currentTurn
+      );
+      if (triggeredThisTurn) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
-  return true;
+  // Official (tehnolog) rules: panic is checked during survival test
+  // No automatic trigger - panic is determined during combat
+  return false;
 }
 
 /**
@@ -70,17 +71,6 @@ export function executePanicTest(
   soldierIndex: number,
   rulesVersion: RulesVersionID
 ): PanicTestResult {
-  // For now, only fan rules implement panic logic
-  if (rulesVersion !== 'fan') {
-    const soldier = (unit.data as any).soldiers?.[soldierIndex];
-    return {
-      soldierIndex,
-      isPanic: false,
-      roll: 0,
-      rank: soldier?.rank || 0,
-    };
-  }
-
   const soldier = (unit.data as any).soldiers?.[soldierIndex];
   if (!soldier) {
     return {
@@ -93,17 +83,58 @@ export function executePanicTest(
 
   // Roll D6
   const roll = Math.floor(Math.random() * 6) + 1;
-  const rank = soldier.rank || 0;
+  const armor = soldier.armor || 0;
 
-  // Panic if roll > rank (fan rules)
-  const isPanic = roll > rank;
+  // Different panic conditions for different rules
+  let isPanic = false;
 
+  if (rulesVersion === 'fan') {
+    // Fan rules: D6 > rank = panic
+    const rank = soldier.rank || 0;
+    isPanic = roll > rank;
+    return {
+      soldierIndex,
+      isPanic,
+      roll,
+      rank,
+    };
+  } else if (rulesVersion === 'tehnolog') {
+    // Official rules: D6 == armor = panic (during survival test)
+    isPanic = roll === armor;
+    return {
+      soldierIndex,
+      isPanic,
+      roll,
+      rank: armor,
+    };
+  }
+
+  // Default: no panic
   return {
     soldierIndex,
-    isPanic,
+    isPanic: false,
     roll,
-    rank,
+    rank: armor,
   };
+}
+
+/**
+ * Check panic after survival test (for official rules)
+ * @param armor - Soldier's armor value
+ * @param roll - D6 roll value
+ * @returns true if panic should occur
+ */
+export function checkPanicAfterSurvivalTest(armor: number, roll: number): boolean {
+  // Official rules: panic when D6 equals armor (Бр)
+  // Only applies if panic is enabled
+  if (typeof window !== 'undefined') {
+    const panicEnabled = localStorage.getItem('bronepehota_panic_enabled');
+    if (panicEnabled === 'false') {
+      return false;
+    }
+  }
+
+  return roll === armor;
 }
 
 /**

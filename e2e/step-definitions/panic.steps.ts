@@ -4,9 +4,11 @@ import { expect } from '@playwright/test';
 // Helper to get page from context
 const getPage = () => (global as any).page;
 
-When('я убиваю (\\d+)-го бойца из (\\d+)', async function (soldierNumStr: string, totalStr: string) {
+When('я убиваю {string}', async function (soldierStr: string) {
   const page = getPage();
-  const idx = parseInt(soldierNumStr) - 1;
+  // Parse "3-го" to get 3, then convert to 0-based index
+  const num = parseInt(soldierStr);
+  const idx = num - 1;
   // Click the KIA (Skull) button for the specific soldier
   const kiaButton = page.locator(`button[aria-label*="Убит"]`).nth(idx);
   await kiaButton.click({ timeout: 10000 });

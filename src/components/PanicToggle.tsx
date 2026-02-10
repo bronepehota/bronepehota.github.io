@@ -28,9 +28,8 @@ export function PanicToggle({ enabled, onEnabledChange, rulesVersion }: PanicTog
     localStorage.setItem(PANIC_STORAGE_KEY, String(newValue));
   };
 
-  // Only show for fan rules, but keep component for consistency
-  const isFanRules = rulesVersion === 'fan';
-  const isDisabled = !isFanRules;
+  // Show for all rules - panic can be toggled independently
+  const isDisabled = false;
 
   return (
     <div
@@ -74,7 +73,7 @@ export function PanicToggle({ enabled, onEnabledChange, rulesVersion }: PanicTog
                 МЕХАНИКА ПАНИКИ
               </h3>
               <p className="text-xs text-slate-500 font-mono mt-0.5">
-                {isFanRules ? 'Правила Панова' : 'Только для правил Панова'}
+                {rulesVersion === 'fan' ? 'Правила Панова' : 'Дополнительная опция'}
               </p>
             </div>
           </div>
@@ -92,12 +91,21 @@ export function PanicToggle({ enabled, onEnabledChange, rulesVersion }: PanicTog
         {/* Info panel */}
         {showInfo && (
           <div className="mb-4 p-3 rounded-lg bg-slate-900/50 border border-slate-700/50 animate-in slide-in-from-top-2 duration-200">
-            <div className="flex items-start gap-2 mb-2">
-              <AlertTriangle className="w-4 h-4 text-orange-400 mt-0.5 shrink-0" />
-              <p className="text-xs text-slate-400 leading-relaxed">
-                При гибели 50% отряда пехотинцы проходят тест на панику (D6 vs Армейский ранг).
-                Провал = паника: пропуск хода и визуальная индикация.
-              </p>
+            <div className="space-y-2 text-xs text-slate-400 leading-relaxed">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 text-orange-400 mt-0.5 shrink-0" />
+                <p>
+                  <strong className="text-orange-300">Правила Панова:</strong> При 50% потерь отряд проходит тест на панику.
+                  D6 &gt; Армейский ранг = паника.
+                </p>
+              </div>
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 text-blue-400 mt-0.5 shrink-0" />
+                <p>
+                  <strong className="text-blue-300">Официальные правила:</strong> При получении урона солдат проходит тест выживания.
+                  D6 == Бр = паника (опционально).
+                </p>
+              </div>
             </div>
           </div>
         )}
@@ -111,8 +119,8 @@ export function PanicToggle({ enabled, onEnabledChange, rulesVersion }: PanicTog
             )}>
               {enabled ? 'ПАНИКА ВКЛЮЧЕНА' : 'ПАНИКА ОТКЛЮЧЕНА'}
             </p>
-            {isDisabled && (
-              <p className="text-[10px] text-slate-600 mt-1">Доступно только для правил Панова</p>
+            {rulesVersion === 'tehnolog' && enabled && (
+              <p className="text-[10px] text-blue-400/70 mt-1">Проверка при получении урона</p>
             )}
           </div>
 
