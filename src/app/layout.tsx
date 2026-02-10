@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Inter, Orbitron } from 'next/font/google'
 import { Russo_One, IBM_Plex_Mono, Oswald } from 'next/font/google'
 import './globals.css'
+import { SerwistRegister } from '@/components/SerwistRegister'
 
 const inter = Inter({ subsets: ['latin'] })
 const orbitron = Orbitron({
@@ -67,7 +68,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ru" className={`${orbitron.variable} ${russoOne.variable} ${ibmPlexMono.variable} ${oswald.variable}`}>
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <SerwistRegister />
+        {children}
+      </body>
     </html>
   )
 }
