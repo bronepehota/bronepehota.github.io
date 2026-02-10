@@ -17,7 +17,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 npm run dev              # Start Next.js dev server (http://localhost:3000)
 npm run dev:e2e          # Start dev server on port 3001 for E2E tests
 
-# Building
+# Building//re
 npm run build            # Production build
 npm run start            # Run production server
 

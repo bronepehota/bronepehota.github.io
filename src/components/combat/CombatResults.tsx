@@ -21,7 +21,7 @@ export function CombatResults({
   parameters,
   rulesVersion,
   onApply,
-  onGoBack,
+  onGoBack: _onGoBack,
   unitType,
   onGrenadeCheckTarget,
 }: CombatResultsProps) {
@@ -30,6 +30,15 @@ export function CombatResults({
   const isMelee = result.actionType === 'melee';
   const [markAsDone, setMarkAsDone] = useState(false);
   const [grenadeTargetArmor, setGrenadeTargetArmor] = useState(2); // Armor input for grenade blast checks
+
+  // Debug logging for grenade
+  if (isGrenade) {
+    console.log('[CombatResults] Grenade result:', {
+      grenadeBlastChecks: result.grenadeBlastChecks,
+      grenadeDistance: result.grenadeDistance,
+      blastChecksLength: result.grenadeBlastChecks?.length || 0
+    });
+  }
 
   // Only show mark as done option for squads
   const showMarkAsDone = unitType === 'squad';
@@ -470,7 +479,8 @@ export function CombatResults({
 
           {/* Target Checks Section */}
           {result.grenadeBlastChecks && result.grenadeBlastChecks.length > 0 && (
-            <div className="space-y-2">
+            <div data-testid="grenade-blast-checks" className="space-y-2">
+              {/* Debug: {console.log('Rendering grenade-blast-checks with', result.grenadeBlastChecks.length, 'checks')} */}
               <div className="text-[9px] font-mono text-slate-600 uppercase tracking-wider text-center">
                 РЕЗУЛЬТАТЫ ПРОВЕРКИ ЦЕЛЕЙ
               </div>

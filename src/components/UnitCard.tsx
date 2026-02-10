@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { GitHubPagesImage as Image } from './GitHubPagesImage';
 import { ArmyUnit, Squad, Machine, RulesVersionID, Weapon } from '@/lib/types';
-import { Shield, Sword, Target, Heart, Zap, CheckCircle2, Bomb, ChevronDown, ChevronUp, UserX, Plane, Skull, Wrench, Flame, Crosshair, X, Image as ImageIcon, Footprints } from 'lucide-react';
+import { Shield, Sword, Target, Heart, CheckCircle2, Bomb, ChevronDown, ChevronUp, UserX, Plane, Skull, Wrench, Flame, Crosshair, X, Image as ImageIcon, Footprints } from 'lucide-react';
 import { formatUnitNumber } from '@/lib/unit-utils';
 import { getDefaultRulesVersion } from '@/lib/rules-registry';
 import { cn } from '@/lib/utils';
@@ -48,7 +48,7 @@ interface UnitCardProps {
   onNavigateToUnit?: (unitInstanceId: string) => void; // Navigate to unit card
 }
 
-export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [], onCombatLogEntry, allUnits = [], onPilotAssign, onPilotRemove, onNavigateToUnit }: UnitCardProps) {
+export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [], onCombatLogEntry, allUnits = [], onPilotAssign, onPilotRemove, onNavigateToUnit: _onNavigateToUnit }: UnitCardProps) {
   const [showImage, setShowImage] = useState(false);
   const [showSoldierImage, setShowSoldierImage] = useState<number | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -645,7 +645,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                 // Check if this soldier is a pilot
                 const soldier = (data as Squad).soldiers[idx];
                 const isPilot = soldier.isPilot;
-                const pilotedMachine = isPilot
+                const _pilotedMachine = isPilot
                   ? allUnits.find((u) => u.instanceId === soldier.pilotOfInstanceId)
                   : null;
 

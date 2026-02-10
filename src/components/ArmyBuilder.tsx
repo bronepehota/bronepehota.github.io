@@ -47,6 +47,7 @@ export default function ArmyBuilder({ army, setArmy, onEnterBattle, rulesVersion
     } else if (army.currentStep === 'unit-select' && setupStep !== 'units') {
       setSetupStep('units');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [army.currentStep]);
 
   // Validate currentStep - only allow 'faction-select' or 'unit-select'

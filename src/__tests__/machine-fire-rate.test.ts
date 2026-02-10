@@ -9,7 +9,7 @@ function canWeaponShoot(
   weaponIndex: number
 ): boolean {
   const machine = unit.data as Machine;
-  const weaponShots = unit.machineWeaponShots?.[weaponIndex] || 0;
+  const _weaponShots = unit.machineWeaponShots?.[weaponIndex] || 0;
   const totalShotsUsed = unit.machineShotsUsed || 0;
   const fireRate = machine.fire_rate;
 
@@ -296,7 +296,7 @@ describe('Machine Fire Rate', () => {
   describe('Reset on Turn End', () => {
     test('Resetting machine state allows shooting again', () => {
       // After all shots used
-      let unit: ArmyUnit = {
+      const unit: ArmyUnit = {
         instanceId: 'test-machine-12',
         type: 'machine',
         data: mockMachine,

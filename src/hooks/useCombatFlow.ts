@@ -126,7 +126,8 @@ function combatFlowReducer(
     case 'GRENADE_CHECK_TARGET':
       if (!state.grenadeData) return state;
 
-      const d20Roll = rollDie(20);
+      // Use the provided d20Roll if available, otherwise roll (for backwards compatibility)
+      const d20Roll = action.d20Roll ?? rollDie(20);
       const hit = d20Roll > action.armor;
 
       const newCheck: GrenadeBlastResult = {
@@ -135,12 +136,24 @@ function combatFlowReducer(
         hit,
       };
 
+      // Update both grenadeData AND result.grenadeBlastChecks
+      // The component reads from result.grenadeBlastChecks
+      const updatedResult = state.result ? {
+        ...state.result,
+        grenadeBlastChecks: [...(state.result.grenadeBlastChecks || []), newCheck],
+      } : state.result;
+
+      console.log('[GRENADE_CHECK_TARGET] New check:', newCheck);
+      console.log('[GRENADE_CHECK_TARGET] Updated result grenadeBlastChecks:', updatedResult?.grenadeBlastChecks);
+
       return {
         ...state,
+        result: updatedResult,
         grenadeData: {
           ...state.grenadeData,
           blastChecks: [...(state.grenadeData.blastChecks || []), newCheck],
         },
+        diceDisplay: { ...state.diceDisplay, hit: d20Roll },
       };
 
     case 'GRENADE_SET_ARMOR':
@@ -412,6 +425,7 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
       grenadeDistance: totalDistance,
       grenadeBlastZone: blastZone,
       soldierRank,
+      grenadeBlastChecks: [], // Initialize empty array for phase 2 target checks
     };
 
     // Store grenade-specific data for target checks
@@ -440,35 +454,15 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
       throw new Error('Cannot check grenade target: no grenade data');
     }
 
-    dispatch({ type: 'GRENADE_CHECK_TARGET', armor } as any);
-
     // Animate D20 roll
     await animateDiceRoll(() => {});
 
+    // Roll D20 for armor check
     const d20Roll = rollDie(20);
-    const hit = d20Roll > armor;
 
-    const blastCheck: GrenadeBlastResult = {
-      armor,
-      roll: d20Roll,
-      hit,
-    };
-
-    // Update state with new check
-    dispatch({
-      type: 'UPDATE_DICE',
-      diceDisplay: { hit: d20Roll }
-    });
-
-    // Update result with blast checks
-    if (state.result) {
-      const updatedResult: CombatResult = {
-        ...state.result,
-        grenadeBlastChecks: [...(state.result.grenadeBlastChecks || []), blastCheck],
-      };
-      dispatch({ type: 'ROLL_COMPLETE', result: updatedResult, diceDisplay: { hit: d20Roll } });
-    }
-  }, [state, animateDiceRoll]);
+    // Dispatch action with the dice roll result
+    dispatch({ type: 'GRENADE_CHECK_TARGET', armor, d20Roll } as any);
+  }, [state.grenadeData, animateDiceRoll]);
 
   /**
    * Execute melee attack

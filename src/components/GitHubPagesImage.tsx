@@ -22,7 +22,7 @@ interface GitHubPagesImageProps extends Omit<React.ImgHTMLAttributes<HTMLImageEl
  *        <GitHubPagesImage src="/images/file.jpg" fill ... />
  */
 export const GitHubPagesImage = forwardRef<HTMLImageElement, GitHubPagesImageProps>(
-  ({ src, width, height, fill, className, style, unoptimized: _unoptimized, ...props }, ref) => {
+  ({ src, width, height, fill, className, style, alt, unoptimized: _unoptimized, ...props }, ref) => {
     // Add basePath to internal image paths
     const finalSrc = typeof src === 'string' && src.startsWith('/images/')
       ? `${BASE_PATH}${src}`
@@ -34,9 +34,11 @@ export const GitHubPagesImage = forwardRef<HTMLImageElement, GitHubPagesImagePro
       : (style || {});
 
     return (
+      // eslint-disable-next-line @next/next/no-img-element
       <img
         ref={ref}
         src={finalSrc}
+        alt={alt || ''}
         width={fill ? undefined : width}
         height={fill ? undefined : height}
         className={className}

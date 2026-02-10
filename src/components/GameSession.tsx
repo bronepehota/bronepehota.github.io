@@ -3,8 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Army, ArmyUnit, Squad, PilotInfo } from '@/lib/types';
 import UnitCard from './UnitCard';
-import { Heart, UserX, History, User, Bot, X, Check } from 'lucide-react';
-import { rollDie } from '@/lib/game-logic';
+import { History, User, Bot, X, Check } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { CombatLogEntry } from '@/lib/combat-types';
@@ -273,8 +272,8 @@ export default function GameSession({ army, setArmy, onInitiativeTriggerRef, sho
     return (unit.currentDurability || 0) > 0;
   }).length;
 
-  // Helper to get unit status for summary
-  const getUnitStatus = (unit: ArmyUnit) => {
+  // Helper to check if unit is active (not done and not dead)
+  const isUnitActive = useCallback((unit: ArmyUnit) => {
     const isSquad = unit.type === 'squad';
     const isDead = isSquad
       ? (unit.deadSoldiers?.length || 0) === (unit.data as Squad).soldiers.length
@@ -283,14 +282,8 @@ export default function GameSession({ army, setArmy, onInitiativeTriggerRef, sho
       ? (unit.data as Squad).soldiers.every((_, idx) => unit.deadSoldiers?.includes(idx) || unit.actionsUsed?.[idx]?.done)
       : unit.isMachineDone;
 
-    return { isDead, isDone };
-  };
-
-  // Helper to check if unit is active (not done and not dead)
-  const isUnitActive = useCallback((unit: ArmyUnit) => {
-    const status = getUnitStatus(unit);
-    return !status.isDead && !status.isDone;
-  }, [getUnitStatus]);
+    return !isDead && !isDone;
+  }, []);
 
   // Get indices of active units only
   const activeUnitIndices = useCallback(() => {
@@ -471,7 +464,7 @@ export default function GameSession({ army, setArmy, onInitiativeTriggerRef, sho
             const elements: React.ReactNode[] = [];
             let lastStatus = -1;
 
-            sortedUnits.forEach(({ unit, idx: originalIndex }, arrayIndex) => {
+            sortedUnits.forEach(({ unit, idx: originalIndex }, _arrayIndex) => {
               const dockStyles = getUnitDockStyles(army.faction);
               const isActive = focusedUnitIdx === originalIndex;
               const statusBarClasses = getUnitStatusBarClasses(unit, dockStyles);

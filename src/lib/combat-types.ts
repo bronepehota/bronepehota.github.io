@@ -126,7 +126,7 @@ export type CombatFlowAction =
   | { type: 'CLOSE_COMBAT' }
   | { type: 'CANCEL' }
   // Grenade-specific actions
-  | { type: 'GRENADE_CHECK_TARGET'; armor: number }
+  | { type: 'GRENADE_CHECK_TARGET'; armor: number; d20Roll?: number }
   | { type: 'GRENADE_SET_ARMOR'; armor: number };
 
 /**

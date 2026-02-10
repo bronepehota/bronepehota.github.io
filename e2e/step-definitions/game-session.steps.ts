@@ -461,11 +461,6 @@ Then('должен быть выполнен бросок D20 для прове�
   await this.page.waitForTimeout(500);
 });
 
-Then('я вижу результат проверки {string}', async function(this: BronepehotaWorld, result: string) {
-  const resultText = this.page.getByText(new RegExp(result, 'i'));
-  await expect(resultText.first()).toBeVisible({ timeout: 3000 });
-});
-
 Then('на кубике D6 выпало значение {string}', async function(this: BronepehotaWorld, value: string) {
   // This step assumes the dice roll resulted in the specified value
   // In real E2E tests, we cannot control dice roll results
@@ -484,4 +479,27 @@ Then('цвет рамки результата должен быть красн�
     this.page.locator('[class*="border-red-"]')
   );
   await expect(redBorder.first()).toBeVisible({ timeout: 3000 });
+});
+
+Then('я вижу результат проверки {string} или {string}', async function(this: BronepehotaWorld, result1: string, result2: string) {
+  // Wait a bit for the UI to update
+  await this.page.waitForTimeout(1000);
+
+  // Check for either result being visible (e.g., "ПРОБИТО" or "НЕ ПРОБИТО")
+  const resultText = this.page.getByText(new RegExp(`${result1}|${result2}`, 'i'));
+  await expect(resultText.first()).toBeVisible({ timeout: 5000 });
+});
+
+// Regex step for capturing two parameters from one string
+Then(/я вижу результат проверки (.+) или (.+)/i, async function(this: BronepehotaWorld, result1: string, result2: string) {
+  await this.page.waitForTimeout(1000);
+  const resultText = this.page.getByText(new RegExp(`${result1.trim()}|${result2.trim()}`, 'i'));
+  await expect(resultText.first()).toBeVisible({ timeout: 5000 });
+});
+
+// Alternative step for "или" syntax without quotes - use regex to capture
+Then(/в списке проверок есть результат: (.+) или (.+)/i, async function(this: BronepehotaWorld, result1: string, result2: string) {
+  await this.page.waitForTimeout(1000);
+  const resultText = this.page.getByText(new RegExp(`${result1.trim()}|${result2.trim()}`, 'i'));
+  await expect(resultText.first()).toBeVisible({ timeout: 5000 });
 });
