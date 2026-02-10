@@ -17,7 +17,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 npm run dev              # Start Next.js dev server (http://localhost:3000)
 npm run dev:e2e          # Start dev server on port 3001 for E2E tests
 
-# Building
+# Building//re
 npm run build            # Production build
 npm run start            # Run production server
 
@@ -138,6 +138,39 @@ Adding a new rules version:
 - `FortificationSelector.tsx` - Fortification selection for units
 - `DiceRoller.tsx` - Animated dice rolling component
 - `SafeImage.tsx` - Image component with error handling
+
+**Combat Components** (`src/components/combat/`):
+- `BottomSheetCombatModal.tsx` - Modal for all combat actions (shot, melee, grenade)
+- `ActionSelector.tsx` - Choose action type: ВЫСТРЕЛ/БЛИЖНИЙ БОЙ/ГРАНАТА
+- `ParameterInputs.tsx` - Set distance, armor, cover before attack
+- `CombatResults.tsx` - Display attack results with grenade blast zone and target checks
+- `DiceAnimation.tsx` - Animated dice rolling visuals
+
+### Grenade Combat Mechanics
+
+**Two-phase grenade flow (per Fan rules lines 1161-1213)**:
+
+**Phase 1: Determine Explosion Location**
+- Roll D6 + soldier's army rank (A) = explosion distance
+- Display: "Взрыв на расстоянии X шагов [Y-Z см]" (X ± 1 step)
+- Warning if D6 roll = 1: "⚠️ Опасно! Вы в зоне взрыва!"
+- Example: D6=4, rank=2 → distance=6 → blast zone [5-7 steps, 20-28 cm]
+
+**Phase 2: Check Targets in Blast Zone**
+- Input: "Броня цели" (with memory for last value)
+- Button: **ВЗРЫВ** → rolls 1D20 vs target armor
+- Result: D20 > armor = ПРОБИТО, D20 ≤ armor = НЕ ПРОБИТО
+- Can repeat for multiple targets in blast zone
+
+**Implementation**:
+- `useCombatFlow.ts`: `executeGrenade()` (Phase 1) and `checkGrenadeTarget()` (Phase 2)
+- `combat-types.ts`: `GrenadeBlastResult`, `grenadeDistance`, `grenadeBlastZone`, `grenadeBlastChecks`
+- `CombatResults.tsx`: Special grenade display with blast zone and target check UI
+
+**Grenade Usage**:
+- Only squads can throw grenades (not machines)
+- Grenades can be used once per battle (`grenadesUsed: true` after first use)
+- Soldier's army rank (0-7) is added to D6 roll for distance
 
 ### Adding New Units via JSON
 

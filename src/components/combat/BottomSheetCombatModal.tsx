@@ -21,6 +21,7 @@ interface BottomSheetCombatModalProps {
   onSetParameters: (params: Partial<CombatParameters>) => void;
   onExecuteAction: () => void;
   onApplyResult: () => void;
+  onGrenadeCheckTarget?: (armor: number) => void; // For grenade blast checks
   grenadesAvailable?: boolean;
   unitDisplayName?: string;
 }
@@ -74,6 +75,7 @@ export function BottomSheetCombatModal({
   onSetParameters,
   onExecuteAction,
   onApplyResult,
+  onGrenadeCheckTarget,
   grenadesAvailable = true,
   unitDisplayName: _unitDisplayName,
 }: BottomSheetCombatModalProps) {
@@ -255,6 +257,7 @@ export function BottomSheetCombatModal({
               onApply={onApplyResult}
               onGoBack={onGoBack}
               unitType={state.unitType}
+              onGrenadeCheckTarget={onGrenadeCheckTarget}
             />
           )}
         </div>

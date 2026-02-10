@@ -56,7 +56,7 @@ export function CompactArmyCard({ unit, onRemove, onClick, factionId, dataTestId
     setImageModalOpen(false);
   };
 
-  const getImageSrc = (): string | null => {
+  const _getImageSrc = (): string | null => {
     if (unit.data.image) return unit.data.image;
     if (!isMachine && (unit.data as Squad).soldiers[0]?.image) {
       return (unit.data as Squad).soldiers[0].image!;

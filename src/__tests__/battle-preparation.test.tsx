@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { BattlePreparationScreen } from '@/components/BattlePreparationScreen';
-import { Army, ArmyUnit } from '@/lib/types';
+import { Army } from '@/lib/types';
 
 describe('BattlePreparationScreen', () => {
   const mockArmy: Army = {

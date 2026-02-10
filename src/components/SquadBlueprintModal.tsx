@@ -1,6 +1,6 @@
 'use client';
 
-import { X, ExternalLink, Shield, Target, Zap, ChevronLeft, Sword } from 'lucide-react';
+import { X, ExternalLink, Shield, Target, Zap, ChevronLeft } from 'lucide-react';
 import { GitHubPagesImage as Image } from './GitHubPagesImage';
 import type { Squad } from '@/lib/types';
 import { cn } from '@/lib/utils';

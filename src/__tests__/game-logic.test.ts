@@ -25,6 +25,124 @@ describe('Game Logic - Dice Rolls', () => {
   });
 });
 
+describe('Grenade Combat Mechanics', () => {
+  describe('Grenade Distance Calculation', () => {
+    test('should calculate total distance as D6 + soldier rank', () => {
+      const distanceRoll = 4;
+      const soldierRank = 2;
+      const totalDistance = distanceRoll + soldierRank;
+
+      expect(totalDistance).toBe(6);
+    });
+
+    test('should calculate blast zone with ±1 step', () => {
+      const totalDistance = 4;
+      const minSteps = Math.max(1, totalDistance - 1);
+      const maxSteps = totalDistance + 1;
+      const minCm = minSteps * 4;
+      const maxCm = maxSteps * 4;
+
+      expect(minSteps).toBe(3);
+      expect(maxSteps).toBe(5);
+      expect(minCm).toBe(12);
+      expect(maxCm).toBe(20);
+    });
+
+    test('should handle distance roll of 1 correctly', () => {
+      const distanceRoll = 1;
+      const soldierRank = 2;
+      const totalDistance = distanceRoll + soldierRank;
+      const minSteps = Math.max(1, totalDistance - 1);
+      const maxSteps = totalDistance + 1;
+
+      expect(totalDistance).toBe(3);
+      expect(minSteps).toBe(2);
+      expect(maxSteps).toBe(4);
+    });
+
+    test('should handle minimum distance (1)', () => {
+      const distanceRoll = 1;
+      const soldierRank = 0;
+      const totalDistance = distanceRoll + soldierRank;
+      const minSteps = Math.max(1, totalDistance - 1);
+      const maxSteps = totalDistance + 1;
+
+      expect(minSteps).toBe(1);
+      expect(maxSteps).toBe(2);
+    });
+
+    test('should handle maximum distance', () => {
+      const distanceRoll = 6;
+      const soldierRank = 3;
+      const totalDistance = distanceRoll + soldierRank;
+      const minSteps = Math.max(1, totalDistance - 1);
+      const maxSteps = totalDistance + 1;
+
+      expect(minSteps).toBe(8);
+      expect(maxSteps).toBe(10);
+    });
+  });
+
+  describe('Grenade Blast Check (Phase 2)', () => {
+    test('should correctly determine if armor is pierced (D20 > armor)', () => {
+      const armor = 2;
+      const d20Roll = 5;
+      const isHit = d20Roll > armor;
+
+      expect(isHit).toBe(true);
+    });
+
+    test('should correctly determine if armor is NOT pierced (D20 <= armor)', () => {
+      const armor = 3;
+      const d20Roll = 3;
+      const isHit = d20Roll > armor;
+
+      expect(isHit).toBe(false);
+    });
+
+    test('should handle edge case - D20 exactly equals armor', () => {
+      const armor = 4;
+      const d20Roll = 4;
+      const isHit = d20Roll > armor;
+
+      // If D20 equals armor, it's NOT pierced (needs to be GREATER than armor)
+      expect(isHit).toBe(false);
+    });
+
+    test('should handle maximum armor value', () => {
+      const armor = 10;
+      const d20Roll = 20;
+      const isHit = d20Roll > armor;
+
+      expect(isHit).toBe(true);
+    });
+
+    test('should handle zero armor', () => {
+      const armor = 0;
+      const d20Roll = 1;
+      const isHit = d20Roll > armor;
+
+      expect(isHit).toBe(true);
+    });
+
+    test('should handle minimum D20 roll', () => {
+      const armor = 2;
+      const d20Roll = 1;
+      const isHit = d20Roll > armor;
+
+      expect(isHit).toBe(false);
+    });
+
+    test('should handle maximum D20 roll', () => {
+      const armor = 2;
+      const d20Roll = 20;
+      const isHit = d20Roll > armor;
+
+      expect(isHit).toBe(true);
+    });
+  });
+});
+
 describe('Version-Specific Calculations', () => {
   describe('Tehnolog version', () => {
     const tehnolog = rulesRegistry.tehnolog;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import InitiativeModal from '@/components/InitiativeModal';
 
 describe('InitiativeModal', () => {
@@ -184,7 +184,7 @@ describe('InitiativeModal', () => {
       await new Promise(resolve => setTimeout(resolve, 700));
     });
 
-    const diceBefore = screen.getByTestId('initiative-dice').textContent;
+    const _diceBefore = screen.getByTestId('initiative-dice').textContent;
 
     const rerollButton = screen.getByTestId('reroll-button');
     await act(async () => {

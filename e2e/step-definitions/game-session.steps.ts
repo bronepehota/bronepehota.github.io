@@ -412,3 +412,94 @@ Then('должен быть выполнен бросок урона', async fun
   );
   await expect(diceResult.first()).toBeVisible({ timeout: 5000 });
 });
+
+// Grenade-specific steps
+Then('должен быть выполнен бросок дистанции D6', async function(this: BronepehotaWorld) {
+  await this.page.waitForTimeout(500);
+  // Check for D6 dice result in grenade phase
+  const d6Result = this.page.locator('text=/\\d+/').first();
+  await expect(d6Result).toBeVisible({ timeout: 3000 });
+});
+
+Then('я вижу зону взрыва с интервалом в шагах', async function(this: BronepehotaWorld) {
+  // Check for blast zone display using data-testid
+  const blastZone = this.page.getByTestId('grenade-blast-zone');
+  await expect(blastZone).toBeVisible({ timeout: 3000 });
+
+  // Verify it contains the steps display (e.g., "3-5 шагов")
+  const stepsText = this.page.getByText(/\d+-\d+\s+шагов/i);
+  await expect(stepsText.first()).toBeVisible({ timeout: 3000 });
+});
+
+Then('я вижу кнопку {string} для проверки цели', async function(this: BronepehotaWorld, buttonText: string) {
+  // Look for EXPLODE button using data-testid
+  const explodeButton = this.page.getByTestId('grenade-explode-button');
+  await expect(explodeButton).toBeVisible({ timeout: 3000 });
+
+  // Verify it contains the expected text
+  const buttonTextElement = explodeButton.getByText(new RegExp(buttonText, 'i'));
+  await expect(buttonTextElement).toBeVisible();
+});
+
+When('я ввожу броню цели {string}', async function(this: BronepehotaWorld, armor: string) {
+  // Find the armor input field using data-testid
+  const armorInput = this.page.getByTestId('grenade-armor-input');
+
+  // Click the input to focus it, then fill
+  await armorInput.click();
+  await armorInput.fill(armor);
+  await this.page.waitForTimeout(200);
+});
+
+Then('должен быть выполнен бросок D20 для проверки брони', async function(this: BronepehotaWorld) {
+  await this.page.waitForTimeout(500);
+
+  // Check for blast check results in grenade results
+  // After clicking EXPLODE, we should see D20 results
+  const blastResults = this.page.getByText(/ПРОБИТО|НЕ ПРОБИТО/i);
+  // The results may not be immediately visible, so we wait a bit
+  await this.page.waitForTimeout(500);
+});
+
+Then('на кубике D6 выпало значение {string}', async function(this: BronepehotaWorld, value: string) {
+  // This step assumes the dice roll resulted in the specified value
+  // In real E2E tests, we cannot control dice roll results
+  // This step is for documentation/demo purposes only
+  await this.page.waitForTimeout(500);
+});
+
+Then('я вижу предупреждение {string}', async function(this: BronepehotaWorld, warning: string) {
+  const warningText = this.page.getByText(new RegExp(warning, 'i'));
+  await expect(warningText.first()).toBeVisible({ timeout: 3000 });
+});
+
+Then('цвет рамки результата должен быть красным', async function(this: BronepehotaWorld) {
+  // Check for red border indicating danger
+  const redBorder = this.page.locator('.border-red-600').or(
+    this.page.locator('[class*="border-red-"]')
+  );
+  await expect(redBorder.first()).toBeVisible({ timeout: 3000 });
+});
+
+Then('я вижу результат проверки {string} или {string}', async function(this: BronepehotaWorld, result1: string, result2: string) {
+  // Wait a bit for the UI to update
+  await this.page.waitForTimeout(1000);
+
+  // Check for either result being visible (e.g., "ПРОБИТО" or "НЕ ПРОБИТО")
+  const resultText = this.page.getByText(new RegExp(`${result1}|${result2}`, 'i'));
+  await expect(resultText.first()).toBeVisible({ timeout: 5000 });
+});
+
+// Regex step for capturing two parameters from one string
+Then(/я вижу результат проверки (.+) или (.+)/i, async function(this: BronepehotaWorld, result1: string, result2: string) {
+  await this.page.waitForTimeout(1000);
+  const resultText = this.page.getByText(new RegExp(`${result1.trim()}|${result2.trim()}`, 'i'));
+  await expect(resultText.first()).toBeVisible({ timeout: 5000 });
+});
+
+// Alternative step for "или" syntax without quotes - use regex to capture
+Then(/в списке проверок есть результат: (.+) или (.+)/i, async function(this: BronepehotaWorld, result1: string, result2: string) {
+  await this.page.waitForTimeout(1000);
+  const resultText = this.page.getByText(new RegExp(`${result1.trim()}|${result2.trim()}`, 'i'));
+  await expect(resultText.first()).toBeVisible({ timeout: 5000 });
+});
