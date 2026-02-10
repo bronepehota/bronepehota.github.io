@@ -22,7 +22,7 @@ export function checkPanicTrigger(
     return false;
   }
 
-  const squad = unit.data;
+  const squad = unit.data as any;
   const totalSoldiers = squad.soldiers.length;
   const deadCount = unit.deadSoldiers?.length || 0;
 

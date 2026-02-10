@@ -54,14 +54,14 @@ export function PanicTestModal({
 
   const handleConductTest = () => {
     setIsRolling(true);
-    const squad = unit.data;
+    const squad = unit.data as any;
     const soldiers = squad.soldiers || [];
     const deadIndices = unit.deadSoldiers || [];
 
     // Test all alive soldiers
     const testResults: PanicTestResult[] = [];
 
-    soldiers.forEach((_, index) => {
+    soldiers.forEach((_soldier: any, index: number) => {
       if (!deadIndices.includes(index)) {
         const result = executePanicTest(unit, index, rulesVersion);
         testResults.push(result);
@@ -83,7 +83,7 @@ export function PanicTestModal({
 
   if (!isOpen) return null;
 
-  const squad = unit.data;
+  const squad = unit.data as any;
   const soldiers = squad.soldiers || [];
   const deadIndices = unit.deadSoldiers || [];
 
@@ -129,7 +129,7 @@ export function PanicTestModal({
 
               {/* Soldier list */}
               <div className="w-full space-y-2">
-                {soldiers.map((soldier, index) => {
+                {soldiers.map((soldier: any, index: number) => {
                   if (deadIndices.includes(index)) return null;
                   return (
                     <div

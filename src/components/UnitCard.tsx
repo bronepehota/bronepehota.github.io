@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { GitHubPagesImage as Image } from './GitHubPagesImage';
-import { ArmyUnit, Squad, Machine, RulesVersionID, Weapon } from '@/lib/types';
+import { ArmyUnit, Squad, Machine, RulesVersionID, Weapon, PanicTestResult } from '@/lib/types';
 import { Shield, Sword, Target, Heart, CheckCircle2, Bomb, ChevronDown, ChevronUp, UserX, Plane, Skull, Wrench, Flame, Crosshair, X, Image as ImageIcon, Footprints } from 'lucide-react';
 import { formatUnitNumber } from '@/lib/unit-utils';
 import { getDefaultRulesVersion } from '@/lib/rules-registry';
@@ -15,6 +15,8 @@ import { PilotInfo } from '@/lib/types';
 import { PilotTestModal } from './combat/PilotTestModal';
 import { usePilotTestFlow } from '@/hooks/usePilotTestFlow';
 import MachineBlueprintModal from './machine/MachineBlueprintModal';
+import { PanicTestModal } from './PanicTestModal';
+import { checkPanicTrigger } from '@/lib/panic-logic';
 
 // Helper function to shorten weapon names for mobile
 const _shortenWeaponName = (name: string): string => {
@@ -58,6 +60,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
   const [pilotSurvivalTest, setPilotSurvivalTest] = useState<{ roll: number; survived: boolean; testedAt: number } | null>(null);
   const [selectedWeaponInfo, setSelectedWeaponInfo] = useState<{ weapon: Weapon; weaponIdx: number } | null>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [showPanicModal, setShowPanicModal] = useState(false);
 
   const combatController = useCombatFlowController();
   const pilotTestFlow = usePilotTestFlow();
@@ -117,7 +120,36 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
     const newDead = dead.includes(idx)
       ? dead.filter(i => i !== idx)
       : [...dead, idx];
-    updateUnit({ ...unit, deadSoldiers: newDead });
+
+    const updatedUnit = { ...unit, deadSoldiers: newDead };
+
+    // Check panic trigger for fan rules
+    if (rulesVersion === 'fan' && newDead.length > 0) {
+      // Use turn 1 as default (will be updated when turn tracking is implemented)
+      const currentTurn = 1;
+      const shouldTestPanic = checkPanicTrigger(updatedUnit, 'fan', currentTurn);
+      if (shouldTestPanic) {
+        setShowPanicModal(true);
+      }
+    }
+
+    updateUnit(updatedUnit);
+  };
+
+  const handlePanicTestComplete = (results: PanicTestResult[]) => {
+    const currentTurn = 1; // Default turn (will be updated when turn tracking is implemented)
+    const panicStates = results
+      .filter(r => r.isPanic)
+      .map(r => ({
+        soldierIndex: r.soldierIndex,
+        testRoll: r.roll,
+        rank: r.rank,
+        triggeredAtTurn: currentTurn,
+      }));
+
+    if (panicStates.length > 0) {
+      updateUnit({ ...unit, panicState: panicStates });
+    }
   };
 
   const updateMachineStat = (stat: 'durability' | 'ammo', delta: number) => {
@@ -438,6 +470,17 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
           machine={data as Machine}
           isOpen={showDetailsModal}
           onClose={() => setShowDetailsModal(false)}
+        />
+      )}
+
+      {/* Panic Test Modal */}
+      {showPanicModal && (
+        <PanicTestModal
+          isOpen={showPanicModal}
+          unit={unit}
+          rulesVersion={rulesVersion}
+          onTestComplete={handlePanicTestComplete}
+          onClose={() => setShowPanicModal(false)}
         />
       )}
 
