@@ -1,5 +1,5 @@
 // src/__tests__/panic-logic.test.ts
-import { checkPanicTrigger, executePanicTest } from '@/lib/panic-logic';
+import { checkPanicTrigger, executePanicTest, resolvePanic } from '@/lib/panic-logic';
 import { ArmyUnit } from '@/lib/types';
 
 describe('checkPanicTrigger', () => {
@@ -175,5 +175,67 @@ describe('executePanicTest', () => {
     };
     const result = executePanicTest(unit, 0, 'tehnolog');
     expect(result.isPanic).toBe(false);
+  });
+});
+
+describe('resolvePanic', () => {
+  test('removes panic states when turn increases', () => {
+    const unit: ArmyUnit = {
+      instanceId: 'test-1',
+      type: 'squad',
+      data: {
+        id: 'test-squad',
+        name: 'Test Squad',
+        faction: 'polaris',
+        cost: 100,
+        soldiers: [
+          { rank: 3, speed: 4, range: 'D6', power: '1D6', melee: 0, props: [], armor: 2 },
+        ],
+      },
+      panicState: [
+        { soldierIndex: 0, testRoll: 5, rank: 3, triggeredAtTurn: 1 },
+      ],
+    };
+    const updated = resolvePanic(unit, 2);
+    expect(updated.panicState).toBeUndefined();
+  });
+
+  test('keeps panic states when turn has not increased', () => {
+    const unit: ArmyUnit = {
+      instanceId: 'test-1',
+      type: 'squad',
+      data: {
+        id: 'test-squad',
+        name: 'Test Squad',
+        faction: 'polaris',
+        cost: 100,
+        soldiers: [
+          { rank: 3, speed: 4, range: 'D6', power: '1D6', melee: 0, props: [], armor: 2 },
+        ],
+      },
+      panicState: [
+        { soldierIndex: 0, testRoll: 5, rank: 3, triggeredAtTurn: 1 },
+      ],
+    };
+    const updated = resolvePanic(unit, 1);
+    expect(updated.panicState).toHaveLength(1);
+  });
+
+  test('handles units without panic state', () => {
+    const unit: ArmyUnit = {
+      instanceId: 'test-1',
+      type: 'squad',
+      data: {
+        id: 'test-squad',
+        name: 'Test Squad',
+        faction: 'polaris',
+        cost: 100,
+        soldiers: [
+          { rank: 3, speed: 4, range: 'D6', power: '1D6', melee: 0, props: [], armor: 2 },
+        ],
+      },
+    };
+    const updated = resolvePanic(unit, 2);
+    expect(updated.panicState).toBeUndefined();
   });
 });

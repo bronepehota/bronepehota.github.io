@@ -97,3 +97,28 @@ export function executePanicTest(
     rank,
   };
 }
+
+/**
+ * Resolve panic state at the start of a new turn
+ * @param unit - The army unit to resolve panic for
+ * @param currentTurn - Current turn number
+ * @returns Updated unit with panic resolved
+ */
+export function resolvePanic(unit: ArmyUnit, currentTurn: number): ArmyUnit {
+  if (!unit.panicState || unit.panicState.length === 0) {
+    return unit;
+  }
+
+  // Check if any panic was triggered in current turn
+  const hasCurrentTurnPanic = unit.panicState.some(
+    p => p.triggeredAtTurn === currentTurn
+  );
+
+  if (!hasCurrentTurnPanic) {
+    // Clear all panic states
+    const { panicState, ...rest } = unit;
+    return rest;
+  }
+
+  return unit;
+}
