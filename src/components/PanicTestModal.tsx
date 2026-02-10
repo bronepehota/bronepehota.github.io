@@ -101,7 +101,7 @@ export function PanicTestModal({
 
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 shrink-0">
-          <h2 className="text-sm font-black uppercase tracking-wider text-orange-500">
+          <h2 data-testid="panic-modal-title" className="text-sm font-black uppercase tracking-wider text-orange-500">
             Тест на панику
           </h2>
           <button
@@ -146,6 +146,7 @@ export function PanicTestModal({
               </div>
 
               <button
+                data-testid="panic-test-button"
                 onClick={handleConductTest}
                 disabled={isRolling}
                 className="w-full max-w-xs px-6 py-3 md:py-4 rounded-xl font-bold text-base md:text-lg shadow-lg active:scale-95 transition-all min-h-[52px] md:min-h-[56px] mt-4 flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-500 text-white disabled:opacity-30 disabled:cursor-not-allowed"
@@ -175,7 +176,7 @@ export function PanicTestModal({
                         result.isPanic ? "text-orange-400" : "text-green-400"
                       )}>
                         {result.isPanic ? (
-                          <span className="flex items-center gap-2">
+                          <span data-testid="panic-indicator" className="flex items-center gap-2">
                             <Footprints className="w-4 h-4" />
                             В ПАНИКЕ!
                           </span>
@@ -197,6 +198,7 @@ export function PanicTestModal({
               ))}
 
               <button
+                data-testid="panic-apply-button"
                 onClick={handleApply}
                 className="w-full px-6 py-3 md:py-4 rounded-xl font-bold text-base md:text-lg shadow-lg active:scale-95 transition-all min-h-[52px] md:min-h-[56px] mt-4 flex items-center justify-center gap-2 bg-slate-700 hover:bg-slate-600 text-white"
               >
