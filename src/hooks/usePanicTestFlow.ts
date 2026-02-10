@@ -15,7 +15,7 @@ export function usePanicTestFlow() {
     isRolling: false,
     results: [],
     unit: null,
-    rulesVersion: 'fan',
+    rulesVersion: 'community_star_system',
   });
 
   const startPanicTest = (unit: ArmyUnit) => {
@@ -24,7 +24,7 @@ export function usePanicTestFlow() {
       isRolling: false,
       results: [],
       unit,
-      rulesVersion: 'fan', // Default, can be overridden
+      rulesVersion: 'community_star_system', // Default, can be overridden
     });
   };
 

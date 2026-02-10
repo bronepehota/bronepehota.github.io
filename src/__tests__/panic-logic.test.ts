@@ -16,7 +16,7 @@ describe('checkPanicTrigger', () => {
       },
       deadSoldiers: [0, 1], // 2 out of 6 dead = 33%
     };
-    expect(checkPanicTrigger(unit, 'fan')).toBe(false);
+    expect(checkPanicTrigger(unit, 'community_star_system')).toBe(false);
   });
 
   test('returns true for squad with 50% losses (3 of 6)', () => {
@@ -32,10 +32,10 @@ describe('checkPanicTrigger', () => {
       },
       deadSoldiers: [0, 1, 2], // 3 out of 6 dead = 50%
     };
-    expect(checkPanicTrigger(unit, 'fan')).toBe(true);
+    expect(checkPanicTrigger(unit, 'community_star_system')).toBe(true);
   });
 
-  test('returns false for non-fan rules', () => {
+  test('returns false for non-community rules', () => {
     const unit: ArmyUnit = {
       instanceId: 'test-1',
       type: 'squad',
@@ -69,7 +69,7 @@ describe('checkPanicTrigger', () => {
       },
       currentDurability: 8,
     };
-    expect(checkPanicTrigger(unit, 'fan')).toBe(false);
+    expect(checkPanicTrigger(unit, 'community_star_system')).toBe(false);
   });
 
   test('returns false if panic already triggered this turn', () => {
@@ -86,7 +86,7 @@ describe('checkPanicTrigger', () => {
       deadSoldiers: [0, 1, 2],
       panicState: [{ soldierIndex: 0, testRoll: 5, rank: 3, triggeredAtTurn: 1 }],
     };
-    expect(checkPanicTrigger(unit, 'fan', 1)).toBe(false);
+    expect(checkPanicTrigger(unit, 'community_star_system', 1)).toBe(false);
   });
 });
 
@@ -113,7 +113,7 @@ describe('executePanicTest', () => {
         ],
       },
     };
-    const result = executePanicTest(unit, 0, 'fan');
+    const result = executePanicTest(unit, 0, 'community_star_system');
     expect(result.isPanic).toBe(true);
     expect(result.roll).toBe(5);
     expect(result.rank).toBe(3);
@@ -134,7 +134,7 @@ describe('executePanicTest', () => {
         ],
       },
     };
-    const result = executePanicTest(unit, 0, 'fan');
+    const result = executePanicTest(unit, 0, 'community_star_system');
     expect(result.isPanic).toBe(true); // 4 > 3
   });
 
@@ -153,7 +153,7 @@ describe('executePanicTest', () => {
         ],
       },
     };
-    const result = executePanicTest(unit, 0, 'fan');
+    const result = executePanicTest(unit, 0, 'community_star_system');
     expect(result.isPanic).toBe(false);
     expect(result.roll).toBe(2);
     expect(result.rank).toBe(7);

@@ -169,6 +169,17 @@ export function RulesSelector({
                         ))}
                       </ul>
                     )}
+                    {version.link && (
+                      <a
+                        href={version.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-blue-400 hover:text-blue-300 underline block"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Сообщество ВКонтакте →
+                      </a>
+                    )}
                   </div>
                 )}
               </div>

@@ -48,9 +48,14 @@ Given('я выбрал фракцию {string} с балансом {string} оч
   const landingButton = this.page.getByTestId('landing-cta-button').or(this.page.getByTestId('final-cta-button')).first();
   if (await landingButton.isVisible({ timeout: 3000 })) {
     await landingButton.click();
-    // Wait for URL to change to /app (Next.js client-side navigation)
-    await this.page.waitForURL('**/app', { timeout: 5000 });
-    await this.page.waitForLoadState('domcontentloaded', { timeout: 5000 });
+    // Wait for army builder elements to appear (more reliable than URL change)
+    // Look for unique elements that only exist on /app page
+    const armyBuilderElement = this.page.getByTestId('faction-selector').or(
+      this.page.getByText(/ПРАВИЛА ИГРЫ/i)
+    ).or(
+      this.page.getByRole('spinbutton') // Budget input
+    ).first();
+    await armyBuilderElement.waitFor({ state: 'visible', timeout: 10000 });
     await this.page.waitForTimeout(500);
   }
 

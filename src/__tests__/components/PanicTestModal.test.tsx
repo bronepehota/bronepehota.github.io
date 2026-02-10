@@ -23,7 +23,7 @@ describe('PanicTestModal', () => {
       <PanicTestModal
         isOpen={true}
         unit={mockUnit}
-        rulesVersion="fan"
+        rulesVersion="community_star_system"
         onTestComplete={jest.fn()}
         onClose={jest.fn()}
       />
@@ -36,7 +36,7 @@ describe('PanicTestModal', () => {
       <PanicTestModal
         isOpen={false}
         unit={mockUnit}
-        rulesVersion="fan"
+        rulesVersion="community_star_system"
         onTestComplete={jest.fn()}
         onClose={jest.fn()}
       />
@@ -50,7 +50,7 @@ describe('PanicTestModal', () => {
       <PanicTestModal
         isOpen={true}
         unit={mockUnit}
-        rulesVersion="fan"
+        rulesVersion="community_star_system"
         onTestComplete={jest.fn()}
         onClose={onClose}
       />
@@ -65,7 +65,7 @@ describe('PanicTestModal', () => {
       <PanicTestModal
         isOpen={true}
         unit={mockUnit}
-        rulesVersion="fan"
+        rulesVersion="community_star_system"
         onTestComplete={onTestComplete}
         onClose={jest.fn()}
       />

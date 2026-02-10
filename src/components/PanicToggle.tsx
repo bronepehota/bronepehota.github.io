@@ -73,7 +73,7 @@ export function PanicToggle({ enabled, onEnabledChange, rulesVersion }: PanicTog
                 МЕХАНИКА ПАНИКИ
               </h3>
               <p className="text-xs text-slate-500 font-mono mt-0.5">
-                {rulesVersion === 'fan' ? 'Правила Панова' : 'Дополнительная опция'}
+                {rulesVersion === 'community_star_system' ? 'Правила сообщества' : 'Дополнительная опция'}
               </p>
             </div>
           </div>
@@ -95,7 +95,7 @@ export function PanicToggle({ enabled, onEnabledChange, rulesVersion }: PanicTog
               <div className="flex items-start gap-2">
                 <AlertTriangle className="w-4 h-4 text-orange-400 mt-0.5 shrink-0" />
                 <p>
-                  <strong className="text-orange-300">Правила Панова:</strong> При 50% потерь отряд проходит тест на панику.
+                  <strong className="text-orange-300">Правила сообщества:</strong> При 50% потерь отряд проходит тест на панику.
                   D6 &gt; Армейский ранг = паника.
                 </p>
               </div>

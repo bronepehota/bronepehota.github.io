@@ -172,25 +172,25 @@ describe('Version-Specific Calculations', () => {
     });
   });
 
-  describe('Fan Edition version', () => {
-    const fan = rulesRegistry.fan;
+  describe('Community Star System version', () => {
+    const community = rulesRegistry.community_star_system;
 
     test('calculateHit works correctly', () => {
-      const result = fan.calculateHit('D6+2', 5);
+      const result = community.calculateHit('D6+2', 5);
       expect(result).toHaveProperty('success');
       expect(result).toHaveProperty('roll');
       expect(result).toHaveProperty('total');
     });
 
     test('calculateDamage works correctly', () => {
-      const result = fan.calculateDamage('2D6', 3);
+      const result = community.calculateDamage('2D6', 3);
       expect(result).toHaveProperty('damage');
       expect(result).toHaveProperty('rolls');
       expect(result.rolls.length).toBe(2);
     });
 
     test('calculateMelee works correctly', () => {
-      const result = fan.calculateMelee(4, 3);
+      const result = community.calculateMelee(4, 3);
       expect(result).toHaveProperty('attackerRoll');
       expect(result).toHaveProperty('attackerTotal');
       expect(result).toHaveProperty('defenderRoll');

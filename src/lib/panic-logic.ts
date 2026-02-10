@@ -34,8 +34,8 @@ export function checkPanicTrigger(
     return false;
   }
 
-  // Fan rules: automatic panic trigger at 50% losses
-  if (rulesVersion === 'fan') {
+  // Community rules: automatic panic trigger at 50% losses
+  if (rulesVersion === 'community_star_system') {
     const halfThreshold = Math.floor(totalSoldiers / 2);
     if (deadCount < halfThreshold) {
       return false;
@@ -88,8 +88,8 @@ export function executePanicTest(
   // Different panic conditions for different rules
   let isPanic = false;
 
-  if (rulesVersion === 'fan') {
-    // Fan rules: D6 > rank = panic
+  if (rulesVersion === 'community_star_system') {
+    // Community rules: D6 > rank = panic
     const rank = soldier.rank || 0;
     isPanic = roll > rank;
     return {

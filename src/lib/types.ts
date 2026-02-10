@@ -1,7 +1,7 @@
 export type FactionID = 'polaris' | 'protectorate' | 'mercenaries';
 
 // Rules version selection
-export type RulesVersionID = 'tehnolog' | 'fan';
+export type RulesVersionID = 'tehnolog' | 'community_star_system';
 
 // UI Control types
 export type ViewMode = 'browse' | 'army';
@@ -247,8 +247,9 @@ export interface RulesVersion {
   description?: string;      // 2-3 sentence explanation in Russian
   features?: string[];       // Array of key differences/abilities in Russian
   color?: string;            // Hex color code for visual theme (e.g., "#ef4444")
+  link?: string;             // External link (e.g., VK community)
   calculateHit: CalculateHitFn;
   calculateDamage: CalculateDamageFn;
   calculateMelee: CalculateMeleeFn;
-  supportsSpecialEffects: boolean; // Панов поддерживает special-эффекты
+  supportsSpecialEffects: boolean; // Community rules support special-effects (AoE, Repair, Burst)
 }

@@ -28,9 +28,9 @@ const TEHNOLOG_CONTENT = (
   </>
 );
 
-const FAN_CONTENT = (
+const COMMUNITY_CONTENT = (
   <>
-    <h3 className="font-semibold mb-3 text-lg">Фанатские правила (Панов)</h3>
+    <h3 className="font-semibold mb-3 text-lg">Правила от Сообщества Star System</h3>
     <p className="mb-2"><strong>Попадание</strong>: Бросок кубика дальности должен быть больше или равен расстоянию до цели</p>
     <p className="mb-2"><strong>Урон по пехоте</strong>: Каждый кубик, пробивающий броню цели, наносит 1 ранение</p>
     <p className="mb-4"><strong>Урон по технике</strong>: Сравнение с зоной прочности<br />
@@ -50,7 +50,7 @@ const FAN_CONTENT = (
 export function RulesInfoModal({ isOpen, onClose, rulesVersion }: RulesInfoModalProps) {
   if (!isOpen) return null;
 
-  const content = rulesVersion === 'tehnolog' ? TEHNOLOG_CONTENT : FAN_CONTENT;
+  const content = rulesVersion === 'tehnolog' ? TEHNOLOG_CONTENT : COMMUNITY_CONTENT;
 
   return (
     <div

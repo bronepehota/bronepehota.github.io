@@ -1,11 +1,11 @@
 import { RulesVersion, RulesVersionID } from './types';
 import { tehnologRules } from './rules/tehnolog';
-import { fanRules } from './rules/fan';
+import { communityStarSystemRules } from './rules/community_star_system';
 
 // Rules version registry with type safety
 export const rulesRegistry: Record<RulesVersionID, RulesVersion> = {
   tehnolog: tehnologRules,
-  fan: fanRules,
+  community_star_system: communityStarSystemRules,
 };
 
 // Get default rules version

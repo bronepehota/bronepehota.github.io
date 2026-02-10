@@ -45,7 +45,7 @@ export function CombatResults({
 
   // Calculate effective distance/armor for display
   const getEffectiveDistance = () => {
-    if (rulesVersion === 'fan' && parameters.fortification !== 'none') {
+    if (rulesVersion === 'community_star_system' && parameters.fortification !== 'none') {
       const bonus = parameters.fortification === 'light' ? 1 : 2;
       return parameters.distance + bonus;
     }

@@ -123,11 +123,11 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
 
     const updatedUnit = { ...unit, deadSoldiers: newDead };
 
-    // Check panic trigger for fan rules
-    if (rulesVersion === 'fan' && newDead.length > 0) {
+    // Check panic trigger for community rules
+    if (rulesVersion === 'community_star_system' && newDead.length > 0) {
       // Use turn 1 as default (will be updated when turn tracking is implemented)
       const currentTurn = 1;
-      const shouldTestPanic = checkPanicTrigger(updatedUnit, 'fan', currentTurn);
+      const shouldTestPanic = checkPanicTrigger(updatedUnit, 'community_star_system', currentTurn);
       if (shouldTestPanic) {
         setShowPanicModal(true);
       }

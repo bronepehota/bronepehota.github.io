@@ -234,7 +234,7 @@ export function ParameterInputs({
         <div className="flex items-center gap-1.5 px-2 py-1 bg-orange-900/10 border border-orange-700/30 rounded">
           <Shield size={12} className="text-orange-400 shrink-0" />
           <span className="text-[10px] text-orange-400">
-            Укрытие: +{parameters.fortification === 'light' ? '1' : '2'} к {rulesVersion === 'fan' ? 'дистанции' : 'броне'}
+            Укрытие: +{parameters.fortification === 'light' ? '1' : '2'} к {rulesVersion === 'community_star_system' ? 'дистанции' : 'броне'}
           </span>
         </div>
       )}
