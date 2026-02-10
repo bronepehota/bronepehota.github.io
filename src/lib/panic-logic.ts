@@ -49,3 +49,51 @@ export function checkPanicTrigger(
 
   return true;
 }
+
+/**
+ * Execute panic test for a specific soldier
+ * @param unit - The army unit
+ * @param soldierIndex - Index of the soldier to test
+ * @param rulesVersion - Current rules version
+ * @returns PanicTestResult with roll and panic status
+ */
+export function executePanicTest(
+  unit: ArmyUnit,
+  soldierIndex: number,
+  rulesVersion: RulesVersionID
+): PanicTestResult {
+  // For now, only fan rules implement panic logic
+  if (rulesVersion !== 'fan') {
+    const soldier = (unit.data as any).soldiers?.[soldierIndex];
+    return {
+      soldierIndex,
+      isPanic: false,
+      roll: 0,
+      rank: soldier?.rank || 0,
+    };
+  }
+
+  const soldier = (unit.data as any).soldiers?.[soldierIndex];
+  if (!soldier) {
+    return {
+      soldierIndex,
+      isPanic: false,
+      roll: 0,
+      rank: 0,
+    };
+  }
+
+  // Roll D6
+  const roll = Math.floor(Math.random() * 6) + 1;
+  const rank = soldier.rank || 0;
+
+  // Panic if roll > rank (fan rules)
+  const isPanic = roll > rank;
+
+  return {
+    soldierIndex,
+    isPanic,
+    roll,
+    rank,
+  };
+}

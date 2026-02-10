@@ -1,5 +1,5 @@
 // src/__tests__/panic-logic.test.ts
-import { checkPanicTrigger } from '@/lib/panic-logic';
+import { checkPanicTrigger, executePanicTest } from '@/lib/panic-logic';
 import { ArmyUnit } from '@/lib/types';
 
 describe('checkPanicTrigger', () => {
@@ -87,5 +87,93 @@ describe('checkPanicTrigger', () => {
       panicState: [{ soldierIndex: 0, testRoll: 5, rank: 3, triggeredAtTurn: 1 }],
     };
     expect(checkPanicTrigger(unit, 'fan', 1)).toBe(false);
+  });
+});
+
+describe('executePanicTest', () => {
+  beforeEach(() => {
+    jest.spyOn(Math, 'random').mockReturnValue(0.8); // Will roll 5 on D6
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('returns panic when roll > rank (roll=5, rank=3)', () => {
+    const unit: ArmyUnit = {
+      instanceId: 'test-1',
+      type: 'squad',
+      data: {
+        id: 'test-squad',
+        name: 'Test Squad',
+        faction: 'polaris',
+        cost: 100,
+        soldiers: [
+          { rank: 3, speed: 4, range: 'D6', power: '1D6', melee: 0, props: [], armor: 2 },
+        ],
+      },
+    };
+    const result = executePanicTest(unit, 0, 'fan');
+    expect(result.isPanic).toBe(true);
+    expect(result.roll).toBe(5);
+    expect(result.rank).toBe(3);
+  });
+
+  test('returns panic when roll == rank + 1 (roll=4, rank=3)', () => {
+    jest.spyOn(Math, 'random').mockReturnValue(0.5); // Will roll 4 on D6
+    const unit: ArmyUnit = {
+      instanceId: 'test-1',
+      type: 'squad',
+      data: {
+        id: 'test-squad',
+        name: 'Test Squad',
+        faction: 'polaris',
+        cost: 100,
+        soldiers: [
+          { rank: 3, speed: 4, range: 'D6', power: '1D6', melee: 0, props: [], armor: 2 },
+        ],
+      },
+    };
+    const result = executePanicTest(unit, 0, 'fan');
+    expect(result.isPanic).toBe(true); // 4 > 3
+  });
+
+  test('returns success when roll < rank (roll=2, rank=7)', () => {
+    jest.spyOn(Math, 'random').mockReturnValue(0.3); // Will roll 2 on D6
+    const unit: ArmyUnit = {
+      instanceId: 'test-1',
+      type: 'squad',
+      data: {
+        id: 'test-squad',
+        name: 'Test Squad',
+        faction: 'polaris',
+        cost: 100,
+        soldiers: [
+          { rank: 7, speed: 4, range: 'D6', power: '1D6', melee: 0, props: [], armor: 2 },
+        ],
+      },
+    };
+    const result = executePanicTest(unit, 0, 'fan');
+    expect(result.isPanic).toBe(false);
+    expect(result.roll).toBe(2);
+    expect(result.rank).toBe(7);
+  });
+
+  test('for tehnolog rules, always returns success (no panic logic)', () => {
+    const unit: ArmyUnit = {
+      instanceId: 'test-1',
+      type: 'squad',
+      data: {
+        id: 'test-squad',
+        name: 'Test Squad',
+        faction: 'polaris',
+        cost: 100,
+        soldiers: [
+          { rank: 3, speed: 4, range: 'D6', power: '1D6', melee: 0, props: [], armor: 2 },
+        ],
+      },
+    };
+    const result = executePanicTest(unit, 0, 'tehnolog');
+    expect(result.isPanic).toBe(false);
   });
 });
