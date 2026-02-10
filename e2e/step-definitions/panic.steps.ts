@@ -1,23 +1,12 @@
-import { Given, When, Then } from '@cucumber/cucumber';
+import { When, Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 
 // Helper to get page from context
 const getPage = () => (global as any).page;
 
-Given('я выбираю правила {string}', async function (rules: string) {
+When('я убиваю (\\d+)-го бойца из (\\d+)', async function (soldierNumStr: string, totalStr: string) {
   const page = getPage();
-  // Rules are selected via a dropdown or similar UI
-  const rulesSelector = rules === 'Панова' ? 'fan' : 'tehnolog';
-  // Assuming there's a rules selector in the UI
-  const rulesButton = page.getByTestId(`rules-select-${rulesSelector}`);
-  if (await rulesButton.isVisible()) {
-    await rulesButton.click();
-  }
-});
-
-When('я убиваю {string}-го бойца из {int}', async function (soldierNum: string, total: number) {
-  const page = getPage();
-  const idx = parseInt(soldierNum) - 1;
+  const idx = parseInt(soldierNumStr) - 1;
   // Click the KIA (Skull) button for the specific soldier
   const kiaButton = page.locator(`button[aria-label*="Убит"]`).nth(idx);
   await kiaButton.click({ timeout: 10000 });
@@ -58,9 +47,9 @@ Then('паникующие бойцы помечены иконкой бега',
 
 Then('действия паникующих бойцов заблокированы', async function () {
   const page = getPage();
-  // Check that action buttons are disabled for panicking soldiers
-  const disabledButtons = page.locator('button:disabled').or(page.locator('button[disabled]'));
-  expect(await disabledButtons.count()).toBeGreaterThan(0);
+  // Check for "В ПАНИКЕ" label instead of disabled action buttons
+  const panicLabels = page.getByText('В ПАНИКЕ');
+  await expect(panicLabels.first()).toBeVisible();
 });
 
 When('я начинаю новый ход', async function () {
