@@ -152,6 +152,11 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
     }
   };
 
+  const isSoldierInPanic = (soldierIndex: number): boolean => {
+    if (!unit.panicState || unit.panicState.length === 0) return false;
+    return unit.panicState.some(p => p.soldierIndex === soldierIndex);
+  };
+
   const updateMachineStat = (stat: 'durability' | 'ammo', delta: number) => {
     const max = stat === 'durability' ? (data as Machine).durability_max : (data as Machine).ammo_max;
     const current = stat === 'durability' ? unit.currentDurability! : unit.currentAmmo!;
@@ -684,6 +689,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                 const isDead = unit.deadSoldiers?.includes(idx);
                 const actions = unit.actionsUsed?.[idx] || { moved: false, shot: false, melee: false, done: false };
                 const isDone = actions.done;
+                const isInPanic = isSoldierInPanic(idx);
 
                 // Check if this soldier is a pilot
                 const soldier = (data as Squad).soldiers[idx];
@@ -745,6 +751,19 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                           </div>
                         </div>
                       )}
+
+                      {/* Panic overlay - footprints icon */}
+                      {isMounted && isInPanic && !isDead && !isDone && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-orange-950/30">
+                          <Footprints
+                            className="w-8 h-8 md:w-10 md:h-10 text-orange-400"
+                            strokeWidth={2}
+                            style={{
+                              filter: 'drop-shadow(0 0 8px rgba(251,146,60,0.8))'
+                            }}
+                          />
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex-1 flex flex-col justify-between min-w-0 gap-1.5 md:gap-2">
@@ -757,7 +776,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                       <div className="flex gap-2 md:gap-3 items-center">
                         {/* ДЕЙСТВИЕ button - fills available space */}
                         <button
-                          disabled={isDone || isDead}
+                          disabled={isDone || isDead || isInPanic}
                           onClick={() => combatController.startCombat(unit, idx)}
                           className={cn(
                             "relative flex-1 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 p-1.5 md:p-2 rounded-sm transition-all flex items-center justify-center gap-1.5 md:gap-2 overflow-hidden",
@@ -779,8 +798,8 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
 
                         {/* Done button */}
                         <button
-                          onClick={() => !isDead && toggleAction(idx, 'done')}
-                          disabled={isDone || isDead}
+                          onClick={() => !isDead && !isInPanic && toggleAction(idx, 'done')}
+                          disabled={isDone || isDead || isInPanic}
                           className={cn(
                             "relative p-1.5 md:p-2 rounded-sm transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border-2 overflow-hidden",
                             isDone ? "bg-emerald-950/30 border-emerald-700/50 text-emerald-400" : "bg-slate-900/60 border-slate-700 text-slate-500 hover:bg-slate-800/60"
