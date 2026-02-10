@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Army, ArmyUnit, Squad, PilotInfo } from '@/lib/types';
+import { resolvePanic } from '@/lib/panic-logic';
 import UnitCard from './UnitCard';
 import { History, User, Bot, X, Check } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
@@ -238,18 +239,23 @@ export default function GameSession({ army, setArmy, onInitiativeTriggerRef, sho
     // Сброс памяти параметров цели при начале нового тура
     resetTargetMemory();
 
+    const newTurn = (army.currentTurn || 1) + 1;
+
     setArmy({
       ...army,
-      currentTurn: (army.currentTurn || 1) + 1,
+      currentTurn: newTurn,
       units: army.units.map(u => {
+        // Resolve panic at the start of new turn
+        const unitWithoutPanic = resolvePanic(u, newTurn);
+
         if (u.type === 'squad') {
           return {
-            ...u,
+            ...unitWithoutPanic,
             actionsUsed: (u.data as Squad).soldiers.map(() => ({ moved: false, shot: false, melee: false, done: false }))
           };
         } else {
           return {
-            ...u,
+            ...unitWithoutPanic,
             isMachineMoved: false,
             isMachineShot: false,
             isMachineMelee: false,
