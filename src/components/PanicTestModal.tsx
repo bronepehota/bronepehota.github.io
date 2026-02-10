@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect } from 'react';
-import { X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { X, Check, Footprints } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useBottomSheet } from '@/hooks/useBottomSheet';
 import { ArmyUnit, RulesVersionID, PanicTestResult } from '@/lib/types';
+import { executePanicTest } from '@/lib/panic-logic';
 
 interface PanicTestModalProps {
   isOpen: boolean;
@@ -27,21 +28,64 @@ export function PanicTestModal({
     isEnabled: true,
   });
 
+  const [isRolling, setIsRolling] = useState(false);
+  const [results, setResults] = useState<PanicTestResult[]>([]);
+  const [showResults, setShowResults] = useState(false);
+
   // Handle escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
+      if (e.key === 'Escape' && isOpen && !isRolling) {
         onClose();
       }
     };
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, isRolling]);
+
+  // Reset state when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setResults([]);
+      setShowResults(false);
+      setIsRolling(false);
+    }
+  }, [isOpen]);
+
+  const handleConductTest = () => {
+    setIsRolling(true);
+    const squad = unit.data;
+    const soldiers = squad.soldiers || [];
+    const deadIndices = unit.deadSoldiers || [];
+
+    // Test all alive soldiers
+    const testResults: PanicTestResult[] = [];
+
+    soldiers.forEach((_, index) => {
+      if (!deadIndices.includes(index)) {
+        const result = executePanicTest(unit, index, rulesVersion);
+        testResults.push(result);
+      }
+    });
+
+    // Simulate dice rolling animation
+    setTimeout(() => {
+      setResults(testResults);
+      setShowResults(true);
+      setIsRolling(false);
+    }, 1000);
+  };
+
+  const handleApply = () => {
+    onTestComplete(results);
+    onClose();
+  };
 
   if (!isOpen) return null;
 
   const squad = unit.data;
   const soldiers = squad.soldiers || [];
+  const deadIndices = unit.deadSoldiers || [];
 
   return (
     <div className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-4">
@@ -62,8 +106,9 @@ export function PanicTestModal({
           </h2>
           <button
             onClick={onClose}
+            disabled={isRolling}
             aria-label="Close"
-            className="p-2 hover:bg-slate-800 rounded-lg transition-colors text-slate-400 hover:text-white min-w-[44px] min-h-[44px] flex items-center justify-center"
+            className="p-2 hover:bg-slate-800 rounded-lg transition-colors text-slate-400 hover:text-white min-w-[44px] min-h-[44px] flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <X className="w-5 h-5" />
           </button>
@@ -71,27 +116,95 @@ export function PanicTestModal({
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-6">
-          <div className="text-center">
-            <p className="text-sm text-slate-400 mb-4">
-              При гибели половины отряда пехотинцы должны пройти тест на панику
-            </p>
-            <p className="text-xs text-slate-500">
-              Бросок D6: если результат > Армейского ранга — паника
-            </p>
-          </div>
-
-          {/* TODO: Add soldier list and test functionality */}
-          <div className="mt-6">
-            {soldiers.map((soldier, index) => (
-              <div
-                key={index}
-                className="bg-slate-800 p-3 rounded-lg mb-2 flex items-center justify-between"
-              >
-                <span className="text-sm">Боец #{index + 1} (Ранг: {soldier.rank})</span>
-                <span className="text-xs text-slate-500">Ожидание...</span>
+          {!showResults ? (
+            <div className="flex flex-col items-center justify-center py-8 space-y-6">
+              <div className="text-center">
+                <p className="text-sm text-slate-400 mb-2">
+                  При гибели половины отряда пехотинцы должны пройти тест на панику
+                </p>
+                <p className="text-xs text-slate-500">
+                  Бросок D6: если результат &gt; Армейского ранга — паника
+                </p>
               </div>
-            ))}
-          </div>
+
+              {/* Soldier list */}
+              <div className="w-full space-y-2">
+                {soldiers.map((soldier, index) => {
+                  if (deadIndices.includes(index)) return null;
+                  return (
+                    <div
+                      key={index}
+                      className="bg-slate-800 p-3 rounded-lg flex items-center justify-between"
+                    >
+                      <span className="text-sm">Боец #{index + 1}</span>
+                      <span className="text-xs text-slate-500">
+                        Ранг: {soldier.rank}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <button
+                onClick={handleConductTest}
+                disabled={isRolling}
+                className="w-full max-w-xs px-6 py-3 md:py-4 rounded-xl font-bold text-base md:text-lg shadow-lg active:scale-95 transition-all min-h-[52px] md:min-h-[56px] mt-4 flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-500 text-white disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                {isRolling ? 'Бросаем кубики...' : 'ПРОВЕСТИ ТЕСТ'}
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {results.map((result, index) => (
+                <div
+                  key={index}
+                  className={cn(
+                    "bg-slate-800 p-4 rounded-xl border-2",
+                    result.isPanic
+                      ? "border-orange-500/50"
+                      : "border-green-500/50"
+                  )}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-[10px] opacity-50 uppercase mb-1">
+                        Боец #{result.soldierIndex + 1}
+                      </div>
+                      <div className={cn(
+                        "text-sm font-bold",
+                        result.isPanic ? "text-orange-400" : "text-green-400"
+                      )}>
+                        {result.isPanic ? (
+                          <span className="flex items-center gap-2">
+                            <Footprints className="w-4 h-4" />
+                            В ПАНИКЕ!
+                          </span>
+                        ) : (
+                          'Справился'
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-[10px] opacity-50 uppercase mb-1">
+                        Бросок / Ранг
+                      </div>
+                      <div className="text-lg font-black">
+                        {result.roll} / {result.rank}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              <button
+                onClick={handleApply}
+                className="w-full px-6 py-3 md:py-4 rounded-xl font-bold text-base md:text-lg shadow-lg active:scale-95 transition-all min-h-[52px] md:min-h-[56px] mt-4 flex items-center justify-center gap-2 bg-slate-700 hover:bg-slate-600 text-white"
+              >
+                <Check className="w-5 h-5" />
+                ПРИМЕНИТЬ
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

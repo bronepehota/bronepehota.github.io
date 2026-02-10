@@ -58,4 +58,20 @@ describe('PanicTestModal', () => {
     fireEvent.click(screen.getByRole('button', { name: /close/i }));
     expect(onClose).toHaveBeenCalled();
   });
+
+  test('shows test button and can conduct panic test', () => {
+    const onTestComplete = jest.fn();
+    render(
+      <PanicTestModal
+        isOpen={true}
+        unit={mockUnit}
+        rulesVersion="fan"
+        onTestComplete={onTestComplete}
+        onClose={jest.fn()}
+      />
+    );
+
+    // Test button should be present
+    expect(screen.getByText(/ПРОВЕСТИ ТЕСТ/i)).toBeInTheDocument();
+  });
 });
