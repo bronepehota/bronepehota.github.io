@@ -1,7 +1,6 @@
 // src/__tests__/hooks/usePanicTestFlow.test.ts
 import { renderHook, act } from '@testing-library/react';
 import { usePanicTestFlow } from '@/hooks/usePanicTestFlow';
-import { PanicTestResult } from '@/lib/types';
 
 describe('usePanicTestFlow', () => {
   test('initializes with default state', () => {

@@ -1,5 +1,5 @@
 // src/__tests__/army-unit-panic.test.ts
-import { ArmyUnit, PanicState } from '@/lib/types';
+import { ArmyUnit } from '@/lib/types';
 
 describe('ArmyUnit panic integration', () => {
   test('ArmyUnit accepts panicState field', () => {

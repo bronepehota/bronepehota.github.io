@@ -1,4 +1,4 @@
-import { ArmyUnit, PanicState, PanicTestResult, RulesVersionID } from './types';
+import { ArmyUnit, PanicTestResult, RulesVersionID } from './types';
 
 /**
  * Check if panic test should be triggered for a unit
@@ -116,7 +116,7 @@ export function resolvePanic(unit: ArmyUnit, currentTurn: number): ArmyUnit {
 
   if (!hasCurrentTurnPanic) {
     // Clear all panic states
-    const { panicState, ...rest } = unit;
+    const { panicState: _panicState, ...rest } = unit;
     return rest;
   }
 
