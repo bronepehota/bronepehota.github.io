@@ -169,6 +169,7 @@ export interface ArmyUnit {
   // [] = no weapons selected (unarmed variant)
   // [0, 2, 4] = only weapons at indices 0, 2, 4 are equipped
   selectedWeaponIndices?: number[]; // Indices into machine.weapons array
+  panicState?: PanicState[]; // Список паникующих солдат
 }
 
 export type ArmyCurrentStep = 'faction-select' | 'unit-select' | 'battle-prep' | 'battle';
