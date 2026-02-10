@@ -774,46 +774,62 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
 
                       {/* Row 1: Action buttons */}
                       <div className="flex gap-2 md:gap-3 items-center">
-                        {/* ДЕЙСТВИЕ button - fills available space */}
-                        <button
-                          disabled={isDone || isDead || isInPanic}
-                          onClick={() => combatController.startCombat(unit, idx)}
-                          className={cn(
-                            "relative flex-1 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 p-1.5 md:p-2 rounded-sm transition-all flex items-center justify-center gap-1.5 md:gap-2 overflow-hidden",
-                            "border-2 text-xs font-mono font-bold uppercase tracking-wider",
-                            "bg-purple-950/20 hover:bg-purple-950/40 border-purple-700/50 text-purple-400 active:scale-95"
-                          )}
-                          title="Выберите действие"
-                          aria-label="Выберите действие"
-                        >
-                          {/* Tech decoration */}
-                          <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-purple-600/40" />
-                          <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-purple-600/40" />
-                          <Crosshair className="w-4 h-4 md:w-5 md:h-5" />
-                          <span className="hidden sm:inline">ДЕЙСТВИЕ</span>
-                        </button>
+                        {/* ДЕЙСТВИЕ button - fills available space, replaced with panic label when panicking */}
+                        {isInPanic ? (
+                          <div className="relative flex-1 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 p-1.5 md:p-2 rounded-sm flex items-center justify-center gap-1.5 md:gap-2 overflow-hidden border-2 text-xs font-mono font-bold uppercase tracking-wider bg-orange-950/30 border-orange-700/50 text-orange-400">
+                            {/* Tech decoration */}
+                            <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-orange-600/40" />
+                            <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-orange-600/40" />
+                            <Footprints className="w-4 h-4 md:w-5 md:h-5" />
+                            <span className="hidden sm:inline">В ПАНИКЕ</span>
+                          </div>
+                        ) : (
+                          <button
+                            disabled={isDone || isDead}
+                            onClick={() => combatController.startCombat(unit, idx)}
+                            className={cn(
+                              "relative flex-1 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 p-1.5 md:p-2 rounded-sm transition-all flex items-center justify-center gap-1.5 md:gap-2 overflow-hidden",
+                              "border-2 text-xs font-mono font-bold uppercase tracking-wider",
+                              "bg-purple-950/20 hover:bg-purple-950/40 border-purple-700/50 text-purple-400 active:scale-95"
+                            )}
+                            title="Выберите действие"
+                            aria-label="Выберите действие"
+                          >
+                            {/* Tech decoration */}
+                            <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-purple-600/40" />
+                            <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-purple-600/40" />
+                            <Crosshair className="w-4 h-4 md:w-5 md:h-5" />
+                            <span className="hidden sm:inline">ДЕЙСТВИЕ</span>
+                          </button>
+                        )}
 
                         {/* Visual separator - desktop only */}
                         <div className="hidden md:block w-px h-8 bg-slate-700/50 mx-1" />
 
-                        {/* Done button */}
-                        <button
-                          onClick={() => !isDead && !isInPanic && toggleAction(idx, 'done')}
-                          disabled={isDone || isDead || isInPanic}
-                          className={cn(
-                            "relative p-1.5 md:p-2 rounded-sm transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border-2 overflow-hidden",
-                            isDone ? "bg-emerald-950/30 border-emerald-700/50 text-emerald-400" : "bg-slate-900/60 border-slate-700 text-slate-500 hover:bg-slate-800/60"
-                          )}
-                          title="Завершить ход бойца"
-                        >
-                          {isDone && (
-                            <>
-                              <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-emerald-600/40" />
-                              <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-emerald-600/40" />
-                            </>
-                          )}
-                          <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5" />
-                        </button>
+                        {/* Done button - disabled for panicking soldiers */}
+                        {isInPanic ? (
+                          <div className="relative p-1.5 md:p-2 rounded-sm min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border-2 overflow-hidden bg-orange-950/20 border-orange-700/30 text-orange-400/50">
+                            <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 opacity-50" />
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => !isDead && toggleAction(idx, 'done')}
+                            disabled={isDone || isDead}
+                            className={cn(
+                              "relative p-1.5 md:p-2 rounded-sm transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border-2 overflow-hidden",
+                              isDone ? "bg-emerald-950/30 border-emerald-700/50 text-emerald-400" : "bg-slate-900/60 border-slate-700 text-slate-500 hover:bg-slate-800/60"
+                            )}
+                            title="Завершить ход бойца"
+                          >
+                            {isDone && (
+                              <>
+                                <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-emerald-600/40" />
+                                <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-emerald-600/40" />
+                              </>
+                            )}
+                            <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5" />
+                          </button>
+                        )}
 
                         {/* KIA button - with Skull icon */}
                         <button
