@@ -220,6 +220,21 @@ export interface MeleeResult {
   attackerRolls?: number[]; // Fan rules: both attacker rolls when surprise attack
 }
 
+// Panic system types
+export interface PanicState {
+  soldierIndex: number;
+  testRoll: number;
+  rank: number;
+  triggeredAtTurn: number;
+}
+
+export interface PanicTestResult {
+  soldierIndex: number;
+  isPanic: boolean;
+  roll: number;
+  rank: number;
+}
+
 export type CalculateHitFn = (rangeStr: string, distanceSteps: number, fortification?: FortificationType) => HitResult;
 export type CalculateDamageFn = (powerStr: string, targetArmor: number, fortification?: FortificationType, special?: WeaponSpecial, isVehicle?: boolean, currentDurability?: number, durabilityMax?: number, vehicleData?: Machine) => DamageResult;
 export type CalculateMeleeFn = (attackerMelee: number, defenderMelee: number) => MeleeResult;
