@@ -34,6 +34,15 @@ interface ArmyBuilderProps {
 
 export default function ArmyBuilder({ army, setArmy, onEnterBattle, rulesVersion, onRulesVersionChange, displayMode, onDisplayModeChange }: ArmyBuilderProps) {
 
+  // Panic enabled state - persisted in localStorage
+  const [panicEnabled, setPanicEnabled] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('bronepehota_panic_enabled');
+      return saved !== null ? saved === 'true' : true; // Default to enabled
+    }
+    return true;
+  });
+
   // Setup step state for guided flow - sync with army.currentStep
   const [setupStep, setSetupStep] = useState<'faction' | 'budget' | 'rules' | 'units'>(() => {
     if (army.currentStep === 'unit-select') return 'units';
@@ -115,6 +124,8 @@ export default function ArmyBuilder({ army, setArmy, onEnterBattle, rulesVersion
                     versions={getAllRulesVersions()}
                     selectedVersion={rulesVersion}
                     onVersionChange={onRulesVersionChange}
+                    panicEnabled={panicEnabled}
+                    onPanicEnabledChange={setPanicEnabled}
                     onConfirm={() => {
                       setArmy({ ...army, currentStep: 'unit-select' });
                       setSetupStep('units');

@@ -12,6 +12,14 @@ export function checkPanicTrigger(
   rulesVersion: RulesVersionID,
   currentTurn?: number
 ): boolean {
+  // Check if panic is enabled in settings
+  if (typeof window !== 'undefined') {
+    const panicEnabled = localStorage.getItem('bronepehota_panic_enabled');
+    if (panicEnabled === 'false') {
+      return false; // Panic is disabled by user
+    }
+  }
+
   // Only fan rules have automatic panic trigger
   if (rulesVersion !== 'fan') {
     return false;

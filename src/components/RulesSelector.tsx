@@ -4,12 +4,15 @@ import { useState, useEffect, useRef, KeyboardEvent } from 'react';
 import { Book, Check } from 'lucide-react';
 import { clsx } from 'clsx';
 import type { RulesVersion, RulesVersionID } from '@/lib/types';
+import { PanicToggle } from './PanicToggle';
 
 interface RulesSelectorProps {
   versions: RulesVersion[];
   selectedVersion: RulesVersionID;
   onVersionChange: (id: RulesVersionID) => void;
   onConfirm?: () => void;
+  panicEnabled?: boolean;
+  onPanicEnabledChange?: (enabled: boolean) => void;
 }
 
 export function RulesSelector({
@@ -17,6 +20,8 @@ export function RulesSelector({
   selectedVersion,
   onVersionChange,
   onConfirm,
+  panicEnabled = true,
+  onPanicEnabledChange,
 }: RulesSelectorProps) {
   const [expandedRulesId, setExpandedRulesId] = useState<RulesVersionID | null>(null);
   const debouncedSaveRef = useRef<NodeJS.Timeout>();
@@ -71,6 +76,17 @@ export function RulesSelector({
         </div>
         <p className="text-sm text-slate-400">Выберите версию правил для вашей партии</p>
       </div>
+
+      {/* Panic toggle - optional setting */}
+      {onPanicEnabledChange && (
+        <div className="max-w-2xl mx-auto">
+          <PanicToggle
+            enabled={panicEnabled}
+            onEnabledChange={onPanicEnabledChange}
+            rulesVersion={selectedVersion}
+          />
+        </div>
+      )}
 
       {/* Responsive grid: single column mobile, 2-3 columns desktop */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
