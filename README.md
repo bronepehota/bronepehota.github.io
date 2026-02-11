@@ -59,7 +59,7 @@ _Таким образом, тур за туром битва продолжае
 
 ## Быстрый старт
 
-1. Откройте [https://luxor.github.io/bronepehota/](https://luxor.github.io/bronepehota/)
+1. Откройте [https://luxor.github.io/bronepehota/](https://luxor.github.i.куo/bronepehota/)
 2. Нажмите «Выбрать фракцию» и выберите одну из трёх фракций
 3. Укажите лимит очков для вашей армии
 4. Нажмите «+» чтобы добавить отряды или технику в вашу армию

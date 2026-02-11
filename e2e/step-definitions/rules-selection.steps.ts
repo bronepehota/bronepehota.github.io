@@ -191,8 +191,9 @@ When('я выбираю правила {string}', async function(this: Bronepeho
   const rulesIdMap: Record<string, string> = {
     'Технолог': 'tehnolog',
     'tehnolog': 'tehnolog',
-    'Панова': 'fan',
-    'fan': 'fan',
+    'Star System': 'community_star_system',
+    'community': 'community_star_system',
+    'Сообщество': 'community_star_system',
   };
 
   const rulesId = rulesIdMap[version] || version.toLowerCase();
@@ -278,7 +279,7 @@ Then('версия правил должна быть обновлена', async
 });
 
 Then('индикатор версии должен отображаться в интерфейсе', async function(this: BronepehotaWorld) {
-  const versionIndicator = this.page.locator('[class*="version"]').or(this.page.getByText(/Технолог|Панова/i));
+  const versionIndicator = this.page.locator('[class*="version"]').or(this.page.getByText(/Технолог|Сообщество|Star System/i));
   await expect(versionIndicator.first()).toBeVisible();
 });
 

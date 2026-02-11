@@ -282,8 +282,9 @@ Given('я выбрал правила {string}', async function(this: Bronepehot
   const rulesIdMap: Record<string, string> = {
     'Технолог': 'tehnolog',
     'tehnolog': 'tehnolog',
-    'Панова': 'fan',
-    'fan': 'fan',
+    'Star System': 'community_star_system',
+    'community': 'community_star_system',
+    'Сообщество': 'community_star_system',
   };
 
   const rulesId = rulesIdMap[rules] || rules.toLowerCase();
