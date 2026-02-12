@@ -39,9 +39,9 @@ Before(async function(this: BronepehotaWorld) {
   this.currentRulesVersion = null;
   this.armyState = null;
 
-  // Go to home page first to enable localStorage access
+  // Go to /app route first (army builder, not landing page)
   try {
-    await page.goto('http://localhost:3001', { waitUntil: 'domcontentloaded', timeout: 10000 });
+    await page.goto('http://localhost:3001/app', { waitUntil: 'domcontentloaded', timeout: 10000 });
     // Wait a bit for page to be ready
     await page.waitForTimeout(200);
     // Clear localStorage at the start of each scenario

@@ -17,6 +17,7 @@ default:
     - e2e/features/game-session.feature
     - e2e/features/rules-selection.feature
     - e2e/features/view-persistence.feature
+    - e2e/features/panic.feature
 
   # Test formatter
   format:
@@ -29,8 +30,8 @@ default:
   retry: 0
   dryRun: false
   failFast: false
-  parallel: 0
   strict: true
+  parallel: 0
   publishQuiet: false
 
   # Language
@@ -38,3 +39,8 @@ default:
 
   # Tags for filtering scenarios
   tags: "not @wip"
+
+  # Environment variables for E2E tests
+  env:
+    BASE_URL: http://localhost:3001
+    PORT: 3001

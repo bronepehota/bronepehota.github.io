@@ -11,7 +11,8 @@ When('я переключаюсь на вкладку {string}', async function(
     const tabs = this.page.locator('[role="tab"]');
     const count = await tabs.count();
     if (count >= 2) {
-      await tabs.nth(1).click({ timeout: 5000 });
+      // Use force: true to click through overlays
+      await tabs.nth(1).click({ timeout: 5000, force: true });
     }
     // Wait for view change
     await this.page.waitForTimeout(500);
@@ -20,7 +21,8 @@ When('я переключаюсь на вкладку {string}', async function(
     const tabs = this.page.locator('[role="tab"]');
     const count = await tabs.count();
     if (count >= 1) {
-      await tabs.nth(0).click({ timeout: 5000 });
+      // Use force: true to click through overlays
+      await tabs.nth(0).click({ timeout: 5000, force: true });
     }
     // Wait for view change
     await this.page.waitForTimeout(500);
@@ -28,12 +30,14 @@ When('я переключаюсь на вкладку {string}', async function(
 });
 
 Given('приложение загружено на главной странице', async function(this: BronepehotaWorld) {
-  await this.page.goto('http://localhost:3001');
+  // Navigate to /app route for army builder, not root landing page
+  await this.page.goto('http://localhost:3001/app');
   await this.page.waitForLoadState('networkidle');
 });
 
 Given('приложение загружено', async function(this: BronepehotaWorld) {
-  await this.page.goto('http://localhost:3001');
+  // Navigate to /app route for army builder, not root landing page
+  await this.page.goto('http://localhost:3001/app');
   await this.page.waitForLoadState('networkidle');
 });
 
@@ -105,6 +109,9 @@ When('я нажимаю кнопку {string}', async function(this: Bronepehota
     button = this.page.getByTestId('rules-confirm-button').or(
       this.page.getByRole('button', { name: /начать игру/i })
     );
+  } else if (buttonText === 'В БОЙ') {
+    // Skip - handled by panic steps
+    return;
   } else if (buttonText === 'Назад') {
     button = this.page.getByTestId('back-to-faction-button').or(
       this.page.getByText(/назад/i)
@@ -304,6 +311,15 @@ Given('я выбрал правила {string}', async function(this: Bronepehot
   this.currentRulesVersion = rules.toLowerCase();
 });
 
+// Battle mode entry step - click "В БОЙ" button
+When('battle: я нажимаю кнопку {string}', async function(this: BronepehotaWorld, buttonText: string) {
+  if (buttonText === 'В БОЙ' || buttonText === 'В Боi') {
+    // Handle "To Battle" button with longer timeout and force click
+    await this.page.locator('[data-testid="to-battle-button"]').click({ timeout: 15000, force: true });
+    await this.page.waitForTimeout(500);
+  }
+});
+
 Then('в шапке должен отображаться бренд фракции {string}', async function(this: BronepehotaWorld, factionName: string) {
   // Map English faction names to Russian display names
   const factionNameMap: Record<string, string> = {
@@ -428,4 +444,72 @@ Then('открывается модальное окно инициативы', 
 Then('я перехожу к экрану игрового сеанса', async function(this: BronepehotaWorld) {
   const gameSession = this.page.locator('[data-testid="game-session"]');
   await expect(gameSession.first()).toBeVisible({ timeout: 5000 });
+});
+
+// Army building steps
+
+Given('я добавляю отряд {string} в армию', async function(this: BronepehotaWorld, squadName: string) {
+  // First ensure we're on the unit selection step
+  const unitSelector = this.page.getByTestId('unit-selector').or(this.page.locator('#unit-selector'));
+
+  // Check if we need to navigate to unit selection
+  const isVisible = await unitSelector.isVisible({ timeout: 2000 });
+  if (!isVisible) {
+    // We might be on an earlier step, try to navigate forward
+    const factionCard = this.page.getByTestId('faction-card-polaris');
+    const factionVisible = await factionCard.isVisible({ timeout: 2000 });
+
+    if (factionVisible) {
+      // We're on faction selection, select faction
+      await factionCard.click();
+      await this.page.waitForTimeout(500);
+
+      // Click continue to go to budget
+      const continueButton = this.page.getByTestId('faction-continue-button');
+      if (await continueButton.isVisible({ timeout: 3000 })) {
+        await continueButton.click();
+        await this.page.waitForTimeout(500);
+      }
+
+      // Fill budget
+      const input = this.page.getByRole('spinbutton').or(this.page.getByPlaceholder(/очки|балл/i)).first();
+      if (await input.isVisible({ timeout: 3000 })) {
+        await input.fill('100');
+        await this.page.waitForTimeout(300);
+
+        // Click next to go to rules
+        const nextButton = this.page.getByTestId('budget-next-button').or(
+          this.page.getByRole('button', { name: /начать сбор армии/i })
+        );
+        await nextButton.first().click();
+        await this.page.waitForTimeout(1000);
+
+        // Select rules and continue
+        const rulesCard = this.page.getByTestId('rules-card-community_star_system').or(
+          this.page.getByTestId('rules-card-tehnolog')
+        );
+        if (await rulesCard.first().isVisible({ timeout: 3000 })) {
+          await rulesCard.first().click();
+          await this.page.waitForTimeout(500);
+
+          const confirmButton = this.page.getByTestId('rules-confirm-button').or(
+            this.page.getByRole('button', { name: /начать игру/i })
+          );
+          await confirmButton.first().click();
+          await this.page.waitForTimeout(1000);
+        }
+      }
+    }
+  }
+
+  // Wait for unit selector to be visible
+  await unitSelector.first().waitFor({ state: 'visible', timeout: 10000 });
+
+  // Find and click the squad card
+  const squadCard = this.page.getByText(new RegExp(squadName, 'i')).or(
+    this.page.locator('[data-testid^="squad-card"]')
+  );
+  await squadCard.first().waitFor({ state: 'visible', timeout: 5000 });
+  await squadCard.first().click();
+  await this.page.waitForTimeout(500);
 });
