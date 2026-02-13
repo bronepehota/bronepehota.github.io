@@ -109,9 +109,6 @@ When('я нажимаю кнопку {string}', async function(this: Bronepehota
     button = this.page.getByTestId('rules-confirm-button').or(
       this.page.getByRole('button', { name: /начать игру/i })
     );
-  } else if (buttonText === 'В БОЙ') {
-    // Skip - handled by panic steps
-    return;
   } else if (buttonText === 'Назад') {
     button = this.page.getByTestId('back-to-faction-button').or(
       this.page.getByText(/назад/i)
@@ -163,9 +160,33 @@ When('я нажимаю кнопку {string}', async function(this: Bronepehota
     button = this.page.getByTestId('start-turn-button').or(
       this.page.getByRole('button', { name: /начать тур/i })
     );
+  } else if (buttonText === 'Начать бой' || buttonText === 'НАЧАТЬ БОЙ') {
+    button = this.page.getByTestId('confirm-initiative-button').or(
+      this.page.getByRole('button', { name: /начать бой/i })
+    );
   } else if (buttonText === 'В БОЙ') {
-    // Handle "To Battle" button with longer timeout
-    await this.page.locator('[data-testid="to-battle-button"]').click({ timeout: 10000, force: true });
+    // Handle "To Battle" button - try multiple selectors and wait for visibility
+    let battleButton = this.page.locator('[data-testid="to-battle-button"]');
+
+    // Try to find button with alternative selectors
+    const isVisible = await battleButton.isVisible({ timeout: 3000 }).catch(() => false);
+
+    if (!isVisible) {
+      // Button might be in a different location or not yet visible
+      // Try alternative selectors
+      battleButton = this.page.getByRole('button', { name: /в бой/i }).or(
+        this.page.getByText('В БОЙ')
+      );
+    }
+
+    await battleButton.waitFor({ state: 'visible', timeout: 10000 }).catch(async () => {
+      // If still not found, take a screenshot and wait a bit more
+      await this.page.screenshot({ path: '/tmp/battle-button-debug.png' });
+      // Wait for UI to settle after tab switch
+      await this.page.waitForTimeout(1000);
+    });
+
+    await battleButton.click({ timeout: 10000, force: true });
     return;
   } else if (buttonText === 'Начать заново' || buttonText === 'Заново') {
     // Try to find the button using multiple approaches
@@ -242,9 +263,33 @@ Given('я нажал кнопку {string}', async function(this: BronepehotaWor
     button = this.page.getByTestId('start-turn-button').or(
       this.page.getByRole('button', { name: /начать тур/i })
     );
+  } else if (buttonText === 'Начать бой' || buttonText === 'НАЧАТЬ БОЙ') {
+    button = this.page.getByTestId('confirm-initiative-button').or(
+      this.page.getByRole('button', { name: /начать бой/i })
+    );
   } else if (buttonText === 'В БОЙ') {
-    // Handle "To Battle" button with longer timeout
-    await this.page.locator('[data-testid="to-battle-button"]').click({ timeout: 10000, force: true });
+    // Handle "To Battle" button - try multiple selectors and wait for visibility
+    let battleButton = this.page.locator('[data-testid="to-battle-button"]');
+
+    // Try to find button with alternative selectors
+    const isVisible = await battleButton.isVisible({ timeout: 3000 }).catch(() => false);
+
+    if (!isVisible) {
+      // Button might be in a different location or not yet visible
+      // Try alternative selectors
+      battleButton = this.page.getByRole('button', { name: /в бой/i }).or(
+        this.page.getByText('В БОЙ')
+      );
+    }
+
+    await battleButton.waitFor({ state: 'visible', timeout: 10000 }).catch(async () => {
+      // If still not found, take a screenshot and wait a bit more
+      await this.page.screenshot({ path: '/tmp/battle-button-debug.png' });
+      // Wait for UI to settle after tab switch
+      await this.page.waitForTimeout(1000);
+    });
+
+    await battleButton.click({ timeout: 10000, force: true });
     return;
   } else if (buttonText === 'Начать заново' || buttonText === 'Заново') {
     button = this.page.getByTestId('reset-fully-button');

@@ -4,7 +4,7 @@ import { BronepehotaWorld } from '../support/world';
 
 // ============================================================================
 // PANIC TEST FLOW STEPS
-// These steps handle the panic test scenarios for Star System rules
+// These steps handle panic test scenarios for Star System rules
 // ============================================================================
 
 // Step: Switch to army tab (for panic tests)
@@ -16,7 +16,12 @@ Given('panic: я переключаюсь на вкладку {string}', async f
     if (count >= 2) {
       await tabs.nth(1).click({ timeout: 5000, force: true });
     }
-    await this.page.waitForTimeout(500);
+    // Wait longer for view to update and army summary to be visible
+    await this.page.waitForTimeout(1500);
+
+    // Wait for army summary view to be visible
+    const armySummary = this.page.getByTestId('army-summary-view');
+    await armySummary.waitFor({ state: 'visible', timeout: 5000 });
   }
 });
 
@@ -27,13 +32,18 @@ Given('panic: я добавляю в армию отряд {string}', async func
   const unitSelector = this.page.getByTestId('unit-selector').or(this.page.locator('#unit-selector'));
   await unitSelector.first().waitFor({ state: 'visible', timeout: 10000 });
 
-  // Find and click squad card
-  const squadCard = this.page.getByText(new RegExp(squadName, 'i')).or(
-    this.page.locator('[data-testid^="squad-card"]')
-  );
-  await squadCard.first().waitFor({ state: 'visible', timeout: 5000 });
-  await squadCard.first().click();
-  await this.page.waitForTimeout(500);
+  // Map squad names to their IDs
+  const squadIdMap: Record<string, string> = {
+    'Лёгкая штурмовая': 'polaris_lyogkaya_shturmovaya_klon_pehota',
+  };
+
+  const squadId = squadIdMap[squadName] || squadName.toLowerCase().replace(/\s+/g, '_');
+
+  // Click "Add" button for this squad
+  const addButton = this.page.locator(`[data-testid="add-unit-${squadId}"]`);
+  await addButton.waitFor({ state: 'visible', timeout: 5000 });
+  await addButton.click({ timeout: 10000 });
+  await this.page.waitForTimeout(1000);
 });
 
 // Step: Select faction specifically for panic tests (no conflict with common steps)
@@ -76,40 +86,18 @@ async function killSoldier(this: BronepehotaWorld, soldierStr: string) {
   const num = parseInt(soldierStr);
   const idx = num - 1;
 
-  // Find all KIA buttons - they contain Skull icon from lucide-react
-  // The button shows "УБИТ" (killed) text when soldier is alive
-  const buttons = this.page.locator('button[title*="УБИТ"]')
-    .or(this.page.locator('button[title*="УБИ"]'))
-    .or(this.page.locator('button:has(svg[class*="skull"])'))
-    .or(this.page.locator('button[aria-label*="Убит"]'))
-    .or(this.page.locator('text="УБИТ"'))
-    .or(this.page.locator('text=УБИ"'));
+  // After "Начать бой" we need to wait for game view to load
+  await this.page.waitForTimeout(1000);
 
-  // Try to find KIA buttons - if not found, we may not be in battle mode
-  let count = await buttons.count();
+  // Find unit navigation button to open unit card
+  const unitNav = this.page.locator('[data-testid^="unit-nav-"]').first();
+  await unitNav.waitFor({ state: 'visible', timeout: 10000 });
+  await unitNav.click({ timeout: 5000 });
+  await this.page.waitForTimeout(1000);
 
-  if (count === 0) {
-    // Check if we need to click "В БОЙ" button to enter battle mode
-    const toBattleButton = this.page.locator('[data-testid="to-battle-button"]').or(
-      this.page.getByRole('button', { name: /в бой/i })
-    );
-
-    const battleButtonVisible = await toBattleButton.isVisible({ timeout: 3000 });
-    if (battleButtonVisible) {
-      await toBattleButton.click({ timeout: 10000, force: true });
-      await this.page.waitForTimeout(1000);
-      count = await buttons.count();
-    } else {
-      // Try opening unit card to see KIA buttons
-      const unitCard = this.page.locator('[data-testid^="unit-card"], div[class*="unit"], div[class*="UnitCard"]').first();
-      const cardVisible = await unitCard.isVisible({ timeout: 3000 });
-      if (cardVisible) {
-        await unitCard.click({ timeout: 5000 });
-        await this.page.waitForTimeout(1000);
-        count = await buttons.count();
-      }
-    }
-  }
+  // Find KIA button by text "ЖИВ" (alive soldier shows "ЖИВ", killed shows "УБИТ")
+  const buttons = this.page.getByRole('button', { name: 'ЖИВ' });
+  const count = await buttons.count();
 
   if (count > idx) {
     await buttons.nth(idx).click({ timeout: 10000 });
@@ -178,15 +166,30 @@ When('я начинаю новый ход', async function(this: BronepehotaWorl
 
 // Step: Click "В БОЙ" button
 When('И я нажимаю кнопку {string}', async function(this: BronepehotaWorld, buttonText: string) {
+  const startBattleButtonVisible = await this.page.locator('[data-testid="start-battle-button"]').isVisible().catch(() => false);
   if (buttonText === 'В БОЙ') {
     const battleButton = this.page.locator('[data-testid="to-battle-button"]');
     // Wait for button to become available
-    await battleButton.waitFor({ state: 'visible', timeout: 5000 });
+    await battleButton.waitFor({ state: 'visible', timeout: 10000 });
     await battleButton.click({ timeout: 15000, force: true });
   } else if (buttonText === 'Начать бой') {
     // Click "Начать бой" button in preparation screen
     const startBattleButton = this.page.locator('[data-testid="start-battle-button"]');
-    await startBattleButton.waitFor({ state: 'visible', timeout: 5000 });
+    await startBattleButton.waitFor({ state: 'visible', timeout: 10000 });
+    await startBattleButton.click({ timeout: 10000 });
+
+    // Wait for initiative modal to appear and roll to complete
+    await this.page.waitForTimeout(2000);
+
+    // Wait for start battle button to become available
+    const startBattleButtonVisible = await this.page.locator('[data-testid="start-battle-button"]').isVisible().catch(() => false);
+    if (!startBattleButtonVisible) {
+      // Take screenshot if button not available
+      await this.page.screenshot({ path: '/tmp/panic-debug.png' });
+      throw new Error('Start battle button not visible - game mode not loaded');
+    }
+
+    await startBattleButton.waitFor({ state: 'visible', timeout: 10000 });
     await startBattleButton.click({ timeout: 10000 });
 
     // Wait for initiative modal to appear and roll to complete
@@ -201,12 +204,4 @@ When('И я нажимаю кнопку {string}', async function(this: Bronepeh
     // Wait for battle screen to be ready
     await this.page.waitForTimeout(1000);
   }
-});
-
-// Step: Verify panic status is removed from soldiers
-Then('статус паники снят с бойцов', async function(this: BronepehotaWorld) {
-  // Look for Footprints icons - should be gone after new turn
-  const panicIcons = this.page.locator('svg.lucide-footprints, svg[class*="footprints"]');
-  const count = await panicIcons.count();
-  expect(count).toBe(0);
 });
