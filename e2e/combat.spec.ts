@@ -32,10 +32,12 @@ test.describe('Combat Mechanics', () => {
   });
 
   test('should display unit card in game session', async ({ page }) => {
-    // Find unit by instanceId
+    // Wait for unit card to be visible
+    await page.waitForSelector('[data-testid^="unit-nav-combat-unit-1"]', { timeout: 5000 });
+
     const unitCard = page.getByTestId('unit-nav-combat-unit-1');
 
-    await expect(unitCard.first()).toBeVisible({ timeout: 5000 });
+    await expect(unitCard.first()).toBeVisible();
   });
 
   test('should open combat modal', async ({ page }) => {

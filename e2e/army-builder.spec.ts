@@ -13,43 +13,38 @@ test.describe('Army Builder', () => {
       const army = {
         name: 'Test Army',
         faction: 'polaris',
-        units: [{
-          instanceId: 'test-1',
-          data: { id: 'test', name: 'Test', cost: 50, soldiers: [], image: '' },
-          instanceNumber: 1,
-          currentSoldiers: [1, 2, 3]
-        }],
-        totalCost: 50,
-        currentStep: 'unit-select', // This shows unit selector
+        units: [],
+        totalCost: 0,
+        currentStep: 'unit-select',
         isInBattle: false,
         currentTurn: 1
       };
       localStorage.setItem('bronepehota_army', JSON.stringify(army));
       localStorage.setItem('bronepehota_view', 'builder');
-      localStorage.setItem('bronepehota_view_mode', 'army'); // Army view mode
+      localStorage.setItem('bronepehota_view_mode', 'army');
     });
 
     await page.reload();
     await page.waitForLoadState('networkidle');
   });
 
-  test('should toggle display mode', async ({ page }) => {
-    // Find display mode toggle buttons by aria-label
-    const detailedButton = page.getByRole('button', { name: /подробный вид/i, exact: false });
-    const compactButton = page.getByRole('button', { name: /компактный вид/i, exact: false });
+  test('should display display mode toggle', async ({ page }) => {
+    // Find display mode toggle buttons by aria-label (more reliable than role)
+    const compactButton = page.getByLabel('Компактный вид').first();
+    const detailedButton = page.getByLabel('Подробный вид').first();
 
     // At least one should be visible in army view mode
-    const hasDetailed = await detailedButton.count() > 0;
     const hasCompact = await compactButton.count() > 0;
-    expect(hasDetailed || hasCompact).toBeTruthy();
+    const hasDetailed = await detailedButton.count() > 0;
+    expect(hasCompact || hasDetailed).toBeTruthy();
 
     // Click to toggle to compact mode
     if (hasCompact) {
-      await compactButton.first().click();
+      await compactButton.click();
       await page.waitForTimeout(500);
 
       // Verify mode changed - compact button should now be pressed
-      const isPressed = await compactButton.first().getAttribute('aria-pressed');
+      const isPressed = await compactButton.getAttribute('aria-pressed');
       expect(isPressed).toBe('true');
     }
   });
