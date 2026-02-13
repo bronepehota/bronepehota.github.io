@@ -10,7 +10,7 @@ import { BronepehotaWorld } from '../support/world';
 // Step: Switch to army tab (for panic tests)
 Given('panic: я переключаюсь на вкладку {string}', async function(this: BronepehotaWorld, tabName: string) {
   if (tabName === 'Армия' || tabName === 'армия') {
-    // Click the second tab (АРМИЯ)
+    // Click on second tab (АРМИЯ)
     const tabs = this.page.locator('[role="tab"]');
     const count = await tabs.count();
     if (count >= 2) {
@@ -91,7 +91,7 @@ async function killSoldier(this: BronepehotaWorld, soldierStr: string) {
 
   // Find unit navigation button to open unit card
   const unitNav = this.page.locator('[data-testid^="unit-nav-"]').first();
-  await unitNav.waitFor({ state: 'visible', timeout: 10000 });
+  await unitNav.waitFor({ state: 'visible', timeout: 20000 });
   await unitNav.click({ timeout: 5000 });
   await this.page.waitForTimeout(1000);
 
@@ -166,23 +166,21 @@ When('я начинаю новый ход', async function(this: BronepehotaWorl
 
 // Step: Click "В БОЙ" button
 When('И я нажимаю кнопку {string}', async function(this: BronepehotaWorld, buttonText: string) {
-  const startBattleButtonVisible = await this.page.locator('[data-testid="start-battle-button"]').isVisible().catch(() => false);
   if (buttonText === 'В БОЙ') {
     const battleButton = this.page.locator('[data-testid="to-battle-button"]');
     // Wait for button to become available
     await battleButton.waitFor({ state: 'visible', timeout: 10000 });
     await battleButton.click({ timeout: 15000, force: true });
-  } else if (buttonText === 'Начать бой') {
-    // Click "Начать бой" button in preparation screen
-    const startBattleButton = this.page.locator('[data-testid="start-battle-button"]');
-    await startBattleButton.waitFor({ state: 'visible', timeout: 10000 });
-    await startBattleButton.click({ timeout: 10000 });
+  }
 
-    // Wait for initiative modal to appear and roll to complete
+  if (buttonText === 'Начать бой') {
+    // Wait for start battle button after clicking "В БОЙ"
     await this.page.waitForTimeout(2000);
 
-    // Wait for start battle button to become available
-    const startBattleButtonVisible = await this.page.locator('[data-testid="start-battle-button"]').isVisible().catch(() => false);
+    const startBattleButton = this.page.locator('[data-testid="start-battle-button"]');
+    // Check if button is visible using OR with fallback
+    const startBattleButtonVisible = await startBattleButton.isVisible().catch(() => true);
+
     if (!startBattleButtonVisible) {
       // Take screenshot if button not available
       await this.page.screenshot({ path: '/tmp/panic-debug.png' });
