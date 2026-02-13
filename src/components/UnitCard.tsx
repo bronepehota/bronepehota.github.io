@@ -834,6 +834,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                         {/* KIA button - with Skull icon */}
                         <button
                           onClick={() => toggleDead(idx)}
+                          aria-label={isDead ? 'УБИТ' : 'ЖИВ'}
                           className={cn("relative p-1.5 md:p-2 rounded-sm font-mono font-black uppercase tracking-wider min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center gap-1 md:gap-1.5 border-2 overflow-hidden transition-all",
                             isDead ? "bg-red-950/40 border-red-700 text-red-300" : "bg-slate-900/60 border-slate-700 text-slate-500 hover:bg-slate-800/60"
                           )}

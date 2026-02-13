@@ -33,6 +33,7 @@ export function SharedControlPanel({
       {/* Compact/Detailed Toggle - Слева */}
       <button
         onClick={toggleDisplayMode}
+        data-testid="display-mode-toggle"
         className={clsx(
           'flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200',
           'border touch-manipulation',

@@ -1,0 +1,8 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../e2e-dist",
+    "types": ["@playwright/test"]
+  },
+  "include": ["*.spec.ts", "*.ts"]
+}
