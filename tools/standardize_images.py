@@ -180,6 +180,107 @@ def process_image(image_path: Path) -> dict:
     return result
 
 
+def generate_html_report(results: list):
+    """Generate HTML report with before/after comparison."""
+
+    # Calculate statistics
+    total = len(results)
+    success = sum(1 for r in results if r["status"] == "OK")
+    errors = total - success
+
+    # Build HTML
+    html = f"""<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Standardization Report</title>
+    <style>
+        * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+        body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #1e293b; color: #e2e8f0; padding: 20px; }}
+        h1 {{ margin-bottom: 20px; color: #f8fafc; }}
+        .stats {{ background: #334155; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; gap: 30px; }}
+        .stat {{ }}
+        .stat-value {{ font-size: 24px; font-weight: bold; color: #22c55e; }}
+        .stat-value.error {{ color: #ef4444; }}
+        .grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }}
+        .card {{ background: #334155; border-radius: 8px; padding: 12px; }}
+        .card.error {{ border: 2px solid #ef4444; }}
+        .card-header {{ font-size: 12px; color: #94a3b8; margin-bottom: 8px; word-break: break-all; }}
+        .images {{ display: flex; gap: 8px; margin-bottom: 8px; }}
+        .image-container {{ flex: 1; }}
+        .image-label {{ font-size: 10px; color: #64748b; margin-bottom: 4px; }}
+        .image-container img {{ width: 100%; height: auto; border-radius: 4px; background: #fff; }}
+        .meta {{ font-size: 11px; color: #94a3b8; display: flex; justify-content: space-between; }}
+        .status {{ font-weight: bold; }}
+        .status.ok {{ color: #22c55e; }}
+        .status.error {{ color: #ef4444; }}
+    </style>
+</head>
+<body>
+    <h1>Image Standardization Report</h1>
+    <div class="stats">
+        <div class="stat">
+            <div class="stat-value">{total}</div>
+            <div>Total Images</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value">{success}</div>
+            <div>Processed</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value error">{errors}</div>
+            <div>Errors</div>
+        </div>
+    </div>
+    <div class="grid">
+"""
+
+    for result in results:
+        status_class = "ok" if result["status"] == "OK" else "error"
+        card_class = "" if result["status"] == "OK" else "error"
+
+        # Get backup path for "before" image
+        rel_path = result["path"]
+        backup_path = f"squads_backup/{rel_path}"
+        processed_path = f"squads/{rel_path}"
+
+        orig_size = result["original_size"]
+        orig_size_str = f"{orig_size[0]}x{orig_size[1]}" if orig_size else "N/A"
+
+        html += f"""
+        <div class="card {card_class}">
+            <div class="card-header">{rel_path}</div>
+            <div class="images">
+                <div class="image-container">
+                    <div class="image-label">Before ({orig_size_str})</div>
+                    <img src="{backup_path}" alt="Before">
+                </div>
+                <div class="image-container">
+                    <div class="image-label">After (300x400)</div>
+                    <img src="{processed_path}" alt="After">
+                </div>
+            </div>
+            <div class="meta">
+                <span class="status {status_class}">{result["status"]}</span>
+                {f'<span>{result["error"]}</span>' if result.get("error") else ''}
+            </div>
+        </div>
+"""
+
+    html += """
+    </div>
+</body>
+</html>
+"""
+
+    # Write report
+    with open(REPORT_PATH, "w", encoding="utf-8") as f:
+        f.write(html)
+
+    print(f"\nReport saved to: {REPORT_PATH}")
+
+
 def main():
     print("=" * 60)
     print("Image Standardization Script")
@@ -217,6 +318,10 @@ def main():
     # Summary
     success_count = sum(1 for r in results if r["status"] == "OK")
     print(f"\nCompleted: {success_count}/{len(images)} images processed successfully")
+
+    # Generate report
+    print("\nGenerating HTML report...")
+    generate_html_report(results)
 
 
 if __name__ == "__main__":
