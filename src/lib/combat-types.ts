@@ -146,7 +146,7 @@ export interface WeaponSelection {
  * Combat configuration
  */
 export interface CombatConfig {
-  rulesVersion: string;       // 'tehnolog' or 'fan'
+  rulesVersion: string;       // 'tehnolog' or 'community_star_system'
   enableSound?: boolean;      // Dice roll sounds
   animationSpeed?: 'fast' | 'normal' | 'slow';
 }

@@ -31,10 +31,10 @@ npm run test             # Run all Jest unit tests
 npm run test:watch       # Run tests in watch mode
 npm run test:ci          # Run tests with coverage (CI mode)
 
-# E2E Testing (requires running app on http://localhost:3000)
-npm run test:e2e         # Run Cucumber E2E tests (headless)
+# E2E Testing
+npm run test:e2e         # Run Playwright E2E tests (headless)
 npm run test:e2e:headed  # Run E2E tests with visible browser
-npm run test:e2e:debug   # Run E2E tests in slow motion for debugging
+npm run test:e2e:debug   # Run E2E tests in debug mode with inspector
 ```
 
 ## Architecture
@@ -273,47 +273,38 @@ Adding a new rules version:
 - Test files location: `src/__tests__/`
 - Run with: `npm run test`
 
-**E2E Tests (Cucumber + Playwright)**:
-- BDD-style tests with Russian Gherkin syntax
-- Test files location: `e2e/features/`
-- Step definitions: `e2e/step-definitions/`
-- Configuration: `e2e/cucumber.yaml`
-- **Requires running application** on `http://localhost:3001` (use `npm run dev:e2e`)
+**E2E Tests (Playwright)**:
+- TypeScript-based E2E tests using Playwright
+- Test files location: `e2e/*.spec.ts`
+- Configuration: `playwright.config.ts`
+- **Automatically starts dev server** on `http://localhost:3001` before tests
 - Run with: `npm run test:e2e`
-
-**Test Data Fixtures**:
-- E2E tests use dedicated test data to avoid dependency on production data changes
-- Test fixtures location: `e2e/fixtures/`
-  - `test-factions.json` - Test faction definitions
-  - `test-squads.json` - Test squad data with predictable costs (50, 100)
-  - `test-machines.json` - Test machine data with predictable costs (75, 150)
-- Use test fixtures when writing new E2E tests to ensure stability
-
-**Test Coverage Requirements**:
-- **When adding new features**: You MUST review and update E2E tests to cover new functionality
-- **When modifying existing features**: Check if E2E tests need updates to reflect changes
-- **Test ID Strategy**: Always add `data-testid` attributes to interactive elements for reliable testing
-- Use test IDs instead of text selectors where possible (more reliable across viewports)
+- Debug mode: `npm run test:e2e:debug` (opens Playwright Inspector)
 
 **E2E Testing Best Practices**:
-- **Mobile/Desktop View Switching**: Add explicit step before army view actions: `И я переключаюсь на вкладку "Армия"`
-  - Mobile: TabBar with `role="tab"` elements (ЮНИТЫ/АРМИЯ)
-  - Desktop: `ArmyControlPanel` with `data-testid="view-mode-army"` button
-- **Selector Priority**: `data-testid` > CSS selectors > `role` > text content
-- **Timeout Management**: Use specific timeouts for slow operations: `await click({ timeout: 10000 })`
-- **Force Click**: Use `force: true` when element is visible but Playwright can't click due to overlays
-- **Avoid Early Returns**: Keep step definition flow simple; use `return` only for special cases
+- **Selector Priority**: `getByTestId()` > `getByRole()` > `getByText()` > CSS selectors
+- **Test ID Strategy**: Add `data-testid` attributes to interactive elements for reliable testing
 - **Local Cleanup**: Always add `beforeEach` hooks to clear localStorage between tests
-- **Debugging**: Use `npm run test:e2e:debug` with SLOWMO for visual debugging
-- **Test Data**: Use `e2e/fixtures/` test fixtures for predictable costs (50, 75, 100, 150)
+- **Mobile Testing**: Use projects in `playwright.config.ts` to test mobile viewports
+- **Timeout Management**: Use explicit waits: `await page.waitForLoadState('networkidle')`
+- **Auto-webServer**: Playwright config automatically starts dev server - no manual setup needed
 
+**Example Test Structure**:
+```typescript
+import { test, expect } from '@playwright/test';
 
+test.describe('Feature Name', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+  });
 
-**Test Structure**:
-- `e2e/features/rules-selection.feature` - Rules version selection scenarios
-- `e2e/features/army-building.feature` - Army creation and unit management
-- `e2e/features/game-session.feature` - Combat gameplay mechanics
-- `e2e/features/armlist-editor.feature` - Squad/machine editor functionality
+  test('should do something', async ({ page }) => {
+    const button = page.getByRole('button', { name: /текст/i });
+    await button.click();
+    await expect(page.getByText('результат')).toBeVisible();
+  });
+});
+```
 
 **CI/CD Pipeline**:
 - Unit tests run on every commit (fast, ~30s)
@@ -346,24 +337,17 @@ Adding a new rules version:
 
 **Testing**:
 - Jest with jsdom environment (unit tests)
-- Cucumber 10.9.0 + Playwright (E2E tests, BDD with Russian Gherkin)
+- Playwright 1.49.0 (E2E tests in TypeScript)
 
 **Utilities**:
 - clsx, tailwind-merge for conditional styling
 
 ## Recent Changes
-- **E2E Tests Fixed (2025-01-30)**: Fixed all 17 E2E test scenarios (144 steps passing)
-  - Fixed mobile/desktop view switching - added explicit step `Когда я переключаюсь на вкладку {string}`
-  - Updated feature files to include army view switching before "В БОЙ" button
-  - Removed duplicate step definition in `army-building.steps.ts`
-  - Simplified step definitions - removed complex UIHelper class
-  - Increased default timeout to 15 seconds for better stability
-  - Created `e2e/support/ui-helpers.ts` for future Page Object Model pattern
-- **TypeScript Errors Fixed (2025-01-30)**: Fixed `ArmySummaryView.tsx`
-  - Added `Shield` and `Plus` to imports from `lucide-react`
-  - Added `onAddUnits` prop to interface and function parameters
-- **Unit Tests Enhanced (2025-01-30)**: Added `beforeEach` localStorage cleanup, fixed view switching test
-- **E2E Testing (2025-01)**: Cucumber + Playwright BDD tests with Russian Gherkin syntax (17 scenarios, 144 steps)
+- **E2E Testing Migration (2025-02)**: Migrated from Cucumber BDD to Playwright TypeScript
+  - Removed complex Cucumber feature files and step definitions
+  - Added `playwright.config.ts` with automatic dev server startup
+  - TypeScript-based tests are simpler to write and maintain
+  - Auto-starts dev server before tests - no manual setup needed
 - **CI/CD Pipeline**: GitHub Actions workflow with parallel quality checks and E2E tests
 - **Bottom Sheet Redesign**: `UnitDetailsModal` redesigned as mobile bottom sheet with swipe-to-close gesture (`useBottomSheet` hook)
 - **Rules System**: Added multi-version rules support with `rules-registry.ts` and rule implementations (fan, tehno)

@@ -1,9 +1,9 @@
-import { fanRules } from '@/lib/rules/fan';
+import { communityStarSystemRules } from '@/lib/rules/community_star_system';
 
-describe('Fan Rules - Hit Calculation with Fortifications', () => {
+describe('Community Star System Rules - Hit Calculation with Fortifications', () => {
   describe('calculateHit', () => {
     it('uses direct comparison: total >= distance = hit', () => {
-      const result = fanRules.calculateHit('D6', 2);
+      const result = communityStarSystemRules.calculateHit('D6', 2);
       expect(result).toHaveProperty('success');
       expect(result).toHaveProperty('roll');
       expect(result).toHaveProperty('total');
@@ -12,8 +12,8 @@ describe('Fan Rules - Hit Calculation with Fortifications', () => {
     });
 
     it('applies light cover fortification (+1 to distance)', () => {
-      const result1 = fanRules.calculateHit('D6', 3, 'none');
-      const result2 = fanRules.calculateHit('D6', 3, 'light');
+      const result1 = communityStarSystemRules.calculateHit('D6', 3, 'none');
+      const result2 = communityStarSystemRules.calculateHit('D6', 3, 'light');
 
       // With light cover, effective distance is 3+1=4
       expect(result1).toHaveProperty('success');
@@ -21,7 +21,7 @@ describe('Fan Rules - Hit Calculation with Fortifications', () => {
     });
 
     it('applies heavy fortification (+2 to distance)', () => {
-      const result = fanRules.calculateHit('D12', 5, 'heavy');
+      const result = communityStarSystemRules.calculateHit('D12', 5, 'heavy');
       expect(result).toHaveProperty('success');
       expect(result).toHaveProperty('total');
       // With heavy, effective distance is 5+2=7
@@ -29,13 +29,13 @@ describe('Fan Rules - Hit Calculation with Fortifications', () => {
     });
 
     it('handles bonus in range with fortification', () => {
-      const result = fanRules.calculateHit('D6+2', 4, 'light');
+      const result = communityStarSystemRules.calculateHit('D6+2', 4, 'light');
       // Effective distance is 4+1=5, total is roll+2
       expect(result.total).toBe(result.roll + 2);
     });
 
     it('handles melee range (ББ) - always hits in melee range', () => {
-      const result = fanRules.calculateHit('ББ', 1);
+      const result = communityStarSystemRules.calculateHit('ББ', 1);
       // ББ returns total=0, which would be 0>=1=false
       // But in practice, melee attacks are always in range
       expect(result.roll).toBe(0);
@@ -47,23 +47,23 @@ describe('Fan Rules - Hit Calculation with Fortifications', () => {
 
   describe('calculateDamage - Infantry (Virtual Fire)', () => {
     it('uses same mechanics as official rules for infantry', () => {
-      const result = fanRules.calculateDamage('2D6', 2, undefined, undefined, false);
+      const result = communityStarSystemRules.calculateDamage('2D6', 2, undefined, undefined, false);
       expect(result).toHaveProperty('damage');
       expect(result).toHaveProperty('rolls');
       expect(result.rolls.length).toBe(2);
     });
 
     it('does not apply fortification modifier to armor for infantry', () => {
-      // Fortifications in fan rules affect distance, not armor
-      const result1 = fanRules.calculateDamage('D6', 2, 'none', undefined, false);
-      const result2 = fanRules.calculateDamage('D6', 2, 'light', undefined, false);
+      // Fortifications in community rules affect distance, not armor
+      const result1 = communityStarSystemRules.calculateDamage('D6', 2, 'none', undefined, false);
+      const result2 = communityStarSystemRules.calculateDamage('D6', 2, 'light', undefined, false);
       // Both use same armor value (2)
       expect(result1).toHaveProperty('damage');
       expect(result2).toHaveProperty('damage');
     });
 
     it('handles bonus in damage calculation', () => {
-      const result = fanRules.calculateDamage('2D6+2', 3, undefined, undefined, false);
+      const result = communityStarSystemRules.calculateDamage('2D6+2', 3, undefined, undefined, false);
       expect(result.rolls.length).toBe(2);
       result.rolls.forEach(roll => {
         expect(roll).toBeGreaterThanOrEqual(3); // 1+2
@@ -74,7 +74,7 @@ describe('Fan Rules - Hit Calculation with Fortifications', () => {
 
   describe('calculateMelee', () => {
     it('implements same mechanics as official rules', () => {
-      const result = fanRules.calculateMelee(3, 2);
+      const result = communityStarSystemRules.calculateMelee(3, 2);
       expect(result).toHaveProperty('attackerRoll');
       expect(result).toHaveProperty('attackerTotal');
       expect(result).toHaveProperty('defenderRoll');
@@ -91,13 +91,13 @@ describe('Fan Rules - Hit Calculation with Fortifications', () => {
     });
 
     it('correctly identifies winner', () => {
-      const result = fanRules.calculateMelee(3, 2);
+      const result = communityStarSystemRules.calculateMelee(3, 2);
       expect(['attacker', 'defender', 'draw']).toContain(result.winner);
     });
   });
 });
 
-describe('Fan Rules - Vehicle Damage (Zone-based)', () => {
+describe('Community Star System Rules - Vehicle Damage (Zone-based)', () => {
   // Create mock machine data for testing
   const mockMachine = {
     id: 'test-vehicle',
@@ -119,7 +119,7 @@ describe('Fan Rules - Vehicle Damage (Zone-based)', () => {
   describe('calculateDamage - Vehicles', () => {
     it('uses zone-based calculation for vehicle targets', () => {
       // Vehicle at durability 7 (green zone: max 6)
-      const result = fanRules.calculateDamage('2D12', 0, undefined, undefined, true, 7, 9, mockMachine);
+      const result = communityStarSystemRules.calculateDamage('2D12', 0, undefined, undefined, true, 7, 9, mockMachine);
       expect(result).toHaveProperty('damage');
       expect(result).toHaveProperty('rolls');
       expect(result.rolls.length).toBe(2);
@@ -127,9 +127,9 @@ describe('Fan Rules - Vehicle Damage (Zone-based)', () => {
 
     it('applies correct damage per die type (D6=1, D12=2, D20=3)', () => {
       // We can't test exact values due to randomness, but we can verify structure
-      const resultD6 = fanRules.calculateDamage('D6', 0, undefined, undefined, true, 7, 9, mockMachine);
-      const resultD12 = fanRules.calculateDamage('D12', 0, undefined, undefined, true, 7, 9, mockMachine);
-      const resultD20 = fanRules.calculateDamage('D20', 0, undefined, undefined, true, 7, 9, mockMachine);
+      const resultD6 = communityStarSystemRules.calculateDamage('D6', 0, undefined, undefined, true, 7, 9, mockMachine);
+      const resultD12 = communityStarSystemRules.calculateDamage('D12', 0, undefined, undefined, true, 7, 9, mockMachine);
+      const resultD20 = communityStarSystemRules.calculateDamage('D20', 0, undefined, undefined, true, 7, 9, mockMachine);
 
       expect(resultD6.rolls.length).toBe(1);
       expect(resultD12.rolls.length).toBe(1);
@@ -138,13 +138,13 @@ describe('Fan Rules - Vehicle Damage (Zone-based)', () => {
 
     it('handles different durability zones correctly', () => {
       // Green zone (durability 7-9): max 6
-      const greenResult = fanRules.calculateDamage('D12', 0, undefined, undefined, true, 8, 9, mockMachine);
+      const greenResult = communityStarSystemRules.calculateDamage('D12', 0, undefined, undefined, true, 8, 9, mockMachine);
 
       // Yellow zone (durability 4-6): max 3
-      const yellowResult = fanRules.calculateDamage('D12', 0, undefined, undefined, true, 5, 9, mockMachine);
+      const yellowResult = communityStarSystemRules.calculateDamage('D12', 0, undefined, undefined, true, 5, 9, mockMachine);
 
       // Red zone (durability 0-3): max 0
-      const redResult = fanRules.calculateDamage('D12', 0, undefined, undefined, true, 2, 9, mockMachine);
+      const redResult = communityStarSystemRules.calculateDamage('D12', 0, undefined, undefined, true, 2, 9, mockMachine);
 
       expect(greenResult.rolls.length).toBe(1);
       expect(yellowResult.rolls.length).toBe(1);
@@ -161,7 +161,7 @@ describe('Fan Rules - Vehicle Damage (Zone-based)', () => {
         ]
       };
 
-      const result = fanRules.calculateDamage('2D12', 0, undefined, undefined, true, 6, 9, machineWithZones);
+      const result = communityStarSystemRules.calculateDamage('2D12', 0, undefined, undefined, true, 6, 9, machineWithZones);
       expect(result.rolls.length).toBe(2);
     });
   });

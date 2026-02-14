@@ -81,18 +81,19 @@ function getDurabilityZone(
   return zones.find(zone => currentDurability > zone.max) || zones[2];
 }
 
-export const fanRules: RulesVersion = {
-  id: 'fan',
-  name: 'Фанатская Редакция',
+export const communityStarSystemRules: RulesVersion = {
+  id: 'community_star_system',
+  name: 'Правила от Сообщества Star System',
   source: 'docs/panov/fan_rules.txt',
-  description: 'Альтернативные правила от Панова с расширенными механиками. Используют зонную систему повреждений для техники и поддерживают спецэффекты оружия. Более сложные, но тактически глубокие правила для опытных игроков.',
+  description: 'Альтернативные правила с расширенными механиками. Используют зонную систему повреждений для техники и поддерживают спецэффекты оружия. Более сложные, но тактически глубокие правила для опытных игроков.',
   features: [
     'Зонные повреждения техники: зелёный/жёлтый/красный сектор',
     'Спецэффекты: Взрыв, Ремонт, Burst',
     'Укрытия увеличивают дистанцию'
   ],
   color: '#3b82f6',
-  supportsSpecialEffects: true, // Фанатская редакция поддерживает расширенные special-эффекты
+  link: 'https://vk.com/bp_bnp',
+  supportsSpecialEffects: true, // Правила сообщества поддерживают расширенные special-эффекты
 
   calculateHit: (rangeStr: string, distanceSteps: number, fortification: FortificationType = 'none'): HitResult => {
     // Apply fortification modifier to distance (fan rules)
@@ -134,7 +135,7 @@ export const fanRules: RulesVersion = {
 
       const result: DamageResult = { damage: specialDamage, rolls };
 
-      // Обработка special-эффектов (Фанатская Редакция)
+      // Обработка special-эффектов (Правила сообщества)
       if (typeof special === 'string') {
         const aoe = parseAoEEffect(special);
         if (aoe) {

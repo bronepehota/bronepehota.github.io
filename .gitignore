@@ -26,6 +26,8 @@
 /coverage/
 /e2e/reports/
 /e2e/screenshots/
+/test-results/
+/playwright-report/
 /logs/
 
 # Production
@@ -42,3 +44,5 @@ Thumbs.db
 
 # Temporary data
 src/data/*.json.tmp
+/test-results/
+/playwright-report/

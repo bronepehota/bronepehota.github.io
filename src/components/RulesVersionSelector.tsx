@@ -13,7 +13,7 @@ export default function RulesVersionSelector({
 }: RulesVersionSelectorProps) {
   // Get version name for display
   const getVersionName = (id: RulesVersionID): string => {
-    return id === 'tehnolog' ? 'Технолог' : 'Фанатская Редакция';
+    return id === 'tehnolog' ? 'Технолог' : 'Сообщество';
   };
 
   // Get version color for badge

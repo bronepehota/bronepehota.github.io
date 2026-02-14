@@ -1,9 +1,0 @@
-[
-  {
-    "id": "test-faction",
-    "name": "Test Faction",
-    "description": "Фракция для E2E тестов",
-    "color": "purple",
-    "image": "/images/factions/test.png"
-  }
-]

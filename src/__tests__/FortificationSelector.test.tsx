@@ -44,12 +44,12 @@ describe('FortificationSelector', () => {
     expect(screen.getByTitle(/Полное.*\+2 к броне/)).toBeInTheDocument();
   });
 
-  it('displays correct modifiers in tooltips for fan rules (distance)', () => {
+  it('displays correct modifiers in tooltips for community_star_system rules (distance)', () => {
     render(
       <FortificationSelector
         value="none"
         onChange={() => {}}
-        rulesVersion="fan"
+        rulesVersion="community_star_system"
       />
     );
 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { GitHubPagesImage as Image } from './GitHubPagesImage';
-import { ArmyUnit, Squad, Machine, RulesVersionID, Weapon } from '@/lib/types';
+import { ArmyUnit, Squad, Machine, RulesVersionID, Weapon, PanicTestResult } from '@/lib/types';
 import { Shield, Sword, Target, Heart, CheckCircle2, Bomb, ChevronDown, ChevronUp, UserX, Plane, Skull, Wrench, Flame, Crosshair, X, Image as ImageIcon, Footprints } from 'lucide-react';
 import { formatUnitNumber } from '@/lib/unit-utils';
 import { getDefaultRulesVersion } from '@/lib/rules-registry';
@@ -15,6 +15,8 @@ import { PilotInfo } from '@/lib/types';
 import { PilotTestModal } from './combat/PilotTestModal';
 import { usePilotTestFlow } from '@/hooks/usePilotTestFlow';
 import MachineBlueprintModal from './machine/MachineBlueprintModal';
+import { PanicTestModal } from './PanicTestModal';
+import { checkPanicTrigger } from '@/lib/panic-logic';
 
 // Helper function to shorten weapon names for mobile
 const _shortenWeaponName = (name: string): string => {
@@ -58,6 +60,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
   const [pilotSurvivalTest, setPilotSurvivalTest] = useState<{ roll: number; survived: boolean; testedAt: number } | null>(null);
   const [selectedWeaponInfo, setSelectedWeaponInfo] = useState<{ weapon: Weapon; weaponIdx: number } | null>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [showPanicModal, setShowPanicModal] = useState(false);
 
   const combatController = useCombatFlowController();
   const pilotTestFlow = usePilotTestFlow();
@@ -117,7 +120,41 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
     const newDead = dead.includes(idx)
       ? dead.filter(i => i !== idx)
       : [...dead, idx];
-    updateUnit({ ...unit, deadSoldiers: newDead });
+
+    const updatedUnit = { ...unit, deadSoldiers: newDead };
+
+    // Check panic trigger for community rules
+    if (rulesVersion === 'community_star_system' && newDead.length > 0) {
+      // Use turn 1 as default (will be updated when turn tracking is implemented)
+      const currentTurn = 1;
+      const shouldTestPanic = checkPanicTrigger(updatedUnit, 'community_star_system', currentTurn);
+      if (shouldTestPanic) {
+        setShowPanicModal(true);
+      }
+    }
+
+    updateUnit(updatedUnit);
+  };
+
+  const handlePanicTestComplete = (results: PanicTestResult[]) => {
+    const currentTurn = 1; // Default turn (will be updated when turn tracking is implemented)
+    const panicStates = results
+      .filter(r => r.isPanic)
+      .map(r => ({
+        soldierIndex: r.soldierIndex,
+        testRoll: r.roll,
+        rank: r.rank,
+        triggeredAtTurn: currentTurn,
+      }));
+
+    if (panicStates.length > 0) {
+      updateUnit({ ...unit, panicState: panicStates });
+    }
+  };
+
+  const isSoldierInPanic = (soldierIndex: number): boolean => {
+    if (!unit.panicState || unit.panicState.length === 0) return false;
+    return unit.panicState.some(p => p.soldierIndex === soldierIndex);
   };
 
   const updateMachineStat = (stat: 'durability' | 'ammo', delta: number) => {
@@ -441,6 +478,17 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
         />
       )}
 
+      {/* Panic Test Modal */}
+      {showPanicModal && (
+        <PanicTestModal
+          isOpen={showPanicModal}
+          unit={unit}
+          rulesVersion={rulesVersion}
+          onTestComplete={handlePanicTestComplete}
+          onClose={() => setShowPanicModal(false)}
+        />
+      )}
+
       {/* Weapon Info Modal */}
       {selectedWeaponInfo && (
         <div
@@ -641,6 +689,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                 const isDead = unit.deadSoldiers?.includes(idx);
                 const actions = unit.actionsUsed?.[idx] || { moved: false, shot: false, melee: false, done: false };
                 const isDone = actions.done;
+                const isInPanic = isSoldierInPanic(idx);
 
                 // Check if this soldier is a pilot
                 const soldier = (data as Squad).soldiers[idx];
@@ -702,6 +751,19 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                           </div>
                         </div>
                       )}
+
+                      {/* Panic overlay - footprints icon */}
+                      {isMounted && isInPanic && !isDead && !isDone && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-orange-950/30">
+                          <Footprints
+                            className="w-8 h-8 md:w-10 md:h-10 text-orange-400"
+                            strokeWidth={2}
+                            style={{
+                              filter: 'drop-shadow(0 0 8px rgba(251,146,60,0.8))'
+                            }}
+                          />
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex-1 flex flex-col justify-between min-w-0 gap-1.5 md:gap-2">
@@ -712,50 +774,67 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
 
                       {/* Row 1: Action buttons */}
                       <div className="flex gap-2 md:gap-3 items-center">
-                        {/* ДЕЙСТВИЕ button - fills available space */}
-                        <button
-                          disabled={isDone || isDead}
-                          onClick={() => combatController.startCombat(unit, idx)}
-                          className={cn(
-                            "relative flex-1 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 p-1.5 md:p-2 rounded-sm transition-all flex items-center justify-center gap-1.5 md:gap-2 overflow-hidden",
-                            "border-2 text-xs font-mono font-bold uppercase tracking-wider",
-                            "bg-purple-950/20 hover:bg-purple-950/40 border-purple-700/50 text-purple-400 active:scale-95"
-                          )}
-                          title="Выберите действие"
-                          aria-label="Выберите действие"
-                        >
-                          {/* Tech decoration */}
-                          <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-purple-600/40" />
-                          <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-purple-600/40" />
-                          <Crosshair className="w-4 h-4 md:w-5 md:h-5" />
-                          <span className="hidden sm:inline">ДЕЙСТВИЕ</span>
-                        </button>
+                        {/* ДЕЙСТВИЕ button - fills available space, replaced with panic label when panicking */}
+                        {isInPanic ? (
+                          <div className="relative flex-1 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 p-1.5 md:p-2 rounded-sm flex items-center justify-center gap-1.5 md:gap-2 overflow-hidden border-2 text-xs font-mono font-bold uppercase tracking-wider bg-orange-950/30 border-orange-700/50 text-orange-400">
+                            {/* Tech decoration */}
+                            <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-orange-600/40" />
+                            <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-orange-600/40" />
+                            <Footprints className="w-4 h-4 md:w-5 md:h-5" />
+                            <span className="hidden sm:inline">В ПАНИКЕ</span>
+                          </div>
+                        ) : (
+                          <button
+                            disabled={isDone || isDead}
+                            onClick={() => combatController.startCombat(unit, idx)}
+                            className={cn(
+                              "relative flex-1 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 p-1.5 md:p-2 rounded-sm transition-all flex items-center justify-center gap-1.5 md:gap-2 overflow-hidden",
+                              "border-2 text-xs font-mono font-bold uppercase tracking-wider",
+                              "bg-purple-950/20 hover:bg-purple-950/40 border-purple-700/50 text-purple-400 active:scale-95"
+                            )}
+                            title="Выберите действие"
+                            aria-label="Выберите действие"
+                          >
+                            {/* Tech decoration */}
+                            <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-purple-600/40" />
+                            <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-purple-600/40" />
+                            <Crosshair className="w-4 h-4 md:w-5 md:h-5" />
+                            <span className="hidden sm:inline">ДЕЙСТВИЕ</span>
+                          </button>
+                        )}
 
                         {/* Visual separator - desktop only */}
                         <div className="hidden md:block w-px h-8 bg-slate-700/50 mx-1" />
 
-                        {/* Done button */}
-                        <button
-                          onClick={() => !isDead && toggleAction(idx, 'done')}
-                          disabled={isDone || isDead}
-                          className={cn(
-                            "relative p-1.5 md:p-2 rounded-sm transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border-2 overflow-hidden",
-                            isDone ? "bg-emerald-950/30 border-emerald-700/50 text-emerald-400" : "bg-slate-900/60 border-slate-700 text-slate-500 hover:bg-slate-800/60"
-                          )}
-                          title="Завершить ход бойца"
-                        >
-                          {isDone && (
-                            <>
-                              <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-emerald-600/40" />
-                              <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-emerald-600/40" />
-                            </>
-                          )}
-                          <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5" />
-                        </button>
+                        {/* Done button - disabled for panicking soldiers */}
+                        {isInPanic ? (
+                          <div className="relative p-1.5 md:p-2 rounded-sm min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border-2 overflow-hidden bg-orange-950/20 border-orange-700/30 text-orange-400/50">
+                            <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 opacity-50" />
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => !isDead && toggleAction(idx, 'done')}
+                            disabled={isDone || isDead}
+                            className={cn(
+                              "relative p-1.5 md:p-2 rounded-sm transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border-2 overflow-hidden",
+                              isDone ? "bg-emerald-950/30 border-emerald-700/50 text-emerald-400" : "bg-slate-900/60 border-slate-700 text-slate-500 hover:bg-slate-800/60"
+                            )}
+                            title="Завершить ход бойца"
+                          >
+                            {isDone && (
+                              <>
+                                <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-emerald-600/40" />
+                                <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-emerald-600/40" />
+                              </>
+                            )}
+                            <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5" />
+                          </button>
+                        )}
 
                         {/* KIA button - with Skull icon */}
                         <button
                           onClick={() => toggleDead(idx)}
+                          aria-label={isDead ? 'УБИТ' : 'ЖИВ'}
                           className={cn("relative p-1.5 md:p-2 rounded-sm font-mono font-black uppercase tracking-wider min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center gap-1 md:gap-1.5 border-2 overflow-hidden transition-all",
                             isDead ? "bg-red-950/40 border-red-700 text-red-300" : "bg-slate-900/60 border-slate-700 text-slate-500 hover:bg-slate-800/60"
                           )}

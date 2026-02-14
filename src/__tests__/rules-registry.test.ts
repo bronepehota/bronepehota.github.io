@@ -7,12 +7,12 @@ describe('Rules Registry', () => {
 
   test('isValidRulesVersion validates correctly', () => {
     expect(isValidRulesVersion('tehnolog')).toBe(true);
-    expect(isValidRulesVersion('fan')).toBe(true);
+    expect(isValidRulesVersion('community_star_system')).toBe(true);
     expect(isValidRulesVersion('invalid')).toBe(false);
   });
 
   test('rulesRegistry contains all versions', () => {
-    expect(Object.keys(rulesRegistry)).toEqual(['tehnolog', 'fan']);
+    expect(Object.keys(rulesRegistry)).toEqual(['tehnolog', 'community_star_system']);
   });
 
   test('getRulesVersion returns correct version', () => {
@@ -20,15 +20,15 @@ describe('Rules Registry', () => {
     expect(tehnolog.id).toBe('tehnolog');
     expect(tehnolog.name).toBe('Технолог');
 
-    const fan = getRulesVersion('fan');
-    expect(fan.id).toBe('fan');
-    expect(fan.name).toBe('Фанатская Редакция');
+    const community = getRulesVersion('community_star_system');
+    expect(community.id).toBe('community_star_system');
+    expect(community.name).toBe('Правила от Сообщества Star System');
   });
 
   test('getAllRulesVersions returns all versions', () => {
     const versions = getAllRulesVersions();
     expect(versions).toHaveLength(2);
-    expect(versions.map(v => v.id)).toEqual(expect.arrayContaining(['tehnolog', 'fan']));
+    expect(versions.map(v => v.id)).toEqual(expect.arrayContaining(['tehnolog', 'community_star_system']));
   });
 
   test('each version has required functions', () => {
@@ -59,31 +59,31 @@ describe('Extensibility Verification', () => {
   });
 });
 
-describe('Special Effects (Fan Edition Rules)', () => {
-  const fan = rulesRegistry.fan;
+describe('Special Effects (Community Rules)', () => {
+  const community = rulesRegistry.community_star_system;
   const tehnolog = rulesRegistry.tehnolog;
 
-  test('Fan supports special effects, Tehnolog does not', () => {
-    expect(fan.supportsSpecialEffects).toBe(true);
+  test('Community supports special effects, Tehnolog does not', () => {
+    expect(community.supportsSpecialEffects).toBe(true);
     expect(tehnolog.supportsSpecialEffects).toBe(false);
   });
 
-  test('Fan parses AoE effect from string', () => {
-    const result = fan.calculateDamage('4D20', 3, 'none', 'Взрыв 2ш - 1D20');
+  test('Community parses AoE effect from string', () => {
+    const result = community.calculateDamage('4D20', 3, 'none', 'Взрыв 2ш - 1D20');
     expect(result.special).toBeDefined();
     expect(result.special?.type).toBe('aoe');
     expect(result.special?.description).toContain('2ш');
   });
 
-  test('Fan parses Repair effect from string', () => {
-    const result = fan.calculateDamage('1D20', 3, 'none', 'Ремонт 2 повреждения');
+  test('Community parses Repair effect from string', () => {
+    const result = community.calculateDamage('1D20', 3, 'none', 'Ремонт 2 повреждения');
     expect(result.special).toBeDefined();
     expect(result.special?.type).toBe('repair');
     expect(result.special?.additionalDamage).toBe(-2);
   });
 
-  test('Fan parses Burst effect from string', () => {
-    const result = fan.calculateDamage('1D6', 3, 'none', '3 выстрела в 3х направлениях');
+  test('Community parses Burst effect from string', () => {
+    const result = community.calculateDamage('1D6', 3, 'none', '3 выстрела в 3х направлениях');
     expect(result.special).toBeDefined();
     expect(result.special?.type).toBe('burst');
     expect(result.special?.targets).toHaveLength(3);
@@ -94,8 +94,8 @@ describe('Special Effects (Fan Edition Rules)', () => {
     expect(result.special).toBeUndefined();
   });
 
-  test('Fan calculates normal damage without special effects', () => {
-    const result = fan.calculateDamage('2D12', 5, 'none');
+  test('Community calculates normal damage without special effects', () => {
+    const result = community.calculateDamage('2D12', 5, 'none');
     expect(result.damage).toBeGreaterThanOrEqual(0);
     expect(result.rolls).toHaveLength(2);
     expect(result.special).toBeUndefined();

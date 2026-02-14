@@ -30,17 +30,17 @@ describe('RulesInfoModal', () => {
     expect(screen.getByText(/docs\/original\/official_rules.txt/)).toBeInTheDocument();
   });
 
-  it('displays fan rules content', () => {
+  it('displays community star system rules content', () => {
     render(
       <RulesInfoModal
         isOpen={true}
         onClose={() => {}}
-        rulesVersion="fan"
+        rulesVersion="community_star_system"
       />
     );
 
     expect(screen.getByRole('dialog')).toBeInTheDocument();
-    expect(screen.getByText('Фанатские правила (Панов)')).toBeInTheDocument();
+    expect(screen.getByText('Правила от Сообщества Star System')).toBeInTheDocument();
     expect(screen.getByText(/docs\/panov\/fan_rules.txt/)).toBeInTheDocument();
   });
 
@@ -66,7 +66,7 @@ describe('RulesInfoModal', () => {
       <RulesInfoModal
         isOpen={true}
         onClose={handleClose}
-        rulesVersion="fan"
+        rulesVersion="community_star_system"
       />
     );
 
@@ -102,12 +102,12 @@ describe('RulesInfoModal', () => {
     })).toBeInTheDocument();
   });
 
-  it('shows fortification modifiers for fan rules', () => {
+  it('shows fortification modifiers for community star system rules', () => {
     render(
       <RulesInfoModal
         isOpen={true}
         onClose={() => {}}
-        rulesVersion="fan"
+        rulesVersion="community_star_system"
       />
     );
 

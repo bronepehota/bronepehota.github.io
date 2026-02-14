@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
  * Gets the conversion factor based on rules version
  */
 function getConversionFactor(rulesVersion: RulesVersionID): number {
-  return rulesVersion === 'fan' ? 4 : 5;
+  return rulesVersion === 'community_star_system' ? 4 : 5;
 }
 
 /**
