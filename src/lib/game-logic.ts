@@ -30,6 +30,25 @@ export const parseRoll = (rollStr: string): { dice: number, sides: number, bonus
   };
 };
 
+/**
+ * Multiply range string by a factor (e.g., D6 -> D12 for aimed shot)
+ * Handles formats: D6, D12, D6+2, 2D6
+ */
+export const multiplyRange = (rangeStr: string, multiplier: number = 2): string => {
+  const regex = /(?:(\d+))?D(\d+)(?:\+(\d+))?/;
+  const match = rangeStr.match(regex);
+  if (!match) return rangeStr; // Return as-is for ББ or invalid
+
+  const diceCount = match[1] ? parseInt(match[1]) : 1;
+  const sides = parseInt(match[2]) * multiplier;
+  const bonus = match[3] ? parseInt(match[3]) * multiplier : 0;
+
+  const dicePart = diceCount === 1 ? `D${sides}` : `${diceCount}D${sides}`;
+  const bonusPart = bonus > 0 ? `+${bonus}` : '';
+
+  return `${dicePart}${bonusPart}`;
+};
+
 export const executeRoll = (rollStr: string): { total: number, rolls: number[], bonus: number } => {
   if (rollStr === 'ББ') return { total: 0, rolls: [], bonus: 0 }; // Special case for melee range
 

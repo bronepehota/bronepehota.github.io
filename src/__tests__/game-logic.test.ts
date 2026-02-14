@@ -1,5 +1,27 @@
-import { parseRoll, executeRoll } from '../lib/game-logic';
+import { parseRoll, executeRoll, multiplyRange } from '../lib/game-logic';
 import { rulesRegistry } from '@/lib/rules-registry';
+
+describe('multiplyRange', () => {
+  it('should double D6 to D12', () => {
+    expect(multiplyRange('D6', 2)).toBe('D12');
+  });
+
+  it('should double D12 to D24', () => {
+    expect(multiplyRange('D12', 2)).toBe('D24');
+  });
+
+  it('should double bonus as well', () => {
+    expect(multiplyRange('D6+2', 2)).toBe('D12+4');
+  });
+
+  it('should handle dice count', () => {
+    expect(multiplyRange('2D6', 2)).toBe('2D12');
+  });
+
+  it('should return unchanged for invalid format', () => {
+    expect(multiplyRange('ББ', 2)).toBe('ББ');
+  });
+});
 
 describe('Game Logic - Dice Rolls', () => {
   test('parseRoll should correctly parse various formats', () => {
