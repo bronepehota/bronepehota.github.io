@@ -35,12 +35,11 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
+  // reuseExistingServer: true позволяет подключиться к уже запущенному серверу на CI
+  // Локально сервер запускается автоматически через npm run dev:e2e
   webServer: {
-    // На CI сервер запускается через GitHub Actions workflow
-    // Локально - автоматический запуск через npm run dev:e2e
-    command: process.env.CI ? undefined : 'npm run dev:e2e',
+    command: 'npm run dev:e2e',
     url: 'http://localhost:3001',
-    // На CI всегда true - сервер уже запущен workflow, локально false для контроля
     reuseExistingServer: true,
     timeout: 120 * 1000,
   },
