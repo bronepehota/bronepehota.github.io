@@ -255,6 +255,12 @@ Adding a new rules version:
 
 **Speed Sectors**: Must cover full range 1 to durability_max without gaps
 
+**Image Standards:**
+- Target size: 300x400 px (PNG format)
+- White background (#FFFFFF)
+- Figure centered with ~5% margins
+- Use `tools/standardize_images.py` to process new images
+
 ### Custom Hooks (`src/hooks/`)
 
 - `useBottomSheet.ts` - Swipe-down gesture hook for mobile bottom sheets
