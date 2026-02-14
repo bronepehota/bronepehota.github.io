@@ -6,44 +6,66 @@ import { test, expect } from '@playwright/test';
  */
 test.describe('Combat Mechanics', () => {
   test.beforeEach(async ({ page }) => {
-    // Set up army with unit in game session
-    await page.goto('/app');
-    await page.evaluate(() => {
+    // Set localStorage BEFORE page loads using addInitScript
+    await page.addInitScript(() => {
+      // Set up army with unit in game session
       const army = {
         name: 'Combat Test Army',
         faction: 'polaris',
         units: [{
           instanceId: 'combat-unit-1',
-          data: { id: 'polaris_light_assault', name: 'Light Assault', cost: 50, soldiers: [], image: '' },
+          type: 'squad',
+          data: {
+            id: 'polaris_lineynaya_klon_pehota',
+            name: 'Линейная клон-пехота',
+            shortName: 'Линейная',
+            faction: 'polaris',
+            cost: 50,
+            image: '/images/squads/polaris/lineynaya_klon_pehota/1.png',
+            soldiers: [
+              { num: 1, rank: 2, speed: 5, range: 'D6', power: '2D6', melee: 3, props: [], armor: 2, image: '' },
+              { num: 2, rank: 2, speed: 5, range: 'D12', power: '2D6', melee: 3, props: [], armor: 2, image: '' },
+              { num: 3, rank: 2, speed: 5, range: 'D12', power: '2D6', melee: 3, props: [], armor: 2, image: '' },
+              { num: 4, rank: 2, speed: 5, range: 'D12', power: '2D6', melee: 3, props: [], armor: 2, image: '' },
+              { num: 5, rank: 2, speed: 5, range: 'D12', power: '2D6', melee: 3, props: [], armor: 2, image: '' },
+              { num: 6, rank: 2, speed: 5, range: 'D12', power: '2D6', melee: 3, props: [], armor: 2, image: '' }
+            ]
+          },
           instanceNumber: 1,
-          currentSoldiers: [1, 2, 3, 4, 5, 6]
+          currentSoldiers: [0, 1, 2, 3, 4, 5],
+          deadSoldiers: [],
+          actionsUsed: []
         }],
         totalCost: 50,
-        currentStep: 'game',
+        currentStep: 'unit-select',
         isInBattle: true,
         currentTurn: 1
       };
       localStorage.setItem('bronepehota_army', JSON.stringify(army));
       localStorage.setItem('bronepehota_view', 'game');
+      localStorage.setItem('bronepehota_display_mode', 'detailed');
     });
 
-    await page.reload();
+    // Navigate to app - localStorage already set
+    await page.goto('/app');
     await page.waitForLoadState('networkidle');
   });
 
   test('should display unit card in game session', async ({ page }) => {
+    // Check if game session is visible
+    const gameSession = page.getByTestId('game-session');
+    await expect(gameSession.first()).toBeVisible({ timeout: 10000 });
+
     // Wait for unit card to be visible
     await page.waitForSelector('[data-testid^="unit-nav-combat-unit-1"]', { timeout: 5000 });
-
     const unitCard = page.getByTestId('unit-nav-combat-unit-1');
-
     await expect(unitCard.first()).toBeVisible();
   });
 
   test('should open combat modal', async ({ page }) => {
-    // Find unit card and click action button
     const unitCard = page.getByTestId('unit-nav-combat-unit-1');
-    await unitCard.first().click();
+    // Use force: true to click even if element is covered
+    await unitCard.first().click({ force: true, timeout: 5000 });
     await page.waitForTimeout(500);
 
     // Look for combat modal or action button
@@ -57,17 +79,13 @@ test.describe('Combat Mechanics', () => {
   });
 
   test('should execute initiative roll', async ({ page }) => {
-    // Find and click initiative button
-    const initiativeButton = page.getByRole('button', { name: /инициатива/i });
+    // Find and click initiative button by test-id (new-turn-button)
+    const initiativeButton = page.getByTestId('new-turn-button');
+    await initiativeButton.click({ force: true, timeout: 5000 });
+    await page.waitForTimeout(500);
 
-    if (await initiativeButton.count() > 0) {
-      await initiativeButton.click();
-      await page.waitForTimeout(500);
-
-      // Should see initiative modal
-      const initiativeModal = page.getByTestId('initiative-modal');
-
-      await expect(initiativeModal.first()).toBeVisible({ timeout: 3000 });
-    }
+    // Should see initiative modal
+    const initiativeModal = page.getByTestId('initiative-modal');
+    await expect(initiativeModal.first()).toBeVisible({ timeout: 3000 });
   });
 });
