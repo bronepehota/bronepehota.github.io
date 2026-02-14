@@ -6,7 +6,7 @@ import { FortificationSelector } from '@/components/FortificationSelector';
 import { RulesVersionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { StaticDiceDisplay } from './StaticDiceDisplay';
-import { getUnitStats } from '@/lib/game-logic';
+import { getUnitStats, multiplyRange } from '@/lib/game-logic';
 import { Target, Shield } from 'lucide-react';
 import { Machine } from '@/lib/types';
 import { TargetMemory } from '@/contexts/CombatTargetContext';
@@ -22,6 +22,7 @@ interface ParameterInputsProps {
   soldierIndex?: number | null;
   targetMemory?: TargetMemory;
   onMemoryUpdate?: (params: Partial<TargetMemory>) => void;
+  isAimedShot?: boolean;
 }
 
 export function ParameterInputs({
@@ -34,6 +35,7 @@ export function ParameterInputs({
   soldierIndex,
   targetMemory,
   onMemoryUpdate,
+  isAimedShot,
 }: ParameterInputsProps) {
   const effectiveDistance = targetMemory?.isDirty && targetMemory?.distance !== null
     ? targetMemory.distance
@@ -98,7 +100,12 @@ export function ParameterInputs({
             <div className="bg-slate-900/50 p-2 md:p-3 rounded-lg border border-blue-500/30">
               <div className="text-[8px] md:text-[10px] opacity-40 uppercase font-bold mb-1 md:mb-2 text-center">Дальность</div>
               <div className="flex justify-center">
-                <StaticDiceDisplay rollStr={unitStats.range} size="sm" color="blue" showLabel />
+                <StaticDiceDisplay
+                  rollStr={isAimedShot && actionType === 'shot' ? multiplyRange(unitStats.range, 2) : unitStats.range}
+                  size="sm"
+                  color="blue"
+                  showLabel
+                />
               </div>
             </div>
             <div className="bg-slate-900/50 p-2 md:p-3 rounded-lg border border-orange-500/30">

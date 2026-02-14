@@ -186,6 +186,7 @@ export function BottomSheetCombatModal({
                 soldierIndex={state.soldierIndex}
                 targetMemory={targetMemory}
                 onMemoryUpdate={updateTargetMemory}
+                isAimedShot={state.parameters.isAimedShot}
               />
 
               {/* Execute button with surprise attack toggle */}
