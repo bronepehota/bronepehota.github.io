@@ -11,7 +11,7 @@ import {
   CombatConfig,
   GrenadeBlastResult,
 } from '@/lib/combat-types';
-import { rollDie } from '@/lib/game-logic';
+import { rollDie, multiplyRange } from '@/lib/game-logic';
 import { rulesRegistry } from '@/lib/rules-registry';
 import { getDefaultRulesVersion } from '@/lib/rules-registry';
 
@@ -255,6 +255,11 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
       const weapon = (unit.data as any).weapons[state.parameters.weaponIndex];
       range = weapon.range;
       power = weapon.power;
+    }
+
+    // Apply aimed shot range multiplier (only for squads)
+    if (state.parameters.isAimedShot && state.unitType === 'squad') {
+      range = multiplyRange(range, 2);
     }
 
     // Animate hit roll
