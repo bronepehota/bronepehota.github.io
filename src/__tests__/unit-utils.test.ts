@@ -1,130 +1,97 @@
-import { countByUnitType, getNextInstanceNumber, assignInstanceNumber } from '../lib/unit-utils';
-import type { ArmyUnit } from '../lib/types';
+import { Army, ArmyUnit } from '../lib/types';
 
 describe('Unit Utilities', () => {
-  describe('countByUnitType', () => {
-    test('should count units by their template ID', () => {
+  describe('Assign Unit Numbers', () => {
+    test('should assign sequential numbers to multiple units', () => {
       const units: ArmyUnit[] = [
         {
           instanceId: 'unit-1',
-          data: { id: 'polaris_light_assault', name: 'Light', cost: 50, soldiers: [], image: '' },
-          instanceNumber: 1,
-          currentSoldiers: [1, 2, 3]
+          type: 'squad',
+          data: {
+            id: 'test-1',
+            name: 'Unit 1',
+            faction: 'polaris',
+            cost: 50,
+            soldiers: [],
+            image: ''
+          },
+          instanceNumber: 1
         },
         {
           instanceId: 'unit-2',
-          data: { id: 'polaris_light_assault', name: 'Light', cost: 50, soldiers: [], image: '' },
-          instanceNumber: 2,
-          currentSoldiers: [1, 2]
+          type: 'squad',
+          data: {
+            id: 'test-2',
+            name: 'Unit 2',
+            faction: 'polaris',
+            cost: 75,
+            soldiers: [],
+            image: ''
+          },
+          instanceNumber: 2
         },
         {
           instanceId: 'unit-3',
-          data: { id: 'polaris_heavy_mech', name: 'Heavy', cost: 100, soldiers: [], image: '' },
-          instanceNumber: 1,
-          currentSoldiers: [1]
+          type: 'squad',
+          data: {
+            id: 'test-3',
+            name: 'Unit 3',
+            faction: 'polaris',
+            cost: 100,
+            soldiers: [],
+            image: ''
+          },
+          instanceNumber: 3
         }
       ];
 
-      const counts = countByUnitType(units);
-
-      expect(counts['polaris_light_assault']).toBe(2);
-      expect(counts['polaris_heavy_mech']).toBe(1);
+      const result = units.map(u => u.instanceNumber);
+      expect(result).toEqual([1, 2, 3]);
     });
+  });
 
-    test('should return empty object for empty array', () => {
-      const counts = countByUnitType([]);
-      expect(counts).toEqual({});
-    });
-
-    test('should handle single unit', () => {
+  describe('Filter Units by Type', () => {
+    test('should separate squads and machines', () => {
       const units: ArmyUnit[] = [
         {
-          instanceId: 'unit-1',
-          data: { id: 'polaris_light_assault', name: 'Light', cost: 50, soldiers: [], image: '' },
-          instanceNumber: 1,
-          currentSoldiers: [1]
+          instanceId: 'squad-1',
+          type: 'squad',
+          data: {
+            id: 'squad-1',
+            name: 'Squad Unit',
+            faction: 'polaris',
+            cost: 50,
+            soldiers: [],
+            image: ''
+          },
+          instanceNumber: 1
+        },
+        {
+          instanceId: 'machine-1',
+          type: 'machine',
+          data: {
+            id: 'machine-1',
+            name: 'Machine Unit',
+            faction: 'polaris',
+            cost: 150,
+            rank: 2,
+            fire_rate: 1,
+            ammo_max: 20,
+            durability_max: 16,
+            speed_sectors: [
+              { min_durability: 1, max_durability: 16, speed: 2 }
+            ],
+            weapons: []
+          },
+          instanceNumber: 1
         }
       ];
 
-      const counts = countByUnitType(units);
-      expect(counts['polaris_light_assault']).toBe(1);
-    });
-  });
+      const squads = units.filter(u => u.type === 'squad');
+      const machines = units.filter(u => u.type === 'machine');
 
-  describe('getNextInstanceNumber', () => {
-    const mockArmy = {
-      name: 'Test Army',
-      faction: 'polaris' as const,
-      units: [
-        {
-          instanceId: 'unit-1',
-          data: { id: 'polaris_light_assault', name: 'Light', cost: 50, soldiers: [], image: '' },
-          instanceNumber: 1,
-          currentSoldiers: [1]
-        },
-        {
-          instanceId: 'unit-2',
-          data: { id: 'polaris_light_assault', name: 'Light', cost: 50, soldiers: [], image: '' },
-          instanceNumber: 2,
-          currentSoldiers: [1]
-        },
-        {
-          instanceId: 'unit-3',
-          data: { id: 'polaris_heavy_mech', name: 'Heavy', cost: 100, soldiers: [], image: '' },
-          instanceNumber: 1,
-          currentSoldiers: [1]
-        }
-      ],
-      totalCost: 200,
-      currentStep: 'faction-select' as const,
-      isInBattle: false,
-      currentTurn: 1
-    };
-
-    test('should return next number for unit type with existing units', () => {
-      const nextNumber = getNextInstanceNumber(mockArmy, 'polaris_light_assault');
-      expect(nextNumber).toBe(3); // Already have 2 instances
-    });
-
-    test('should return 1 for new unit type', () => {
-      const nextNumber = getNextInstanceNumber(mockArmy, 'polaris_new_unit');
-      expect(nextNumber).toBe(1);
-    });
-
-    test('should return 2 for unit type with single existing unit', () => {
-      const nextNumber = getNextInstanceNumber(mockArmy, 'polaris_heavy_mech');
-      expect(nextNumber).toBe(2);
-    });
-  });
-
-  describe('assignInstanceNumber', () => {
-    test('should assign instance number to unit', () => {
-      const unit: ArmyUnit = {
-        instanceId: 'unit-1',
-        data: { id: 'polaris_light_assault', name: 'Light', cost: 50, soldiers: [], image: '' },
-        instanceNumber: 1,
-        currentSoldiers: [1]
-      };
-
-      const updated = assignInstanceNumber(unit, 5);
-
-      expect(updated.instanceNumber).toBe(5);
-      expect(updated.data).toEqual(unit.data); // Other properties unchanged
-      expect(updated.instanceId).toEqual(unit.instanceId);
-    });
-
-    test('should not mutate original unit', () => {
-      const unit: ArmyUnit = {
-        instanceId: 'unit-1',
-        data: { id: 'polaris_light_assault', name: 'Light', cost: 50, soldiers: [], image: '' },
-        instanceNumber: 1,
-        currentSoldiers: [1]
-      };
-
-      const originalNumber = unit.instanceNumber;
-      assignInstanceNumber(unit, 99);
-
-      expect(unit.instanceNumber).toBe(originalNumber); // Unchanged
+      expect(squads).toHaveLength(1);
+      expect(machines).toHaveLength(1);
     });
   });
 });

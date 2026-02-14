@@ -37,15 +37,17 @@ describe('Type Validation', () => {
     test('should require instanceId', () => {
       const unit: ArmyUnit = {
         instanceId: 'test-1',
+        type: 'squad',
         data: {
           id: 'test',
           name: 'Test',
+          faction: 'polaris',
           cost: 50,
           soldiers: [],
           image: ''
         },
         instanceNumber: 1,
-        currentSoldiers: [1, 2, 3]
+        deadSoldiers: [1, 2, 3]
       };
 
       expect(unit.instanceId).toBeTruthy();
@@ -55,15 +57,17 @@ describe('Type Validation', () => {
     test('should require data property', () => {
       const unit: ArmyUnit = {
         instanceId: 'test-1',
+        type: 'squad',
         data: {
           id: 'test',
           name: 'Test',
+          faction: 'polaris',
           cost: 50,
           soldiers: [],
           image: ''
         },
         instanceNumber: 1,
-        currentSoldiers: [1, 2, 3]
+        deadSoldiers: [1, 2, 3]
       };
 
       expect(unit.data).toBeDefined();
@@ -74,15 +78,17 @@ describe('Type Validation', () => {
     test('should require cost in data', () => {
       const unit: ArmyUnit = {
         instanceId: 'test-1',
+        type: 'squad',
         data: {
           id: 'test',
           name: 'Test',
+          faction: 'polaris',
           cost: 50,
           soldiers: [],
           image: ''
         },
         instanceNumber: 1,
-        currentSoldiers: [1, 2, 3]
+        deadSoldiers: [1, 2, 3]
       };
 
       expect(unit.data.cost).toBeDefined();
@@ -93,9 +99,11 @@ describe('Type Validation', () => {
     test('should handle soldiers array', () => {
       const unit: ArmyUnit = {
         instanceId: 'test-1',
+        type: 'squad',
         data: {
           id: 'test',
           name: 'Test',
+          faction: 'polaris',
           cost: 50,
           soldiers: [
             { rank: 7, speed: 4, range: 'D6', power: '1D6', melee: 0, props: [], armor: 2 },
@@ -104,11 +112,13 @@ describe('Type Validation', () => {
           image: ''
         },
         instanceNumber: 1,
-        currentSoldiers: [1, 2]
+        deadSoldiers: [1, 2]
       };
 
-      expect(Array.isArray(unit.data.soldiers)).toBe(true);
-      expect(unit.data.soldiers).toHaveLength(2);
+      // Type assertion needed for this test - we know it's a squad
+      const squadData = unit.data as { id: string; name: string; faction: string; cost: number; soldiers: unknown[]; image: string };
+      expect(Array.isArray(squadData.soldiers)).toBe(true);
+      expect(squadData.soldiers).toHaveLength(2);
     });
   });
 
@@ -142,23 +152,24 @@ describe('Type Validation', () => {
       expect(army.currentStep).toBe('unit-select');
     });
 
-    test('should handle game step', () => {
+    test('should handle battle step', () => {
       const army: Army = {
         name: 'Test',
         faction: 'polaris',
         units: [{
           instanceId: 'test-1',
-          data: { id: 'test', name: 'Test', cost: 50, soldiers: [], image: '' },
+          type: 'squad',
+          data: { id: 'test', name: 'Test', faction: 'polaris', cost: 50, soldiers: [], image: '' },
           instanceNumber: 1,
-          currentSoldiers: [1, 2, 3]
+          deadSoldiers: [1, 2, 3]
         }],
         totalCost: 50,
-        currentStep: 'game',
+        currentStep: 'battle',
         isInBattle: true,
         currentTurn: 1
       };
 
-      expect(army.currentStep).toBe('game');
+      expect(army.currentStep).toBe('battle');
       expect(army.isInBattle).toBe(true);
     });
 
@@ -168,7 +179,7 @@ describe('Type Validation', () => {
         faction: 'polaris',
         units: [],
         totalCost: 0,
-        currentStep: 'game',
+        currentStep: 'battle',
         isInBattle: true,
         currentTurn: 5
       };

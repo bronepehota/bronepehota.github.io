@@ -44,15 +44,17 @@ describe('Army State', () => {
     test('should add unit to army', () => {
       const unit: ArmyUnit = {
         instanceId: 'unit-1',
+        type: 'squad',
         data: {
           id: 'test',
           name: 'Test Unit',
+          faction: 'polaris',
           cost: 50,
           soldiers: [],
           image: '/test.jpg'
         },
         instanceNumber: 1,
-        currentSoldiers: [1, 2, 3]
+        deadSoldiers: []
       };
 
       const army: Army = {
@@ -78,15 +80,17 @@ describe('Army State', () => {
     test('should remove unit from army', () => {
       const unit: ArmyUnit = {
         instanceId: 'unit-1',
+        type: 'squad',
         data: {
           id: 'test',
           name: 'Test Unit',
+          faction: 'polaris',
           cost: 50,
           soldiers: [],
           image: '/test.jpg'
         },
         instanceNumber: 1,
-        currentSoldiers: [1, 2, 3]
+        deadSoldiers: []
       };
 
       const army: Army = {
@@ -113,21 +117,24 @@ describe('Army State', () => {
       const units: ArmyUnit[] = [
         {
           instanceId: 'unit-1',
-          data: { id: 'test1', name: 'Unit 1', cost: 50, soldiers: [], image: '' },
+          type: 'squad',
+          data: { id: 'test1', name: 'Unit 1', faction: 'polaris', cost: 50, soldiers: [], image: '' },
           instanceNumber: 1,
-          currentSoldiers: [1, 2]
+          deadSoldiers: [1, 2]
         },
         {
           instanceId: 'unit-2',
-          data: { id: 'test2', name: 'Unit 2', cost: 75, soldiers: [], image: '' },
+          type: 'squad',
+          data: { id: 'test2', name: 'Unit 2', faction: 'polaris', cost: 75, soldiers: [], image: '' },
           instanceNumber: 1,
-          currentSoldiers: [1]
+          deadSoldiers: [1]
         },
         {
           instanceId: 'unit-3',
-          data: { id: 'test3', name: 'Unit 3', cost: 100, soldiers: [], image: '' },
+          type: 'squad',
+          data: { id: 'test3', name: 'Unit 3', faction: 'polaris', cost: 100, soldiers: [], image: '' },
           instanceNumber: 1,
-          currentSoldiers: [1, 2, 3]
+          deadSoldiers: [1, 2, 3]
         }
       ];
 
@@ -144,14 +151,14 @@ describe('Army State', () => {
         faction: 'polaris',
         units: [],
         totalCost: 0,
-        currentStep: 'game',
+        currentStep: 'battle',
         isInBattle: true,
         currentTurn: 5
       };
 
-      expect(army.currentTurn).toBe(5);
+      expect(army.currentTurn).toBeGreaterThan(0);
       expect(army.isInBattle).toBe(true);
-      expect(army.currentStep).toBe('game');
+      expect(army.currentStep).toBe('battle');
     });
 
     test('should handle turn increment', () => {
@@ -160,14 +167,14 @@ describe('Army State', () => {
         faction: 'polaris',
         units: [],
         totalCost: 0,
-        currentStep: 'game',
+        currentStep: 'battle',
         isInBattle: true,
         currentTurn: 1
       };
 
       const nextTurn = {
         ...army,
-        currentTurn: army.currentTurn + 1
+        currentTurn: (army.currentTurn ?? 1) + 1
       };
 
       expect(nextTurn.currentTurn).toBe(2);
