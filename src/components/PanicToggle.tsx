@@ -94,16 +94,16 @@ export function PanicToggle({ enabled, onEnabledChange, rulesVersion }: PanicTog
             <div className="space-y-2 text-xs text-slate-400 leading-relaxed">
               <div className="flex items-start gap-2">
                 <AlertTriangle className="w-4 h-4 text-orange-400 mt-0.5 shrink-0" />
-                <p>
-                  <strong className="text-orange-300">Правила сообщества:</strong> При 50% потерь отряд проходит тест на панику.
-                  D6 &gt; Армейский ранг = паника.
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  <strong className="text-orange-300">Правила сообщества:</strong> Отряд автоматически проходит тест на панику при потере 50% солдат.
+                  Бросок D6, где результат превышает Армейский ранг солдата = паника.
                 </p>
               </div>
               <div className="flex items-start gap-2">
                 <AlertTriangle className="w-4 h-4 text-blue-400 mt-0.5 shrink-0" />
-                <p>
-                  <strong className="text-blue-300">Официальные правила:</strong> При получении урона солдат проходит тест выживания.
-                  D6 == Бр = паника (опционально).
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  <strong className="text-blue-300">Официальные правила:</strong> Каждый солдат отдельно проходит Тест выживания при получении любого урона.
+                  Бросок D6, где результат равен Броне (Бр) = паника. Паникующий солдат бежит к границе поля.
                 </p>
               </div>
             </div>

@@ -15,7 +15,8 @@ const TEHNOLOG_CONTENT = (
     <h3 className="font-semibold mb-3 text-lg">Официальные правила (Технолог)</h3>
     <p className="mb-2"><strong>Попадание</strong>: Бросок кубика дальности должен быть больше или равен расстоянию до цели</p>
     <p className="mb-2"><strong>Урон по пехоте</strong>: Каждый кубик, пробивающий броню цели, наносит 1 ранение</p>
-    <p className="mb-4"><strong>Урон по технике</strong>: Каждый кубик, пробивающий броню, наносит 1 повреждение</p>
+    <p className="mb-2"><strong>Урон по технике</strong>: Каждый кубик, пробивающий броню, наносит 1 повреждение</p>
+    <p className="mb-4"><strong>Паника</strong>: При получении любого урона каждый солдат бросает D6. Если результат равен броне (Бр), солдат паникует и бежит к границе поля</p>
 
     <h4 className="font-semibold mb-2">Укрепления</h4>
     <ul className="list-disc pl-5 mb-4 space-y-1">
@@ -35,6 +36,12 @@ const COMMUNITY_CONTENT = (
     <p className="mb-2"><strong>Урон по пехоте</strong>: Каждый кубик, пробивающий броню цели, наносит 1 ранение</p>
     <p className="mb-4"><strong>Урон по технике</strong>: Сравнение с зоной прочности<br />
       <span className="text-sm opacity-80">D6 = 1 урон, D12 = 2 урона, D20 = 3 урона при пробитии</span></p>
+
+    <h4 className="font-semibold mb-2">Паника</h4>
+    <ul className="list-disc pl-5 mb-4 space-y-1">
+      <li>Отряд автоматически проходит тест на панику при потере 50% солдат</li>
+      <li>Бросок D6, где результат превышает армейский ранг = паника</li>
+    </ul>
 
     <h4 className="font-semibold mb-2">Укрепления</h4>
     <ul className="list-disc pl-5 mb-4 space-y-1">
