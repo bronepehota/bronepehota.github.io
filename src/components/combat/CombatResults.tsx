@@ -5,7 +5,6 @@ import { CombatResult, CombatParameters } from '@/lib/combat-types';
 import { RulesVersionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { CheckCircle2, AlertTriangle, Skull, Shield } from 'lucide-react';
-import { multiplyRange } from '@/lib/game-logic';
 
 interface CombatResultsProps {
   result: CombatResult;
