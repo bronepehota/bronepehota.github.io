@@ -48,6 +48,27 @@ def get_all_images():
     return sorted(images)
 
 
+def create_backup(image_path: Path) -> Path:
+    """
+    Create backup of original image in squads_backup/.
+    Returns path to backup file.
+    """
+    # Get relative path from SOURCE_DIR
+    rel_path = image_path.relative_to(SOURCE_DIR)
+    backup_path = BACKUP_DIR / rel_path
+
+    # Skip if backup already exists
+    if backup_path.exists():
+        return backup_path
+
+    # Create parent directories
+    backup_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Copy file
+    shutil.copy2(image_path, backup_path)
+    return backup_path
+
+
 def main():
     print("=" * 60)
     print("Image Standardization Script")
@@ -61,6 +82,14 @@ def main():
     ensure_backup_dir()
     images = get_all_images()
     print(f"\nFound {len(images)} images to process")
+
+    # Create backups
+    print("\nCreating backups...")
+    for i, img_path in enumerate(images, 1):
+        backup_path = create_backup(img_path)
+        if i <= 5 or i == len(images):
+            print(f"  [{i}/{len(images)}] {img_path.relative_to(SOURCE_DIR)}")
+    print("Backups created successfully!")
 
 
 if __name__ == "__main__":
