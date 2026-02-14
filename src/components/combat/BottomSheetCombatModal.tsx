@@ -258,9 +258,12 @@ export function BottomSheetCombatModal({
                       {state.actionType === 'shot' ? 'ВЫСТРЕЛИТЬ' :
                        state.actionType === 'melee' ? 'АТАКОВАТЬ' : 'БРОСИТЬ'}
                     </span>
-                    {state.parameters.isSurpriseAttack && (
+                    {/* Show modifiers in button */}
+                    {(state.parameters.isSurpriseAttack || state.parameters.isAimedShot) && (
                       <span className="text-purple-300 text-[10px] opacity-80">
-                        с тыла x2
+                        {state.parameters.isSurpriseAttack && 'с тыла'}
+                        {state.parameters.isSurpriseAttack && state.parameters.isAimedShot && ' + '}
+                        {state.parameters.isAimedShot && 'прицельный'}
                       </span>
                     )}
                   </div>
