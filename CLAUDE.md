@@ -17,7 +17,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 npm run dev              # Start Next.js dev server (http://localhost:3000)
 npm run dev:e2e          # Start dev server on port 3001 for E2E tests
 
-# Building//re
+# Building
 npm run build            # Production build
 npm run start            # Run production server
 
@@ -61,8 +61,11 @@ src/data/
 **Client-side persistence** (localStorage keys):
 - `bronepehota_army` - Player's army state (units, totalCost, faction)
 - `bronepehota_rules_version` - Selected rules version for game session
+- `bronepehota_panic_enabled` - Panic rule toggle state
+- `bronepehota_aimed_shot_enabled` - Aimed shot rule toggle state
+- `bronepehota_surprise_attack_enabled` - Surprise attack (rear attack) toggle state
 
-The main page (`src/app/page.tsx`) manages the `Army` state and passes it down to child components.
+The main app page (`src/app/app/page.tsx`) manages the `Army` state and passes it down to child components.
 
 **Runtime vs Template Data**:
 - Template data (Squad, Machine) = immutable definitions from JSON
@@ -95,6 +98,7 @@ Dice notation parsing: `D6`, `D12+2`, `2D12`, `ББ` (melee)
 - `calculateHit(rangeStr, distanceSteps)` → hit check
 - `calculateDamage(powerStr, targetArmor)` → damage count
 - `calculateMelee(attackerMelee, defenderMelee)` → combat resolution
+- `multiplyRange(rangeStr, multiplier)` → multiply dice range (e.g., D6 → D12, D6+2 → D12+4)
 
 ### Rules System (`src/lib/`)
 
@@ -113,7 +117,7 @@ Adding a new rules version:
 
 ### Component Structure
 
-**Main Page** (`src/app/page.tsx`):
+**Main Page** (`src/app/app/page.tsx`):
 - Header with faction branding, view toggle (Штаб/В Бой)
 - ArmyBuilder (construction) OR GameSession (gameplay)
 - Footer with army stats
@@ -131,6 +135,9 @@ Adding a new rules version:
 - `RulesVersionSelector.tsx` - Dropdown/picker for rules version
 - `RulesInfoModal.tsx` - Modal displaying current rules details
 - `StepProgressIndicator.tsx` - Visual step progress for multi-step flows
+- `PanicToggle.tsx` - Toggle for panic rule with info modal
+- `AimedShotToggle.tsx` - Toggle for aimed shot rule (infantry range x2)
+- `SurpriseAttackToggle.tsx` - Toggle for rear attack rule (damage x2)
 
 **UI Components**:
 - `FactionSelector.tsx` - Faction selection with visual branding
@@ -138,6 +145,8 @@ Adding a new rules version:
 - `FortificationSelector.tsx` - Fortification selection for units
 - `DiceRoller.tsx` - Animated dice rolling component
 - `SafeImage.tsx` - Image component with error handling
+- `DisplayModeToggle.tsx` - Toggle between detailed/compact display modes
+- `TabBar.tsx` - Bottom tab navigation for mobile
 
 **Combat Components** (`src/components/combat/`):
 - `BottomSheetCombatModal.tsx` - Modal for all combat actions (shot, melee, grenade)
@@ -252,10 +261,14 @@ Adding a new rules version:
   - Configurable close threshold (default: 100px)
   - Touch handlers for drag-to-close
   - Smooth snap-back animation
+- `useCombatFlow.ts` - Combat state machine for shots, melee, grenades
+  - `executeShot()`, `executeMelee()`, `executeGrenade()`, `checkGrenadeTarget()`
+  - Manages combat parameters, dice rolls, and results
 
 ### Utilities (`src/lib/`)
 
 - `unit-utils.ts` - Helper functions for unit operations (numbering, validation, etc.)
+- `combat-types.ts` - TypeScript types for combat system (CombatParameters, ShotResult, MeleeResult, GrenadeBlastResult, etc.)
 
 ### Styling
 
@@ -288,6 +301,41 @@ Adding a new rules version:
 - **Mobile Testing**: Use projects in `playwright.config.ts` to test mobile viewports
 - **Timeout Management**: Use explicit waits: `await page.waitForLoadState('networkidle')`
 - **Auto-webServer**: Playwright config automatically starts dev server - no manual setup needed
+- **Debugging**: Use `webapp-testing` skill to debug failing E2E tests - it can navigate the app, take screenshots, and inspect DOM in real-time
+
+**App Navigation Flow** (critical for E2E tests):
+```
+/app page flow:
+1. Faction Selection → click [data-testid="faction-continue-button"]
+2. Budget Selection → select points → click [data-testid="budget-next-button"]
+3. Rules Selection → optional rules toggles are HERE
+4. Army Builder → add units
+5. Game Session → battle mode
+```
+
+**Common E2E Testing Pitfalls**:
+1. **Skipping steps**: The app has a multi-step flow. Tests cannot jump directly to Rules screen - must go through Faction → Budget → Rules
+2. **Wrong selectors**: When testing toggle components, `data-testid` may be on a wrapper `<div>` while `aria-pressed` is on an inner `<button>`. Use: `container.locator('button[aria-pressed]')`
+3. **Async state**: Always use `await page.waitForTimeout(200)` after clicks to allow React state updates
+
+**Helper Functions for E2E Tests**:
+```typescript
+// Navigate to Rules screen through the full flow
+async function navigateToRulesScreen(page: Page) {
+  // Step 1: Select faction
+  await page.click('[data-testid="faction-card-polaris"]');
+  await page.click('[data-testid="faction-continue-button"]');
+  await page.waitForTimeout(300);
+
+  // Step 2: Select budget
+  await page.click('button:has-text("350")');
+  await page.waitForTimeout(300);
+
+  // Step 3: Proceed to Rules
+  await page.click('[data-testid="budget-next-button"]');
+  await page.waitForTimeout(300);
+}
+```
 
 **Example Test Structure**:
 ```typescript
@@ -295,13 +343,26 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Feature Name', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    // Clear localStorage before each test
+    await page.addInitScript(() => {
+      localStorage.clear();
+    });
+    await page.goto('/app');
+    await page.waitForLoadState('networkidle');
   });
 
-  test('should do something', async ({ page }) => {
-    const button = page.getByRole('button', { name: /текст/i });
-    await button.click();
-    await expect(page.getByText('результат')).toBeVisible();
+  test('should toggle option', async ({ page }) => {
+    // Navigate through the flow
+    await navigateToRulesScreen(page);
+
+    // Find toggle - data-testid is on container, aria-pressed on inner button
+    const toggleContainer = page.getByTestId('some-toggle');
+    const toggleButton = toggleContainer.locator('button[aria-pressed]');
+
+    await expect(toggleButton).toHaveAttribute('aria-pressed', 'false');
+    await toggleButton.click();
+    await page.waitForTimeout(200);
+    await expect(toggleButton).toHaveAttribute('aria-pressed', 'true');
   });
 });
 ```
@@ -331,8 +392,7 @@ test.describe('Feature Name', () => {
 - Lucide React (icons)
 
 **State & Storage**:
-- localStorage for army state (`bronepehota_army`)
-- localStorage for rules version (`bronepehota_rules_version`)
+- localStorage for state persistence (see full list in State Management section)
 - JSON files in `src/data/` (factions.json, and faction-specific squads/machines)
 
 **Testing**:
@@ -343,6 +403,15 @@ test.describe('Feature Name', () => {
 - clsx, tailwind-merge for conditional styling
 
 ## Recent Changes
+- **Aimed Shot Feature (2025-02)**: Implemented "11.1 Прицельная стрельба пехотинцев" from official rules
+  - Doubles range for infantry when using aimed shot (not moving)
+  - Toggle on Rules screen and in combat modal
+  - `multiplyRange()` function in game-logic.ts handles D6, D12, D6+2 notation
+  - Only available for squads (not machines)
+- **Optional Rules Toggles**: Redesigned rules screen with compact toggles
+  - `PanicToggle`, `AimedShotToggle`, `SurpriseAttackToggle` components
+  - Info modals with detailed rule descriptions
+  - States persisted in localStorage
 - **E2E Testing Migration (2025-02)**: Migrated from Cucumber BDD to Playwright TypeScript
   - Removed complex Cucumber feature files and step definitions
   - Added `playwright.config.ts` with automatic dev server startup

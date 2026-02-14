@@ -188,6 +188,25 @@ test.describe('Aimed Shot - Combat Modal', () => {
 });
 
 /**
+ * Helper function to navigate through the setup flow to Rules screen
+ * Flow: Faction → Budget → Rules
+ */
+async function navigateToRulesScreen(page: import('@playwright/test').Page) {
+  // Step 1: Select faction
+  await page.click('[data-testid="faction-card-polaris"]');
+  await page.click('[data-testid="faction-continue-button"]');
+  await page.waitForTimeout(300);
+
+  // Step 2: Select budget (350 is recommended)
+  await page.click('button:has-text("350")');
+  await page.waitForTimeout(300);
+
+  // Step 3: Click "НАЧАТЬ СБОР АРМИИ" to proceed to Rules
+  await page.click('[data-testid="budget-next-button"]');
+  await page.waitForTimeout(300);
+}
+
+/**
  * Rules Screen - Optional Rules Toggles
  */
 test.describe('Optional Rules Toggles', () => {
@@ -196,16 +215,16 @@ test.describe('Optional Rules Toggles', () => {
     await page.addInitScript(() => {
       localStorage.clear();
     });
-    await page.goto('/');
+    await page.goto('/app');
     await page.waitForLoadState('networkidle');
   });
 
   test('should show all optional rule toggles on rules screen', async ({ page }) => {
-    // Select faction to proceed to rules screen
-    await page.click('[data-testid="faction-selector"] button:first-child');
+    // Wait for page to load
+    await page.waitForLoadState('networkidle');
 
-    // Click "Штаб" to proceed
-    await page.click('text=Штаб');
+    // Navigate to rules screen (Faction → Budget → Rules)
+    await navigateToRulesScreen(page);
 
     // Wait for rules selector to appear
     const rulesSelector = page.locator('#rules-selector');
@@ -225,59 +244,73 @@ test.describe('Optional Rules Toggles', () => {
   });
 
   test('should toggle aimed shot on rules screen', async ({ page }) => {
-    // Navigate to rules screen
-    await page.click('[data-testid="faction-selector"] button:first-child');
-    await page.click('text=Штаб');
+    // Wait for page to load
+    await page.waitForLoadState('networkidle');
 
-    // Find aimed shot toggle (the whole card is clickable)
-    const aimedShotToggle = page.getByTestId('aimed-shot-toggle');
-    await expect(aimedShotToggle).toBeVisible({ timeout: 5000 });
+    // Navigate to rules screen
+    await navigateToRulesScreen(page);
+
+    // Find aimed shot toggle container
+    const aimedShotContainer = page.getByTestId('aimed-shot-toggle');
+    await expect(aimedShotContainer).toBeVisible({ timeout: 5000 });
+
+    // Find the button with aria-pressed inside the toggle
+    const aimedShotButton = aimedShotContainer.locator('button[aria-pressed]');
 
     // Check initial state - should be disabled by default
-    await expect(aimedShotToggle).toHaveAttribute('aria-pressed', 'false');
+    await expect(aimedShotButton).toHaveAttribute('aria-pressed', 'false');
 
-    // Toggle on
-    await aimedShotToggle.click();
+    // Toggle on - click the button inside
+    await aimedShotButton.click();
     await page.waitForTimeout(200);
-    await expect(aimedShotToggle).toHaveAttribute('aria-pressed', 'true');
+    await expect(aimedShotButton).toHaveAttribute('aria-pressed', 'true');
 
     // Toggle off
-    await aimedShotToggle.click();
+    await aimedShotButton.click();
     await page.waitForTimeout(200);
-    await expect(aimedShotToggle).toHaveAttribute('aria-pressed', 'false');
+    await expect(aimedShotButton).toHaveAttribute('aria-pressed', 'false');
   });
 
   test('should toggle surprise attack on rules screen', async ({ page }) => {
-    // Navigate to rules screen
-    await page.click('[data-testid="faction-selector"] button:first-child');
-    await page.click('text=Штаб');
+    // Wait for page to load
+    await page.waitForLoadState('networkidle');
 
-    // Find surprise attack toggle (the whole card is clickable)
-    const surpriseAttackToggle = page.getByTestId('surprise-attack-toggle');
-    await expect(surpriseAttackToggle).toBeVisible({ timeout: 5000 });
+    // Navigate to rules screen
+    await navigateToRulesScreen(page);
+
+    // Find surprise attack toggle container
+    const surpriseAttackContainer = page.getByTestId('surprise-attack-toggle');
+    await expect(surpriseAttackContainer).toBeVisible({ timeout: 5000 });
+
+    // Find the button with aria-pressed inside the toggle
+    const surpriseAttackButton = surpriseAttackContainer.locator('button[aria-pressed]');
 
     // Check initial state - should be disabled by default
-    await expect(surpriseAttackToggle).toHaveAttribute('aria-pressed', 'false');
+    await expect(surpriseAttackButton).toHaveAttribute('aria-pressed', 'false');
 
-    // Toggle on
-    await surpriseAttackToggle.click();
+    // Toggle on - click the button inside
+    await surpriseAttackButton.click();
     await page.waitForTimeout(200);
-    await expect(surpriseAttackToggle).toHaveAttribute('aria-pressed', 'true');
+    await expect(surpriseAttackButton).toHaveAttribute('aria-pressed', 'true');
   });
 
   test('should persist toggle states in localStorage', async ({ page }) => {
-    // Navigate to rules screen
-    await page.click('[data-testid="faction-selector"] button:first-child');
-    await page.click('text=Штаб');
+    // Wait for page to load
+    await page.waitForLoadState('networkidle');
 
-    // Toggle aimed shot on (the whole card is clickable)
-    const aimedShotToggle = page.getByTestId('aimed-shot-toggle');
-    await aimedShotToggle.click();
+    // Navigate to rules screen
+    await navigateToRulesScreen(page);
+
+    // Find aimed shot toggle and click the button inside
+    const aimedShotContainer = page.getByTestId('aimed-shot-toggle');
+    const aimedShotButton = aimedShotContainer.locator('button[aria-pressed]');
+    await aimedShotButton.click();
     await page.waitForTimeout(200);
 
-    // Toggle surprise attack on
-    const surpriseAttackToggle = page.getByTestId('surprise-attack-toggle');
-    await surpriseAttackToggle.click();
+    // Find surprise attack toggle and click the button inside
+    const surpriseAttackContainer = page.getByTestId('surprise-attack-toggle');
+    const surpriseAttackButton = surpriseAttackContainer.locator('button[aria-pressed]');
+    await surpriseAttackButton.click();
     await page.waitForTimeout(200);
 
     // Check localStorage
