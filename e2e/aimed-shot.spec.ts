@@ -4,7 +4,7 @@ import { test, expect } from '@playwright/test';
  * Aimed Shot E2E tests
  * Tests the aimed shot feature for squad shooting attacks
  */
-test.describe('Aimed Shot', () => {
+test.describe('Aimed Shot - Combat Modal', () => {
   test.beforeEach(async ({ page }) => {
     // Set localStorage BEFORE page loads using addInitScript
     await page.addInitScript(() => {
@@ -57,7 +57,6 @@ test.describe('Aimed Shot', () => {
     await expect(gameSession.first()).toBeVisible({ timeout: 10000 });
 
     // Click the "ДЕЙСТВИЕ" button for the first soldier to open combat modal
-    // The button has aria-label="Выберите действие"
     const actionButton = page.getByRole('button', { name: 'Выберите действие' }).first();
     await expect(actionButton).toBeVisible({ timeout: 5000 });
     await actionButton.click({ force: true });
@@ -144,15 +143,13 @@ test.describe('Aimed Shot', () => {
     const gameSession = newPage.getByTestId('game-session');
     await expect(gameSession.first()).toBeVisible({ timeout: 10000 });
 
-    // Machines have a "ВЫСТРЕЛ" button directly for each weapon (no action selector needed)
-    // Look for the weapon fire button with title "Выстрел"
+    // Machines have a "ВЫСТРЕЛ" button directly for each weapon
     const weaponFireButton = newPage.locator('button[title="Выстрел"]').first();
     await expect(weaponFireButton).toBeVisible({ timeout: 5000 });
     await weaponFireButton.click({ force: true });
     await newPage.waitForTimeout(500);
 
     // Check aimed shot button is NOT visible for machines
-    // (Machines skip the action selector and go directly to parameters)
     const aimedShotButton = newPage.locator('button[aria-label*="Прицельный"]');
     await expect(aimedShotButton).not.toBeVisible();
   });
@@ -187,5 +184,115 @@ test.describe('Aimed Shot', () => {
     await aimedShotButton.click();
     await page.waitForTimeout(200);
     await expect(aimedShotButton).toHaveAttribute('aria-label', 'Прицельный выстрел выключен');
+  });
+});
+
+/**
+ * Rules Screen - Optional Rules Toggles
+ */
+test.describe('Optional Rules Toggles', () => {
+  test.beforeEach(async ({ page }) => {
+    // Clear localStorage
+    await page.addInitScript(() => {
+      localStorage.clear();
+    });
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+  });
+
+  test('should show all optional rule toggles on rules screen', async ({ page }) => {
+    // Select faction to proceed to rules screen
+    await page.click('[data-testid="faction-selector"] button:first-child');
+
+    // Click "Штаб" to proceed
+    await page.click('text=Штаб');
+
+    // Wait for rules selector to appear
+    const rulesSelector = page.locator('#rules-selector');
+    await expect(rulesSelector).toBeVisible({ timeout: 5000 });
+
+    // Check panic toggle is visible
+    const panicToggle = page.getByTestId('panic-toggle');
+    await expect(panicToggle).toBeVisible();
+
+    // Check aimed shot toggle is visible
+    const aimedShotToggle = page.getByTestId('aimed-shot-toggle');
+    await expect(aimedShotToggle).toBeVisible();
+
+    // Check surprise attack toggle is visible
+    const surpriseAttackToggle = page.getByTestId('surprise-attack-toggle');
+    await expect(surpriseAttackToggle).toBeVisible();
+  });
+
+  test('should toggle aimed shot on rules screen', async ({ page }) => {
+    // Navigate to rules screen
+    await page.click('[data-testid="faction-selector"] button:first-child');
+    await page.click('text=Штаб');
+
+    // Find aimed shot toggle
+    const aimedShotToggle = page.getByTestId('aimed-shot-toggle');
+    await expect(aimedShotToggle).toBeVisible({ timeout: 5000 });
+
+    // Check initial state - should be disabled by default
+    const toggleButton = aimedShotToggle.locator('button[aria-label*="прицельную"]');
+    await expect(toggleButton).toHaveAttribute('aria-pressed', 'false');
+
+    // Toggle on
+    await toggleButton.click();
+    await page.waitForTimeout(200);
+    await expect(toggleButton).toHaveAttribute('aria-pressed', 'true');
+
+    // Toggle off
+    await toggleButton.click();
+    await page.waitForTimeout(200);
+    await expect(toggleButton).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  test('should toggle surprise attack on rules screen', async ({ page }) => {
+    // Navigate to rules screen
+    await page.click('[data-testid="faction-selector"] button:first-child');
+    await page.click('text=Штаб');
+
+    // Find surprise attack toggle
+    const surpriseAttackToggle = page.getByTestId('surprise-attack-toggle');
+    await expect(surpriseAttackToggle).toBeVisible({ timeout: 5000 });
+
+    // Check initial state - should be disabled by default
+    const toggleButton = surpriseAttackToggle.locator('button[aria-label*="тыла"]');
+    await expect(toggleButton).toHaveAttribute('aria-pressed', 'false');
+
+    // Toggle on
+    await toggleButton.click();
+    await page.waitForTimeout(200);
+    await expect(toggleButton).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  test('should persist toggle states in localStorage', async ({ page }) => {
+    // Navigate to rules screen
+    await page.click('[data-testid="faction-selector"] button:first-child');
+    await page.click('text=Штаб');
+
+    // Toggle aimed shot on
+    const aimedShotToggle = page.getByTestId('aimed-shot-toggle');
+    const aimedShotButton = aimedShotToggle.locator('button[aria-label*="прицельную"]');
+    await aimedShotButton.click();
+    await page.waitForTimeout(200);
+
+    // Toggle surprise attack on
+    const surpriseAttackToggle = page.getByTestId('surprise-attack-toggle');
+    const surpriseAttackButton = surpriseAttackToggle.locator('button[aria-label*="тыла"]');
+    await surpriseAttackButton.click();
+    await page.waitForTimeout(200);
+
+    // Check localStorage
+    const aimedShotEnabled = await page.evaluate(() =>
+      localStorage.getItem('bronepehota_aimed_shot_enabled')
+    );
+    expect(aimedShotEnabled).toBe('true');
+
+    const surpriseAttackEnabled = await page.evaluate(() =>
+      localStorage.getItem('bronepehota_surprise_attack_enabled')
+    );
+    expect(surpriseAttackEnabled).toBe('true');
   });
 });
