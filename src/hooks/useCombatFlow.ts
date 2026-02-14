@@ -30,6 +30,7 @@ const initialCombatFlowState: CombatFlowState = {
     targetMelee: 2,
     fortification: 'none',
     isSurpriseAttack: false,
+    isAimedShot: false,
   },
   diceDisplay: {},
   result: null,

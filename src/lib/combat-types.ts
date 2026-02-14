@@ -32,6 +32,7 @@ export interface CombatParameters {
   fortification: FortificationType;  // Target's cover/fortification
   weaponIndex?: number;       // For machines: which weapon to use
   isSurpriseAttack?: boolean; // Attack from behind (Fan rules: roll twice, take best; machine's BB ignored)
+  isAimedShot?: boolean;      // Aimed shot: squad only shoots (no movement/melee), doubles range
 }
 
 /**
