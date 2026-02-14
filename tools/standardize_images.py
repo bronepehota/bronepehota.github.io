@@ -119,6 +119,67 @@ def find_content_bbox(image_path: Path) -> tuple:
         return (left, top, right, bottom)
 
 
+def process_image(image_path: Path) -> dict:
+    """
+    Process a single image: crop, resize, and save.
+    Returns dict with processing info for report.
+    """
+    result = {
+        "path": str(image_path.relative_to(SOURCE_DIR)),
+        "original_size": None,
+        "new_size": (TARGET_WIDTH, TARGET_HEIGHT),
+        "status": "OK",
+        "error": None,
+    }
+
+    try:
+        with Image.open(image_path) as img:
+            result["original_size"] = img.size
+
+            # Convert to RGB if necessary
+            if img.mode != "RGB":
+                img = img.convert("RGB")
+
+            # Find content bounding box
+            bbox = find_content_bbox(image_path)
+            left, top, right, bottom = bbox
+
+            # Crop to content
+            cropped = img.crop((left, top, right, bottom))
+
+            # Calculate scaling to fit in 300x400 while preserving aspect ratio
+            crop_width, crop_height = cropped.size
+            target_ratio = TARGET_WIDTH / TARGET_HEIGHT
+            crop_ratio = crop_width / crop_height
+
+            if crop_ratio > target_ratio:
+                # Image is wider than target - fit to width
+                new_width = TARGET_WIDTH
+                new_height = int(TARGET_WIDTH / crop_ratio)
+            else:
+                # Image is taller than target - fit to height
+                new_height = TARGET_HEIGHT
+                new_width = int(TARGET_HEIGHT * crop_ratio)
+
+            # Resize
+            resized = cropped.resize((new_width, new_height), Image.LANCZOS)
+
+            # Create white canvas and center the image
+            canvas = Image.new("RGB", (TARGET_WIDTH, TARGET_HEIGHT), BACKGROUND_COLOR)
+            offset_x = (TARGET_WIDTH - new_width) // 2
+            offset_y = (TARGET_HEIGHT - new_height) // 2
+            canvas.paste(resized, (offset_x, offset_y))
+
+            # Save as PNG
+            canvas.save(image_path, "PNG", optimize=True)
+
+    except Exception as e:
+        result["status"] = "ERROR"
+        result["error"] = str(e)
+
+    return result
+
+
 def main():
     print("=" * 60)
     print("Image Standardization Script")
@@ -141,11 +202,21 @@ def main():
             print(f"  [{i}/{len(images)}] {img_path.relative_to(SOURCE_DIR)}")
     print("Backups created successfully!")
 
-    # Test bbox detection on first image
-    if images:
-        test_img = images[0]
-        bbox = find_content_bbox(test_img)
-        print(f"\nTest bbox for {test_img.name}: {bbox}")
+    # TEST: Process only first 3 images
+    images = images[:3]
+
+    # Process all images
+    print("\nProcessing images...")
+    results = []
+    for i, img_path in enumerate(images, 1):
+        result = process_image(img_path)
+        results.append(result)
+        status_icon = "✓" if result["status"] == "OK" else "✗"
+        print(f"  [{i}/{len(images)}] {status_icon} {result['path']}")
+
+    # Summary
+    success_count = sum(1 for r in results if r["status"] == "OK")
+    print(f"\nCompleted: {success_count}/{len(images)} images processed successfully")
 
 
 if __name__ == "__main__":
