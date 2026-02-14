@@ -303,9 +303,6 @@ def main():
             print(f"  [{i}/{len(images)}] {img_path.relative_to(SOURCE_DIR)}")
     print("Backups created successfully!")
 
-    # TEST: Process only first 3 images
-    images = images[:3]
-
     # Process all images
     print("\nProcessing images...")
     results = []
