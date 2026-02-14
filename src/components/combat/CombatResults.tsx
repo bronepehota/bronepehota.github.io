@@ -94,6 +94,24 @@ export function CombatResults({
         </div>
       </div>
 
+      {/* Attack modifiers display */}
+      {isShot && (parameters.isSurpriseAttack || parameters.isAimedShot) && (
+        <div className="flex justify-center gap-2 mb-2">
+          {parameters.isAimedShot && (
+            <div className="flex items-center gap-1 px-2 py-1 bg-cyan-950/30 border border-cyan-700/50 rounded text-cyan-400 text-[10px] font-mono uppercase">
+              <span>Прицельный</span>
+              <span className="text-cyan-500">x2 дальность</span>
+            </div>
+          )}
+          {parameters.isSurpriseAttack && (
+            <div className="flex items-center gap-1 px-2 py-1 bg-purple-950/30 border border-purple-700/50 rounded text-purple-400 text-[10px] font-mono uppercase">
+              <span>С тыла</span>
+              <span className="text-purple-500">x2 урон</span>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Shot Results */}
       {isShot && result.hitResult && (
         <>

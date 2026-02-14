@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect, useRef, KeyboardEvent } from 'react';
-import { Book, Check } from 'lucide-react';
+import { Book, Check, ChevronDown } from 'lucide-react';
 import { clsx } from 'clsx';
 import type { RulesVersion, RulesVersionID } from '@/lib/types';
 import { PanicToggle } from './PanicToggle';
+import { AimedShotToggle } from './AimedShotToggle';
+import { SurpriseAttackToggle } from './SurpriseAttackToggle';
 
 interface RulesSelectorProps {
   versions: RulesVersion[];
@@ -13,6 +15,10 @@ interface RulesSelectorProps {
   onConfirm?: () => void;
   panicEnabled?: boolean;
   onPanicEnabledChange?: (enabled: boolean) => void;
+  aimedShotEnabled?: boolean;
+  onAimedShotEnabledChange?: (enabled: boolean) => void;
+  surpriseAttackEnabled?: boolean;
+  onSurpriseAttackEnabledChange?: (enabled: boolean) => void;
 }
 
 export function RulesSelector({
@@ -22,6 +28,10 @@ export function RulesSelector({
   onConfirm,
   panicEnabled = true,
   onPanicEnabledChange,
+  aimedShotEnabled = false,
+  onAimedShotEnabledChange,
+  surpriseAttackEnabled = false,
+  onSurpriseAttackEnabledChange,
 }: RulesSelectorProps) {
   const [expandedRulesId, setExpandedRulesId] = useState<RulesVersionID | null>(null);
   const debouncedSaveRef = useRef<NodeJS.Timeout>();
@@ -43,11 +53,9 @@ export function RulesSelector({
   }, []);
 
   const handleRulesClick = (rulesId: RulesVersionID) => {
-    // Immediate UI update
     onVersionChange(rulesId);
     setExpandedRulesId(rulesId === expandedRulesId ? null : rulesId);
 
-    // Debounced localStorage write
     if (debouncedSaveRef.current) {
       clearTimeout(debouncedSaveRef.current);
     }
@@ -65,31 +73,22 @@ export function RulesSelector({
     }
   };
 
+  const selectedRules = versions.find(v => v.id === selectedVersion);
+
   return (
-    <div id="rules-selector" className="space-y-6">
-      {/* Header */}
-      <div className="text-center space-y-2">
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <Book className="w-6 h-6 text-slate-500" />
-          <h2 className="text-2xl font-bold text-slate-200 font-mono tracking-wider">ПРАВИЛА ИГРЫ</h2>
-          <Book className="w-6 h-6 text-slate-500" />
+    <div id="rules-selector" className="space-y-4 max-w-2xl mx-auto">
+      {/* Compact Header */}
+      <div className="flex items-center justify-center gap-3 py-2">
+        <div className="h-px flex-1 bg-slate-700/50" />
+        <div className="flex items-center gap-2">
+          <Book className="w-4 h-4 text-slate-500" />
+          <h2 className="text-lg font-bold text-slate-300 font-mono tracking-wider">ПРАВИЛА</h2>
         </div>
-        <p className="text-sm text-slate-400">Выберите версию правил для вашей партии</p>
+        <div className="h-px flex-1 bg-slate-700/50" />
       </div>
 
-      {/* Panic toggle - optional setting */}
-      {onPanicEnabledChange && (
-        <div className="max-w-2xl mx-auto">
-          <PanicToggle
-            enabled={panicEnabled}
-            onEnabledChange={onPanicEnabledChange}
-            rulesVersion={selectedVersion}
-          />
-        </div>
-      )}
-
-      {/* Responsive grid: single column mobile, 2-3 columns desktop */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Rules Version Selector - Compact accordion style */}
+      <div className="space-y-2">
         {versions.map((version) => {
           const isSelected = selectedVersion === version.id;
           const isExpanded = expandedRulesId === version.id;
@@ -101,109 +100,135 @@ export function RulesSelector({
               tabIndex={0}
               aria-pressed={isSelected}
               aria-expanded={isExpanded}
-              aria-label={`Версия правил ${version.name}, ${isSelected ? 'выбрана' : 'не выбрана'}`}
               onKeyDown={(e) => handleKeyDown(e, version.id)}
               onClick={() => handleRulesClick(version.id)}
               data-testid={`rules-card-${version.id}`}
               className={clsx(
-                'relative group cursor-pointer transition-all duration-300',
-                'border bg-slate-800/80 backdrop-blur-sm overflow-hidden',
-                'min-h-[120px] min-w-[44px] touch-manipulation',
-                isSelected ? 'scale-105' : 'hover:scale-102',
-                'active:scale-95'
+                'relative group cursor-pointer transition-all duration-200',
+                'rounded-lg border overflow-hidden',
+                isSelected ? 'ring-1' : 'hover:border-slate-600'
               )}
               style={{
                 borderColor: isSelected ? version.color : '#334155',
-                ...(isSelected && {
-                  boxShadow: `0 0 20px ${version.color}40`
-                })
+                backgroundColor: isSelected ? `${version.color}10` : 'rgba(30, 41, 59, 0.6)',
+                ...(isSelected && { ringColor: `${version.color}50` })
               }}
             >
-              {/* Corner accents for selected version */}
-              {isSelected && (
-                <>
-                  <div className="absolute top-0 left-0 w-3 h-3 border-l-2 border-t-2" style={{ borderColor: version.color }} />
-                  <div className="absolute top-0 right-0 w-3 h-3 border-r-2 border-t-2" style={{ borderColor: version.color }} />
-                  <div className="absolute bottom-0 left-0 w-3 h-3 border-l-2 border-b-2" style={{ borderColor: version.color }} />
-                  <div className="absolute bottom-0 right-0 w-3 h-3 border-r-2 border-b-2" style={{ borderColor: version.color }} />
-                </>
-              )}
+              {/* Main row - always visible */}
+              <div className="flex items-center justify-between p-3">
+                <div className="flex items-center gap-3">
+                  {/* Selection indicator */}
+                  <div
+                    className={clsx(
+                      'w-5 h-5 rounded flex items-center justify-center border-2 transition-all',
+                      isSelected ? 'border-current' : 'border-slate-600'
+                    )}
+                    style={{ borderColor: isSelected ? version.color : undefined }}
+                  >
+                    {isSelected && <Check className="w-3 h-3" style={{ color: version.color }} />}
+                  </div>
 
-              {/* Book icon in background */}
-              <div className="absolute bottom-3 right-3 opacity-10">
-                <Book className="w-12 h-12" style={{ color: version.color }} />
-              </div>
-
-              {/* Content */}
-              <div className="relative z-10 p-4">
-                {/* Name and status */}
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className={clsx('font-mono font-bold text-sm tracking-wide', isSelected ? 'text-slate-200' : 'text-slate-400')}>
-                    {version.name.toUpperCase()}
-                  </h3>
-                  {isSelected && (
-                    <div className="w-6 h-6 rounded-full flex items-center justify-center bg-green-500/20 border border-green-500">
-                      <Check className="w-4 h-4 text-green-400" />
-                    </div>
-                  )}
+                  <div>
+                    <h3 className={clsx(
+                      'font-mono font-bold text-sm tracking-wide',
+                      isSelected ? '' : 'text-slate-400'
+                    )} style={isSelected ? { color: version.color } : undefined}>
+                      {version.name}
+                    </h3>
+                  </div>
                 </div>
 
-                {/* Description */}
-                <p className={clsx('text-xs italic mb-3 font-mono', isSelected ? 'text-slate-400' : 'text-slate-500')}>
-                  {version.description || 'Описание недоступно'}
-                </p>
-
-                {/* Color indicator bar */}
-                <div className="h-0.5 rounded-full" style={{ backgroundColor: version.color }}></div>
-
-                {/* Expanded details */}
-                {isExpanded && (
-                  <div className="mt-3 pt-3 border-t border-slate-700/50 space-y-2">
-                    {version.description && (
-                      <p className="text-xs text-slate-400 leading-relaxed">{version.description}</p>
-                    )}
-                    {version.features && version.features.length > 0 && (
-                      <ul className="list-disc list-inside space-y-1 text-xs text-slate-500 font-mono">
-                        {version.features.map((feature, idx) => (
-                          <li key={idx}>{feature}</li>
-                        ))}
-                      </ul>
-                    )}
-                    {version.link && (
-                      <a
-                        href={version.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-blue-400 hover:text-blue-300 underline block"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        Сообщество ВКонтакте →
-                      </a>
-                    )}
-                  </div>
-                )}
+                <ChevronDown
+                  className={clsx(
+                    'w-4 h-4 text-slate-500 transition-transform duration-200',
+                    isExpanded && 'rotate-180'
+                  )}
+                />
               </div>
+
+              {/* Expanded details */}
+              {isExpanded && (
+                <div className="px-3 pb-3 pt-0 border-t border-slate-700/30">
+                  <p className="text-xs text-slate-400 leading-relaxed mb-2">
+                    {version.description || 'Стандартные правила настольной игры'}
+                  </p>
+                  {version.features && version.features.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {version.features.map((feature, idx) => (
+                        <span
+                          key={idx}
+                          className="text-[10px] px-2 py-0.5 rounded bg-slate-700/50 text-slate-400 font-mono"
+                        >
+                          {feature}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {version.link && (
+                    <a
+                      href={version.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-blue-400 hover:text-blue-300 underline block mt-2"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Подробнее →
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
           );
         })}
       </div>
 
+      {/* Optional Rules Section - Compact toggles */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 py-1">
+          <div className="h-px flex-1 bg-slate-700/30" />
+          <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">Опциональные правила</span>
+          <div className="h-px flex-1 bg-slate-700/30" />
+        </div>
+
+        {/* Side-by-side toggles on desktop, stacked on mobile */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+          {onPanicEnabledChange && (
+            <PanicToggle
+              enabled={panicEnabled}
+              onEnabledChange={onPanicEnabledChange}
+              rulesVersion={selectedVersion}
+            />
+          )}
+          {onAimedShotEnabledChange && (
+            <AimedShotToggle
+              enabled={aimedShotEnabled}
+              onEnabledChange={onAimedShotEnabledChange}
+            />
+          )}
+          {onSurpriseAttackEnabledChange && (
+            <SurpriseAttackToggle
+              enabled={surpriseAttackEnabled}
+              onEnabledChange={onSurpriseAttackEnabledChange}
+            />
+          )}
+        </div>
+      </div>
+
       {/* Confirm button */}
       {onConfirm && (
-        <div className="pt-4 flex justify-center">
-          <button
-            onClick={onConfirm}
-            data-testid="rules-confirm-button"
-            className={clsx(
-              'px-8 py-3 font-mono text-sm font-bold uppercase tracking-wider',
-              'border transition-all min-h-[48px] min-w-[44px]',
-              'hover:scale-105 active:scale-95',
-              'border-blue-500 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20'
-            )}
-          >
-            НАЧАТЬ ИГРУ
-          </button>
-        </div>
+        <button
+          onClick={onConfirm}
+          data-testid="rules-confirm-button"
+          className={clsx(
+            'w-full py-3 font-mono text-sm font-bold uppercase tracking-wider',
+            'border-2 transition-all min-h-[48px] rounded-lg',
+            'border-emerald-600 bg-emerald-600/20 text-emerald-400',
+            'hover:bg-emerald-600/30 hover:border-emerald-500',
+            'active:scale-[0.98]'
+          )}
+        >
+          НАЧАТЬ ИГРУ
+        </button>
       )}
     </div>
   );

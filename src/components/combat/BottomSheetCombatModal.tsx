@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { X, ChevronLeft, Target, Sword, Bomb, EyeOff } from 'lucide-react';
+import { X, ChevronLeft, Target, Sword, Bomb, EyeOff, Crosshair } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useBottomSheet } from '@/hooks/useBottomSheet';
 import { CombatFlowState, CombatActionType, CombatParameters } from '@/lib/combat-types';
@@ -186,6 +186,7 @@ export function BottomSheetCombatModal({
                 soldierIndex={state.soldierIndex}
                 targetMemory={targetMemory}
                 onMemoryUpdate={updateTargetMemory}
+                isAimedShot={state.parameters.isAimedShot}
               />
 
               {/* Execute button with surprise attack toggle */}
@@ -215,6 +216,30 @@ export function BottomSheetCombatModal({
                   </button>
                 )}
 
+                {/* Aimed Shot toggle - shot only, squads only */}
+                {state.actionType === 'shot' && state.unitType === 'squad' && (
+                  <button
+                    type="button"
+                    onClick={() => onSetParameters({ isAimedShot: !state.parameters.isAimedShot })}
+                    className={cn(
+                      'relative h-14 w-14 min-h-[56px] min-w-[56px] rounded-lg border-2 flex items-center justify-center shrink-0',
+                      'touch-manipulation active:scale-95 transition-all duration-200',
+                      state.parameters.isAimedShot
+                        ? 'bg-cyan-600/20 border-cyan-500 shadow-lg shadow-cyan-500/20'
+                        : 'bg-slate-700/50 border-slate-600 hover:bg-slate-700'
+                    )}
+                    aria-label={state.parameters.isAimedShot ? 'Прицельный выстрел включён' : 'Прицельный выстрел выключен'}
+                  >
+                    <Crosshair
+                      className={cn('transition-colors duration-200', state.parameters.isAimedShot ? 'text-cyan-400' : 'text-slate-400')}
+                      size={22}
+                    />
+                    {state.parameters.isAimedShot && (
+                      <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-cyan-400 rounded-full animate-pulse" />
+                    )}
+                  </button>
+                )}
+
                 {/* Execute button - Tactical Control */}
                 <button
                   onClick={onExecuteAction}
@@ -234,9 +259,12 @@ export function BottomSheetCombatModal({
                       {state.actionType === 'shot' ? 'ВЫСТРЕЛИТЬ' :
                        state.actionType === 'melee' ? 'АТАКОВАТЬ' : 'БРОСИТЬ'}
                     </span>
-                    {state.parameters.isSurpriseAttack && (
+                    {/* Show modifiers in button */}
+                    {(state.parameters.isSurpriseAttack || state.parameters.isAimedShot) && (
                       <span className="text-purple-300 text-[10px] opacity-80">
-                        с тыла x2
+                        {state.parameters.isSurpriseAttack && 'с тыла'}
+                        {state.parameters.isSurpriseAttack && state.parameters.isAimedShot && ' + '}
+                        {state.parameters.isAimedShot && 'прицельный'}
                       </span>
                     )}
                   </div>

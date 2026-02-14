@@ -43,6 +43,24 @@ export default function ArmyBuilder({ army, setArmy, onEnterBattle, rulesVersion
     return true;
   });
 
+  // Aimed shot enabled state - persisted in localStorage
+  const [aimedShotEnabled, setAimedShotEnabled] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('bronepehota_aimed_shot_enabled');
+      return saved !== null ? saved === 'true' : false; // Default to disabled
+    }
+    return false;
+  });
+
+  // Surprise attack enabled state - persisted in localStorage
+  const [surpriseAttackEnabled, setSurpriseAttackEnabled] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('bronepehota_surprise_attack_enabled');
+      return saved !== null ? saved === 'true' : false; // Default to disabled
+    }
+    return false;
+  });
+
   // Setup step state for guided flow - sync with army.currentStep
   const [setupStep, setSetupStep] = useState<'faction' | 'budget' | 'rules' | 'units'>(() => {
     if (army.currentStep === 'unit-select') return 'units';
@@ -126,6 +144,10 @@ export default function ArmyBuilder({ army, setArmy, onEnterBattle, rulesVersion
                     onVersionChange={onRulesVersionChange}
                     panicEnabled={panicEnabled}
                     onPanicEnabledChange={setPanicEnabled}
+                    aimedShotEnabled={aimedShotEnabled}
+                    onAimedShotEnabledChange={setAimedShotEnabled}
+                    surpriseAttackEnabled={surpriseAttackEnabled}
+                    onSurpriseAttackEnabledChange={setSurpriseAttackEnabled}
                     onConfirm={() => {
                       setArmy({ ...army, currentStep: 'unit-select' });
                       setSetupStep('units');
