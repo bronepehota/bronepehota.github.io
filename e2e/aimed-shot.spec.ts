@@ -229,23 +229,22 @@ test.describe('Optional Rules Toggles', () => {
     await page.click('[data-testid="faction-selector"] button:first-child');
     await page.click('text=Штаб');
 
-    // Find aimed shot toggle
+    // Find aimed shot toggle (the whole card is clickable)
     const aimedShotToggle = page.getByTestId('aimed-shot-toggle');
     await expect(aimedShotToggle).toBeVisible({ timeout: 5000 });
 
     // Check initial state - should be disabled by default
-    const toggleButton = aimedShotToggle.locator('button[aria-label*="прицельную"]');
-    await expect(toggleButton).toHaveAttribute('aria-pressed', 'false');
+    await expect(aimedShotToggle).toHaveAttribute('aria-pressed', 'false');
 
     // Toggle on
-    await toggleButton.click();
+    await aimedShotToggle.click();
     await page.waitForTimeout(200);
-    await expect(toggleButton).toHaveAttribute('aria-pressed', 'true');
+    await expect(aimedShotToggle).toHaveAttribute('aria-pressed', 'true');
 
     // Toggle off
-    await toggleButton.click();
+    await aimedShotToggle.click();
     await page.waitForTimeout(200);
-    await expect(toggleButton).toHaveAttribute('aria-pressed', 'false');
+    await expect(aimedShotToggle).toHaveAttribute('aria-pressed', 'false');
   });
 
   test('should toggle surprise attack on rules screen', async ({ page }) => {
@@ -253,18 +252,17 @@ test.describe('Optional Rules Toggles', () => {
     await page.click('[data-testid="faction-selector"] button:first-child');
     await page.click('text=Штаб');
 
-    // Find surprise attack toggle
+    // Find surprise attack toggle (the whole card is clickable)
     const surpriseAttackToggle = page.getByTestId('surprise-attack-toggle');
     await expect(surpriseAttackToggle).toBeVisible({ timeout: 5000 });
 
     // Check initial state - should be disabled by default
-    const toggleButton = surpriseAttackToggle.locator('button[aria-label*="тыла"]');
-    await expect(toggleButton).toHaveAttribute('aria-pressed', 'false');
+    await expect(surpriseAttackToggle).toHaveAttribute('aria-pressed', 'false');
 
     // Toggle on
-    await toggleButton.click();
+    await surpriseAttackToggle.click();
     await page.waitForTimeout(200);
-    await expect(toggleButton).toHaveAttribute('aria-pressed', 'true');
+    await expect(surpriseAttackToggle).toHaveAttribute('aria-pressed', 'true');
   });
 
   test('should persist toggle states in localStorage', async ({ page }) => {
@@ -272,16 +270,14 @@ test.describe('Optional Rules Toggles', () => {
     await page.click('[data-testid="faction-selector"] button:first-child');
     await page.click('text=Штаб');
 
-    // Toggle aimed shot on
+    // Toggle aimed shot on (the whole card is clickable)
     const aimedShotToggle = page.getByTestId('aimed-shot-toggle');
-    const aimedShotButton = aimedShotToggle.locator('button[aria-label*="прицельную"]');
-    await aimedShotButton.click();
+    await aimedShotToggle.click();
     await page.waitForTimeout(200);
 
     // Toggle surprise attack on
     const surpriseAttackToggle = page.getByTestId('surprise-attack-toggle');
-    const surpriseAttackButton = surpriseAttackToggle.locator('button[aria-label*="тыла"]');
-    await surpriseAttackButton.click();
+    await surpriseAttackToggle.click();
     await page.waitForTimeout(200);
 
     // Check localStorage
