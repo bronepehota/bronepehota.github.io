@@ -1,11 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getUnitById, getAllUnits } from '@/lib/encyclopedia-utils';
-import { UnitHeader } from '@/components/encyclopedia/UnitDetail/UnitHeader';
-import { UnitStats } from '@/components/encyclopedia/UnitDetail/UnitStats';
-import { UnitLore } from '@/components/encyclopedia/UnitDetail/UnitLore';
-import { UnitTactics } from '@/components/encyclopedia/UnitDetail/UnitTactics';
-import { SourceLink } from '@/components/encyclopedia/UnitDetail/SourceLink';
+import UnitDetailPage from '@/components/encyclopedia/UnitDetailPage';
 
 interface PageProps {
   params: { id: string };
@@ -34,24 +30,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function UnitDetailPage({ params }: PageProps) {
+export default async function Page({ params }: PageProps) {
   const unit = await getUnitById(params.id);
 
   if (!unit) {
     notFound();
   }
 
-  return (
-    <div className="min-h-screen bg-slate-900">
-      <div className="container mx-auto px-4 py-8">
-        <UnitHeader unit={unit} />
-        <UnitStats unit={unit} />
-        <UnitLore unit={unit} />
-        <UnitTactics unit={unit} />
-        <div className="mt-8">
-          <SourceLink unit={unit} />
-        </div>
-      </div>
-    </div>
-  );
+  return <UnitDetailPage unit={unit} />;
 }

@@ -403,6 +403,7 @@ button, a, input, select, textarea {
   width: 30px;
   height: 30px;
   background: linear-gradient(135deg, transparent 50%, rgba(71, 85, 105, 0.3) 50%);
+  pointer-events: none;
 }
 
 .folded-paper:hover {
@@ -424,6 +425,7 @@ button, a, input, select, textarea {
   border-color: rgba(234, 88, 12, 0.5);
   border-style: solid;
   transition: all 0.3s ease;
+  pointer-events: none;
 }
 
 .military-corners::before {
