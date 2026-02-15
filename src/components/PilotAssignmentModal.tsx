@@ -433,9 +433,9 @@ export function PilotAssignmentModal({
                           <Image
                             src={getSoldierImage(soldier)}
                             alt={`Боец ${candidate.soldierIndex + 1}`}
-                            width={56}
+                            width={42}
                             height={56}
-                            className="w-full h-full object-cover scale-150"
+                            className="w-full h-full object-cover object-center"
                             unoptimized
                           />
                           {/* Rank Badge */}

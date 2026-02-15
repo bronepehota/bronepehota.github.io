@@ -92,8 +92,7 @@ export function CompactArmyCard({ unit, onRemove, onClick, factionId, dataTestId
                   alt={unit.data.name}
                   width={32}
                   height={32}
-                  className="w-full h-full object-cover"
-                  style={{ objectPosition: '50% 40%', transform: 'scale(2) translateY(10%)' }}
+                  className="w-full h-full object-cover object-center"
                   unoptimized
                 />
               </button>
@@ -114,8 +113,7 @@ export function CompactArmyCard({ unit, onRemove, onClick, factionId, dataTestId
                   alt={`${unit.data.name} - боец 1`}
                   width={32}
                   height={32}
-                  className="w-full h-full object-cover"
-                  style={{ objectPosition: '50% 40%', transform: 'scale(2) translateY(10%)' }}
+                  className="w-full h-full object-cover object-center"
                   unoptimized
                 />
               </button>

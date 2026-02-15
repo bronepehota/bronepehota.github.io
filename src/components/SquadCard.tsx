@@ -93,7 +93,7 @@ export default function SquadCard({ squad, onAdd, onViewDetails, testId }: Squad
             src={squad.image}
             alt={squad.name}
             fill
-            className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500 scale-125"
+            className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
             loading="lazy"
             unoptimized
           />
