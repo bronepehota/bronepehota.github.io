@@ -193,11 +193,10 @@ export default function SquadBlueprintModal({
             <Image
               src={squad.image || '/images/soldiers/empty.png'}
               alt={squad.name}
-              width={400}
-              height={300}
-              className="w-full h-full object-cover scale-125"
+              width={300}
+              height={400}
+              className="w-full h-full object-cover object-center"
               unoptimized
-              style={{ objectPosition: 'center' }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent" />
             {/* Tech overlay corners */}
@@ -284,11 +283,10 @@ export default function SquadBlueprintModal({
                           <Image
                             src={soldier.image}
                             alt={`Боец ${soldier.num || index + 1}`}
-                            width={80}
+                            width={60}
                             height={80}
-                            className="w-full h-full object-cover scale-150"
+                            className="w-full h-full object-cover object-center"
                             unoptimized
-                            style={{ objectPosition: 'center' }}
                           />
                         </div>
                       ) : (

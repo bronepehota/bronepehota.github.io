@@ -13,7 +13,7 @@ interface SafeImageProps {
   onError?: () => void;
 }
 
-export default function SafeImage({ src, alt, className, width = 400, height = 300, fill = false, onError }: SafeImageProps) {
+export default function SafeImage({ src, alt, className, width = 300, height = 400, fill = false, onError }: SafeImageProps) {
   const [hasError, setHasError] = useState(false);
 
   const handleError = () => {

@@ -596,8 +596,8 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
             <Image
               src={getSoldierImage(showSoldierImage)}
               alt={`Солдат ${showSoldierImage + 1}`}
-              width={400}
-              height={533}
+              width={300}
+              height={400}
               className="max-w-full max-h-full object-contain"
               unoptimized
             />
@@ -722,10 +722,9 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                         <Image
                           src={getSoldierImage(idx)}
                           alt={`Солдат ${idx + 1}`}
-                          width={96}
-                          height={128}
-                          className="w-full h-full object-cover"
-                          style={{ objectPosition: '50% 40%', transform: 'scale(2) translateY(10%)' }}
+                          width={60}
+                          height={80}
+                          className="w-full h-full object-cover object-center"
                           unoptimized
                         />
                       </div>
@@ -1012,9 +1011,9 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                       <>
                         <Image
                           src={getPilotImage() || '/images/soldiers/empty.png'}
-                          width={64}
-                          height={128}
-                          className="w-full h-full object-cover scale-150"
+                          width={48}
+                          height={64}
+                          className="w-full h-full object-cover object-center"
                           unoptimized
                           alt="Пилот"
                         />
@@ -1396,8 +1395,8 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                       src={getSoldierImage(idx)}
                       alt={`Солдат ${idx + 1}`}
                       width={24}
-                      height={24}
-                      className="w-full h-full object-cover object-center scale-150"
+                      height={32}
+                      className="w-full h-full object-cover object-center"
                       unoptimized
                     />
                     {/* Tech decoration */}

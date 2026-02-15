@@ -57,10 +57,9 @@ function SoldierStats({ soldier, index, factionColor, onImageClick }: SoldierSta
             <Image
               src={soldier.image}
               alt={`Боец ${index + 1}`}
-              width={64}
+              width={48}
               height={64}
-              className="w-full h-full object-cover"
-              style={{ objectPosition: '50% 40%', transform: 'scale(2) translateY(10%)' }}
+              className="w-full h-full object-cover object-center"
               onError={(e) => {
                 (e.target as HTMLImageElement).style.display = 'none';
               }}
