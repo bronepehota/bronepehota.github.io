@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import Link from 'next/link';
 import { Army, RulesVersionID } from '@/lib/types';
 import ArmyBuilder from '@/components/ArmyBuilder';
 import GameSession from '@/components/GameSession';
 import { BattlePreparationScreen } from '@/components/BattlePreparationScreen';
 import factionsData from '@/data/factions.json';
-import { Shield, ArrowLeft, CheckCircle2, MoreVertical, List, Grid, History, Heart, UserX, AlertTriangle, X } from 'lucide-react';
+import { Shield, ArrowLeft, CheckCircle2, MoreVertical, List, Grid, History, Heart, UserX, AlertTriangle, X, BookOpen } from 'lucide-react';
 import { isValidRulesVersion } from '@/lib/rules-registry';
 import { cn } from '@/lib/utils';
 import { CombatTargetProvider } from '@/contexts/CombatTargetContext';
@@ -361,6 +362,22 @@ export default function Home() {
                 </button>
               </div>
             )}
+
+            {/* Encyclopedia link - always visible in header */}
+            <Link
+              href="/encyclopedia"
+              data-testid="encyclopedia-link"
+              className={cn(
+                'p-1 rounded transition-all duration-200 touch-manipulation',
+                'min-w-[36px] min-h-[36px] flex items-center justify-center',
+                'relative z-50',
+                'text-slate-500 hover:text-slate-300 hover:bg-slate-800/50'
+              )}
+              aria-label="Энциклопедия"
+              title="Энциклопедия"
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+            </Link>
 
             {/* End Battle button - dropdown menu */}
             {view === 'game' && army.isInBattle && (
