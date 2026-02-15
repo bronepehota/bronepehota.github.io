@@ -18,15 +18,15 @@ import mercenariesSquads from '@/data/mercenaries/squads.json';
 import mercenariesMachines from '@/data/mercenaries/machines.json';
 
 const squadData: Record<FactionID, Squad[]> = {
-  polaris: polarisSquads,
-  protectorate: protectorateSquads,
-  mercenaries: mercenariesSquads,
+  polaris: polarisSquads as Squad[],
+  protectorate: protectorateSquads as Squad[],
+  mercenaries: mercenariesSquads as Squad[],
 };
 
 const machineData: Record<FactionID, Machine[]> = {
-  polaris: polarisMachines,
-  protectorate: protectorateMachines,
-  mercenaries: mercenariesMachines,
+  polaris: polarisMachines as Machine[],
+  protectorate: protectorateMachines as Machine[],
+  mercenaries: mercenariesMachines as Machine[],
 };
 
 export async function getAllUnits(): Promise<UnitWithType[]> {

@@ -5,6 +5,13 @@
     "shortName": "Линейная клон-пехота",
     "faction": "polaris",
     "cost": 50,
+    "encyclopedia": {
+      "class": "Линейная пехота",
+      "lore": "Основная пехота Империи Полярис. Клоны выращиваются на заводах-инкубаторах и программируются на безусловную преданность Императору. Формируют костяк имперской армии.",
+      "tactics": "Дешёвый и эффективный filler-юнит. Используйте для захвата точек на карте, удержания позиций и создания стрелковой линии. 5 бойцов с D12 могут вести огонь на средней дистанции. Слаба в ближнем бою.",
+      "history": "Создана после Войны Клонов как замена традиционной призывной армии. Стандартизирована во всех секторах Империи.",
+      "manufacturer": "Имперский Департамент Биоинженерии"
+    },
     "soldiers": [
       {
         "num": 1,
@@ -80,6 +87,13 @@
     "shortName": "Режимная клон-пехота",
     "faction": "polaris",
     "cost": 60,
+    "encyclopedia": {
+      "class": "Тяжёлая пехота",
+      "lore": "Элитные клоны с усиленной бронёй (Броня 4). Специально обучены для ближнего боя, не имеют огнестрельного оружия. Используются как штурмовые группы для прорыва обороны.",
+      "tactics": "Штурмовой отряд ближнего боя. 6 бойцов с Ближний Бой 6 пробивают Броню 3. Двигайтесь прямо к врагу и атакуйте в рукопашной. Броня 4 обеспечивает выживаемость при подходе. Идеален против lightly-armored противников.",
+      "history": "Разработана для assaults on fortified positions. First deployed during the Siege of Sector 7.",
+      "manufacturer": "Имперский Департамент Биоинженерии"
+    },
     "soldiers": [
       {
         "num": 1,
@@ -167,6 +181,13 @@
     "shortName": "Лёгкая штурмовая",
     "faction": "polaris",
     "cost": 70,
+    "encyclopedia": {
+      "class": "Штурмовая пехота",
+      "lore": "Мобильные штурмовики с комбинированным вооружением. Часть бойцов специализируется на огневой поддержке, часть - на ближнем бою. Гибридный класс для тактической гибкости.",
+      "tactics": "Универсальный штурмовой отряд. Смешанный состав: бойцы с D6/2D6 для огня, бойцы с ББ 6 для ближнего боя. Адаптируйтесь к ситуации. Скорость 5 позволяет быстро маневрировать. Используйте для фланговых атак.",
+      "history": "Создана как ответ на необходимость гибких штурмовых частей, способных действовать и в огневом контакте, и в рукопашной.",
+      "manufacturer": "Имперский Департамент Биоинженерии"
+    },
     "soldiers": [
       {
         "num": 1,
@@ -254,6 +275,13 @@
     "shortName": "Тяжёлая клон-пехота",
     "faction": "polaris",
     "cost": 80,
+    "encyclopedia": {
+      "class": "Тяжёлая пехота",
+      "lore": "Вооружённые ракетомётами тяжёлые пехотинцы. Оснащены D12/D20 оружием для поражения бронированных целей. Сильнейшая огневая мощь в линейных частях.",
+      "tactics": "Anti-armor specialists. D12+2 and D20 weapons punch through heavy armor. Mix of specialists: D12 snipers, D12/2D12 heavy weapons, melee backup. Hold positions and engage at range. Use rocket launcher (D20) against high-armor targets.",
+      "history": "Developed during the Armor Wars to counter enemy vehicles and heavy infantry.",
+      "manufacturer": "Имперский Департамент Биоинженерии"
+    },
     "soldiers": [
       {
         "num": 1,
@@ -341,6 +369,13 @@
     "shortName": "Спецназ планеты Шиду",
     "faction": "polaris",
     "cost": 90,
+    "encyclopedia": {
+      "class": "Спецназ",
+      "lore": "Элитный спецназ с планеты Шиду. Ранг 4 и Броня 5 делают их одними из toughest юнитов в армии. Veteran warriors, прошедшие harsh training на volcanic planet.",
+      "tactics": "Elite squad with high stats. Броня 5 обеспечивает отличную защиту. D20 sniper provides long-range precision. Mix of D6, D12+2, D12/2D12 weapons for flexible engagement. Используйте для critical missions и elimination of high-value targets. Small squad (4 fighters) but each is powerful.",
+      "history": "Formed on planet Shidu, known for its harsh environment and brutal training regimens. Only 10% of recruits survive.",
+      "manufacturer": "Шидуская Военная Академия"
+    },
     "soldiers": [
       {
         "num": 1,
@@ -394,6 +429,13 @@
     "shortName": "Лёгкий штурмовой десант",
     "faction": "polaris",
     "cost": 95,
+    "encyclopedia": {
+      "class": "Десантные войска",
+      "lore": "Лёгкие десантники с rocket launchers и boosted stats. Ранг 3 и Броня 3. Fast insertion troops для rapid deployment и shock assaults.",
+      "tactics": "Mobile assault squad with rocket launchers. All soldiers equipped with Рм (rocket launchers). Use for breakthrough attacks and flanking maneuvers. D6, D12, D12/2D12 mix provides flexible fire power. Скорость 5 позволяет быстро занимать выгодные позиции. Use for spearheading attacks.",
+      "history": "Created as part of Imperial Rapid Response Force. Used in planetary assaults and special operations.",
+      "manufacturer": "Имперский Департамент Космического Десанта"
+    },
     "soldiers": [
       {
         "num": 1,
@@ -481,6 +523,13 @@
     "shortName": "Тяжёлый штурмовой десант",
     "faction": "polaris",
     "cost": 105,
+    "encyclopedia": {
+      "class": "Десантные войска",
+      "lore": "Тяжёлые десантники с улучшенной бронёй и rocket launchers. Броня 4 для better survivability при insertion. Slower but more durable than light assault.",
+      "tactics": "Heavier assault squad with rockets. Броня 4 provides better protection during insertion. Скорость 4 (slower but still mobile). All equipped with rocket launchers for anti-armor work. Use for fortified positions and defended landing zones. Balance of mobility and protection.",
+      "history": "Developed after heavy losses in light assault drops. Designed for contested landings.",
+      "manufacturer": "Имперский Департамент Космического Десанта"
+    },
     "soldiers": [
       {
         "num": 1,
@@ -568,6 +617,13 @@
     "shortName": "Трибунаторы новые",
     "faction": "polaris",
     "cost": 165,
+    "encyclopedia": {
+      "class": "Элитная гвардия",
+      "lore": "Личная гвардия Императора. Новые модели трибунаторов с улучшенным вооружением. Ранг 5, Броня 6. Самые elitnye бойцы в Империи. Верны только Императору.",
+      "tactics": "Elite guards with maximum stats. Броня 6 обеспечивает exceptional protection. D20 sniper provides long-range precision. Mix of D6, D12 weapons and melee specialist. Use for bodyguard duties or critical assaults. Slow (Скорость 3) but extremely durable. High cost reflects elite status.",
+      "history": "Originally the Imperial Tribune's personal guard. Re-equipped with modern weapons after the Tribune Reformation.",
+      "manufacturer": "Имперская Гвардия (Exclusively for Emperor)"
+    },
     "soldiers": [
       {
         "num": 1,
@@ -643,6 +699,13 @@
     "shortName": "Трибунаторы старые",
     "faction": "polaris",
     "cost": 170,
+    "encyclopedia": {
+      "class": "Элитная гвардия",
+      "lore": "Старая гвардия Императора. Ветераны с устаревшим но мощным вооружением. 2D12 и 1D20 weapons. Ранг 5, Броня 6. Traditionally equipped, still deadly.",
+      "tactics": "Veteran guards with old-school equipment. Powerful melee focus (ББ 6, 7). 2D12 heavy weapons and D20 precision fire. Use as heavy assault unit or last line of defense. Slow (Скорость 3) but extremely tough. D6-1 shows outdated rifles, but power compensates.",
+      "history": "The original Imperial Guard. Maintained their traditional equipment even after newer models were introduced. Considered an honor to serve in old tribunes.",
+      "manufacturer": "Имперская Гвардия (Traditional Armory)"
+    },
     "soldiers": [
       {
         "num": 1,
