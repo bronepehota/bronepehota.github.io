@@ -9,23 +9,33 @@ export interface FilterOptions {
   search?: string;
 }
 
-async function loadSquads(faction: string): Promise<Squad[]> {
-  const data = await import(`@/data/${faction}/squads.json`);
-  return data.default;
-}
+// Direct imports for JSON files (works with Next.js static export)
+import polarisSquads from '@/data/polaris/squads.json';
+import polarisMachines from '@/data/polaris/machines.json';
+import protectorateSquads from '@/data/protectorate/squads.json';
+import protectorateMachines from '@/data/protectorate/machines.json';
+import mercenariesSquads from '@/data/mercenaries/squads.json';
+import mercenariesMachines from '@/data/mercenaries/machines.json';
 
-async function loadMachines(faction: string): Promise<Machine[]> {
-  const data = await import(`@/data/${faction}/machines.json`);
-  return data.default;
-}
+const squadData: Record<FactionID, Squad[]> = {
+  polaris: polarisSquads,
+  protectorate: protectorateSquads,
+  mercenaries: mercenariesSquads,
+};
+
+const machineData: Record<FactionID, Machine[]> = {
+  polaris: polarisMachines,
+  protectorate: protectorateMachines,
+  mercenaries: mercenariesMachines,
+};
 
 export async function getAllUnits(): Promise<UnitWithType[]> {
   const factions: FactionID[] = ['polaris', 'protectorate', 'mercenaries'];
   const units: UnitWithType[] = [];
 
   for (const faction of factions) {
-    const squads = await loadSquads(faction);
-    const machines = await loadMachines(faction);
+    const squads = squadData[faction];
+    const machines = machineData[faction];
 
     units.push(
       ...squads.map(s => ({ ...s, type: 'squad' as const })),

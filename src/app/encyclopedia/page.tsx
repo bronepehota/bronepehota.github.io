@@ -7,11 +7,6 @@ import { FilterBar } from '@/components/encyclopedia/FilterBar';
 import { SearchInput } from '@/components/encyclopedia/SearchInput';
 import { UnitGrid } from '@/components/encyclopedia/UnitGrid';
 
-export const metadata = {
-  title: 'Энциклопедия — Бронепехота',
-  description: 'Полный справочник по отрядам и технике Бронепехоты',
-};
-
 export default function EncyclopediaPage() {
   const [units, setUnits] = useState<UnitWithType[]>([]);
   const [filteredUnits, setFilteredUnits] = useState<UnitWithType[]>([]);
