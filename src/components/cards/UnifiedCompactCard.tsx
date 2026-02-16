@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Plus, X, User, Zap } from 'lucide-react';
-import { ImageModal } from '@/components/ImageModal';
+import { ImageModal } from '@/components/modals/ImageModal';
 import { GitHubPagesImage as Image } from '@/components/GitHubPagesImage';
 import { getFactionColors } from '@/lib/faction-colors';
 import { cn } from '@/lib/utils';

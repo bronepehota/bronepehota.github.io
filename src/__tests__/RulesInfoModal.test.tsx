@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { RulesInfoModal } from '@/components/RulesInfoModal';
+import { RulesInfoModal } from '@/components/modals/RulesInfoModal';
 
 describe('RulesInfoModal', () => {
   it('does not render when isOpen is false', () => {

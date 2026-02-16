@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { GitHubPagesImage as Image } from './GitHubPagesImage';
+import { GitHubPagesImage as Image } from '../GitHubPagesImage';
 import { X, Target, Zap, Check } from 'lucide-react';
 import type { Machine, Faction, Weapon } from '@/lib/types';
 import { useBottomSheet } from '@/hooks/useBottomSheet';

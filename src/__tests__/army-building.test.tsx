@@ -7,8 +7,8 @@
 
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { FactionSelector } from '@/components/FactionSelector';
-import { PointBudgetInput } from '@/components/PointBudgetInput';
+import { FactionSelector } from '@/components/controls/FactionSelector';
+import { PointBudgetInput } from '@/components/controls/PointBudgetInput';
 import { UnitSelector } from '@/components/UnitSelector';
 import type { Faction, Squad, Machine, ArmyUnit, FactionID } from '@/lib/types';
 

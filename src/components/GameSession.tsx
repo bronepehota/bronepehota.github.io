@@ -4,12 +4,12 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Army, ArmyUnit, Squad, PilotInfo, FactionID } from '@/lib/types';
 import { resolvePanic } from '@/lib/panic-logic';
 import { getFactionColors } from '@/lib/faction-colors';
-import UnitCard from './UnitCard';
+import UnitCard from './cards/UnitCard';
 import { History, User, Bot, X, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CombatLogEntry } from '@/lib/combat-types';
 import { useCombatTargetContext } from '@/contexts/CombatTargetContext';
-import InitiativeModal from './InitiativeModal';
+import InitiativeModal from './modals/InitiativeModal';
 
 // Faction styles for unit dock navigation
 const getUnitDockStyles = (factionId: string) => {

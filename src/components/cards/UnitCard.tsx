@@ -1,21 +1,21 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { GitHubPagesImage as Image } from './GitHubPagesImage';
+import { GitHubPagesImage as Image } from '../GitHubPagesImage';
 import { ArmyUnit, Squad, Machine, RulesVersionID, Weapon, PanicTestResult } from '@/lib/types';
 import { Shield, Sword, Target, Heart, CheckCircle2, Bomb, ChevronDown, ChevronUp, UserX, Plane, Skull, Wrench, Flame, Crosshair, X, Image as ImageIcon, Footprints } from 'lucide-react';
 import { formatUnitNumber } from '@/lib/unit-utils';
 import { getDefaultRulesVersion } from '@/lib/rules-registry';
 import { cn } from '@/lib/utils';
-import { BottomSheetCombatModal } from './combat/BottomSheetCombatModal';
-import { useCombatFlowController } from './combat/CombatFlowController';
+import { BottomSheetCombatModal } from '../combat/BottomSheetCombatModal';
+import { useCombatFlowController } from '../combat/CombatFlowController';
 import { CombatLogEntry } from '@/lib/combat-types';
-import { PilotAssignmentModal } from './PilotAssignmentModal';
+import { PilotAssignmentModal } from '../modals/PilotAssignmentModal';
 import { PilotInfo } from '@/lib/types';
-import { PilotTestModal } from './combat/PilotTestModal';
+import { PilotTestModal } from '../combat/PilotTestModal';
 import { usePilotTestFlow } from '@/hooks/usePilotTestFlow';
-import MachineBlueprintModal from './machine/MachineBlueprintModal';
-import { PanicTestModal } from './PanicTestModal';
+import MachineBlueprintModal from '../machine/MachineBlueprintModal';
+import { PanicTestModal } from '../modals/PanicTestModal';
 import { checkPanicTrigger } from '@/lib/panic-logic';
 
 // Helper function to shorten weapon names for mobile

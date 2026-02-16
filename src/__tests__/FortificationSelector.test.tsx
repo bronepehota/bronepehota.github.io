@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { FortificationSelector } from '@/components/FortificationSelector';
+import { FortificationSelector } from '@/components/controls/FortificationSelector';
 
 describe('FortificationSelector', () => {
   it('renders 3 options', () => {

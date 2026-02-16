@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { GitHubPagesImage as Image } from './GitHubPagesImage';
+import { GitHubPagesImage as Image } from '../GitHubPagesImage';
 import { ArmyUnit, Machine, PilotInfo, Squad, Soldier } from '@/lib/types';
 import { Shield, UserX, X, ArrowLeft, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';

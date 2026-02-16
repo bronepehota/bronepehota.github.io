@@ -10,11 +10,11 @@ import mercenariesSquads from '@/data/mercenaries/squads.json';
 import mercenariesMachines from '@/data/mercenaries/machines.json';
 import factionsData from '@/data/factions.json';
 import { ArrowLeft } from 'lucide-react';
-import { FactionSelector } from './FactionSelector';
-import { PointBudgetInput } from './PointBudgetInput';
+import { FactionSelector } from './controls/FactionSelector';
+import { PointBudgetInput } from './controls/PointBudgetInput';
 import { UnitSelector } from './UnitSelector';
-import { RulesSelector } from './RulesSelector';
-import { StepProgressIndicator } from './StepProgressIndicator';
+import { RulesSelector } from './rules/RulesSelector';
+import { StepProgressIndicator } from './rules/StepProgressIndicator';
 import { getAllRulesVersions } from '@/lib/rules-registry';
 
 // Type assertions for JSON imports

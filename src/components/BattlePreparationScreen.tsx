@@ -3,7 +3,7 @@ import { ArrowLeft, Sword } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Army, FactionID } from '@/lib/types';
 import { CompactArmyCard } from './CompactArmyCard';
-import InitiativeModal from './InitiativeModal';
+import InitiativeModal from './modals/InitiativeModal';
 
 interface BattlePreparationScreenProps {
   army: Army;
