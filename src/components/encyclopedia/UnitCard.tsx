@@ -2,7 +2,6 @@ import Link from 'next/link';
 import SafeImage from '@/components/SafeImage';
 import { UnitWithType } from '@/lib/encyclopedia-utils';
 import { Squad } from '@/lib/types';
-import { cn } from '@/lib/utils';
 
 interface UnitCardProps {
   unit: UnitWithType;

@@ -5,7 +5,7 @@ import { X, User, Zap } from 'lucide-react';
 import { ArmyUnit, FactionID, Squad } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { GitHubPagesImage as Image } from './GitHubPagesImage';
-import { ImageModal } from './ImageModal';
+import { ImageModal } from './modals/ImageModal';
 
 interface CompactArmyCardProps {
   unit: ArmyUnit;

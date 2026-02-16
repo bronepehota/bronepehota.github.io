@@ -1,4 +1,4 @@
-import { calculateHit, calculateDamage, executeRoll, parseRoll } from '../lib/game-logic';
+import { calculateHit, calculateDamage, executeRoll } from '../lib/game-logic';
 import { rulesRegistry } from '@/lib/rules-registry';
 
 describe('Combat Mechanics', () => {

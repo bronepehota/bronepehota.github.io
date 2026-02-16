@@ -1,6 +1,7 @@
 'use client';
 
 import { Github } from 'lucide-react';
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
 interface FooterProps {
@@ -32,7 +33,7 @@ export default function Footer({ className }: FooterProps) {
         </div>
 
         {/* Encyclopedia link */}
-        <a
+        <Link
           href="/encyclopedia"
           data-testid="encyclopedia-link"
           className="flex items-center gap-2 px-4 py-2 rounded-sm border border-slate-700/50 hover:border-military-amber/50 transition-all duration-300 group touch-manipulation min-h-[44px]"
@@ -40,7 +41,7 @@ export default function Footer({ className }: FooterProps) {
           <span className="font-russo text-xs text-slate-400 group-hover:text-military-amber transition-colors">
             ЭНЦИКЛОПЕДИЯ
           </span>
-        </a>
+        </Link>
 
         {/* GitHub link */}
         <a

@@ -3,6 +3,7 @@
 import React from 'react';
 import { ViewMode, FilterType, FactionID } from '@/lib/types';
 import { Users, Zap, Shield } from 'lucide-react';
+import { getFactionColors } from '@/lib/faction-colors';
 
 interface ArmyControlPanelProps {
   viewMode: ViewMode;
@@ -23,27 +24,6 @@ export function ArmyControlPanel({
   machineCount,
   mercenaryCount
 }: ArmyControlPanelProps) {
-  const getFactionColors = (factionId: FactionID) => {
-    const colorMap = {
-      polaris: {
-        bg: 'bg-red-500/10',
-        accent: 'text-red-400',
-        border: 'border-red-500/50',
-      },
-      protectorate: {
-        bg: 'bg-cyan-500/10',
-        accent: 'text-cyan-400',
-        border: 'border-cyan-500/50',
-      },
-      mercenaries: {
-        bg: 'bg-yellow-500/10',
-        accent: 'text-yellow-400',
-        border: 'border-yellow-500/50',
-      }
-    };
-    return colorMap[factionId] || colorMap.polaris;
-  };
-
   const colors = getFactionColors(factionId);
 
   // Only show filter panel in browse mode
@@ -62,7 +42,7 @@ export function ArmyControlPanel({
             transition-all duration-200 touch-manipulation border
             flex items-center justify-center gap-2
             ${filterType === 'squad' || filterType === 'all'
-              ? `${colors.bg} ${colors.accent} ${colors.border} shadow-lg transform scale-105`
+              ? `${colors.bg} ${colors.text} ${colors.border} shadow-lg transform scale-105`
               : 'bg-slate-900/30 text-slate-500 border-slate-700/30 hover:text-slate-300'
             }
           `}
@@ -87,7 +67,7 @@ export function ArmyControlPanel({
             transition-all duration-200 touch-manipulation border
             flex items-center justify-center gap-2
             ${filterType === 'machine' || filterType === 'all'
-              ? `${colors.bg} ${colors.accent} ${colors.border} shadow-lg transform scale-105`
+              ? `${colors.bg} ${colors.text} ${colors.border} shadow-lg transform scale-105`
               : 'bg-slate-900/30 text-slate-500 border-slate-700/30 hover:text-slate-300'
             }
           `}
@@ -112,7 +92,7 @@ export function ArmyControlPanel({
             transition-all duration-200 touch-manipulation border
             flex items-center justify-center gap-2
             ${filterType === 'mercenary' || filterType === 'all'
-              ? `${colors.bg} ${colors.accent} ${colors.border} shadow-lg transform scale-105`
+              ? `${colors.bg} ${colors.text} ${colors.border} shadow-lg transform scale-105`
               : 'bg-slate-900/30 text-slate-500 border-slate-700/30 hover:text-slate-300'
             }
           `}

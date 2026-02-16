@@ -21,6 +21,18 @@ describe('multiplyRange', () => {
   it('should return unchanged for invalid format', () => {
     expect(multiplyRange('ББ', 2)).toBe('ББ');
   });
+
+  it('should handle multiplier of 1 (no change)', () => {
+    expect(multiplyRange('D6', 1)).toBe('D6');
+  });
+
+  it('should handle D20 with multiplier 2', () => {
+    expect(multiplyRange('D20', 2)).toBe('D40');
+  });
+
+  it('should handle D20 with bonus', () => {
+    expect(multiplyRange('D20+1', 2)).toBe('D40+2');
+  });
 });
 
 describe('Game Logic - Dice Rolls', () => {

@@ -1,6 +1,6 @@
 // src/__tests__/components/PanicTestModal.test.tsx
 import { render, screen, fireEvent } from '@testing-library/react';
-import { PanicTestModal } from '@/components/PanicTestModal';
+import { PanicTestModal } from '@/components/modals/PanicTestModal';
 import { ArmyUnit } from '@/lib/types';
 
 describe('PanicTestModal', () => {

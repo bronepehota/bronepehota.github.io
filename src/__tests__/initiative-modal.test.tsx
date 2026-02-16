@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import InitiativeModal from '@/components/InitiativeModal';
+import InitiativeModal from '@/components/modals/InitiativeModal';
 
 describe('InitiativeModal', () => {
   const mockOnClose = jest.fn();

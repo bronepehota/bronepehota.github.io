@@ -2,7 +2,7 @@
 
 import { CombatParameters, CombatActionType } from '@/lib/combat-types';
 import { NumberStepper } from '@/components/ui/NumberStepper';
-import { FortificationSelector } from '@/components/FortificationSelector';
+import { FortificationSelector } from '@/components/controls/FortificationSelector';
 import { RulesVersionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { StaticDiceDisplay } from './StaticDiceDisplay';

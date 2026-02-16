@@ -4,43 +4,8 @@ import { useState, useCallback, useEffect } from 'react';
 import { FactionID } from '@/lib/types';
 import { X } from 'lucide-react';
 import { rollDie } from '@/lib/game-logic';
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
-
-// Faction color system for battle interface
-const getFactionColors = (factionId: string) => {
-  const colorMap = {
-    polaris: {
-      primary: 'text-red-400',
-      border: 'border-red-500/50',
-      bg: 'bg-red-500/10',
-      glow: 'shadow-red-500/20',
-      accent: 'border-red-500',
-      progress: 'bg-red-500'
-    },
-    protectorate: {
-      primary: 'text-cyan-400',
-      border: 'border-cyan-500/50',
-      bg: 'bg-cyan-500/10',
-      glow: 'shadow-cyan-500/20',
-      accent: 'border-cyan-500',
-      progress: 'bg-cyan-500'
-    },
-    mercenaries: {
-      primary: 'text-yellow-400',
-      border: 'border-yellow-500/50',
-      bg: 'bg-yellow-500/10',
-      glow: 'shadow-yellow-500/20',
-      accent: 'border-yellow-500',
-      progress: 'bg-yellow-500'
-    }
-  };
-  return colorMap[factionId as keyof typeof colorMap] || colorMap.polaris;
-};
+import { cn } from '@/lib/utils';
+import { getFactionColors } from '@/lib/faction-colors';
 
 interface InitiativeModalProps {
   isOpen: boolean;
@@ -112,7 +77,7 @@ export default function InitiativeModal({
         {/* Header with close button */}
         <div className="flex items-center gap-3">
           <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent"></div>
-          <h3 className={cn("text-lg md:text-xl font-mono font-bold tracking-wider", factionColors.primary)}>
+          <h3 className={cn("text-lg md:text-xl font-mono font-bold tracking-wider", factionColors.text)}>
             ИНИЦИАТИВА
           </h3>
           <button
@@ -130,7 +95,7 @@ export default function InitiativeModal({
             "relative w-20 h-20 md:w-28 md:h-28 bg-slate-900/80 rounded-2xl md:rounded-3xl border-4 flex items-center justify-center text-4xl md:text-6xl font-mono font-black shadow-2xl transition-all",
             factionColors.border,
             isRolling ? "scale-110 rotate-12" : "scale-100 rotate-0",
-            factionColors.primary
+            factionColors.text
           )} data-testid="initiative-dice">
             {initRoll}
             {/* Corner accents on dice */}
@@ -144,7 +109,7 @@ export default function InitiativeModal({
           <div className="bg-slate-900/50 p-3 md:p-4 rounded-xl border border-slate-700/50 space-y-2">
             <div className="flex justify-between items-center text-xs md:text-sm font-mono">
               <span className="uppercase tracking-wider text-slate-500">БОЕСПОСОБНЫХ:</span>
-              <span className={cn("font-black text-base md:text-lg", factionColors.primary)}>{activeUnitsCount}</span>
+              <span className={cn("font-black text-base md:text-lg", factionColors.text)}>{activeUnitsCount}</span>
             </div>
           </div>
         )}
@@ -174,7 +139,7 @@ export default function InitiativeModal({
               "flex-[2] py-3 md:py-4 font-mono text-sm md:text-lg font-bold uppercase tracking-wider border transition-all min-h-[52px] md:min-h-[56px]",
               factionColors.border,
               factionColors.bg,
-              factionColors.primary,
+              factionColors.text,
               "hover:scale-102 active:scale-95 disabled:opacity-50"
             )}
           >

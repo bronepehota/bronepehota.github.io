@@ -79,6 +79,7 @@ export function SoldierImages({ unit }: SoldierImagesProps) {
                 fill
                 className="object-cover"
                 sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
+                unoptimized
               />
               {/* Dark gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-military-dark/90 via-military-dark/20 to-transparent" />

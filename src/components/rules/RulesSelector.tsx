@@ -4,9 +4,9 @@ import { useState, useEffect, useRef, KeyboardEvent } from 'react';
 import { Book, Check, ChevronDown } from 'lucide-react';
 import { clsx } from 'clsx';
 import type { RulesVersion, RulesVersionID } from '@/lib/types';
-import { PanicToggle } from './PanicToggle';
-import { AimedShotToggle } from './AimedShotToggle';
-import { SurpriseAttackToggle } from './SurpriseAttackToggle';
+import { PanicToggle } from '../toggles/PanicToggle';
+import { AimedShotToggle } from '../toggles/AimedShotToggle';
+import { SurpriseAttackToggle } from '../toggles/SurpriseAttackToggle';
 
 interface RulesSelectorProps {
   versions: RulesVersion[];
@@ -72,8 +72,6 @@ export function RulesSelector({
       setExpandedRulesId(null);
     }
   };
-
-  const selectedRules = versions.find(v => v.id === selectedVersion);
 
   return (
     <div id="rules-selector" className="space-y-4 max-w-2xl mx-auto">

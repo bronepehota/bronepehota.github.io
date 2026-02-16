@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { User, Zap, Plus } from 'lucide-react';
 import { GitHubPagesImage as Image } from './GitHubPagesImage';
-import { ImageModal } from './ImageModal';
+import { ImageModal } from './modals/ImageModal';
 import type { Squad, Machine, FactionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
 

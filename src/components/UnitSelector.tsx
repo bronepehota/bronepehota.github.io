@@ -4,7 +4,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { GitHubPagesImage as Image } from './GitHubPagesImage';
 import type { Faction, Squad, Machine, ArmyUnit, FactionID, FilterType } from '@/lib/types';
 import { Plus, ArrowLeft, Users, Zap, Shield } from 'lucide-react';
-import { WeaponSelectorModal } from './WeaponSelectorModal';
+import { WeaponSelectorModal } from './modals/WeaponSelectorModal';
 import MachineBlueprintModal from './machine/MachineBlueprintModal';
 import SquadBlueprintModal from './SquadBlueprintModal';
 import { countByUnitType } from '@/lib/unit-utils';
@@ -14,6 +14,7 @@ import { ArmyControlPanel } from './ArmyControlPanel';
 import { ArmySummaryView } from './ArmySummaryView';
 import { CompactUnitCard } from './CompactUnitCard';
 import { clsx } from 'clsx';
+import { getFactionColors } from '@/lib/faction-colors';
 
 interface UnitSelectorProps {
   factions: Faction[];
@@ -219,37 +220,6 @@ export function UnitSelector({
     return min === max ? `${min}` : `${min}-${max}`;
   };
 
-  // Faction color system for squad cards
-  const getFactionColors = (factionId: FactionID) => {
-    const colorMap = {
-      polaris: {
-        border: 'border-red-500/50 hover:border-red-500',
-        bg: 'hover:bg-red-500/10',
-        accent: 'text-red-400',
-        glow: 'shadow-red-500/20',
-        corner: 'border-red-500',
-        disabled: 'border-slate-700 text-slate-500'
-      },
-      protectorate: {
-        border: 'border-cyan-500/50 hover:border-cyan-500',
-        bg: 'hover:bg-cyan-500/10',
-        accent: 'text-cyan-400',
-        glow: 'shadow-cyan-500/20',
-        corner: 'border-cyan-500',
-        disabled: 'border-slate-700 text-slate-500'
-      },
-      mercenaries: {
-        border: 'border-yellow-500/50 hover:border-yellow-500',
-        bg: 'hover:bg-yellow-500/10',
-        accent: 'text-yellow-400',
-        glow: 'shadow-yellow-500/20',
-        corner: 'border-yellow-500',
-        disabled: 'border-slate-700 text-slate-500'
-      }
-    };
-    return colorMap[factionId] || colorMap.polaris;
-  };
-
   // Loading state
   if (isLoading) {
     return (
@@ -387,6 +357,11 @@ export function UnitSelector({
                 // Use squad's faction for colors (important for mercenaries)
                 const squadFaction = squad.faction as FactionID;
                 const colors = getFactionColors(squadFaction);
+                const disabledColors = 'border-slate-700 text-slate-500';
+
+                // Construct combined hover classes for border and bg
+                const borderWithHover = `${colors.border} hover:${colors.borderSolid}`;
+                const bgHover = colors.bg.replace('bg-', 'hover:bg-');
 
                 return (
                   <div key={unit.data.id} className="relative">
@@ -396,30 +371,30 @@ export function UnitSelector({
                       className={clsx(
                         'relative group cursor-pointer transition-all duration-300',
                         'border bg-slate-800/80 backdrop-blur-sm overflow-hidden',
-                        affordable ? colors.border : colors.disabled,
-                        affordable ? colors.bg : ''
+                        affordable ? borderWithHover : disabledColors,
+                        affordable ? bgHover : ''
                       )}
                     >
                       {/* Corner accents */}
                       <div className={clsx(
                         'absolute top-0 left-0 w-3 h-3 border-l-2 border-t-2',
                         'transition-all duration-300',
-                        affordable ? colors.corner : 'border-slate-700'
+                        affordable ? colors.borderSolid : 'border-slate-700'
                       )} />
                       <div className={clsx(
                         'absolute top-0 right-0 w-3 h-3 border-r-2 border-t-2',
                         'transition-all duration-300',
-                        affordable ? colors.corner : 'border-slate-700'
+                        affordable ? colors.borderSolid : 'border-slate-700'
                       )} />
                       <div className={clsx(
                         'absolute bottom-0 left-0 w-3 h-3 border-l-2 border-b-2',
                         'transition-all duration-300',
-                        affordable ? colors.corner : 'border-slate-700'
+                        affordable ? colors.borderSolid : 'border-slate-700'
                       )} />
                       <div className={clsx(
                         'absolute bottom-0 right-0 w-3 h-3 border-r-2 border-b-2',
                         'transition-all duration-300',
-                        affordable ? colors.corner : 'border-slate-700'
+                        affordable ? colors.borderSolid : 'border-slate-700'
                       )} />
 
                       {/* Image container */}
@@ -446,7 +421,7 @@ export function UnitSelector({
                         ) : (
                           /* Final fallback: placeholder icon */
                           <div className="w-full h-full flex items-center justify-center bg-slate-800">
-                            <Users className={clsx('w-16 h-16 opacity-20', affordable ? colors.accent : 'text-slate-600')} />
+                            <Users className={clsx('w-16 h-16 opacity-20', affordable ? colors.text : 'text-slate-600')} />
                           </div>
                         )}
 
@@ -455,7 +430,7 @@ export function UnitSelector({
                           'absolute top-2 right-2 px-2 py-0.5 rounded-sm font-mono text-xs font-bold',
                           'bg-slate-900/90 backdrop-blur-sm border',
                           affordable ? colors.border : 'border-slate-700',
-                          affordable ? colors.accent : 'text-slate-500'
+                          affordable ? colors.text : 'text-slate-500'
                         )}>
                           R{getSquadMaxRank(squad)}
                         </div>
@@ -471,7 +446,7 @@ export function UnitSelector({
                           <div className="flex-1 min-w-0">
                             <h3 className={clsx(
                               'font-bold text-sm font-mono tracking-wide truncate',
-                              affordable ? colors.accent : 'text-slate-500'
+                              affordable ? colors.text : 'text-slate-500'
                             )} title={squad.name}>
                               {squad.name.toUpperCase()}
                             </h3>
@@ -480,7 +455,7 @@ export function UnitSelector({
                             </p>
                           </div>
                           <div className="text-right">
-                            <span className={clsx('font-mono font-bold text-sm', affordable ? colors.accent : 'text-slate-500')}>
+                            <span className={clsx('font-mono font-bold text-sm', affordable ? colors.text : 'text-slate-500')}>
                               {squad.cost}
                             </span>
                             <span className="text-[10px] text-slate-500 block font-mono">очков</span>
@@ -497,7 +472,7 @@ export function UnitSelector({
                             <Shield className="w-3 h-3" />
                             <span>Бр {getSquadArmorRange(squad)}</span>
                           </div>
-                          <div className={clsx('ml-auto', affordable ? colors.accent : 'text-slate-600')}>
+                          <div className={clsx('ml-auto', affordable ? colors.text : 'text-slate-600')}>
                             R{getSquadMaxRank(squad)}
                           </div>
                         </div>
@@ -517,9 +492,9 @@ export function UnitSelector({
                             'border font-mono text-xs font-bold uppercase tracking-wider',
                             'transition-all duration-200',
                             'touch-manipulation',
-                            affordable ? colors.border : 'border-slate-700',
-                            affordable ? colors.bg : '',
-                            affordable ? colors.accent : 'text-slate-500',
+                            affordable ? borderWithHover : 'border-slate-700',
+                            affordable ? bgHover : '',
+                            affordable ? colors.text : 'text-slate-500',
                             !affordable && 'bg-slate-800/50 cursor-not-allowed opacity-50'
                           )}
                         >

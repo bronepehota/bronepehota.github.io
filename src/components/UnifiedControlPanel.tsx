@@ -2,6 +2,7 @@
 
 import { List, Grid3x3, Users, Zap } from "lucide-react";
 import { clsx } from "clsx";
+import { getFactionColors } from '@/lib/faction-colors';
 
 interface UnifiedControlPanelProps {
   displayMode: 'compact' | 'detailed';
@@ -11,27 +12,6 @@ interface UnifiedControlPanelProps {
   selectedFaction: string;
 }
 
-const getFactionColors = (faction: string) => {
-  const colors = {
-    polaris: {
-      accent: 'text-red-400',
-      active: 'bg-red-500/20 border-red-500 text-red-400',
-      hover: 'hover:bg-red-500/10 hover:border-red-500/50',
-    },
-    protectorate: {
-      accent: 'text-cyan-400',
-      active: 'bg-cyan-500/20 border-cyan-500 text-cyan-400',
-      hover: 'hover:bg-cyan-500/10 hover:border-cyan-500/50',
-    },
-    mercenaries: {
-      accent: 'text-yellow-400',
-      active: 'bg-yellow-500/20 border-yellow-500 text-yellow-400',
-      hover: 'hover:bg-yellow-500/10 hover:border-yellow-500/50',
-    },
-  };
-  return colors[faction as keyof typeof colors] || colors.polaris;
-};
-
 export function UnifiedControlPanel({
   displayMode,
   onDisplayModeChange,
@@ -39,7 +19,10 @@ export function UnifiedControlPanel({
   onFilterChange,
   selectedFaction,
 }: UnifiedControlPanelProps) {
-  const colors = getFactionColors(selectedFaction);
+  const colors = getFactionColors(selectedFaction as 'polaris' | 'protectorate' | 'mercenaries');
+
+  // Build active state from base colors
+  const activeState = `${colors.bg} ${colors.borderSolid} ${colors.text}`;
 
   return (
     <div className="flex items-center justify-between gap-3 mb-4 px-1">
@@ -50,7 +33,7 @@ export function UnifiedControlPanel({
           className={clsx(
             'flex items-center gap-2 px-3 py-2 rounded-md text-xs font-medium transition-all duration-200',
             displayMode === 'compact'
-              ? colors.active
+              ? activeState
               : 'text-slate-500 hover:text-slate-300'
           )}
         >
@@ -62,7 +45,7 @@ export function UnifiedControlPanel({
           className={clsx(
             'flex items-center gap-2 px-3 py-2 rounded-md text-xs font-medium transition-all duration-200',
             displayMode === 'detailed'
-              ? colors.active
+              ? activeState
               : 'text-slate-500 hover:text-slate-300'
           )}
         >
@@ -78,7 +61,7 @@ export function UnifiedControlPanel({
           className={clsx(
             'flex items-center gap-2 px-3 py-2 rounded-md text-xs font-medium transition-all duration-200',
             filterType === 'squad' || filterType === 'all'
-              ? colors.active
+              ? activeState
               : 'text-slate-500 hover:text-slate-300'
           )}
         >
@@ -90,7 +73,7 @@ export function UnifiedControlPanel({
           className={clsx(
             'flex items-center gap-2 px-3 py-2 rounded-md text-xs font-medium transition-all duration-200',
             filterType === 'machine' || filterType === 'all'
-              ? colors.active
+              ? activeState
               : 'text-slate-500 hover:text-slate-300'
           )}
         >

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
-import { GitHubPagesImage as Image } from './GitHubPagesImage';
+import { GitHubPagesImage as Image } from '../GitHubPagesImage';
 
 interface ImageModalProps {
   src: string;
