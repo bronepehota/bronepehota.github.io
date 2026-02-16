@@ -36,7 +36,7 @@ describe('useCombatFlow', () => {
 
     // Just verify the method can be called without error
     expect(() => {
-      result.current.startCombat('shot', {
+      result.current.startCombat({
         instanceId: 'test',
         type: 'squad',
         data: {

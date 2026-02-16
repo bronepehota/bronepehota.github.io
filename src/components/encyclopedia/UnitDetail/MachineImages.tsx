@@ -66,6 +66,7 @@ export function MachineImages({ unit }: MachineImagesProps) {
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 50vw"
+              unoptimized
             />
             {/* Dark gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-military-dark/90 via-military-dark/20 to-transparent" />
