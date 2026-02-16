@@ -117,6 +117,21 @@ Adding a new rules version:
 
 ### Component Structure
 
+**Component Organization** (`src/components/`):
+```
+src/components/
+├── cards/           - Card components (UnifiedCompactCard, types)
+├── controls/        - Control panels and input components
+├── modals/          - Modal components (ImageModal, WeaponSelectorModal, etc.)
+├── rules/           - Rules selection and toggle components
+├── toggles/         - Toggle components (PanicToggle, AimedShotToggle, etc.)
+├── combat/          - Combat-related components
+├── encyclopedia/    - Encyclopedia page components
+├── landing/         - Landing page components
+├── machine/         - Machine-specific components
+└── *.tsx           - Other top-level components
+```
+
 **Main Page** (`src/app/app/page.tsx`):
 - Header with faction branding, view toggle (Штаб/В Бой)
 - ArmyBuilder (construction) OR GameSession (gameplay)
@@ -130,14 +145,20 @@ Adding a new rules version:
 - `UnitDetailsModal.tsx` - Bottom sheet modal for unit details (mobile swipe-to-close)
 - `UnitSelector.tsx` - Unit selection interface with filters
 
-**Rules Components**:
+**Rules Components** (`src/components/rules/`):
 - `RulesSelector.tsx` - Rules version selection interface
 - `RulesVersionSelector.tsx` - Dropdown/picker for rules version
 - `RulesInfoModal.tsx` - Modal displaying current rules details
 - `StepProgressIndicator.tsx` - Visual step progress for multi-step flows
+
+**Toggle Components** (`src/components/toggles/`):
 - `PanicToggle.tsx` - Toggle for panic rule with info modal
 - `AimedShotToggle.tsx` - Toggle for aimed shot rule (infantry range x2)
 - `SurpriseAttackToggle.tsx` - Toggle for rear attack rule (damage x2)
+
+**Card Components** (`src/components/cards/`):
+- `UnifiedCompactCard.tsx` - Unified card component for add/remove/view modes
+- `types.ts` - TypeScript types for card components
 
 **UI Components**:
 - `FactionSelector.tsx` - Faction selection with visual branding
@@ -275,15 +296,33 @@ Adding a new rules version:
 
 - `unit-utils.ts` - Helper functions for unit operations (numbering, validation, etc.)
 - `combat-types.ts` - TypeScript types for combat system (CombatParameters, ShotResult, MeleeResult, GrenadeBlastResult, etc.)
+- `faction-colors.ts` - Centralized faction color mappings (getFactionColors function)
+  - Polaris: red tones, Protectorate: cyan tones, Mercenaries: yellow tones
+  - Returns object with all color variants (text, bg, border, glow, etc.)
+- `constants.ts` - Application-wide constants
+  - LOCAL_STORAGE_KEYS - All localStorage key names
+  - DEFAULT_POINT_BUDGETS - Available point budget options
+  - Use import { LOCAL_STORAGE_KEYS, DEFAULT_POINT_BUDGETS } from '@/lib/constants'
 
 ### Styling
 
 - **MOBILE FIRST**: Design for mobile screens first (320px+), then enhance for tablets and desktop using Tailwind's `md:` and `lg:` breakpoints
 - **Tailwind CSS** with dark theme (slate-900 base)
-- **Faction colors**: Polaris (red #ef4444), Protectorate (blue #3b82f6), Mercenaries (yellow #eab308)
+- **Faction colors**: Use `getFactionColors(factionId)` from `@/lib/faction-colors` for consistent coloring
+  - Polaris: red tones (#ef4444)
+  - Protectorate: cyan tones (#06b6d4)
+  - Mercenaries: yellow tones (#eab308)
 - **Touch-friendly targets**: Minimum 44x44px tap targets (WCAG 2.5.5)
 - **Responsive patterns**: Bottom sheets for mobile modals, centered cards for desktop, hide labels on mobile (`hidden md:inline`)
 - **Path alias**: `@/*` maps to `src/*` (configured in `tsconfig.json`)
+
+### GitHub Pages Deployment
+
+**Important Notes**:
+- The app uses `basePath: '/bronepehota'` in production (configured in `next.config.mjs`)
+- Always use Next.js `<Link>` component for internal navigation (respects basePath automatically)
+- For `<Image>` components, use `unoptimized` prop when images don't display on GitHub Pages
+- Example: `<Link href="/encyclopedia">` not `<a href="/encyclopedia">`
 
 ### Testing
 
@@ -409,6 +448,16 @@ test.describe('Feature Name', () => {
 - clsx, tailwind-merge for conditional styling
 
 ## Recent Changes
+- **Code Refactoring (2026-02)**: Major refactoring to eliminate code duplication and improve organization
+  - Created centralized `getFactionColors()` utility in `src/lib/faction-colors.ts`
+  - Created `constants.ts` for application-wide constants (localStorage keys, point budgets)
+  - Organized components into logical directories: `cards/`, `controls/`, `modals/`, `rules/`, `toggles/`
+  - Added comprehensive unit tests (370+ tests passing)
+  - Replaced duplicate `cn()` implementations with shared utility from `@/lib/utils`
+  - Updated faction colors: Protectorate blue→cyan, Mercenaries green→yellow
+- **GitHub Pages Fixes (2026-02)**: Fixed encyclopedia images and navigation on GitHub Pages
+  - Added `unoptimized` prop to Image components for compatibility
+  - Fixed Footer.tsx to use Next.js Link component for proper basePath handling
 - **Aimed Shot Feature (2025-02)**: Implemented "11.1 Прицельная стрельба пехотинцев" from official rules
   - Doubles range for infantry when using aimed shot (not moving)
   - Toggle on Rules screen and in combat modal
