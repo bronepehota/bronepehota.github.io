@@ -72,7 +72,7 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
           <div className="max-w-7xl mx-auto">
             {/* Back link */}
             <Link
-              href="/"
+              href="/app"
               className={cn(
                 'inline-flex items-center gap-2 font-ibm-mono text-xs md:text-sm',
                 'text-military-rust/60 hover:text-military-amber transition-colors',
@@ -83,7 +83,7 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
               style={{ animationFillMode: 'forwards', animationDelay: '0.1s' }}
             >
               <span className="text-lg">←</span>
-              <span>На главную</span>
+              <span>В приложение</span>
             </Link>
 
             {/* Main title */}
