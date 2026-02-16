@@ -73,8 +73,6 @@ export function RulesSelector({
     }
   };
 
-  const selectedRules = versions.find(v => v.id === selectedVersion);
-
   return (
     <div id="rules-selector" className="space-y-4 max-w-2xl mx-auto">
       {/* Compact Header */}

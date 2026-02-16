@@ -14,13 +14,15 @@ const SURPRISE_ATTACK_STORAGE_KEY = 'bronepehota_surprise_attack_enabled';
 export function SurpriseAttackToggle({ enabled, onEnabledChange }: SurpriseAttackToggleProps) {
   const [showModal, setShowModal] = useState(false);
 
-  // Load saved preference on mount
+  // Load saved preference on mount (only once, intentionally)
+  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     const saved = localStorage.getItem(SURPRISE_ATTACK_STORAGE_KEY);
     if (saved !== null) {
       onEnabledChange(saved === 'true');
     }
   }, []);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   const handleToggle = () => {
     const newValue = !enabled;

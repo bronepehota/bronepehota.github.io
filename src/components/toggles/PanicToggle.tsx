@@ -15,13 +15,15 @@ const PANIC_STORAGE_KEY = 'bronepehota_panic_enabled';
 export function PanicToggle({ enabled, onEnabledChange, rulesVersion }: PanicToggleProps) {
   const [showModal, setShowModal] = useState(false);
 
-  // Load saved preference on mount
+  // Load saved preference on mount (only once, intentionally)
+  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     const saved = localStorage.getItem(PANIC_STORAGE_KEY);
     if (saved !== null) {
       onEnabledChange(saved === 'true');
     }
   }, []);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   const handleToggle = () => {
     const newValue = !enabled;

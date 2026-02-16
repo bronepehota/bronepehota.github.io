@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowLeft, Shield, Zap, Skull } from 'lucide-react';
 import { UnitWithType } from '@/lib/encyclopedia-utils';
-import { Squad } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { SoldierImages } from './UnitDetail/SoldierImages';
 import { MachineImages } from './UnitDetail/MachineImages';
@@ -90,10 +90,13 @@ export default function UnitDetailPage({ unit }: UnitDetailPageProps) {
                 >
                   {/* Image */}
                   <div className="relative w-full h-full">
-                    <img
+                    <Image
                       src={unit.image}
                       alt={unit.name}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      unoptimized
                     />
                     {/* Dark gradient overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-military-dark/60 to-transparent" />

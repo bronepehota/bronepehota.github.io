@@ -1,4 +1,5 @@
 import { UnitWithType } from '@/lib/encyclopedia-utils';
+import Image from 'next/image';
 
 interface PaintedExamplesProps {
   unit: UnitWithType;
@@ -83,11 +84,13 @@ export default function PaintedExamples({ unit }: PaintedExamplesProps) {
             className="relative group overflow-hidden rounded-lg border border-slate-700 bg-slate-800 hover:border-military-amber/50 transition-all duration-300"
           >
             <div className="aspect-[4/3] relative bg-slate-900">
-              <img
+              <Image
                 src={image}
                 alt={`Покрашенный пример: ${unit.name}`}
-                className="w-full h-full object-cover"
-                loading="lazy"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                unoptimized
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent" />
             </div>

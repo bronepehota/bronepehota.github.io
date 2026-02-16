@@ -1,4 +1,4 @@
-import { getAllUnits, getUnitById, filterUnits, UnitWithType } from '@/lib/encyclopedia-utils';
+import { getAllUnits, getUnitById, filterUnits } from '@/lib/encyclopedia-utils';
 
 describe('encyclopedia-utils', () => {
   describe('getAllUnits', () => {

@@ -6,7 +6,7 @@ import { ImageModal } from '@/components/modals/ImageModal';
 import { GitHubPagesImage as Image } from '@/components/GitHubPagesImage';
 import { getFactionColors } from '@/lib/faction-colors';
 import { cn } from '@/lib/utils';
-import type { CardMode, UnifiedCompactCardProps } from './types';
+import type { UnifiedCompactCardProps } from './types';
 import type { Squad, Machine, ArmyUnit } from '@/lib/types';
 
 export function UnifiedCompactCard({

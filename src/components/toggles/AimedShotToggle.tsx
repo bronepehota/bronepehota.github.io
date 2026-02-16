@@ -14,13 +14,15 @@ const AIMED_SHOT_STORAGE_KEY = 'bronepehota_aimed_shot_enabled';
 export function AimedShotToggle({ enabled, onEnabledChange }: AimedShotToggleProps) {
   const [showModal, setShowModal] = useState(false);
 
-  // Load saved preference on mount
+  // Load saved preference on mount (only once, intentionally)
+  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     const saved = localStorage.getItem(AIMED_SHOT_STORAGE_KEY);
     if (saved !== null) {
       onEnabledChange(saved === 'true');
     }
   }, []);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   const handleToggle = () => {
     const newValue = !enabled;
