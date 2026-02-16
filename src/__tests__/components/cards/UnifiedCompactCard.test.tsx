@@ -202,7 +202,7 @@ describe('UnifiedCompactCard', () => {
       );
 
       const card = container.firstChild as HTMLElement;
-      expect(card).toHaveClass('border-blue-500');
+      expect(card).toHaveClass('border-cyan-500');
       expect(card).toHaveClass('border-l-4');
     });
 

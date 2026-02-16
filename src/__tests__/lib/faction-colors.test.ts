@@ -22,15 +22,15 @@ describe('faction-colors', () => {
     it('should return correct colors for protectorate faction', () => {
       const colors = getFactionColors('protectorate');
       expect(colors).toEqual({
-        text: 'text-blue-400',
-        border: 'border-blue-500/50',
-        bg: 'bg-blue-500/10',
-        glow: 'shadow-blue-500/20',
-        primary: '#3b82f6',
-        borderSolid: 'border-blue-500',
-        bgSolid: 'bg-blue-500',
-        progress: 'bg-blue-500',
-        accent: 'border-blue-500',
+        text: 'text-cyan-400',
+        border: 'border-cyan-500/50',
+        bg: 'bg-cyan-500/10',
+        glow: 'shadow-cyan-500/20',
+        primary: '#06b6d4',
+        borderSolid: 'border-cyan-500',
+        bgSolid: 'bg-cyan-500',
+        progress: 'bg-cyan-500',
+        accent: 'border-cyan-500',
       });
     });
 

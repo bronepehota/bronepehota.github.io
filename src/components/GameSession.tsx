@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Army, ArmyUnit, Squad, PilotInfo } from '@/lib/types';
+import { Army, ArmyUnit, Squad, PilotInfo, FactionID } from '@/lib/types';
 import { resolvePanic } from '@/lib/panic-logic';
+import { getFactionColors } from '@/lib/faction-colors';
 import UnitCard from './UnitCard';
 import { History, User, Bot, X, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -10,69 +11,18 @@ import { CombatLogEntry } from '@/lib/combat-types';
 import { useCombatTargetContext } from '@/contexts/CombatTargetContext';
 import InitiativeModal from './InitiativeModal';
 
-// Faction color system for battle interface
-const getFactionColors = (factionId: string) => {
-  const colorMap = {
-    polaris: {
-      primary: 'text-red-400',
-      border: 'border-red-500/50',
-      bg: 'bg-red-500/10',
-      glow: 'shadow-red-500/20',
-      accent: 'border-red-500',
-      progress: 'bg-red-500'
-    },
-    protectorate: {
-      primary: 'text-cyan-400',
-      border: 'border-cyan-500/50',
-      bg: 'bg-cyan-500/10',
-      glow: 'shadow-cyan-500/20',
-      accent: 'border-cyan-500',
-      progress: 'bg-cyan-500'
-    },
-    mercenaries: {
-      primary: 'text-yellow-400',
-      border: 'border-yellow-500/50',
-      bg: 'bg-yellow-500/10',
-      glow: 'shadow-yellow-500/20',
-      accent: 'border-yellow-500',
-      progress: 'bg-yellow-500'
-    }
-  };
-  return colorMap[factionId as keyof typeof colorMap] || colorMap.polaris;
-};
-
 // Faction styles for unit dock navigation
 const getUnitDockStyles = (factionId: string) => {
-  const styleMap = {
-    polaris: {
-      primary: 'border-red-400',
-      primaryBg: 'bg-red-400',
-      muted: 'border-red-700/60',
-      mutedBg: 'bg-red-700/60',
-      text: 'text-red-400',
-      activeGlow: 'shadow-red-500/30',
-      accent: 'border-red-400'
-    },
-    protectorate: {
-      primary: 'border-cyan-400',
-      primaryBg: 'bg-cyan-400',
-      muted: 'border-cyan-700/60',
-      mutedBg: 'bg-cyan-700/60',
-      text: 'text-cyan-400',
-      activeGlow: 'shadow-cyan-500/30',
-      accent: 'border-cyan-400'
-    },
-    mercenaries: {
-      primary: 'border-yellow-400',
-      primaryBg: 'bg-yellow-400',
-      muted: 'border-yellow-700/60',
-      mutedBg: 'bg-yellow-700/60',
-      text: 'text-yellow-400',
-      activeGlow: 'shadow-yellow-500/30',
-      accent: 'border-yellow-400'
-    }
+  const colors = getFactionColors(factionId as FactionID);
+  return {
+    primary: colors.borderSolid,
+    primaryBg: colors.bgSolid,
+    muted: colors.border,
+    mutedBg: colors.bg,
+    text: colors.text,
+    activeGlow: colors.glow,
+    accent: colors.accent
   };
-  return styleMap[factionId as keyof typeof styleMap] || styleMap.polaris;
 };
 
 // Get unit status bar classes based on state and faction
