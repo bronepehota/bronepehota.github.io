@@ -4,12 +4,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { FactionID } from '@/lib/types';
 import { X } from 'lucide-react';
 import { rollDie } from '@/lib/game-logic';
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
+import { cn } from '@/lib/utils';
 
 // Faction color system for battle interface
 const getFactionColors = (factionId: string) => {
