@@ -31,6 +31,17 @@ export default function Footer({ className }: FooterProps) {
           <div className="hidden md:block">BUILD: 2025.02</div>
         </div>
 
+        {/* Encyclopedia link */}
+        <a
+          href="/encyclopedia"
+          data-testid="encyclopedia-link"
+          className="flex items-center gap-2 px-4 py-2 rounded-sm border border-slate-700/50 hover:border-military-amber/50 transition-all duration-300 group touch-manipulation min-h-[44px]"
+        >
+          <span className="font-russo text-xs text-slate-400 group-hover:text-military-amber transition-colors">
+            ЭНЦИКЛОПЕДИЯ
+          </span>
+        </a>
+
         {/* GitHub link */}
         <a
           href="https://github.com/Luxor/bronepehota"

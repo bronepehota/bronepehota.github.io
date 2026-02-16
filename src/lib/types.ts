@@ -18,6 +18,15 @@ export interface Faction {
   motto: string;
 }
 
+export interface EncyclopediaData {
+  class?: string;
+  lore?: string;
+  tactics?: string;
+  history?: string;
+  manufacturer?: string;
+  sourceUrl?: string;
+}
+
 export interface Soldier {
   num?: number;         // Soldier number in squad (from Excel)
   rank: number;
@@ -38,6 +47,7 @@ export interface Squad {
   shortName?: string;
   faction: FactionID;
   cost: number;
+  encyclopedia?: EncyclopediaData;
   soldiers: Soldier[];
   image?: string;
   originalUrl?: string;
@@ -110,6 +120,7 @@ export interface Machine {
   shortName?: string;
   faction: FactionID;
   cost: number;
+  encyclopedia?: EncyclopediaData;
   rank: number;
   fire_rate: number;
   ammo_max: number;

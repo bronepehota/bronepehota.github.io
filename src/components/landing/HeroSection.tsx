@@ -123,6 +123,23 @@ export default function HeroSection({ className }: HeroSectionProps) {
         >
           <CTAButton />
         </div>
+
+        {/* Encyclopedia link */}
+        <div
+          className={cn(
+            'mt-4 md:mt-6',
+            'transition-all duration-700 delay-300',
+            showCTA ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          )}
+        >
+          <a
+            href="/encyclopedia"
+            data-testid="encyclopedia-link"
+            className="font-ibm-mono text-xs md:text-sm text-military-rust/60 hover:text-military-amber transition-colors duration-200 tracking-widest uppercase"
+          >
+            Энциклопедия отрядов и техники
+          </a>
+        </div>
       </div>
 
       {/* Scroll indicator - hidden on very small screens */}
