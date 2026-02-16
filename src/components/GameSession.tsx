@@ -5,15 +5,10 @@ import { Army, ArmyUnit, Squad, PilotInfo } from '@/lib/types';
 import { resolvePanic } from '@/lib/panic-logic';
 import UnitCard from './UnitCard';
 import { History, User, Bot, X, Check } from 'lucide-react';
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import { cn } from '@/lib/utils';
 import { CombatLogEntry } from '@/lib/combat-types';
 import { useCombatTargetContext } from '@/contexts/CombatTargetContext';
 import InitiativeModal from './InitiativeModal';
-
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
 
 // Faction color system for battle interface
 const getFactionColors = (factionId: string) => {
