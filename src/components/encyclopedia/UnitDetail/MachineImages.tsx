@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
+import { GitHubPagesImage } from '@/components/GitHubPagesImage';
 import { UnitWithType } from '@/lib/encyclopedia-utils';
 import { Machine } from '@/lib/types';
 import { Zap } from 'lucide-react';
@@ -34,7 +34,7 @@ export function MachineImages({ unit }: MachineImagesProps) {
   const maxSpeed = machine.speed_sectors[machine.speed_sectors.length - 1]?.speed || 0;
 
   return (
-    <section className="folded-paper military-corners p-6">
+    <section id="machine-images" className="folded-paper military-corners p-6">
       <div className="flex items-center gap-2 mb-6">
         <Zap className="w-4 h-4 text-military-rust/60" />
         <span className="font-ibm-mono text-[10px] text-military-rust/60 uppercase tracking-wider">
@@ -60,13 +60,11 @@ export function MachineImages({ unit }: MachineImagesProps) {
         >
           {/* Machine image */}
           <div className="relative w-full h-full">
-            <Image
+            <GitHubPagesImage
               src={machine.image}
               alt={machine.name}
               fill
               className="object-cover"
-              sizes="(max-width: 768px) 100vw, 50vw"
-              unoptimized
             />
             {/* Dark gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-military-dark/90 via-military-dark/20 to-transparent" />

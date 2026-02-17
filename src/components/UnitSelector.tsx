@@ -5,8 +5,7 @@ import { GitHubPagesImage as Image } from './GitHubPagesImage';
 import type { Faction, Squad, Machine, ArmyUnit, FactionID, FilterType } from '@/lib/types';
 import { Plus, ArrowLeft, Users, Zap, Shield } from 'lucide-react';
 import { WeaponSelectorModal } from './modals/WeaponSelectorModal';
-import MachineBlueprintModal from './machine/MachineBlueprintModal';
-import SquadBlueprintModal from './SquadBlueprintModal';
+import { EncyclopediaModal } from './modals/EncyclopediaModal';
 import { countByUnitType } from '@/lib/unit-utils';
 import MachineCard from './machine/MachineCard';
 import { TabBar } from './TabBar';
@@ -15,6 +14,7 @@ import { ArmySummaryView } from './ArmySummaryView';
 import { CompactUnitCard } from './CompactUnitCard';
 import { clsx } from 'clsx';
 import { getFactionColors } from '@/lib/faction-colors';
+import { UnitWithType } from '@/lib/encyclopedia-utils';
 
 interface UnitSelectorProps {
   factions: Faction[];
@@ -534,18 +534,12 @@ export function UnitSelector({
       )}
 
       {/* Unit details modal */}
-      {selectedUnit && selectedUnit.type === 'squad' && (
-        <SquadBlueprintModal
-          squad={selectedUnit.data as any}
+      {selectedUnit && (
+        <EncyclopediaModal
+          unit={{ ...selectedUnit.data, type: selectedUnit.type } as UnitWithType}
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-        />
-      )}
-      {selectedUnit && selectedUnit.type === 'machine' && (
-        <MachineBlueprintModal
-          machine={selectedUnit.data as any}
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
+          scrollTarget={selectedUnit.type === 'squad' ? 'soldier-images' : 'machine-images'}
         />
       )}
 

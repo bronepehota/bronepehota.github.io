@@ -14,9 +14,10 @@ import { PilotAssignmentModal } from '../modals/PilotAssignmentModal';
 import { PilotInfo } from '@/lib/types';
 import { PilotTestModal } from '../combat/PilotTestModal';
 import { usePilotTestFlow } from '@/hooks/usePilotTestFlow';
-import MachineBlueprintModal from '../machine/MachineBlueprintModal';
+import { EncyclopediaModal } from '../modals/EncyclopediaModal';
 import { PanicTestModal } from '../modals/PanicTestModal';
 import { checkPanicTrigger } from '@/lib/panic-logic';
+import { UnitWithType } from '@/lib/encyclopedia-utils';
 
 // Helper function to shorten weapon names for mobile
 const _shortenWeaponName = (name: string): string => {
@@ -471,10 +472,11 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
 
       {/* Machine Blueprint Modal */}
       {showDetailsModal && !isSquad && (
-        <MachineBlueprintModal
-          machine={data as Machine}
+        <EncyclopediaModal
+          unit={{ ...data, type: 'machine' } as UnitWithType}
           isOpen={showDetailsModal}
           onClose={() => setShowDetailsModal(false)}
+          scrollTarget="machine-images"
         />
       )}
 
@@ -729,6 +731,15 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                         />
                       </div>
 
+                      {/* Soldier number HUD - bottom right, like in encyclopedia */}
+                      <div className="absolute bottom-1 right-1 z-10">
+                        <div className="px-1.5 py-0.5 backdrop-blur-md bg-slate-900/70 border border-slate-600/50 rounded-sm">
+                          <span className="font-mono text-[10px] font-bold text-white">
+                            #{idx + 1}
+                          </span>
+                        </div>
+                      </div>
+
                       {/* Death overlay - only render after mount to prevent hydration mismatch */}
                       {isMounted && isDead && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/40">
@@ -766,11 +777,6 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                     </div>
 
                     <div className="flex-1 flex flex-col justify-between min-w-0 gap-1.5 md:gap-2">
-                      {/* Soldier number label */}
-                      <div className="text-[10px] font-mono font-bold text-slate-500 opacity-60">
-                        #{idx + 1}
-                      </div>
-
                       {/* Row 1: Action buttons */}
                       <div className="flex gap-2 md:gap-3 items-center">
                         {/* ДЕЙСТВИЕ button - fills available space, replaced with panic label when panicking */}
