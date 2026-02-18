@@ -16,7 +16,7 @@ import { UnitSelector } from './UnitSelector';
 import { RulesSelector } from './rules/RulesSelector';
 import { StepProgressIndicator } from './rules/StepProgressIndicator';
 import { getAllRulesVersions } from '@/lib/rules-registry';
-import { BattlePreparationScreen } from './BattlePreparationScreen';
+import { BattlePreparationScreen } from './preparation';
 
 // Type assertions for JSON imports
 const typedFactions = factionsData as Faction[];
@@ -30,9 +30,10 @@ interface ArmyBuilderProps {
   onRulesVersionChange: (version: RulesVersionID) => void;
   displayMode: 'detailed' | 'compact';
   onDisplayModeChange: (mode: 'detailed' | 'compact') => void;
+  onStartBattle: () => void;
 }
 
-export default function ArmyBuilder({ army, setArmy, rulesVersion, onRulesVersionChange, displayMode, onDisplayModeChange }: ArmyBuilderProps) {
+export default function ArmyBuilder({ army, setArmy, rulesVersion, onRulesVersionChange, displayMode, onDisplayModeChange, onStartBattle: _onStartBattle }: ArmyBuilderProps) {
 
   // Panic enabled state - persisted in localStorage
   const [panicEnabled, setPanicEnabled] = useState<boolean>(() => {
@@ -276,6 +277,7 @@ export default function ArmyBuilder({ army, setArmy, rulesVersion, onRulesVersio
               setArmy={setArmy}
               onStartBattle={() => {
                 setArmy({ ...army, isInBattle: true, currentStep: 'battle' });
+                _onStartBattle();
               }}
               onBackToBuilder={() => {
                 setSetupStep('units');
