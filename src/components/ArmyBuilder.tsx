@@ -16,6 +16,7 @@ import { UnitSelector } from './UnitSelector';
 import { RulesSelector } from './rules/RulesSelector';
 import { StepProgressIndicator } from './rules/StepProgressIndicator';
 import { getAllRulesVersions } from '@/lib/rules-registry';
+import { BattlePreparationScreen } from './BattlePreparationScreen';
 
 // Type assertions for JSON imports
 const typedFactions = factionsData as Faction[];
@@ -25,14 +26,13 @@ const typedMachines = [...polairsMachines, ...protectorateMachines, ...mercenari
 interface ArmyBuilderProps {
   army: Army;
   setArmy: (army: Army) => void;
-  onEnterBattle?: () => void;
   rulesVersion: RulesVersionID;
   onRulesVersionChange: (version: RulesVersionID) => void;
   displayMode: 'detailed' | 'compact';
   onDisplayModeChange: (mode: 'detailed' | 'compact') => void;
 }
 
-export default function ArmyBuilder({ army, setArmy, onEnterBattle, rulesVersion, onRulesVersionChange, displayMode, onDisplayModeChange }: ArmyBuilderProps) {
+export default function ArmyBuilder({ army, setArmy, rulesVersion, onRulesVersionChange, displayMode, onDisplayModeChange }: ArmyBuilderProps) {
 
   // Panic enabled state - persisted in localStorage
   const [panicEnabled, setPanicEnabled] = useState<boolean>(() => {
@@ -62,8 +62,9 @@ export default function ArmyBuilder({ army, setArmy, onEnterBattle, rulesVersion
   });
 
   // Setup step state for guided flow - sync with army.currentStep
-  const [setupStep, setSetupStep] = useState<'faction' | 'budget' | 'rules' | 'units'>(() => {
+  const [setupStep, setSetupStep] = useState<'faction' | 'budget' | 'rules' | 'units' | 'preparation'>(() => {
     if (army.currentStep === 'unit-select') return 'units';
+    if (army.currentStep === 'preparation') return 'preparation';
     return 'faction';
   });
 
@@ -73,12 +74,14 @@ export default function ArmyBuilder({ army, setArmy, onEnterBattle, rulesVersion
       setSetupStep('faction');
     } else if (army.currentStep === 'unit-select' && setupStep !== 'units') {
       setSetupStep('units');
+    } else if (army.currentStep === 'preparation' && setupStep !== 'preparation') {
+      setSetupStep('preparation');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [army.currentStep]);
 
-  // Validate currentStep - only allow 'faction-select' or 'unit-select'
-  const validStep = (army.currentStep === 'faction-select' || army.currentStep === 'unit-select')
+  // Validate currentStep - allow 'faction-select', 'unit-select', or 'preparation'
+  const validStep = (army.currentStep === 'faction-select' || army.currentStep === 'unit-select' || army.currentStep === 'preparation')
     ? army.currentStep
     : 'faction-select';
 
@@ -236,13 +239,13 @@ export default function ArmyBuilder({ army, setArmy, onEnterBattle, rulesVersion
                 totalCost: army.totalCost - unitToRemove.data.cost,
               });
             }}
-            onToBattle={onEnterBattle || (() => {
+            onToBattle={() => {
               setArmy({
                 ...army,
                 isInBattle: true,
-                currentStep: 'battle',
+                currentStep: 'preparation',
               });
-            })}
+            }}
             onBackToFactionSelect={() => {
               setSetupStep('faction');
               setArmy({
@@ -257,6 +260,28 @@ export default function ArmyBuilder({ army, setArmy, onEnterBattle, rulesVersion
             displayMode={displayMode}
             onDisplayModeChange={onDisplayModeChange}
           />
+          </>
+        )}
+
+        {setupStep === 'preparation' && (
+          <>
+            <StepProgressIndicator
+              currentStep={setupStep}
+              selectedFaction={army.faction}
+              selectedBudget={army.pointBudget || 0}
+              selectedRules={rulesVersion}
+            />
+            <BattlePreparationScreen
+              army={army}
+              setArmy={setArmy}
+              onStartBattle={() => {
+                setArmy({ ...army, isInBattle: true, currentStep: 'battle' });
+              }}
+              onBackToBuilder={() => {
+                setSetupStep('units');
+                setArmy({ ...army, currentStep: 'unit-select' });
+              }}
+            />
           </>
         )}
       </div>

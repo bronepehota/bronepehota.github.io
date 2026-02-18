@@ -1,8 +1,9 @@
 'use client';
 
 import React from 'react';
-import { Shield, Coins, Book, Users, Check, LucideIcon } from 'lucide-react';
+import { Shield, Coins, Book, Users, Sword, Check, LucideIcon } from 'lucide-react';
 import type { FactionID, RulesVersionID } from '@/lib/types';
+import { getFactionColors } from '@/lib/faction-colors';
 
 interface Step {
   id: number;
@@ -16,17 +17,18 @@ const steps: Step[] = [
   { id: 2, label: 'Бюджет', description: 'Установите лимит очков армии', icon: Coins },
   { id: 3, label: 'Правила', description: 'Выберите версию правил', icon: Book },
   { id: 4, label: 'Армия', description: 'Соберите свою армию', icon: Users },
+  { id: 5, label: 'Расстановка', description: 'Подготовьте войска к бою', icon: Sword },
 ];
 
 interface StepProgressIndicatorProps {
-  currentStep: 'faction' | 'budget' | 'rules' | 'units' | 'complete';
+  currentStep: 'faction' | 'budget' | 'rules' | 'units' | 'preparation' | 'complete';
   selectedFaction?: FactionID;
   selectedBudget?: number;
   selectedRules?: RulesVersionID;
 }
 
 /**
- * StepProgressIndicator - Visual progress indicator for 4-step army setup flow
+ * StepProgressIndicator - Visual progress indicator for 5-step army setup flow
  *
  * Accessibility:
  * - aria-current="step" for active step
@@ -48,8 +50,9 @@ export function StepProgressIndicator({
       case 'faction': return 0;
       case 'budget': return 1;
       case 'rules': return 2;
-      case 'units':
-      case 'complete': return 3;
+      case 'units': return 3;
+      case 'preparation':
+      case 'complete': return 4;
       default: return 0;
     }
   };
@@ -58,13 +61,8 @@ export function StepProgressIndicator({
   const activeStep = steps[activeIndex];
 
   // Get faction color for active step glow
-  const factionColors: Record<FactionID, string> = {
-    polaris: '#ef4444',
-    protectorate: '#3b82f6',
-    mercenaries: '#eab308',
-  };
-
-  const activeColor = selectedFaction ? factionColors[selectedFaction] : '#64748b';
+  const factionColors = selectedFaction ? getFactionColors(selectedFaction) : null;
+  const activeColor = factionColors?.primary || '#64748b';
 
   return (
     <div className="w-full mb-8">
@@ -73,7 +71,6 @@ export function StepProgressIndicator({
         {steps.map((step, index) => {
           const isActive = index === activeIndex;
           const isCompleted = index < activeIndex;
-          const _isPending = index > activeIndex;
           const StepIcon = step.icon;
 
           return (

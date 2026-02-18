@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { ArrowLeft, Sword } from 'lucide-react';
+import { Sword } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Army, FactionID } from '@/lib/types';
-import { CompactArmyCard } from './CompactArmyCard';
+import { PrepArmyList } from './preparation/PrepArmyList';
 import InitiativeModal from './modals/InitiativeModal';
 
 interface BattlePreparationScreenProps {
@@ -16,7 +16,7 @@ export function BattlePreparationScreen({
   army,
   setArmy,
   onStartBattle,
-  onBackToBuilder,
+  onBackToBuilder: _onBackToBuilder,
 }: BattlePreparationScreenProps) {
   const [showInitiativeModal, setShowInitiativeModal] = useState(false);
 
@@ -74,33 +74,6 @@ export function BattlePreparationScreen({
 
       {/* Контент поверх фона */}
       <div className="relative z-10" data-testid="battle-preparation-screen">
-        {/* Header */}
-        <div className="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-md border-b border-slate-800/50 px-4 py-3">
-          <div className="max-w-4xl mx-auto flex items-center gap-4">
-            <button
-              onClick={onBackToBuilder}
-              className="p-2 -ml-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all duration-200 active:scale-95 touch-manipulation"
-              data-testid="back-to-builder-button"
-              aria-label="Вернуться к сбору армии"
-            >
-              <ArrowLeft className="w-6 h-6" />
-            </button>
-
-            <div className="flex-1">
-              <h1 className="text-xl md:text-2xl font-mono font-black uppercase tracking-wider text-white">
-                Подготовка к бою
-              </h1>
-            </div>
-
-            {/* Фракционный индикатор */}
-            <div className={cn('px-3 py-1.5 rounded-full text-xs font-mono font-bold uppercase tracking-wider border', styles.bg, styles.accentBorder, styles.accent)}>
-              {army.faction === 'polaris' && 'Полярис'}
-              {army.faction === 'protectorate' && 'Протекторат'}
-              {army.faction === 'mercenaries' && 'Наёмники'}
-            </div>
-          </div>
-        </div>
-
         {/* Основной контент */}
         <div className="max-w-4xl mx-auto px-4 py-6 space-y-8 pb-40">
           {/* Иммерсивный текст */}
@@ -127,39 +100,7 @@ export function BattlePreparationScreen({
           </div>
 
           {/* Список армии */}
-          <div className="space-y-4">
-            {/* Заголовок списка */}
-            <div className="flex items-center justify-between px-1">
-              <h3 className="text-sm font-mono font-bold uppercase tracking-wider text-slate-400">
-                Состав армии
-              </h3>
-              <span className="text-xs font-mono text-slate-500">
-                {army.units.length} {army.units.length === 1 ? 'юнит' : army.units.length > 1 && army.units.length < 5 ? 'юнита' : 'юнитов'} • {army.totalCost} {army.totalCost === 1 ? 'очко' : army.totalCost > 1 && army.totalCost < 5 ? 'очка' : 'очков'}
-              </span>
-            </div>
-
-            {/* Список - переиспользуем CompactArmyCard */}
-            <div className="space-y-2" data-testid="army-list-prep">
-              {army.units.map((unit) => (
-                <CompactArmyCard
-                  key={unit.instanceId}
-                  unit={unit}
-                  onRemove={() => {}}
-                  onClick={undefined}
-                  factionId={army.faction}
-                  dataTestId={`prep-unit-${unit.instanceId}`}
-                  readonly
-                />
-              ))}
-            </div>
-
-            {/* Пустое состояние */}
-            {army.units.length === 0 && (
-              <div className="text-center py-12 px-4">
-                <p className="text-slate-400">Армия пуста. Вернитесь к сбору армии.</p>
-              </div>
-            )}
-          </div>
+          <PrepArmyList army={army} />
         </div>
 
         {/* Фиксированная кнопка "Начать бой" */}

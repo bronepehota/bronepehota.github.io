@@ -183,7 +183,7 @@ export interface ArmyUnit {
   panicState?: PanicState[]; // Список паникующих солдат
 }
 
-export type ArmyCurrentStep = 'faction-select' | 'unit-select' | 'battle-prep' | 'battle';
+export type ArmyCurrentStep = 'faction-select' | 'unit-select' | 'preparation' | 'battle';
 
 export interface Army {
   name: string;
