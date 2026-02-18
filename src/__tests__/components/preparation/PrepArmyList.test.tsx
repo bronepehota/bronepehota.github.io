@@ -70,14 +70,14 @@ describe('PrepArmyList', () => {
   describe('empty state', () => {
     it('should display empty state message when army has no units', () => {
       const emptyArmy = createMockArmy([]);
-      render(<PrepArmyList army={emptyArmy} factionId="polaris" />);
+      render(<PrepArmyList army={emptyArmy} />);
 
       expect(screen.getByText('Армия пуста. Вернитесь к сбору армии.')).toBeInTheDocument();
     });
 
     it('should render container with proper testid when empty', () => {
       const emptyArmy = createMockArmy([]);
-      render(<PrepArmyList army={emptyArmy} factionId="polaris" />);
+      render(<PrepArmyList army={emptyArmy} />);
 
       expect(screen.getByTestId('prep-army-list')).toBeInTheDocument();
     });
@@ -86,14 +86,14 @@ describe('PrepArmyList', () => {
   describe('squad units', () => {
     it('should display squad name', () => {
       const army = createMockArmy([mockSquadUnit]);
-      render(<PrepArmyList army={army} factionId="polaris" />);
+      render(<PrepArmyList army={army} />);
 
       expect(screen.getByText('Штурмовики')).toBeInTheDocument();
     });
 
     it('should render soldier images for squad', () => {
       const army = createMockArmy([mockSquadUnit]);
-      render(<PrepArmyList army={army} factionId="polaris" />);
+      render(<PrepArmyList army={army} />);
 
       const images = screen.getAllByRole('img');
       expect(images.length).toBe(2); // 2 soldiers
@@ -110,7 +110,7 @@ describe('PrepArmyList', () => {
         } as Squad,
       };
       const army = createMockArmy([squadWithoutSoldierImages]);
-      render(<PrepArmyList army={army} factionId="polaris" />);
+      render(<PrepArmyList army={army} />);
 
       // Should still render image with fallback
       const images = screen.getAllByRole('img');
@@ -121,7 +121,7 @@ describe('PrepArmyList', () => {
   describe('machine units', () => {
     it('should display machine name', () => {
       const army = createMockArmy([mockMachineUnit]);
-      render(<PrepArmyList army={army} factionId="polaris" />);
+      render(<PrepArmyList army={army} />);
 
       expect(screen.getByText(/Танк/)).toBeInTheDocument();
       expect(screen.getByText(/Гром/)).toBeInTheDocument();
@@ -129,7 +129,7 @@ describe('PrepArmyList', () => {
 
     it('should render single image for machine', () => {
       const army = createMockArmy([mockMachineUnit]);
-      render(<PrepArmyList army={army} factionId="polaris" />);
+      render(<PrepArmyList army={army} />);
 
       const images = screen.getAllByRole('img');
       expect(images.length).toBe(1);
@@ -143,14 +143,14 @@ describe('PrepArmyList', () => {
         instanceNumber: 2,
       };
       const army = createMockArmy([unitWithNumber]);
-      render(<PrepArmyList army={army} factionId="polaris" />);
+      render(<PrepArmyList army={army} />);
 
       expect(screen.getByText(/#2/)).toBeInTheDocument();
     });
 
     it('should not display instance number when 1', () => {
       const army = createMockArmy([mockSquadUnit]);
-      render(<PrepArmyList army={army} factionId="polaris" />);
+      render(<PrepArmyList army={army} />);
 
       expect(screen.queryByText(/#\d+$/)).not.toBeInTheDocument();
     });
@@ -159,7 +159,7 @@ describe('PrepArmyList', () => {
   describe('mixed units', () => {
     it('should display both squad and machine units', () => {
       const army = createMockArmy([mockSquadUnit, mockMachineUnit]);
-      render(<PrepArmyList army={army} factionId="polaris" />);
+      render(<PrepArmyList army={army} />);
 
       expect(screen.getByText('Штурмовики')).toBeInTheDocument();
       expect(screen.getByText(/Танк/)).toBeInTheDocument();
@@ -167,7 +167,7 @@ describe('PrepArmyList', () => {
 
     it('should render correct number of images', () => {
       const army = createMockArmy([mockSquadUnit, mockMachineUnit]);
-      render(<PrepArmyList army={army} factionId="polaris" />);
+      render(<PrepArmyList army={army} />);
 
       const images = screen.getAllByRole('img');
       expect(images.length).toBe(3); // 2 soldiers + 1 machine
