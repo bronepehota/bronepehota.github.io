@@ -3,6 +3,7 @@
 import React from 'react';
 import { Shield, Coins, Book, Users, Sword, Check, LucideIcon } from 'lucide-react';
 import type { FactionID, RulesVersionID } from '@/lib/types';
+import { getFactionColors } from '@/lib/faction-colors';
 
 interface Step {
   id: number;
@@ -60,13 +61,8 @@ export function StepProgressIndicator({
   const activeStep = steps[activeIndex];
 
   // Get faction color for active step glow
-  const factionColors: Record<FactionID, string> = {
-    polaris: '#ef4444',
-    protectorate: '#3b82f6',
-    mercenaries: '#eab308',
-  };
-
-  const activeColor = selectedFaction ? factionColors[selectedFaction] : '#64748b';
+  const factionColors = selectedFaction ? getFactionColors(selectedFaction) : null;
+  const activeColor = factionColors?.primary || '#64748b';
 
   return (
     <div className="w-full mb-8">
@@ -75,7 +71,6 @@ export function StepProgressIndicator({
         {steps.map((step, index) => {
           const isActive = index === activeIndex;
           const isCompleted = index < activeIndex;
-          const _isPending = index > activeIndex;
           const StepIcon = step.icon;
 
           return (
