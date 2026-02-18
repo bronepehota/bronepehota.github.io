@@ -240,7 +240,7 @@ export default function ArmyBuilder({ army, setArmy, onEnterBattle, rulesVersion
               setArmy({
                 ...army,
                 isInBattle: true,
-                currentStep: 'battle',
+                currentStep: 'preparation',
               });
             })}
             onBackToFactionSelect={() => {
