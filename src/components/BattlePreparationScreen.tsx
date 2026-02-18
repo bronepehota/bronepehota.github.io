@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ArrowLeft, Sword } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Army, FactionID } from '@/lib/types';
-import { CompactArmyCard } from './CompactArmyCard';
+import { PrepArmyList } from './preparation/PrepArmyList';
 import InitiativeModal from './modals/InitiativeModal';
 
 interface BattlePreparationScreenProps {
@@ -127,39 +127,7 @@ export function BattlePreparationScreen({
           </div>
 
           {/* Список армии */}
-          <div className="space-y-4">
-            {/* Заголовок списка */}
-            <div className="flex items-center justify-between px-1">
-              <h3 className="text-sm font-mono font-bold uppercase tracking-wider text-slate-400">
-                Состав армии
-              </h3>
-              <span className="text-xs font-mono text-slate-500">
-                {army.units.length} {army.units.length === 1 ? 'юнит' : army.units.length > 1 && army.units.length < 5 ? 'юнита' : 'юнитов'} • {army.totalCost} {army.totalCost === 1 ? 'очко' : army.totalCost > 1 && army.totalCost < 5 ? 'очка' : 'очков'}
-              </span>
-            </div>
-
-            {/* Список - переиспользуем CompactArmyCard */}
-            <div className="space-y-2" data-testid="army-list-prep">
-              {army.units.map((unit) => (
-                <CompactArmyCard
-                  key={unit.instanceId}
-                  unit={unit}
-                  onRemove={() => {}}
-                  onClick={undefined}
-                  factionId={army.faction}
-                  dataTestId={`prep-unit-${unit.instanceId}`}
-                  readonly
-                />
-              ))}
-            </div>
-
-            {/* Пустое состояние */}
-            {army.units.length === 0 && (
-              <div className="text-center py-12 px-4">
-                <p className="text-slate-400">Армия пуста. Вернитесь к сбору армии.</p>
-              </div>
-            )}
-          </div>
+          <PrepArmyList army={army} />
         </div>
 
         {/* Фиксированная кнопка "Начать бой" */}
