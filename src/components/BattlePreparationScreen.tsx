@@ -16,7 +16,7 @@ export function BattlePreparationScreen({
   army,
   setArmy,
   onStartBattle,
-  onBackToBuilder,
+  onBackToBuilder: _onBackToBuilder,
 }: BattlePreparationScreenProps) {
   const [showInitiativeModal, setShowInitiativeModal] = useState(false);
 

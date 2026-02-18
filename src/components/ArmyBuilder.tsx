@@ -26,14 +26,13 @@ const typedMachines = [...polairsMachines, ...protectorateMachines, ...mercenari
 interface ArmyBuilderProps {
   army: Army;
   setArmy: (army: Army) => void;
-  onEnterBattle?: () => void;
   rulesVersion: RulesVersionID;
   onRulesVersionChange: (version: RulesVersionID) => void;
   displayMode: 'detailed' | 'compact';
   onDisplayModeChange: (mode: 'detailed' | 'compact') => void;
 }
 
-export default function ArmyBuilder({ army, setArmy, onEnterBattle, rulesVersion, onRulesVersionChange, displayMode, onDisplayModeChange }: ArmyBuilderProps) {
+export default function ArmyBuilder({ army, setArmy, rulesVersion, onRulesVersionChange, displayMode, onDisplayModeChange }: ArmyBuilderProps) {
 
   // Panic enabled state - persisted in localStorage
   const [panicEnabled, setPanicEnabled] = useState<boolean>(() => {
@@ -240,13 +239,13 @@ export default function ArmyBuilder({ army, setArmy, onEnterBattle, rulesVersion
                 totalCost: army.totalCost - unitToRemove.data.cost,
               });
             }}
-            onToBattle={onEnterBattle || (() => {
+            onToBattle={() => {
               setArmy({
                 ...army,
                 isInBattle: true,
                 currentStep: 'preparation',
               });
-            })}
+            }}
             onBackToFactionSelect={() => {
               setSetupStep('faction');
               setArmy({
@@ -275,9 +274,9 @@ export default function ArmyBuilder({ army, setArmy, onEnterBattle, rulesVersion
             <BattlePreparationScreen
               army={army}
               setArmy={setArmy}
-              onStartBattle={onEnterBattle || (() => {
+              onStartBattle={() => {
                 setArmy({ ...army, isInBattle: true, currentStep: 'battle' });
-              })}
+              }}
               onBackToBuilder={() => {
                 setSetupStep('units');
                 setArmy({ ...army, currentStep: 'unit-select' });
