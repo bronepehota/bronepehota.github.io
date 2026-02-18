@@ -264,7 +264,7 @@ export default function ArmyBuilder({ army, setArmy, onEnterBattle, rulesVersion
           </>
         )}
 
-        {validStep === 'preparation' && (
+        {setupStep === 'preparation' && (
           <>
             <StepProgressIndicator
               currentStep={setupStep}
