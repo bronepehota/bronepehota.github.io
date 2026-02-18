@@ -9,7 +9,7 @@ describe('BattlePreparationScreen', () => {
     faction: 'polaris',
     units: [],
     totalCost: 0,
-    currentStep: 'battle-prep',
+    currentStep: 'preparation',
     isInBattle: false,
     currentTurn: 1
   };

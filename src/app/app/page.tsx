@@ -110,7 +110,7 @@ export default function Home() {
     setArmy({
       ...army,
       isInBattle: false,
-      currentStep: 'battle-prep',
+      currentStep: 'preparation',
     });
     setView('preparation');
   };
