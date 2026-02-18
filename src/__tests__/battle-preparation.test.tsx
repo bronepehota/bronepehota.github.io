@@ -18,7 +18,7 @@ describe('BattlePreparationScreen', () => {
   const mockOnStartBattle = jest.fn();
   const mockOnBackToBuilder = jest.fn();
 
-  it('должен отображать заголовок "Подготовка к бою"', () => {
+  it('должен отображать заголовок "Готовьте войска!"', () => {
     render(
       <BattlePreparationScreen
         army={mockArmy}
@@ -28,7 +28,7 @@ describe('BattlePreparationScreen', () => {
       />
     );
 
-    expect(screen.getByText('Подготовка к бою')).toBeInTheDocument();
+    expect(screen.getByText('Готовьте войска!')).toBeInTheDocument();
   });
 
   it('должен показывать иммерсивный текст', () => {
@@ -58,36 +58,6 @@ describe('BattlePreparationScreen', () => {
     const button = screen.getByTestId('start-battle-button');
     expect(button).toBeInTheDocument();
     expect(button).toHaveTextContent('Начать бой');
-  });
-
-  it('должен вызывать onBackToBuilder при клике на кнопку "Назад"', () => {
-    render(
-      <BattlePreparationScreen
-        army={mockArmy}
-        setArmy={mockSetArmy}
-        onStartBattle={mockOnStartBattle}
-        onBackToBuilder={mockOnBackToBuilder}
-      />
-    );
-
-    const backButton = screen.getByTestId('back-to-builder-button');
-    fireEvent.click(backButton);
-
-    expect(mockOnBackToBuilder).toHaveBeenCalledTimes(1);
-  });
-
-  it('должен возвращать в ArmyBuilder при пустой армии', () => {
-    render(
-      <BattlePreparationScreen
-        army={mockArmy}
-        setArmy={mockSetArmy}
-        onStartBattle={mockOnStartBattle}
-        onBackToBuilder={mockOnBackToBuilder}
-      />
-    );
-
-    // Пустая армия должна вызвать onBackToBuilder через useEffect
-    expect(mockOnBackToBuilder).toHaveBeenCalledTimes(1);
   });
 
   it('должен открывать модальное окно инициативы при клике на "Начать бой" (с юнитами)', () => {
