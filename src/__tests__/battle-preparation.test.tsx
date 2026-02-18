@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { BattlePreparationScreen } from '@/components/BattlePreparationScreen';
+import { BattlePreparationScreen } from '@/components/preparation';
 import { Army } from '@/lib/types';
 
 describe('BattlePreparationScreen', () => {
@@ -18,42 +18,33 @@ describe('BattlePreparationScreen', () => {
   const mockOnStartBattle = jest.fn();
   const mockOnBackToBuilder = jest.fn();
 
-  it('должен отображать заголовок "Готовьте войска!"', () => {
-    render(
+  // Function to render with all required props
+  const renderComponent = (army: Army = mockArmy) => {
+    return render(
       <BattlePreparationScreen
-        army={mockArmy}
+        army={army}
         setArmy={mockSetArmy}
         onStartBattle={mockOnStartBattle}
         onBackToBuilder={mockOnBackToBuilder}
       />
     );
+  };
+
+  it('должен отображать заголовок "Готовьте войска!"', () => {
+    renderComponent();
 
     expect(screen.getByText('Готовьте войска!')).toBeInTheDocument();
   });
 
   it('должен показывать иммерсивный текст', () => {
-    render(
-      <BattlePreparationScreen
-        army={mockArmy}
-        setArmy={mockSetArmy}
-        onStartBattle={mockOnStartBattle}
-        onBackToBuilder={mockOnBackToBuilder}
-      />
-    );
+    renderComponent();
 
     expect(screen.getByText('Готовьте войска!')).toBeInTheDocument();
     expect(screen.getByText('Соберите миниатюры и расставьте их на поле.')).toBeInTheDocument();
   });
 
   it('должен отображать кнопку "Начать бой"', () => {
-    render(
-      <BattlePreparationScreen
-        army={mockArmy}
-        setArmy={mockSetArmy}
-        onStartBattle={mockOnStartBattle}
-        onBackToBuilder={mockOnBackToBuilder}
-      />
-    );
+    renderComponent();
 
     const button = screen.getByTestId('start-battle-button');
     expect(button).toBeInTheDocument();
@@ -80,14 +71,7 @@ describe('BattlePreparationScreen', () => {
       ]
     };
 
-    render(
-      <BattlePreparationScreen
-        army={mockArmyWithUnits}
-        setArmy={mockSetArmy}
-        onStartBattle={mockOnStartBattle}
-        onBackToBuilder={mockOnBackToBuilder}
-      />
-    );
+    renderComponent(mockArmyWithUnits);
 
     const button = screen.getByTestId('start-battle-button');
     fireEvent.click(button);

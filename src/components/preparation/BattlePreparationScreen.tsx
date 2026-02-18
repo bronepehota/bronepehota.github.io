@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Sword } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Army, FactionID } from '@/lib/types';
-import { PrepArmyList } from './preparation/PrepArmyList';
-import InitiativeModal from './modals/InitiativeModal';
+import { PrepArmyList } from './PrepArmyList';
+import InitiativeModal from '../modals/InitiativeModal';
 
 interface BattlePreparationScreenProps {
   army: Army;

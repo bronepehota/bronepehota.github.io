@@ -418,6 +418,7 @@ export default function Home() {
             onRulesVersionChange={setRulesVersion}
             displayMode={displayMode}
             onDisplayModeChange={setDisplayMode}
+            onStartBattle={() => setView('game')}
           />
         ) : (
           <GameSession
