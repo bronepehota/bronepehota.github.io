@@ -165,7 +165,7 @@ export function SoldierCard({
 
       {/* Progress bar during long-press */}
       {isLongPressing && (
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-slate-800 z-20">
+        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-slate-800 z-20">
           <div
             className="h-full bg-gradient-to-r from-emerald-500 to-emerald-600 transition-all duration-75"
             style={{ width: `${longPressProgress * 100}%` }}
