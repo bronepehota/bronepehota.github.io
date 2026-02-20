@@ -291,6 +291,87 @@ src/components/
 - `useCombatFlow.ts` - Combat state machine for shots, melee, grenades
   - `executeShot()`, `executeMelee()`, `executeGrenade()`, `checkGrenadeTarget()`
   - Manages combat parameters, dice rolls, and results
+- `useLongPress.ts` - Long-press gesture detection for undo actions
+
+### Long-Press Pattern
+
+**Purpose**: Allow users to undo state changes (marking done/dead) via long-press gesture.
+
+**Usage in SoldierCard** (`src/components/cards/SoldierCard.tsx`):
+
+```typescript
+const [isLongPressing, setIsLongPressing] = useState(false);
+const [longPressProgress, setLongPressProgress] = useState(0);
+const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+const startLongPress = (callback: () => void) => {
+  // Show progress bar only after 100ms of holding
+  const progressDelay = 100;
+
+  // Long press callback after 600ms
+  longPressTimerRef.current = setTimeout(() => {
+    callback();
+    setIsLongPressing(false);
+    setLongPressProgress(1);
+  }, 600);
+
+  // Show progress bar after delay
+  longPressProgressRef.current = setTimeout(() => {
+    setIsLongPressing(true);
+    setLongPressProgress(0);
+
+    // Animate progress
+    let progress = progressDelay / 600;
+    const progressInterval = setInterval(() => {
+      progress += 0.05;
+      if (progress >= 1) {
+        progress = 1;
+        clearInterval(progressInterval);
+      }
+      setLongPressProgress(progress);
+    }, 30);
+  }, progressDelay);
+};
+
+const cancelLongPress = () => {
+  if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
+  if (longPressProgressRef.current) clearTimeout(longPressProgressRef.current);
+  setIsLongPressing(false);
+  setLongPressProgress(0);
+};
+```
+
+**Button Logic** (`src/components/cards/soldier-card/SoldierActions.tsx`):
+
+```typescript
+// Only start long-press if in the "active" state (for cancellation)
+if (isDone) {
+  onMouseDown={() => {
+    setWasLongPressTriggered(false);
+    onStartLongPress(() => {
+      setWasLongPressTriggered(true);
+      onToggleDone(); // Cancel: reset done state
+    });
+  }
+}
+
+// Short click for activation
+onClick={() => {
+  if (wasLongPressTriggered) return; // Ignore if long-press fired
+  if (!isDone) {
+    onToggleDone(); // Activate: mark as done
+  }
+  setWasLongPressTriggered(false);
+}
+```
+
+**Behavior**:
+- Short click (< 100ms): Activates state (mark done/kill), NO progress bar
+- Long press (> 100ms): Progress bar appears, after 600ms → cancels state (reset/resurrect)
+
+**Visual feedback**:
+- Progress bar: `h-0.5 bg-gradient-to-r from-emerald-500 to-emerald-600` at bottom of card
+- Button: `scale-95 opacity-80` during press
 
 ### Utilities (`src/lib/`)
 
