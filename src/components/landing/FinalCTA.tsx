@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
 interface FinalCTAProps {
@@ -8,7 +8,6 @@ interface FinalCTAProps {
 }
 
 export default function FinalCTA({ className }: FinalCTAProps) {
-  const router = useRouter();
 
   return (
     <section
@@ -55,10 +54,12 @@ export default function FinalCTA({ className }: FinalCTAProps) {
           </p>
 
           {/* CTA Button */}
-          <button
+          <Link
+            href="/app"
             data-testid="final-cta-button"
-            onClick={() => router.push('/app')}
             className={cn(
+              'inline-flex',
+              'no-underline',
               'group relative px-10 py-5 bg-military-rust',
               'border-2 border-military-rust hover:border-military-amber',
               'font-russo font-bold text-lg md:text-xl uppercase tracking-widest text-white',
@@ -93,7 +94,7 @@ export default function FinalCTA({ className }: FinalCTAProps) {
             <span className="absolute inset-0 overflow-hidden">
               <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -translate-x-full group-hover:animate-shine" />
             </span>
-          </button>
+          </Link>
 
           {/* Technical decoration below button */}
           <div className="mt-8 flex items-center justify-center gap-4 font-ibm-mono text-xs text-military-steel/60">
