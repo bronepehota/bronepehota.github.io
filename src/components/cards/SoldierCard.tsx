@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { SoldierActions } from './soldier-card/SoldierActions';
 import { SoldierStats } from './soldier-card/SoldierStats';
 import { SoldierImage } from './soldier-card/SoldierImage';
@@ -35,6 +35,10 @@ export function SoldierCard({
   getSoldierImage,
 }: SoldierCardProps) {
   const [isMounted, setIsMounted] = useState(false);
+  const [isLongPressing, setIsLongPressing] = useState(false);
+  const [longPressProgress, setLongPressProgress] = useState(0);
+  const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const longPressProgressRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -53,6 +57,55 @@ export function SoldierCard({
     if (isDone) return 'done';
     return 'active';
   };
+
+  const startLongPress = (callback: () => void) => {
+    setIsLongPressing(true);
+    setLongPressProgress(0);
+
+    // Progress bar animation (600ms total)
+    let progress = 0;
+    longPressProgressRef.current = setInterval(() => {
+      progress += 0.05; // Update every 30ms
+      if (progress >= 1) {
+        progress = 1;
+        if (longPressProgressRef.current) {
+          clearInterval(longPressProgressRef.current);
+        }
+      }
+      setLongPressProgress(progress);
+    }, 30);
+
+    // Long press callback after 600ms
+    longPressTimerRef.current = setTimeout(() => {
+      callback();
+      setIsLongPressing(false);
+      setLongPressProgress(1);
+      if (longPressProgressRef.current) {
+        clearInterval(longPressProgressRef.current);
+      }
+    }, 600);
+  };
+
+  const cancelLongPress = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+    if (longPressProgressRef.current) {
+      clearInterval(longPressProgressRef.current);
+      longPressProgressRef.current = null;
+    }
+    setIsLongPressing(false);
+    setLongPressProgress(0);
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
+      if (longPressProgressRef.current) clearInterval(longPressProgressRef.current);
+    };
+  }, []);
 
   const handleToggleAction = () => {
     const newActions = [...(unit.actionsUsed || [])];
@@ -110,6 +163,16 @@ export function SoldierCard({
       {/* Status stripe */}
       <StatusStripe state={getStripeState()} />
 
+      {/* Progress bar during long-press */}
+      {isLongPressing && (
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-slate-800 z-20">
+          <div
+            className="h-full bg-gradient-to-r from-emerald-500 to-emerald-600 transition-all duration-75"
+            style={{ width: `${longPressProgress * 100}%` }}
+          />
+        </div>
+      )}
+
       {/* Tech corners for pilot */}
       {isPilot && !isDead && (
         <>
@@ -141,6 +204,9 @@ export function SoldierCard({
           onToggleDone={handleToggleAction}
           onToggleDead={handleToggleDead}
           soldierIndex={soldierIndex}
+          onStartLongPress={startLongPress}
+          onEndLongPress={cancelLongPress}
+          isLongPressing={isLongPressing}
         />
 
         {/* Row 2: Stats */}

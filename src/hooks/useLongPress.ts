@@ -14,7 +14,7 @@ interface UseLongPressReturn {
   onTouchStart: () => void;
   onTouchEnd: () => void;
   isPressed: boolean;
-  longPressTriggered: boolean; // true when long-press callback has fired
+  longPressTriggered: boolean;
 }
 
 export function useLongPress({

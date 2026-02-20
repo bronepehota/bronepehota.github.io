@@ -1,8 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import { CheckCircle2, Skull, Crosshair, Footprints } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useLongPress } from '@/hooks/useLongPress';
 
 export interface SoldierActionState {
   moved: boolean;
@@ -20,6 +20,9 @@ interface SoldierActionsProps {
   onToggleDone: () => void;
   onToggleDead: () => void;
   soldierIndex: number;
+  onStartLongPress: (callback: () => void) => void;
+  onEndLongPress: () => void;
+  isLongPressing: boolean;
 }
 
 export function SoldierActions({
@@ -29,18 +32,43 @@ export function SoldierActions({
   onActionClick,
   onToggleDone,
   onToggleDead,
+  onStartLongPress,
+  onEndLongPress,
+  isLongPressing,
 }: SoldierActionsProps) {
-  // Long press for DONE button (600ms)
-  const doneLongPress = useLongPress({
-    onLongPress: onToggleDone,
-    ms: 600,
-  });
+  const [wasLongPressTriggered, setWasLongPressTriggered] = useState(false);
 
-  // Long press for DEATH button (600ms)
-  const deathLongPress = useLongPress({
-    onLongPress: onToggleDead,
-    ms: 600,
-  });
+  const handleDoneMouseDown = () => {
+    setWasLongPressTriggered(false);
+    onStartLongPress(() => {
+      setWasLongPressTriggered(true);
+      onToggleDone(); // Undo: reset done state
+    });
+  };
+
+  const handleDoneClick = () => {
+    // Only activate if long-press was NOT triggered
+    if (!isDead && !wasLongPressTriggered) {
+      onToggleDone(); // Activate: mark as done
+    }
+    setWasLongPressTriggered(false);
+  };
+
+  const handleDeadMouseDown = () => {
+    setWasLongPressTriggered(false);
+    onStartLongPress(() => {
+      setWasLongPressTriggered(true);
+      onToggleDead(); // Undo: resurrect
+    });
+  };
+
+  const handleDeadClick = () => {
+    // Only activate if long-press was NOT triggered
+    if (!wasLongPressTriggered) {
+      onToggleDead(); // Activate: kill
+    }
+    setWasLongPressTriggered(false);
+  };
 
   return (
     <div className="flex gap-2 md:gap-3 items-center">
@@ -77,30 +105,27 @@ export function SoldierActions({
       {/* Visual separator - desktop only */}
       <div className="hidden md:block w-px h-8 bg-slate-700/50 mx-1" aria-hidden="true" />
 
-      {/* ГОТОВ button - gradient: from-emerald-600 to-emerald-800, shadow-[0_0_15px_rgba(16,185,129,0.5)], long-press 600ms */}
+      {/* ГОТОВ button - gradient with long-press */}
       {isInPanic ? (
         <div className="relative p-1.5 md:p-2 rounded-sm min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border-2 overflow-hidden bg-orange-950/20 border-orange-700/30 text-orange-400/50" aria-hidden="true">
           <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 opacity-50" />
         </div>
       ) : (
         <button
-          {...doneLongPress}
           disabled={isDead}
-          onClick={(e) => {
-            // Short click: activate (mark done)
-            // Long press: handled by doneLongPress (cancel/undo)
-            if (!isDead && !doneLongPress.longPressTriggered) {
-              e.preventDefault();
-              onToggleDone();
-            }
-          }}
+          onMouseDown={handleDoneMouseDown}
+          onMouseUp={onEndLongPress}
+          onMouseLeave={onEndLongPress}
+          onTouchStart={handleDoneMouseDown}
+          onTouchEnd={onEndLongPress}
+          onClick={handleDoneClick}
           className={cn(
             "relative p-1.5 md:p-2 rounded-sm transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border-2 overflow-hidden",
             "font-mono font-black uppercase",
             isDone
               ? "bg-gradient-to-br from-emerald-600 to-emerald-800 hover:from-emerald-500 hover:to-emerald-700 shadow-[0_0_15px_rgba(16,185,129,0.5)] hover:shadow-[0_0_20px_rgba(16,185,129,0.7)] border-emerald-500 text-emerald-100"
               : "bg-gradient-to-br from-slate-700 to-slate-900 hover:from-slate-600 hover:to-slate-800 border-slate-600 text-slate-300",
-            doneLongPress.isPressed && "scale-95 opacity-80",
+            isLongPressing && "scale-95 opacity-80",
             "disabled:opacity-50 disabled:cursor-not-allowed"
           )}
           type="button"
@@ -115,31 +140,24 @@ export function SoldierActions({
               <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-emerald-400/60" aria-hidden="true" />
             </>
           )}
-          {/* Pulse overlay during press */}
-          {doneLongPress.isPressed && (
-            <div className="absolute inset-0 bg-white/10 animate-pulse" aria-hidden="true" />
-          )}
           <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5" />
         </button>
       )}
 
-      {/* УБИТЬ button - gradient: from-red-700 to-red-900, shadow-[0_0_15px_rgba(220,38,38,0.5)], long-press 600ms */}
+      {/* УБИТЬ button - gradient with long-press */}
       <button
-        {...deathLongPress}
-        onClick={(e) => {
-          // Short click: activate (kill)
-          // Long press: handled by deathLongPress (resurrect/undo)
-          if (!deathLongPress.longPressTriggered) {
-            e.preventDefault();
-            onToggleDead();
-          }
-        }}
+        onMouseDown={handleDeadMouseDown}
+        onMouseUp={onEndLongPress}
+        onMouseLeave={onEndLongPress}
+        onTouchStart={handleDeadMouseDown}
+        onTouchEnd={onEndLongPress}
+        onClick={handleDeadClick}
         className={cn(
           "relative p-1.5 md:p-2 rounded-sm font-mono font-black uppercase tracking-wider min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center gap-1 md:gap-1.5 border-2 overflow-hidden transition-all",
           isDead
             ? "bg-gradient-to-br from-red-700 to-red-900 hover:from-red-600 hover:to-red-800 shadow-[0_0_15px_rgba(220,38,38,0.5)] hover:shadow-[0_0_20px_rgba(220,38,38,0.7)] border-red-600 text-red-100"
             : "bg-gradient-to-br from-slate-700 to-slate-900 hover:from-slate-600 hover:to-slate-800 border-slate-600 text-slate-300",
-          deathLongPress.isPressed && "scale-95 opacity-80"
+          isLongPressing && "scale-95 opacity-80"
         )}
         type="button"
         title={isDead ? "Долгое нажатие для воскрешения" : "Пометить как убитый"}
@@ -152,10 +170,6 @@ export function SoldierActions({
             <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-red-500/60" aria-hidden="true" />
             <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-red-500/60" aria-hidden="true" />
           </>
-        )}
-        {/* Pulse overlay during press */}
-        {deathLongPress.isPressed && (
-          <div className="absolute inset-0 bg-white/10 animate-pulse" aria-hidden="true" />
         )}
         <Skull className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />
         <span className="hidden md:inline text-[10px] font-mono font-black uppercase ml-0.5">
