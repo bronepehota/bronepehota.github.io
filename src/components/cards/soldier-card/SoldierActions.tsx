@@ -86,13 +86,6 @@ export function SoldierActions({
         <button
           {...doneLongPress}
           disabled={isDead}
-          onClick={(e) => {
-            // Prevent triggering long-press click if not actually done
-            if (!isDead && !doneLongPress.isPressed) {
-              e.preventDefault();
-              onToggleDone();
-            }
-          }}
           className={cn(
             "relative p-1.5 md:p-2 rounded-sm transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border-2 overflow-hidden",
             "font-mono font-black uppercase",
