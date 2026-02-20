@@ -14,6 +14,7 @@ interface UseLongPressReturn {
   onTouchStart: () => void;
   onTouchEnd: () => void;
   isPressed: boolean;
+  longPressTriggered: boolean; // true when long-press callback has fired
 }
 
 export function useLongPress({
@@ -21,14 +22,17 @@ export function useLongPress({
   ms = 600,
 }: UseLongPressOptions): UseLongPressReturn {
   const [isPressed, setIsPressed] = useState(false);
+  const [longPressTriggered, setLongPressTriggered] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const startPress = useCallback(() => {
     setIsPressed(true);
+    setLongPressTriggered(false);
 
     timerRef.current = setTimeout(() => {
       onLongPress();
       setIsPressed(false);
+      setLongPressTriggered(true);
     }, ms);
   }, [onLongPress, ms]);
 
@@ -56,5 +60,6 @@ export function useLongPress({
     onTouchStart: startPress,
     onTouchEnd: cancelPress,
     isPressed,
+    longPressTriggered,
   };
 }

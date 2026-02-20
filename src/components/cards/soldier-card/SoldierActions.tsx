@@ -88,8 +88,8 @@ export function SoldierActions({
           disabled={isDead}
           onClick={(e) => {
             // Short click: activate (mark done)
-            // Long press will be handled by doneLongPress (cancel)
-            if (!isDead && !doneLongPress.isPressed) {
+            // Long press: handled by doneLongPress (cancel/undo)
+            if (!isDead && !doneLongPress.longPressTriggered) {
               e.preventDefault();
               onToggleDone();
             }
@@ -128,8 +128,8 @@ export function SoldierActions({
         {...deathLongPress}
         onClick={(e) => {
           // Short click: activate (kill)
-          // Long press will be handled by deathLongPress (resurrect)
-          if (!deathLongPress.isPressed) {
+          // Long press: handled by deathLongPress (resurrect/undo)
+          if (!deathLongPress.longPressTriggered) {
             e.preventDefault();
             onToggleDead();
           }
