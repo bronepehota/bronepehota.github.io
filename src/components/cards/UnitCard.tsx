@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { GitHubPagesImage as Image } from '../GitHubPagesImage';
 import { ArmyUnit, Squad, Machine, RulesVersionID, Weapon, PanicTestResult } from '@/lib/types';
 import { Shield, Sword, Target, Heart, CheckCircle2, Bomb, ChevronDown, ChevronUp, UserX, Plane, Skull, Wrench, Flame, Crosshair, X, Image as ImageIcon, Footprints } from 'lucide-react';
+import { SoldierCard } from './SoldierCard';
 import { formatUnitNumber } from '@/lib/unit-utils';
 import { getDefaultRulesVersion } from '@/lib/rules-registry';
 import { cn } from '@/lib/utils';
@@ -95,48 +96,6 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
   const isMachineDone = !isSquad && (unit.isMachineDone || isMachineDestroyed);
   const isCollapsed = isManualCollapsed;
 
-  const toggleAction = (soldierIdx: number, action: 'moved' | 'shot' | 'melee' | 'done') => {
-    const newActions = [...(unit.actionsUsed || [])];
-    const currentDone = newActions[soldierIdx]?.done || false;
-
-    if (action === 'done' && currentDone) {
-      // Untoggling "done" - reset all actions to return to active state
-      newActions[soldierIdx] = {
-        moved: false,
-        shot: false,
-        melee: false,
-        done: false
-      };
-    } else {
-      newActions[soldierIdx] = {
-        ...newActions[soldierIdx],
-        [action]: !newActions[soldierIdx][action]
-      };
-    }
-    updateUnit({ ...unit, actionsUsed: newActions });
-  };
-
-  const toggleDead = (idx: number) => {
-    const dead = unit.deadSoldiers || [];
-    const newDead = dead.includes(idx)
-      ? dead.filter(i => i !== idx)
-      : [...dead, idx];
-
-    const updatedUnit = { ...unit, deadSoldiers: newDead };
-
-    // Check panic trigger for community rules
-    if (rulesVersion === 'community_star_system' && newDead.length > 0) {
-      // Use turn 1 as default (will be updated when turn tracking is implemented)
-      const currentTurn = 1;
-      const shouldTestPanic = checkPanicTrigger(updatedUnit, 'community_star_system', currentTurn);
-      if (shouldTestPanic) {
-        setShowPanicModal(true);
-      }
-    }
-
-    updateUnit(updatedUnit);
-  };
-
   const handlePanicTestComplete = (results: PanicTestResult[]) => {
     const currentTurn = 1; // Default turn (will be updated when turn tracking is implemented)
     const panicStates = results
@@ -151,11 +110,6 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
     if (panicStates.length > 0) {
       updateUnit({ ...unit, panicState: panicStates });
     }
-  };
-
-  const isSoldierInPanic = (soldierIndex: number): boolean => {
-    if (!unit.panicState || unit.panicState.length === 0) return false;
-    return unit.panicState.some(p => p.soldierIndex === soldierIndex);
   };
 
   const updateMachineStat = (stat: 'durability' | 'ammo', delta: number) => {
@@ -687,240 +641,21 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
         <div className="p-2 md:p-3 animate-in slide-in-from-top-2 duration-200 relative z-10">
           {isSquad ? (
             <div className="grid grid-cols-1 gap-1.5 md:gap-2">
-              {(data as Squad).soldiers.map((s, idx) => {
-                const isDead = unit.deadSoldiers?.includes(idx);
-                const actions = unit.actionsUsed?.[idx] || { moved: false, shot: false, melee: false, done: false };
-                const isDone = actions.done;
-                const isInPanic = isSoldierInPanic(idx);
-
-                // Check if this soldier is a pilot
-                const soldier = (data as Squad).soldiers[idx];
-                const isPilot = soldier.isPilot;
-                const _pilotedMachine = isPilot
-                  ? allUnits.find((u) => u.instanceId === soldier.pilotOfInstanceId)
-                  : null;
-
-                return (
-                  <div
-                    key={idx}
-                    className={cn(
-                      "relative p-1 md:p-1.5 rounded-sm border flex gap-1.5 md:gap-2 transition-all overflow-hidden",
-                      isDead ? "bg-slate-950/80 border-slate-800 opacity-40 grayscale" :
-                      isDone ? "bg-slate-900/40 border-slate-700/50 opacity-70" : "bg-slate-800/30 border-slate-700/50",
-                      isPilot && !isDead ? "border-cyan-700/40" : ""
-                    )}
-                  >
-                    {/* Tech corners for pilot */}
-                    {isPilot && !isDead && (
-                      <>
-                        <div className="absolute top-0 left-0 w-1.5 h-1.5 border-l border-t border-cyan-500/40" />
-                        <div className="absolute top-0 right-0 w-1.5 h-1.5 border-r border-t border-cyan-500/40" />
-                      </>
-                    )}
-
-                    {/* Soldier image with tactical frame - moved to top-right */}
-                    <div className="relative w-16 md:w-20 aspect-[3/4] rounded-sm overflow-hidden flex-shrink-0 bg-slate-900 cursor-pointer shadow-md absolute top-0 right-0">
-                      <div onClick={() => setShowSoldierImage(idx)} className="w-full h-full overflow-hidden">
-                        <Image
-                          src={getSoldierImage(idx)}
-                          alt={`Солдат ${idx + 1}`}
-                          width={60}
-                          height={80}
-                          className="w-full h-full object-cover object-center"
-                          unoptimized
-                        />
-                      </div>
-
-                      {/* Soldier number HUD - bottom right, like in encyclopedia */}
-                      <div className="absolute bottom-1 right-1 z-10">
-                        <div className="px-1.5 py-0.5 backdrop-blur-md bg-slate-900/70 border border-slate-600/50 rounded-sm">
-                          <span className="font-mono text-[10px] font-bold text-white">
-                            #{idx + 1}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Death overlay - only render after mount to prevent hydration mismatch */}
-                      {isMounted && isDead && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-                          <Skull
-                            className="w-8 h-8 md:w-10 md:h-10 text-red-500"
-                            strokeWidth={2.5}
-                            style={{
-                              filter: 'drop-shadow(0 0 12px rgba(239,68,68,1))'
-                            }}
-                          />
-                        </div>
-                      )}
-
-                      {/* Done overlay - green checkmark in center - only render after mount to prevent hydration mismatch */}
-                      {isMounted && isDone && !isDead && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="bg-emerald-500 rounded-full p-1 md:p-1.5 shadow-[0_0_8px_rgba(16,185,129,0.8)]">
-                            <CheckCircle2 className="w-5 h-5 md:w-6 md:h-6 text-white" strokeWidth={3} />
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Panic overlay - footprints icon */}
-                      {isMounted && isInPanic && !isDead && !isDone && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-orange-950/30">
-                          <Footprints
-                            className="w-8 h-8 md:w-10 md:h-10 text-orange-400"
-                            strokeWidth={2}
-                            style={{
-                              filter: 'drop-shadow(0 0 8px rgba(251,146,60,0.8))'
-                            }}
-                          />
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex-1 flex flex-col justify-between min-w-0 gap-1.5 md:gap-2">
-                      {/* Row 1: Action buttons */}
-                      <div className="flex gap-2 md:gap-3 items-center">
-                        {/* ДЕЙСТВИЕ button - fills available space, replaced with panic label when panicking */}
-                        {isInPanic ? (
-                          <div className="relative flex-1 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 p-1.5 md:p-2 rounded-sm flex items-center justify-center gap-1.5 md:gap-2 overflow-hidden border-2 text-xs font-mono font-bold uppercase tracking-wider bg-orange-950/30 border-orange-700/50 text-orange-400">
-                            {/* Tech decoration */}
-                            <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-orange-600/40" />
-                            <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-orange-600/40" />
-                            <Footprints className="w-4 h-4 md:w-5 md:h-5" />
-                            <span className="hidden sm:inline">В ПАНИКЕ</span>
-                          </div>
-                        ) : (
-                          <button
-                            disabled={isDone || isDead}
-                            onClick={() => combatController.startCombat(unit, idx)}
-                            className={cn(
-                              "relative flex-1 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 p-1.5 md:p-2 rounded-sm transition-all flex items-center justify-center gap-1.5 md:gap-2 overflow-hidden",
-                              "border-2 text-xs font-mono font-bold uppercase tracking-wider",
-                              "bg-purple-950/20 hover:bg-purple-950/40 border-purple-700/50 text-purple-400 active:scale-95"
-                            )}
-                            title="Выберите действие"
-                            aria-label="Выберите действие"
-                          >
-                            {/* Tech decoration */}
-                            <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-purple-600/40" />
-                            <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-purple-600/40" />
-                            <Crosshair className="w-4 h-4 md:w-5 md:h-5" />
-                            <span className="hidden sm:inline">ДЕЙСТВИЕ</span>
-                          </button>
-                        )}
-
-                        {/* Visual separator - desktop only */}
-                        <div className="hidden md:block w-px h-8 bg-slate-700/50 mx-1" />
-
-                        {/* Done button - disabled for panicking soldiers */}
-                        {isInPanic ? (
-                          <div className="relative p-1.5 md:p-2 rounded-sm min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border-2 overflow-hidden bg-orange-950/20 border-orange-700/30 text-orange-400/50">
-                            <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 opacity-50" />
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => !isDead && toggleAction(idx, 'done')}
-                            disabled={isDone || isDead}
-                            className={cn(
-                              "relative p-1.5 md:p-2 rounded-sm transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border-2 overflow-hidden",
-                              isDone ? "bg-emerald-950/30 border-emerald-700/50 text-emerald-400" : "bg-slate-900/60 border-slate-700 text-slate-500 hover:bg-slate-800/60"
-                            )}
-                            title="Завершить ход бойца"
-                          >
-                            {isDone && (
-                              <>
-                                <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-emerald-600/40" />
-                                <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-emerald-600/40" />
-                              </>
-                            )}
-                            <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5" />
-                          </button>
-                        )}
-
-                        {/* KIA button - with Skull icon */}
-                        <button
-                          onClick={() => toggleDead(idx)}
-                          aria-label={isDead ? 'УБИТ' : 'ЖИВ'}
-                          className={cn("relative p-1.5 md:p-2 rounded-sm font-mono font-black uppercase tracking-wider min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center gap-1 md:gap-1.5 border-2 overflow-hidden transition-all",
-                            isDead ? "bg-red-950/40 border-red-700 text-red-300" : "bg-slate-900/60 border-slate-700 text-slate-500 hover:bg-slate-800/60"
-                          )}
-                        >
-                          {isDead ? (
-                            <>
-                              <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-red-600/40" />
-                              <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-red-600/40" />
-                            </>
-                          ) : null}
-                          <Skull className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />
-                          <span className="hidden md:inline text-[10px] font-mono font-black uppercase ml-0.5">
-                            {isDead ? 'УБИТ' : 'ЖИВ'}
-                          </span>
-                        </button>
-                      </div>
-
-                      {/* Row 2: Stats - Left-aligned flex layout */}
-                      <div className="flex flex-wrap gap-0.5 md:gap-1">
-                        {/* Armor */}
-                        <div className="relative flex flex-col items-center justify-center p-0.5 md:p-1 rounded-lg md:rounded-full min-h-[44px] min-w-[42px] md:min-w-[56px]">
-                          <Shield className="w-[14px] md:w-[18px] h-[14px] md:h-[18px] text-yellow-400 mb-1 md:mb-0 shrink-0" />
-                          <span className="text-xs md:text-sm font-mono font-black text-yellow-300 leading-none truncate w-full text-center" title={s.armor.toString()}>
-                            {s.armor}
-                          </span>
-                        </div>
-
-                        {/* Speed */}
-                        <div className="relative flex flex-col items-center justify-center p-0.5 md:p-1 rounded-lg md:rounded-full min-h-[44px] min-w-[42px] md:min-w-[56px]">
-                          <Footprints className="w-[14px] md:w-[18px] h-[14px] md:h-[18px] text-cyan-400 mb-1 md:mb-0 shrink-0" />
-                          <span className="text-xs md:text-sm font-mono font-black text-cyan-300 leading-none truncate w-full text-center" title={s.speed.toString()}>
-                            {s.speed}
-                          </span>
-                        </div>
-
-                        {/* Range - disabled if no ranged attack */}
-                        <div className={cn(
-                          "relative flex flex-col items-center justify-center p-0.5 md:p-1 rounded-lg md:rounded-full min-h-[44px] min-w-[42px] md:min-w-[56px]",
-                          (!s.range || s.range === '0') && "opacity-40"
-                        )}>
-                          <Target className={cn("w-[14px] md:w-[18px] h-[14px] md:h-[18px] mb-1 md:mb-0 shrink-0", (!s.range || s.range === '0') ? "text-slate-600" : "text-amber-400")} />
-                          <span className={cn(
-                            "text-[10px] md:text-xs font-mono font-black leading-none truncate w-full text-center",
-                            (!s.range || s.range === '0') ? "text-slate-600" : "text-amber-300"
-                          )} title={s.range}>
-                            {s.range && s.range !== '0' ? (s.range.length > 4 ? s.range.replace('D', '') : s.range) : '—'}
-                          </span>
-                        </div>
-
-                        {/* Power - disabled if no ranged attack */}
-                        <div className={cn(
-                          "relative flex flex-col items-center justify-center p-0.5 md:p-1 rounded-lg md:rounded-full min-h-[44px] min-w-[42px] md:min-w-[56px]",
-                          (!s.power || s.power === '0') && "opacity-40"
-                        )}>
-                          <Flame className={cn("w-[14px] md:w-[18px] h-[14px] md:h-[18px] mb-1 md:mb-0 shrink-0", (!s.power || s.power === '0') ? "text-slate-600" : "text-red-400")} />
-                          <span className={cn(
-                            "text-[10px] md:text-xs font-mono font-black leading-none truncate w-full text-center",
-                            (!s.power || s.power === '0') ? "text-slate-600" : "text-red-300"
-                          )} title={s.power}>
-                            {s.power && s.power !== '0' ? (s.power.length > 4 ? s.power.replace('D', '') : s.power) : '—'}
-                          </span>
-                        </div>
-
-                        {/* Melee - disabled if no melee attack */}
-                        <div className={cn(
-                          "relative flex flex-col items-center justify-center p-0.5 md:p-1 rounded-lg md:rounded-full min-h-[44px] min-w-[42px] md:min-w-[56px]",
-                          s.melee <= 0 && "opacity-40"
-                        )}>
-                          <Sword className={cn("w-[14px] md:w-[18px] h-[14px] md:h-[18px] mb-1 md:mb-0 shrink-0", s.melee <= 0 ? "text-slate-600" : "text-red-400")} />
-                          <span className={cn(
-                            "text-xs md:text-sm font-mono font-black leading-none truncate w-full text-center",
-                            s.melee <= 0 ? "text-slate-600" : "text-red-300"
-                          )} title={s.melee.toString()}>
-                            {s.melee > 0 ? s.melee : '—'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+              {(data as Squad).soldiers.map((s, idx) => (
+                <SoldierCard
+                  key={idx}
+                  squad={data as Squad}
+                  unit={unit}
+                  soldierIndex={idx}
+                  allUnits={allUnits}
+                  rulesVersion={rulesVersion}
+                  updateUnit={updateUnit}
+                  onSoldierAction={_handleSoldierAction}
+                  setShowSoldierImage={setShowSoldierImage}
+                  setShowPanicModal={setShowPanicModal}
+                  getSoldierImage={getSoldierImage}
+                />
+              ))}
             </div>
           ) : (
             <div className="space-y-2">
