@@ -1,0 +1,1 @@
+export { SoldierStats } from './SoldierStats';
