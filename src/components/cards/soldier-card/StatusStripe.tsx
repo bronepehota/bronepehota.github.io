@@ -31,4 +31,5 @@ const StatusStripe: React.FC<StatusStripeProps> = ({ state, className }) => {
   );
 };
 
+export { StatusStripe };
 export default StatusStripe;

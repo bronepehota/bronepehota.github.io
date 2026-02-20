@@ -17,7 +17,6 @@ import { PilotTestModal } from '../combat/PilotTestModal';
 import { usePilotTestFlow } from '@/hooks/usePilotTestFlow';
 import { EncyclopediaModal } from '../modals/EncyclopediaModal';
 import { PanicTestModal } from '../modals/PanicTestModal';
-import { checkPanicTrigger } from '@/lib/panic-logic';
 import { UnitWithType } from '@/lib/encyclopedia-utils';
 
 // Helper function to shorten weapon names for mobile
@@ -61,18 +60,12 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
   const [showPilotModal, setShowPilotModal] = useState(false);
   const [pilotSurvivalTest, setPilotSurvivalTest] = useState<{ roll: number; survived: boolean; testedAt: number } | null>(null);
   const [selectedWeaponInfo, setSelectedWeaponInfo] = useState<{ weapon: Weapon; weaponIdx: number } | null>(null);
-  const [isMounted, setIsMounted] = useState(false);
   const [showPanicModal, setShowPanicModal] = useState(false);
 
   const combatController = useCombatFlowController();
   const pilotTestFlow = usePilotTestFlow();
   // Track last processed result to prevent duplicate processing
   const lastProcessedResultRef = useRef<number | null>(null);
-
-  // Prevent hydration mismatch by only rendering client-dependent UI after mount
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   // Load rules version from localStorage
   useEffect(() => {

@@ -2,7 +2,6 @@
 
 import { GitHubPagesImage as Image } from '@/components/GitHubPagesImage';
 import { CheckCircle2, Skull, Footprints } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface SoldierImageProps {
   imageUrl: string;

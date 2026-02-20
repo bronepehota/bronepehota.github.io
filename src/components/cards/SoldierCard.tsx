@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { SoldierActions, type SoldierActionState } from './soldier-card/SoldierActions';
+import { SoldierActions } from './soldier-card/SoldierActions';
 import { SoldierStats } from './soldier-card/SoldierStats';
 import { SoldierImage } from './soldier-card/SoldierImage';
 import StatusStripe, { type SoldierState } from './soldier-card/StatusStripe';
@@ -26,7 +26,7 @@ export function SoldierCard({
   squad,
   unit,
   soldierIndex,
-  allUnits,
+  allUnits: _allUnits,
   rulesVersion,
   updateUnit,
   onSoldierAction,
