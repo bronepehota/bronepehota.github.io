@@ -1,0 +1,158 @@
+'use client';
+
+import { CheckCircle2, Skull, Crosshair, Footprints } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useLongPress } from '@/hooks/useLongPress';
+
+export interface SoldierActionState {
+  moved: boolean;
+  shot: boolean;
+  melee: boolean;
+  done: boolean;
+}
+
+interface SoldierActionsProps {
+  isDead: boolean;
+  isDone: boolean;
+  isInPanic: boolean;
+  actions: SoldierActionState;
+  onActionClick: () => void;
+  onToggleDone: () => void;
+  onToggleDead: () => void;
+  soldierIndex: number;
+}
+
+export function SoldierActions({
+  isDead,
+  isDone,
+  isInPanic,
+  onActionClick,
+  onToggleDone,
+  onToggleDead,
+}: SoldierActionsProps) {
+  // Long press for DONE button (600ms)
+  const doneLongPress = useLongPress({
+    onLongPress: onToggleDone,
+    ms: 600,
+  });
+
+  // Long press for DEATH button (600ms)
+  const deathLongPress = useLongPress({
+    onLongPress: onToggleDead,
+    ms: 600,
+  });
+
+  return (
+    <div className="flex gap-2 md:gap-3 items-center">
+      {/* ДЕЙСТВИЕ button - disabled for dead/done/panic soldiers */}
+      {isInPanic ? (
+        <div className="relative flex-1 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 p-1.5 md:p-2 rounded-sm flex items-center justify-center gap-1.5 md:gap-2 overflow-hidden border-2 text-xs font-mono font-bold uppercase tracking-wider bg-orange-950/30 border-orange-700/50 text-orange-400">
+          {/* Tech corners */}
+          <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-orange-600/40" aria-hidden="true" />
+          <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-orange-600/40" aria-hidden="true" />
+          <Footprints className="w-4 h-4 md:w-5 md:h-5" />
+          <span className="hidden sm:inline">В ПАНИКЕ</span>
+        </div>
+      ) : (
+        <button
+          disabled={isDone || isDead}
+          onClick={onActionClick}
+          className={cn(
+            "relative flex-1 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 p-1.5 md:p-2 rounded-sm transition-all flex items-center justify-center gap-1.5 md:gap-2 overflow-hidden",
+            "border-2 text-xs font-mono font-bold uppercase tracking-wider",
+            "bg-purple-950/20 hover:bg-purple-950/40 border-purple-700/50 text-purple-400 active:scale-95",
+            "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-purple-950/20"
+          )}
+          type="button"
+          aria-label="Выберите действие"
+        >
+          {/* Tech corners */}
+          <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-purple-600/40" aria-hidden="true" />
+          <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-purple-600/40" aria-hidden="true" />
+          <Crosshair className="w-4 h-4 md:w-5 md:h-5" />
+          <span className="hidden sm:inline">ДЕЙСТВИЕ</span>
+        </button>
+      )}
+
+      {/* Visual separator - desktop only */}
+      <div className="hidden md:block w-px h-8 bg-slate-700/50 mx-1" aria-hidden="true" />
+
+      {/* ГОТОВ button - gradient: from-emerald-600 to-emerald-800, shadow-[0_0_15px_rgba(16,185,129,0.5)], long-press 600ms */}
+      {isInPanic ? (
+        <div className="relative p-1.5 md:p-2 rounded-sm min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border-2 overflow-hidden bg-orange-950/20 border-orange-700/30 text-orange-400/50" aria-hidden="true">
+          <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 opacity-50" />
+        </div>
+      ) : (
+        <button
+          {...doneLongPress}
+          disabled={isDead}
+          onClick={(e) => {
+            // Prevent triggering long-press click if not actually done
+            if (!isDead && !doneLongPress.isPressed) {
+              e.preventDefault();
+              onToggleDone();
+            }
+          }}
+          className={cn(
+            "relative p-1.5 md:p-2 rounded-sm transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border-2 overflow-hidden",
+            "font-mono font-black uppercase",
+            isDone
+              ? "bg-gradient-to-br from-emerald-600 to-emerald-800 hover:from-emerald-500 hover:to-emerald-700 shadow-[0_0_15px_rgba(16,185,129,0.5)] hover:shadow-[0_0_20px_rgba(16,185,129,0.7)] border-emerald-500 text-emerald-100"
+              : "bg-gradient-to-br from-slate-700 to-slate-900 hover:from-slate-600 hover:to-slate-800 border-slate-600 text-slate-300",
+            doneLongPress.isPressed && "scale-95 opacity-80",
+            "disabled:opacity-50 disabled:cursor-not-allowed"
+          )}
+          type="button"
+          title={isDone ? "Долгое нажатие для отмены" : "Завершить ход бойца"}
+          aria-label={isDone ? "Боевых действий завершён. Долгое нажатие для отмены." : "Завершить ход бойца"}
+          aria-pressed={isDone}
+        >
+          {/* Tech corners when done */}
+          {isDone && (
+            <>
+              <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-emerald-400/60" aria-hidden="true" />
+              <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-emerald-400/60" aria-hidden="true" />
+            </>
+          )}
+          {/* Pulse overlay during press */}
+          {doneLongPress.isPressed && (
+            <div className="absolute inset-0 bg-white/10 animate-pulse" aria-hidden="true" />
+          )}
+          <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5" />
+        </button>
+      )}
+
+      {/* УБИТЬ button - gradient: from-red-700 to-red-900, shadow-[0_0_15px_rgba(220,38,38,0.5)], long-press 600ms */}
+      <button
+        {...deathLongPress}
+        className={cn(
+          "relative p-1.5 md:p-2 rounded-sm font-mono font-black uppercase tracking-wider min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center gap-1 md:gap-1.5 border-2 overflow-hidden transition-all",
+          isDead
+            ? "bg-gradient-to-br from-red-700 to-red-900 hover:from-red-600 hover:to-red-800 shadow-[0_0_15px_rgba(220,38,38,0.5)] hover:shadow-[0_0_20px_rgba(220,38,38,0.7)] border-red-600 text-red-100"
+            : "bg-gradient-to-br from-slate-700 to-slate-900 hover:from-slate-600 hover:to-slate-800 border-slate-600 text-slate-300",
+          deathLongPress.isPressed && "scale-95 opacity-80"
+        )}
+        type="button"
+        title={isDead ? "Долгое нажатие для воскрешения" : "Пометить как убитый"}
+        aria-label={isDead ? "Боец убит. Долгое нажатие для отмены." : "Пометить бойца как убитого"}
+        aria-pressed={isDead}
+      >
+        {/* Tech corners when dead */}
+        {isDead && (
+          <>
+            <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-red-500/60" aria-hidden="true" />
+            <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-red-500/60" aria-hidden="true" />
+          </>
+        )}
+        {/* Pulse overlay during press */}
+        {deathLongPress.isPressed && (
+          <div className="absolute inset-0 bg-white/10 animate-pulse" aria-hidden="true" />
+        )}
+        <Skull className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />
+        <span className="hidden md:inline text-[10px] font-mono font-black uppercase ml-0.5">
+          {isDead ? 'УБИТ' : 'ЖИВ'}
+        </span>
+      </button>
+    </div>
+  );
+}
