@@ -18,14 +18,10 @@ interface SoldierStatsProps {
 export function SoldierStats({ soldier, className }: SoldierStatsProps) {
   return (
     <div className={cn('flex flex-wrap gap-0.5 md:gap-1', className)}>
-      {/* Armor - HIGHLIGHTED with tech styling */}
-      <div className="relative flex flex-col items-center justify-center p-0.5 md:p-1 rounded-lg md:rounded-full min-h-[44px] min-w-[42px] md:min-w-[56px] bg-yellow-950/30 border-2 border-yellow-500/50 shadow-[0_0_8px_rgba(234,179,8,0.25)] overflow-hidden">
-        {/* Tech corners at top-left and bottom-right */}
-        <div className="absolute top-0 left-0 w-1.5 h-1.5 border-l-2 border-t-2 border-yellow-400/60 -ml-px -mt-px pointer-events-none" />
-        <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-r-2 border-b-2 border-yellow-400/60 -mr-px -mb-px pointer-events-none" />
-
-        <Shield className="w-[14px] md:w-[18px] h-[14px] md:h-[18px] text-yellow-200 mb-1 md:mb-0 shrink-0" />
-        <span className="text-xs md:text-sm font-mono font-black text-yellow-200 leading-none truncate w-full text-center" title={soldier.armor.toString()}>
+      {/* Armor - subtle highlight */}
+      <div className="relative flex flex-col items-center justify-center p-0.5 md:p-1 rounded-lg md:rounded-full min-h-[44px] min-w-[42px] md:min-w-[56px]">
+        <Shield className="w-[14px] md:w-[18px] h-[14px] md:h-[18px] text-yellow-400 mb-1 md:mb-0 shrink-0" />
+        <span className="text-xs md:text-sm font-mono font-black text-yellow-300 leading-none truncate w-full text-center" title={soldier.armor.toString()}>
           {soldier.armor}
         </span>
       </div>
