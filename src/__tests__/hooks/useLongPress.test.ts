@@ -28,7 +28,7 @@ describe('useLongPress', () => {
     const { result } = renderHook(() => useLongPress({ onLongPress }));
 
     act(() => {
-      result.current.onMouseDown({ preventDefault: jest.fn() } as any);
+      result.current.onMouseDown();
     });
 
     expect(result.current.isPressed).toBe(true);
@@ -46,7 +46,7 @@ describe('useLongPress', () => {
     const { result } = renderHook(() => useLongPress({ onLongPress, ms: 1000 }));
 
     act(() => {
-      result.current.onMouseDown({ preventDefault: jest.fn() } as any);
+      result.current.onMouseDown();
     });
 
     act(() => {
@@ -67,7 +67,7 @@ describe('useLongPress', () => {
     const { result } = renderHook(() => useLongPress({ onLongPress, ms: 600 }));
 
     act(() => {
-      result.current.onMouseDown({ preventDefault: jest.fn() } as any);
+      result.current.onMouseDown();
     });
 
     act(() => {
@@ -75,7 +75,7 @@ describe('useLongPress', () => {
     });
 
     act(() => {
-      result.current.onMouseUp({ preventDefault: jest.fn() } as any);
+      result.current.onMouseUp();
     });
 
     act(() => {
@@ -91,7 +91,7 @@ describe('useLongPress', () => {
     const { result } = renderHook(() => useLongPress({ onLongPress, ms: 600 }));
 
     act(() => {
-      result.current.onMouseDown({ preventDefault: jest.fn() } as any);
+      result.current.onMouseDown();
     });
 
     act(() => {
@@ -107,7 +107,7 @@ describe('useLongPress', () => {
     const { result } = renderHook(() => useLongPress({ onLongPress, ms: 600 }));
 
     act(() => {
-      result.current.onMouseDown({ preventDefault: jest.fn() } as any);
+      result.current.onMouseDown();
     });
 
     act(() => {
@@ -131,7 +131,7 @@ describe('useLongPress', () => {
     const { result } = renderHook(() => useLongPress({ onLongPress, ms: 600 }));
 
     act(() => {
-      result.current.onTouchStart({ preventDefault: jest.fn() } as any);
+      result.current.onTouchStart();
     });
 
     act(() => {
@@ -146,7 +146,7 @@ describe('useLongPress', () => {
     const { result } = renderHook(() => useLongPress({ onLongPress, ms: 600 }));
 
     act(() => {
-      result.current.onTouchStart({ preventDefault: jest.fn() } as any);
+      result.current.onTouchStart();
     });
 
     act(() => {
@@ -154,7 +154,7 @@ describe('useLongPress', () => {
     });
 
     act(() => {
-      result.current.onTouchEnd({ preventDefault: jest.fn() } as any);
+      result.current.onTouchEnd();
     });
 
     act(() => {
@@ -172,7 +172,7 @@ describe('useLongPress', () => {
     expect(result.current.isPressed).toBe(false);
 
     act(() => {
-      result.current.onMouseDown({ preventDefault: jest.fn() } as any);
+      result.current.onMouseDown();
     });
 
     expect(result.current.isPressed).toBe(true);
@@ -189,7 +189,7 @@ describe('useLongPress', () => {
     const { result } = renderHook(() => useLongPress({ onLongPress, ms: 600 }));
 
     act(() => {
-      result.current.onMouseDown({ preventDefault: jest.fn() } as any);
+      result.current.onMouseDown();
     });
 
     act(() => {
@@ -198,8 +198,8 @@ describe('useLongPress', () => {
 
     // Start new press before first completes
     act(() => {
-      result.current.onMouseUp({ preventDefault: jest.fn() } as any);
-      result.current.onMouseDown({ preventDefault: jest.fn() } as any);
+      result.current.onMouseUp();
+      result.current.onMouseDown();
     });
 
     act(() => {
@@ -222,7 +222,7 @@ describe('useLongPress', () => {
     const { result } = renderHook(() => useLongPress({ onLongPress, ms: 600 }));
 
     act(() => {
-      result.current.onMouseDown({ preventDefault: jest.fn() } as any);
+      result.current.onMouseDown();
     });
 
     act(() => {

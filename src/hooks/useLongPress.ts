@@ -8,11 +8,11 @@ interface UseLongPressOptions {
 }
 
 interface UseLongPressReturn {
-  onMouseDown: (e: React.MouseEvent) => void;
-  onMouseUp: (e: React.MouseEvent) => void;
+  onMouseDown: () => void;
+  onMouseUp: () => void;
   onMouseLeave: () => void;
-  onTouchStart: (e: React.TouchEvent) => void;
-  onTouchEnd: (e: React.TouchEvent) => void;
+  onTouchStart: () => void;
+  onTouchEnd: () => void;
   isPressed: boolean;
 }
 
@@ -23,19 +23,14 @@ export function useLongPress({
   const [isPressed, setIsPressed] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const startPress = useCallback(
-    (e: React.MouseEvent | React.TouchEvent) => {
-      // Prevent default to avoid text selection and other default behaviors
-      e.preventDefault();
-      setIsPressed(true);
+  const startPress = useCallback(() => {
+    setIsPressed(true);
 
-      timerRef.current = setTimeout(() => {
-        onLongPress();
-        setIsPressed(false);
-      }, ms);
-    },
-    [onLongPress, ms]
-  );
+    timerRef.current = setTimeout(() => {
+      onLongPress();
+      setIsPressed(false);
+    }, ms);
+  }, [onLongPress, ms]);
 
   const cancelPress = useCallback(() => {
     if (timerRef.current) {
