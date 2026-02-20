@@ -59,23 +59,10 @@ export function SoldierCard({
   };
 
   const startLongPress = (callback: () => void) => {
-    setIsLongPressing(true);
-    setLongPressProgress(0);
+    // Don't show progress bar immediately - wait 100ms first
+    const progressDelay = 100;
 
-    // Progress bar animation (600ms total)
-    let progress = 0;
-    longPressProgressRef.current = setInterval(() => {
-      progress += 0.05; // Update every 30ms
-      if (progress >= 1) {
-        progress = 1;
-        if (longPressProgressRef.current) {
-          clearInterval(longPressProgressRef.current);
-        }
-      }
-      setLongPressProgress(progress);
-    }, 30);
-
-    // Long press callback after 600ms
+    // Start the long-press timer (600ms for cancel)
     longPressTimerRef.current = setTimeout(() => {
       callback();
       setIsLongPressing(false);
@@ -84,6 +71,26 @@ export function SoldierCard({
         clearInterval(longPressProgressRef.current);
       }
     }, 600);
+
+    // Show progress bar only after 100ms of holding
+    longPressProgressRef.current = setTimeout(() => {
+      setIsLongPressing(true);
+      setLongPressProgress(0);
+
+      // Start progress animation
+      let progress = progressDelay / 600; // Start at 100/600 = ~17%
+      const progressInterval = setInterval(() => {
+        progress += 0.05;
+        if (progress >= 1) {
+          progress = 1;
+          clearInterval(progressInterval);
+        }
+        setLongPressProgress(progress);
+      }, 30);
+
+      // Store interval ID for cleanup
+      (longPressProgressRef as any).interval = progressInterval;
+    }, progressDelay);
   };
 
   const cancelLongPress = () => {
@@ -92,7 +99,10 @@ export function SoldierCard({
       longPressTimerRef.current = null;
     }
     if (longPressProgressRef.current) {
-      clearInterval(longPressProgressRef.current);
+      clearTimeout(longPressProgressRef.current);
+      if ((longPressProgressRef as any).interval) {
+        clearInterval((longPressProgressRef as any).interval);
+      }
       longPressProgressRef.current = null;
     }
     setIsLongPressing(false);
