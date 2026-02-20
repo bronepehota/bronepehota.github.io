@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { Army, FactionID } from '@/lib/types';
 import { PrepArmyList } from './PrepArmyList';
 import InitiativeModal from '../modals/InitiativeModal';
+import { BASE_PATH } from '@/lib/constants';
 
 interface BattlePreparationScreenProps {
   army: Army;
@@ -66,7 +67,7 @@ export function BattlePreparationScreen({
       {/* Фоновое изображение */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: 'url(/images/hero-art.jpg)' }}
+        style={{ backgroundImage: `url(${BASE_PATH}/images/hero-art.jpg)` }}
       />
 
       {/* Затемнение для читаемости */}

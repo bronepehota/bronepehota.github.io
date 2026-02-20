@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -9,14 +9,12 @@ interface CTAButtonProps {
 }
 
 export default function CTAButton({ className }: CTAButtonProps) {
-  const router = useRouter();
-
   return (
-    <button
+    <Link
+      href="/app"
       data-testid="landing-cta-button"
-      onClick={() => router.push('/app')}
       className={cn(
-        'group relative',
+        'group relative inline-flex',
         // Responsive padding and sizing
         'px-4 py-2 sm:px-6 sm:py-3 md:px-8 md:py-4',
         'bg-transparent',
@@ -30,6 +28,8 @@ export default function CTAButton({ className }: CTAButtonProps) {
         // Responsive min-height for touch target
         'min-h-[44px] md:min-h-[56px]',
         'hover:shadow-[0_0_20px_rgba(234,88,12,0.3)]',
+        // Remove default link styles
+        'no-underline',
         className
       )}
     >
@@ -53,6 +53,6 @@ export default function CTAButton({ className }: CTAButtonProps) {
       <span className="absolute inset-0 overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity duration-300">
         <span className="absolute inset-0 bg-gradient-to-r from-transparent via-military-rust/20 to-transparent transform -translate-x-full group-hover:animate-shine" />
       </span>
-    </button>
+    </Link>
   );
 }

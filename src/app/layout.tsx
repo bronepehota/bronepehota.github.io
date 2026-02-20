@@ -3,6 +3,7 @@ import { Inter, Orbitron } from 'next/font/google'
 import { Russo_One, IBM_Plex_Mono, Oswald } from 'next/font/google'
 import './globals.css'
 import { SerwistRegister } from '@/components/SerwistRegister'
+import NavigationProgress from '@/components/NavigationProgress'
 
 const inter = Inter({ subsets: ['latin'] })
 const orbitron = Orbitron({
@@ -70,6 +71,7 @@ export default function RootLayout({
     <html lang="ru" className={`${orbitron.variable} ${russoOne.variable} ${ibmPlexMono.variable} ${oswald.variable}`}>
       <body className={inter.className}>
         <SerwistRegister />
+        <NavigationProgress />
         {children}
       </body>
     </html>

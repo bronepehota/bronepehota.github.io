@@ -5,6 +5,7 @@ import Link from 'next/link';
 import HUDOverlay from './HUDOverlay';
 import CTAButton from './CTAButton';
 import { cn } from '@/lib/utils';
+import { BASE_PATH } from '@/lib/constants';
 
 interface HeroSectionProps {
   className?: string;
@@ -33,7 +34,7 @@ export default function HeroSection({ className }: HeroSectionProps) {
         className
       )}
       style={{
-        backgroundImage: "url('/images/hero-art.jpg')",
+        backgroundImage: `url('${BASE_PATH}/images/hero-art.jpg')`,
         backgroundSize: 'cover',
         backgroundPosition: 'center top',
         backgroundRepeat: 'no-repeat',

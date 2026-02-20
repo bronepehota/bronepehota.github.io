@@ -1,5 +1,8 @@
 import type { FactionID } from './types';
 
+// Base path for GitHub Pages deployment
+export const BASE_PATH = process.env.NODE_ENV === 'production' ? '/bronepehota' : '';
+
 export const LOCAL_STORAGE_KEYS = {
   ARMY: 'bronepehota_army',
   RULES_VERSION: 'bronepehota_rules_version',
