@@ -39,32 +39,40 @@ export function SoldierActions({
   const [wasLongPressTriggered, setWasLongPressTriggered] = useState(false);
 
   const handleDoneMouseDown = () => {
-    setWasLongPressTriggered(false);
-    onStartLongPress(() => {
-      setWasLongPressTriggered(true);
-      onToggleDone(); // Undo: reset done state
-    });
+    // Only start long-press if already DONE (for cancellation)
+    if (isDone) {
+      setWasLongPressTriggered(false);
+      onStartLongPress(() => {
+        setWasLongPressTriggered(true);
+        onToggleDone(); // Cancel: reset done state
+      });
+    }
   };
 
   const handleDoneClick = () => {
-    // Only activate if long-press was NOT triggered
-    if (!isDead && !wasLongPressTriggered) {
+    // If NOT done → activate (mark done)
+    // If done → only process if NOT long-press triggered (shouldn't happen, but safety)
+    if (!isDead && !isDone) {
       onToggleDone(); // Activate: mark as done
     }
     setWasLongPressTriggered(false);
   };
 
   const handleDeadMouseDown = () => {
-    setWasLongPressTriggered(false);
-    onStartLongPress(() => {
-      setWasLongPressTriggered(true);
-      onToggleDead(); // Undo: resurrect
-    });
+    // Only start long-press if already DEAD (for resurrection)
+    if (isDead) {
+      setWasLongPressTriggered(false);
+      onStartLongPress(() => {
+        setWasLongPressTriggered(true);
+        onToggleDead(); // Cancel: resurrect
+      });
+    }
   };
 
   const handleDeadClick = () => {
-    // Only activate if long-press was NOT triggered
-    if (!wasLongPressTriggered) {
+    // If NOT dead → activate (kill)
+    // If dead → only process if NOT long-press triggered (shouldn't happen, but safety)
+    if (!isDead) {
       onToggleDead(); // Activate: kill
     }
     setWasLongPressTriggered(false);
