@@ -86,6 +86,14 @@ export function SoldierActions({
         <button
           {...doneLongPress}
           disabled={isDead}
+          onClick={(e) => {
+            // Short click: activate (mark done)
+            // Long press will be handled by doneLongPress (cancel)
+            if (!isDead && !doneLongPress.isPressed) {
+              e.preventDefault();
+              onToggleDone();
+            }
+          }}
           className={cn(
             "relative p-1.5 md:p-2 rounded-sm transition-all min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border-2 overflow-hidden",
             "font-mono font-black uppercase",
@@ -118,6 +126,14 @@ export function SoldierActions({
       {/* УБИТЬ button - gradient: from-red-700 to-red-900, shadow-[0_0_15px_rgba(220,38,38,0.5)], long-press 600ms */}
       <button
         {...deathLongPress}
+        onClick={(e) => {
+          // Short click: activate (kill)
+          // Long press will be handled by deathLongPress (resurrect)
+          if (!deathLongPress.isPressed) {
+            e.preventDefault();
+            onToggleDead();
+          }
+        }}
         className={cn(
           "relative p-1.5 md:p-2 rounded-sm font-mono font-black uppercase tracking-wider min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center gap-1 md:gap-1.5 border-2 overflow-hidden transition-all",
           isDead
