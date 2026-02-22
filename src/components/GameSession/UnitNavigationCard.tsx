@@ -1,10 +1,12 @@
 'use client';
 
 import { memo } from 'react';
-import Image from 'next/image';
 import { ArmyUnit, Squad, FactionID } from '@/lib/types';
 import { Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+// Use basePath only in production, empty in development
+const BASE_PATH = process.env.NODE_ENV === 'production' ? '/bronepehota' : '';
 
 interface UnitNavigationCardProps {
   unit: ArmyUnit;
@@ -52,6 +54,11 @@ export const UnitNavigationCard = memo(function UnitNavigationCard({
     ? unit.data.image!
     : ((unit.data as Squad).soldiers[0]?.image || unit.data.image!)!;
 
+  // Add basePath to image paths for GitHub Pages
+  const finalSrc = imageUrl.startsWith('/images/')
+    ? `${BASE_PATH}${imageUrl}`
+    : imageUrl;
+
   return (
     <button
       onClick={onClick}
@@ -66,14 +73,11 @@ export const UnitNavigationCard = memo(function UnitNavigationCard({
       data-testid={`unit-nav-${unit.instanceId}`}
     >
       <div className="absolute inset-0">
-        <Image
-          src={imageUrl}
+        <img
+          src={finalSrc}
           alt={unit.data.name}
-          fill
-          className="object-cover"
+          className="w-full h-full object-cover"
           style={{ objectPosition: '50% 85%' }}
-          sizes="(max-width: 768px) 72px, 88px"
-          unoptimized
         />
         <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
       </div>
