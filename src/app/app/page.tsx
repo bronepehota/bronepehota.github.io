@@ -60,22 +60,6 @@ export default function Home() {
     localStorage.setItem('bronepehota_rules_version', rulesVersion);
   }, [rulesVersion]);
 
-  // Persist display mode to localStorage on change
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    localStorage.setItem('bronepehota_display_mode', displayMode);
-    // Debug logging
-    if (typeof window !== 'undefined') {
-      console.log('[page.tsx] Display mode changed to:', displayMode);
-    }
-  }, [displayMode]);
-
-  // Persist view state to localStorage on change
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    localStorage.setItem('bronepehota_view', view);
-  }, [view]);
-
   // Initiative trigger function from GameSession - use ref to persist across remounts
   const triggerInitiativeRef = useRef<(() => void) | null>(null);
   const handleInitiativeTrigger = useCallback(() => {
@@ -144,11 +128,29 @@ export default function Home() {
 
   // Track if component is mounted (client-side)
   const [isMounted, setIsMounted] = useState(false);
+  // Track if initial army has been loaded from localStorage
+  const [isArmyLoaded, setIsArmyLoaded] = useState(false);
 
   // Set mounted flag on client
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  // Persist display mode to localStorage on change (only after mount to avoid overwriting saved value)
+  useEffect(() => {
+    if (typeof window === 'undefined' || !isMounted) return;
+    localStorage.setItem('bronepehota_display_mode', displayMode);
+    // Debug logging
+    if (typeof window !== 'undefined') {
+      console.log('[page.tsx] Display mode changed to:', displayMode);
+    }
+  }, [displayMode, isMounted]);
+
+  // Persist view state to localStorage on change (only after mount to avoid overwriting saved value)
+  useEffect(() => {
+    if (typeof window === 'undefined' || !isMounted) return;
+    localStorage.setItem('bronepehota_view', view);
+  }, [view, isMounted]);
 
   // Load army from localStorage on mount (client-side only)
   useEffect(() => {
@@ -172,14 +174,15 @@ export default function Home() {
         console.error('Failed to load army', e);
       }
     }
+    // Mark army as loaded regardless of whether localStorage had data
+    setIsArmyLoaded(true);
   }, [isMounted]);
 
-  // Save army to localStorage when it changes (only after mount)
+  // Save army to localStorage when it changes (only after initial load)
   useEffect(() => {
-    if (isMounted) {
-      localStorage.setItem('bronepehota_army', JSON.stringify(army));
-    }
-  }, [army, isMounted]);
+    if (!isArmyLoaded) return;
+    localStorage.setItem('bronepehota_army', JSON.stringify(army));
+  }, [army, isArmyLoaded]);
 
   return (
     <CombatTargetProvider>
