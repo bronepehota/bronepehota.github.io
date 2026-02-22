@@ -4,9 +4,7 @@ import { memo } from 'react';
 import { ArmyUnit, Squad, FactionID } from '@/lib/types';
 import { Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-// Use basePath only in production, empty in development
-const BASE_PATH = process.env.NODE_ENV === 'production' ? '/bronepehota' : '';
+import { BASE_PATH } from '@/lib/constants';
 
 interface UnitNavigationCardProps {
   unit: ArmyUnit;

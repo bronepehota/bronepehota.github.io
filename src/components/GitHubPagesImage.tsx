@@ -1,9 +1,7 @@
 'use client';
 
 import { forwardRef } from 'react';
-
-// Use basePath only when GITHUB_PAGES env var is set (for GitHub Pages deployment)
-const BASE_PATH = process.env.GITHUB_PAGES === 'true' ? '/bronepehota' : '';
+import { BASE_PATH } from '@/lib/constants';
 
 interface GitHubPagesImageProps extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, 'src'> {
   src: string;
