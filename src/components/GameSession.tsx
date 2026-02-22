@@ -11,7 +11,7 @@ import { CombatLogEntry } from '@/lib/combat-types';
 import { useCombatTargetContext } from '@/contexts/CombatTargetContext';
 import InitiativeModal from './modals/InitiativeModal';
 import Image from 'next/image';
-import { UnitNavigationCard } from './GameSession/UnitNavigationCard';
+import { UnitNavigationCard } from './GameSession/index';
 
 // Faction styles for unit dock navigation
 const getUnitDockStyles = (factionId: string) => {
