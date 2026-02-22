@@ -46,7 +46,7 @@ export function DiceAnimation({ state }: DiceAnimationProps) {
   const isMelee = state.actionType === 'melee';
   const colors = getActionColors(state.actionType || 'shot');
 
-  // Check for critical roll (max value) to add shake effect
+  // Check for critical roll (max value) for visual highlighting
   const isCritical = state.diceDisplay.hit !== undefined &&
     ['shot', 'grenade'].includes(state.actionType || '') &&
     state.diceDisplay.hit >= (state.actionType === 'grenade' ? 6 : 20);
@@ -58,16 +58,15 @@ export function DiceAnimation({ state }: DiceAnimationProps) {
         {/* Top decorative line */}
         <div className="flex items-center gap-2 mb-3">
           <div className={cn("h-px flex-1", colors.accent, "opacity-40")} />
-          <div className={cn("w-1.5 h-1.5 rotate-45", colors.primary, "opacity-60 animate-pulse")} />
+          <div className={cn("w-1.5 h-1.5 rotate-45", colors.primary, "opacity-60")} />
           <div className={cn("h-px flex-1", colors.accent, "opacity-40")} />
         </div>
 
-        {/* Rolling indicator with glitch effect on critical */}
+        {/* Rolling indicator */}
         <div className="text-center">
           <div className={cn(
-            "text-sm md:text-base font-mono font-bold uppercase tracking-[0.2em] animate-pulse",
-            colors.primary,
-            isCritical && "animate-shake"
+            "text-sm md:text-base font-mono font-bold uppercase tracking-[0.2em]",
+            colors.primary
           )}>
             {state.actionType === 'melee' ? 'ВЫЧИСЛЕНИЕ...' : 'СКАНИРОВАНИЕ...'}
           </div>
@@ -80,20 +79,19 @@ export function DiceAnimation({ state }: DiceAnimationProps) {
         {/* Bottom decorative line */}
         <div className="flex items-center gap-2 mt-3">
           <div className={cn("h-px flex-1", colors.accent, "opacity-40")} />
-          <div className={cn("w-1.5 h-1.5 rotate-45", colors.primary, "opacity-60 animate-pulse")} />
+          <div className={cn("w-1.5 h-1.5 rotate-45", colors.primary, "opacity-60")} />
           <div className={cn("h-px flex-1", colors.accent, "opacity-40")} />
         </div>
       </div>
 
-      {/* Dice visuals - HUD Style with 3D effects */}
+      {/* Dice visuals - simplified for performance */}
       {isShot && (
         <div className="grid grid-cols-2 gap-3 w-full max-w-sm">
-          {/* Your Roll - Tactical Display with 3D perspective */}
+          {/* Your Roll - Simplified display */}
           <div className={cn(
-            "relative bg-slate-900/60 p-3 rounded-sm border-2 backdrop-blur-sm overflow-hidden",
+            "relative bg-slate-900/80 p-3 rounded-sm border-2 overflow-hidden",
             colors.border,
-            colors.glow,
-            isCritical && "animate-shake"
+            colors.glow
           )}>
             {/* Tech frame corners */}
             <div className={cn("absolute top-0 left-0 w-2 h-2 border-l-2 border-t-2", colors.accent)} />
@@ -101,53 +99,35 @@ export function DiceAnimation({ state }: DiceAnimationProps) {
             <div className={cn("absolute bottom-0 left-0 w-2 h-2 border-l-2 border-b-2", colors.accent)} />
             <div className={cn("absolute bottom-0 right-0 w-2 h-2 border-r-2 border-b-2", colors.accent)} />
 
-            {/* Background scan effect */}
-            <div className={cn(
-              "absolute inset-0 opacity-20 animate-scan-vertical",
-              "bg-gradient-to-b from-transparent via-white/10 to-transparent"
-            )} />
-
             <div className="relative">
               <div className="text-[8px] font-mono opacity-40 uppercase mb-2 text-center tracking-[0.15em]">ROLL VALUE</div>
               <div className="flex justify-center">
-                {/* 3D dice container */}
-                <div className="relative perspective-200">
-                  <div className={cn(
-                    "relative w-16 h-16 bg-slate-950/80 rounded-sm flex items-center justify-center text-3xl font-mono font-black border-2 transition-all",
-                    state.diceDisplay.hit !== undefined
-                      ? `${colors.primary} ${colors.targetBorder} shadow-lg result-reveal`
-                      : `${colors.primary}/30 ${colors.border} dice-spin`,
-                    isCritical && "ring-2 ring-white/50 ring-offset-2 ring-offset-slate-900"
-                  )}>
-                    {state.diceDisplay.hit ?? <span className="text-slate-700">···</span>}
+                {/* Simplified dice container */}
+                <div className={cn(
+                  "relative w-16 h-16 bg-slate-950/80 rounded-sm flex items-center justify-center text-3xl font-mono font-black border-2",
+                  state.diceDisplay.hit !== undefined
+                    ? `${colors.primary} ${colors.targetBorder} shadow-md`
+                    : `${colors.primary}/30 ${colors.border}`,
+                  isCritical && "ring-2 ring-white/50"
+                )}>
+                  {state.diceDisplay.hit ?? <span className="text-slate-700">···</span>}
 
-                    {/* 3D depth effect */}
-                    {state.diceDisplay.hit !== undefined && (
-                      <>
-                        <div className={cn("absolute top-1 left-1 w-1 h-1", colors.accent, "opacity-60")} />
-                        <div className={cn("absolute top-1 right-1 w-1 h-1", colors.accent, "opacity-60")} />
-                        <div className={cn("absolute bottom-1 left-1 w-1 h-1", colors.accent, "opacity-60")} />
-                        <div className={cn("absolute bottom-1 right-1 w-1 h-1", colors.accent, "opacity-60")} />
-
-                        {/* Inner glow for critical */}
-                        {isCritical && (
-                          <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-sm animate-pulse" />
-                        )}
-                      </>
-                    )}
-                  </div>
-
-                  {/* Shadow for 3D effect */}
+                  {/* Simple corner dots for result */}
                   {state.diceDisplay.hit !== undefined && (
-                    <div className="absolute -bottom-1 left-2 right-2 h-1 bg-black/50 blur-sm rounded-sm" />
+                    <>
+                      <div className={cn("absolute top-1 left-1 w-1 h-1", colors.accent, "opacity-60")} />
+                      <div className={cn("absolute top-1 right-1 w-1 h-1", colors.accent, "opacity-60")} />
+                      <div className={cn("absolute bottom-1 left-1 w-1 h-1", colors.accent, "opacity-60")} />
+                      <div className={cn("absolute bottom-1 right-1 w-1 h-1", colors.accent, "opacity-60")} />
+                    </>
                   )}
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Target Value - Reference Display with 3D effect */}
-          <div className="relative bg-slate-900/60 p-3 rounded-sm border-2 border-slate-700/50 backdrop-blur-sm overflow-hidden">
+          {/* Target Value - Simplified display */}
+          <div className="relative bg-slate-900/80 p-3 rounded-sm border-2 border-slate-700/50 overflow-hidden">
             {/* Tech frame corners */}
             <div className="absolute top-0 left-0 w-2 h-2 border-l border-t border-slate-600" />
             <div className="absolute top-0 right-0 w-2 h-2 border-r border-t border-slate-600" />
@@ -158,22 +138,14 @@ export function DiceAnimation({ state }: DiceAnimationProps) {
               {state.actionType === 'grenade' ? 'TARGET RANGE' : 'DISTANCE'}
             </div>
             <div className="flex justify-center">
-              {/* 3D dice container */}
-              <div className="relative perspective-200">
-                <div className="relative w-16 h-16 bg-slate-950/80 rounded-sm flex items-center justify-center text-3xl font-mono font-black border-2 border-slate-700 shadow-lg">
-                  {state.parameters.distance}
-                  {/* Tech decorations */}
-                  <div className="absolute top-1 left-1 w-1 h-1 border-slate-600 opacity-40" />
-                  <div className="absolute top-1 right-1 w-1 h-1 border-slate-600 opacity-40" />
-                  <div className="absolute bottom-1 left-1 w-1 h-1 border-slate-600 opacity-40" />
-                  <div className="absolute bottom-1 right-1 w-1 h-1 border-slate-600 opacity-40" />
-
-                  {/* Subtle gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-slate-700/20 to-transparent rounded-sm pointer-events-none" />
-                </div>
-
-                {/* Shadow for 3D effect */}
-                <div className="absolute -bottom-1 left-2 right-2 h-1 bg-black/50 blur-sm rounded-sm" />
+              {/* Simplified dice container */}
+              <div className="relative w-16 h-16 bg-slate-950/80 rounded-sm flex items-center justify-center text-3xl font-mono font-black border-2 border-slate-700 shadow-md">
+                {state.parameters.distance}
+                {/* Tech decorations */}
+                <div className="absolute top-1 left-1 w-1 h-1 border-slate-600 opacity-40" />
+                <div className="absolute top-1 right-1 w-1 h-1 border-slate-600 opacity-40" />
+                <div className="absolute bottom-1 left-1 w-1 h-1 border-slate-600 opacity-40" />
+                <div className="absolute bottom-1 right-1 w-1 h-1 border-slate-600 opacity-40" />
               </div>
             </div>
           </div>
@@ -182,9 +154,9 @@ export function DiceAnimation({ state }: DiceAnimationProps) {
 
       {isMelee && (
         <div className="grid grid-cols-2 gap-3 w-full max-w-sm">
-          {/* Attacker - Tactical Display with 3D effect */}
+          {/* Attacker - Simplified display */}
           <div className={cn(
-            "relative bg-slate-900/60 p-3 rounded-sm border-2 backdrop-blur-sm overflow-hidden",
+            "relative bg-slate-900/80 p-3 rounded-sm border-2 overflow-hidden",
             colors.border,
             colors.glow
           )}>
@@ -194,76 +166,53 @@ export function DiceAnimation({ state }: DiceAnimationProps) {
             <div className={cn("absolute bottom-0 left-0 w-2 h-2 border-l-2 border-b-2", colors.accent)} />
             <div className={cn("absolute bottom-0 right-0 w-2 h-2 border-r-2 border-b-2", colors.accent)} />
 
-            {/* Background scan effect */}
-            <div className={cn(
-              "absolute inset-0 opacity-10 animate-scan-vertical",
-              "bg-gradient-to-b from-transparent via-cyan-500/20 to-transparent"
-            )} />
-
             <div className="text-[8px] font-mono opacity-40 uppercase mb-2 text-center tracking-[0.15em]">ATTACKER</div>
             <div className="flex justify-center">
-              {/* 3D dice container */}
-              <div className="relative perspective-200">
-                <div className={cn(
-                  "relative w-16 h-16 bg-slate-950/80 rounded-sm flex items-center justify-center text-3xl font-mono font-black border-2 transition-all",
-                  state.diceDisplay.meleeA !== undefined
-                    ? `${colors.primary} ${colors.targetBorder} shadow-lg result-reveal`
-                    : `${colors.primary}/30 ${colors.border} dice-spin`
-                )}>
-                  {state.diceDisplay.meleeA ?? <span className="text-slate-700">···</span>}
-                  {state.diceDisplay.meleeA !== undefined && (
-                    <>
-                      <div className={cn("absolute top-1 left-1 w-1 h-1", colors.accent, "opacity-60")} />
-                      <div className={cn("absolute top-1 right-1 w-1 h-1", colors.accent, "opacity-60")} />
-                      <div className={cn("absolute bottom-1 left-1 w-1 h-1", colors.accent, "opacity-60")} />
-                      <div className={cn("absolute bottom-1 right-1 w-1 h-1", colors.accent, "opacity-60")} />
-                    </>
-                  )}
-                </div>
-
-                {/* Shadow for 3D effect */}
+              {/* Simplified dice container */}
+              <div className={cn(
+                "relative w-16 h-16 bg-slate-950/80 rounded-sm flex items-center justify-center text-3xl font-mono font-black border-2",
+                state.diceDisplay.meleeA !== undefined
+                  ? `${colors.primary} ${colors.targetBorder} shadow-md`
+                  : `${colors.primary}/30 ${colors.border}`
+              )}>
+                {state.diceDisplay.meleeA ?? <span className="text-slate-700">···</span>}
                 {state.diceDisplay.meleeA !== undefined && (
-                  <div className="absolute -bottom-1 left-2 right-2 h-1 bg-black/50 blur-sm rounded-sm" />
+                  <>
+                    <div className={cn("absolute top-1 left-1 w-1 h-1", colors.accent, "opacity-60")} />
+                    <div className={cn("absolute top-1 right-1 w-1 h-1", colors.accent, "opacity-60")} />
+                    <div className={cn("absolute bottom-1 left-1 w-1 h-1", colors.accent, "opacity-60")} />
+                    <div className={cn("absolute bottom-1 right-1 w-1 h-1", colors.accent, "opacity-60")} />
+                  </>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Defender - Hostile Display with 3D effect */}
-          <div className="relative bg-slate-900/60 p-3 rounded-sm border-2 border-red-600/40 backdrop-blur-sm shadow-red-900/20 overflow-hidden">
+          {/* Defender - Simplified display */}
+          <div className="relative bg-slate-900/80 p-3 rounded-sm border-2 border-red-600/40 shadow-red-900/20 overflow-hidden">
             {/* Tech frame corners */}
             <div className="absolute top-0 left-0 w-2 h-2 border-l-2 border-t-2 border-red-500" />
             <div className="absolute top-0 right-0 w-2 h-2 border-r-2 border-t-2 border-red-500" />
             <div className="absolute bottom-0 left-0 w-2 h-2 border-l-2 border-b-2 border-red-500" />
             <div className="absolute bottom-0 right-0 w-2 h-2 border-r-2 border-b-2 border-red-500" />
 
-            {/* Background scan effect */}
-            <div className="absolute inset-0 opacity-10 animate-scan-vertical bg-gradient-to-b from-transparent via-red-500/20 to-transparent" />
-
             <div className="text-[8px] font-mono opacity-40 uppercase mb-2 text-center tracking-[0.15em]">DEFENDER</div>
             <div className="flex justify-center">
-              {/* 3D dice container */}
-              <div className="relative perspective-200">
-                <div className={cn(
-                  "relative w-16 h-16 bg-slate-950/80 rounded-sm flex items-center justify-center text-3xl font-mono font-black border-2 transition-all",
-                  state.diceDisplay.meleeD !== undefined
-                    ? "text-red-400 border-red-500/30 shadow-lg result-reveal"
-                    : "text-red-400/30 border-red-500/20 dice-spin"
-                )}>
-                  {state.diceDisplay.meleeD ?? state.parameters.targetMelee}
-                  {state.diceDisplay.meleeD !== undefined && (
-                    <>
-                      <div className="absolute top-1 left-1 w-1 h-1 border-red-500 opacity-60" />
-                      <div className="absolute top-1 right-1 w-1 h-1 border-red-500 opacity-60" />
-                      <div className="absolute bottom-1 left-1 w-1 h-1 border-red-500 opacity-60" />
-                      <div className="absolute bottom-1 right-1 w-1 h-1 border-red-500 opacity-60" />
-                    </>
-                  )}
-                </div>
-
-                {/* Shadow for 3D effect */}
+              {/* Simplified dice container */}
+              <div className={cn(
+                "relative w-16 h-16 bg-slate-950/80 rounded-sm flex items-center justify-center text-3xl font-mono font-black border-2",
+                state.diceDisplay.meleeD !== undefined
+                  ? "text-red-400 border-red-500/30 shadow-md"
+                  : "text-red-400/30 border-red-500/20"
+              )}>
+                {state.diceDisplay.meleeD ?? state.parameters.targetMelee}
                 {state.diceDisplay.meleeD !== undefined && (
-                  <div className="absolute -bottom-1 left-2 right-2 h-1 bg-black/50 blur-sm rounded-sm" />
+                  <>
+                    <div className="absolute top-1 left-1 w-1 h-1 border-red-500 opacity-60" />
+                    <div className="absolute top-1 right-1 w-1 h-1 border-red-500 opacity-60" />
+                    <div className="absolute bottom-1 left-1 w-1 h-1 border-red-500 opacity-60" />
+                    <div className="absolute bottom-1 right-1 w-1 h-1 border-red-500 opacity-60" />
+                  </>
                 )}
               </div>
             </div>
@@ -271,31 +220,13 @@ export function DiceAnimation({ state }: DiceAnimationProps) {
         </div>
       )}
 
-      {/* Tech Loading Bar with enhanced effects */}
+      {/* Tech Loading Bar - simplified */}
       <div className="w-full max-w-xs h-2 bg-slate-950/90 rounded-full overflow-hidden border border-slate-800 relative">
-        {/* Background grid pattern */}
-        <div className="absolute inset-0 opacity-20" style={{
-          backgroundImage: `repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255,255,255,0.05) 2px, rgba(255,255,255,0.05) 4px)`
-        }} />
-
         {/* Animated progress bar */}
         <div className={cn(
-          "h-full animate-in slide-in-from-left-full duration-1000 relative overflow-hidden",
+          "h-full animate-in slide-in-from-left-full duration-1000",
           colors.primary
-        )}>
-          {/* Scanline effect inside bar */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full animate-[shimmer_1s_infinite]" />
-
-          {/* Glowing leading edge */}
-          <div className="absolute right-0 top-0 bottom-0 w-1 bg-white/50 blur-sm" />
-        </div>
-
-        {/* Status indicator dots */}
-        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-0.5">
-          <div className={cn("w-0.5 h-0.5 rounded-full animate-pulse", colors.primary)} />
-          <div className={cn("w-0.5 h-0.5 rounded-full animate-pulse stagger-100", colors.primary)} />
-          <div className={cn("w-0.5 h-0.5 rounded-full animate-pulse stagger-200", colors.primary)} />
-        </div>
+        )} />
       </div>
     </div>
   );
