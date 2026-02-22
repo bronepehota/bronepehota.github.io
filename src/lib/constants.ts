@@ -1,7 +1,7 @@
 import type { FactionID } from './types';
 
 // Re-export BASE_PATH from next.config.mjs for easy access in components
-export { BASE_PATH } from 'next.config.mjs';
+export { BASE_PATH } from '../../next.config.mjs';
 
 export const LOCAL_STORAGE_KEYS = {
   ARMY: 'bronepehota_army',
