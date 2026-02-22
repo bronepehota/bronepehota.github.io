@@ -227,11 +227,17 @@ function SoldierCard({
 }
 
 // Memoize SoldierCard to prevent unnecessary re-renders
-// Custom comparison checks: soldierIndex, unit (for isDead/isDone), squad (for soldier data)
+// Custom comparison checks soldier-specific state to avoid re-rendering all cards when any soldier updates
 export default memo(SoldierCard, (prevProps, nextProps) => {
+  const prevIsDead = prevProps.unit.deadSoldiers?.includes(prevProps.soldierIndex) || false;
+  const nextIsDead = nextProps.unit.deadSoldiers?.includes(nextProps.soldierIndex) || false;
+  const prevIsDone = prevProps.unit.actionsUsed?.[prevProps.soldierIndex]?.done || false;
+  const nextIsDone = nextProps.unit.actionsUsed?.[nextProps.soldierIndex]?.done || false;
+
   return (
     prevProps.soldierIndex === nextProps.soldierIndex &&
-    prevProps.unit === nextProps.unit &&
-    prevProps.squad === nextProps.squad
+    prevProps.squad === nextProps.squad &&
+    prevIsDead === nextIsDead &&
+    prevIsDone === nextIsDone
   );
 });
