@@ -1,1 +1,2 @@
-export { default as UnitNavigationCard } from './UnitNavigationCard'
+export { UnitNavigationCard } from './UnitNavigationCard';
+

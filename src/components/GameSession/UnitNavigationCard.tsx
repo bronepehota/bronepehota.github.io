@@ -1,26 +1,33 @@
-'use client'
+'use client';
 
-import { memo } from 'react'
-import Image from 'next/image'
-import type { ArmyUnit, Squad, FactionID } from '@/lib/types'
-import { Check, X } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { getFactionColors } from '@/lib/faction-colors'
+import { memo } from 'react';
+import Image from 'next/image';
+import { ArmyUnit, Squad, FactionID } from '@/lib/types';
+import { Check, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface UnitNavigationCardProps {
-  unit: ArmyUnit
-  originalIndex: number
-  isActive: boolean
-  isDone: boolean
-  isDead: boolean
-  isMachine: boolean
-  onClick: () => void
-  faction: FactionID
-  dockStyles: ReturnType<typeof getUnitDockStyles>
+  unit: ArmyUnit;
+  originalIndex: number;
+  isActive: boolean;
+  isDone: boolean;
+  isDead: boolean;
+  isMachine: boolean;
+  onClick: () => void;
+  faction: FactionID;
+  dockStyles: Record<string, string>;
 }
 
-function getUnitDockStyles(factionId: string) {
-  const colors = getFactionColors(factionId as FactionID)
+// Helper outside component to avoid recreation
+const getDockStyles = (factionId: string) => {
+  const colors = {
+    polaris: { borderSolid: 'border-red-500', bgSolid: 'bg-red-500', border: 'border-red-500/30', bg: 'bg-red-500/20', text: 'text-red-400', glow: 'shadow-red-500/50', accent: 'border-red-400' },
+    protectorate: { borderSolid: 'border-cyan-500', bgSolid: 'bg-cyan-500', border: 'border-cyan-500/30', bg: 'bg-cyan-500/20', text: 'text-cyan-400', glow: 'shadow-cyan-500/50', accent: 'border-cyan-400' },
+    mercenaries: { borderSolid: 'border-yellow-500', bgSolid: 'bg-yellow-500', border: 'border-yellow-500/30', bg: 'bg-yellow-500/20', text: 'text-yellow-400', glow: 'shadow-yellow-500/50', accent: 'border-yellow-400' },
+  }[factionId] || {
+    borderSolid: 'border-red-500', bgSolid: 'bg-red-500', border: 'border-red-500/30', bg: 'bg-red-500/20', text: 'text-red-400', glow: 'shadow-red-500/50', accent: 'border-red-400'
+  };
+
   return {
     primary: colors.borderSolid,
     primaryBg: colors.bgSolid,
@@ -29,106 +36,107 @@ function getUnitDockStyles(factionId: string) {
     text: colors.text,
     activeGlow: colors.glow,
     accent: colors.accent
-  }
-}
+  };
+};
 
-function UnitNavigationCard({
+export const UnitNavigationCard = memo(function UnitNavigationCard({
   unit,
-  originalIndex,
   isActive,
   isDone,
   isDead,
   isMachine,
   onClick,
-  faction,
   dockStyles,
-}: UnitNavigationCardProps) {
-  const unitNumber = originalIndex + 1
-  const unitData = unit.data
+}: Omit<UnitNavigationCardProps, 'originalIndex' | 'faction'>) {
+  const imageUrl = isMachine
+    ? unit.data.image!
+    : ((unit.data as Squad).soldiers[0]?.image || unit.data.image!)!;
 
   return (
     <button
       onClick={onClick}
       className={cn(
-        'relative h-20 w-[72px] flex-shrink-0 rounded-lg border-2 bg-slate-800/50 p-0.5 transition-all md:h-24 md:w-[88px]',
-        isActive && `${dockStyles.primary} shadow-lg scale-105`,
-        !isActive && 'border-slate-700 opacity-60 hover:opacity-100'
+        "relative shrink-0 snap-start rounded-md border-2 transition-all duration-300 overflow-hidden group",
+        "hover:scale-105 active:scale-95 shadow-md",
+        "h-20 w-[72px] md:h-24 md:w-[88px]",
+        isActive
+          ? cn("scale-110 shadow-2xl border-current z-20", dockStyles.activeGlow, dockStyles.primaryBg, dockStyles.primary)
+          : "border-slate-700/50 opacity-80 hover:opacity-100 grayscale hover:grayscale-0 z-10"
       )}
-      aria-label={`Unit ${unitNumber}`}
+      data-testid={`unit-nav-${unit.instanceId}`}
     >
-      {/* Unit Image */}
-      <div className="relative h-full w-full overflow-hidden rounded bg-slate-900">
+      <div className="absolute inset-0">
         <Image
-          src={
-            isMachine
-              ? unitData.image!
-              : ((unitData as Squad).soldiers[0]?.image || unitData.image!)
-          }
-          alt={unitData.name}
+          src={imageUrl}
+          alt={unit.data.name}
           fill
           className="object-cover"
-          unoptimized
+          style={{ objectPosition: '50% 85%' }}
           sizes="(max-width: 768px) 72px, 88px"
+          unoptimized
         />
+        <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
       </div>
 
-      {/* Active Overlay */}
-      {isActive && (
-        <div className="absolute inset-0 rounded-lg bg-gradient-to-t from-slate-900/60 to-transparent pointer-events-none" />
-      )}
+      {isActive && <div className="absolute inset-0 bg-slate-700/30" />}
+      {isDead && <div className="absolute inset-0 bg-red-900/50" />}
 
-      {/* Dead Overlay */}
-      {isDead && (
-        <div className="absolute inset-0 flex items-center justify-center bg-slate-900/70">
-          <X className={cn('h-8 w-8 md:h-10 md:w-10', dockStyles.text)} strokeWidth={3} />
-        </div>
-      )}
+      <div className={cn(
+        "absolute w-4 h-4 transition-all z-20",
+        isMachine ? "bottom-0 right-0" : "bottom-0 left-0",
+        isMachine
+          ? cn("border-r-2 border-t-2", dockStyles.accent || dockStyles.primary)
+          : cn("border-l-2 border-t-2", dockStyles.muted)
+      )} />
 
-      {/* Done Badge */}
-      {isDone && !isDead && (
-        <div className="absolute top-0 right-0 p-1">
-          <div className={cn('rounded-full p-0.5 shadow-md', dockStyles.primaryBg)}>
-            <Check className="h-3 w-3 text-slate-900" strokeWidth={3} />
-          </div>
-        </div>
-      )}
-
-      {/* Corner Accents for Active Unit */}
       {isActive && (
         <>
-          <div className={cn('absolute top-0 left-0 h-3 w-3 border-t-2 border-l-2', dockStyles.primary)} />
-          <div className={cn('absolute top-0 right-0 h-3 w-3 border-t-2 border-r-2', dockStyles.primary)} />
-          <div className={cn('absolute bottom-0 left-0 h-3 w-3 border-b-2 border-l-2', dockStyles.primary)} />
-          <div className={cn('absolute bottom-0 right-0 h-3 w-3 border-b-2 border-r-2', dockStyles.primary)} />
+          <div className={cn("absolute top-0 left-0 w-3 h-3 border-l-2 border-t-2 z-30", dockStyles.primary)} />
+          <div className={cn("absolute top-0 right-0 w-3 h-3 border-r-2 border-t-2 z-30", dockStyles.primary)} />
+          <div className={cn("absolute bottom-0 left-0 w-3 h-3 border-l-2 border-b-2 z-30", dockStyles.primary)} />
+          <div className={cn("absolute bottom-0 right-0 w-3 h-3 border-r-2 border-b-2 z-30", dockStyles.primary)} />
         </>
       )}
 
-      {/* Unit Number Badge */}
-      <div className="absolute bottom-0 left-0 px-1.5 py-0.5 bg-slate-900/90 rounded-tr-lg border-r border-t border-slate-700">
-        <span className="text-xs font-bold text-slate-300">{unitNumber}</span>
+      <div className="absolute bottom-0 left-0 right-0 z-20">
+        <div className={cn("px-2 pb-1 pt-1", isActive ? "bg-slate-800/90" : "bg-black/70")}>
+          <div className="flex items-center justify-center gap-1">
+            {unit.instanceNumber && (
+              <span className="font-mono text-[8px] font-black text-white/90">
+                {unit.instanceNumber}
+              </span>
+            )}
+            <span className="font-mono text-[9px] font-bold text-white tracking-wide">
+              {(unit.data.shortName || unit.data.name || '').substring(0, 4).toUpperCase()}
+            </span>
+          </div>
+        </div>
       </div>
 
-      {/* Machine Indicator */}
-      {isMachine && (
-        <div className="absolute top-0 left-0 px-1 py-0.5 bg-slate-900/90 rounded-br-lg border-r border-b border-slate-700">
-          <div className="w-2 h-2 rounded-full bg-amber-500" />
+      {isDone && !isDead && (
+        <div className="absolute top-1 left-1 w-5 h-5 md:w-6 md:h-6
+                     bg-emerald-500 rounded-full border-2 border-white
+                     flex items-center justify-center z-30
+                     shadow-lg">
+          <Check className="w-3 h-3 text-white" strokeWidth={3.5} />
+        </div>
+      )}
+
+      {isDead && (
+        <div className="absolute inset-0 flex items-center justify-center z-30 bg-red-900/40">
+          <div className="w-8 h-8 md:w-10 md:h-10 bg-red-600 rounded-full flex items-center justify-center shadow-xl">
+            <X className="w-5 h-5 text-white" strokeWidth={3} />
+          </div>
         </div>
       )}
     </button>
-  )
-}
-
-// Custom comparison function to prevent unnecessary re-renders
-function arePropsEqual(
-  prevProps: UnitNavigationCardProps,
-  nextProps: UnitNavigationCardProps
-): boolean {
+  );
+}, (prevProps, nextProps) => {
+  // Custom comparison for better performance
   return (
     prevProps.unit.instanceId === nextProps.unit.instanceId &&
     prevProps.isActive === nextProps.isActive &&
     prevProps.isDone === nextProps.isDone &&
     prevProps.isDead === nextProps.isDead
-  )
-}
-
-export default memo(UnitNavigationCard, arePropsEqual)
+  );
+});
