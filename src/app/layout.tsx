@@ -35,15 +35,9 @@ const oswald = Oswald({
   display: 'swap',
 })
 
-// Generate dynamic manifest with BASE_PATH-aware paths
-function getManifest() {
-  return `${BASE_PATH}/manifest.json`
-}
-
 export const metadata: Metadata = {
   title: 'Бронепехота - Помощник',
   description: 'Приложение для игры в варгейм Бронепехота',
-  manifest: getManifest(),
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
