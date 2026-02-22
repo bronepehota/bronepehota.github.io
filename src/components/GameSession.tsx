@@ -429,16 +429,14 @@ export default function GameSession({ army, setArmy, onInitiativeTriggerRef, sho
         >
           {/* Expand/collapse handle indicator */}
           <div
-            className="flex justify-center pt-3 pb-2 active:bg-slate-800/30 transition-colors"
+            className="flex justify-center py-0 active:bg-slate-800/30 transition-colors"
             onClick={toggleDockExpanded}
-            onMouseDown={(e) => e.stopPropagation()}
-            onTouchStart={(e) => e.stopPropagation()}
           >
-            {/* Touch target - larger than visible handle */}
-            <div className="w-16 h-8 flex items-center justify-center">
+            {/* Minimal touch target */}
+            <div className="w-5 h-3 flex items-center justify-center">
               <div className={cn(
-                "w-12 h-1 rounded-full transition-all duration-300",
-                isDockExpanded ? "bg-slate-500" : factionColors.bgSolid.replace('bg-', 'bg-').replace('500', '500')
+                "w-5 h-px rounded-full transition-all duration-200",
+                isDockExpanded ? "bg-slate-400" : factionColors.bgSolid.replace('bg-', 'bg-').replace('500', '400')
               )} />
             </div>
           </div>
@@ -515,7 +513,7 @@ export default function GameSession({ army, setArmy, onInitiativeTriggerRef, sho
                 style={{ background: 'linear-gradient(to left, rgb(2 6 23 / 0.95), transparent)' }}
               />
 
-              <div className="flex overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-hide items-center px-2 pt-2 pb-3">
+              <div className="flex overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-hide items-center px-1.5 py-0.5">
             {(() => {
               // Sort and group units: active first, then done/dead
               const sortedUnits = army.units

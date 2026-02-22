@@ -1,10 +1,12 @@
 'use client';
 
 import { memo } from 'react';
-import Image from 'next/image';
 import { ArmyUnit, Squad, FactionID } from '@/lib/types';
 import { Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+// Use basePath only in production, empty in development
+const BASE_PATH = process.env.NODE_ENV === 'production' ? '/bronepehota' : '';
 
 interface UnitNavigationCardProps {
   unit: ArmyUnit;
@@ -52,13 +54,18 @@ export const UnitNavigationCard = memo(function UnitNavigationCard({
     ? unit.data.image!
     : ((unit.data as Squad).soldiers[0]?.image || unit.data.image!)!;
 
+  // Add basePath to image paths for GitHub Pages
+  const finalSrc = imageUrl.startsWith('/images/')
+    ? `${BASE_PATH}${imageUrl}`
+    : imageUrl;
+
   return (
     <button
       onClick={onClick}
       className={cn(
         "relative shrink-0 snap-start rounded-md border-2 transition-all duration-300 overflow-hidden group",
         "hover:scale-105 active:scale-95 shadow-md",
-        "h-20 w-[72px] md:h-24 md:w-[88px]",
+        "h-14 w-[56px]",
         isActive
           ? cn("scale-110 shadow-2xl border-current z-20", dockStyles.activeGlow, dockStyles.primaryBg, dockStyles.primary)
           : "border-slate-700/50 opacity-80 hover:opacity-100 grayscale hover:grayscale-0 z-10"
@@ -66,16 +73,13 @@ export const UnitNavigationCard = memo(function UnitNavigationCard({
       data-testid={`unit-nav-${unit.instanceId}`}
     >
       <div className="absolute inset-0">
-        <Image
-          src={imageUrl}
+        <img
+          src={finalSrc}
           alt={unit.data.name}
-          fill
-          className="object-cover"
+          className="w-full h-full object-cover"
           style={{ objectPosition: '50% 85%' }}
-          sizes="(max-width: 768px) 72px, 88px"
-          unoptimized
         />
-        <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-7 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
       </div>
 
       {isActive && <div className="absolute inset-0 bg-slate-700/30" />}

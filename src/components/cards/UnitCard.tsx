@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { GitHubPagesImage as Image } from '../GitHubPagesImage';
 import { ArmyUnit, Squad, Machine, RulesVersionID, Weapon, PanicTestResult } from '@/lib/types';
 import { Shield, Sword, Target, Heart, CheckCircle2, Bomb, ChevronDown, ChevronUp, UserX, Plane, Skull, Wrench, Flame, Crosshair, X, Image as ImageIcon, Footprints } from 'lucide-react';
@@ -158,9 +158,9 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
   };
 
   // Handle combat actions
-  const _handleSoldierAction = (soldierIndex: number) => {
+  const _handleSoldierAction = useCallback((soldierIndex: number) => {
     combatController.startCombat(unit, soldierIndex);
-  };
+  }, [unit, combatController]);
 
   const handleVehicleAttack = (weaponIndex: number) => {
     combatController.startCombat(unit, undefined, weaponIndex, 'shot');
@@ -298,14 +298,14 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
     combatController.closeCombat();
   };
 
-  const getSoldierImage = (idx: number) => {
+  const getSoldierImage = useCallback((idx: number) => {
     if (!isSquad) return '/images/soldiers/empty.png';
     const soldier = (data as Squad).soldiers[idx];
     if (soldier.image) {
       return soldier.image;
     }
     return '/images/soldiers/empty.png';
-  };
+  }, [isSquad, data]);
 
   const getPilotImage = (): string | null => {
     if (!unit.pilotInfo) return null;
