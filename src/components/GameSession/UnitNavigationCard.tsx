@@ -65,7 +65,7 @@ export const UnitNavigationCard = memo(function UnitNavigationCard({
       className={cn(
         "relative shrink-0 snap-start rounded-md border-2 transition-all duration-300 overflow-hidden group",
         "hover:scale-105 active:scale-95 shadow-md",
-        "h-20 w-[72px] md:h-24 md:w-[88px]",
+        "h-16 w-[64px]",
         isActive
           ? cn("scale-110 shadow-2xl border-current z-20", dockStyles.activeGlow, dockStyles.primaryBg, dockStyles.primary)
           : "border-slate-700/50 opacity-80 hover:opacity-100 grayscale hover:grayscale-0 z-10"
