@@ -429,13 +429,13 @@ export default function GameSession({ army, setArmy, onInitiativeTriggerRef, sho
         >
           {/* Expand/collapse handle indicator */}
           <div
-            className="flex justify-center py-1 active:bg-slate-800/30 transition-colors"
+            className="flex justify-center py-0 active:bg-slate-800/30 transition-colors"
             onClick={toggleDockExpanded}
           >
-            {/* Compact touch target */}
-            <div className="w-8 h-6 flex items-center justify-center">
+            {/* Minimal touch target */}
+            <div className="w-5 h-3 flex items-center justify-center">
               <div className={cn(
-                "w-8 h-0.5 rounded-full transition-all duration-200",
+                "w-5 h-px rounded-full transition-all duration-200",
                 isDockExpanded ? "bg-slate-400" : factionColors.bgSolid.replace('bg-', 'bg-').replace('500', '400')
               )} />
             </div>
@@ -513,7 +513,7 @@ export default function GameSession({ army, setArmy, onInitiativeTriggerRef, sho
                 style={{ background: 'linear-gradient(to left, rgb(2 6 23 / 0.95), transparent)' }}
               />
 
-              <div className="flex overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-hide items-center px-2 py-1">
+              <div className="flex overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-hide items-center px-1.5 py-0.5">
             {(() => {
               // Sort and group units: active first, then done/dead
               const sortedUnits = army.units
