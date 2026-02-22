@@ -133,3 +133,35 @@ export function formatCountBadge(count: number): string | null {
   }
   return String(count);
 }
+
+/**
+ * Shortens weapon names for mobile display by replacing long Russian words with abbreviations
+ *
+ * @param name - Full weapon name in Russian
+ * @returns Shortened weapon name
+ *
+ * @example
+ * shortenWeaponName("шестиствольная скорострельная пусковые установки");
+ * // Returns: "6-ств. скор. ПУ"
+ * shortenWeaponName("автоматическая бронебойная");
+ * // Returns: "авт. бронеб."
+ */
+export function shortenWeaponName(name: string): string {
+  return name
+    .replace(/шестиствольная/gi, '6-ств.')
+    .replace(/четырехствольная/gi, '4-ств.')
+    .replace(/трехствольная/gi, '3-ств.')
+    .replace(/двуствольная/gi, '2-ств.')
+    .replace(/двуствольный/gi, '2-ств.')
+    .replace(/скорострельные/gi, 'скор.')
+    .replace(/автоматическая/gi, 'авт.')
+    .replace(/автоматический/gi, 'авт.')
+    .replace(/бронебойная/gi, 'бронеб.')
+    .replace(/бронебойный/gi, 'бронеб.')
+    .replace(/пусковые установки/gi, 'ПУ')
+    .replace(/управляемые ракеты/gi, 'УР')
+    .replace(/стандартный/gi, 'станд.')
+    // Clean up extra spaces
+    .replace(/\s+/g, ' ')
+    .trim();
+}
