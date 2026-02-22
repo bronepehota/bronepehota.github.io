@@ -408,6 +408,17 @@ onClick={() => {
 - For `<Image>` components, use `unoptimized` prop when images don't display on GitHub Pages
 - Example: `<Link href="/encyclopedia">` not `<a href="/encyclopedia">`
 
+**Image Loading for GitHub Pages:**
+- Use `GitHubPagesImage` component from `@/components/GitHubPagesImage` for most images
+- It automatically handles `BASE_PATH` prefixing for paths starting with `/images/`
+- Uses regular `<img>` tag instead of Next.js `<Image>` for reliable static export
+- For dynamic image components (like navigation cards), use:
+  ```tsx
+  const BASE_PATH = process.env.GITHUB_PAGES === 'true' ? '/bronepehota' : '';
+  const finalSrc = imageUrl.startsWith('/images/') ? `${BASE_PATH}${imageUrl}` : imageUrl;
+  <img src={finalSrc} ... />
+  ```
+
 **Building for local testing**:
 ```bash
 npm run build
