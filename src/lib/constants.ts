@@ -2,8 +2,8 @@ import type { FactionID } from './types';
 
 // Base path for GitHub Pages deployment
 // Must match next.config.mjs BASE_PATH value
-// Set GITHUB_PAGES=true when building for GitHub Pages deployment
-export const BASE_PATH = process.env.GITHUB_PAGES === 'true' ? '/bronepehota' : '';
+// NEXT_PUBLIC_GITHUB_PAGES is set in deploy.yml and available in client code
+export const BASE_PATH = process.env.NEXT_PUBLIC_GITHUB_PAGES === 'true' ? '/bronepehota' : '';
 
 export const LOCAL_STORAGE_KEYS = {
   ARMY: 'bronepehota_army',

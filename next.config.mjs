@@ -1,9 +1,9 @@
 import withSerwistInit from "@serwist/next";
 
 /** @type {import('next').NextConfig} */
-// Use GITHUB_PAGES environment variable to control basePath for deployment
-// Set GITHUB_PAGES=true when building for GitHub Pages deployment
-const isGitHubPages = process.env.GITHUB_PAGES === 'true';
+// Use NEXT_PUBLIC_GITHUB_PAGES environment variable to control basePath for deployment
+// Set NEXT_PUBLIC_GITHUB_PAGES=true when building for GitHub Pages deployment
+const isGitHubPages = process.env.NEXT_PUBLIC_GITHUB_PAGES === 'true';
 
 // Base path for GitHub Pages deployment
 // Export for use in components (e.g., PWA manifest generation)
