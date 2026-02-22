@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
 import { SoldierActions } from './soldier-card/SoldierActions';
 import { SoldierStats } from './soldier-card/SoldierStats';
 import { SoldierImage } from './soldier-card/SoldierImage';
@@ -22,7 +22,7 @@ interface SoldierCardProps {
   getSoldierImage: (idx: number) => string;
 }
 
-export function SoldierCard({
+function SoldierCard({
   squad,
   unit,
   soldierIndex,
@@ -225,3 +225,19 @@ export function SoldierCard({
     </div>
   );
 }
+
+// Memoize SoldierCard to prevent unnecessary re-renders
+// Custom comparison checks soldier-specific state to avoid re-rendering all cards when any soldier updates
+export default memo(SoldierCard, (prevProps, nextProps) => {
+  const prevIsDead = prevProps.unit.deadSoldiers?.includes(prevProps.soldierIndex) || false;
+  const nextIsDead = nextProps.unit.deadSoldiers?.includes(nextProps.soldierIndex) || false;
+  const prevIsDone = prevProps.unit.actionsUsed?.[prevProps.soldierIndex]?.done || false;
+  const nextIsDone = nextProps.unit.actionsUsed?.[nextProps.soldierIndex]?.done || false;
+
+  return (
+    prevProps.soldierIndex === nextProps.soldierIndex &&
+    prevProps.squad === nextProps.squad &&
+    prevIsDead === nextIsDead &&
+    prevIsDone === nextIsDone
+  );
+});

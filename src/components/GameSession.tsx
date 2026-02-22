@@ -10,7 +10,8 @@ import { cn } from '@/lib/utils';
 import { CombatLogEntry } from '@/lib/combat-types';
 import { useCombatTargetContext } from '@/contexts/CombatTargetContext';
 import InitiativeModal from './modals/InitiativeModal';
-import { BASE_PATH } from '@/lib/constants';
+import Image from 'next/image';
+import { UnitNavigationCard } from './GameSession/index';
 
 // Faction styles for unit dock navigation
 const getUnitDockStyles = (factionId: string) => {
@@ -302,48 +303,6 @@ export default function GameSession({ army, setArmy, onInitiativeTriggerRef, sho
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden" data-testid="game-session">
-      {/* Battle Screen Atmosphere - Tactical HUD Effects */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* Animated grid background */}
-        <div className="absolute inset-0 combat-grid-bg opacity-30" />
-
-        {/* Scanlines overlay */}
-        <div className="absolute inset-0 combat-scanlines opacity-40" />
-
-        {/* Vignette effect */}
-        <div className="absolute inset-0 pointer-events-none" style={{
-          background: 'radial-gradient(ellipse at center, transparent 0%, rgba(10, 10, 15, 0.4) 100%)'
-        }} />
-
-        {/* Noise texture overlay */}
-        <div className="absolute inset-0 opacity-10" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`
-        }} />
-
-        {/* Animated tactical scan line */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="w-full h-px bg-gradient-to-r from-transparent via-cyan-400/20 to-transparent animate-scan" />
-        </div>
-
-        {/* Corner targeting brackets - faction colored */}
-        <div className={cn("absolute top-4 left-4 w-12 h-12 border-l-2 border-t-2 opacity-50 animate-pulse-slow", factionColors.border)} />
-        <div className={cn("absolute top-4 right-4 w-12 h-12 border-r-2 border-t-2 opacity-50 animate-pulse-slow", factionColors.border)} />
-        <div className={cn("absolute bottom-24 left-4 w-12 h-12 border-l-2 border-b-2 opacity-50 animate-pulse-slow", factionColors.border)} />
-        <div className={cn("absolute bottom-24 right-4 w-12 h-12 border-r-2 border-b-2 opacity-50 animate-pulse-slow", factionColors.border)} />
-
-        {/* Tactical status indicators */}
-        <div className="absolute top-6 left-20 font-ibm-mono text-[8px] text-slate-500/60">
-          <div>HUD_ACTIVE</div>
-          <div>SYS_COMBAT</div>
-        </div>
-
-        {/* Coordinate display */}
-        <div className="absolute top-6 right-20 font-ibm-mono text-[8px] text-slate-500/60 text-right hidden sm:block">
-          <div>TAC_{army.faction.toUpperCase()}</div>
-          <div>MODE_BATTLE</div>
-        </div>
-      </div>
-
       {/* Initiative Modal */}
       <InitiativeModal
         isOpen={showInitiativeModal}
@@ -470,15 +429,18 @@ export default function GameSession({ army, setArmy, onInitiativeTriggerRef, sho
         >
           {/* Expand/collapse handle indicator */}
           <div
-            className="flex justify-center pt-2 pb-1 cursor-grab active:cursor-grabbing"
+            className="flex justify-center pt-3 pb-2 active:bg-slate-800/30 transition-colors"
             onClick={toggleDockExpanded}
             onMouseDown={(e) => e.stopPropagation()}
             onTouchStart={(e) => e.stopPropagation()}
           >
-            <div className={cn(
-              "w-12 h-1 rounded-full transition-all duration-300",
-              isDockExpanded ? "bg-slate-600" : factionColors.bgSolid.replace('bg-', 'bg-').replace('500', '600')
-            )} />
+            {/* Touch target - larger than visible handle */}
+            <div className="w-16 h-8 flex items-center justify-center">
+              <div className={cn(
+                "w-12 h-1 rounded-full transition-all duration-300",
+                isDockExpanded ? "bg-slate-500" : factionColors.bgSolid.replace('bg-', 'bg-').replace('500', '500')
+              )} />
+            </div>
           </div>
 
           {/* Dock top decorative line with faction color */}
@@ -524,94 +486,16 @@ export default function GameSession({ army, setArmy, onInitiativeTriggerRef, sho
                   })();
 
                   return (
-                    <button
+                    <UnitNavigationCard
                       key={unit.instanceId}
-                      data-testid={`unit-nav-${unit.instanceId}`}
+                      unit={unit}
+                      isActive={isActive}
+                      isDone={isDone}
+                      isDead={isDead}
+                      isMachine={isMachine}
                       onClick={() => { setFocusedUnitIdx(idx); setIsDockExpanded(false); }}
-                      className={cn(
-                        "relative rounded-md border-2 transition-all overflow-hidden group aspect-square",
-                        "hover:scale-105 active:scale-95 shadow-md",
-                        isActive
-                          ? cn("scale-110 shadow-2xl border-current z-20 ring-2 ring-white/20", dockStyles.activeGlow, dockStyles.primaryBg, dockStyles.primary)
-                          : "border-slate-700/50 opacity-80 hover:opacity-100 grayscale hover:grayscale-0 z-10"
-                      )}
-                    >
-                      {/* Unit portrait */}
-                      <div className="absolute inset-0">
-                        <img
-                          src={`${BASE_PATH}${
-                            isMachine
-                              ? unit.data.image
-                              : ((unit.data as Squad).soldiers[0]?.image || unit.data.image)
-                          }`}
-                          alt={unit.data.name}
-                          className="w-full h-full object-cover"
-                          style={{ objectPosition: '50% 85%' }}
-                        />
-                        <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-                      </div>
-
-                      {/* Active overlay */}
-                      {isActive && <div className="absolute inset-0 bg-slate-700/30" />}
-
-                      {/* Dead overlay */}
-                      {isDead && <div className="absolute inset-0 bg-red-900/50" />}
-
-                      {/* Corner accent */}
-                      <div className={cn(
-                        "absolute w-4 h-4 transition-all z-20",
-                        isMachine ? "bottom-0 right-0" : "bottom-0 left-0",
-                        isMachine
-                          ? cn("border-r-2 border-t-2", dockStyles.accent || dockStyles.primary)
-                          : cn("border-l-2 border-t-2", dockStyles.muted)
-                      )} />
-
-                      {/* Active corners */}
-                      {isActive && (
-                        <>
-                          <div className={cn("absolute top-0 left-0 w-3 h-3 border-l-2 border-t-2 z-30 animate-pulse", dockStyles.primary)} />
-                          <div className={cn("absolute top-0 right-0 w-3 h-3 border-r-2 border-t-2 z-30 animate-pulse", dockStyles.primary)} />
-                          <div className={cn("absolute bottom-0 left-0 w-3 h-3 border-l-2 border-b-2 z-30 animate-pulse", dockStyles.primary)} />
-                          <div className={cn("absolute bottom-0 right-0 w-3 h-3 border-r-2 border-b-2 z-30 animate-pulse", dockStyles.primary)} />
-                        </>
-                      )}
-
-                      {/* Text label */}
-                      <div className="absolute bottom-0 left-0 right-0 z-20">
-                        <div className={cn(
-                          "px-1 pb-0.5 pt-0.5",
-                          isActive ? "bg-slate-800/90" : "bg-black/70"
-                        )}>
-                          <div className="flex items-center justify-center gap-0.5">
-                            {unit.instanceNumber && (
-                              <span className="font-mono text-[6px] font-black text-white/90">
-                                {unit.instanceNumber}
-                              </span>
-                            )}
-                            <span className="font-mono text-[7px] font-bold text-white tracking-wide">
-                              {(unit.data.shortName || unit.data.name || '').substring(0, 3).toUpperCase()}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Done badge */}
-                      {isDone && !isDead && (
-                        <div className="absolute top-0.5 left-0.5 w-4 h-4 md:w-5 md:h-5
-                                     bg-emerald-500 rounded-full border border-white/80
-                                     flex items-center justify-center z-30
-                                     shadow-lg animate-pulse-slow">
-                          <Check className="w-2 h-2 text-white" strokeWidth={4} />
-                        </div>
-                      )}
-
-                      {/* Dead badge */}
-                      {isDead && (
-                        <div className="absolute inset-0 flex items-center justify-center z-30 bg-red-900/40">
-                          <X className="w-4 h-4 text-white" strokeWidth={3} />
-                        </div>
-                      )}
-                    </button>
+                      dockStyles={dockStyles}
+                    />
                   );
                 })}
               </div>
@@ -631,7 +515,7 @@ export default function GameSession({ army, setArmy, onInitiativeTriggerRef, sho
                 style={{ background: 'linear-gradient(to left, rgb(2 6 23 / 0.95), transparent)' }}
               />
 
-              <div className="flex overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-hide items-center px-2 py-3">
+              <div className="flex overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-hide items-center px-2 pt-2 pb-3">
             {(() => {
               // Sort and group units: active first, then done/dead
               const sortedUnits = army.units
@@ -711,108 +595,16 @@ export default function GameSession({ army, setArmy, onInitiativeTriggerRef, sho
               })();
 
               elements.push(
-                <button
+                <UnitNavigationCard
                   key={unit.instanceId}
-                  data-testid={`unit-nav-${unit.instanceId}`}
+                  unit={unit}
+                  isActive={isActive}
+                  isDone={isDone}
+                  isDead={isDead}
+                  isMachine={isMachine}
                   onClick={() => setFocusedUnitIdx(originalIndex)}
-                  className={cn(
-                    "relative shrink-0 snap-start rounded-md border-2 transition-all duration-300 overflow-hidden group",
-                    "hover:scale-105 active:scale-95 shadow-md",
-                    // Original height - no extra space
-                    "h-20 w-[72px] md:h-24 md:w-[88px]",
-                    isActive
-                      ? cn("scale-110 shadow-2xl border-current z-20", dockStyles.activeGlow, dockStyles.primaryBg, dockStyles.primary)
-                      : "border-slate-700/50 opacity-80 hover:opacity-100 grayscale hover:grayscale-0 z-10"
-                  )}
-                >
-                  {/* Unit portrait image - MAIN IDENTIFICATION - fully visible */}
-                  <div className="absolute inset-0">
-                    <img
-                      src={`${BASE_PATH}${
-                        isMachine
-                          ? unit.data.image
-                          : ((unit.data as Squad).soldiers[0]?.image || unit.data.image)
-                      }`}
-                      alt={unit.data.name}
-                      className="w-full h-full object-cover"
-                      style={{ objectPosition: '50% 85%' }}
-                    />
-
-                    {/* Gradient overlay ONLY at very bottom for text readability */}
-                    <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-                  </div>
-
-                  {/* Active unit overlay with faction color */}
-                  {isActive && (
-                    <div className="absolute inset-0 bg-slate-700/30" />
-                  )}
-
-                  {/* Dead unit dark overlay */}
-                  {isDead && (
-                    <div className="absolute inset-0 bg-red-900/50" />
-                  )}
-
-                  {/* Type-specific corner accent - aligned with text at bottom */}
-                  <div className={cn(
-                    "absolute w-4 h-4 transition-all z-20",
-                    isMachine ? "bottom-0 right-0" : "bottom-0 left-0",
-                    isMachine
-                      ? cn("border-r-2 border-t-2", dockStyles.accent || dockStyles.primary)
-                      : cn("border-l-2 border-t-2", dockStyles.muted)
-                  )} />
-
-                  {/* Tech corner brackets for active unit */}
-                  {isActive && (
-                    <>
-                      <div className={cn("absolute top-0 left-0 w-3 h-3 border-l-2 border-t-2 z-30 animate-pulse", dockStyles.primary)} />
-                      <div className={cn("absolute top-0 right-0 w-3 h-3 border-r-2 border-t-2 z-30 animate-pulse", dockStyles.primary)} />
-                      <div className={cn("absolute bottom-0 left-0 w-3 h-3 border-l-2 border-b-2 z-30 animate-pulse", dockStyles.primary)} />
-                      <div className={cn("absolute bottom-0 right-0 w-3 h-3 border-r-2 border-b-2 z-30 animate-pulse", dockStyles.primary)} />
-                    </>
-                  )}
-
-                  {/* Text label AT VERY BOTTOM EDGE - on image with background */}
-                  <div className="absolute bottom-0 left-0 right-0 z-20">
-                    <div className={cn(
-                      "px-2 pb-1 pt-1",
-                      isActive ? "bg-slate-800/90" : "bg-black/70"
-                    )}>
-                      <div className="flex items-center justify-center gap-1">
-                        {/* Instance number for duplicate units */}
-                        {unit.instanceNumber && (
-                          <span className="font-mono text-[8px] font-black text-white/90">
-                            {unit.instanceNumber}
-                          </span>
-                        )}
-
-                        {/* Short name */}
-                        <span className="font-mono text-[9px] font-bold text-white tracking-wide">
-                          {(unit.data.shortName || unit.data.name || '').substring(0, 4).toUpperCase()}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Done status badge - checkmark in corner */}
-                  {isDone && !isDead && (
-                    <div className="absolute top-1 left-1 w-5 h-5 md:w-6 md:h-6
-                                 bg-emerald-500 rounded-full
-                                 border-2 border-white
-                                 flex items-center justify-center z-30
-                                 shadow-lg animate-pulse-slow">
-                      <Check className="w-3 h-3 text-white" strokeWidth={3.5} />
-                    </div>
-                  )}
-
-                  {/* Dead status badge - X icon overlay */}
-                  {isDead && (
-                    <div className="absolute inset-0 flex items-center justify-center z-30 bg-red-900/40">
-                      <div className="w-8 h-8 md:w-10 md:h-10 bg-red-600 rounded-full flex items-center justify-center shadow-xl">
-                        <X className="w-5 h-5 text-white" strokeWidth={3} />
-                      </div>
-                    </div>
-                  )}
-                </button>
+                  dockStyles={dockStyles}
+                />
               );
             });
 

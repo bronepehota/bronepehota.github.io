@@ -4,8 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import { GitHubPagesImage as Image } from '../GitHubPagesImage';
 import { ArmyUnit, Squad, Machine, RulesVersionID, Weapon, PanicTestResult } from '@/lib/types';
 import { Shield, Sword, Target, Heart, CheckCircle2, Bomb, ChevronDown, ChevronUp, UserX, Plane, Skull, Wrench, Flame, Crosshair, X, Image as ImageIcon, Footprints } from 'lucide-react';
-import { SoldierCard } from './SoldierCard';
-import { formatUnitNumber } from '@/lib/unit-utils';
+import SoldierCard from './SoldierCard';
+import { formatUnitNumber, shortenWeaponName } from '@/lib/unit-utils';
 import { getDefaultRulesVersion } from '@/lib/rules-registry';
 import { cn } from '@/lib/utils';
 import { BottomSheetCombatModal } from '../combat/BottomSheetCombatModal';
@@ -18,27 +18,6 @@ import { usePilotTestFlow } from '@/hooks/usePilotTestFlow';
 import { EncyclopediaModal } from '../modals/EncyclopediaModal';
 import { PanicTestModal } from '../modals/PanicTestModal';
 import { UnitWithType } from '@/lib/encyclopedia-utils';
-
-// Helper function to shorten weapon names for mobile
-const _shortenWeaponName = (name: string): string => {
-  return name
-    .replace(/шестиствольная/gi, '6-ств.')
-    .replace(/четырехствольная/gi, '4-ств.')
-    .replace(/трехствольная/gi, '3-ств.')
-    .replace(/двуствольная/gi, '2-ств.')
-    .replace(/двуствольный/gi, '2-ств.')
-    .replace(/скорострельные/gi, 'скор.')
-    .replace(/автоматическая/gi, 'авт.')
-    .replace(/автоматический/gi, 'авт.')
-    .replace(/бронебойная/gi, 'бронеб.')
-    .replace(/бронебойный/gi, 'бронеб.')
-    .replace(/пусковые установки/gi, 'ПУ')
-    .replace(/управляемые ракеты/gi, 'УР')
-    .replace(/стандартный/gi, 'станд.')
-    // Clean up extra spaces
-    .replace(/\s+/g, ' ')
-    .trim();
-};
 
 interface UnitCardProps {
   unit: ArmyUnit;
