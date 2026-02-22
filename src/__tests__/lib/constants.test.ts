@@ -12,6 +12,7 @@ describe('constants', () => {
   describe('BASE_PATH', () => {
     it('should be empty when GITHUB_PAGES is not set', () => {
       // In test environment, GITHUB_PAGES is not set
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { BASE_PATH } = require('@/lib/constants');
       expect(BASE_PATH).toBe('');
     });
@@ -21,6 +22,7 @@ describe('constants', () => {
       process.env.GITHUB_PAGES = 'true';
       // Clear require cache to re-import with new env
       jest.resetModules();
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { BASE_PATH } = require('@/lib/constants');
       expect(BASE_PATH).toBe('/bronepehota');
       // Clean up
