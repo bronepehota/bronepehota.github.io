@@ -1,11 +1,13 @@
 import withSerwistInit from "@serwist/next";
 
 /** @type {import('next').NextConfig} */
-const isProd = process.env.NODE_ENV === 'production';
+// Use GITHUB_PAGES environment variable to control basePath for deployment
+// Set GITHUB_PAGES=true when building for GitHub Pages deployment
+const isGitHubPages = process.env.GITHUB_PAGES === 'true';
 
 // Base path for GitHub Pages deployment
 // Export for use in components (e.g., PWA manifest generation)
-const BASE_PATH = isProd ? '/bronepehota' : '';
+const BASE_PATH = isGitHubPages ? '/bronepehota' : '';
 
 export { BASE_PATH };
 
