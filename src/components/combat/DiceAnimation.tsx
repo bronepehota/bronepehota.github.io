@@ -220,11 +220,11 @@ export function DiceAnimation({ state }: DiceAnimationProps) {
         </div>
       )}
 
-      {/* Tech Loading Bar - simplified */}
+      {/* Tech Loading Bar - simplified, no animation for performance */}
       <div className="w-full max-w-xs h-2 bg-slate-950/90 rounded-full overflow-hidden border border-slate-800 relative">
-        {/* Animated progress bar */}
+        {/* Simple static progress indicator instead of animation */}
         <div className={cn(
-          "h-full animate-in slide-in-from-left-full duration-1000",
+          "h-full w-1/2",
           colors.primary
         )} />
       </div>

@@ -240,18 +240,26 @@ test.describe('Aimed Shot - Combat Modal', () => {
  * Flow: Faction → Budget → Rules
  */
 async function navigateToRulesScreen(page: import('@playwright/test').Page) {
-  // Step 1: Select faction
+  // Step 1: Select faction - wait for faction cards to be visible
+  await page.waitForSelector('[data-testid="faction-card-polaris"]', { timeout: 10000 });
   await page.click('[data-testid="faction-card-polaris"]');
+  await page.waitForTimeout(300);
+
   await page.click('[data-testid="faction-continue-button"]');
   await page.waitForTimeout(300);
 
-  // Step 2: Select budget (350 is recommended)
+  // Step 2: Select budget (350 is recommended) - wait for budget buttons
+  await page.waitForSelector('button:has-text("350")', { timeout: 5000 });
   await page.click('button:has-text("350")');
   await page.waitForTimeout(300);
 
-  // Step 3: Click "НАЧАТЬ СБОР АРМИИ" to proceed to Rules
+  // Step 3: Click "НАЧАТЬ СБОР АРМИИ" to proceed to Rules - wait for button
+  await page.waitForSelector('[data-testid="budget-next-button"]', { timeout: 5000 });
   await page.click('[data-testid="budget-next-button"]');
   await page.waitForTimeout(300);
+
+  // Wait for rules screen to be visible
+  await page.waitForSelector('#rules-selector', { timeout: 5000 });
 }
 
 /**

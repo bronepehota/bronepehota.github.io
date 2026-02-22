@@ -116,19 +116,8 @@ export function BottomSheetCombatModal({
           actionColors.border
         )}
       >
-        {/* Animated grid background */}
-        <div className="absolute inset-0 combat-grid-bg opacity-60 pointer-events-none" />
-
-        {/* Scanline overlay - very subtle */}
-        <div className="absolute inset-0 combat-scanlines opacity-50 pointer-events-none" />
-
-        {/* Vignette effect for depth */}
-        <div className="combat-vignette" />
-
-        {/* Noise texture overlay */}
-        <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`
-        }} />
+        {/* Simplified background - removed overlays for performance */}
+        {/* Previously: grid animation, scanlines, vignette, noise - all removed */}
 
         {/* Corner accents with pulsing glow */}
         <div className={cn("absolute top-0 left-0 w-3 h-3 border-l-2 border-t-2 z-10", actionColors.accent)} />
