@@ -65,7 +65,7 @@ export const UnitNavigationCard = memo(function UnitNavigationCard({
       className={cn(
         "relative shrink-0 snap-start rounded-md border-2 transition-all duration-300 overflow-hidden group",
         "hover:scale-105 active:scale-95 shadow-md",
-        "h-12 w-[48px]",
+        "h-14 w-[56px]",
         isActive
           ? cn("scale-110 shadow-2xl border-current z-20", dockStyles.activeGlow, dockStyles.primaryBg, dockStyles.primary)
           : "border-slate-700/50 opacity-80 hover:opacity-100 grayscale hover:grayscale-0 z-10"
@@ -79,7 +79,7 @@ export const UnitNavigationCard = memo(function UnitNavigationCard({
           className="w-full h-full object-cover"
           style={{ objectPosition: '50% 85%' }}
         />
-        <div className="absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-7 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
       </div>
 
       {isActive && <div className="absolute inset-0 bg-slate-700/30" />}
