@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 import { CombatTargetProvider } from '@/contexts/CombatTargetContext';
 
 export default function Home() {
-  // View state with localStorage persistence
+  // View state - use URL hash for persistence instead of localStorage to avoid race conditions
   const [view, setView] = useState<'builder' | 'game'>('builder');
   const [showEndMenu, setShowEndMenu] = useState(false);
   const [showCombatLog, setShowCombatLog] = useState(false);
@@ -62,6 +62,7 @@ export default function Home() {
 
   // Persist display mode to localStorage on change
   useEffect(() => {
+    if (typeof window === 'undefined') return;
     localStorage.setItem('bronepehota_display_mode', displayMode);
     // Debug logging
     if (typeof window !== 'undefined') {
@@ -71,6 +72,7 @@ export default function Home() {
 
   // Persist view state to localStorage on change
   useEffect(() => {
+    if (typeof window === 'undefined') return;
     localStorage.setItem('bronepehota_view', view);
   }, [view]);
 

@@ -6,9 +6,14 @@ import { test, expect } from '@playwright/test';
  */
 test.describe('Aimed Shot - Combat Modal', () => {
   test.beforeEach(async ({ page }) => {
-    // Set localStorage BEFORE page loads using addInitScript
-    await page.addInitScript(() => {
-      // Set up army with squad in game session for aimed shot testing
+    // Navigate to app page first
+    await page.goto('/app');
+    await page.waitForLoadState('networkidle');
+  });
+
+  test('should show aimed shot toggle for squad shots', async ({ page }) => {
+    // Set up game session state
+    await page.evaluate(() => {
       const army = {
         name: 'Aimed Shot Test Army',
         faction: 'polaris',
@@ -37,7 +42,7 @@ test.describe('Aimed Shot - Combat Modal', () => {
           actionsUsed: []
         }],
         totalCost: 50,
-        currentStep: 'unit-select',
+        currentStep: 'battle',
         isInBattle: true,
         currentTurn: 1
       };
@@ -46,12 +51,9 @@ test.describe('Aimed Shot - Combat Modal', () => {
       localStorage.setItem('bronepehota_display_mode', 'detailed');
     });
 
-    // Navigate to app - localStorage already set
-    await page.goto('/app');
+    await page.reload();
     await page.waitForLoadState('networkidle');
-  });
 
-  test('should show aimed shot toggle for squad shots', async ({ page }) => {
     // Check if game session is visible
     const gameSession = page.getByTestId('game-session');
     await expect(gameSession.first()).toBeVisible({ timeout: 10000 });
@@ -84,12 +86,16 @@ test.describe('Aimed Shot - Combat Modal', () => {
   });
 
   test('should not show aimed shot toggle for machines', async ({ page, context }) => {
-    // Create a new page with machine army state set BEFORE navigation
+    // Create a new page for machine test
     await page.close();
-
-    // Set up machine army state using addInitScript on context
     const newPage = await context.newPage();
-    await newPage.addInitScript(() => {
+
+    // Navigate first
+    await newPage.goto('/app');
+    await newPage.waitForLoadState('networkidle');
+
+    // Set up machine army state
+    await newPage.evaluate(() => {
       const army = {
         name: 'Machine Test Army',
         faction: 'polaris',
@@ -127,7 +133,7 @@ test.describe('Aimed Shot - Combat Modal', () => {
           machineShotsUsed: 0
         }],
         totalCost: 150,
-        currentStep: 'unit-select',
+        currentStep: 'battle',
         isInBattle: true,
         currentTurn: 1
       };
@@ -136,7 +142,7 @@ test.describe('Aimed Shot - Combat Modal', () => {
       localStorage.setItem('bronepehota_display_mode', 'detailed');
     });
 
-    await newPage.goto('/app');
+    await newPage.reload();
     await newPage.waitForLoadState('networkidle');
 
     // Check if game session is visible
@@ -155,6 +161,48 @@ test.describe('Aimed Shot - Combat Modal', () => {
   });
 
   test('should toggle aimed shot off after being enabled', async ({ page }) => {
+    // Set up game session state
+    await page.evaluate(() => {
+      const army = {
+        name: 'Aimed Shot Test Army',
+        faction: 'polaris',
+        units: [{
+          instanceId: 'squad-test-1',
+          type: 'squad',
+          data: {
+            id: 'polaris_lineynaya_klon_pehota',
+            name: 'Линейная клон-пехота',
+            shortName: 'Линейная',
+            faction: 'polaris',
+            cost: 50,
+            image: '/images/squads/polaris/lineynaya_klon_pehota/1.png',
+            soldiers: [
+              { num: 1, rank: 2, speed: 5, range: 'D6', power: '2D6', melee: 3, props: [], armor: 2, image: '' },
+              { num: 2, rank: 2, speed: 5, range: 'D12', power: '2D6', melee: 3, props: [], armor: 2, image: '' },
+              { num: 3, rank: 2, speed: 5, range: 'D12', power: '2D6', melee: 3, props: [], armor: 2, image: '' },
+              { num: 4, rank: 2, speed: 5, range: 'D12', power: '2D6', melee: 3, props: [], armor: 2, image: '' },
+              { num: 5, rank: 2, speed: 5, range: 'D12', power: '2D6', melee: 3, props: [], armor: 2, image: '' },
+              { num: 6, rank: 2, speed: 5, range: 'D12', power: '2D6', melee: 3, props: [], armor: 2, image: '' }
+            ]
+          },
+          instanceNumber: 1,
+          currentSoldiers: [0, 1, 2, 3, 4, 5],
+          deadSoldiers: [],
+          actionsUsed: []
+        }],
+        totalCost: 50,
+        currentStep: 'battle',
+        isInBattle: true,
+        currentTurn: 1
+      };
+      localStorage.setItem('bronepehota_army', JSON.stringify(army));
+      localStorage.setItem('bronepehota_view', 'game');
+      localStorage.setItem('bronepehota_display_mode', 'detailed');
+    });
+
+    await page.reload();
+    await page.waitForLoadState('networkidle');
+
     // Check if game session is visible
     const gameSession = page.getByTestId('game-session');
     await expect(gameSession.first()).toBeVisible({ timeout: 10000 });
