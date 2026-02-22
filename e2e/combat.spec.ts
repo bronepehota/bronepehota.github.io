@@ -6,14 +6,8 @@ import { test, expect } from '@playwright/test';
  */
 test.describe('Combat Mechanics', () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate to app page first
-    await page.goto('/app');
-    await page.waitForLoadState('networkidle');
-  });
-
-  test('should display unit card in game session', async ({ page }) => {
-    // Set up game session state using page.evaluate()
-    await page.evaluate(() => {
+    // Set up game session state BEFORE page loads (using addInitScript)
+    await page.addInitScript(() => {
       const army = {
         name: 'Combat Test Army',
         faction: 'polaris',
@@ -51,8 +45,8 @@ test.describe('Combat Mechanics', () => {
       localStorage.setItem('bronepehota_display_mode', 'detailed');
     });
 
-    // Reload to apply localStorage changes
-    await page.reload();
+    // Navigate to app page - localStorage is already set from addInitScript
+    await page.goto('/app');
     await page.waitForLoadState('networkidle');
 
     // Check if game session is visible
@@ -66,8 +60,8 @@ test.describe('Combat Mechanics', () => {
   });
 
   test('should open combat modal', async ({ page }) => {
-    // Set up game session state
-    await page.evaluate(() => {
+    // Set up game session state BEFORE page loads
+    await page.addInitScript(() => {
       const army = {
         name: 'Combat Test Army',
         faction: 'polaris',
@@ -105,7 +99,8 @@ test.describe('Combat Mechanics', () => {
       localStorage.setItem('bronepehota_display_mode', 'detailed');
     });
 
-    await page.reload();
+    // Navigate to app page - localStorage is already set from addInitScript
+    await page.goto('/app');
     await page.waitForLoadState('networkidle');
 
     const unitCard = page.getByTestId('unit-nav-combat-unit-1');
@@ -124,8 +119,8 @@ test.describe('Combat Mechanics', () => {
   });
 
   test('should execute initiative roll', async ({ page }) => {
-    // Set up game session state
-    await page.evaluate(() => {
+    // Set up game session state BEFORE page loads
+    await page.addInitScript(() => {
       const army = {
         name: 'Combat Test Army',
         faction: 'polaris',
@@ -163,7 +158,8 @@ test.describe('Combat Mechanics', () => {
       localStorage.setItem('bronepehota_display_mode', 'detailed');
     });
 
-    await page.reload();
+    // Navigate to app page - localStorage is already set from addInitScript
+    await page.goto('/app');
     await page.waitForLoadState('networkidle');
     // Find and click initiative button by test-id (new-turn-button)
     const initiativeButton = page.getByTestId('new-turn-button');

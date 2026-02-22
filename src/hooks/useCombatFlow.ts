@@ -208,25 +208,12 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
   }, []);
 
   /**
-   * Animate dice rolling with gradual updates
+   * Minimal dice animation - just show the result immediately
+   * Removed animation loop for performance - was causing 1-3 second delays
    */
-  const animateDiceRoll = useCallback(async (
-    updateFn: (display: DiceDisplay) => void
-  ): Promise<void> => {
-    const iterations = 8;
-    const delay = 60;
-
-    for (let i = 0; i < iterations; i++) {
-      const display: DiceDisplay = {
-        hit: rollDie(12),
-        power: [rollDie(6), rollDie(6)],
-        meleeA: rollDie(6),
-        meleeD: rollDie(6),
-      };
-      updateFn(display);
-      dispatch({ type: 'UPDATE_DICE', diceDisplay: display });
-      await new Promise(r => setTimeout(r, delay));
-    }
+  const animateDiceRoll = useCallback(async (): Promise<void> => {
+    // Minimal delay for visual feedback (50ms instead of 480ms)
+    await new Promise(r => setTimeout(r, 50));
   }, []);
 
   /**
@@ -263,7 +250,7 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
     }
 
     // Animate hit roll
-    await animateDiceRoll((_display) => {});
+    await animateDiceRoll();
 
     // Calculate hit (surprise attack doesn't affect hit roll)
     const hitResult = rules.calculateHit(
@@ -276,15 +263,8 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
     const finalDisplay: DiceDisplay = { hit: hitResult.roll };
 
     if (hitResult.success) {
-      // Determine dice type from power string
-      const diceMatch = power.match(/(\d*)D(\d+)/);
-      const _sides = diceMatch?.[2] === '12' ? 12 : diceMatch?.[2] === '20' ? 20 : 6;
-      const diceCount = parseInt(diceMatch?.[1] || '1');
-
       // Animate damage rolls
-      await animateDiceRoll((display) => {
-        finalDisplay.power = display.power?.slice(0, diceCount);
-      });
+      await animateDiceRoll();
 
       // For surprise attack, roll damage twice and take best result
       if (state.parameters.isSurpriseAttack) {
@@ -331,7 +311,7 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
           const armorTestRoll = rollDie(12);
 
           // Animate armor test roll
-          await animateDiceRoll(() => {});
+          await animateDiceRoll();
 
           // Armor test: roll > machine armor means armor is penetrated
           if (armorTestRoll > machineArmor) {
@@ -394,7 +374,7 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
     }
 
     // Animate distance roll (D6)
-    await animateDiceRoll(() => {});
+    await animateDiceRoll();
 
     const distanceRoll = rollDie(6);
     const totalDistance = distanceRoll + soldierRank;
@@ -461,7 +441,7 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
     }
 
     // Animate D20 roll
-    await animateDiceRoll(() => {});
+    await animateDiceRoll();
 
     // Roll D20 for armor check
     const d20Roll = rollDie(20);
@@ -489,7 +469,7 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
     }
 
     // Animate melee rolls
-    await animateDiceRoll(() => {});
+    await animateDiceRoll();
 
     // For surprise attack, attacker rolls twice and takes best (all rules versions)
     let meleeResult;
