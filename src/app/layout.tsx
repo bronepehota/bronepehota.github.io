@@ -4,6 +4,7 @@ import { Russo_One, IBM_Plex_Mono, Oswald } from 'next/font/google'
 import './globals.css'
 import { SerwistRegister } from '@/components/SerwistRegister'
 import NavigationProgress from '@/components/NavigationProgress'
+import { BASE_PATH } from '@/lib/constants'
 
 const inter = Inter({ subsets: ['latin'] })
 const orbitron = Orbitron({
@@ -34,10 +35,15 @@ const oswald = Oswald({
   display: 'swap',
 })
 
+// Generate dynamic manifest with BASE_PATH-aware paths
+function getManifest() {
+  return `${BASE_PATH}/manifest.json`
+}
+
 export const metadata: Metadata = {
   title: 'Бронепехота - Помощник',
   description: 'Приложение для игры в варгейм Бронепехота',
-  manifest: "/manifest.json",
+  manifest: getManifest(),
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -45,11 +51,11 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
-      { url: "/icons/icon-512x512.png", sizes: "512x512", type: "image/png" },
+      { url: `${BASE_PATH}/icons/icon-192x192.png`, sizes: "192x192", type: "image/png" },
+      { url: `${BASE_PATH}/icons/icon-512x512.png`, sizes: "512x512", type: "image/png" },
     ],
     apple: [
-      { url: "/icons/icon-152x152.png", sizes: "152x152", type: "image/png" },
+      { url: `${BASE_PATH}/icons/icon-152x152.png`, sizes: "152x152", type: "image/png" },
     ],
   },
 }
