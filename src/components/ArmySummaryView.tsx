@@ -154,7 +154,7 @@ export function ArmySummaryView({
           </div>
 
           {/* Action buttons row */}
-          <div className="pt-4">
+          <div className="pt-4 pb-24">
             {/* Primary: TO BATTLE */}
             {canGoToBattle && (
               <button

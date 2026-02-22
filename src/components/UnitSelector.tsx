@@ -294,7 +294,7 @@ export function UnitSelector({
       {/* Content based on view mode */}
       {viewMode === 'browse' ? (
         /* Available units */
-        <div className="space-y-4">
+        <div className="space-y-4 pb-20">
           {filteredAvailableUnits.length === 0 ? (
             <div className="text-center py-12 px-4 bg-slate-800/30 rounded-lg border border-slate-700/50">
               <p className="text-slate-500 text-sm">

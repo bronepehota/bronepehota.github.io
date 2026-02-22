@@ -57,20 +57,33 @@ export function ParameterInputs({
     if (actionType === 'grenade') {
       // Grenades have fixed dice
       return (
-        <div className="bg-gradient-to-br from-slate-800 to-slate-800/50 p-4 rounded-xl border border-slate-700 mb-4">
-          <div className="text-[10px] opacity-50 uppercase font-bold mb-3 tracking-wider text-center">
+        <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/60 p-4 rounded-xl border border-slate-700/50 mb-4 relative overflow-hidden">
+          {/* Tech decoration */}
+          <div className="absolute top-0 left-0 w-2 h-2 border-l border-t border-emerald-500/30" />
+          <div className="absolute top-0 right-0 w-2 h-2 border-r border-t border-emerald-500/30" />
+          <div className="absolute bottom-0 left-0 w-2 h-2 border-l border-b border-emerald-500/30" />
+          <div className="absolute bottom-0 right-0 w-2 h-2 border-r border-b border-emerald-500/30" />
+
+          {/* Scanline effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 via-transparent to-emerald-500/5 opacity-50 pointer-events-none" />
+
+          <div className="text-[10px] opacity-50 uppercase font-bold mb-3 tracking-wider text-center relative">
             Граната
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-slate-900/50 p-3 rounded-lg border border-blue-500/30">
-              <div className="text-[8px] opacity-40 uppercase font-bold mb-2 text-center">Дальность</div>
-              <div className="flex justify-center">
+            <div className="bg-slate-950/80 p-3 rounded-lg border border-blue-500/30 shadow-lg shadow-blue-900/10 relative group">
+              {/* Tech glow on hover */}
+              <div className="absolute inset-0 bg-blue-500/0 group-hover:bg-blue-500/5 transition-colors rounded-lg pointer-events-none" />
+              <div className="text-[8px] opacity-40 uppercase font-bold mb-2 text-center relative">Дальность</div>
+              <div className="flex justify-center relative">
                 <StaticDiceDisplay rollStr="D6" size="md" color="blue" />
               </div>
             </div>
-            <div className="bg-slate-900/50 p-3 rounded-lg border border-orange-500/30">
-              <div className="text-[8px] opacity-40 uppercase font-bold mb-2 text-center">Мощность</div>
-              <div className="flex justify-center">
+            <div className="bg-slate-950/80 p-3 rounded-lg border border-orange-500/30 shadow-lg shadow-orange-900/10 relative group">
+              {/* Tech glow on hover */}
+              <div className="absolute inset-0 bg-orange-500/0 group-hover:bg-orange-500/5 transition-colors rounded-lg pointer-events-none" />
+              <div className="text-[8px] opacity-40 uppercase font-bold mb-2 text-center relative">Мощность</div>
+              <div className="flex justify-center relative">
                 <StaticDiceDisplay rollStr="1D20" size="md" color="orange" />
               </div>
             </div>
@@ -86,8 +99,14 @@ export function ParameterInputs({
         : null;
 
       return (
-        <div className="bg-gradient-to-br from-slate-800 to-slate-800/50 p-3 md:p-4 rounded-xl border border-slate-700 mb-4">
-          <div className="text-[10px] md:text-xs opacity-50 uppercase font-bold mb-2 md:mb-3 tracking-wider text-center flex items-center justify-center gap-2">
+        <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/60 p-3 md:p-4 rounded-xl border border-slate-700/50 mb-4 relative overflow-hidden">
+          {/* Tech decoration */}
+          <div className="absolute top-0 left-0 w-2 h-2 border-l border-t border-cyan-500/30" />
+          <div className="absolute top-0 right-0 w-2 h-2 border-r border-t border-cyan-500/30" />
+          <div className="absolute bottom-0 left-0 w-2 h-2 border-l border-b border-cyan-500/30" />
+          <div className="absolute bottom-0 right-0 w-2 h-2 border-r border-b border-cyan-500/30" />
+
+          <div className="text-[10px] md:text-xs opacity-50 uppercase font-bold mb-2 md:mb-3 tracking-wider text-center flex items-center justify-center gap-2 relative">
             {isMachine && weaponName && (
               <>
                 <Target className="w-3 h-3 md:w-4 md:h-4" />
@@ -97,9 +116,11 @@ export function ParameterInputs({
             {!isMachine && 'Ваше оружие'}
           </div>
           <div className="grid grid-cols-2 gap-2 md:gap-3">
-            <div className="bg-slate-900/50 p-2 md:p-3 rounded-lg border border-blue-500/30">
-              <div className="text-[8px] md:text-[10px] opacity-40 uppercase font-bold mb-1 md:mb-2 text-center">Дальность</div>
-              <div className="flex justify-center">
+            <div className="bg-slate-950/80 p-2 md:p-3 rounded-lg border border-blue-500/30 shadow-lg shadow-blue-900/10 relative group">
+              {/* Tech glow on hover */}
+              <div className="absolute inset-0 bg-blue-500/0 group-hover:bg-blue-500/5 transition-colors rounded-lg pointer-events-none" />
+              <div className="text-[8px] md:text-[10px] opacity-40 uppercase font-bold mb-1 md:mb-2 text-center relative">Дальность</div>
+              <div className="flex justify-center relative">
                 <StaticDiceDisplay
                   rollStr={isAimedShot && actionType === 'shot' ? multiplyRange(unitStats.range, 2) : unitStats.range}
                   size="sm"
@@ -108,9 +129,11 @@ export function ParameterInputs({
                 />
               </div>
             </div>
-            <div className="bg-slate-900/50 p-2 md:p-3 rounded-lg border border-orange-500/30">
-              <div className="text-[8px] md:text-[10px] opacity-40 uppercase font-bold mb-1 md:mb-2 text-center">Мощность</div>
-              <div className="flex justify-center">
+            <div className="bg-slate-950/80 p-2 md:p-3 rounded-lg border border-orange-500/30 shadow-lg shadow-orange-900/10 relative group">
+              {/* Tech glow on hover */}
+              <div className="absolute inset-0 bg-orange-500/0 group-hover:bg-orange-500/5 transition-colors rounded-lg pointer-events-none" />
+              <div className="text-[8px] md:text-[10px] opacity-40 uppercase font-bold mb-1 md:mb-2 text-center relative">Мощность</div>
+              <div className="flex justify-center relative">
                 <StaticDiceDisplay rollStr={unitStats.power} size="sm" color="orange" showLabel />
               </div>
             </div>
@@ -127,27 +150,37 @@ export function ParameterInputs({
     if (!unitStats) return null;
 
     return (
-      <div className="bg-gradient-to-br from-slate-800 to-slate-800/50 p-4 rounded-xl border border-slate-700 mb-4">
-        <div className="text-[10px] opacity-50 uppercase font-bold mb-3 tracking-wider text-center">
+      <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/60 p-4 rounded-xl border border-slate-700/50 mb-4 relative overflow-hidden">
+        {/* Tech decoration */}
+        <div className="absolute top-0 left-0 w-2 h-2 border-l border-t border-cyan-500/30" />
+        <div className="absolute top-0 right-0 w-2 h-2 border-r border-t border-red-500/30" />
+        <div className="absolute bottom-0 left-0 w-2 h-2 border-l border-b border-cyan-500/30" />
+        <div className="absolute bottom-0 right-0 w-2 h-2 border-r border-b border-red-500/30" />
+
+        <div className="text-[10px] opacity-50 uppercase font-bold mb-3 tracking-wider text-center relative">
           Ближний бой
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-slate-900/50 p-3 rounded-lg border border-blue-500/30">
-            <div className="text-[8px] opacity-40 uppercase font-bold mb-2 text-center">Вы</div>
-            <div className="flex flex-col items-center gap-2">
-              <div className="text-lg font-black text-blue-400">ББ: +{unitStats.melee}</div>
+          <div className="bg-slate-950/80 p-3 rounded-lg border border-cyan-500/30 shadow-lg shadow-cyan-900/10 relative group">
+            {/* Tech glow on hover */}
+            <div className="absolute inset-0 bg-cyan-500/0 group-hover:bg-cyan-500/5 transition-colors rounded-lg pointer-events-none" />
+            <div className="text-[8px] opacity-40 uppercase font-bold mb-2 text-center relative">Вы</div>
+            <div className="flex flex-col items-center gap-2 relative">
+              <div className="text-lg font-black text-cyan-400">ББ: +{unitStats.melee}</div>
               <StaticDiceDisplay rollStr="1D6" size="sm" color="blue" />
             </div>
           </div>
-          <div className="bg-slate-900/50 p-3 rounded-lg border border-red-500/30">
-            <div className="text-[8px] opacity-40 uppercase font-bold mb-2 text-center">Цель</div>
-            <div className="flex flex-col items-center gap-2">
+          <div className="bg-slate-950/80 p-3 rounded-lg border border-red-500/30 shadow-lg shadow-red-900/10 relative group">
+            {/* Tech glow on hover */}
+            <div className="absolute inset-0 bg-red-500/0 group-hover:bg-red-500/5 transition-colors rounded-lg pointer-events-none" />
+            <div className="text-[8px] opacity-40 uppercase font-bold mb-2 text-center relative">Цель</div>
+            <div className="flex flex-col items-center gap-2 relative">
               <div className="text-lg font-black text-red-400">ББ: {effectiveTargetMelee}</div>
               <StaticDiceDisplay rollStr="1D6" size="sm" color="red" />
             </div>
           </div>
         </div>
-        <div className="mt-3 text-center text-xs opacity-60">
+        <div className="mt-3 text-center text-xs opacity-60 relative">
           Ваш итог: D6 + {unitStats.melee} vs Цель: D6 + {effectiveTargetMelee}
         </div>
       </div>
@@ -160,8 +193,18 @@ export function ParameterInputs({
       {(actionType === 'shot' || actionType === 'grenade') && renderShotGrenadeStats()}
       {actionType === 'melee' && renderMeleeStats()}
 
-      <div className="bg-slate-800 p-4 rounded-xl border border-slate-700">
-        <div className="text-xs opacity-50 uppercase font-bold mb-4 tracking-wider">Параметры атаки</div>
+      {/* Parameters section with enhanced styling */}
+      <div className="bg-slate-900/80 p-4 rounded-xl border border-slate-700/50 relative overflow-hidden">
+        {/* Tech decoration */}
+        <div className="absolute top-0 left-0 w-2 h-2 border-l border-t border-slate-600/30" />
+        <div className="absolute top-0 right-0 w-2 h-2 border-r border-t border-slate-600/30" />
+        <div className="absolute bottom-0 left-0 w-2 h-2 border-l border-b border-slate-600/30" />
+        <div className="absolute bottom-0 right-0 w-2 h-2 border-r border-b border-slate-600/30" />
+
+        {/* Subtle scanline effect */}
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-500/5 via-transparent to-slate-500/5 opacity-30 pointer-events-none" />
+
+        <div className="text-xs opacity-50 uppercase font-bold mb-4 tracking-wider relative">Параметры атаки</div>
 
         <div className="grid grid-cols-1 gap-4">
           {/* Distance Input with Converter */}

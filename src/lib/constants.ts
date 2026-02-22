@@ -1,7 +1,7 @@
 import type { FactionID } from './types';
 
-// Base path for GitHub Pages deployment
-export const BASE_PATH = process.env.NODE_ENV === 'production' ? '/bronepehota' : '';
+// Re-export BASE_PATH from next.config.mjs for easy access in components
+export { BASE_PATH } from 'next.config.mjs';
 
 export const LOCAL_STORAGE_KEYS = {
   ARMY: 'bronepehota_army',

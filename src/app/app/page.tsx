@@ -12,22 +12,27 @@ import { cn } from '@/lib/utils';
 import { CombatTargetProvider } from '@/contexts/CombatTargetContext';
 
 export default function Home() {
-  // View state with localStorage persistence - lazy init to avoid race condition
-  const [view, setView] = useState<'builder' | 'game'>(() => {
-    if (typeof window === 'undefined') return 'builder';
-    const saved = localStorage.getItem('bronepehota_view');
-    return (saved === 'builder' || saved === 'game') ? saved : 'builder';
-  });
+  // View state with localStorage persistence
+  const [view, setView] = useState<'builder' | 'game'>('builder');
   const [showEndMenu, setShowEndMenu] = useState(false);
   const [showCombatLog, setShowCombatLog] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
-  // Display mode state with localStorage persistence - lazy init to avoid race condition
-  const [displayMode, setDisplayMode] = useState<'detailed' | 'compact'>(() => {
-    if (typeof window === 'undefined') return 'detailed';
-    const saved = localStorage.getItem('bronepehota_display_mode');
-    return (saved === 'compact' || saved === 'detailed') ? saved : 'detailed';
-  });
+  // Display mode state with localStorage persistence
+  const [displayMode, setDisplayMode] = useState<'detailed' | 'compact'>('detailed');
+
+  // Load view and displayMode from localStorage after mount
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const savedView = localStorage.getItem('bronepehota_view');
+    if (savedView === 'builder' || savedView === 'game') {
+      setView(savedView);
+    }
+    const savedDisplayMode = localStorage.getItem('bronepehota_display_mode');
+    if (savedDisplayMode === 'compact' || savedDisplayMode === 'detailed') {
+      setDisplayMode(savedDisplayMode);
+    }
+  }, []);
 
   const [army, setArmy] = useState<Army>({
     name: 'Моя Армия',
@@ -138,9 +143,14 @@ export default function Home() {
   // Track if component is mounted (client-side)
   const [isMounted, setIsMounted] = useState(false);
 
-  // Load army from localStorage on mount (client-side only)
+  // Set mounted flag on client
   useEffect(() => {
     setIsMounted(true);
+  }, []);
+
+  // Load army from localStorage on mount (client-side only)
+  useEffect(() => {
+    if (!isMounted) return;
     const saved = localStorage.getItem('bronepehota_army');
     if (saved) {
       try {
@@ -160,7 +170,7 @@ export default function Home() {
         console.error('Failed to load army', e);
       }
     }
-  }, []);
+  }, [isMounted]);
 
   // Save army to localStorage when it changes (only after mount)
   useEffect(() => {
@@ -171,12 +181,39 @@ export default function Home() {
 
   return (
     <CombatTargetProvider>
-      <main className="min-h-screen flex flex-col bg-slate-900 text-slate-100">
-      {/* Header - Tech Blueprint Style - Optimized for mobile */}
-      <header className="bg-slate-900/90 backdrop-blur-sm border-b border-slate-800/50 px-2 md:px-3 py-1 md:py-2 sticky top-0 z-50 relative">
-        {/* Tech corners - faction-colored */}
-        <div className={cn("absolute top-0 left-0 w-2 h-2 border-l border-t z-10", factionStyles.accent)} />
-        <div className={cn("absolute top-0 right-0 w-2 h-2 border-r border-t z-10", factionStyles.accent)} />
+      <main className="h-screen flex flex-col bg-slate-900 text-slate-100 overflow-hidden">
+        {/* Scrollable wrapper containing both header and content */}
+        <div className="flex-1 overflow-auto min-h-0">
+          {/* Header - Tech Blueprint Style - Optimized for mobile */}
+          <header className={cn(
+            "backdrop-blur-sm border-b px-2 md:px-3 py-1 md:py-2 sticky top-0 z-50 transition-all duration-300",
+            view === 'game' && army.isInBattle
+              ? "bg-slate-950/95 border-slate-700/70"
+              : "bg-slate-900/90 border-slate-800/50"
+          )}>
+        {/* Battle mode: additional tactical HUD elements */}
+        {view === 'game' && army.isInBattle && (
+          <>
+            {/* Scanline effect overlay on header */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-30">
+              <div className="w-full h-px bg-gradient-to-r from-transparent via-cyan-400/30 to-transparent animate-scan" />
+            </div>
+
+            {/* Tech corners - enhanced for battle */}
+            <div className={cn("absolute top-0 left-0 w-3 h-3 border-l-2 border-t-2 z-10 animate-pulse-slow", factionStyles.accent)} />
+            <div className={cn("absolute top-0 right-0 w-3 h-3 border-r-2 border-t-2 z-10 animate-pulse-slow", factionStyles.accent)} />
+            <div className={cn("absolute bottom-0 left-0 w-3 h-3 border-l-2 border-b-2 z-10 animate-pulse-slow", factionStyles.accent)} />
+            <div className={cn("absolute bottom-0 right-0 w-3 h-3 border-r-2 border-b-2 z-10 animate-pulse-slow", factionStyles.accent)} />
+          </>
+        )}
+
+        {/* Non-battle mode: simple tech corners */}
+        {!(view === 'game' && army.isInBattle) && (
+          <>
+            <div className={cn("absolute top-0 left-0 w-2 h-2 border-l border-t z-10", factionStyles.accent)} />
+            <div className={cn("absolute top-0 right-0 w-2 h-2 border-r border-t z-10", factionStyles.accent)} />
+          </>
+        )}
 
         <div className="flex items-center gap-1.5 md:gap-3">
           {/* Left section - Faction badge */}
@@ -403,34 +440,33 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Content */}
-      <div className={`flex-1 overflow-auto ${view === 'builder' && army.currentStep === 'unit-select' ? 'pb-20' : ''}`}>
-        {!isMounted ? (
-          // Loading placeholder during SSR/hydration
-          <div className="flex items-center justify-center h-full">
-            <div className="text-slate-500 text-sm">Загрузка...</div>
-          </div>
-        ) : view === 'builder' ? (
-          <ArmyBuilder
-            army={army}
-            setArmy={setArmy}
-            rulesVersion={rulesVersion}
-            onRulesVersionChange={setRulesVersion}
-            displayMode={displayMode}
-            onDisplayModeChange={setDisplayMode}
-            onStartBattle={() => setView('game')}
-          />
-        ) : (
-          <GameSession
-            army={army}
-            setArmy={setArmy}
-            isInBattle={army.isInBattle}
-            onEndBattle={handleEndBattle}
-            onInitiativeTriggerRef={(fn) => { triggerInitiativeRef.current = fn; }}
-            showCombatLog={showCombatLog}
-            setShowCombatLog={setShowCombatLog}
-          />
-        )}
+      {/* Content - loading or builder/game */}
+      {!isMounted ? (
+        // Loading placeholder during SSR/hydration
+        <div className="flex items-center justify-center h-full">
+          <div className="text-slate-500 text-sm">Загрузка...</div>
+        </div>
+      ) : view === 'builder' ? (
+        <ArmyBuilder
+          army={army}
+          setArmy={setArmy}
+          rulesVersion={rulesVersion}
+          onRulesVersionChange={setRulesVersion}
+          displayMode={displayMode}
+          onDisplayModeChange={setDisplayMode}
+          onStartBattle={() => setView('game')}
+        />
+      ) : (
+        <GameSession
+          army={army}
+          setArmy={setArmy}
+          isInBattle={army.isInBattle}
+          onEndBattle={handleEndBattle}
+          onInitiativeTriggerRef={(fn) => { triggerInitiativeRef.current = fn; }}
+          showCombatLog={showCombatLog}
+          setShowCombatLog={setShowCombatLog}
+        />
+      )}
       </div>
 
       {/* Reset confirmation modal */}
