@@ -112,11 +112,25 @@ export function BottomSheetCombatModal({
         ref={sheetRef}
         {...touchHandlers}
         className={cn(
-          "w-full max-w-[600px] bg-slate-900/90 backdrop-blur-sm border-2 shadow-2xl max-h-[85vh] overflow-hidden flex flex-col relative",
+          "w-full max-w-[600px] combat-glass combat-border-glow border-2 shadow-2xl max-h-[85vh] overflow-hidden flex flex-col relative",
           actionColors.border
         )}
       >
-        {/* Corner accents */}
+        {/* Animated grid background */}
+        <div className="absolute inset-0 combat-grid-bg opacity-60 pointer-events-none" />
+
+        {/* Scanline overlay - very subtle */}
+        <div className="absolute inset-0 combat-scanlines opacity-50 pointer-events-none" />
+
+        {/* Vignette effect for depth */}
+        <div className="combat-vignette" />
+
+        {/* Noise texture overlay */}
+        <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`
+        }} />
+
+        {/* Corner accents with pulsing glow */}
         <div className={cn("absolute top-0 left-0 w-3 h-3 border-l-2 border-t-2 z-10", actionColors.accent)} />
         <div className={cn("absolute top-0 right-0 w-3 h-3 border-r-2 border-t-2 z-10", actionColors.accent)} />
         <div className={cn("absolute bottom-0 left-0 w-3 h-3 border-l-2 border-b-2 z-10", actionColors.accent)} />
@@ -127,20 +141,33 @@ export function BottomSheetCombatModal({
           <div className="w-16 h-1 bg-slate-700 rounded-full" />
         </div>
 
-        {/* Tech Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800/50 shrink-0 relative z-10">
+        {/* Tech Header with faction branding */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800/50 shrink-0 relative z-10 bg-gradient-to-r from-slate-900/50 to-transparent">
+          {/* Tech decoration line */}
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent" />
+
           <div className="flex items-center gap-3">
             {canGoBack && (
               <button
                 onClick={onGoBack}
-                className="p-2 hover:bg-slate-800/80 rounded-sm transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center border border-slate-700"
+                className="p-2 hover:bg-slate-800/80 rounded-sm transition-all min-w-[44px] min-h-[44px] flex items-center justify-center border border-slate-700 hover:border-slate-600 active:scale-95"
               >
                 <ChevronLeft className="w-5 h-5 text-slate-400" />
               </button>
             )}
-            {/* Action type icon */}
+            {/* Action type icon with pulsing glow */}
             {state.actionType && (
-              <div className={cn("p-2 rounded-sm border-2", actionColors.bg, actionColors.border)}>
+              <div className={cn(
+                "p-2 rounded-sm border-2 relative",
+                actionColors.bg,
+                actionColors.border,
+                "animate-pulse-glow"
+              )}>
+                {/* Tech corner markers */}
+                <div className={cn("absolute top-0 left-0 w-1 h-1", actionColors.accent)} />
+                <div className={cn("absolute top-0 right-0 w-1 h-1", actionColors.accent)} />
+                <div className={cn("absolute bottom-0 left-0 w-1 h-1", actionColors.accent)} />
+                <div className={cn("absolute bottom-0 right-0 w-1 h-1", actionColors.accent)} />
                 {state.actionType === 'shot' && <Target className={cn("w-4 h-4", actionColors.primary)} />}
                 {state.actionType === 'melee' && <Sword className={cn("w-4 h-4", actionColors.primary)} />}
                 {state.actionType === 'grenade' && <Bomb className={cn("w-4 h-4", actionColors.primary)} />}
@@ -150,17 +177,31 @@ export function BottomSheetCombatModal({
               <h2 className={cn("text-sm font-mono font-bold uppercase tracking-wider", actionColors.primary)}>
                 {getPhaseTitle()}
               </h2>
-              {/* Tech label */}
-              {state.actionType && (
-                <div className="text-[8px] font-mono text-slate-600 uppercase tracking-wider">
-                  {state.actionType.toUpperCase()} PROTOCOL
+              {/* Tech label with status indicator */}
+              <div className="flex items-center gap-2">
+                {state.actionType && (
+                  <div className="text-[8px] font-mono text-slate-600 uppercase tracking-wider">
+                    {state.actionType.toUpperCase()} PROTOCOL
+                  </div>
+                )}
+                {/* Status indicator dots */}
+                <div className="flex gap-0.5">
+                  <div className={cn("w-1 h-1 rounded-full animate-pulse", actionColors.primary)} />
+                  <div className={cn("w-1 h-1 rounded-full animate-pulse stagger-100", actionColors.primary)} />
+                  <div className={cn("w-1 h-1 rounded-full animate-pulse stagger-200", actionColors.primary)} />
                 </div>
-              )}
+              </div>
+            </div>
+          </div>
+          {/* Tech hex code decoration - static value to avoid hydration errors */}
+          <div className="hidden md:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+            <div className="text-[7px] font-mono text-slate-700">
+              SYS_7A2F
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-slate-800/80 rounded-sm transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center border border-slate-700"
+            className="p-2 hover:bg-slate-800/80 rounded-sm transition-all min-w-[44px] min-h-[44px] flex items-center justify-center border border-slate-700 hover:border-slate-600 active:scale-95"
           >
             <X className="w-5 h-5 text-slate-400" />
           </button>
@@ -240,21 +281,29 @@ export function BottomSheetCombatModal({
                   </button>
                 )}
 
-                {/* Execute button - Tactical Control */}
+                {/* Execute button - Tactical Control with enhanced effects */}
                 <button
                   onClick={onExecuteAction}
                   className={cn(
                     "relative flex-1 font-mono text-sm md:text-base font-bold uppercase tracking-wider border-2 transition-all min-h-[56px]",
-                    actionColors.button,
-                    "hover:scale-[1.02] active:scale-95 overflow-hidden"
+                    "hover:scale-[1.02] active:scale-95 overflow-hidden shimmer-effect",
+                    "shadow-lg",
+                    actionColors.button
                   )}
+                  style={{
+                    textShadow: '0 0 10px rgba(255,255,255,0.3)'
+                  }}
                 >
-                  {/* Tech decoration */}
-                  <div className="absolute top-0 left-0 w-2 h-2 border-l border-t opacity-30" />
-                  <div className="absolute top-0 right-0 w-2 h-2 border-r border-t opacity-30" />
-                  <div className="absolute bottom-0 left-0 w-2 h-2 border-l border-b opacity-30" />
-                  <div className="absolute bottom-0 right-0 w-2 h-2 border-r border-b opacity-30" />
-                  <div className="flex items-center justify-center gap-2 py-3 md:py-4">
+                  {/* Tech decoration corners */}
+                  <div className={cn("absolute top-0 left-0 w-2 h-2 border-l-2 border-t-2 opacity-40", actionColors.accent)} />
+                  <div className={cn("absolute top-0 right-0 w-2 h-2 border-r-2 border-t-2 opacity-40", actionColors.accent)} />
+                  <div className={cn("absolute bottom-0 left-0 w-2 h-2 border-l-2 border-b-2 opacity-40", actionColors.accent)} />
+                  <div className={cn("absolute bottom-0 right-0 w-2 h-2 border-r-2 border-b-2 opacity-40", actionColors.accent)} />
+
+                  {/* Inner shadow for depth */}
+                  <div className="absolute inset-0 shadow-inner pointer-events-none" />
+
+                  <div className="relative flex items-center justify-center gap-2 py-3 md:py-4">
                     <span>
                       {state.actionType === 'shot' ? 'ВЫСТРЕЛИТЬ' :
                        state.actionType === 'melee' ? 'АТАКОВАТЬ' : 'БРОСИТЬ'}

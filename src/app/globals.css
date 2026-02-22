@@ -454,12 +454,6 @@ button, a, input, select, textarea {
   background-clip: text;
   -webkit-text-fill-color: transparent;
   background-size: 200% auto;
-  animation: shimmer 3s linear infinite;
-}
-
-@keyframes shimmer {
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
 }
 
 /* Diagonal stripe background */
@@ -697,4 +691,240 @@ button, a, input, select, textarea {
 /* Remove spinner */
 #nprogress .spinner {
   display: none;
+}
+
+/* ========================================
+   TACTICAL COMBAT HUD ANIMATIONS
+   ======================================== */
+
+/* Grid move animation for background */
+@keyframes grid-move {
+  0% { background-position: 0 0; }
+  100% { background-position: 50px 50px; }
+}
+
+.combat-grid-bg {
+  background-image:
+    linear-gradient(rgba(100, 100, 120, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(100, 100, 120, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+  animation: grid-move 20s linear infinite;
+}
+
+/* Combat scanlines - very subtle */
+.combat-scanlines {
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.03) 2px,
+    rgba(0, 0, 0, 0.03) 4px
+  );
+  pointer-events: none;
+}
+
+/* Pulse glow for active elements */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 10px currentColor,
+                0 0 20px currentColor;
+  }
+  50% {
+    box-shadow: 0 0 25px currentColor,
+                0 0 40px currentColor,
+                0 0 60px currentColor;
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Scan vertical effect */
+@keyframes scan-vertical {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+.animate-scan-vertical {
+  animation: scan-vertical 2s linear infinite;
+}
+
+/* Glitch effect for combat results */
+@keyframes glitch {
+  0%, 90%, 100% { transform: translate(0); }
+  92% { transform: translate(-2px, 1px); }
+  94% { transform: translate(1px, -1px); }
+  96% { transform: translate(-2px, -1px); }
+  98% { transform: translate(2px, 1px); }
+}
+
+.animate-glitch {
+  animation: glitch 0.5s ease-in-out;
+}
+
+/* Shake effect for critical rolls */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+  20%, 40%, 60%, 80% { transform: translateX(3px); }
+}
+
+.animate-shake {
+  animation: shake 0.4s ease-in-out;
+}
+
+/* Result reveal animation */
+@keyframes result-reveal {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.result-reveal {
+  animation: result-reveal 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Staggered delays for sequential animations */
+.stagger-100 { animation-delay: 100ms; }
+.stagger-200 { animation-delay: 200ms; }
+.stagger-300 { animation-delay: 300ms; }
+
+/* Slow pulse animation for battle screen elements */
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s ease-in-out infinite;
+}
+
+/* Horizontal scan animation for battle screen */
+@keyframes scan-horizontal {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-scan {
+  animation: scan-horizontal 3s linear infinite;
+}
+
+/* Scale 102 for subtle hover effect */
+.hover\:scale-102:hover {
+  transform: scale(1.02);
+}
+
+.scale-102 {
+  transform: scale(1.02);
+}
+.stagger-400 { animation-delay: 400ms; }
+.stagger-500 { animation-delay: 500ms; }
+
+/* Combat utility classes */
+.combat-glass {
+  background: rgba(10, 10, 15, 0.95);
+  backdrop-filter: blur(20px) saturate(180%);
+}
+
+.combat-border-glow {
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 0 30px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Vignette overlay for depth */
+.combat-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 0%,
+    transparent 60%,
+    rgba(0, 0, 0, 0.3) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Shimmer effect for buttons */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.shimmer-effect::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 100%
+  );
+  animation: shimmer 2s infinite;
+  pointer-events: none;
+}
+
+/* Border pulse for active states */
+@keyframes border-pulse {
+  0%, 100% {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  50% {
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+}
+
+.border-pulse {
+  animation: border-pulse 2s ease-in-out infinite;
+}
+
+/* Reticle/targeting effect */
+@keyframes reticle-expand {
+  0% {
+    transform: scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.reticle-expand {
+  animation: reticle-expand 1s ease-out infinite;
+}
+
+/* Dice roll animation variants */
+@keyframes dice-spin {
+  0% { transform: rotateX(0deg) rotateY(0deg); }
+  25% { transform: rotateX(90deg) rotateY(90deg); }
+  50% { transform: rotateX(180deg) rotateY(180deg); }
+  75% { transform: rotateX(270deg) rotateY(270deg); }
+  100% { transform: rotateX(360deg) rotateY(360deg); }
+}
+
+.dice-spin {
+  animation: dice-spin 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Critical hit flash */
+@keyframes critical-flash {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+.critical-flash {
+  animation: critical-flash 0.3s ease-in-out 2;
 }

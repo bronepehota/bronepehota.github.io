@@ -401,9 +401,26 @@ onClick={() => {
 
 **Important Notes**:
 - The app uses `basePath: '/bronepehota'` in production (configured in `next.config.mjs`)
+- The basePath is controlled by `GITHUB_PAGES` environment variable:
+  - **Local development**: `GITHUB_PAGES` unset → basePath is empty (`""`)
+  - **GitHub Pages**: `GITHUB_PAGES=true` → basePath is `/bronepehota`
 - Always use Next.js `<Link>` component for internal navigation (respects basePath automatically)
 - For `<Image>` components, use `unoptimized` prop when images don't display on GitHub Pages
 - Example: `<Link href="/encyclopedia">` not `<a href="/encyclopedia">`
+
+**Building for local testing**:
+```bash
+npm run build
+npx serve out -l 3000
+# Manifest will have paths without /bronepehota prefix
+```
+
+**Building for GitHub Pages**:
+```bash
+GITHUB_PAGES=true npm run build
+# Manifest will have paths with /bronepehota prefix
+# This is automatically set in .github/workflows/deploy.yml
+```
 
 ### Testing
 
@@ -529,6 +546,12 @@ test.describe('Feature Name', () => {
 - clsx, tailwind-merge for conditional styling
 
 ## Recent Changes
+- **PWA Installability Fix (2026-02)**: Fixed PWA manifest for GitHub Pages deployment
+  - Changed from `NODE_ENV` to `GITHUB_PAGES` environment variable for basePath control
+  - Dynamic manifest generation using Next.js route handler (`src/app/manifest.ts`)
+  - Updated `.github/workflows/deploy.yml` to build with `GITHUB_PAGES=true`
+  - Local testing: `npm run build` (no basePath)
+  - GitHub Pages: `GITHUB_PAGES=true npm run build` (basePath: `/bronepehota`)
 - **Code Refactoring (2026-02)**: Major refactoring to eliminate code duplication and improve organization
   - Created centralized `getFactionColors()` utility in `src/lib/faction-colors.ts`
   - Created `constants.ts` for application-wide constants (localStorage keys, point budgets)

@@ -24,6 +24,9 @@ test.describe('Landing Page', () => {
     await ctaButton.click();
     await page.waitForLoadState('networkidle');
 
+    // Wait for URL to update to /app (client-side routing might be delayed)
+    await page.waitForURL(/\/app/, { timeout: 3000 });
+
     // Should be on app page now
     const url = page.url();
     expect(url).toContain('/app'); // Should be on /app route

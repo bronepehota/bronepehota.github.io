@@ -72,11 +72,11 @@ export function CombatResults({
 
   return (
     <div className="space-y-4 animate-in fade-in duration-300">
-      {/* Tech Header - After Action Report */}
-      <div className="relative">
+      {/* Tech Header - After Action Report with enhanced visuals */}
+      <div className="relative result-reveal">
         <div className="flex items-center gap-2 mb-2">
           <div className="h-px flex-1 bg-emerald-600/30" />
-          <div className="w-1 h-1 bg-emerald-500 rotate-45" />
+          <div className="w-1 h-1 bg-emerald-500 rotate-45 animate-pulse" />
           <div className="h-px flex-1 bg-emerald-600/30" />
         </div>
         <div className="text-center">
@@ -89,7 +89,7 @@ export function CombatResults({
         </div>
         <div className="flex items-center gap-2 mt-2">
           <div className="h-px flex-1 bg-emerald-600/30" />
-          <div className="w-1 h-1 bg-emerald-500 rotate-45" />
+          <div className="w-1 h-1 bg-emerald-500 rotate-45 animate-pulse" />
           <div className="h-px flex-1 bg-emerald-600/30" />
         </div>
       </div>
@@ -115,35 +115,43 @@ export function CombatResults({
       {/* Shot Results */}
       {isShot && result.hitResult && (
         <>
-          {/* Hit Comparison - Tactical Displays */}
+          {/* Hit Comparison - Tactical Displays with reveal */}
           <div className="grid grid-cols-2 gap-3">
-            {/* Your Roll */}
+            {/* Your Roll - with reveal animation */}
             <div className={cn(
-              "relative bg-slate-900/60 p-3 rounded-sm border-2 backdrop-blur-sm transition-all",
+              "relative bg-slate-900/60 p-3 rounded-sm border-2 backdrop-blur-sm transition-all result-reveal overflow-hidden",
               result.hitResult.success
-                ? "border-emerald-600/40 shadow-emerald-900/20"
-                : "border-red-600/40 shadow-red-900/20"
+                ? "border-emerald-600/40 shadow-emerald-900/20 shadow-lg"
+                : "border-red-600/40 shadow-red-900/20 shadow-lg"
             )}>
+              {/* Glow effect for success/failure */}
+              {result.hitResult.success && (
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent pointer-events-none" />
+              )}
+              {!result.hitResult.success && (
+                <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 to-transparent pointer-events-none" />
+              )}
+
               {/* Tech frame corners */}
               <div className={cn(
                 "absolute top-0 left-0 w-2 h-2 border-l-2 border-t-2",
-                result.hitResult.success ? "border-emerald-500" : "border-red-500"
+                result.hitResult.success ? "border-emerald-500 animate-pulse" : "border-red-500 animate-pulse"
               )} />
               <div className={cn(
                 "absolute top-0 right-0 w-2 h-2 border-r-2 border-t-2",
-                result.hitResult.success ? "border-emerald-500" : "border-red-500"
+                result.hitResult.success ? "border-emerald-500 animate-pulse stagger-100" : "border-red-500 animate-pulse stagger-100"
               )} />
               <div className={cn(
                 "absolute bottom-0 left-0 w-2 h-2 border-l-2 border-b-2",
-                result.hitResult.success ? "border-emerald-500" : "border-red-500"
+                result.hitResult.success ? "border-emerald-500 animate-pulse stagger-200" : "border-red-500 animate-pulse stagger-200"
               )} />
               <div className={cn(
                 "absolute bottom-0 right-0 w-2 h-2 border-r-2 border-b-2",
-                result.hitResult.success ? "border-emerald-500" : "border-red-500"
+                result.hitResult.success ? "border-emerald-500 animate-pulse stagger-300" : "border-red-500 animate-pulse stagger-300"
               )} />
 
-              <div className="text-[8px] font-mono opacity-40 uppercase mb-2 text-center tracking-[0.15em]">YOUR ROLL</div>
-              <div className="flex flex-col items-center">
+              <div className="text-[8px] font-mono opacity-40 uppercase mb-2 text-center tracking-[0.15em] relative">YOUR ROLL</div>
+              <div className="flex flex-col items-center relative">
                 {/* Show individual dice if available */}
                 {result.hitResult?.rolls && result.hitResult.rolls.length > 1 ? (
                   <div className="flex items-center gap-1.5 mb-2">
@@ -153,18 +161,24 @@ export function CombatResults({
                       const isMax = roll === maxRoll;
                       return (
                         <div key={i} className={cn(
-                          "relative w-10 h-10 md:w-12 md:h-12 bg-slate-950/80 rounded-sm flex items-center justify-center text-lg md:text-xl font-mono font-black border-2",
+                          "relative w-10 h-10 md:w-12 md:h-12 bg-slate-950/80 rounded-sm flex items-center justify-center text-lg md:text-xl font-mono font-black border-2 transition-all",
                           isMax
-                            ? "text-blue-400 border-blue-500/50 ring-2 ring-blue-400/30"
+                            ? "text-blue-400 border-blue-500/50 ring-2 ring-blue-400/30 shadow-lg shadow-blue-500/20"
                             : "text-slate-500 border-slate-700"
                         )}>
                           {roll}
+                          {/* Critical hit badge for max roll */}
+                          {isMax && maxRoll >= 20 && (
+                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-amber-500 rounded-full border border-amber-300 flex items-center justify-center animate-pulse">
+                              <span className="text-[6px] font-black text-white">★</span>
+                            </div>
+                          )}
                         </div>
                       );
                     })}
                     {/* Show bonus if exists */}
                     {result.hitResult.bonus && result.hitResult.bonus > 0 && (
-                      <div className="relative w-8 h-8 md:w-10 md:h-10 bg-emerald-950/60 rounded-sm flex items-center justify-center text-sm md:text-base font-mono font-black border border-emerald-500/30 text-emerald-400">
+                      <div className="relative w-8 h-8 md:w-10 md:h-10 bg-emerald-950/60 rounded-sm flex items-center justify-center text-sm md:text-base font-mono font-black border border-emerald-500/30 text-emerald-400 shadow-lg shadow-emerald-500/20">
                         +{result.hitResult.bonus}
                       </div>
                     )}
@@ -173,8 +187,8 @@ export function CombatResults({
                   <div className={cn(
                     "relative w-14 h-14 bg-slate-950/80 rounded-sm flex items-center justify-center text-3xl font-mono font-black border-2 mb-1",
                     result.hitResult.success
-                      ? "text-emerald-400 border-emerald-500/30"
-                      : "text-red-400 border-red-500/30"
+                      ? "text-emerald-400 border-emerald-500/30 shadow-lg shadow-emerald-500/20"
+                      : "text-red-400 border-red-500/30 shadow-lg shadow-red-500/20"
                   )}>
                     {result.hitResult.total}
                     {/* Tech decorations */}
@@ -194,8 +208,8 @@ export function CombatResults({
               </div>
             </div>
 
-            {/* Target Value */}
-            <div className="relative bg-slate-900/60 p-3 rounded-sm border-2 border-amber-600/40 backdrop-blur-sm shadow-amber-900/20">
+            {/* Target Value - with reveal */}
+            <div className="relative bg-slate-900/60 p-3 rounded-sm border-2 border-amber-600/40 backdrop-blur-sm shadow-amber-900/20 result-reveal overflow-hidden">
               {/* Tech frame corners */}
               <div className="absolute top-0 left-0 w-2 h-2 border-l border-t border-amber-500" />
               <div className="absolute top-0 right-0 w-2 h-2 border-r border-t border-amber-500" />
@@ -206,7 +220,7 @@ export function CombatResults({
                 {isGrenade ? 'TARGET RANGE' : 'DISTANCE'}
               </div>
               <div className="flex flex-col items-center">
-                <div className="w-14 h-14 bg-slate-950/80 rounded-sm flex items-center justify-center text-3xl font-mono font-black text-amber-400 border-2 border-amber-500/30 mb-1">
+                <div className="w-14 h-14 bg-slate-950/80 rounded-sm flex items-center justify-center text-3xl font-mono font-black text-amber-400 border-2 border-amber-500/30 mb-1 shadow-lg shadow-amber-500/20">
                   {isGrenade ? parameters.distance : getEffectiveDistance()}
                 </div>
                 <div className="text-sm font-mono font-black text-amber-400">
@@ -217,47 +231,67 @@ export function CombatResults({
             </div>
           </div>
 
-          {/* Hit Result - Status Display */}
+          {/* Hit Result - Status Display with dramatic reveal */}
           <div className={cn(
-            "relative p-4 rounded-sm border-2 flex items-center justify-center gap-3",
+            "relative p-4 rounded-sm border-2 flex items-center justify-center gap-3 result-reveal overflow-hidden",
             result.hitResult.success
-              ? "bg-emerald-950/30 border-emerald-600/40 shadow-emerald-900/30"
-              : "bg-red-950/30 border-red-600/40 shadow-red-900/30"
+              ? "bg-emerald-950/30 border-emerald-600/40 shadow-emerald-900/30 shadow-lg"
+              : "bg-red-950/30 border-red-600/40 shadow-red-900/30 shadow-lg"
           )}>
+            {/* Expand effect for success/failure */}
+            {result.hitResult.success && (
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 via-transparent to-emerald-500/10 animate-pulse pointer-events-none" />
+            )}
+            {!result.hitResult.success && (
+              <div className="absolute inset-0 bg-gradient-to-br from-red-500/20 via-transparent to-red-500/10 pointer-events-none" />
+            )}
+
             {/* Tech frame */}
             <div className={cn(
               "absolute top-0 left-0 w-2 h-2 border-l-2 border-t-2",
-              result.hitResult.success ? "border-emerald-500" : "border-red-500"
+              result.hitResult.success ? "border-emerald-500 animate-pulse" : "border-red-500 animate-pulse"
             )} />
             <div className={cn(
               "absolute top-0 right-0 w-2 h-2 border-r-2 border-t-2",
-              result.hitResult.success ? "border-emerald-500" : "border-red-500"
+              result.hitResult.success ? "border-emerald-500 animate-pulse stagger-100" : "border-red-500 animate-pulse stagger-100"
             )} />
             <div className={cn(
               "absolute bottom-0 left-0 w-2 h-2 border-l-2 border-b-2",
-              result.hitResult.success ? "border-emerald-500" : "border-red-500"
+              result.hitResult.success ? "border-emerald-500 animate-pulse stagger-200" : "border-red-500 animate-pulse stagger-200"
             )} />
             <div className={cn(
               "absolute bottom-0 right-0 w-2 h-2 border-r-2 border-b-2",
-              result.hitResult.success ? "border-emerald-500" : "border-red-500"
+              result.hitResult.success ? "border-emerald-500 animate-pulse stagger-300" : "border-red-500 animate-pulse stagger-300"
             )} />
 
-            <div className="text-[8px] font-mono opacity-40 uppercase font-bold tracking-[0.2em]">STATUS</div>
-            <div className={cn("text-xl md:text-2xl font-mono font-black tracking-wider",
-              result.hitResult.success ? "text-emerald-400" : "text-red-400"
+            {/* Reticle expansion effect */}
+            <div className={cn(
+              "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 border rounded-full reticle-expand",
+              result.hitResult.success ? "border-emerald-500/50" : "border-red-500/50"
+            )} />
+
+            <div className="text-[8px] font-mono opacity-40 uppercase font-bold tracking-[0.2em] relative">STATUS</div>
+            <div className={cn("text-xl md:text-2xl font-mono font-black tracking-wider relative",
+              result.hitResult.success ? "text-emerald-400" : "text-red-400",
+              !result.hitResult.success && "animate-shake"
             )}>
               {isGrenade ? 'ВЗРЫВ!' : (result.hitResult.success ? 'ПОПАДАНИЕ' : 'ПРОМАХ')}
             </div>
           </div>
 
-          {/* Damage Rolls (if hit succeeded) */}
+          {/* Damage Rolls (if hit succeeded) - with reveal animation */}
           {(result.hitResult.success || isGrenade) && result.damageResult && (
             <div className={cn(
-              "relative p-3 rounded-sm border-2",
+              "relative p-3 rounded-sm border-2 result-reveal overflow-hidden",
               result.damageResult.damage > 0
-                ? "bg-amber-950/20 border-amber-600/40 shadow-amber-900/20"
+                ? "bg-amber-950/20 border-amber-600/40 shadow-amber-900/20 shadow-lg"
                 : "bg-slate-900/60 border-slate-700"
             )}>
+              {/* Subtle glow for successful damage */}
+              {result.damageResult.damage > 0 && (
+                <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent pointer-events-none" />
+              )}
+
               {/* Tech frame corners */}
               <div className={cn(
                 "absolute top-0 left-0 w-2 h-2 border-l border-t",
@@ -336,7 +370,7 @@ export function CombatResults({
                   })}
                 </div>
               ) : (
-                // Normal single roll display
+                // Normal single roll display with enhanced visuals
                 <div className="flex justify-center items-start gap-2 flex-wrap">
                   {result.damageResult?.rolls.map((roll, i) => {
                     const effectiveArmor = getEffectiveArmor();
@@ -346,14 +380,17 @@ export function CombatResults({
                     const rolls = result.damageResult?.rolls ?? [];
                     const maxRoll = isInfantry ? Math.max(...rolls) : roll;
                     const isMax = isInfantry && roll === maxRoll;
+                    // Check for critical hit (max possible roll for most dice is 20 or 12)
+                    const isCritical = roll >= 20 || roll >= 12;
                     return (
-                      <div key={i} className="flex flex-col items-center gap-1">
+                      <div key={i} className="flex flex-col items-center gap-1 stagger-100" style={{ animationDelay: `${i * 50}ms` }}>
                         <div className={cn(
-                          "relative w-12 h-12 bg-slate-950/80 rounded-sm border-2 flex items-center justify-center text-xl font-mono font-black shadow-lg",
+                          "relative w-12 h-12 bg-slate-950/80 rounded-sm border-2 flex items-center justify-center text-xl font-mono font-black shadow-lg transition-all result-reveal",
                           penetrated
-                            ? "text-amber-400 border-amber-500"
+                            ? "text-amber-400 border-amber-500 shadow-amber-500/20"
                             : "text-slate-600 border-slate-700",
-                          isMax && penetrated && "ring-2 ring-blue-400/50"
+                          isMax && penetrated && "ring-2 ring-blue-400/50 ring-offset-1 ring-offset-slate-900",
+                          isCritical && penetrated && "animate-pulse"
                         )}>
                           {roll}
                           {/* Tech decoration */}
@@ -363,8 +400,14 @@ export function CombatResults({
                           )} />
                           {/* Max indicator for infantry */}
                           {isMax && penetrated && (
-                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border border-blue-300 flex items-center justify-center">
+                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border border-blue-300 flex items-center justify-center animate-pulse">
                               <span className="text-[8px] font-black text-white">★</span>
+                            </div>
+                          )}
+                          {/* Critical hit badge for max rolls */}
+                          {isCritical && penetrated && (
+                            <div className="absolute -top-1 -left-1 w-3 h-3 bg-amber-500 rounded-full border border-amber-300 flex items-center justify-center animate-pulse">
+                              <span className="text-[8px] font-black text-white">!</span>
                             </div>
                           )}
                         </div>
@@ -405,35 +448,48 @@ export function CombatResults({
         </>
       )}
 
-      {/* Grenade Results - Special Two-Phase Display */}
+      {/* Grenade Results - Special Two-Phase Display with reveal */}
       {isGrenade && result.hitResult && result.grenadeBlastZone && (
         <>
-          {/* Blast Zone Display */}
+          {/* Blast Zone Display with reveal animation */}
           <div
             data-testid="grenade-blast-zone"
             className={cn(
-              "relative p-4 rounded-sm border-2",
+              "relative p-4 rounded-sm border-2 result-reveal overflow-hidden",
               (result.hitResult.roll ?? 0) === 1
-                ? "bg-red-950/30 border-red-600/50 shadow-red-900/20"
-                : "bg-emerald-950/20 border-emerald-600/40 shadow-emerald-900/20"
+                ? "bg-red-950/30 border-red-600/50 shadow-red-900/20 shadow-lg"
+                : "bg-emerald-950/20 border-emerald-600/40 shadow-emerald-900/20 shadow-lg"
             )}
           >
+            {/* Glow effect based on danger level */}
+            {(result.hitResult.roll ?? 0) === 1 && (
+              <div className="absolute inset-0 bg-gradient-to-br from-red-500/20 via-transparent to-red-500/10 animate-pulse pointer-events-none" />
+            )}
+            {(result.hitResult.roll ?? 0) > 1 && (
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-transparent to-emerald-500/5 pointer-events-none" />
+            )}
+
+            {/* Pulsing radius indicator for blast zone */}
+            {(result.hitResult.roll ?? 0) > 1 && (
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 border border-emerald-500/20 rounded-full reticle-expand pointer-events-none" />
+            )}
+
             {/* Tech frame corners */}
             <div className={cn(
               "absolute top-0 left-0 w-2 h-2 border-l-2 border-t-2",
-              (result.hitResult.roll ?? 0) === 1 ? "border-red-500" : "border-emerald-500"
+              (result.hitResult.roll ?? 0) === 1 ? "border-red-500 animate-pulse" : "border-emerald-500 animate-pulse"
             )} />
             <div className={cn(
               "absolute top-0 right-0 w-2 h-2 border-r-2 border-t-2",
-              (result.hitResult.roll ?? 0) === 1 ? "border-red-500" : "border-emerald-500"
+              (result.hitResult.roll ?? 0) === 1 ? "border-red-500 animate-pulse stagger-100" : "border-emerald-500 animate-pulse stagger-100"
             )} />
             <div className={cn(
               "absolute bottom-0 left-0 w-2 h-2 border-l-2 border-b-2",
-              (result.hitResult.roll ?? 0) === 1 ? "border-red-500" : "border-emerald-500"
+              (result.hitResult.roll ?? 0) === 1 ? "border-red-500 animate-pulse stagger-200" : "border-emerald-500 animate-pulse stagger-200"
             )} />
             <div className={cn(
               "absolute bottom-0 right-0 w-2 h-2 border-r-2 border-b-2",
-              (result.hitResult.roll ?? 0) === 1 ? "border-red-500" : "border-emerald-500"
+              (result.hitResult.roll ?? 0) === 1 ? "border-red-500 animate-pulse stagger-300" : "border-emerald-500 animate-pulse stagger-300"
             )} />
 
             {/* Danger warning if rolled 1 */}
@@ -495,7 +551,7 @@ export function CombatResults({
             </div>
           </div>
 
-          {/* Target Checks Section */}
+          {/* Target Checks Section with reveal animations */}
           {result.grenadeBlastChecks && result.grenadeBlastChecks.length > 0 && (
             <div data-testid="grenade-blast-checks" className="space-y-2">
               {/* Debug: {console.log('Rendering grenade-blast-checks with', result.grenadeBlastChecks.length, 'checks')} */}
@@ -506,14 +562,20 @@ export function CombatResults({
                 <div
                   key={idx}
                   className={cn(
-                    "relative p-3 rounded-sm border-2 flex items-center justify-between",
+                    "relative p-3 rounded-sm border-2 flex items-center justify-between result-reveal overflow-hidden",
                     check.hit
-                      ? "bg-orange-950/20 border-orange-600/40"
+                      ? "bg-orange-950/20 border-orange-600/40 shadow-orange-900/10"
                       : "bg-slate-800/60 border-slate-700"
                   )}
+                  style={{ animationDelay: `${idx * 100}ms` }}
                 >
+                  {/* Subtle glow for hits */}
+                  {check.hit && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 via-transparent to-orange-500/10 pointer-events-none" />
+                  )}
+
                   {/* Left side: Armor and Roll */}
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 relative">
                     <div className="relative">
                       <div className="text-[8px] font-mono opacity-40 uppercase mb-1 text-center">
                         БРОНЯ
@@ -530,24 +592,30 @@ export function CombatResults({
                         D20
                       </div>
                       <div className={cn(
-                        "w-12 h-12 rounded border-2 flex items-center justify-center text-xl font-mono font-bold",
+                        "w-12 h-12 rounded border-2 flex items-center justify-center text-xl font-mono font-bold transition-all",
                         check.hit
-                          ? "bg-orange-900/40 border-orange-500 text-orange-400"
+                          ? "bg-orange-900/40 border-orange-500 text-orange-400 shadow-lg shadow-orange-500/20"
                           : "bg-slate-900/80 border-slate-600 text-slate-500"
                       )}>
                         {check.roll}
+                        {/* Critical hit indicator for 20 */}
+                        {check.hit && check.roll === 20 && (
+                          <div className="absolute -top-1 -right-1 w-3 h-3 bg-amber-500 rounded-full border border-amber-300 flex items-center justify-center animate-pulse">
+                            <span className="text-[8px] font-black text-white">!</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
 
                   {/* Right side: Result icon */}
                   <div className={cn(
-                    "flex items-center gap-2 pl-3 border-l border-slate-700",
+                    "flex items-center gap-2 pl-3 border-l border-slate-700 relative",
                     check.hit ? "border-orange-700/30" : ""
                   )}>
                     {check.hit ? (
                       <>
-                        <Skull className="w-5 h-5 text-orange-400" />
+                        <Skull className="w-5 h-5 text-orange-400 animate-pulse" />
                         <span className="text-sm font-mono font-bold text-orange-400 uppercase">
                           ПРОБИТО
                         </span>
@@ -636,13 +704,13 @@ export function CombatResults({
         </>
       )}
 
-      {/* Melee Results - Combat Display */}
+      {/* Melee Results - Combat Display with reveal */}
       {isMelee && result.meleeResult && (() => {
         const meleeResult = result.meleeResult!;
         return (
           <div className="space-y-3">
             {/* Tech header for melee */}
-            <div className="text-center">
+            <div className="text-center result-reveal">
               <div className="text-[8px] font-mono text-cyan-400/60 uppercase tracking-[0.2em]">
                 CLOSE COMBAT ENGAGEMENT
               </div>
@@ -732,55 +800,75 @@ export function CombatResults({
             </div>
           )}
 
-          {/* Melee Result - Status Display */}
+          {/* Melee Result - Status Display with reveal and effects */}
           <div className={cn(
-            "relative p-4 rounded-sm border-2 flex items-center justify-center",
+            "relative p-4 rounded-sm border-2 flex items-center justify-center result-reveal overflow-hidden",
             meleeResult.winner === 'attacker'
-              ? "bg-emerald-950/30 border-emerald-600/40 shadow-emerald-900/20"
+              ? "bg-emerald-950/30 border-emerald-600/40 shadow-emerald-900/20 shadow-lg"
               : meleeResult.winner === 'defender'
-              ? "bg-red-950/30 border-red-600/40 shadow-red-900/20"
+              ? "bg-red-950/30 border-red-600/40 shadow-red-900/20 shadow-lg"
               : "bg-slate-900/60 border-slate-700"
           )}>
+            {/* Glow effect based on result */}
+            {meleeResult.winner === 'attacker' && (
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 via-transparent to-emerald-500/10 animate-pulse pointer-events-none" />
+            )}
+            {meleeResult.winner === 'defender' && (
+              <div className="absolute inset-0 bg-gradient-to-br from-red-500/20 via-transparent to-red-500/10 pointer-events-none" />
+            )}
+            {meleeResult.winner === 'defender' && (
+              <div className="absolute inset-0 animate-shake" />
+            )}
+
             {/* Tech frame */}
             <div className={cn(
               "absolute top-0 left-0 w-2 h-2 border-l-2 border-t-2",
               meleeResult.winner === 'attacker'
-                ? "border-emerald-500"
+                ? "border-emerald-500 animate-pulse"
                 : meleeResult.winner === 'defender'
-                ? "border-red-500"
+                ? "border-red-500 animate-pulse"
                 : "border-slate-600"
             )} />
             <div className={cn(
               "absolute top-0 right-0 w-2 h-2 border-r-2 border-t-2",
               meleeResult.winner === 'attacker'
-                ? "border-emerald-500"
+                ? "border-emerald-500 animate-pulse stagger-100"
                 : meleeResult.winner === 'defender'
-                ? "border-red-500"
+                ? "border-red-500 animate-pulse stagger-100"
                 : "border-slate-600"
             )} />
             <div className={cn(
               "absolute bottom-0 left-0 w-2 h-2 border-l-2 border-b-2",
               meleeResult.winner === 'attacker'
-                ? "border-emerald-500"
+                ? "border-emerald-500 animate-pulse stagger-200"
                 : meleeResult.winner === 'defender'
-                ? "border-red-500"
+                ? "border-red-500 animate-pulse stagger-200"
                 : "border-slate-600"
             )} />
             <div className={cn(
               "absolute bottom-0 right-0 w-2 h-2 border-r-2 border-b-2",
               meleeResult.winner === 'attacker'
-                ? "border-emerald-500"
+                ? "border-emerald-500 animate-pulse stagger-300"
                 : meleeResult.winner === 'defender'
-                ? "border-red-500"
+                ? "border-red-500 animate-pulse stagger-300"
                 : "border-slate-600"
             )} />
 
-            <div className={cn("text-xl md:text-2xl font-mono font-black tracking-wider",
+            {/* Reticle expansion effect */}
+            {meleeResult.winner !== 'draw' && (
+              <div className={cn(
+                "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 border rounded-full reticle-expand",
+                meleeResult.winner === 'attacker' ? "border-emerald-500/50" : "border-red-500/50"
+              )} />
+            )}
+
+            <div className={cn("text-xl md:text-2xl font-mono font-black tracking-wider relative",
               meleeResult.winner === 'attacker'
                 ? "text-emerald-400"
                 : meleeResult.winner === 'defender'
                 ? "text-red-400"
-                : "text-slate-400"
+                : "text-slate-400",
+              meleeResult.winner === 'attacker' && "animate-shake"
             )}>
               {meleeResult.winner === 'attacker'
                 ? 'VICTORY'

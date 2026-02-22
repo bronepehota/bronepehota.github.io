@@ -48,6 +48,7 @@ const getActionTechStyle = (actionType: CombatActionType) => {
 };
 
 export function ActionSelector({ onSelect, grenadesAvailable = true, className }: ActionSelectorProps) {
+  // Static tech hex codes for decoration (stable across renders)
   const actions: Array<{
     type: CombatActionType;
     label: string;
@@ -56,6 +57,7 @@ export function ActionSelector({ onSelect, grenadesAvailable = true, className }
     icon: React.ReactNode;
     techIcon: React.ReactNode;
     disabled?: boolean;
+    hexCode?: string;
   }> = [
     {
       type: 'shot',
@@ -64,6 +66,7 @@ export function ActionSelector({ onSelect, grenadesAvailable = true, className }
       description: 'Дистанция • Броня • Укрытие',
       icon: <Target className="w-6 h-6" />,
       techIcon: <Crosshair className="w-5 h-5" />,
+      hexCode: '0x3F7A',
     },
     {
       type: 'melee',
@@ -72,6 +75,7 @@ export function ActionSelector({ onSelect, grenadesAvailable = true, className }
       description: 'Кубики против кубиков',
       icon: <Sword className="w-6 h-6" />,
       techIcon: <Sword className="w-5 h-5" />,
+      hexCode: '0xC4E2',
     },
     {
       type: 'grenade',
@@ -81,6 +85,7 @@ export function ActionSelector({ onSelect, grenadesAvailable = true, className }
       icon: <Bomb className="w-6 h-6" />,
       techIcon: <Bomb className="w-5 h-5" />,
       disabled: !grenadesAvailable,
+      hexCode: '0x8B1F',
     },
   ];
 
@@ -125,14 +130,23 @@ export function ActionSelector({ onSelect, grenadesAvailable = true, className }
               disabled={disabled}
               className={cn(
                 "relative w-full overflow-hidden group",
-                "transition-all duration-200",
+                "transition-all duration-300 ease-out",
                 "active:scale-[0.98]",
                 "touch-manipulation",
                 disabled
                   ? "opacity-40 cursor-not-allowed"
-                  : "hover:scale-[1.01]"
+                  : "hover:scale-[1.02]"
               )}
             >
+              {/* Hover glow effect - radiates from center */}
+              {!disabled && (
+                <div className={cn(
+                  "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500",
+                  "bg-gradient-to-r from-transparent via-white/5 to-transparent",
+                  "group-hover:animate-pulse"
+                )} />
+              )}
+
               {/* Main card */}
               <div className={cn(
                 "relative p-4 min-h-[72px] rounded-sm border-2",
@@ -141,43 +155,60 @@ export function ActionSelector({ onSelect, grenadesAvailable = true, className }
                   ? "border-slate-700/50"
                   : `${style.border} ${style.borderHover}`,
                 !disabled && style.glow,
-                "shadow-lg"
+                "shadow-lg transition-all duration-300",
+                !disabled && "group-hover:shadow-2xl"
               )}>
-                {/* Tech frame corners */}
+                {/* Tech frame corners with pulsing animation */}
                 {!disabled && (
                   <>
-                    <div className={cn("absolute top-0 left-0 w-3 h-3 border-l-2 border-t-2", style.accent)} />
-                    <div className={cn("absolute top-0 right-0 w-3 h-3 border-r-2 border-t-2", style.accent)} />
-                    <div className={cn("absolute bottom-0 left-0 w-3 h-3 border-l-2 border-b-2", style.accent)} />
-                    <div className={cn("absolute bottom-0 right-0 w-3 h-3 border-r-2 border-b-2", style.accent)} />
+                    <div className={cn("absolute top-0 left-0 w-3 h-3 border-l-2 border-t-2 animate-pulse", style.accent)} />
+                    <div className={cn("absolute top-0 right-0 w-3 h-3 border-r-2 border-t-2 animate-pulse stagger-100", style.accent)} />
+                    <div className={cn("absolute bottom-0 left-0 w-3 h-3 border-l-2 border-b-2 animate-pulse stagger-200", style.accent)} />
+                    <div className={cn("absolute bottom-0 right-0 w-3 h-3 border-r-2 border-b-2 animate-pulse stagger-300", style.accent)} />
 
                     {/* Scanline effect */}
                     <div className={cn(
-                      "absolute inset-0 bg-gradient-to-r opacity-0 group-hover:opacity-100 transition-opacity duration-500",
+                      "absolute inset-0 bg-gradient-to-r opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-scan-vertical",
                       style.scanline
                     )} />
+
+                    {/* Tech data decoration - hex code */}
+                    <div className={cn("absolute bottom-1.5 right-2 text-[7px] font-mono opacity-20", style.primary)}>
+                      {action.hexCode}
+                    </div>
+
+                    {/* Status indicator dots */}
+                    <div className="absolute top-1.5 right-2 flex gap-0.5 opacity-0 group-hover:opacity-40 transition-opacity duration-300">
+                      <div className={cn("w-1 h-1 rounded-full animate-pulse", style.primary)} />
+                      <div className={cn("w-1 h-1 rounded-full animate-pulse stagger-100", style.primary)} />
+                      <div className={cn("w-1 h-1 rounded-full animate-pulse stagger-200", style.primary)} />
+                    </div>
                   </>
                 )}
 
                 {/* Content */}
                 <div className="relative flex items-center gap-4">
-                  {/* Tech icon badge */}
+                  {/* Tech icon badge with hover animation */}
                   <div className={cn(
-                    "relative p-3 rounded-sm border-2 shrink-0",
+                    "relative p-3 rounded-sm border-2 shrink-0 transition-all duration-300",
                     disabled
                       ? "bg-slate-800/50 border-slate-700"
-                      : `${style.bg} ${style.accent}/50`
+                      : `${style.bg} ${style.accent}/50 group-hover:${style.bg}/60`
                   )}>
-                    {/* Tech decoration */}
+                    {/* Tech decoration with animation */}
                     {!disabled && (
                       <>
-                        <div className="absolute top-0 left-0 w-1 h-1 bg-current opacity-50" />
-                        <div className="absolute top-0 right-0 w-1 h-1 bg-current opacity-50" />
-                        <div className="absolute bottom-0 left-0 w-1 h-1 bg-current opacity-50" />
-                        <div className="absolute bottom-0 right-0 w-1 h-1 bg-current opacity-50" />
+                        <div className={cn("absolute top-0 left-0 w-1 h-1 bg-current opacity-50 group-hover:opacity-100 transition-opacity", style.primary)} />
+                        <div className={cn("absolute top-0 right-0 w-1 h-1 bg-current opacity-50 group-hover:opacity-100 transition-opacity", style.primary)} />
+                        <div className={cn("absolute bottom-0 left-0 w-1 h-1 bg-current opacity-50 group-hover:opacity-100 transition-opacity", style.primary)} />
+                        <div className={cn("absolute bottom-0 right-0 w-1 h-1 bg-current opacity-50 group-hover:opacity-100 transition-opacity", style.primary)} />
                       </>
                     )}
-                    <div className={cn(disabled ? "text-slate-600" : style.primary)}>
+                    <div className={cn(
+                      "transition-transform duration-300",
+                      disabled ? "text-slate-600" : style.primary,
+                      !disabled && "group-hover:scale-110 group-hover:rotate-6"
+                    )}>
                       {action.techIcon}
                     </div>
                   </div>
@@ -205,10 +236,10 @@ export function ActionSelector({ onSelect, grenadesAvailable = true, className }
                     </div>
                   </div>
 
-                  {/* Arrow indicator */}
+                  {/* Arrow indicator with animation */}
                   {!disabled && (
                     <div className={cn(
-                      "text-slate-700 group-hover:text-slate-500 transition-colors font-mono text-lg",
+                      "text-slate-700 group-hover:text-slate-500 transition-all font-mono text-lg duration-300 group-hover:translate-x-1",
                       style.primary
                     )}>
                       →
@@ -216,19 +247,26 @@ export function ActionSelector({ onSelect, grenadesAvailable = true, className }
                   )}
                 </div>
 
-                {/* Tech measurement marks */}
+                {/* Tech measurement marks with enhanced visuals */}
                 {!disabled && (
                   <>
-                    <div className="absolute left-2 top-1/2 -translate-y-1/2 w-1 h-3 flex flex-col justify-between opacity-30">
+                    <div className="absolute left-2 top-1/2 -translate-y-1/2 w-1 h-3 flex flex-col justify-between opacity-40 group-hover:opacity-60 transition-opacity">
                       <div className={cn("h-px", style.accent)} />
                       <div className={cn("h-px w-0.5", style.accent)} />
                       <div className={cn("h-px", style.accent)} />
                     </div>
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2 w-1 h-3 flex flex-col justify-between opacity-30">
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 w-1 h-3 flex flex-col justify-between opacity-40 group-hover:opacity-60 transition-opacity">
                       <div className={cn("h-px", style.accent)} />
                       <div className={cn("h-px w-0.5", style.accent)} />
                       <div className={cn("h-px", style.accent)} />
                     </div>
+
+                    {/* Tech reticle decoration */}
+                    <div className={cn(
+                      "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 border rounded-full opacity-0 group-hover:opacity-20 transition-all duration-500",
+                      style.accent,
+                      "group-hover:scale-150"
+                    )} />
                   </>
                 )}
 
@@ -238,13 +276,22 @@ export function ActionSelector({ onSelect, grenadesAvailable = true, className }
                 </div>
               </div>
 
-              {/* Bottom tech decoration */}
+              {/* Bottom tech decoration with status bar */}
               {!disabled && (
-                <div className="h-0.5 mt-px flex">
-                  <div className={cn("flex-1 opacity-30", style.accent)} />
-                  <div className="w-4" />
-                  <div className={cn("flex-1 opacity-30", style.accent)} />
-                </div>
+                <>
+                  {/* Status bar */}
+                  <div className="h-0.5 mt-px flex">
+                    <div className={cn("flex-1 opacity-30", style.accent)} />
+                    <div className="w-4" />
+                    <div className={cn("flex-1 opacity-30", style.accent)} />
+                  </div>
+
+                  {/* Animated power level indicator */}
+                  <div className="absolute bottom-0 left-0 h-0.5 transition-all duration-300 group-hover:w-full w-0 opacity-50" style={{
+                    background: `linear-gradient(90deg, transparent, currentColor, transparent)`,
+                    animation: 'shimmer 2s infinite'
+                  }} />
+                </>
               )}
             </button>
           );
