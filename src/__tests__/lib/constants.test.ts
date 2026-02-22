@@ -10,23 +10,23 @@ import {
 
 describe('constants', () => {
   describe('BASE_PATH', () => {
-    it('should be empty when GITHUB_PAGES is not set', () => {
-      // In test environment, GITHUB_PAGES is not set
+    it('should be empty when NEXT_PUBLIC_GITHUB_PAGES is not set', () => {
+      // In test environment, NEXT_PUBLIC_GITHUB_PAGES is not set
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { BASE_PATH } = require('@/lib/constants');
       expect(BASE_PATH).toBe('');
     });
 
-    it('should contain /bronepehota when GITHUB_PAGES is true', () => {
+    it('should contain /bronepehota when NEXT_PUBLIC_GITHUB_PAGES is true', () => {
       // Set env var before importing
-      process.env.GITHUB_PAGES = 'true';
+      process.env.NEXT_PUBLIC_GITHUB_PAGES = 'true';
       // Clear require cache to re-import with new env
       jest.resetModules();
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { BASE_PATH } = require('@/lib/constants');
       expect(BASE_PATH).toBe('/bronepehota');
       // Clean up
-      delete process.env.GITHUB_PAGES;
+      delete process.env.NEXT_PUBLIC_GITHUB_PAGES;
       jest.resetModules();
     });
   });
