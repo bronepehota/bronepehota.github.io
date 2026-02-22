@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { CombatLogEntry } from '@/lib/combat-types';
 import { useCombatTargetContext } from '@/contexts/CombatTargetContext';
 import InitiativeModal from './modals/InitiativeModal';
-import { BASE_PATH } from '@/lib/constants';
+import Image from 'next/image';
 
 // Faction styles for unit dock navigation
 const getUnitDockStyles = (factionId: string) => {
@@ -302,48 +302,6 @@ export default function GameSession({ army, setArmy, onInitiativeTriggerRef, sho
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden" data-testid="game-session">
-      {/* Battle Screen Atmosphere - Tactical HUD Effects */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* Animated grid background */}
-        <div className="absolute inset-0 combat-grid-bg opacity-30" />
-
-        {/* Scanlines overlay */}
-        <div className="absolute inset-0 combat-scanlines opacity-40" />
-
-        {/* Vignette effect */}
-        <div className="absolute inset-0 pointer-events-none" style={{
-          background: 'radial-gradient(ellipse at center, transparent 0%, rgba(10, 10, 15, 0.4) 100%)'
-        }} />
-
-        {/* Noise texture overlay */}
-        <div className="absolute inset-0 opacity-10" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`
-        }} />
-
-        {/* Animated tactical scan line */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="w-full h-px bg-gradient-to-r from-transparent via-cyan-400/20 to-transparent animate-scan" />
-        </div>
-
-        {/* Corner targeting brackets - faction colored */}
-        <div className={cn("absolute top-4 left-4 w-12 h-12 border-l-2 border-t-2 opacity-50 animate-pulse-slow", factionColors.border)} />
-        <div className={cn("absolute top-4 right-4 w-12 h-12 border-r-2 border-t-2 opacity-50 animate-pulse-slow", factionColors.border)} />
-        <div className={cn("absolute bottom-24 left-4 w-12 h-12 border-l-2 border-b-2 opacity-50 animate-pulse-slow", factionColors.border)} />
-        <div className={cn("absolute bottom-24 right-4 w-12 h-12 border-r-2 border-b-2 opacity-50 animate-pulse-slow", factionColors.border)} />
-
-        {/* Tactical status indicators */}
-        <div className="absolute top-6 left-20 font-ibm-mono text-[8px] text-slate-500/60">
-          <div>HUD_ACTIVE</div>
-          <div>SYS_COMBAT</div>
-        </div>
-
-        {/* Coordinate display */}
-        <div className="absolute top-6 right-20 font-ibm-mono text-[8px] text-slate-500/60 text-right hidden sm:block">
-          <div>TAC_{army.faction.toUpperCase()}</div>
-          <div>MODE_BATTLE</div>
-        </div>
-      </div>
-
       {/* Initiative Modal */}
       <InitiativeModal
         isOpen={showInitiativeModal}
@@ -470,15 +428,18 @@ export default function GameSession({ army, setArmy, onInitiativeTriggerRef, sho
         >
           {/* Expand/collapse handle indicator */}
           <div
-            className="flex justify-center pt-2 pb-1 cursor-grab active:cursor-grabbing"
+            className="flex justify-center pt-3 pb-2 active:bg-slate-800/30 transition-colors"
             onClick={toggleDockExpanded}
             onMouseDown={(e) => e.stopPropagation()}
             onTouchStart={(e) => e.stopPropagation()}
           >
-            <div className={cn(
-              "w-12 h-1 rounded-full transition-all duration-300",
-              isDockExpanded ? "bg-slate-600" : factionColors.bgSolid.replace('bg-', 'bg-').replace('500', '600')
-            )} />
+            {/* Touch target - larger than visible handle */}
+            <div className="w-16 h-8 flex items-center justify-center">
+              <div className={cn(
+                "w-12 h-1 rounded-full transition-all duration-300",
+                isDockExpanded ? "bg-slate-500" : factionColors.bgSolid.replace('bg-', 'bg-').replace('500', '500')
+              )} />
+            </div>
           </div>
 
           {/* Dock top decorative line with faction color */}
@@ -538,15 +499,18 @@ export default function GameSession({ army, setArmy, onInitiativeTriggerRef, sho
                     >
                       {/* Unit portrait */}
                       <div className="absolute inset-0">
-                        <img
-                          src={`${BASE_PATH}${
+                        <Image
+                          src={
                             isMachine
-                              ? unit.data.image
-                              : ((unit.data as Squad).soldiers[0]?.image || unit.data.image)
-                          }`}
+                              ? unit.data.image!
+                              : ((unit.data as Squad).soldiers[0]?.image || unit.data.image!)
+                          }
                           alt={unit.data.name}
-                          className="w-full h-full object-cover"
+                          fill
+                          className="object-cover"
                           style={{ objectPosition: '50% 85%' }}
+                          sizes="72px"
+                          unoptimized
                         />
                         <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
                       </div>
@@ -631,7 +595,7 @@ export default function GameSession({ army, setArmy, onInitiativeTriggerRef, sho
                 style={{ background: 'linear-gradient(to left, rgb(2 6 23 / 0.95), transparent)' }}
               />
 
-              <div className="flex overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-hide items-center px-2 py-3">
+              <div className="flex overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-hide items-center px-2 pt-2 pb-3">
             {(() => {
               // Sort and group units: active first, then done/dead
               const sortedUnits = army.units
@@ -727,15 +691,18 @@ export default function GameSession({ army, setArmy, onInitiativeTriggerRef, sho
                 >
                   {/* Unit portrait image - MAIN IDENTIFICATION - fully visible */}
                   <div className="absolute inset-0">
-                    <img
-                      src={`${BASE_PATH}${
+                    <Image
+                      src={
                         isMachine
-                          ? unit.data.image
-                          : ((unit.data as Squad).soldiers[0]?.image || unit.data.image)
-                      }`}
+                          ? unit.data.image!
+                          : ((unit.data as Squad).soldiers[0]?.image || unit.data.image!)
+                      }
                       alt={unit.data.name}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
                       style={{ objectPosition: '50% 85%' }}
+                      sizes="(max-width: 768px) 72px, 88px"
+                      unoptimized
                     />
 
                     {/* Gradient overlay ONLY at very bottom for text readability */}
