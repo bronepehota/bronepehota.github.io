@@ -15,7 +15,7 @@ interface SoldierCardProps {
   soldierIndex: number;
   allUnits: ArmyUnit[];
   rulesVersion: RulesVersionID;
-  updateUnit: (unit: ArmyUnit) => void;
+  updateUnit: (instanceId: string, updateFn: (currentUnit: ArmyUnit) => ArmyUnit) => void;
   onSoldierAction: (soldierIndex: number) => void;
   setShowSoldierImage: (idx: number | null) => void;
   setShowPanicModal: (show: boolean) => void;
@@ -118,44 +118,54 @@ function SoldierCard({
   }, []);
 
   const handleToggleAction = () => {
-    const newActions = [...(unit.actionsUsed || [])];
-    const currentDone = newActions[soldierIndex]?.done || false;
+    // Use explicit instanceId to avoid updating all units
+    updateUnit(unit.instanceId, (currentUnit: ArmyUnit) => {
+      const newActions = [...(currentUnit.actionsUsed || [])];
+      const currentDone = newActions[soldierIndex]?.done || false;
 
-    if (currentDone) {
-      // Untoggling "done" - reset all actions
-      newActions[soldierIndex] = {
-        moved: false,
-        shot: false,
-        melee: false,
-        done: false
-      };
-    } else {
-      newActions[soldierIndex] = {
-        ...newActions[soldierIndex],
-        done: true
-      };
-    }
-    updateUnit({ ...unit, actionsUsed: newActions });
+      if (currentDone) {
+        // Untoggling "done" - reset all actions
+        newActions[soldierIndex] = {
+          moved: false,
+          shot: false,
+          melee: false,
+          done: false
+        };
+      } else {
+        newActions[soldierIndex] = {
+          ...newActions[soldierIndex],
+          done: true
+        };
+      }
+      return { ...currentUnit, actionsUsed: newActions };
+    });
   };
 
   const handleToggleDead = () => {
+    // Store whether this is adding or removing a kill (before state changes)
     const dead = unit.deadSoldiers || [];
-    const newDead = dead.includes(soldierIndex)
-      ? dead.filter(i => i !== soldierIndex)
-      : [...dead, soldierIndex];
+    const isAddingKill = !dead.includes(soldierIndex);
 
-    const updatedUnit = { ...unit, deadSoldiers: newDead };
+    // Use explicit instanceId to avoid updating all units
+    updateUnit(unit.instanceId, (currentUnit: ArmyUnit) => {
+      const currentDead = currentUnit.deadSoldiers || [];
+      const newDead = currentDead.includes(soldierIndex)
+        ? currentDead.filter(i => i !== soldierIndex)
+        : [...currentDead, soldierIndex];
 
-    // Check panic trigger for community rules
-    if (rulesVersion === 'community_star_system' && newDead.length > 0 && !dead.includes(soldierIndex)) {
-      const currentTurn = 1;
-      const shouldTestPanic = checkPanicTrigger(updatedUnit, 'community_star_system', currentTurn);
-      if (shouldTestPanic) {
-        setShowPanicModal(true);
+      const updatedUnit = { ...currentUnit, deadSoldiers: newDead };
+
+      // Check panic trigger for community rules when adding a kill
+      if (isAddingKill && rulesVersion === 'community_star_system') {
+        const currentTurn = 1;
+        const shouldTestPanic = checkPanicTrigger(updatedUnit, 'community_star_system', currentTurn);
+        if (shouldTestPanic) {
+          setShowPanicModal(true);
+        }
       }
-    }
 
-    updateUnit(updatedUnit);
+      return updatedUnit;
+    });
   };
 
   // Check if this soldier is a pilot

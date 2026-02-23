@@ -35,6 +35,7 @@ export function SoldierActions({
   onStartLongPress,
   onEndLongPress,
   isLongPressing,
+  soldierIndex,
 }: SoldierActionsProps) {
   const [wasLongPressTriggered, setWasLongPressTriggered] = useState(false);
 
@@ -57,8 +58,9 @@ export function SoldierActions({
     }
 
     // If NOT done → activate (mark done)
-    if (!isDead && !isDone) {
-      onToggleDone(); // Activate: mark as done
+    // If DONE → deactivate (toggle back)
+    if (!isDead) {
+      onToggleDone(); // Toggle: mark done or not done
     }
   };
 
@@ -148,6 +150,8 @@ export function SoldierActions({
           title={isDone ? "Долгое нажатие для отмены" : "Завершить ход бойца"}
           aria-label={isDone ? "Боевых действий завершён. Долгое нажатие для отмены." : "Завершить ход бойца"}
           aria-pressed={isDone}
+          data-testid="soldier-done-button"
+          data-soldier-index={soldierIndex}
         >
           {/* Tech corners when done */}
           {isDone && (
@@ -179,6 +183,8 @@ export function SoldierActions({
         title={isDead ? "Долгое нажатие для воскрешения" : "Пометить как убитый"}
         aria-label={isDead ? "Боец убит. Долгое нажатие для отмены." : "Пометить бойца как убитого"}
         aria-pressed={isDead}
+        data-testid="soldier-kill-button"
+        data-soldier-index={soldierIndex}
       >
         {/* Tech corners when dead */}
         {isDead && (

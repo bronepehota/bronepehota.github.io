@@ -21,7 +21,7 @@ import { UnitWithType } from '@/lib/encyclopedia-utils';
 
 interface UnitCardProps {
   unit: ArmyUnit;
-  updateUnit: (unit: ArmyUnit) => void;
+  updateUnit: (instanceId: string, updateFn: (currentUnit: ArmyUnit) => ArmyUnit) => void;
   combatLog?: CombatLogEntry[];
   onCombatLogEntry?: (entry: CombatLogEntry) => void;
   allUnits?: ArmyUnit[]; // All units in the army for pilot assignment
@@ -57,6 +57,11 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
   const isSquad = unit.type === 'squad';
   const data = unit.data;
 
+  // Helper to wrap the new updateUnit API for backward-compatible calls within UnitCard
+  const updateThisUnit = (updateFn: (currentUnit: ArmyUnit) => ArmyUnit) => {
+    updateUnit(unit.instanceId, updateFn);
+  };
+
   const isSquadDone = isSquad && (data as Squad).soldiers.every((_, idx) => {
     const isDead = unit.deadSoldiers?.includes(idx);
     const isDone = unit.actionsUsed?.[idx]?.done;
@@ -80,7 +85,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
       }));
 
     if (panicStates.length > 0) {
-      updateUnit({ ...unit, panicState: panicStates });
+      updateThisUnit((u) => ({ ...u, panicState: panicStates }));
     }
   };
 
@@ -90,17 +95,17 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
     const newVal = Math.max(0, Math.min(max, current + delta));
 
     if (stat === 'durability' && newVal === 0) {
-      updateUnit({ ...unit, currentDurability: 0, isMachineDone: true });
+      updateThisUnit((u) => ({ ...u, currentDurability: 0, isMachineDone: true }));
     } else {
-      updateUnit({ ...unit, [stat === 'durability' ? 'currentDurability' : 'currentAmmo']: newVal });
+      updateThisUnit((u) => ({ ...u, [stat === 'durability' ? 'currentDurability' : 'currentAmmo']: newVal }));
     }
   };
 
   const _toggleMachineDestroyed = () => {
     if (unit.currentDurability === 0) {
-      updateUnit({ ...unit, currentDurability: 1, isMachineDone: false });
+      updateThisUnit((u) => ({ ...u, currentDurability: 1, isMachineDone: false }));
     } else {
-      updateUnit({ ...unit, currentDurability: 0, isMachineDone: true });
+      updateThisUnit((u) => ({ ...u, currentDurability: 0, isMachineDone: true }));
     }
   };
 
@@ -202,7 +207,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
           pilotArmor: unit.pilotInfo.pilotArmor || 0,
           alive: false
         };
-        updateUnit({ ...unit, pilotInfo: updatedPilotInfo });
+        updateThisUnit((u) => ({ ...u, pilotInfo: updatedPilotInfo }));
       }
     });
   };
@@ -230,10 +235,10 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
             ...newActions[result.soldierIndex],
             shot: true
           };
-          updateUnit({ ...unit, actionsUsed: newActions });
+          updateThisUnit((u) => ({ ...u, actionsUsed: newActions }));
 
           if (result.actionType === 'grenade') {
-            updateUnit({ ...unit, grenadesUsed: true });
+            updateThisUnit((u) => ({ ...u, grenadesUsed: true }));
           }
         } else if (result.unitType === 'machine') {
           const weaponIndex = result.parameters.weaponIndex || 0;
@@ -248,13 +253,13 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
             ...(unit.machineWeaponShots || {}),
             [weaponIndex]: (unit.machineWeaponShots?.[weaponIndex] || 0) + 1
           };
-          updateUnit({
-            ...unit,
+          updateThisUnit((u) => ({
+            ...u,
             currentAmmo: newAmmo,
             machineShotsUsed: newShotsUsed,
             machineWeaponShots: newWeaponShots,
             isMachineShot: true
-          });
+          }));
         }
       } else if (result.actionType === 'melee') {
         if (result.unitType === 'squad' && result.soldierIndex !== undefined) {
@@ -263,9 +268,9 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
             ...newActions[result.soldierIndex],
             melee: true
           };
-          updateUnit({ ...unit, actionsUsed: newActions });
+          updateThisUnit((u) => ({ ...u, actionsUsed: newActions }));
         } else if (result.unitType === 'machine') {
-          updateUnit({ ...unit, isMachineMelee: true });
+          updateThisUnit((u) => ({ ...u, isMachineMelee: true }));
         }
       }
 
@@ -283,7 +288,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
         ...newActions[soldierIdx],
         done: true
       };
-      updateUnit({ ...unit, actionsUsed: newActions });
+      updateThisUnit((u) => ({ ...u, actionsUsed: newActions }));
     }
 
     if (combatController.state.result && onCombatLogEntry) {
@@ -595,10 +600,10 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                     if (isDead) return action;
                     return { ...action, done: true };
                   });
-                updateUnit({ ...unit, actionsUsed: newActions });
+                updateThisUnit((u) => ({ ...u, actionsUsed: newActions }));
               } else {
                 // Mark machine as done
-                updateUnit({ ...unit, isMachineDone: true });
+                updateThisUnit((u) => ({ ...u, isMachineDone: true }));
               }
             }}
             className="p-1.5 md:p-1 hover:bg-white/10 rounded-sm transition-colors min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border border-slate-700/50"
@@ -615,7 +620,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
             <div className="grid grid-cols-1 gap-1.5 md:gap-2">
               {(data as Squad).soldiers.map((s, idx) => (
                 <SoldierCard
-                  key={idx}
+                  key={`soldier-${unit.instanceId}-${idx}-${s.num}`}
                   squad={data as Squad}
                   unit={unit}
                   soldierIndex={idx}
@@ -1062,15 +1067,15 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                     if (isMachineDestroyed) return;
                     if (unit.isMachineDone) {
                       // Untoggling done - reset all actions to return to active state
-                      updateUnit({
-                        ...unit,
+                      updateThisUnit((u) => ({
+                        ...u,
                         isMachineMoved: false,
                         isMachineShot: false,
                         isMachineMelee: false,
                         isMachineDone: false
-                      });
+                      }));
                     } else {
-                      updateUnit({ ...unit, isMachineDone: true });
+                      updateThisUnit((u) => ({ ...u, isMachineDone: true }));
                     }
                   }}
                   disabled={isMachineDestroyed || isMachineDone}
@@ -1103,7 +1108,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
             <div className="flex gap-2 items-center flex-1">
               <div className="flex -space-x-2">
                 {(data as Squad).soldiers.slice(0, 3).map((_, idx) => (
-                  <div key={idx} className="w-6 h-6 rounded-full border border-slate-700 overflow-hidden bg-slate-900 ring-2 ring-slate-800 relative">
+                  <div key={`${unit.instanceId}-collapsed-${idx}`} className="w-6 h-6 rounded-full border border-slate-700 overflow-hidden bg-slate-900 ring-2 ring-slate-800 relative">
                     <Image
                       src={getSoldierImage(idx)}
                       alt={`Солдат ${idx + 1}`}
