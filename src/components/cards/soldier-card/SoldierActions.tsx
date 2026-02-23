@@ -58,8 +58,9 @@ export function SoldierActions({
     }
 
     // If NOT done → activate (mark done)
-    if (!isDead && !isDone) {
-      onToggleDone(); // Activate: mark as done
+    // If DONE → deactivate (toggle back)
+    if (!isDead) {
+      onToggleDone(); // Toggle: mark done or not done
     }
   };
 

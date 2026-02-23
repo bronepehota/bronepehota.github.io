@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Army, ArmyUnit, Squad, PilotInfo, FactionID } from '@/lib/types';
 import { resolvePanic } from '@/lib/panic-logic';
 import { getFactionColors } from '@/lib/faction-colors';
@@ -45,6 +45,71 @@ export default function GameSession({ army, setArmy, onInitiativeTriggerRef, sho
   const [dockDragProgress, setDockDragProgress] = useState(0);
   const { resetTargetMemory } = useCombatTargetContext();
 
+  // Keep ref to current army for immediate access in updateUnit
+  const armyRef = useRef(army);
+  useEffect(() => {
+    armyRef.current = army;
+  }, [army]);
+
+  const updateUnit = (
+    arg1: string | ArmyUnit | ((currentUnit: ArmyUnit) => ArmyUnit),
+    arg2?: (currentUnit: ArmyUnit) => ArmyUnit
+  ) => {
+    // Three API styles supported:
+    // 1. updateUnit(instanceId, updateFn) - functional update with explicit instanceId
+    // 2. updateUnit(armyUnit) - direct update with unit object (backward compatibility)
+    // 3. updateUnit(updateFn) - NOT SUPPORTED (causes bug where all units get updated)
+
+    let targetInstanceId: string;
+    let updatedUnit: ArmyUnit | undefined;
+
+    if (typeof arg1 === 'string') {
+      // Style 1: updateUnit(instanceId, updateFn)
+      targetInstanceId = arg1;
+      // Apply update function only to matching unit
+      const newArmy = {
+        ...armyRef.current,
+        units: armyRef.current.units.map(u =>
+          u.instanceId === targetInstanceId ? arg2!(u) : u
+        )
+      };
+      armyRef.current = newArmy;
+      setArmy(newArmy);
+      return;
+    } else if (typeof arg1 === 'function') {
+      // Style 3: updateUnit(updateFn) - find the unit by trying the function
+      // This is called from SoldierCard with closure-captured soldierIndex
+      // We need to find which unit actually changed
+      const newArmy = {
+        ...armyRef.current,
+        units: armyRef.current.units.map(u => {
+          const result = arg1(u);
+          // The function adds/removes the captured soldierIndex from deadSoldiers
+          // Only the matching unit will have a different deadSoldiers array
+          const deadChanged = JSON.stringify(u.deadSoldiers) !== JSON.stringify(result.deadSoldiers);
+          const actionsChanged = JSON.stringify(u.actionsUsed) !== JSON.stringify(result.actionsUsed);
+          return (deadChanged || actionsChanged) ? result : u;
+        })
+      };
+      armyRef.current = newArmy;
+      setArmy(newArmy);
+      return;
+    } else {
+      // Style 2: updateUnit(armyUnit) - direct update
+      targetInstanceId = arg1.instanceId;
+      updatedUnit = arg1;
+    }
+
+    // Direct update path
+    const newArmy = {
+      ...armyRef.current,
+      units: armyRef.current.units.map(u => u.instanceId === targetInstanceId ? updatedUnit! : u)
+    };
+    armyRef.current = newArmy;
+    setArmy(newArmy);
+  };
+
+  // Calculate initiative - opens the initiative modal
   const calculateInitiative = useCallback(() => {
     setShowInitiativeModal(true);
   }, []);
@@ -63,13 +128,6 @@ export default function GameSession({ army, setArmy, onInitiativeTriggerRef, sho
 
   // Combat log state
   const [combatLog, setCombatLog] = useState<CombatLogEntry[]>([]);
-
-  const updateUnit = (updatedUnit: ArmyUnit) => {
-    setArmy({
-      ...army,
-      units: army.units.map(u => u.instanceId === updatedUnit.instanceId ? updatedUnit : u)
-    });
-  };
 
   // Handle pilot assignment - updates both machine and squad
   const handlePilotAssign = useCallback((machineInstanceId: string, pilotInfo: PilotInfo) => {
