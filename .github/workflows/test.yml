@@ -2,9 +2,9 @@ name: Test
 
 on:
   push:
-    branches: [main, develop, cucumber-fixes]
+    branches: [main, develop, cucumber-fixes, battle-redesign]
   pull_request:
-    branches: [main, develop]
+    branches: [main, develop, battle-redesign]
     types: [opened, synchronize]
 
 jobs:
