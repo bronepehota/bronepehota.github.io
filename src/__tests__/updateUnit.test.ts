@@ -51,7 +51,6 @@ describe('updateUnit - Soldier State Management', () => {
         type: 'squad',
         data: squadData,
         instanceNumber: 1,
-        currentSoldiers: [0, 1, 2, 3, 4, 5],
         deadSoldiers: [],
         actionsUsed: []
       }],
@@ -169,7 +168,6 @@ describe('updateUnit - Soldier State Management', () => {
         type: 'squad',
         data: mockArmy.units[0].data as Squad,
         instanceNumber: 2,
-        currentSoldiers: [0, 1, 2, 3, 4, 5],
         deadSoldiers: [],
         actionsUsed: []
       });
