@@ -615,7 +615,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
             <div className="grid grid-cols-1 gap-1.5 md:gap-2">
               {(data as Squad).soldiers.map((s, idx) => (
                 <SoldierCard
-                  key={idx}
+                  key={`soldier-${unit.instanceId}-${idx}-${s.num}`}
                   squad={data as Squad}
                   unit={unit}
                   soldierIndex={idx}
@@ -1103,7 +1103,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
             <div className="flex gap-2 items-center flex-1">
               <div className="flex -space-x-2">
                 {(data as Squad).soldiers.slice(0, 3).map((_, idx) => (
-                  <div key={idx} className="w-6 h-6 rounded-full border border-slate-700 overflow-hidden bg-slate-900 ring-2 ring-slate-800 relative">
+                  <div key={`${unit.instanceId}-collapsed-${idx}`} className="w-6 h-6 rounded-full border border-slate-700 overflow-hidden bg-slate-900 ring-2 ring-slate-800 relative">
                     <Image
                       src={getSoldierImage(idx)}
                       alt={`Солдат ${idx + 1}`}
