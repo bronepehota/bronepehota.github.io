@@ -208,12 +208,11 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
   }, []);
 
   /**
-   * Minimal dice animation - just show the result immediately
-   * Removed animation loop for performance - was causing 1-3 second delays
+   * Dice animation - visible roll duration
    */
   const animateDiceRoll = useCallback(async (): Promise<void> => {
-    // Minimal delay for visual feedback (50ms instead of 480ms)
-    await new Promise(r => setTimeout(r, 50));
+    // Visible dice roll animation (400ms for quick feedback)
+    await new Promise(r => setTimeout(r, 400));
   }, []);
 
   /**
@@ -260,12 +259,14 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
     );
 
     let damageResult: any = { damage: 0, rolls: [] };
-    const finalDisplay: DiceDisplay = { hit: hitResult.roll };
+    const finalDisplay: DiceDisplay = {
+      hitRolls: hitResult.rolls,
+      hitBonus: hitResult.bonus,
+      hitTotal: hitResult.total,
+      hit: hitResult.roll, // for backward compatibility
+    };
 
     if (hitResult.success) {
-      // Animate damage rolls
-      await animateDiceRoll();
-
       // For surprise attack, roll damage twice and take best result
       if (state.parameters.isSurpriseAttack) {
         const damage1 = rules.calculateDamage(

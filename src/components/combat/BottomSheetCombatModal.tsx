@@ -24,6 +24,8 @@ interface BottomSheetCombatModalProps {
   onGrenadeCheckTarget?: (armor: number) => void; // For grenade blast checks
   grenadesAvailable?: boolean;
   unitDisplayName?: string;
+  rememberMarkAsDone?: boolean;
+  setRememberMarkAsDone?: (value: boolean) => void;
 }
 
 // Action type colors for Military Tech Blueprint
@@ -78,6 +80,8 @@ export function BottomSheetCombatModal({
   onGrenadeCheckTarget,
   grenadesAvailable = true,
   unitDisplayName: _unitDisplayName,
+  rememberMarkAsDone = false,
+  setRememberMarkAsDone,
 }: BottomSheetCombatModalProps) {
   const { sheetRef, touchHandlers } = useBottomSheet({
     onClose,
@@ -170,7 +174,8 @@ export function BottomSheetCombatModal({
               <div className="flex items-center gap-2">
                 {state.actionType && (
                   <div className="text-[8px] font-mono text-slate-600 uppercase tracking-wider">
-                    {state.actionType.toUpperCase()} PROTOCOL
+                    {state.actionType === 'shot' ? 'ВЫСТРЕЛ' :
+                     state.actionType === 'melee' ? 'БЛИЖНИЙ БОЙ' : 'ГРАНАТА'}
                   </div>
                 )}
                 {/* Status indicator dots */}
@@ -202,6 +207,8 @@ export function BottomSheetCombatModal({
             <ActionSelector
               onSelect={(action) => onSelectAction(action)}
               grenadesAvailable={grenadesAvailable}
+              unit={state.unit}
+              soldierIndex={state.soldierIndex}
             />
           )}
 
@@ -324,6 +331,8 @@ export function BottomSheetCombatModal({
               onGoBack={onGoBack}
               unitType={state.unitType}
               onGrenadeCheckTarget={onGrenadeCheckTarget}
+              rememberMarkAsDone={rememberMarkAsDone}
+              setRememberMarkAsDone={setRememberMarkAsDone}
             />
           )}
         </div>

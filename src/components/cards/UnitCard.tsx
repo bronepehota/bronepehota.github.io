@@ -40,6 +40,8 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
   const [pilotSurvivalTest, setPilotSurvivalTest] = useState<{ roll: number; survived: boolean; testedAt: number } | null>(null);
   const [selectedWeaponInfo, setSelectedWeaponInfo] = useState<{ weapon: Weapon; weaponIdx: number } | null>(null);
   const [showPanicModal, setShowPanicModal] = useState(false);
+  // Remember user's choice for "mark as done" checkbox across combat actions
+  const [rememberMarkAsDone, setRememberMarkAsDone] = useState(false);
 
   const combatController = useCombatFlowController();
   const pilotTestFlow = usePilotTestFlow();
@@ -229,18 +231,13 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
 
       // Update unit state based on combat result
       if (result.actionType === 'shot' || result.actionType === 'grenade') {
-        if (result.unitType === 'squad' && result.soldierIndex !== undefined) {
-          const newActions = [...(unit.actionsUsed || [])];
-          newActions[result.soldierIndex] = {
-            ...newActions[result.soldierIndex],
-            shot: true
-          };
-          updateThisUnit((u) => ({ ...u, actionsUsed: newActions }));
-
-          if (result.actionType === 'grenade') {
-            updateThisUnit((u) => ({ ...u, grenadesUsed: true }));
-          }
-        } else if (result.unitType === 'machine') {
+        // For grenades, mark as used immediately (no choice needed)
+        if (result.actionType === 'grenade' && result.unitType === 'squad') {
+          updateThisUnit((u) => ({ ...u, grenadesUsed: true }));
+        }
+        // For squads: don't auto-mark shot, let user choose via UI
+        // For machines: handle ammo/shot counting
+        if (result.unitType === 'machine') {
           const weaponIndex = result.parameters.weaponIndex || 0;
           const weapon = (unit.data as Machine).weapons[weaponIndex];
           const isMeleeWeapon = weapon?.range === 'ББ';
@@ -280,14 +277,34 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
   }, [combatController.state.phase, combatController.state.result, unit, updateUnit]);
 
   const handleApplyResult = (markAsDone?: boolean) => {
-    // Mark soldier as done if requested and this is a squad action
-    if (markAsDone && isSquad && combatController.state.result?.soldierIndex !== undefined) {
-      const soldierIdx = combatController.state.result.soldierIndex;
+    const result = combatController.state.result;
+
+    // For squads: mark shot as used and optionally mark as done
+    if (isSquad && result?.soldierIndex !== undefined) {
+      const soldierIdx = result.soldierIndex;
       const newActions = [...(unit.actionsUsed || [])];
-      newActions[soldierIdx] = {
-        ...newActions[soldierIdx],
-        done: true
-      };
+
+      // Mark shot as used
+      if (result.actionType === 'shot') {
+        newActions[soldierIdx] = {
+          ...newActions[soldierIdx],
+          shot: true
+        };
+      } else if (result.actionType === 'melee') {
+        newActions[soldierIdx] = {
+          ...newActions[soldierIdx],
+          melee: true
+        };
+      }
+
+      // Mark as done if checkbox was checked
+      if (markAsDone) {
+        newActions[soldierIdx] = {
+          ...newActions[soldierIdx],
+          done: true
+        };
+      }
+
       updateThisUnit((u) => ({ ...u, actionsUsed: newActions }));
     }
 
@@ -376,6 +393,8 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
           onGrenadeCheckTarget={combatController.checkGrenadeTarget}
           grenadesAvailable={isSquad && !unit.grenadesUsed}
           unitDisplayName={`${formatUnitNumber(unit)} - ${data.name}`}
+          rememberMarkAsDone={rememberMarkAsDone}
+          setRememberMarkAsDone={setRememberMarkAsDone}
         />
       )}
 
@@ -965,7 +984,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                                   <div className="relative flex flex-col items-center justify-center p-1.5 md:p-2 rounded-lg md:rounded-full bg-slate-900/40 shrink-0 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0">
                                     <Target className="w-3.5 h-3.5 md:w-4 md:h-4 text-amber-400 mb-0.5 shrink-0" />
                                     <span className="text-[10px] md:text-xs font-mono font-bold text-amber-300 leading-tight truncate w-full text-center" title={weapon.range}>
-                                      {weapon.range.length > 4 ? weapon.range.replace('D', '') : weapon.range}
+                                      {weapon.range}
                                     </span>
                                   </div>
 
@@ -973,7 +992,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                                   <div className="relative flex flex-col items-center justify-center p-1.5 md:p-2 rounded-lg md:rounded-full bg-slate-900/40 shrink-0 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0">
                                     <Flame className="w-3.5 h-3.5 md:w-4 md:h-4 text-red-400 mb-0.5 shrink-0" />
                                     <span className="text-[10px] md:text-xs font-mono font-bold text-red-300 leading-tight truncate w-full text-center" title={weapon.power}>
-                                      {weapon.power.length > 4 ? weapon.power.replace('D', '') : weapon.power}
+                                      {weapon.power}
                                     </span>
                                   </div>
                                 </div>

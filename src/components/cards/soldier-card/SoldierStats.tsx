@@ -44,7 +44,7 @@ export function SoldierStats({ soldier, className }: SoldierStatsProps) {
           'text-[10px] md:text-xs font-mono font-black leading-none truncate w-full text-center',
           (!soldier.range || soldier.range === '0') ? 'text-slate-600' : 'text-amber-300'
         )} title={soldier.range}>
-          {soldier.range && soldier.range !== '0' ? (soldier.range.length > 4 ? soldier.range.replace('D', '') : soldier.range) : '—'}
+          {soldier.range && soldier.range !== '0' ? soldier.range : '—'}
         </span>
       </div>
 
@@ -58,7 +58,7 @@ export function SoldierStats({ soldier, className }: SoldierStatsProps) {
           'text-[10px] md:text-xs font-mono font-black leading-none truncate w-full text-center',
           (!soldier.power || soldier.power === '0') ? 'text-slate-600' : 'text-red-300'
         )} title={soldier.power}>
-          {soldier.power && soldier.power !== '0' ? (soldier.power.length > 4 ? soldier.power.replace('D', '') : soldier.power) : '—'}
+          {soldier.power && soldier.power !== '0' ? soldier.power : '—'}
         </span>
       </div>
 
