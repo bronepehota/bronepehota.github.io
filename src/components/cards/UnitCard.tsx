@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { GitHubPagesImage as Image } from '../GitHubPagesImage';
 import { ArmyUnit, Squad, Machine, RulesVersionID, Weapon, PanicTestResult } from '@/lib/types';
-import { Shield, Sword, Target, Heart, CheckCircle2, Bomb, ChevronDown, ChevronUp, UserX, Plane, Skull, Wrench, Flame, Crosshair, X, Image as ImageIcon, Footprints } from 'lucide-react';
+import { Shield, Sword, Target, CheckCircle2, Bomb, UserX, Plane, Skull, Wrench, Flame, Crosshair, X, Image as ImageIcon, Footprints } from 'lucide-react';
 import SoldierCard from './SoldierCard';
 import { formatUnitNumber, shortenWeaponName } from '@/lib/unit-utils';
 import { getDefaultRulesVersion } from '@/lib/rules-registry';
@@ -34,12 +34,13 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
   const [showImage, setShowImage] = useState(false);
   const [showSoldierImage, setShowSoldierImage] = useState<number | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [isManualCollapsed, setIsManualCollapsed] = useState(false);
   const [rulesVersion, setRulesVersion] = useState<RulesVersionID>(getDefaultRulesVersion());
   const [showPilotModal, setShowPilotModal] = useState(false);
   const [pilotSurvivalTest, setPilotSurvivalTest] = useState<{ roll: number; survived: boolean; testedAt: number } | null>(null);
   const [selectedWeaponInfo, setSelectedWeaponInfo] = useState<{ weapon: Weapon; weaponIdx: number } | null>(null);
   const [showPanicModal, setShowPanicModal] = useState(false);
+  // Remember user's choice for "mark as done" checkbox across combat actions
+  const [rememberMarkAsDone, setRememberMarkAsDone] = useState(false);
 
   const combatController = useCombatFlowController();
   const pilotTestFlow = usePilotTestFlow();
@@ -71,7 +72,6 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
   const isAllDead = isSquad && unit.deadSoldiers?.length === (data as Squad).soldiers.length;
   const isMachineDestroyed = !isSquad && (unit.currentDurability === 0);
   const isMachineDone = !isSquad && (unit.isMachineDone || isMachineDestroyed);
-  const isCollapsed = isManualCollapsed;
 
   const handlePanicTestComplete = (results: PanicTestResult[]) => {
     const currentTurn = 1; // Default turn (will be updated when turn tracking is implemented)
@@ -98,14 +98,6 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
       updateThisUnit((u) => ({ ...u, currentDurability: 0, isMachineDone: true }));
     } else {
       updateThisUnit((u) => ({ ...u, [stat === 'durability' ? 'currentDurability' : 'currentAmmo']: newVal }));
-    }
-  };
-
-  const _toggleMachineDestroyed = () => {
-    if (unit.currentDurability === 0) {
-      updateThisUnit((u) => ({ ...u, currentDurability: 1, isMachineDone: false }));
-    } else {
-      updateThisUnit((u) => ({ ...u, currentDurability: 0, isMachineDone: true }));
     }
   };
 
@@ -229,18 +221,13 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
 
       // Update unit state based on combat result
       if (result.actionType === 'shot' || result.actionType === 'grenade') {
-        if (result.unitType === 'squad' && result.soldierIndex !== undefined) {
-          const newActions = [...(unit.actionsUsed || [])];
-          newActions[result.soldierIndex] = {
-            ...newActions[result.soldierIndex],
-            shot: true
-          };
-          updateThisUnit((u) => ({ ...u, actionsUsed: newActions }));
-
-          if (result.actionType === 'grenade') {
-            updateThisUnit((u) => ({ ...u, grenadesUsed: true }));
-          }
-        } else if (result.unitType === 'machine') {
+        // For grenades, mark as used immediately (no choice needed)
+        if (result.actionType === 'grenade' && result.unitType === 'squad') {
+          updateThisUnit((u) => ({ ...u, grenadesUsed: true }));
+        }
+        // For squads: don't auto-mark shot, let user choose via UI
+        // For machines: handle ammo/shot counting
+        if (result.unitType === 'machine') {
           const weaponIndex = result.parameters.weaponIndex || 0;
           const weapon = (unit.data as Machine).weapons[weaponIndex];
           const isMeleeWeapon = weapon?.range === 'ББ';
@@ -280,14 +267,34 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
   }, [combatController.state.phase, combatController.state.result, unit, updateUnit]);
 
   const handleApplyResult = (markAsDone?: boolean) => {
-    // Mark soldier as done if requested and this is a squad action
-    if (markAsDone && isSquad && combatController.state.result?.soldierIndex !== undefined) {
-      const soldierIdx = combatController.state.result.soldierIndex;
+    const result = combatController.state.result;
+
+    // For squads: mark shot as used and optionally mark as done
+    if (isSquad && result?.soldierIndex !== undefined) {
+      const soldierIdx = result.soldierIndex;
       const newActions = [...(unit.actionsUsed || [])];
-      newActions[soldierIdx] = {
-        ...newActions[soldierIdx],
-        done: true
-      };
+
+      // Mark shot as used
+      if (result.actionType === 'shot') {
+        newActions[soldierIdx] = {
+          ...newActions[soldierIdx],
+          shot: true
+        };
+      } else if (result.actionType === 'melee') {
+        newActions[soldierIdx] = {
+          ...newActions[soldierIdx],
+          melee: true
+        };
+      }
+
+      // Mark as done if checkbox was checked
+      if (markAsDone) {
+        newActions[soldierIdx] = {
+          ...newActions[soldierIdx],
+          done: true
+        };
+      }
+
       updateThisUnit((u) => ({ ...u, actionsUsed: newActions }));
     }
 
@@ -376,6 +383,8 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
           onGrenadeCheckTarget={combatController.checkGrenadeTarget}
           grenadesAvailable={isSquad && !unit.grenadesUsed}
           unitDisplayName={`${formatUnitNumber(unit)} - ${data.name}`}
+          rememberMarkAsDone={rememberMarkAsDone}
+          setRememberMarkAsDone={setRememberMarkAsDone}
         />
       )}
 
@@ -541,9 +550,8 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
 
       {/* Unit Header - Tactical Style */}
       <div
-        onClick={() => setIsManualCollapsed(!isManualCollapsed)}
         className={cn(
-          "p-2 md:p-3 flex justify-between items-center cursor-pointer hover:bg-white/5 transition-colors relative z-10 border-b border-slate-800/50",
+          "p-2 md:p-3 flex justify-between items-center relative z-10 border-b border-slate-800/50",
           data.faction === 'polaris' ? "bg-red-950/20" : data.faction === 'protectorate' ? "bg-cyan-950/20" : "bg-yellow-950/20"
         )}
       >
@@ -555,7 +563,6 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 md:gap-2 flex-wrap">
-            {isCollapsed ? (isManualCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />) : <ChevronUp className="w-4 h-4" />}
             {unit.instanceNumber && (
               <span className="text-base md:text-lg font-mono font-bold text-slate-400">{formatUnitNumber(unit)}</span>
             )}
@@ -614,8 +621,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
         </div>
       </div>
 
-      {!isCollapsed && (
-        <div className="p-2 md:p-3 animate-in slide-in-from-top-2 duration-200 relative z-10">
+      <div className="p-2 md:p-3 relative z-10">
           {isSquad ? (
             <div className="grid grid-cols-1 gap-1.5 md:gap-2">
               {(data as Squad).soldiers.map((s, idx) => (
@@ -965,7 +971,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                                   <div className="relative flex flex-col items-center justify-center p-1.5 md:p-2 rounded-lg md:rounded-full bg-slate-900/40 shrink-0 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0">
                                     <Target className="w-3.5 h-3.5 md:w-4 md:h-4 text-amber-400 mb-0.5 shrink-0" />
                                     <span className="text-[10px] md:text-xs font-mono font-bold text-amber-300 leading-tight truncate w-full text-center" title={weapon.range}>
-                                      {weapon.range.length > 4 ? weapon.range.replace('D', '') : weapon.range}
+                                      {weapon.range}
                                     </span>
                                   </div>
 
@@ -973,7 +979,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                                   <div className="relative flex flex-col items-center justify-center p-1.5 md:p-2 rounded-lg md:rounded-full bg-slate-900/40 shrink-0 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0">
                                     <Flame className="w-3.5 h-3.5 md:w-4 md:h-4 text-red-400 mb-0.5 shrink-0" />
                                     <span className="text-[10px] md:text-xs font-mono font-bold text-red-300 leading-tight truncate w-full text-center" title={weapon.power}>
-                                      {weapon.power.length > 4 ? weapon.power.replace('D', '') : weapon.power}
+                                      {weapon.power}
                                     </span>
                                   </div>
                                 </div>
@@ -1097,72 +1103,6 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
             </div>
           )}
         </div>
-      )}
-
-      {isCollapsed && (
-        <div
-          onClick={() => setIsManualCollapsed(false)}
-          className="px-3 pb-3 pt-1 flex gap-4 items-center animate-in fade-in duration-300 relative z-10"
-        >
-          {isSquad ? (
-            <div className="flex gap-2 items-center flex-1">
-              <div className="flex -space-x-2">
-                {(data as Squad).soldiers.slice(0, 3).map((_, idx) => (
-                  <div key={`${unit.instanceId}-collapsed-${idx}`} className="w-6 h-6 rounded-full border border-slate-700 overflow-hidden bg-slate-900 ring-2 ring-slate-800 relative">
-                    <Image
-                      src={getSoldierImage(idx)}
-                      alt={`Солдат ${idx + 1}`}
-                      width={24}
-                      height={32}
-                      className="w-full h-full object-cover object-center"
-                      unoptimized
-                    />
-                    {/* Tech decoration */}
-                    <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-slate-600/40" />
-                  </div>
-                ))}
-                {(data as Squad).soldiers.length > 3 && (
-                  <div className="w-6 h-6 rounded-full border border-slate-700 bg-slate-900 flex items-center justify-center text-[8px] font-mono font-bold ring-2 ring-slate-800">
-                    +{(data as Squad).soldiers.length - 3}
-                  </div>
-                )}
-              </div>
-              <div className="text-[10px] font-mono font-bold opacity-60">
-                ЖИВЫХ: <span className="text-white">{(data as Squad).soldiers.length - (unit.deadSoldiers?.length || 0)}/{(data as Squad).soldiers.length}</span>
-              </div>
-            </div>
-          ) : (
-            <div className="flex gap-4 items-center flex-1">
-              {/* Durability - Tech Display */}
-              <div className="flex items-center gap-2">
-                <div className="relative">
-                  <div className="absolute -top-0.5 -left-0.5 w-4 h-4 border border-slate-600/20" />
-                  <Heart className={cn("w-3 h-3", isMachineDestroyed ? "text-red-500" : "text-emerald-500")} />
-                  <span className={cn("text-[10px] font-mono font-bold", isMachineDestroyed ? "text-red-400" : "text-emerald-400")}>
-                    {unit.currentDurability} HP
-                  </span>
-                </div>
-              </div>
-
-              {/* Ammo - Tech Display */}
-              <div className="flex items-center gap-2">
-                <div className="relative">
-                  <div className="absolute -top-0.5 -left-0.5 w-4 h-4 border border-slate-600/20" />
-                  <Bomb className="w-3 h-3 text-blue-400" />
-                  <span className="text-[10px] font-mono font-bold text-blue-400">{unit.currentAmmo} AMMO</span>
-                </div>
-              </div>
-
-              {isMachineDestroyed && (
-                <div className="ml-auto text-[8px] font-mono font-black uppercase text-red-400 bg-red-950/50 border border-red-700 px-1 py-0.5 rounded-sm">
-                  УНИЧТОЖЕН
-                </div>
-              )}
-            </div>
-          )}
-          <div className="text-[10px] opacity-40 italic">Нажмите, чтобы развернуть...</div>
-        </div>
-      )}
     </div>
   );
 }

@@ -39,7 +39,10 @@ export interface CombatParameters {
  * Dice roll display state during animation
  */
 export interface DiceDisplay {
-  hit?: number;               // Range/distance roll
+  hit?: number;               // Range/distance roll (deprecated - use hitTotal)
+  hitBonus?: number;          // Bonus added to hit roll
+  hitRolls?: number[];        // Individual dice rolls for hit
+  hitTotal?: number;          // Total hit result (roll + bonus)
   power?: number[];           // Damage rolls
   meleeA?: number;            // Attacker melee roll
   meleeD?: number;            // Defender melee roll

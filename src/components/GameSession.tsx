@@ -455,7 +455,7 @@ export default function GameSession({ army, setArmy, onInitiativeTriggerRef, sho
       )}
 
       {/* Main Content */}
-      <div className="flex-1 p-3 md:p-4 pb-36 min-h-0">
+      <div className="flex-1 p-3 md:p-4 pb-44 min-h-0">
         {army.units.length > 0 && (
           <div className={cn(
             "w-full bg-transparent p-0.5 md:p-1 mx-auto",

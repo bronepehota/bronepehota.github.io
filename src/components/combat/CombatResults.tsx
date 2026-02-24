@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CombatResult, CombatParameters } from '@/lib/combat-types';
 import { RulesVersionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -13,7 +13,9 @@ interface CombatResultsProps {
   onApply: (markAsDone?: boolean) => void;
   onGoBack: () => void;
   unitType?: 'squad' | 'machine';
-  onGrenadeCheckTarget?: (armor: number) => void; // For grenade blast checks
+  onGrenadeCheckTarget?: (armor: number) => void;
+  rememberMarkAsDone?: boolean;
+  setRememberMarkAsDone?: (value: boolean) => void;
 }
 
 export function CombatResults({
@@ -24,26 +26,22 @@ export function CombatResults({
   onGoBack: _onGoBack,
   unitType,
   onGrenadeCheckTarget,
+  rememberMarkAsDone = false,
+  setRememberMarkAsDone,
 }: CombatResultsProps) {
   const isShot = result.actionType === 'shot';
   const isGrenade = result.actionType === 'grenade';
   const isMelee = result.actionType === 'melee';
-  const [markAsDone, setMarkAsDone] = useState(false);
-  const [grenadeTargetArmor, setGrenadeTargetArmor] = useState(2); // Armor input for grenade blast checks
+  const [markAsDone, setMarkAsDone] = useState(rememberMarkAsDone);
+  const [grenadeTargetArmor, setGrenadeTargetArmor] = useState(2);
 
-  // Debug logging for grenade
-  if (isGrenade) {
-    console.log('[CombatResults] Grenade result:', {
-      grenadeBlastChecks: result.grenadeBlastChecks,
-      grenadeDistance: result.grenadeDistance,
-      blastChecksLength: result.grenadeBlastChecks?.length || 0
-    });
-  }
+  // Update local state when rememberMarkAsDone prop changes
+  useEffect(() => {
+    setMarkAsDone(rememberMarkAsDone);
+  }, [rememberMarkAsDone]);
 
-  // Only show mark as done option for squads
   const showMarkAsDone = unitType === 'squad';
 
-  // Calculate effective distance/armor for display
   const getEffectiveDistance = () => {
     if (rulesVersion === 'community_star_system' && parameters.fortification !== 'none') {
       const bonus = parameters.fortification === 'light' ? 1 : 2;
@@ -65,46 +63,24 @@ export function CombatResults({
     const bonus = parameters.fortification === 'light' ? 1 : 2;
     return (
       <span className="text-amber-400 text-sm font-mono">
-        +{bonus} <span className="text-[9px] opacity-60">(FORT)</span>
+        +{bonus} <span className="text-[9px] opacity-60">(укрытие)</span>
       </span>
     );
   };
 
   return (
     <div className="space-y-4 animate-in fade-in duration-300">
-      {/* Tech Header - After Action Report with enhanced visuals */}
-      <div className="relative result-reveal">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="h-px flex-1 bg-emerald-600/30" />
-          <div className="w-1 h-1 bg-emerald-500 rotate-45 animate-pulse" />
-          <div className="h-px flex-1 bg-emerald-600/30" />
-        </div>
-        <div className="text-center">
-          <div className="text-xs font-mono font-bold text-emerald-400 tracking-[0.2em] uppercase">
-            After Action Report
-          </div>
-          <div className="text-[8px] font-mono text-slate-600 uppercase tracking-wider">
-            MISSION RESULTS // {result.actionType.toUpperCase()}
-          </div>
-        </div>
-        <div className="flex items-center gap-2 mt-2">
-          <div className="h-px flex-1 bg-emerald-600/30" />
-          <div className="w-1 h-1 bg-emerald-500 rotate-45 animate-pulse" />
-          <div className="h-px flex-1 bg-emerald-600/30" />
-        </div>
-      </div>
-
       {/* Attack modifiers display */}
       {isShot && (parameters.isSurpriseAttack || parameters.isAimedShot) && (
-        <div className="flex justify-center gap-2 mb-2">
+        <div className="flex justify-center gap-2">
           {parameters.isAimedShot && (
-            <div className="flex items-center gap-1 px-2 py-1 bg-cyan-950/30 border border-cyan-700/50 rounded text-cyan-400 text-[10px] font-mono uppercase">
+            <div className="flex items-center gap-1 px-3 py-1.5 bg-cyan-950/30 border border-cyan-700/50 rounded-lg text-cyan-400 text-xs font-mono uppercase">
               <span>Прицельный</span>
               <span className="text-cyan-500">x2 дальность</span>
             </div>
           )}
           {parameters.isSurpriseAttack && (
-            <div className="flex items-center gap-1 px-2 py-1 bg-purple-950/30 border border-purple-700/50 rounded text-purple-400 text-[10px] font-mono uppercase">
+            <div className="flex items-center gap-1 px-3 py-1.5 bg-purple-950/30 border border-purple-700/50 rounded-lg text-purple-400 text-xs font-mono uppercase">
               <span>С тыла</span>
               <span className="text-purple-500">x2 урон</span>
             </div>
@@ -115,107 +91,104 @@ export function CombatResults({
       {/* Shot Results */}
       {isShot && result.hitResult && (
         <>
-          {/* Hit Comparison - Simplified displays */}
+          {/* Hit Comparison */}
           <div className="grid grid-cols-2 gap-3">
-            {/* Your Roll - simplified */}
+            {/* Your Roll */}
             <div className={cn(
-              "relative bg-slate-900/80 p-3 rounded-sm border-2 overflow-hidden",
+              "relative bg-slate-900/80 p-4 rounded-lg border-2",
               result.hitResult.success
-                ? "border-emerald-600/40"
-                : "border-red-600/40"
+                ? "border-emerald-600/50"
+                : "border-red-600/50"
             )}>
-              {/* Tech frame corners */}
               <div className={cn(
-                "absolute top-0 left-0 w-2 h-2 border-l-2 border-t-2",
-                result.hitResult.success ? "border-emerald-500" : "border-red-500"
-              )} />
-              <div className={cn(
-                "absolute top-0 right-0 w-2 h-2 border-r-2 border-t-2",
-                result.hitResult.success ? "border-emerald-500" : "border-red-500"
-              )} />
-              <div className={cn(
-                "absolute bottom-0 left-0 w-2 h-2 border-l-2 border-b-2",
-                result.hitResult.success ? "border-emerald-500" : "border-red-500"
-              )} />
-              <div className={cn(
-                "absolute bottom-0 right-0 w-2 h-2 border-r-2 border-b-2",
-                result.hitResult.success ? "border-emerald-500" : "border-red-500"
-              )} />
-
-              <div className="text-[8px] font-mono opacity-40 uppercase mb-2 text-center tracking-[0.15em] relative">YOUR ROLL</div>
-              <div className="flex flex-col items-center relative">
-                {/* Show individual dice if available */}
+                "text-xs font-mono opacity-60 mb-3 text-center",
+                result.hitResult.success ? "text-emerald-400" : "text-red-400"
+              )}>
+                Ваш бросок
+              </div>
+              <div className="flex flex-col items-center">
                 {result.hitResult?.rolls && result.hitResult.rolls.length > 1 ? (
-                  <div className="flex items-center gap-1.5 mb-2">
+                  <div className="flex items-center gap-2 mb-2">
                     {result.hitResult.rolls.map((roll, i) => {
                       const rolls = result.hitResult?.rolls ?? [];
                       const maxRoll = Math.max(...rolls);
                       const isMax = roll === maxRoll;
                       return (
                         <div key={i} className={cn(
-                          "relative w-10 h-10 md:w-12 md:h-12 bg-slate-950/80 rounded-sm flex items-center justify-center text-lg md:text-xl font-mono font-black border-2",
+                          "relative w-12 h-12 bg-slate-950/80 rounded-lg flex items-center justify-center text-lg font-mono font-black border-2",
                           isMax
                             ? "text-blue-400 border-blue-500/50"
                             : "text-slate-500 border-slate-700"
                         )}>
                           {roll}
-                          {/* Critical hit badge for max roll */}
                           {isMax && maxRoll >= 20 && (
-                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-amber-500 rounded-full border border-amber-300 flex items-center justify-center">
-                              <span className="text-[6px] font-black text-white">★</span>
+                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 rounded-full border border-amber-300 flex items-center justify-center">
+                              <span className="text-[8px] font-black text-white">★</span>
                             </div>
                           )}
                         </div>
                       );
                     })}
-                    {/* Show bonus if exists */}
                     {result.hitResult.bonus && result.hitResult.bonus > 0 && (
-                      <div className="relative w-8 h-8 md:w-10 md:h-10 bg-emerald-950/60 rounded-sm flex items-center justify-center text-sm md:text-base font-mono font-black border border-emerald-500/30 text-emerald-400">
+                      <div className="relative w-10 h-10 bg-emerald-950/60 rounded-lg flex items-center justify-center text-base font-mono font-black border border-emerald-500/30 text-emerald-400">
                         +{result.hitResult.bonus}
                       </div>
                     )}
                   </div>
                 ) : (
-                  <div className={cn(
-                    "relative w-14 h-14 bg-slate-950/80 rounded-sm flex items-center justify-center text-3xl font-mono font-black border-2 mb-1",
-                    result.hitResult.success
-                      ? "text-emerald-400 border-emerald-500/30"
-                      : "text-red-400 border-red-500/30"
-                  )}>
-                    {result.hitResult.total}
-                    {/* Tech decorations */}
+                  /* Single dice - show roll + bonus + total */
+                  <div className="flex flex-col items-center gap-2">
+                    {/* The dice roll value */}
                     <div className={cn(
-                      "absolute top-1 left-1 w-1 h-1",
-                      result.hitResult.success ? "bg-emerald-500/40" : "bg-red-500/40"
-                    )} />
-                    <div className={cn(
-                      "absolute bottom-1 right-1 w-1 h-1",
-                      result.hitResult.success ? "bg-emerald-500/40" : "bg-red-500/40"
-                    )} />
+                      "relative w-16 h-16 bg-slate-950/80 rounded-lg flex items-center justify-center text-3xl font-mono font-black border-2",
+                      result.hitResult.success
+                        ? "text-emerald-400 border-emerald-500/30"
+                        : "text-red-400 border-red-500/30"
+                    )}>
+                      {result.hitResult.roll}
+                    </div>
+
+                    {/* Show roll + bonus + total if bonus exists */}
+                    {result.hitResult.bonus && result.hitResult.bonus > 0 ? (
+                      <div className="flex items-center gap-2">
+                        <span className={cn(
+                          "text-xl font-mono font-bold",
+                          result.hitResult.success ? "text-emerald-400" : "text-red-400"
+                        )}>
+                          {result.hitResult.roll}
+                        </span>
+                        <span className="text-emerald-400 text-lg font-mono font-bold">
+                          +{result.hitResult.bonus}
+                        </span>
+                        <span className="text-slate-500">=</span>
+                        <span className={cn(
+                          "text-xl font-mono font-black",
+                          result.hitResult.success ? "text-emerald-400" : "text-red-400"
+                        )}>
+                          {result.hitResult.total}
+                        </span>
+                      </div>
+                    ) : (
+                      /* No bonus - just show total */
+                      <div className={cn("text-xl font-mono font-black", result.hitResult.success ? "text-emerald-400" : "text-red-400")}>
+                        {result.hitResult.total}
+                      </div>
+                    )}
                   </div>
                 )}
-                <div className={cn("text-lg md:text-xl font-mono font-black", result.hitResult.success ? "text-emerald-400" : "text-red-400")}>
-                  = {result.hitResult.total}
-                </div>
               </div>
             </div>
 
-            {/* Target Value - with reveal */}
-            <div className="relative bg-slate-900/80 p-3 rounded-sm border-2 border-amber-600/40 overflow-hidden">
-              {/* Tech frame corners */}
-              <div className="absolute top-0 left-0 w-2 h-2 border-l border-t border-amber-500" />
-              <div className="absolute top-0 right-0 w-2 h-2 border-r border-t border-amber-500" />
-              <div className="absolute bottom-0 left-0 w-2 h-2 border-l border-b border-amber-500" />
-              <div className="absolute bottom-0 right-0 w-2 h-2 border-r border-b border-amber-500" />
-
-              <div className="text-[8px] font-mono opacity-40 uppercase mb-2 text-center tracking-[0.15em]">
-                {isGrenade ? 'TARGET RANGE' : 'DISTANCE'}
+            {/* Target Value */}
+            <div className="relative bg-slate-900/80 p-4 rounded-lg border-2 border-amber-600/50">
+              <div className="text-xs font-mono opacity-60 text-amber-400 mb-3 text-center">
+                Дистанция
               </div>
               <div className="flex flex-col items-center">
-                <div className="w-14 h-14 bg-slate-950/80 rounded-sm flex items-center justify-center text-3xl font-mono font-black text-amber-400 border-2 border-amber-500/30 mb-1">
-                  {isGrenade ? parameters.distance : getEffectiveDistance()}
+                <div className="w-16 h-16 bg-slate-950/80 rounded-lg flex items-center justify-center text-3xl font-mono font-black text-amber-400 border-2 border-amber-500/30 mb-2">
+                  {getEffectiveDistance()}
                 </div>
-                <div className="text-sm font-mono font-black text-amber-400">
+                <div className="text-base font-mono font-black text-amber-400">
                   {parameters.distance}
                   {getFortificationBonusDisplay()}
                 </div>
@@ -223,75 +196,32 @@ export function CombatResults({
             </div>
           </div>
 
-          {/* Hit Result - Simplified status display */}
+          {/* Hit Result */}
           <div className={cn(
-            "relative p-4 rounded-sm border-2 flex items-center justify-center gap-3 overflow-hidden",
+            "relative p-4 rounded-lg border-2 flex items-center justify-center",
             result.hitResult.success
-              ? "bg-emerald-950/30 border-emerald-600/40"
-              : "bg-red-950/30 border-red-600/40"
+              ? "bg-emerald-950/30 border-emerald-600/50"
+              : "bg-red-950/30 border-red-600/50"
           )}>
-            {/* Tech frame - simplified */}
-            <div className={cn(
-              "absolute top-0 left-0 w-2 h-2 border-l-2 border-t-2",
-              result.hitResult.success ? "border-emerald-500" : "border-red-500"
-            )} />
-            <div className={cn(
-              "absolute top-0 right-0 w-2 h-2 border-r-2 border-t-2",
-              result.hitResult.success ? "border-emerald-500" : "border-red-500"
-            )} />
-            <div className={cn(
-              "absolute bottom-0 left-0 w-2 h-2 border-l-2 border-b-2",
-              result.hitResult.success ? "border-emerald-500" : "border-red-500"
-            )} />
-            <div className={cn(
-              "absolute bottom-0 right-0 w-2 h-2 border-r-2 border-b-2",
-              result.hitResult.success ? "border-emerald-500" : "border-red-500"
-            )} />
-
-            <div className="text-[8px] font-mono opacity-40 uppercase font-bold tracking-[0.2em] relative">STATUS</div>
-            <div className={cn("text-xl md:text-2xl font-mono font-black tracking-wider relative",
+            <div className={cn("text-2xl font-mono font-black tracking-wider",
               result.hitResult.success ? "text-emerald-400" : "text-red-400"
             )}>
               {isGrenade ? 'ВЗРЫВ!' : (result.hitResult.success ? 'ПОПАДАНИЕ' : 'ПРОМАХ')}
             </div>
           </div>
 
-          {/* Damage Rolls (if hit succeeded) - simplified */}
+          {/* Damage Rolls */}
           {(result.hitResult.success || isGrenade) && result.damageResult && (
             <div className={cn(
-              "relative p-3 rounded-sm border-2 overflow-hidden",
+              "relative p-4 rounded-lg border-2",
               result.damageResult.damage > 0
-                ? "bg-amber-950/20 border-amber-600/40"
+                ? "bg-amber-950/20 border-amber-600/50"
                 : "bg-slate-900/60 border-slate-700"
             )}>
-              {/* Subtle glow for successful damage */}
-              {result.damageResult.damage > 0 && (
-                <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent pointer-events-none" />
-              )}
-
-              {/* Tech frame corners */}
-              <div className={cn(
-                "absolute top-0 left-0 w-2 h-2 border-l border-t",
-                result.damageResult.damage > 0 ? "border-amber-500" : "border-slate-600"
-              )} />
-              <div className={cn(
-                "absolute top-0 right-0 w-2 h-2 border-r border-t",
-                result.damageResult.damage > 0 ? "border-amber-500" : "border-slate-600"
-              )} />
-              <div className={cn(
-                "absolute bottom-0 left-0 w-2 h-2 border-l border-b",
-                result.damageResult.damage > 0 ? "border-amber-500" : "border-slate-600"
-              )} />
-              <div className={cn(
-                "absolute bottom-0 right-0 w-2 h-2 border-r border-b",
-                result.damageResult.damage > 0 ? "border-amber-500" : "border-slate-600"
-              )} />
-
-              <div className="text-[8px] font-mono opacity-40 uppercase font-bold mb-3 tracking-[0.15em] text-center">
-                DAMAGE ROLLS vs ARMOR [{getEffectiveArmor()}]
+              <div className="text-xs font-mono opacity-60 font-bold mb-3 text-center">
+                Урон vs Броня [{getEffectiveArmor()}]
               </div>
 
-              {/* Surprise Attack - Show both roll sets (compact for mobile) */}
               {parameters.isSurpriseAttack && result.damageResult.isSurpriseAttack && (result.damageResult as any).bothRolls ? (
                 <div className="space-y-2">
                   {(result.damageResult as any).bothRolls.map((rollSet: number[], setIndex: number) => {
@@ -305,23 +235,23 @@ export function CombatResults({
                       <div
                         key={setIndex}
                         className={cn(
-                          "flex items-center gap-2 p-2 rounded-lg border",
+                          "flex items-center gap-2 p-3 rounded-lg border",
                           isWinner
                             ? "bg-purple-900/30 border-purple-500"
                             : "bg-slate-800/50 border-slate-600"
                         )}
                       >
-                        <span className={cn("text-[9px] uppercase font-bold min-w-[40px]",
+                        <span className={cn("text-xs font-bold min-w-[50px]",
                           isWinner ? "text-purple-300" : "text-slate-400"
                         )}>
                           Бросок {setIndex + 1}
                         </span>
-                        <div className="flex gap-1 flex-wrap">
+                        <div className="flex gap-1.5 flex-wrap">
                           {rollSet.map((roll, i) => {
                             const penetrated = roll > getEffectiveArmor();
                             return (
                               <div key={i} className={cn(
-                                "w-9 h-9 bg-slate-900 rounded flex items-center justify-center text-sm font-black",
+                                "w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center text-sm font-black",
                                 penetrated
                                   ? "text-orange-400"
                                   : "text-slate-600"
@@ -332,7 +262,7 @@ export function CombatResults({
                           })}
                         </div>
                         {isWinner && (
-                          <span className="text-[8px] bg-purple-600 text-white px-1.5 py-0.5 rounded font-bold ml-auto">
+                          <span className="text-xs bg-purple-600 text-white px-2 py-0.5 rounded font-bold ml-auto">
                             ВЫБРАН
                           </span>
                         )}
@@ -347,48 +277,39 @@ export function CombatResults({
                   })}
                 </div>
               ) : (
-                // Normal single roll display with enhanced visuals
                 <div className="flex justify-center items-start gap-2 flex-wrap">
                   {result.damageResult?.rolls.map((roll, i) => {
                     const effectiveArmor = getEffectiveArmor();
                     const penetrated = roll > effectiveArmor;
-                    // For infantry (not machine), highlight the max roll
                     const isInfantry = result.unitType === 'squad';
                     const rolls = result.damageResult?.rolls ?? [];
                     const maxRoll = isInfantry ? Math.max(...rolls) : roll;
                     const isMax = isInfantry && roll === maxRoll;
-                    // Check for critical hit (max possible roll for most dice is 20 or 12)
                     const isCritical = roll >= 20 || roll >= 12;
+
                     return (
-                      <div key={i} className="flex flex-col items-center gap-1 stagger-100" style={{ animationDelay: `${i * 50}ms` }}>
+                      <div key={i} className="flex flex-col items-center gap-1">
                         <div className={cn(
-                          "relative w-12 h-12 bg-slate-950/80 rounded-sm border-2 flex items-center justify-center text-xl font-mono font-black shadow-lg transition-all result-reveal",
+                          "relative w-12 h-12 bg-slate-950/80 rounded-lg border-2 flex items-center justify-center text-xl font-mono font-black",
                           penetrated
-                            ? "text-amber-400 border-amber-500 shadow-amber-500/20"
+                            ? "text-amber-400 border-amber-500"
                             : "text-slate-600 border-slate-700",
                           isMax && penetrated && "ring-2 ring-blue-400/50 ring-offset-1 ring-offset-slate-900",
                           isCritical && penetrated && "animate-pulse"
                         )}>
                           {roll}
-                          {/* Tech decoration */}
-                          <div className={cn(
-                            "absolute top-0.5 right-0.5 w-1 h-1",
-                            penetrated ? "bg-amber-500/40" : "bg-slate-600/30"
-                          )} />
-                          {/* Max indicator for infantry */}
                           {isMax && penetrated && (
-                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full border border-blue-300 flex items-center justify-center animate-pulse">
+                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full border border-blue-300 flex items-center justify-center animate-pulse">
                               <span className="text-[8px] font-black text-white">★</span>
                             </div>
                           )}
-                          {/* Critical hit badge for max rolls */}
                           {isCritical && penetrated && (
-                            <div className="absolute -top-1 -left-1 w-3 h-3 bg-amber-500 rounded-full border border-amber-300 flex items-center justify-center animate-pulse">
+                            <div className="absolute -top-1 -left-1 w-4 h-4 bg-amber-500 rounded-full border border-amber-300 flex items-center justify-center animate-pulse">
                               <span className="text-[8px] font-black text-white">!</span>
                             </div>
                           )}
                         </div>
-                        <div className={cn("text-[9px] font-mono font-bold",
+                        <div className={cn("text-xs font-mono font-bold",
                           penetrated ? "text-amber-400" : "text-slate-600"
                         )}>
                           {penetrated ? '>' : '≤'}{effectiveArmor}
@@ -400,21 +321,20 @@ export function CombatResults({
               )}
 
               {/* Damage Summary */}
-              <div className="mt-3 pt-3 border-t border-slate-800 text-center">
-                <div className={cn("text-xl md:text-2xl font-mono font-black tracking-wider",
+              <div className="mt-4 pt-4 border-t border-slate-800 text-center">
+                <div className={cn("text-2xl font-mono font-black tracking-wider",
                   result.damageResult.damage > 0
                     ? "text-amber-400"
                     : "text-slate-500"
                 )}>
                   {result.damageResult.damage > 0
-                    ? `-${result.damageResult.damage} ${result.unitType === 'machine' ? 'HP' : 'WOUNDS'}`
-                    : 'NO PENETRATION'}
+                    ? `-${result.damageResult.damage} ${result.unitType === 'machine' ? 'HP' : 'урона'}`
+                    : 'Не пробито'}
                 </div>
               </div>
 
-              {/* Special effects */}
               {result.damageResult.special && (
-                <div className="mt-3 pt-3 border-t border-slate-700">
+                <div className="mt-4 pt-4 border-t border-slate-700">
                   <div className="text-xs text-purple-400 font-medium text-center">
                     {result.damageResult.special.description}
                   </div>
@@ -425,53 +345,20 @@ export function CombatResults({
         </>
       )}
 
-      {/* Grenade Results - Special Two-Phase Display with reveal */}
+      {/* Grenade Results */}
       {isGrenade && result.hitResult && result.grenadeBlastZone && (
         <>
-          {/* Blast Zone Display with reveal animation */}
           <div
             data-testid="grenade-blast-zone"
             className={cn(
-              "relative p-4 rounded-sm border-2 result-reveal overflow-hidden",
+              "relative p-5 rounded-lg border-2",
               (result.hitResult.roll ?? 0) === 1
-                ? "bg-red-950/30 border-red-600/50 shadow-red-900/20 shadow-lg"
-                : "bg-emerald-950/20 border-emerald-600/40 shadow-emerald-900/20 shadow-lg"
+                ? "bg-red-950/30 border-red-600/50"
+                : "bg-emerald-950/20 border-emerald-600/50"
             )}
           >
-            {/* Glow effect based on danger level */}
             {(result.hitResult.roll ?? 0) === 1 && (
-              <div className="absolute inset-0 bg-gradient-to-br from-red-500/20 via-transparent to-red-500/10 animate-pulse pointer-events-none" />
-            )}
-            {(result.hitResult.roll ?? 0) > 1 && (
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-transparent to-emerald-500/5 pointer-events-none" />
-            )}
-
-            {/* Pulsing radius indicator for blast zone */}
-            {(result.hitResult.roll ?? 0) > 1 && (
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 border border-emerald-500/20 rounded-full reticle-expand pointer-events-none" />
-            )}
-
-            {/* Tech frame corners */}
-            <div className={cn(
-              "absolute top-0 left-0 w-2 h-2 border-l-2 border-t-2",
-              (result.hitResult.roll ?? 0) === 1 ? "border-red-500 animate-pulse" : "border-emerald-500 animate-pulse"
-            )} />
-            <div className={cn(
-              "absolute top-0 right-0 w-2 h-2 border-r-2 border-t-2",
-              (result.hitResult.roll ?? 0) === 1 ? "border-red-500 animate-pulse stagger-100" : "border-emerald-500 animate-pulse stagger-100"
-            )} />
-            <div className={cn(
-              "absolute bottom-0 left-0 w-2 h-2 border-l-2 border-b-2",
-              (result.hitResult.roll ?? 0) === 1 ? "border-red-500 animate-pulse stagger-200" : "border-emerald-500 animate-pulse stagger-200"
-            )} />
-            <div className={cn(
-              "absolute bottom-0 right-0 w-2 h-2 border-r-2 border-b-2",
-              (result.hitResult.roll ?? 0) === 1 ? "border-red-500 animate-pulse stagger-300" : "border-emerald-500 animate-pulse stagger-300"
-            )} />
-
-            {/* Danger warning if rolled 1 */}
-            {(result.hitResult.roll ?? 0) === 1 && (
-              <div className="flex items-center gap-2 mb-3 pb-3 border-b border-red-700/30">
+              <div className="flex items-center gap-2 mb-4 pb-4 border-b border-red-700/30">
                 <AlertTriangle className="w-5 h-5 text-red-400 shrink-0" />
                 <span className="text-red-400 font-bold font-mono text-sm uppercase tracking-wider">
                   Опасно! Вы в зоне взрыва!
@@ -481,44 +368,31 @@ export function CombatResults({
 
             <div className="text-center space-y-2">
               <div className={cn(
-                "text-2xl md:text-3xl font-mono font-black uppercase tracking-wider",
+                "text-3xl font-mono font-black uppercase tracking-wider",
                 (result.hitResult.roll ?? 0) === 1 ? "text-red-400" : "text-emerald-400"
               )}>
                 ВЗРЫВ
               </div>
-              <div className="text-base md:text-lg font-mono font-bold text-slate-300">
+              <div className="text-lg font-mono font-bold text-slate-300">
                 {result.grenadeBlastZone.minSteps}-{result.grenadeBlastZone.maxSteps} шагов
               </div>
-              <div className="text-sm md:text-base font-mono text-slate-500">
+              <div className="text-base font-mono text-slate-500">
                 [{result.grenadeBlastZone.minCm}-{result.grenadeBlastZone.maxCm} см]
               </div>
-              <div className="text-[10px] font-mono text-slate-600 uppercase tracking-wider mt-2">
+              <div className="text-xs font-mono text-slate-600 uppercase tracking-wider mt-3">
                 Радиус взрыва: ±1 шаг
               </div>
             </div>
 
-            {/* Dice result */}
-            <div className="mt-4 pt-4 border-t border-slate-800/50 flex justify-center items-center gap-4">
-              <div className="text-[9px] font-mono text-slate-600 uppercase tracking-wider">
+            <div className="mt-5 pt-5 border-t border-slate-800/50 flex justify-center items-center gap-4">
+              <div className="text-xs font-mono text-slate-600 uppercase tracking-wider">
                 Бросок D6
               </div>
               <div className={cn(
-                "relative w-14 h-14 bg-slate-950/80 rounded-sm flex items-center justify-center text-2xl font-mono font-black border-2",
+                "relative w-16 h-16 bg-slate-950/80 rounded-lg flex items-center justify-center text-2xl font-mono font-black border-2",
                 (result.hitResult.roll ?? 0) === 1 ? "border-red-600/50" : "border-emerald-600/50"
               )}>
                 {result.hitResult.roll ?? 0}
-                <div className={cn("absolute top-1 left-1 w-1 h-1",
-                  (result.hitResult.roll ?? 0) === 1 ? "bg-red-500/40" : "bg-emerald-500/40"
-                )} />
-                <div className={cn("absolute top-1 right-1 w-1 h-1",
-                  (result.hitResult.roll ?? 0) === 1 ? "bg-red-500/40" : "bg-emerald-500/40"
-                )} />
-                <div className={cn("absolute bottom-1 left-1 w-1 h-1",
-                  (result.hitResult.roll ?? 0) === 1 ? "bg-red-500/40" : "bg-emerald-500/40"
-                )} />
-                <div className={cn("absolute bottom-1 right-1 w-1 h-1",
-                  (result.hitResult.roll ?? 0) === 1 ? "bg-red-500/40" : "bg-emerald-500/40"
-                )} />
               </div>
               <div className={cn("text-xl font-mono font-black",
                 (result.hitResult.roll ?? 0) === 1 ? "text-red-400" : "text-emerald-400"
@@ -528,56 +402,43 @@ export function CombatResults({
             </div>
           </div>
 
-          {/* Target Checks Section with reveal animations */}
+          {/* Target Checks Section */}
           {result.grenadeBlastChecks && result.grenadeBlastChecks.length > 0 && (
             <div data-testid="grenade-blast-checks" className="space-y-2">
-              {/* Debug: {console.log('Rendering grenade-blast-checks with', result.grenadeBlastChecks.length, 'checks')} */}
-              <div className="text-[9px] font-mono text-slate-600 uppercase tracking-wider text-center">
+              <div className="text-xs font-mono text-slate-600 uppercase tracking-wider text-center">
                 РЕЗУЛЬТАТЫ ПРОВЕРКИ ЦЕЛЕЙ
               </div>
               {result.grenadeBlastChecks.map((check, idx) => (
                 <div
                   key={idx}
                   className={cn(
-                    "relative p-3 rounded-sm border-2 flex items-center justify-between result-reveal overflow-hidden",
+                    "relative p-4 rounded-lg border-2 flex items-center justify-between",
                     check.hit
-                      ? "bg-orange-950/20 border-orange-600/40 shadow-orange-900/10"
+                      ? "bg-orange-950/20 border-orange-600/50"
                       : "bg-slate-800/60 border-slate-700"
                   )}
-                  style={{ animationDelay: `${idx * 100}ms` }}
                 >
-                  {/* Subtle glow for hits */}
-                  {check.hit && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 via-transparent to-orange-500/10 pointer-events-none" />
-                  )}
-
-                  {/* Left side: Armor and Roll */}
-                  <div className="flex items-center gap-3 relative">
-                    <div className="relative">
-                      <div className="text-[8px] font-mono opacity-40 uppercase mb-1 text-center">
-                        БРОНЯ
-                      </div>
-                      <div className="w-12 h-12 bg-slate-950/80 rounded border border-slate-700 flex items-center justify-center text-xl font-mono font-bold text-slate-300">
+                  <div className="flex items-center gap-4">
+                    <div className="text-center">
+                      <div className="text-xs font-mono opacity-60 mb-1">БРОНЯ</div>
+                      <div className="w-12 h-12 bg-slate-950/80 rounded-lg border border-slate-700 flex items-center justify-center text-xl font-mono font-bold text-slate-300">
                         {check.armor}
                       </div>
                     </div>
 
                     <div className="text-slate-500 text-2xl">vs</div>
 
-                    <div className="relative">
-                      <div className="text-[8px] font-mono opacity-40 uppercase mb-1 text-center">
-                        D20
-                      </div>
+                    <div className="text-center">
+                      <div className="text-xs font-mono opacity-60 mb-1">D20</div>
                       <div className={cn(
-                        "w-12 h-12 rounded border-2 flex items-center justify-center text-xl font-mono font-bold transition-all",
+                        "w-12 h-12 rounded-lg border-2 flex items-center justify-center text-xl font-mono font-bold",
                         check.hit
-                          ? "bg-orange-900/40 border-orange-500 text-orange-400 shadow-lg shadow-orange-500/20"
+                          ? "bg-orange-900/40 border-orange-500 text-orange-400"
                           : "bg-slate-900/80 border-slate-600 text-slate-500"
                       )}>
                         {check.roll}
-                        {/* Critical hit indicator for 20 */}
                         {check.hit && check.roll === 20 && (
-                          <div className="absolute -top-1 -right-1 w-3 h-3 bg-amber-500 rounded-full border border-amber-300 flex items-center justify-center animate-pulse">
+                          <div className="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 rounded-full border border-amber-300 flex items-center justify-center animate-pulse">
                             <span className="text-[8px] font-black text-white">!</span>
                           </div>
                         )}
@@ -585,9 +446,8 @@ export function CombatResults({
                     </div>
                   </div>
 
-                  {/* Right side: Result icon */}
                   <div className={cn(
-                    "flex items-center gap-2 pl-3 border-l border-slate-700 relative",
+                    "flex items-center gap-2 pl-4 border-l border-slate-700",
                     check.hit ? "border-orange-700/30" : ""
                   )}>
                     {check.hit ? (
@@ -613,22 +473,21 @@ export function CombatResults({
 
           {/* Grenade Target Check Input Section */}
           {isGrenade && onGrenadeCheckTarget && (
-            <div data-testid="grenade-target-check-section" className="bg-slate-800 p-4 rounded-sm border border-slate-700">
-              <div className="text-xs opacity-50 uppercase font-bold mb-4 tracking-wider">
+            <div data-testid="grenade-target-check-section" className="bg-slate-800 p-4 rounded-lg border border-slate-700">
+              <div className="text-xs opacity-60 uppercase font-bold mb-4 tracking-wider">
                 ПРОВЕРИТЬ ЦЕЛЬ В ЗОНЕ ВЗРЫВА
               </div>
 
               <div className="space-y-4">
-                {/* Armor input */}
                 <div className="flex items-center gap-3">
-                  <label className="text-xs opacity-70 uppercase font-bold whitespace-nowrap min-w-[80px]">
+                  <label className="text-sm opacity-70 uppercase font-bold whitespace-nowrap min-w-[90px]">
                     Броня цели
                   </label>
                   <div className="flex-1 flex gap-2">
                     <button
                       type="button"
                       onClick={() => setGrenadeTargetArmor(Math.max(0, grenadeTargetArmor - 1))}
-                      className="w-12 h-12 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg border border-slate-600 flex items-center justify-center text-2xl font-bold transition-all active:scale-95 touch-manipulation"
+                      className="w-14 h-14 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg border border-slate-600 flex items-center justify-center text-2xl font-bold transition-all active:scale-95"
                     >
                       −
                     </button>
@@ -640,33 +499,31 @@ export function CombatResults({
                       min={0}
                       max={99}
                       className={cn(
-                        "flex-1 h-12 bg-slate-900 border-2 border-emerald-600/40 rounded-lg",
+                        "flex-1 h-14 bg-slate-900 border-2 border-emerald-600/50 rounded-lg",
                         "flex items-center justify-center font-mono font-bold text-white text-center",
                         "focus:outline-none focus:border-emerald-500 transition-colors",
-                        // Remove spinner buttons
-                        '[&_::-webkit-inner-spin-button]:m-0 [&_::-webkit-inner-spin-button]:appearance-none',
-                        '[&_::-webkit-outer-spin-button]:m-0 [&_::-webkit-outer-spin-button]:appearance-none',
+                        '[&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none',
+                        '[&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none',
                         '-moz-appearance:none appearance-none text-lg'
                       )}
                     />
                     <button
                       type="button"
                       onClick={() => setGrenadeTargetArmor(Math.min(99, grenadeTargetArmor + 1))}
-                      className="w-12 h-12 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg border border-slate-600 flex items-center justify-center text-2xl font-bold transition-all active:scale-95 touch-manipulation"
+                      className="w-14 h-14 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg border border-slate-600 flex items-center justify-center text-2xl font-bold transition-all active:scale-95"
                     >
                       +
                     </button>
                   </div>
                 </div>
 
-                {/* Explode button */}
                 <button
                   data-testid="grenade-explode-button"
                   onClick={() => onGrenadeCheckTarget(grenadeTargetArmor)}
                   className={cn(
-                    "relative w-full py-4 rounded-sm font-mono text-base font-bold uppercase tracking-wider border-2 transition-all min-h-[56px]",
-                    "active:scale-95 touch-manipulation",
-                    "bg-emerald-950/20 border-emerald-600/40 text-emerald-400 hover:bg-emerald-950/40 hover:scale-[1.02] shadow-emerald-900/20"
+                    "relative w-full py-4 rounded-lg font-mono text-base font-bold uppercase tracking-wider border-2 transition-all min-h-[56px]",
+                    "active:scale-95",
+                    "bg-emerald-950/20 border-emerald-600/50 text-emerald-400 hover:bg-emerald-950/40"
                   )}
                 >
                   <div className="flex items-center justify-center gap-3">
@@ -681,34 +538,27 @@ export function CombatResults({
         </>
       )}
 
-      {/* Melee Results - Combat Display with reveal */}
+      {/* Melee Results */}
       {isMelee && result.meleeResult && (() => {
         const meleeResult = result.meleeResult!;
         return (
           <div className="space-y-3">
-            {/* Tech header for melee */}
-            <div className="text-center result-reveal">
-              <div className="text-[8px] font-mono text-cyan-400/60 uppercase tracking-[0.2em]">
-                CLOSE COMBAT ENGAGEMENT
-              </div>
-            </div>
-            {/* Surprise Attack - Show both attacker rolls (compact for mobile) */}
             {parameters.isSurpriseAttack && (meleeResult as any).attackerRolls ? (
-              <div className="bg-purple-900/20 p-2 rounded-lg border border-purple-700">
+              <div className="bg-purple-900/20 p-3 rounded-lg border border-purple-700">
                 <div className="flex items-center justify-center gap-3">
                   {(meleeResult as any).attackerRolls.map((roll: number, index: number) => {
                     const isBest = roll === meleeResult.attackerRoll;
                   return (
                     <div key={index} className="flex items-center gap-1">
                       <div className={cn(
-                        "w-10 h-10 bg-slate-900 rounded border flex items-center justify-center text-lg font-black",
+                        "w-11 h-11 bg-slate-900 rounded-lg border flex items-center justify-center text-lg font-black",
                         isBest
                           ? "text-purple-400 border-purple-500"
                           : "text-slate-500 border-slate-600"
                       )}>
                         {roll}
                       </div>
-                      <span className={cn("text-[8px] font-bold",
+                      <span className={cn("text-xs font-bold",
                         isBest ? "text-purple-400" : "text-slate-500"
                       )}>
                         {isBest ? '✓' : ''}
@@ -716,60 +566,47 @@ export function CombatResults({
                     </div>
                   );
                 })}
-                <div className="border-l border-slate-600 pl-2">
-                  <div className="text-sm font-black text-blue-400">
+                <div className="border-l border-slate-600 pl-3">
+                  <div className="text-base font-black text-blue-400">
                     {meleeResult.attackerTotal}
                   </div>
-                  <div className="text-[8px] text-slate-400">
+                  <div className="text-xs text-slate-400">
                     Вы
                   </div>
                 </div>
-                <div className="border-l border-slate-600 pl-2">
-                  <div className="text-sm font-black text-red-400">
+                <div className="border-l border-slate-600 pl-3">
+                  <div className="text-base font-black text-red-400">
                     {meleeResult.defenderTotal}
                   </div>
-                  <div className="text-[8px] text-slate-400">
+                  <div className="text-xs text-slate-400">
                     Цель
                   </div>
                 </div>
               </div>
             </div>
           ) : (
-            // Normal melee display - Tactical
             <div className="grid grid-cols-2 gap-3">
               {/* Attacker */}
-              <div className="relative bg-slate-900/60 p-3 rounded-sm border-2 border-cyan-600/40 shadow-cyan-900/20">
-                {/* Tech frame */}
-                <div className="absolute top-0 left-0 w-1.5 h-1.5 border-l border-t border-cyan-500" />
-                <div className="absolute top-0 right-0 w-1.5 h-1.5 border-r border-t border-cyan-500" />
-                <div className="absolute bottom-0 left-0 w-1.5 h-1.5 border-l border-b border-cyan-500" />
-                <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-r border-b border-cyan-500" />
-
-                <div className="text-[8px] font-mono opacity-40 uppercase mb-2 text-center tracking-[0.15em]">ATTACKER</div>
+              <div className="bg-slate-900/60 p-4 rounded-lg border-2 border-cyan-600/50">
+                <div className="text-xs font-mono opacity-60 text-cyan-400 mb-3 text-center">Атакующий</div>
                 <div className="flex flex-col items-center">
-                  <div className="w-12 h-12 bg-slate-950/80 rounded-sm flex items-center justify-center text-2xl font-mono font-black text-cyan-400 border-2 border-cyan-500/30">
+                  <div className="w-14 h-14 bg-slate-950/80 rounded-lg flex items-center justify-center text-2xl font-mono font-black text-cyan-400 border-2 border-cyan-500/30 mb-2">
                     {meleeResult.attackerRoll}
                   </div>
-                  <div className="text-base font-mono font-black text-cyan-400">
+                  <div className="text-lg font-mono font-black text-cyan-400">
                     {meleeResult.attackerTotal}
                   </div>
                 </div>
               </div>
 
               {/* Defender */}
-              <div className="relative bg-slate-900/60 p-3 rounded-sm border-2 border-red-600/40 shadow-red-900/20">
-                {/* Tech frame */}
-                <div className="absolute top-0 left-0 w-1.5 h-1.5 border-l border-t border-red-500" />
-                <div className="absolute top-0 right-0 w-1.5 h-1.5 border-r border-t border-red-500" />
-                <div className="absolute bottom-0 left-0 w-1.5 h-1.5 border-l border-b border-red-500" />
-                <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-r border-b border-red-500" />
-
-                <div className="text-[8px] font-mono opacity-40 uppercase mb-2 text-center tracking-[0.15em]">DEFENDER</div>
+              <div className="bg-slate-900/60 p-4 rounded-lg border-2 border-red-600/50">
+                <div className="text-xs font-mono opacity-60 text-red-400 mb-3 text-center">Защищающийся</div>
                 <div className="flex flex-col items-center">
-                  <div className="w-12 h-12 bg-slate-950/80 rounded-sm flex items-center justify-center text-2xl font-mono font-black text-red-400 border-2 border-red-500/30">
+                  <div className="w-14 h-14 bg-slate-950/80 rounded-lg flex items-center justify-center text-2xl font-mono font-black text-red-400 border-2 border-red-500/30 mb-2">
                     {meleeResult.defenderRoll}
                   </div>
-                  <div className="text-base font-mono font-black text-red-400">
+                  <div className="text-lg font-mono font-black text-red-400">
                     {meleeResult.defenderTotal}
                   </div>
                 </div>
@@ -777,116 +614,63 @@ export function CombatResults({
             </div>
           )}
 
-          {/* Melee Result - Status Display with reveal and effects */}
+          {/* Melee Result */}
           <div className={cn(
-            "relative p-4 rounded-sm border-2 flex items-center justify-center result-reveal overflow-hidden",
+            "relative p-5 rounded-lg border-2 flex items-center justify-center",
             meleeResult.winner === 'attacker'
-              ? "bg-emerald-950/30 border-emerald-600/40 shadow-emerald-900/20 shadow-lg"
+              ? "bg-emerald-950/30 border-emerald-600/50"
               : meleeResult.winner === 'defender'
-              ? "bg-red-950/30 border-red-600/40 shadow-red-900/20 shadow-lg"
+              ? "bg-red-950/30 border-red-600/50"
               : "bg-slate-900/60 border-slate-700"
           )}>
-            {/* Glow effect based on result */}
-            {meleeResult.winner === 'attacker' && (
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 via-transparent to-emerald-500/10 animate-pulse pointer-events-none" />
-            )}
-            {meleeResult.winner === 'defender' && (
-              <div className="absolute inset-0 bg-gradient-to-br from-red-500/20 via-transparent to-red-500/10 pointer-events-none" />
-            )}
-            {meleeResult.winner === 'defender' && (
-              <div className="absolute inset-0 animate-shake" />
-            )}
-
-            {/* Tech frame */}
-            <div className={cn(
-              "absolute top-0 left-0 w-2 h-2 border-l-2 border-t-2",
-              meleeResult.winner === 'attacker'
-                ? "border-emerald-500 animate-pulse"
-                : meleeResult.winner === 'defender'
-                ? "border-red-500 animate-pulse"
-                : "border-slate-600"
-            )} />
-            <div className={cn(
-              "absolute top-0 right-0 w-2 h-2 border-r-2 border-t-2",
-              meleeResult.winner === 'attacker'
-                ? "border-emerald-500 animate-pulse stagger-100"
-                : meleeResult.winner === 'defender'
-                ? "border-red-500 animate-pulse stagger-100"
-                : "border-slate-600"
-            )} />
-            <div className={cn(
-              "absolute bottom-0 left-0 w-2 h-2 border-l-2 border-b-2",
-              meleeResult.winner === 'attacker'
-                ? "border-emerald-500 animate-pulse stagger-200"
-                : meleeResult.winner === 'defender'
-                ? "border-red-500 animate-pulse stagger-200"
-                : "border-slate-600"
-            )} />
-            <div className={cn(
-              "absolute bottom-0 right-0 w-2 h-2 border-r-2 border-b-2",
-              meleeResult.winner === 'attacker'
-                ? "border-emerald-500 animate-pulse stagger-300"
-                : meleeResult.winner === 'defender'
-                ? "border-red-500 animate-pulse stagger-300"
-                : "border-slate-600"
-            )} />
-
-            {/* Reticle expansion effect */}
-            {meleeResult.winner !== 'draw' && (
-              <div className={cn(
-                "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 border rounded-full reticle-expand",
-                meleeResult.winner === 'attacker' ? "border-emerald-500/50" : "border-red-500/50"
-              )} />
-            )}
-
-            <div className={cn("text-xl md:text-2xl font-mono font-black tracking-wider relative",
+            <div className={cn("text-2xl font-mono font-black tracking-wider",
               meleeResult.winner === 'attacker'
                 ? "text-emerald-400"
                 : meleeResult.winner === 'defender'
                 ? "text-red-400"
-                : "text-slate-400",
-              meleeResult.winner === 'attacker' && "animate-shake"
+                : "text-slate-400"
             )}>
               {meleeResult.winner === 'attacker'
-                ? 'VICTORY'
+                ? 'ПОБЕДА'
                 : meleeResult.winner === 'defender'
-                ? 'COUNTERATTACK'
-                : 'DRAW'}
+                ? 'КОНТРАТАКА'
+                : 'НИЧЬЯ'}
             </div>
           </div>
         </div>
         );
       })()}
 
-      {/* Action Buttons - Tactical Controls */}
-      <div className="flex gap-2 pt-4">
-        {/* Mark as done toggle - only for squads, compact on mobile */}
+      {/* Action Buttons */}
+      <div className="flex gap-3 pt-4">
         {showMarkAsDone && (
           <button
-            onClick={() => setMarkAsDone(!markAsDone)}
+            onClick={() => {
+              const newValue = !markAsDone;
+              setMarkAsDone(newValue);
+              setRememberMarkAsDone?.(newValue);
+            }}
             className={cn(
-              "shrink-0 px-3 md:px-4 py-2 md:py-3 rounded-sm font-mono text-xs md:text-sm font-bold uppercase tracking-wider border-2 transition-all flex items-center justify-center gap-1.5 min-w-[100px] md:min-w-[120px]",
+              "shrink-0 px-4 py-3 rounded-lg font-mono text-sm font-bold uppercase tracking-wider border-2 transition-all flex items-center justify-center gap-2 min-w-[110px]",
               markAsDone
                 ? "bg-emerald-950/40 border-emerald-600/50 text-emerald-400"
-                : "bg-slate-800/60 border-slate-700 text-slate-500 hover:bg-slate-700/60 hover:text-slate-400"
+                : "bg-slate-800/60 border-slate-700 text-slate-500 hover:bg-slate-700/60"
             )}
           >
-            <CheckCircle2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
-            <span className="hidden md:inline">{markAsDone ? 'ГОТОВ' : 'ГОТОВ?'}</span>
-            <span className="md:hidden">{markAsDone ? '✓' : '?'}</span>
+            <CheckCircle2 className="w-4 h-4" />
+            <span>{markAsDone ? 'ГОТОВ' : 'ГОТОВ?'}</span>
           </button>
         )}
 
-        {/* Accept button - flex to fill remaining space */}
         <button
-          onClick={() => onApply(showMarkAsDone ? true : undefined)}
+          onClick={() => onApply(showMarkAsDone ? markAsDone : undefined)}
           className={cn(
-            "flex-1 py-2 md:py-3 rounded-sm font-mono text-sm md:text-sm font-bold uppercase tracking-wider border-2 transition-all min-h-[48px] md:min-h-[52px]",
+            "flex-1 py-3 rounded-lg font-mono text-sm font-bold uppercase tracking-wider border-2 transition-all min-h-[52px]",
             (isShot || isGrenade) && result.hitResult?.success
-              ? "bg-emerald-600 hover:bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-900/30"
+              ? "bg-emerald-600 hover:bg-emerald-500 border-emerald-500 text-white"
               : isMelee && result.meleeResult?.winner === 'attacker'
-              ? "bg-emerald-600 hover:bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-900/30"
-              : "bg-blue-600 hover:bg-blue-500 border-blue-500 text-white shadow-lg shadow-blue-900/30"
+              ? "bg-emerald-600 hover:bg-emerald-500 border-emerald-500 text-white"
+              : "bg-blue-600 hover:bg-blue-500 border-blue-500 text-white"
           )}
         >
           ПРИНЯТЬ
