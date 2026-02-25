@@ -208,11 +208,10 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
   }, []);
 
   /**
-   * Dice animation - visible roll duration
+   * Dice animation - instant (no delay)
    */
   const animateDiceRoll = useCallback(async (): Promise<void> => {
-    // Visible dice roll animation (400ms for quick feedback)
-    await new Promise(r => setTimeout(r, 400));
+    // No animation delay - instant result
   }, []);
 
   /**

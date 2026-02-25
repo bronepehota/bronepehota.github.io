@@ -7,7 +7,6 @@ import { useBottomSheet } from '@/hooks/useBottomSheet';
 import { CombatFlowState, CombatActionType, CombatParameters } from '@/lib/combat-types';
 import { ActionSelector } from './ActionSelector';
 import { ParameterInputs } from './ParameterInputs';
-import { DiceAnimation } from './DiceAnimation';
 import { CombatResults } from './CombatResults';
 import { RulesVersionID } from '@/lib/types';
 import { useCombatTargetContext } from '@/contexts/CombatTargetContext';
@@ -90,7 +89,15 @@ export function BottomSheetCombatModal({
   });
 
   // Access combat target context for memory
-  const { targetMemory, updateTargetMemory } = useCombatTargetContext();
+  const { targetMemory, updateTargetMemory, resetTargetMemory } = useCombatTargetContext();
+
+  // Reset target memory when combat starts for a new unit
+  useEffect(() => {
+    if (state.phase !== 'IDLE' && state.unit) {
+      // Reset memory when opening combat for a new unit
+      resetTargetMemory();
+    }
+  }, [state.unit?.instanceId]); // Only when unit changes, not on every render
 
   // Handle escape key
   useEffect(() => {
@@ -316,10 +323,6 @@ export function BottomSheetCombatModal({
                 </button>
               </div>
             </div>
-          )}
-
-          {state.phase === 'ROLLING' && (
-            <DiceAnimation state={state} />
           )}
 
           {state.phase === 'RESULTS' && state.result && (
