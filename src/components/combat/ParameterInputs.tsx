@@ -5,7 +5,7 @@ import { NumberStepper } from '@/components/ui/NumberStepper';
 import { FortificationSelector } from '@/components/controls/FortificationSelector';
 import { RulesVersionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { StaticDiceDisplay } from './StaticDiceDisplay';
+import { DiceNotationDisplay } from './DiceNotationDisplay';
 import { getUnitStats, multiplyRange } from '@/lib/game-logic';
 import { Target, Shield } from 'lucide-react';
 import { Machine } from '@/lib/types';
@@ -76,7 +76,7 @@ export function ParameterInputs({
               <div className="absolute inset-0 bg-blue-500/0 group-hover:bg-blue-500/5 transition-colors rounded-lg pointer-events-none" />
               <div className="text-[8px] opacity-40 uppercase font-bold mb-2 text-center relative">Дальность</div>
               <div className="flex justify-center relative">
-                <StaticDiceDisplay rollStr="D6" size="md" color="blue" />
+                <DiceNotationDisplay rollStr="D6" color="blue" />
               </div>
             </div>
             <div className="bg-slate-950/80 p-3 rounded-lg border border-orange-500/30 shadow-lg shadow-orange-900/10 relative group">
@@ -84,7 +84,7 @@ export function ParameterInputs({
               <div className="absolute inset-0 bg-orange-500/0 group-hover:bg-orange-500/5 transition-colors rounded-lg pointer-events-none" />
               <div className="text-[8px] opacity-40 uppercase font-bold mb-2 text-center relative">Мощность</div>
               <div className="flex justify-center relative">
-                <StaticDiceDisplay rollStr="1D20" size="md" color="orange" />
+                <DiceNotationDisplay rollStr="1D20" color="orange" />
               </div>
             </div>
           </div>
@@ -121,11 +121,9 @@ export function ParameterInputs({
               <div className="absolute inset-0 bg-blue-500/0 group-hover:bg-blue-500/5 transition-colors rounded-lg pointer-events-none" />
               <div className="text-[8px] md:text-[10px] opacity-40 uppercase font-bold mb-1 md:mb-2 text-center relative">Дальность</div>
               <div className="flex justify-center relative">
-                <StaticDiceDisplay
+                <DiceNotationDisplay
                   rollStr={isAimedShot && actionType === 'shot' ? multiplyRange(unitStats.range, 2) : unitStats.range}
-                  size="sm"
                   color="blue"
-                  showLabel
                 />
               </div>
             </div>
@@ -134,7 +132,7 @@ export function ParameterInputs({
               <div className="absolute inset-0 bg-orange-500/0 group-hover:bg-orange-500/5 transition-colors rounded-lg pointer-events-none" />
               <div className="text-[8px] md:text-[10px] opacity-40 uppercase font-bold mb-1 md:mb-2 text-center relative">Мощность</div>
               <div className="flex justify-center relative">
-                <StaticDiceDisplay rollStr={unitStats.power} size="sm" color="orange" showLabel />
+                <DiceNotationDisplay rollStr={unitStats.power} color="orange" />
               </div>
             </div>
           </div>
@@ -165,23 +163,21 @@ export function ParameterInputs({
             {/* Tech glow on hover */}
             <div className="absolute inset-0 bg-cyan-500/0 group-hover:bg-cyan-500/5 transition-colors rounded-lg pointer-events-none" />
             <div className="text-[8px] opacity-40 uppercase font-bold mb-2 text-center relative">Вы</div>
-            <div className="flex flex-col items-center gap-2 relative">
-              <div className="text-lg font-black text-cyan-400">ББ: +{unitStats.melee}</div>
-              <StaticDiceDisplay rollStr="1D6" size="sm" color="blue" />
+            <div className="flex justify-center relative">
+              <DiceNotationDisplay rollStr={`1D6+${unitStats.melee}`} color="cyan" />
             </div>
           </div>
           <div className="bg-slate-950/80 p-3 rounded-lg border border-red-500/30 shadow-lg shadow-red-900/10 relative group">
             {/* Tech glow on hover */}
             <div className="absolute inset-0 bg-red-500/0 group-hover:bg-red-500/5 transition-colors rounded-lg pointer-events-none" />
             <div className="text-[8px] opacity-40 uppercase font-bold mb-2 text-center relative">Цель</div>
-            <div className="flex flex-col items-center gap-2 relative">
-              <div className="text-lg font-black text-red-400">ББ: {effectiveTargetMelee}</div>
-              <StaticDiceDisplay rollStr="1D6" size="sm" color="red" />
+            <div className="flex justify-center relative">
+              <DiceNotationDisplay rollStr={`1D6+${effectiveTargetMelee}`} color="red" />
             </div>
           </div>
         </div>
         <div className="mt-3 text-center text-xs opacity-60 relative">
-          Ваш итог: D6 + {unitStats.melee} vs Цель: D6 + {effectiveTargetMelee}
+          Сравните результаты бросков
         </div>
       </div>
     );

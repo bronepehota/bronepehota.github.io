@@ -7,7 +7,6 @@ import { useBottomSheet } from '@/hooks/useBottomSheet';
 import { CombatFlowState, CombatActionType, CombatParameters } from '@/lib/combat-types';
 import { ActionSelector } from './ActionSelector';
 import { ParameterInputs } from './ParameterInputs';
-import { DiceAnimation } from './DiceAnimation';
 import { CombatResults } from './CombatResults';
 import { RulesVersionID } from '@/lib/types';
 import { useCombatTargetContext } from '@/contexts/CombatTargetContext';
@@ -316,10 +315,6 @@ export function BottomSheetCombatModal({
                 </button>
               </div>
             </div>
-          )}
-
-          {state.phase === 'ROLLING' && (
-            <DiceAnimation state={state} />
           )}
 
           {state.phase === 'RESULTS' && state.result && (
