@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { CombatResult, CombatParameters } from '@/lib/combat-types';
 import { RulesVersionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { CheckCircle2, AlertTriangle, Skull, Shield } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, Skull, Shield, Footprints, Bomb } from 'lucide-react';
+import { AnimatedDice, AnimatedDiceGroup } from './AnimatedDice';
 
 interface CombatResultsProps {
   result: CombatResult;
@@ -114,19 +115,16 @@ export function CombatResults({
                       const maxRoll = Math.max(...rolls);
                       const isMax = roll === maxRoll;
                       return (
-                        <div key={i} className={cn(
-                          "relative w-12 h-12 bg-slate-950/80 rounded-lg flex items-center justify-center text-lg font-mono font-black border-2",
-                          isMax
-                            ? "text-blue-400 border-blue-500/50"
-                            : "text-slate-500 border-slate-700"
-                        )}>
-                          {roll}
-                          {isMax && maxRoll >= 20 && (
-                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 rounded-full border border-amber-300 flex items-center justify-center">
-                              <span className="text-[8px] font-black text-white">★</span>
-                            </div>
-                          )}
-                        </div>
+                        <AnimatedDice
+                          key={i}
+                          value={roll}
+                          maxSide={20}
+                          color={isMax ? "blue" : "blue"}
+                          size="sm"
+                          delay={i * 100}
+                          isHit={isMax}
+                          className={cn(!isMax && "opacity-50")}
+                        />
                       );
                     })}
                     {result.hitResult.bonus && result.hitResult.bonus > 0 && (
@@ -136,44 +134,20 @@ export function CombatResults({
                     )}
                   </div>
                 ) : (
-                  /* Single dice - show roll + bonus + total */
+                  /* Single dice - animated */
                   <div className="flex flex-col items-center gap-2">
-                    {/* The dice roll value */}
-                    <div className={cn(
-                      "relative w-16 h-16 bg-slate-950/80 rounded-lg flex items-center justify-center text-3xl font-mono font-black border-2",
-                      result.hitResult.success
-                        ? "text-emerald-400 border-emerald-500/30"
-                        : "text-red-400 border-red-500/30"
-                    )}>
-                      {result.hitResult.roll}
-                    </div>
-
-                    {/* Show roll + bonus + total if bonus exists */}
-                    {result.hitResult.bonus && result.hitResult.bonus > 0 ? (
-                      <div className="flex items-center gap-2">
-                        <span className={cn(
-                          "text-xl font-mono font-bold",
-                          result.hitResult.success ? "text-emerald-400" : "text-red-400"
-                        )}>
-                          {result.hitResult.roll}
-                        </span>
-                        <span className="text-emerald-400 text-lg font-mono font-bold">
-                          +{result.hitResult.bonus}
-                        </span>
-                        <span className="text-slate-500">=</span>
-                        <span className={cn(
-                          "text-xl font-mono font-black",
-                          result.hitResult.success ? "text-emerald-400" : "text-red-400"
-                        )}>
-                          {result.hitResult.total}
-                        </span>
-                      </div>
-                    ) : (
-                      /* No bonus - just show total */
-                      <div className={cn("text-xl font-mono font-black", result.hitResult.success ? "text-emerald-400" : "text-red-400")}>
-                        {result.hitResult.total}
-                      </div>
-                    )}
+                    <AnimatedDice
+                      value={result.hitResult.roll}
+                      maxSide={20}
+                      color={result.hitResult.success ? "emerald" : "red"}
+                      size="md"
+                      delay={0}
+                      isHit={result.hitResult.success}
+                      bonus={result.hitResult.bonus}
+                      total={result.hitResult.total}
+                      targetValue={getEffectiveDistance()}
+                      resultLabel={result.hitResult.success ? 'hit' : 'miss'}
+                    />
                   </div>
                 )}
               </div>
@@ -184,29 +158,17 @@ export function CombatResults({
               <div className="text-xs font-mono opacity-60 text-amber-400 mb-3 text-center">
                 Дистанция
               </div>
-              <div className="flex flex-col items-center">
-                <div className="w-16 h-16 bg-slate-950/80 rounded-lg flex items-center justify-center text-3xl font-mono font-black text-amber-400 border-2 border-amber-500/30 mb-2">
-                  {getEffectiveDistance()}
+              <div className="flex flex-col items-center gap-2">
+                <div className="flex items-center gap-2">
+                  <Footprints className="w-6 h-6 text-amber-500" />
+                  <span className="text-3xl font-mono font-black text-amber-400">
+                    {getEffectiveDistance()}
+                  </span>
                 </div>
-                <div className="text-base font-mono font-black text-amber-400">
-                  {parameters.distance}
-                  {getFortificationBonusDisplay()}
-                </div>
+                {getFortificationBonusDisplay() && (
+                  <div className="text-xs opacity-70">{getFortificationBonusDisplay()}</div>
+                )}
               </div>
-            </div>
-          </div>
-
-          {/* Hit Result */}
-          <div className={cn(
-            "relative p-4 rounded-lg border-2 flex items-center justify-center",
-            result.hitResult.success
-              ? "bg-emerald-950/30 border-emerald-600/50"
-              : "bg-red-950/30 border-red-600/50"
-          )}>
-            <div className={cn("text-2xl font-mono font-black tracking-wider",
-              result.hitResult.success ? "text-emerald-400" : "text-red-400"
-            )}>
-              {isGrenade ? 'ВЗРЫВ!' : (result.hitResult.success ? 'ПОПАДАНИЕ' : 'ПРОМАХ')}
             </div>
           </div>
 
@@ -250,14 +212,15 @@ export function CombatResults({
                           {rollSet.map((roll, i) => {
                             const penetrated = roll > getEffectiveArmor();
                             return (
-                              <div key={i} className={cn(
-                                "w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center text-sm font-black",
-                                penetrated
-                                  ? "text-orange-400"
-                                  : "text-slate-600"
-                              )}>
-                                {roll}
-                              </div>
+                              <AnimatedDice
+                                key={i}
+                                value={roll}
+                                maxSide={20}
+                                color={penetrated ? "orange" : "blue"}
+                                size="sm"
+                                delay={setIndex * 200 + i * 80}
+                                isHit={penetrated}
+                              />
                             );
                           })}
                         </div>
@@ -289,26 +252,15 @@ export function CombatResults({
 
                     return (
                       <div key={i} className="flex flex-col items-center gap-1">
-                        <div className={cn(
-                          "relative w-12 h-12 bg-slate-950/80 rounded-lg border-2 flex items-center justify-center text-xl font-mono font-black",
-                          penetrated
-                            ? "text-amber-400 border-amber-500"
-                            : "text-slate-600 border-slate-700",
-                          isMax && penetrated && "ring-2 ring-blue-400/50 ring-offset-1 ring-offset-slate-900",
-                          isCritical && penetrated && "animate-pulse"
-                        )}>
-                          {roll}
-                          {isMax && penetrated && (
-                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full border border-blue-300 flex items-center justify-center animate-pulse">
-                              <span className="text-[8px] font-black text-white">★</span>
-                            </div>
-                          )}
-                          {isCritical && penetrated && (
-                            <div className="absolute -top-1 -left-1 w-4 h-4 bg-amber-500 rounded-full border border-amber-300 flex items-center justify-center animate-pulse">
-                              <span className="text-[8px] font-black text-white">!</span>
-                            </div>
-                          )}
-                        </div>
+                        <AnimatedDice
+                          value={roll}
+                          maxSide={20}
+                          color={penetrated ? "amber" : "blue"}
+                          size="sm"
+                          delay={i * 100}
+                          isHit={penetrated}
+                          className={cn(isMax && penetrated && "ring-2 ring-blue-400/50 ring-offset-1 ring-offset-slate-900 rounded-xl")}
+                        />
                         <div className={cn("text-xs font-mono font-bold",
                           penetrated ? "text-amber-400" : "text-slate-600"
                         )}>
@@ -321,15 +273,16 @@ export function CombatResults({
               )}
 
               {/* Damage Summary */}
-              <div className="mt-4 pt-4 border-t border-slate-800 text-center">
-                <div className={cn("text-2xl font-mono font-black tracking-wider",
+              <div className="mt-4 pt-4 border-t border-slate-800 flex justify-center">
+                <div className={cn(
+                  "px-3 py-1.5 rounded-lg border-2 font-mono text-xs font-black uppercase tracking-wider animate-pop-in",
                   result.damageResult.damage > 0
-                    ? "text-amber-400"
-                    : "text-slate-500"
+                    ? "bg-amber-950/80 border-amber-500/50 text-amber-400"
+                    : "bg-slate-800/80 border-slate-600/50 text-slate-500"
                 )}>
                   {result.damageResult.damage > 0
-                    ? `-${result.damageResult.damage} ${result.unitType === 'machine' ? 'HP' : 'урона'}`
-                    : 'Не пробито'}
+                    ? `-${result.damageResult.damage} ${result.unitType === 'machine' ? 'HP' : 'УРОНА'}`
+                    : 'НЕ ПРОБИТО'}
                 </div>
               </div>
 
@@ -348,123 +301,152 @@ export function CombatResults({
       {/* Grenade Results */}
       {isGrenade && result.hitResult && result.grenadeBlastZone && (
         <>
-          <div
-            data-testid="grenade-blast-zone"
-            className={cn(
-              "relative p-5 rounded-lg border-2",
-              (result.hitResult.roll ?? 0) === 1
-                ? "bg-red-950/30 border-red-600/50"
-                : "bg-emerald-950/20 border-emerald-600/50"
-            )}
-          >
-            {(result.hitResult.roll ?? 0) === 1 && (
-              <div className="flex items-center gap-2 mb-4 pb-4 border-b border-red-700/30">
-                <AlertTriangle className="w-5 h-5 text-red-400 shrink-0" />
-                <span className="text-red-400 font-bold font-mono text-sm uppercase tracking-wider">
-                  Опасно! Вы в зоне взрыва!
-                </span>
-              </div>
-            )}
+          {/* Danger Warning */}
+          {(result.hitResult.roll ?? 0) === 1 && (
+            <div className="flex items-center justify-center gap-2 p-3 bg-red-950/30 rounded-lg border-2 border-red-600/50">
+              <AlertTriangle className="w-5 h-5 text-red-400 shrink-0 animate-pulse" />
+              <span className="text-red-400 font-bold font-mono text-sm uppercase tracking-wider">
+                Опасно! Вы в зоне взрыва!
+              </span>
+            </div>
+          )}
 
-            <div className="text-center space-y-2">
+          {/* Hit Comparison - same style as shot */}
+          <div className="grid grid-cols-2 gap-3">
+            {/* Your Roll */}
+            <div className={cn(
+              "relative bg-slate-900/80 p-4 rounded-lg border-2",
+              (result.hitResult.roll ?? 0) === 1
+                ? "border-red-600/50"
+                : "border-emerald-600/50"
+            )}>
               <div className={cn(
-                "text-3xl font-mono font-black uppercase tracking-wider",
+                "text-xs font-mono opacity-60 mb-3 text-center",
                 (result.hitResult.roll ?? 0) === 1 ? "text-red-400" : "text-emerald-400"
               )}>
-                ВЗРЫВ
+                Ваш бросок
               </div>
-              <div className="text-lg font-mono font-bold text-slate-300">
-                {result.grenadeBlastZone.minSteps}-{result.grenadeBlastZone.maxSteps} шагов
-              </div>
-              <div className="text-base font-mono text-slate-500">
-                [{result.grenadeBlastZone.minCm}-{result.grenadeBlastZone.maxCm} см]
-              </div>
-              <div className="text-xs font-mono text-slate-600 uppercase tracking-wider mt-3">
-                Радиус взрыва: ±1 шаг
+              <div className="flex flex-col items-center">
+                <AnimatedDice
+                  value={result.hitResult.roll ?? 0}
+                  maxSide={6}
+                  color={(result.hitResult.roll ?? 0) === 1 ? "red" : "emerald"}
+                  size="md"
+                  delay={0}
+                  isHit={(result.hitResult.roll ?? 0) !== 1}
+                  bonus={result.soldierRank || 0}
+                  total={result.grenadeDistance}
+                />
               </div>
             </div>
 
-            <div className="mt-5 pt-5 border-t border-slate-800/50 flex justify-center items-center gap-4">
-              <div className="text-xs font-mono text-slate-600 uppercase tracking-wider">
-                Бросок D6
+            {/* Blast Zone */}
+            <div className="relative bg-slate-900/80 p-4 rounded-lg border-2 border-amber-600/50">
+              <div className="text-xs font-mono opacity-60 text-amber-400 mb-3 text-center">
+                Зона взрыва
               </div>
-              <div className={cn(
-                "relative w-16 h-16 bg-slate-950/80 rounded-lg flex items-center justify-center text-2xl font-mono font-black border-2",
-                (result.hitResult.roll ?? 0) === 1 ? "border-red-600/50" : "border-emerald-600/50"
-              )}>
-                {result.hitResult.roll ?? 0}
+              <div className="flex flex-col items-center gap-1">
+                <div className="flex items-center gap-2">
+                  <Bomb className="w-5 h-5 text-amber-500" />
+                  <span className="text-2xl font-mono font-black text-amber-400">
+                    {result.grenadeBlastZone.minSteps}-{result.grenadeBlastZone.maxSteps}
+                  </span>
+                  <Footprints className="w-4 h-4 text-amber-500/60" />
+                </div>
+                <div className="text-xs font-mono text-slate-500">
+                  [{result.grenadeBlastZone.minCm}-{result.grenadeBlastZone.maxCm} см]
+                </div>
               </div>
-              <div className={cn("text-xl font-mono font-black",
-                (result.hitResult.roll ?? 0) === 1 ? "text-red-400" : "text-emerald-400"
-              )}>
-                +{result.soldierRank || 0} = {result.grenadeDistance}
-              </div>
+            </div>
+          </div>
+
+          {/* Result Label */}
+          <div className="flex justify-center">
+            <div className={cn(
+              "px-3 py-1.5 rounded-lg border-2 font-mono text-xs font-black uppercase tracking-wider animate-pop-in",
+              (result.hitResult.roll ?? 0) === 1
+                ? "bg-red-950/80 border-red-500/50 text-red-400"
+                : "bg-emerald-950/80 border-emerald-500/50 text-emerald-400"
+            )}>
+              {(result.hitResult.roll ?? 0) === 1 ? 'ОПАСНО' : 'ВЗРЫВ'}
             </div>
           </div>
 
           {/* Target Checks Section */}
           {result.grenadeBlastChecks && result.grenadeBlastChecks.length > 0 && (
-            <div data-testid="grenade-blast-checks" className="space-y-2">
-              <div className="text-xs font-mono text-slate-600 uppercase tracking-wider text-center">
-                РЕЗУЛЬТАТЫ ПРОВЕРКИ ЦЕЛЕЙ
-              </div>
+            <div data-testid="grenade-blast-checks" className="space-y-3">
               {result.grenadeBlastChecks.map((check, idx) => (
                 <div
                   key={idx}
-                  className={cn(
-                    "relative p-4 rounded-lg border-2 flex items-center justify-between",
-                    check.hit
-                      ? "bg-orange-950/20 border-orange-600/50"
-                      : "bg-slate-800/60 border-slate-700"
-                  )}
+                  className="space-y-3"
+                  style={{ animationDelay: `${idx * 100}ms` }}
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="text-center">
-                      <div className="text-xs font-mono opacity-60 mb-1">БРОНЯ</div>
-                      <div className="w-12 h-12 bg-slate-950/80 rounded-lg border border-slate-700 flex items-center justify-center text-xl font-mono font-bold text-slate-300">
-                        {check.armor}
+                  {/* Grid layout - same as shot */}
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* D20 Roll */}
+                    <div className={cn(
+                      "relative bg-slate-900/80 p-4 rounded-lg border-2",
+                      check.hit
+                        ? "border-orange-600/50"
+                        : "border-slate-600/50"
+                    )}>
+                      <div className={cn(
+                        "text-xs font-mono opacity-60 mb-3 text-center",
+                        check.hit ? "text-orange-400" : "text-slate-400"
+                      )}>
+                        Бросок D20
+                      </div>
+                      <div className="flex flex-col items-center">
+                        <AnimatedDice
+                          value={check.roll}
+                          maxSide={20}
+                          color={check.hit ? "orange" : "blue"}
+                          size="md"
+                          delay={idx * 200}
+                          isHit={check.hit}
+                          targetValue={check.armor}
+                          total={check.roll}
+                          resultLabel={check.hit ? 'hit' : 'miss'}
+                        />
                       </div>
                     </div>
 
-                    <div className="text-slate-500 text-2xl">vs</div>
-
-                    <div className="text-center">
-                      <div className="text-xs font-mono opacity-60 mb-1">D20</div>
-                      <div className={cn(
-                        "w-12 h-12 rounded-lg border-2 flex items-center justify-center text-xl font-mono font-bold",
-                        check.hit
-                          ? "bg-orange-900/40 border-orange-500 text-orange-400"
-                          : "bg-slate-900/80 border-slate-600 text-slate-500"
-                      )}>
-                        {check.roll}
-                        {check.hit && check.roll === 20 && (
-                          <div className="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 rounded-full border border-amber-300 flex items-center justify-center animate-pulse">
-                            <span className="text-[8px] font-black text-white">!</span>
-                          </div>
-                        )}
+                    {/* Armor */}
+                    <div className="relative bg-slate-900/80 p-4 rounded-lg border-2 border-slate-600/50">
+                      <div className="text-xs font-mono opacity-60 text-slate-400 mb-3 text-center">
+                        Броня цели
+                      </div>
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="flex items-center gap-2">
+                          <Shield className="w-6 h-6 text-slate-500" />
+                          <span className="text-3xl font-mono font-black text-slate-400">
+                            {check.armor}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className={cn(
-                    "flex items-center gap-2 pl-4 border-l border-slate-700",
-                    check.hit ? "border-orange-700/30" : ""
-                  )}>
-                    {check.hit ? (
-                      <>
-                        <Skull className="w-5 h-5 text-orange-400 animate-pulse" />
-                        <span className="text-sm font-mono font-bold text-orange-400 uppercase">
-                          ПРОБИТО
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <Shield className="w-5 h-5 text-slate-500" />
-                        <span className="text-sm font-mono font-bold text-slate-500 uppercase">
-                          НЕ ПРОБИТО
-                        </span>
-                      </>
-                    )}
+                  {/* Result Label */}
+                  <div className="flex justify-center">
+                    <div className={cn(
+                      "px-3 py-1.5 rounded-lg border-2 font-mono text-xs font-black uppercase tracking-wider animate-pop-in",
+                      check.hit
+                        ? "bg-orange-950/80 border-orange-500/50 text-orange-400"
+                        : "bg-slate-800/80 border-slate-600/50 text-slate-500"
+                    )}>
+                      {check.hit ? (
+                        <>
+                          <Skull className="w-4 h-4 inline mr-1" />
+                          ПРОБИТО {check.roll}:{check.armor}
+                        </>
+                      ) : (
+                        <>
+                          <Shield className="w-4 h-4 inline mr-1" />
+                          НЕ ПРОБИТО {check.roll}:{check.armor}
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -549,21 +531,16 @@ export function CombatResults({
                   {(meleeResult as any).attackerRolls.map((roll: number, index: number) => {
                     const isBest = roll === meleeResult.attackerRoll;
                   return (
-                    <div key={index} className="flex items-center gap-1">
-                      <div className={cn(
-                        "w-11 h-11 bg-slate-900 rounded-lg border flex items-center justify-center text-lg font-black",
-                        isBest
-                          ? "text-purple-400 border-purple-500"
-                          : "text-slate-500 border-slate-600"
-                      )}>
-                        {roll}
-                      </div>
-                      <span className={cn("text-xs font-bold",
-                        isBest ? "text-purple-400" : "text-slate-500"
-                      )}>
-                        {isBest ? '✓' : ''}
-                      </span>
-                    </div>
+                    <AnimatedDice
+                      key={index}
+                      value={roll}
+                      maxSide={6}
+                      color={isBest ? "purple" : "blue"}
+                      size="sm"
+                      delay={index * 100}
+                      isHit={isBest}
+                      className={cn(!isBest && "opacity-50")}
+                    />
                   );
                 })}
                 <div className="border-l border-slate-600 pl-3">
@@ -590,12 +567,16 @@ export function CombatResults({
               <div className="bg-slate-900/60 p-4 rounded-lg border-2 border-cyan-600/50">
                 <div className="text-xs font-mono opacity-60 text-cyan-400 mb-3 text-center">Атакующий</div>
                 <div className="flex flex-col items-center">
-                  <div className="w-14 h-14 bg-slate-950/80 rounded-lg flex items-center justify-center text-2xl font-mono font-black text-cyan-400 border-2 border-cyan-500/30 mb-2">
-                    {meleeResult.attackerRoll}
-                  </div>
-                  <div className="text-lg font-mono font-black text-cyan-400">
-                    {meleeResult.attackerTotal}
-                  </div>
+                  <AnimatedDice
+                    value={meleeResult.attackerRoll}
+                    maxSide={6}
+                    color="cyan"
+                    size="md"
+                    delay={0}
+                    isHit={meleeResult.winner === 'attacker'}
+                    bonus={meleeResult.attackerTotal - meleeResult.attackerRoll}
+                    total={meleeResult.attackerTotal}
+                  />
                 </div>
               </div>
 
@@ -603,38 +584,36 @@ export function CombatResults({
               <div className="bg-slate-900/60 p-4 rounded-lg border-2 border-red-600/50">
                 <div className="text-xs font-mono opacity-60 text-red-400 mb-3 text-center">Защищающийся</div>
                 <div className="flex flex-col items-center">
-                  <div className="w-14 h-14 bg-slate-950/80 rounded-lg flex items-center justify-center text-2xl font-mono font-black text-red-400 border-2 border-red-500/30 mb-2">
-                    {meleeResult.defenderRoll}
-                  </div>
-                  <div className="text-lg font-mono font-black text-red-400">
-                    {meleeResult.defenderTotal}
-                  </div>
+                  <AnimatedDice
+                    value={meleeResult.defenderRoll}
+                    maxSide={6}
+                    color="red"
+                    size="md"
+                    delay={150}
+                    isHit={meleeResult.winner === 'defender'}
+                    bonus={meleeResult.defenderTotal - meleeResult.defenderRoll}
+                    total={meleeResult.defenderTotal}
+                  />
                 </div>
               </div>
             </div>
           )}
 
           {/* Melee Result */}
-          <div className={cn(
-            "relative p-5 rounded-lg border-2 flex items-center justify-center",
-            meleeResult.winner === 'attacker'
-              ? "bg-emerald-950/30 border-emerald-600/50"
-              : meleeResult.winner === 'defender'
-              ? "bg-red-950/30 border-red-600/50"
-              : "bg-slate-900/60 border-slate-700"
-          )}>
-            <div className={cn("text-2xl font-mono font-black tracking-wider",
+          <div className="mt-4 pt-4 border-t border-slate-800 flex justify-center">
+            <div className={cn(
+              "px-3 py-1.5 rounded-lg border-2 font-mono text-xs font-black uppercase tracking-wider animate-pop-in",
               meleeResult.winner === 'attacker'
-                ? "text-emerald-400"
+                ? "bg-emerald-950/80 border-emerald-500/50 text-emerald-400"
                 : meleeResult.winner === 'defender'
-                ? "text-red-400"
-                : "text-slate-400"
+                ? "bg-red-950/80 border-red-500/50 text-red-400"
+                : "bg-slate-800/80 border-slate-600/50 text-slate-500"
             )}>
               {meleeResult.winner === 'attacker'
-                ? 'ПОБЕДА'
+                ? `ПОБЕДА ${meleeResult.attackerTotal}:${meleeResult.defenderTotal}`
                 : meleeResult.winner === 'defender'
-                ? 'КОНТРАТАКА'
-                : 'НИЧЬЯ'}
+                ? `КОНТРАТАКА ${meleeResult.defenderTotal}:${meleeResult.attackerTotal}`
+                : `НИЧЬЯ ${meleeResult.attackerTotal}:${meleeResult.defenderTotal}`}
             </div>
           </div>
         </div>
