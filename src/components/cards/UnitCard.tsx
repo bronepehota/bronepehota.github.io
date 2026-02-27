@@ -55,6 +55,9 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
     }
   }, []);
 
+  // Check if per-weapon ammo system should be used (only for community_star_system rules)
+  const usePerWeaponAmmo = rulesVersion === 'community_star_system';
+
   const isSquad = unit.type === 'squad';
   const data = unit.data;
 
@@ -901,8 +904,21 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                           const weaponShots = unit.machineWeaponShots?.[weaponIdx] || 0;
                           const totalShotsUsed = unit.machineShotsUsed || 0;
                           const fireRate = (data as Machine).fire_rate;
+
+                          // Per-weapon ammo calculation for community_star_system rules
+                          const machine = data as Machine;
+                          const weaponAmmo = usePerWeaponAmmo
+                            ? (unit.weaponAmmo?.[weaponIdx] ?? weapon.ammo ?? machine.ammo_max)
+                            : (unit.currentAmmo || 0);
+                          const weaponMaxAmmo = usePerWeaponAmmo
+                            ? (weapon.ammo ?? machine.ammo_max)
+                            : machine.ammo_max;
+                          const hasAmmo = weaponAmmo > 0;
+                          const isMeleeWeapon = weapon.range === 'ББ';
+
+                          // Can shoot: not done/destroyed, has ammo (per-weapon or global), within fire rate
                           const canShoot = !isMachineDone && !isMachineDestroyed &&
-                                          (unit.currentAmmo || 0) > 0 &&
+                                          (usePerWeaponAmmo ? hasAmmo : (unit.currentAmmo || 0) > 0) &&
                                           totalShotsUsed < fireRate;
 
                           return (
@@ -912,6 +928,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                                 "relative p-1.5 md:p-2.5 rounded-sm flex gap-1.5 md:gap-3 transition-all overflow-hidden",
                                 isMachineDestroyed ? "bg-slate-950/80 opacity-40 grayscale" :
                                 isMachineDone ? "bg-slate-900/40 opacity-70" :
+                                usePerWeaponAmmo && !hasAmmo ? "bg-slate-950/60 opacity-50" :
                                 weaponShots > 0 ? "bg-amber-950/20" : "bg-slate-800/30"
                               )}
                             >
@@ -965,6 +982,10 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                                     )}
                                     <Target className="w-4 h-4 md:w-5 md:h-5" />
                                     <span className="hidden sm:inline">ВЫСТРЕЛ</span>
+                                    {/* Per-weapon ammo display */}
+                                    {usePerWeaponAmmo && !isMeleeWeapon && (
+                                      <span className="text-[9px] opacity-70 ml-1">({weaponAmmo}/{weaponMaxAmmo})</span>
+                                    )}
                                   </button>
 
                                   {/* Range Stat Display */}
