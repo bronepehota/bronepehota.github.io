@@ -112,6 +112,7 @@ export interface Weapon {
   special?: WeaponSpecial;
   description?: string;    // Описание оружия (история, характеристики)
   manufacturer?: string;   // Производитель оружия
+  ammo?: number;           // Per-weapon ammo (only for community_star_system)
 }
 
 export interface Machine {
@@ -160,6 +161,7 @@ export interface ArmyUnit {
   // Current state in game
   currentDurability?: number;
   currentAmmo?: number;
+  weaponAmmo?: number[];  // Current ammo per weapon [weapon0Ammo, weapon1Ammo, ...]
   grenadesUsed?: boolean;
   deadSoldiers?: number[]; // indices of dead soldiers
   actionsUsed?: {

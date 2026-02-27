@@ -89,7 +89,8 @@ export const communityStarSystemRules: RulesVersion = {
   features: [
     'Зонные повреждения техники',
     'Паника при потере 50% отряда',
-    'Укрытия: +к дистанции'
+    'Укрытия: +к дистанции',
+    'Боезапас по орудиям'
   ],
   color: '#3b82f6',
   link: 'https://vk.com/bp_bnp',

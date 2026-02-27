@@ -55,6 +55,9 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
     }
   }, []);
 
+  // Check if per-weapon ammo system should be used (only for community_star_system rules)
+  const usePerWeaponAmmo = rulesVersion === 'community_star_system';
+
   const isSquad = unit.type === 'squad';
   const data = unit.data;
 
@@ -232,21 +235,40 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
           const weapon = (unit.data as Machine).weapons[weaponIndex];
           const isMeleeWeapon = weapon?.range === 'ББ';
 
-          const newAmmo = isMeleeWeapon
-            ? (unit.currentAmmo || 0)  // Не списываем для ББ
-            : Math.max(0, (unit.currentAmmo || 0) - 1);
           const newShotsUsed = (unit.machineShotsUsed || 0) + 1;
           const newWeaponShots = {
             ...(unit.machineWeaponShots || {}),
             [weaponIndex]: (unit.machineWeaponShots?.[weaponIndex] || 0) + 1
           };
-          updateThisUnit((u) => ({
-            ...u,
-            currentAmmo: newAmmo,
-            machineShotsUsed: newShotsUsed,
-            machineWeaponShots: newWeaponShots,
-            isMachineShot: true
-          }));
+
+          if (usePerWeaponAmmo && !isMeleeWeapon) {
+            // Per-weapon ammo system (community_star_system): decrease weapon-specific ammo
+            const newWeaponAmmo = [...(unit.weaponAmmo || [])];
+            newWeaponAmmo[weaponIndex] = Math.max(0, (newWeaponAmmo[weaponIndex] || 0) - 1);
+
+            updateThisUnit((u) => ({
+              ...u,
+              weaponAmmo: newWeaponAmmo,
+              // Also update global ammo for display compatibility
+              currentAmmo: Math.max(0, (u.currentAmmo || 0) - 1),
+              machineShotsUsed: newShotsUsed,
+              machineWeaponShots: newWeaponShots,
+              isMachineShot: true
+            }));
+          } else {
+            // Original behavior for tehnolog or melee weapons
+            const newAmmo = isMeleeWeapon
+              ? (unit.currentAmmo || 0)  // Не списываем для ББ
+              : Math.max(0, (unit.currentAmmo || 0) - 1);
+
+            updateThisUnit((u) => ({
+              ...u,
+              currentAmmo: newAmmo,
+              machineShotsUsed: newShotsUsed,
+              machineWeaponShots: newWeaponShots,
+              isMachineShot: true
+            }));
+          }
         }
       } else if (result.actionType === 'melee') {
         if (result.unitType === 'squad' && result.soldierIndex !== undefined) {
@@ -802,25 +824,58 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    {/* Ammo progress bar - Segmented */}
-                    <div className="flex-1 flex items-center gap-1">
-                      <div className="flex-1 flex items-center gap-px">
-                        {Array.from({ length: (data as Machine).ammo_max }).map((_, i) => (
-                          <div
-                            key={i}
-                            className={cn(
-                              "h-2 rounded-sm transition-all flex-1",
-                              i < (unit.currentAmmo || 0)
-                                ? "bg-blue-500"
-                                : "bg-slate-800"
-                            )}
-                          />
-                        ))}
+                    {/* Ammo progress bar - Segmented (only for tehnolog rules) */}
+                    {!usePerWeaponAmmo ? (
+                      <div className="flex-1 flex items-center gap-1">
+                        <div className="flex-1 flex items-center gap-px">
+                          {Array.from({ length: (data as Machine).ammo_max }).map((_, i) => (
+                            <div
+                              key={i}
+                              className={cn(
+                                "h-2 rounded-sm transition-all flex-1",
+                                i < (unit.currentAmmo || 0)
+                                  ? "bg-blue-500"
+                                  : "bg-slate-800"
+                              )}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-[9px] md:text-xs font-mono font-black text-blue-400 min-w-[38px] text-right shrink-0">
+                          {unit.currentAmmo}/{(data as Machine).ammo_max}
+                        </span>
                       </div>
-                      <span className="text-[9px] md:text-xs font-mono font-black text-blue-400 min-w-[38px] text-right shrink-0">
-                        {unit.currentAmmo}/{(data as Machine).ammo_max}
-                      </span>
-                    </div>
+                    ) : (
+                      (() => {
+                        // Calculate total ammo from all weapons for community_star_system
+                        const machine = data as Machine;
+                        const totalWeaponAmmo = machine.weapons.reduce((sum, weapon, idx) => {
+                          return sum + (unit.weaponAmmo?.[idx] ?? weapon.ammo ?? machine.ammo_max);
+                        }, 0);
+                        const maxWeaponAmmo = machine.weapons.reduce((sum, weapon) => {
+                          return sum + (weapon.ammo ?? machine.ammo_max);
+                        }, 0);
+                        return (
+                          <div className="flex-1 flex items-center gap-1">
+                            <div className="flex-1 flex items-center gap-px">
+                              {Array.from({ length: Math.min(maxWeaponAmmo, 30) }).map((_, i) => (
+                                <div
+                                  key={i}
+                                  className={cn(
+                                    "h-2 rounded-sm transition-all flex-1",
+                                    i < totalWeaponAmmo
+                                      ? "bg-blue-500"
+                                      : "bg-slate-800"
+                                  )}
+                                />
+                              ))}
+                            </div>
+                            <span className="text-[9px] md:text-xs font-mono font-black text-blue-400 min-w-[38px] text-right shrink-0">
+                              {totalWeaponAmmo}/{maxWeaponAmmo}
+                            </span>
+                          </div>
+                        );
+                      })()
+                    )}
 
                     {/* Shots count - Segmented */}
                     <div className="flex items-center gap-1 shrink-0">
@@ -901,8 +956,21 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                           const weaponShots = unit.machineWeaponShots?.[weaponIdx] || 0;
                           const totalShotsUsed = unit.machineShotsUsed || 0;
                           const fireRate = (data as Machine).fire_rate;
+
+                          // Per-weapon ammo calculation for community_star_system rules
+                          const machine = data as Machine;
+                          const weaponAmmo = usePerWeaponAmmo
+                            ? (unit.weaponAmmo?.[weaponIdx] ?? weapon.ammo ?? machine.ammo_max)
+                            : (unit.currentAmmo || 0);
+                          const weaponMaxAmmo = usePerWeaponAmmo
+                            ? (weapon.ammo ?? machine.ammo_max)
+                            : machine.ammo_max;
+                          const hasAmmo = weaponAmmo > 0;
+                          const isMeleeWeapon = weapon.range === 'ББ';
+
+                          // Can shoot: not done/destroyed, has ammo (per-weapon or global), within fire rate
                           const canShoot = !isMachineDone && !isMachineDestroyed &&
-                                          (unit.currentAmmo || 0) > 0 &&
+                                          (usePerWeaponAmmo ? hasAmmo : (unit.currentAmmo || 0) > 0) &&
                                           totalShotsUsed < fireRate;
 
                           return (
@@ -912,6 +980,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                                 "relative p-1.5 md:p-2.5 rounded-sm flex gap-1.5 md:gap-3 transition-all overflow-hidden",
                                 isMachineDestroyed ? "bg-slate-950/80 opacity-40 grayscale" :
                                 isMachineDone ? "bg-slate-900/40 opacity-70" :
+                                usePerWeaponAmmo && !hasAmmo ? "bg-slate-950/60 opacity-50" :
                                 weaponShots > 0 ? "bg-amber-950/20" : "bg-slate-800/30"
                               )}
                             >
@@ -965,6 +1034,10 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                                     )}
                                     <Target className="w-4 h-4 md:w-5 md:h-5" />
                                     <span className="hidden sm:inline">ВЫСТРЕЛ</span>
+                                    {/* Per-weapon ammo display */}
+                                    {usePerWeaponAmmo && !isMeleeWeapon && (
+                                      <span className="text-[9px] opacity-70 ml-1">({weaponAmmo}/{weaponMaxAmmo})</span>
+                                    )}
                                   </button>
 
                                   {/* Range Stat Display */}
