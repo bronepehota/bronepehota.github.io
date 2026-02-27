@@ -845,10 +845,36 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                         </span>
                       </div>
                     ) : (
-                      <div className="flex-1 text-[9px] md:text-xs text-slate-400 italic flex items-center">
-                        <Bomb className="w-2.5 h-2.5 md:w-3 md:h-3 mr-1 opacity-60" />
-                        Боезапас по орудиям
-                      </div>
+                      (() => {
+                        // Calculate total ammo from all weapons for community_star_system
+                        const machine = data as Machine;
+                        const totalWeaponAmmo = machine.weapons.reduce((sum, weapon, idx) => {
+                          return sum + (unit.weaponAmmo?.[idx] ?? weapon.ammo ?? machine.ammo_max);
+                        }, 0);
+                        const maxWeaponAmmo = machine.weapons.reduce((sum, weapon) => {
+                          return sum + (weapon.ammo ?? machine.ammo_max);
+                        }, 0);
+                        return (
+                          <div className="flex-1 flex items-center gap-1">
+                            <div className="flex-1 flex items-center gap-px">
+                              {Array.from({ length: Math.min(maxWeaponAmmo, 30) }).map((_, i) => (
+                                <div
+                                  key={i}
+                                  className={cn(
+                                    "h-2 rounded-sm transition-all flex-1",
+                                    i < totalWeaponAmmo
+                                      ? "bg-blue-500"
+                                      : "bg-slate-800"
+                                  )}
+                                />
+                              ))}
+                            </div>
+                            <span className="text-[9px] md:text-xs font-mono font-black text-blue-400 min-w-[38px] text-right shrink-0">
+                              {totalWeaponAmmo}/{maxWeaponAmmo}
+                            </span>
+                          </div>
+                        );
+                      })()
                     )}
 
                     {/* Shots count - Segmented */}
