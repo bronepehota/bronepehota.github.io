@@ -1,4 +1,4 @@
-import { Machine, ArmyUnit, Weapon } from '@/lib/types';
+import { Machine, ArmyUnit } from '@/lib/types';
 
 /**
  * Test helper to simulate the ammo deduction logic from UnitCard.tsx
