@@ -824,25 +824,32 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    {/* Ammo progress bar - Segmented */}
-                    <div className="flex-1 flex items-center gap-1">
-                      <div className="flex-1 flex items-center gap-px">
-                        {Array.from({ length: (data as Machine).ammo_max }).map((_, i) => (
-                          <div
-                            key={i}
-                            className={cn(
-                              "h-2 rounded-sm transition-all flex-1",
-                              i < (unit.currentAmmo || 0)
-                                ? "bg-blue-500"
-                                : "bg-slate-800"
-                            )}
-                          />
-                        ))}
+                    {/* Ammo progress bar - Segmented (only for tehnolog rules) */}
+                    {!usePerWeaponAmmo ? (
+                      <div className="flex-1 flex items-center gap-1">
+                        <div className="flex-1 flex items-center gap-px">
+                          {Array.from({ length: (data as Machine).ammo_max }).map((_, i) => (
+                            <div
+                              key={i}
+                              className={cn(
+                                "h-2 rounded-sm transition-all flex-1",
+                                i < (unit.currentAmmo || 0)
+                                  ? "bg-blue-500"
+                                  : "bg-slate-800"
+                              )}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-[9px] md:text-xs font-mono font-black text-blue-400 min-w-[38px] text-right shrink-0">
+                          {unit.currentAmmo}/{(data as Machine).ammo_max}
+                        </span>
                       </div>
-                      <span className="text-[9px] md:text-xs font-mono font-black text-blue-400 min-w-[38px] text-right shrink-0">
-                        {unit.currentAmmo}/{(data as Machine).ammo_max}
-                      </span>
-                    </div>
+                    ) : (
+                      <div className="flex-1 text-[9px] md:text-xs text-slate-400 italic flex items-center">
+                        <Bomb className="w-2.5 h-2.5 md:w-3 md:h-3 mr-1 opacity-60" />
+                        Боезапас по орудиям
+                      </div>
+                    )}
 
                     {/* Shots count - Segmented */}
                     <div className="flex items-center gap-1 shrink-0">
