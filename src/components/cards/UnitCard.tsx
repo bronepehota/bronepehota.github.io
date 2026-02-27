@@ -235,21 +235,40 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
           const weapon = (unit.data as Machine).weapons[weaponIndex];
           const isMeleeWeapon = weapon?.range === 'ББ';
 
-          const newAmmo = isMeleeWeapon
-            ? (unit.currentAmmo || 0)  // Не списываем для ББ
-            : Math.max(0, (unit.currentAmmo || 0) - 1);
           const newShotsUsed = (unit.machineShotsUsed || 0) + 1;
           const newWeaponShots = {
             ...(unit.machineWeaponShots || {}),
             [weaponIndex]: (unit.machineWeaponShots?.[weaponIndex] || 0) + 1
           };
-          updateThisUnit((u) => ({
-            ...u,
-            currentAmmo: newAmmo,
-            machineShotsUsed: newShotsUsed,
-            machineWeaponShots: newWeaponShots,
-            isMachineShot: true
-          }));
+
+          if (usePerWeaponAmmo && !isMeleeWeapon) {
+            // Per-weapon ammo system (community_star_system): decrease weapon-specific ammo
+            const newWeaponAmmo = [...(unit.weaponAmmo || [])];
+            newWeaponAmmo[weaponIndex] = Math.max(0, (newWeaponAmmo[weaponIndex] || 0) - 1);
+
+            updateThisUnit((u) => ({
+              ...u,
+              weaponAmmo: newWeaponAmmo,
+              // Also update global ammo for display compatibility
+              currentAmmo: Math.max(0, (u.currentAmmo || 0) - 1),
+              machineShotsUsed: newShotsUsed,
+              machineWeaponShots: newWeaponShots,
+              isMachineShot: true
+            }));
+          } else {
+            // Original behavior for tehnolog or melee weapons
+            const newAmmo = isMeleeWeapon
+              ? (unit.currentAmmo || 0)  // Не списываем для ББ
+              : Math.max(0, (unit.currentAmmo || 0) - 1);
+
+            updateThisUnit((u) => ({
+              ...u,
+              currentAmmo: newAmmo,
+              machineShotsUsed: newShotsUsed,
+              machineWeaponShots: newWeaponShots,
+              isMachineShot: true
+            }));
+          }
         }
       } else if (result.actionType === 'melee') {
         if (result.unitType === 'squad' && result.soldierIndex !== undefined) {
