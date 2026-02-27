@@ -212,6 +212,9 @@ export default function ArmyBuilder({ army, setArmy, rulesVersion, onRulesVersio
               // Store selected weapon indices (default to all if not provided)
               const weaponIndices = selectedWeaponIndices ?? machine.weapons.map((_, i) => i);
 
+              // Initialize per-weapon ammo from weapon definitions
+              const weaponAmmo = machine.weapons.map(w => w.ammo ?? machine.ammo_max);
+
               const newUnit: ArmyUnit = {
                 instanceId: `${machine.id}_${Date.now()}`,
                 type: 'machine',
@@ -219,6 +222,7 @@ export default function ArmyBuilder({ army, setArmy, rulesVersion, onRulesVersio
                 instanceNumber,
                 currentDurability: machine.durability_max,
                 currentAmmo: machine.ammo_max,
+                weaponAmmo,
                 deadSoldiers: undefined,
                 actionsUsed: [{ moved: false, shot: false, melee: false, done: false }],
                 machineShotsUsed: 0,
