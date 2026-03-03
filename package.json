@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "dev:e2e": "PORT=3001 next dev",
+    "prebuild": "node scripts/generate-build-info.js",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

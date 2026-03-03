@@ -3,12 +3,15 @@
 import { Github } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { BUILD_INFO } from '@/lib/build-info';
 
 interface FooterProps {
   className?: string;
 }
 
 export default function Footer({ className }: FooterProps) {
+  const { version, displayDate, gitSha } = BUILD_INFO;
+
   return (
     <footer
       className={cn(
@@ -29,7 +32,7 @@ export default function Footer({ className }: FooterProps) {
             <span>SYSTEM: ONLINE</span>
           </div>
           <div className="hidden md:block">|</div>
-          <div className="hidden md:block">BUILD: 2025.02</div>
+          <div className="hidden md:block">BUILD: {displayDate}</div>
         </div>
 
         {/* Encyclopedia link */}
@@ -58,7 +61,10 @@ export default function Footer({ className }: FooterProps) {
 
         {/* Version info */}
         <div className="flex items-center gap-4 font-orbitron text-[10px] text-slate-500 hud-text">
-          <div>BRONEPEHOTA v2.0</div>
+          <div>v{version}</div>
+          <div className="hidden md:flex items-center gap-1">
+            <span className="text-hud-green/40">{gitSha}</span>
+          </div>
           <div className="hidden md:block">© 2025</div>
         </div>
       </div>
