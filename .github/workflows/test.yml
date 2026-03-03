@@ -24,9 +24,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Generate build-info
-        run: node scripts/generate-build-info.js
-
       - name: Type check
         run: npm run type-check
 
@@ -59,42 +56,8 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install chromium
 
-      - name: Kill any existing process on port 3001
-        run: |
-          lsof -ti:3001 | xargs kill -9 2>/dev/null || echo "Port 3001 is free"
-          sleep 2
-
-      - name: Start dev server in background with logging
-        run: |
-          mkdir -p logs
-          nohup npm run dev:e2e > logs/server.log 2>&1 &
-          echo $! > logs/server.pid
-          echo "Server started with PID: $(cat logs/server.pid)"
-
-      - name: Wait for app to be ready with retries
-        run: |
-          for i in {1..24}; do
-            if curl -s http://localhost:3001 > /dev/null; then
-              echo "Server is ready!"
-              exit 0
-            fi
-            echo "Attempt $i/24: Server not ready yet, waiting 3s..."
-            sleep 3
-          done
-          echo "Server failed to start after 72s"
-          echo "Server logs:"
-          cat logs/server.log || true
-          exit 1
-
       - name: Run E2E tests
         run: npm run test:e2e:ci
-
-      - name: Upload server logs on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: server-logs
-          path: logs/
 
       - name: Upload Cucumber report
         if: always()
@@ -109,11 +72,3 @@ jobs:
         with:
           name: screenshots
           path: e2e/screenshots/
-
-      - name: Kill server
-        if: always()
-        run: |
-          if [ -f logs/server.pid ]; then
-            pid=$(cat logs/server.pid)
-            kill $pid 2>/dev/null || true
-          fi
