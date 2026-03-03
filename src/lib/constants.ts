@@ -11,6 +11,7 @@ export const LOCAL_STORAGE_KEYS = {
   PANIC_ENABLED: 'bronepehota_panic_enabled',
   AIMED_SHOT_ENABLED: 'bronepehota_aimed_shot_enabled',
   SURPRISE_ATTACK_ENABLED: 'bronepehota_surprise_attack_enabled',
+  STRICT_PILOT_RANK_ENABLED: 'bronepehota_strict_pilot_rank_enabled',
 } as const;
 
 export const DEFAULT_POINT_BUDGETS = [250, 350, 500, 1000];

@@ -9,6 +9,7 @@ import factionsData from '@/data/factions.json';
 import { Shield, ArrowLeft, CheckCircle2, MoreVertical, List, Grid, History, Heart, UserX, AlertTriangle, X, BookOpen } from 'lucide-react';
 import { isValidRulesVersion } from '@/lib/rules-registry';
 import { cn } from '@/lib/utils';
+import { LOCAL_STORAGE_KEYS } from '@/lib/constants';
 import { CombatTargetProvider } from '@/contexts/CombatTargetContext';
 
 export default function Home() {
@@ -54,6 +55,15 @@ export default function Home() {
       setRulesVersion(saved as RulesVersionID);
     }
   }, []);
+
+  // Strict pilot rank enabled state - persisted in localStorage
+  const [strictPilotRankEnabled, setStrictPilotRankEnabled] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.STRICT_PILOT_RANK_ENABLED);
+      return saved !== null ? saved === 'true' : true; // Default to enabled
+    }
+    return true;
+  });
 
   // Persist rules version to localStorage on change
   useEffect(() => {
@@ -460,6 +470,8 @@ export default function Home() {
           displayMode={displayMode}
           onDisplayModeChange={setDisplayMode}
           onStartBattle={() => setView('game')}
+          strictPilotRankEnabled={strictPilotRankEnabled}
+          onStrictPilotRankEnabledChange={setStrictPilotRankEnabled}
         />
       ) : (
         <GameSession
@@ -470,6 +482,7 @@ export default function Home() {
           onInitiativeTriggerRef={(fn) => { triggerInitiativeRef.current = fn; }}
           showCombatLog={showCombatLog}
           setShowCombatLog={setShowCombatLog}
+          strictPilotRankEnabled={strictPilotRankEnabled}
         />
       )}
       </div>

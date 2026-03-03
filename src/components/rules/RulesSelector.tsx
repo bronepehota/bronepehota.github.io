@@ -7,6 +7,7 @@ import type { RulesVersion, RulesVersionID } from '@/lib/types';
 import { PanicToggle } from '../toggles/PanicToggle';
 import { AimedShotToggle } from '../toggles/AimedShotToggle';
 import { SurpriseAttackToggle } from '../toggles/SurpriseAttackToggle';
+import { StrictPilotRankToggle } from '../toggles/StrictPilotRankToggle';
 
 interface RulesSelectorProps {
   versions: RulesVersion[];
@@ -19,6 +20,8 @@ interface RulesSelectorProps {
   onAimedShotEnabledChange?: (enabled: boolean) => void;
   surpriseAttackEnabled?: boolean;
   onSurpriseAttackEnabledChange?: (enabled: boolean) => void;
+  strictPilotRankEnabled?: boolean;
+  onStrictPilotRankEnabledChange?: (enabled: boolean) => void;
 }
 
 export function RulesSelector({
@@ -32,6 +35,8 @@ export function RulesSelector({
   onAimedShotEnabledChange,
   surpriseAttackEnabled = false,
   onSurpriseAttackEnabledChange,
+  strictPilotRankEnabled = true,
+  onStrictPilotRankEnabledChange,
 }: RulesSelectorProps) {
   const [expandedRulesId, setExpandedRulesId] = useState<RulesVersionID | null>(null);
   const debouncedSaveRef = useRef<NodeJS.Timeout>();
@@ -189,7 +194,7 @@ export function RulesSelector({
         </div>
 
         {/* Side-by-side toggles on desktop, stacked on mobile */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           {onPanicEnabledChange && (
             <PanicToggle
               enabled={panicEnabled}
@@ -207,6 +212,12 @@ export function RulesSelector({
             <SurpriseAttackToggle
               enabled={surpriseAttackEnabled}
               onEnabledChange={onSurpriseAttackEnabledChange}
+            />
+          )}
+          {onStrictPilotRankEnabledChange && (
+            <StrictPilotRankToggle
+              enabled={strictPilotRankEnabled}
+              onEnabledChange={onStrictPilotRankEnabledChange}
             />
           )}
         </div>

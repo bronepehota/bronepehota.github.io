@@ -38,6 +38,7 @@ const oswald = Oswald({
 export const metadata: Metadata = {
   title: 'Бронепехота - Помощник',
   description: 'Приложение для игры в варгейм Бронепехота',
+  manifest: `${BASE_PATH}/manifest.json`,
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",

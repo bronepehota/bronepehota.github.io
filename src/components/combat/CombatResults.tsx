@@ -5,7 +5,7 @@ import { CombatResult, CombatParameters } from '@/lib/combat-types';
 import { RulesVersionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { CheckCircle2, AlertTriangle, Skull, Shield, Footprints, Bomb } from 'lucide-react';
-import { AnimatedDice, AnimatedDiceGroup } from './AnimatedDice';
+import { AnimatedDice } from './AnimatedDice';
 
 interface CombatResultsProps {
   result: CombatResult;
@@ -248,7 +248,6 @@ export function CombatResults({
                     const rolls = result.damageResult?.rolls ?? [];
                     const maxRoll = isInfantry ? Math.max(...rolls) : roll;
                     const isMax = isInfantry && roll === maxRoll;
-                    const isCritical = roll >= 20 || roll >= 12;
 
                     return (
                       <div key={i} className="flex flex-col items-center gap-1">

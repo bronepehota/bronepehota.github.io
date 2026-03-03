@@ -18,7 +18,8 @@ interface UnitNavigationCardProps {
   dockStyles: Record<string, string>;
 }
 
-// Helper outside component to avoid recreation
+// Helper outside component to avoid recreation (not used here, but kept for potential future use)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getDockStyles = (factionId: string) => {
   const colors = {
     polaris: { borderSolid: 'border-red-500', bgSolid: 'bg-red-500', border: 'border-red-500/30', bg: 'bg-red-500/20', text: 'text-red-400', glow: 'shadow-red-500/50', accent: 'border-red-400' },
@@ -71,6 +72,7 @@ export const UnitNavigationCard = memo(function UnitNavigationCard({
       data-testid={`unit-nav-${unit.instanceId}`}
     >
       <div className="absolute inset-0">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={finalSrc}
           alt={unit.data.name}
