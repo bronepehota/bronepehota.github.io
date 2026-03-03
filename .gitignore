@@ -8,9 +8,6 @@
 /build/
 *.tsbuildinfo
 
-# Generated files
-/src/lib/build-info.ts
-
 # Service Worker (generated)
 /public/sw.js
 /public/sw.js.map
