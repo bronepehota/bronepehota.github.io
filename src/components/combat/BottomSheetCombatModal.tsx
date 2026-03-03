@@ -97,6 +97,7 @@ export function BottomSheetCombatModal({
       // Reset memory when opening combat for a new unit
       resetTargetMemory();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.unit?.instanceId]); // Only when unit changes, not on every render
 
   // Handle escape key

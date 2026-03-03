@@ -37,13 +37,14 @@ describe('constants', () => {
       expect(LOCAL_STORAGE_KEYS.PANIC_ENABLED).toBe('bronepehota_panic_enabled');
       expect(LOCAL_STORAGE_KEYS.AIMED_SHOT_ENABLED).toBe('bronepehota_aimed_shot_enabled');
       expect(LOCAL_STORAGE_KEYS.SURPRISE_ATTACK_ENABLED).toBe('bronepehota_surprise_attack_enabled');
+      expect(LOCAL_STORAGE_KEYS.STRICT_PILOT_RANK_ENABLED).toBe('bronepehota_strict_pilot_rank_enabled');
     });
 
     it('should have correct types (as const provides compile-time readonly)', () => {
       // as const ensures TypeScript treats these as readonly literals
       // Note: Runtime immutability would require Object.freeze()
       expect(typeof LOCAL_STORAGE_KEYS.ARMY).toBe('string');
-      expect(Object.keys(LOCAL_STORAGE_KEYS)).toHaveLength(5);
+      expect(Object.keys(LOCAL_STORAGE_KEYS)).toHaveLength(6);
     });
   });
 

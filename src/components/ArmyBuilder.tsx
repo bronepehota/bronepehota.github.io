@@ -31,9 +31,21 @@ interface ArmyBuilderProps {
   displayMode: 'detailed' | 'compact';
   onDisplayModeChange: (mode: 'detailed' | 'compact') => void;
   onStartBattle: () => void;
+  strictPilotRankEnabled?: boolean;
+  onStrictPilotRankEnabledChange?: (enabled: boolean) => void;
 }
 
-export default function ArmyBuilder({ army, setArmy, rulesVersion, onRulesVersionChange, displayMode, onDisplayModeChange, onStartBattle: _onStartBattle }: ArmyBuilderProps) {
+export default function ArmyBuilder({
+  army,
+  setArmy,
+  rulesVersion,
+  onRulesVersionChange,
+  displayMode,
+  onDisplayModeChange,
+  onStartBattle: _onStartBattle,
+  strictPilotRankEnabled = true,
+  onStrictPilotRankEnabledChange
+}: ArmyBuilderProps) {
 
   // Panic enabled state - persisted in localStorage
   const [panicEnabled, setPanicEnabled] = useState<boolean>(() => {
@@ -152,6 +164,8 @@ export default function ArmyBuilder({ army, setArmy, rulesVersion, onRulesVersio
                     onAimedShotEnabledChange={setAimedShotEnabled}
                     surpriseAttackEnabled={surpriseAttackEnabled}
                     onSurpriseAttackEnabledChange={setSurpriseAttackEnabled}
+                    strictPilotRankEnabled={strictPilotRankEnabled}
+                    onStrictPilotRankEnabledChange={onStrictPilotRankEnabledChange}
                     onConfirm={() => {
                       setArmy({ ...army, currentStep: 'unit-select' });
                       setSetupStep('units');

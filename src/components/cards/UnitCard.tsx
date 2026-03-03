@@ -5,7 +5,7 @@ import { GitHubPagesImage as Image } from '../GitHubPagesImage';
 import { ArmyUnit, Squad, Machine, RulesVersionID, Weapon, PanicTestResult } from '@/lib/types';
 import { Shield, Sword, Target, CheckCircle2, Bomb, UserX, Plane, Skull, Wrench, Flame, Crosshair, X, Image as ImageIcon, Footprints } from 'lucide-react';
 import SoldierCard from './SoldierCard';
-import { formatUnitNumber, shortenWeaponName } from '@/lib/unit-utils';
+import { formatUnitNumber } from '@/lib/unit-utils';
 import { getDefaultRulesVersion } from '@/lib/rules-registry';
 import { cn } from '@/lib/utils';
 import { BottomSheetCombatModal } from '../combat/BottomSheetCombatModal';
@@ -28,9 +28,10 @@ interface UnitCardProps {
   onPilotAssign?: (machineInstanceId: string, pilotInfo: PilotInfo) => void;
   onPilotRemove?: (machineInstanceId: string) => void;
   onNavigateToUnit?: (unitInstanceId: string) => void; // Navigate to unit card
+  strictPilotRankEnabled?: boolean;
 }
 
-export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [], onCombatLogEntry, allUnits = [], onPilotAssign, onPilotRemove, onNavigateToUnit: _onNavigateToUnit }: UnitCardProps) {
+export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [], onCombatLogEntry, allUnits = [], onPilotAssign, onPilotRemove, onNavigateToUnit: _onNavigateToUnit, strictPilotRankEnabled = true }: UnitCardProps) {
   const [showImage, setShowImage] = useState(false);
   const [showSoldierImage, setShowSoldierImage] = useState<number | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -286,7 +287,8 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
       // Mark this result as processed
       lastProcessedResultRef.current = result.timestamp;
     }
-  }, [combatController.state.phase, combatController.state.result, unit, updateUnit]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [combatController.state.phase, combatController.state.result, unit]);
 
   const handleApplyResult = (markAsDone?: boolean) => {
     const result = combatController.state.result;
@@ -419,6 +421,7 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
           allUnits={allUnits}
           onAssignPilot={handlePilotAssign}
           onRemovePilot={handlePilotRemove}
+          strictPilotRankEnabled={strictPilotRankEnabled}
         />
       )}
 

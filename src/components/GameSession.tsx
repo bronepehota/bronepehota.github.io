@@ -5,12 +5,11 @@ import { Army, ArmyUnit, Squad, PilotInfo, FactionID } from '@/lib/types';
 import { resolvePanic } from '@/lib/panic-logic';
 import { getFactionColors } from '@/lib/faction-colors';
 import UnitCard from './cards/UnitCard';
-import { History, X, Check } from 'lucide-react';
+import { History, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CombatLogEntry } from '@/lib/combat-types';
 import { useCombatTargetContext } from '@/contexts/CombatTargetContext';
 import InitiativeModal from './modals/InitiativeModal';
-import Image from 'next/image';
 import { UnitNavigationCard } from './GameSession/index';
 
 // Faction styles for unit dock navigation
@@ -35,9 +34,10 @@ interface GameSessionProps {
   onInitiativeTriggerRef?: (trigger: () => void) => void;
   showCombatLog?: boolean;
   setShowCombatLog?: (show: boolean) => void;
+  strictPilotRankEnabled?: boolean;
 }
 
-export default function GameSession({ army, setArmy, onInitiativeTriggerRef, showCombatLog, setShowCombatLog }: GameSessionProps) {
+export default function GameSession({ army, setArmy, onInitiativeTriggerRef, showCombatLog, setShowCombatLog, strictPilotRankEnabled = true }: GameSessionProps) {
   const [showInitiativeModal, setShowInitiativeModal] = useState(false);
   const [showTurnConfirmation, setShowTurnConfirmation] = useState(false);
   const [focusedUnitIdx, setFocusedUnitIdx] = useState(0);
@@ -470,6 +470,7 @@ export default function GameSession({ army, setArmy, onInitiativeTriggerRef, sho
               onPilotAssign={handlePilotAssign}
               onPilotRemove={handlePilotRemove}
               onNavigateToUnit={handleNavigateToUnit}
+              strictPilotRankEnabled={strictPilotRankEnabled}
             />
           </div>
         )}

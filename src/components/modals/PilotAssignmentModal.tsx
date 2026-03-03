@@ -30,6 +30,7 @@ interface PilotAssignmentModalProps {
   allUnits: ArmyUnit[];
   onAssignPilot: (pilotInfo: PilotInfo) => void;
   onRemovePilot: () => void;
+  strictPilotRankEnabled?: boolean;
 }
 
 export function PilotAssignmentModal({
@@ -39,6 +40,7 @@ export function PilotAssignmentModal({
   allUnits,
   onAssignPilot,
   onRemovePilot,
+  strictPilotRankEnabled = true,
 }: PilotAssignmentModalProps) {
   const [selectedPilot, setSelectedPilot] = useState<PilotCandidate | null>(null);
   const [step, setStep] = useState<StepState>('squads');
@@ -83,9 +85,10 @@ export function PilotAssignmentModal({
         .map((soldier, idx) => ({ soldier, idx }))
         .filter(({ soldier, idx }) => {
           const isCurrentPilot = soldierIsCurrentPilot(unit, idx);
-          const isEligible = soldier.rank >= machineRank &&
-                           !unit.deadSoldiers?.includes(idx) &&
-                           !soldier.isPilot;
+          const isAlive = !unit.deadSoldiers?.includes(idx);
+          const isNotPiloting = !soldier.isPilot;
+          const rankCheck = strictPilotRankEnabled ? soldier.rank >= machineRank : true;
+          const isEligible = isAlive && isNotPiloting && rankCheck;
           return isEligible || isCurrentPilot;
         });
 
