@@ -50,7 +50,12 @@ export function BattlePreparationScreen({
 
   // Обработка начала боя после инициативы
   const handleStartBattle = () => {
-    setArmy({ ...army, isInBattle: true, currentStep: 'battle' });
+    setArmy({
+      ...army,
+      isInBattle: true,
+      currentStep: 'battle',
+      lastBattleDate: new Date().toISOString()
+    });
     onStartBattle();
   };
 

@@ -199,6 +199,7 @@ export interface Army {
   isLoading?: boolean;
   loadError?: string;
   currentTurn?: number; // Starts at 1, increments with each new turn
+  lastBattleDate?: string; // ISO timestamp when battle was started
 }
 
 // Rules version selection

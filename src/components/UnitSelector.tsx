@@ -4,7 +4,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { GitHubPagesImage as Image } from './GitHubPagesImage';
 import type { Faction, Squad, Machine, ArmyUnit, FactionID, FilterType } from '@/lib/types';
 import { Plus, ArrowLeft, Users, Zap, Shield } from 'lucide-react';
-import { WeaponSelectorModal } from './modals/WeaponSelectorModal';
+// import { WeaponSelectorModal } from './modals/WeaponSelectorModal'; // Preserved for potential future use
 import { EncyclopediaModal } from './modals/EncyclopediaModal';
 import { countByUnitType } from '@/lib/unit-utils';
 import MachineCard from './machine/MachineCard';
@@ -53,7 +53,7 @@ type UnitDisplay = {
  * - Images: 120px minimum width
  */
 export function UnitSelector({
-  factions,
+  factions: _factions, // factions prop kept for backward compatibility, no longer needed after WeaponSelectorModal removal
   squads,
   machines = [],
   selectedFaction,
@@ -98,9 +98,9 @@ export function UnitSelector({
   const [selectedUnit, setSelectedUnit] = useState<UnitDisplay | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Weapon selector modal state for machines
-  const [weaponSelectorMachine, setWeaponSelectorMachine] = useState<Machine | null>(null);
-  const [isWeaponSelectorOpen, setIsWeaponSelectorOpen] = useState(false);
+  // Weapon selector modal state for machines - preserved for potential future use
+  // const [weaponSelectorMachine, setWeaponSelectorMachine] = useState<Machine | null>(null);
+  // const [isWeaponSelectorOpen, setIsWeaponSelectorOpen] = useState(false);
 
   // Calculate remaining points
   const totalCost = army.reduce((sum, unit) => {
@@ -146,9 +146,6 @@ export function UnitSelector({
   // Check if unit can be afforded
   const canAffordUnit = (cost: number) => cost <= remainingPoints;
 
-  // Get faction for styling
-  const faction = factions.find(f => f.id === selectedFaction);
-
   // Handle add unit with budget check
   const handleAddUnit = (unit: UnitDisplay) => {
     if (!canAffordUnit(unit.data.cost)) {
@@ -159,26 +156,25 @@ export function UnitSelector({
     if (unit.type === 'squad') {
       onAddUnit(unit.data as Squad);
     } else if (unit.type === 'machine' && onAddMachine) {
-      // Open weapon selector modal for machines
-      setWeaponSelectorMachine(unit.data as Machine);
-      setIsWeaponSelectorOpen(true);
+      // Add machine directly with all weapons selected (default behavior)
+      onAddMachine(unit.data as Machine);
     }
   };
 
-  // Handle weapon selection confirmation
-  const handleWeaponSelectionConfirm = (selectedIndices: number[]) => {
-    if (weaponSelectorMachine && onAddMachine) {
-      onAddMachine(weaponSelectorMachine, selectedIndices);
-    }
-    setIsWeaponSelectorOpen(false);
-    setWeaponSelectorMachine(null);
-  };
+  // Handle weapon selection confirmation - preserved for potential future use
+  // const handleWeaponSelectionConfirm = (selectedIndices: number[]) => {
+  //   if (weaponSelectorMachine && onAddMachine) {
+  //     onAddMachine(weaponSelectorMachine, selectedIndices);
+  //   }
+  //   setIsWeaponSelectorOpen(false);
+  //   setWeaponSelectorMachine(null);
+  // };
 
-  // Handle weapon selection cancel
-  const handleWeaponSelectionCancel = () => {
-    setIsWeaponSelectorOpen(false);
-    setWeaponSelectorMachine(null);
-  };
+  // Handle weapon selection cancel - preserved for potential future use
+  // const handleWeaponSelectionCancel = () => {
+  //   setIsWeaponSelectorOpen(false);
+  //   setWeaponSelectorMachine(null);
+  // };
 
   // Handle unit card click
   const handleUnitClick = (unit: UnitDisplay) => {
@@ -543,7 +539,7 @@ export function UnitSelector({
         />
       )}
 
-      {/* Weapon selector modal for machines */}
+      {/* Weapon selector modal for machines - preserved for potential future use
       {weaponSelectorMachine && faction && (
         <WeaponSelectorModal
           machine={weaponSelectorMachine}
@@ -552,7 +548,7 @@ export function UnitSelector({
           onClose={handleWeaponSelectionCancel}
           onConfirm={handleWeaponSelectionConfirm}
         />
-      )}
+      )} */}
 
       {/* Tab bar (mobile only) */}
       <TabBar

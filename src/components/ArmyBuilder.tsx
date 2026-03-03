@@ -294,7 +294,12 @@ export default function ArmyBuilder({
               army={army}
               setArmy={setArmy}
               onStartBattle={() => {
-                setArmy({ ...army, isInBattle: true, currentStep: 'battle' });
+                setArmy({
+                  ...army,
+                  isInBattle: true,
+                  currentStep: 'battle',
+                  lastBattleDate: army.lastBattleDate || new Date().toISOString()
+                });
                 _onStartBattle();
               }}
               onBackToBuilder={() => {
