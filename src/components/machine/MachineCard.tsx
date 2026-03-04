@@ -104,8 +104,8 @@ export default function MachineCard({ machine, onAdd, onViewDetails, testId }: M
 
       {/* Content */}
       <div className="p-3 space-y-2">
-        {/* Name and cost */}
-        <div className="flex items-start justify-between gap-2">
+        {/* Name row */}
+        <div className="flex items-start gap-2">
           <div className="flex-1 min-w-0">
             <h3 className={clsx(
               'font-bold text-sm font-mono tracking-wide truncate',
@@ -117,16 +117,22 @@ export default function MachineCard({ machine, onAdd, onViewDetails, testId }: M
               {machine.class?.toUpperCase()}
             </p>
           </div>
-          <div className="text-right">
-            <span className={clsx('font-mono font-bold text-sm', colors.accent)}>
+          {/* Cost badge */}
+          <div className="flex-shrink-0">
+            <span className={clsx(
+              'px-2 py-0.5 rounded-md font-mono font-bold text-sm',
+              colors.bg,
+              colors.border,
+              colors.accent
+            )}>
               {machine.cost}
             </span>
-            <span className="text-[10px] text-slate-500 block font-mono">очков</span>
           </div>
         </div>
 
         {/* Quick stats */}
-        <div className="flex items-center gap-2 text-[10px] text-slate-500 font-mono flex-wrap">
+        <div className="flex items-center gap-2 text-[10px] text-slate-500 font-mono">
+          <span className="px-1.5 py-0.5 rounded bg-slate-700/30">ТЕХНИКА</span>
           <div className="flex items-center gap-1">
             <Shield className="w-3 h-3" />
             <span>Прч {machine.durability_max}</span>

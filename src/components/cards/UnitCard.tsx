@@ -387,6 +387,20 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
         data.faction === 'polaris' ? "border-red-600/30" : data.faction === 'protectorate' ? "border-cyan-600/30" : "border-yellow-600/30"
       )}
     >
+      {/* Unit number badge - top left corner */}
+      {unit.instanceNumber && (
+        <div className={cn(
+          "absolute top-0 left-0 z-20 px-1.5 py-0.5 rounded-br-sm font-mono font-bold text-xs md:text-sm border border-r-2 border-b-2 pointer-events-none",
+          data.faction === 'polaris'
+            ? "bg-red-950/90 text-red-400 border-red-600/40"
+            : data.faction === 'protectorate'
+            ? "bg-cyan-950/90 text-cyan-400 border-cyan-600/40"
+            : "bg-yellow-950/90 text-yellow-400 border-yellow-600/40"
+        )}>
+          {formatUnitNumber(unit)}
+        </div>
+      )}
+
       {/* Tech corners - faction colored */}
       <div className="absolute top-0 left-0 w-3 h-3 border-l-2 border-t-2 -ml-px -mt-px pointer-events-none" style={{ borderColor: factionBorderColor }} />
       <div className="absolute top-0 right-0 w-3 h-3 border-r-2 border-t-2 -mr-px -mt-px pointer-events-none" style={{ borderColor: factionBorderColor }} />
@@ -586,28 +600,40 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
           data.faction === 'polaris' ? "bg-red-600/20" : data.faction === 'protectorate' ? "bg-cyan-600/20" : "bg-yellow-600/20"
         )} />
 
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 md:gap-2 flex-wrap">
-            {unit.instanceNumber && (
-              <span className="text-base md:text-lg font-mono font-bold text-slate-400">{formatUnitNumber(unit)}</span>
+        <div className={cn("flex-1 min-w-0", unit.instanceNumber && "pl-9 md:pl-11")}>
+          {/* Row 1: Name + Done badge */}
+          <div className="flex items-center gap-1 md:gap-2 min-w-0">
+            <h3 className="min-w-0 flex-1 font-mono font-bold text-xs md:text-sm uppercase tracking-wide truncate" title={data.name}>{data.name}</h3>
+            {((isSquadDone && !isAllDead) || (isMachineDone && !isMachineDestroyed)) && (
+              <span className="shrink-0 text-emerald-400">
+                <CheckCircle2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
+              </span>
             )}
-            <h3 className="font-mono font-bold text-xs md:text-sm uppercase tracking-wide truncate">{data.name}</h3>
-            <span className="text-[9px] md:text-[10px] opacity-50 font-mono">{data.cost} ОЧК.</span>
-            {isSquad && (
+          </div>
+
+          {/* Row 2: Status badges */}
+          <div className="flex items-center gap-1 mt-0.5">
+            {/* Cost */}
+            <span className="text-[10px] md:text-xs font-mono font-bold text-slate-500">{data.cost} очк</span>
+
+            {/* Grenade status - squads only */}
+            {isSquad && !isAllDead && (
               <div className={cn(
-                "flex items-center gap-0.5 md:gap-1 px-1 md:px-1.5 py-0.5 rounded-sm text-[7px] md:text-[8px] font-mono font-black uppercase tracking-tighter border",
-                unit.grenadesUsed ? "bg-red-950/30 text-red-400 border-red-700/50" : "bg-emerald-950/30 text-emerald-400 border-emerald-700/50"
+                "flex items-center justify-center w-4 h-4 md:w-5 md:h-5 rounded-sm border",
+                unit.grenadesUsed
+                  ? "bg-red-950/40 text-red-400 border-red-700/50"
+                  : "bg-emerald-950/40 text-emerald-400 border-emerald-700/50"
               )}>
-                <Bomb className="w-2 h-2 md:w-2.5 md:h-2.5" />
-                <span className="hidden sm:inline">{unit.grenadesUsed ? 'Пусто' : '1'}</span>
+                <Bomb className="w-2 h-2 md:w-2.5 md:h-2.5 shrink-0" />
               </div>
             )}
-            {isAllDead && <div className="bg-red-950/50 text-red-400 border border-red-700 text-[7px] md:text-[8px] px-1 md:px-1.5 py-0.5 rounded-sm font-mono font-black uppercase"><UserX className="w-2.5 h-2.5 md:w-3 md:h-3 inline mr-0.5 md:mr-1" />УНИЧТОЖЕН</div>}
-          </div>
-          <div className="text-[9px] md:text-[10px] opacity-50 flex gap-1.5 md:gap-2 items-center font-mono">
-            {isSquadDone && !isAllDead && <span className="text-emerald-400 font-bold ml-auto flex items-center gap-1"><CheckCircle2 className="w-2.5 h-2.5 md:w-3 md:h-3" /> <span className="hidden sm:inline">ГОТОВ</span></span>}
-            {isMachineDone && !isMachineDestroyed && <span className="text-emerald-400 font-bold ml-auto flex items-center gap-1"><CheckCircle2 className="w-2.5 h-2.5 md:w-3 md:h-3" /> <span className="hidden sm:inline">ГОТОВ</span></span>}
-            {isMachineDestroyed && <div className="bg-red-950/50 text-red-400 border border-red-700 text-[7px] md:text-[8px] px-1 md:px-1.5 py-0.5 rounded-sm font-mono font-black uppercase ml-auto"><UserX className="w-2.5 h-2.5 md:w-3 md:h-3 inline mr-0.5 md:mr-1" />УНИЧТОЖЕН</div>}
+
+            {/* All Dead badge */}
+            {isAllDead && (
+              <div className="bg-red-950/50 text-red-400 border border-red-700/70 px-1 py-0.5 rounded-sm text-[8px] md:text-[9px] font-mono font-black uppercase flex items-center gap-0.5">
+                <UserX className="w-2 h-2 md:w-2.5 md:h-2.5 shrink-0" />
+              </div>
+            )}
           </div>
         </div>
         <div className="flex gap-0.5 md:gap-1" onClick={e => e.stopPropagation()}>
