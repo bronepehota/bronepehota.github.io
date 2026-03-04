@@ -110,7 +110,13 @@ export function UnitSelector({
 
   // Filter units by selected faction
   const availableSquads = useMemo(() => squads.filter(s => s.faction === selectedFaction), [squads, selectedFaction]);
-  const availableMachines = useMemo(() => machines.filter(m => m.faction === selectedFaction), [machines, selectedFaction]);
+  // Mercenaries have access to ALL machines from all factions
+  const availableMachines = useMemo(() => {
+    if (selectedFaction === 'mercenaries') {
+      return machines; // Show all machines for mercenaries
+    }
+    return machines.filter(m => m.faction === selectedFaction);
+  }, [machines, selectedFaction]);
 
   // All mercenaries squads - available to all factions
   const allMercenaries = useMemo(() => squads.filter(s => s.faction === 'mercenaries'), [squads]);
@@ -437,8 +443,8 @@ export function UnitSelector({
 
                       {/* Content */}
                       <div className="p-3 space-y-2">
-                        {/* Name and cost */}
-                        <div className="flex items-start justify-between gap-2">
+                        {/* Name row */}
+                        <div className="flex items-start gap-2">
                           <div className="flex-1 min-w-0">
                             <h3 className={clsx(
                               'font-bold text-sm font-mono tracking-wide truncate',
@@ -446,20 +452,22 @@ export function UnitSelector({
                             )} title={squad.name}>
                               {squad.name.toUpperCase()}
                             </h3>
-                            <p className="text-[10px] text-slate-500 truncate font-mono">
-                              ОТРЯД
-                            </p>
                           </div>
-                          <div className="text-right">
-                            <span className={clsx('font-mono font-bold text-sm', affordable ? colors.text : 'text-slate-500')}>
+                          {/* Cost badge - absolutely positioned top-right */}
+                          <div className="flex-shrink-0">
+                            <span className={clsx(
+                              'px-2 py-0.5 rounded-md font-mono font-bold text-sm',
+                              affordable ? colors.bgSolid.replace('bg-', 'bg-') + '/20 ' + colors.border : 'bg-slate-700/30 border-slate-600',
+                              affordable ? colors.text : 'text-slate-500'
+                            )}>
                               {squad.cost}
                             </span>
-                            <span className="text-[10px] text-slate-500 block font-mono">очков</span>
                           </div>
                         </div>
 
                         {/* Quick stats */}
-                        <div className="flex items-center gap-2 text-[10px] text-slate-500 font-mono flex-wrap">
+                        <div className="flex items-center gap-2 text-[10px] text-slate-500 font-mono">
+                          <span className="px-1.5 py-0.5 rounded bg-slate-700/30">ОТРЯД</span>
                           <div className="flex items-center gap-1">
                             <Users className="w-3 h-3" />
                             <span>{squad.soldiers.length}</span>
