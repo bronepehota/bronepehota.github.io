@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Minus, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -29,6 +29,7 @@ export function NumberStepper({
 }: NumberStepperProps) {
   const [inputValue, setInputValue] = useState(value.toString());
   const [isFocused, setIsFocused] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const decrement = () => {
     const newValue = Math.max(min, value - step);
@@ -68,7 +69,13 @@ export function NumberStepper({
     }
   };
 
-  const handleFocus = () => setIsFocused(true);
+  const handleFocus = () => {
+    setIsFocused(true);
+    // Select all text when focused for easy overwriting
+    if (inputRef.current) {
+      inputRef.current.select();
+    }
+  };
 
   const canDecrement = value > min;
   const canIncrement = value < max;
@@ -120,6 +127,7 @@ export function NumberStepper({
         </button>
 
         <input
+          ref={inputRef}
           type="number"
           value={isFocused ? inputValue : value}
           onChange={handleInputChange}

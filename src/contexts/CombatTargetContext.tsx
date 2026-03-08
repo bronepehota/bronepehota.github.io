@@ -11,10 +11,14 @@ export interface TargetMemory {
 }
 
 interface CombatTargetContextType {
-  targetMemory: TargetMemory;
-  updateTargetMemory: (params: Partial<TargetMemory>) => void;
-  resetTargetMemory: () => void;
-  isMemoryDirty: boolean;
+  // Get memory for a specific unit
+  getTargetMemory: (unitId: string) => TargetMemory;
+  // Update memory for a specific unit
+  updateTargetMemory: (unitId: string, params: Partial<TargetMemory>) => void;
+  // Check if memory is dirty for a specific unit
+  isMemoryDirty: (unitId: string) => boolean;
+  // Clear all memory (for reset scenarios)
+  clearAllMemory: () => void;
 }
 
 const CombatTargetContext = createContext<CombatTargetContextType | undefined>(undefined);
@@ -31,42 +35,54 @@ interface CombatTargetProviderProps {
   children: ReactNode;
 }
 
+// Default empty memory state
+const createEmptyMemory = (): TargetMemory => ({
+  distance: null,
+  targetArmor: null,
+  targetMelee: null,
+  lastUpdateTimestamp: 0,
+  isDirty: false,
+});
+
 export function CombatTargetProvider({ children }: CombatTargetProviderProps) {
-  const [targetMemory, setTargetMemory] = useState<TargetMemory>({
-    distance: null,
-    targetArmor: null,
-    targetMelee: null,
-    lastUpdateTimestamp: 0,
-    isDirty: false,
-  });
+  // Store memory for each unit separately
+  const [memoryMap, setMemoryMap] = useState<Map<string, TargetMemory>>(new Map());
 
-  const updateTargetMemory = useCallback((params: Partial<TargetMemory>) => {
-    setTargetMemory((prev) => ({
-      ...prev,
-      ...params,
-      lastUpdateTimestamp: Date.now(),
-      isDirty: true,
-    }));
-  }, []);
+  const getTargetMemory = useCallback((unitId: string): TargetMemory => {
+    return memoryMap.get(unitId) || createEmptyMemory();
+  }, [memoryMap]);
 
-  const resetTargetMemory = useCallback(() => {
-    setTargetMemory({
-      distance: null,
-      targetArmor: null,
-      targetMelee: null,
-      lastUpdateTimestamp: 0,
-      isDirty: false,
+  const updateTargetMemory = useCallback((unitId: string, params: Partial<TargetMemory>) => {
+    setMemoryMap((prevMap) => {
+      const current = prevMap.get(unitId) || createEmptyMemory();
+      const updated: TargetMemory = {
+        ...current,
+        ...params,
+        lastUpdateTimestamp: Date.now(),
+        isDirty: true,
+      };
+
+      const newMap = new Map(prevMap);
+      newMap.set(unitId, updated);
+      return newMap;
     });
   }, []);
 
-  const isMemoryDirty = targetMemory.isDirty;
+  const isMemoryDirty = useCallback((unitId: string): boolean => {
+    const memory = memoryMap.get(unitId);
+    return memory?.isDirty || false;
+  }, [memoryMap]);
+
+  const clearAllMemory = useCallback(() => {
+    setMemoryMap(new Map());
+  }, []);
 
   const contextValue: CombatTargetContextType = useMemo(() => ({
-    targetMemory,
+    getTargetMemory,
     updateTargetMemory,
-    resetTargetMemory,
     isMemoryDirty,
-  }), [targetMemory, updateTargetMemory, resetTargetMemory, isMemoryDirty]);
+    clearAllMemory,
+  }), [getTargetMemory, updateTargetMemory, isMemoryDirty, clearAllMemory]);
 
   return (
     <CombatTargetContext.Provider value={contextValue}>

@@ -35,15 +35,26 @@ interface GameSessionProps {
   showCombatLog?: boolean;
   setShowCombatLog?: (show: boolean) => void;
   strictPilotRankEnabled?: boolean;
+  distanceInputUnit?: 'steps' | 'cm';
+  stepToCmFactor?: number;
 }
 
-export default function GameSession({ army, setArmy, onInitiativeTriggerRef, showCombatLog, setShowCombatLog, strictPilotRankEnabled = true }: GameSessionProps) {
+export default function GameSession({
+  army,
+  setArmy,
+  onInitiativeTriggerRef,
+  showCombatLog,
+  setShowCombatLog,
+  strictPilotRankEnabled = true,
+  distanceInputUnit = 'steps',
+  stepToCmFactor = 5
+}: GameSessionProps) {
   const [showInitiativeModal, setShowInitiativeModal] = useState(false);
   const [showTurnConfirmation, setShowTurnConfirmation] = useState(false);
   const [focusedUnitIdx, setFocusedUnitIdx] = useState(0);
   const [isDockExpanded, setIsDockExpanded] = useState(false);
   const [dockDragProgress, setDockDragProgress] = useState(0);
-  const { resetTargetMemory } = useCombatTargetContext();
+  const { clearAllMemory } = useCombatTargetContext();
 
   // Keep ref to current army for immediate access in updateUnit
   const armyRef = useRef(army);
@@ -219,7 +230,7 @@ export default function GameSession({ army, setArmy, onInitiativeTriggerRef, sho
 
   const confirmStartNewTurn = () => {
     // Сброс памяти параметров цели при начале нового тура
-    resetTargetMemory();
+    clearAllMemory();
 
     const newTurn = (army.currentTurn || 1) + 1;
 
@@ -471,6 +482,8 @@ export default function GameSession({ army, setArmy, onInitiativeTriggerRef, sho
               onPilotRemove={handlePilotRemove}
               onNavigateToUnit={handleNavigateToUnit}
               strictPilotRankEnabled={strictPilotRankEnabled}
+              distanceInputUnit={distanceInputUnit}
+              stepToCmFactor={stepToCmFactor}
             />
           </div>
         )}

@@ -33,6 +33,10 @@ interface ArmyBuilderProps {
   onStartBattle: () => void;
   strictPilotRankEnabled?: boolean;
   onStrictPilotRankEnabledChange?: (enabled: boolean) => void;
+  distanceInputUnit?: 'steps' | 'cm';
+  onDistanceInputUnitChange?: (value: 'steps' | 'cm') => void;
+  stepToCmFactor?: '4' | '5';
+  onStepToCmFactorChange?: (value: '4' | '5') => void;
 }
 
 export default function ArmyBuilder({
@@ -44,7 +48,11 @@ export default function ArmyBuilder({
   onDisplayModeChange,
   onStartBattle: _onStartBattle,
   strictPilotRankEnabled = true,
-  onStrictPilotRankEnabledChange
+  onStrictPilotRankEnabledChange,
+  distanceInputUnit = 'steps',
+  onDistanceInputUnitChange,
+  stepToCmFactor = '5',
+  onStepToCmFactorChange,
 }: ArmyBuilderProps) {
 
   // Panic enabled state - persisted in localStorage
@@ -166,6 +174,10 @@ export default function ArmyBuilder({
                     onSurpriseAttackEnabledChange={setSurpriseAttackEnabled}
                     strictPilotRankEnabled={strictPilotRankEnabled}
                     onStrictPilotRankEnabledChange={onStrictPilotRankEnabledChange}
+                    distanceInputUnit={distanceInputUnit}
+                    onDistanceInputUnitChange={onDistanceInputUnitChange}
+                    stepToCmFactor={stepToCmFactor}
+                    onStepToCmFactorChange={onStepToCmFactorChange}
                     onConfirm={() => {
                       setArmy({ ...army, currentStep: 'unit-select' });
                       setSetupStep('units');

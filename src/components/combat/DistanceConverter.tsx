@@ -4,39 +4,23 @@ import { useState, useEffect } from 'react';
 import { NumberStepper } from '@/components/ui/NumberStepper';
 import { RulesVersionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
-
-/**
- * Gets the conversion factor based on rules version
- */
-function getConversionFactor(rulesVersion: RulesVersionID): number {
-  return rulesVersion === 'community_star_system' ? 4 : 5;
-}
-
-/**
- * Converts steps to centimeters
- */
-function stepsToCm(steps: number, rulesVersion: RulesVersionID): number {
-  return steps * getConversionFactor(rulesVersion);
-}
-
-/**
- * Converts centimeters to steps
- */
-function cmToSteps(cm: number, rulesVersion: RulesVersionID): number {
-  return Math.round(cm / getConversionFactor(rulesVersion));
-}
+import { stepsToCm, cmToSteps } from '@/lib/distance-utils';
 
 export interface DistanceConverterProps {
   /** Current distance in steps */
   steps: number;
   /** Callback when the distance changes (receives the new steps value) */
   onChange: (steps: number) => void;
-  /** The rules version to use for conversion */
-  rulesVersion: RulesVersionID;
+  /** The rules version (kept for backwards compatibility, but not used for conversion) */
+  rulesVersion?: RulesVersionID;
   /** Optional CSS class name */
   className?: string;
   /** Whether the component is disabled */
   disabled?: boolean;
+  /** Step to cm conversion factor (4 or 5) - overrides rules version */
+  stepToCmFactor?: number;
+  /** Default mode (respects global distanceInputUnit setting) */
+  defaultMode?: 'steps' | 'cm';
 }
 
 type DistanceMode = 'steps' | 'cm';
@@ -50,33 +34,39 @@ type DistanceMode = 'steps' | 'cm';
  * - Same size="lg" and spacing
  *
  * The mode toggle is integrated into the label - tap to switch between steps/cm.
+ * Now uses global stepToCmFactor instead of rules version for conversion.
  */
 export function DistanceConverter({
   steps,
   onChange,
-  rulesVersion,
+  rulesVersion: _rulesVersion = 'tehnolog',
   className,
   disabled = false,
+  stepToCmFactor = 5,
+  defaultMode = 'steps',
 }: DistanceConverterProps) {
-  const [mode, setMode] = useState<DistanceMode>('steps');
-  const [cmValue, setCmValue] = useState<number>(stepsToCm(steps, rulesVersion));
+  const [mode, setMode] = useState<DistanceMode>(defaultMode);
+  const [cmValue, setCmValue] = useState<number>(stepsToCm(steps, stepToCmFactor));
 
-  const conversionFactor = getConversionFactor(rulesVersion);
+  // Sync mode when defaultMode changes (user changed distance unit preference)
+  useEffect(() => {
+    setMode(defaultMode);
+  }, [defaultMode]);
 
   // Sync cm value when steps prop changes from parent
   useEffect(() => {
     if (mode === 'steps') {
-      setCmValue(stepsToCm(steps, rulesVersion));
+      setCmValue(stepsToCm(steps, stepToCmFactor));
     }
-  }, [steps, rulesVersion, mode]);
+  }, [steps, stepToCmFactor, mode]);
 
   const handleStepsChange = (newSteps: number) => {
     onChange(newSteps);
-    setCmValue(stepsToCm(newSteps, rulesVersion));
+    setCmValue(stepsToCm(newSteps, stepToCmFactor));
   };
 
   const handleCmChange = (newCm: number) => {
-    const newSteps = cmToSteps(newCm, rulesVersion);
+    const newSteps = cmToSteps(newCm, stepToCmFactor);
     onChange(newSteps);
     setCmValue(newCm);
   };
@@ -86,8 +76,8 @@ export function DistanceConverter({
   };
 
   const isEditingSteps = mode === 'steps';
-  const displaySteps = mode === 'steps' ? steps : cmToSteps(cmValue, rulesVersion);
-  const displayCm = mode === 'cm' ? cmValue : stepsToCm(steps, rulesVersion);
+  const displaySteps = mode === 'steps' ? steps : cmToSteps(cmValue, stepToCmFactor);
+  const displayCm = mode === 'cm' ? cmValue : stepsToCm(steps, stepToCmFactor);
 
   return (
     <div className={cn('space-y-1', className)}>
@@ -113,9 +103,9 @@ export function DistanceConverter({
           <NumberStepper
             value={isEditingSteps ? displaySteps : displayCm}
             onChange={isEditingSteps ? handleStepsChange : handleCmChange}
-            min={isEditingSteps ? 1 : conversionFactor}
-            max={isEditingSteps ? 20 : 20 * conversionFactor}
-            step={isEditingSteps ? 1 : conversionFactor}
+            min={isEditingSteps ? 1 : stepToCmFactor}
+            max={isEditingSteps ? 20 : 20 * stepToCmFactor}
+            step={isEditingSteps ? 1 : stepToCmFactor}
             size="lg"
             disabled={disabled}
             className="flex-1 justify-start"
