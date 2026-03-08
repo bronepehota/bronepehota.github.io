@@ -11,6 +11,11 @@ import { Target, Shield } from 'lucide-react';
 import { Machine } from '@/lib/types';
 import { TargetMemory } from '@/contexts/CombatTargetContext';
 import { DistanceConverter } from './DistanceConverter';
+import {
+  CompactProbabilityIndicator,
+  calculateHitProbability,
+  calculatePenetrationProbability
+} from './HitProbabilityIndicator';
 
 interface ParameterInputsProps {
   actionType: CombatActionType;
@@ -23,6 +28,8 @@ interface ParameterInputsProps {
   targetMemory?: TargetMemory;
   onMemoryUpdate?: (params: Partial<TargetMemory>) => void;
   isAimedShot?: boolean;
+  distanceInputUnit?: 'steps' | 'cm';
+  stepToCmFactor?: number;
 }
 
 export function ParameterInputs({
@@ -36,6 +43,8 @@ export function ParameterInputs({
   targetMemory,
   onMemoryUpdate,
   isAimedShot,
+  distanceInputUnit = 'steps',
+  stepToCmFactor = 5,
 }: ParameterInputsProps) {
   const effectiveDistance = targetMemory?.isDirty && targetMemory?.distance !== null
     ? targetMemory.distance
@@ -98,6 +107,15 @@ export function ParameterInputs({
         ? (unit.data as Machine).weapons[parameters.weaponIndex].name
         : null;
 
+      // Calculate probabilities for shot action
+      const effectiveRange = isAimedShot && actionType === 'shot' ? multiplyRange(unitStats.range, 2) : unitStats.range;
+      const hitProb = actionType === 'shot'
+        ? calculateHitProbability(effectiveRange, effectiveDistance, parameters.fortification, rulesVersion, parameters.isSurpriseAttack)
+        : null;
+      const penProb = actionType === 'shot'
+        ? calculatePenetrationProbability(unitStats.power, effectiveTargetArmor, parameters.fortification, rulesVersion)
+        : null;
+
       return (
         <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/60 p-3 md:p-4 rounded-xl border border-slate-700/50 mb-4 relative overflow-hidden">
           {/* Tech decoration */}
@@ -116,24 +134,44 @@ export function ParameterInputs({
             {!isMachine && 'Ваше оружие'}
           </div>
           <div className="grid grid-cols-2 gap-2 md:gap-3">
+            {/* Range Card */}
             <div className="bg-slate-950/80 p-2 md:p-3 rounded-lg border border-blue-500/30 shadow-lg shadow-blue-900/10 relative group">
               {/* Tech glow on hover */}
               <div className="absolute inset-0 bg-blue-500/0 group-hover:bg-blue-500/5 transition-colors rounded-lg pointer-events-none" />
               <div className="text-[8px] md:text-[10px] opacity-40 uppercase font-bold mb-1 md:mb-2 text-center relative">Дальность</div>
-              <div className="flex justify-center relative">
-                <DiceNotationDisplay
-                  rollStr={isAimedShot && actionType === 'shot' ? multiplyRange(unitStats.range, 2) : unitStats.range}
-                  color="blue"
-                />
+              <div className="flex justify-center relative mb-1 md:mb-2">
+                <DiceNotationDisplay rollStr={effectiveRange} color="blue" />
               </div>
+              {/* Hit probability indicator */}
+              {hitProb && (
+                <div className="flex justify-center fade-in-up">
+                  <CompactProbabilityIndicator
+                    type="hit"
+                    probability={hitProb.probability}
+                    className="text-[8px] md:text-[9px]"
+                  />
+                </div>
+              )}
             </div>
+
+            {/* Power Card */}
             <div className="bg-slate-950/80 p-2 md:p-3 rounded-lg border border-orange-500/30 shadow-lg shadow-orange-900/10 relative group">
               {/* Tech glow on hover */}
               <div className="absolute inset-0 bg-orange-500/0 group-hover:bg-orange-500/5 transition-colors rounded-lg pointer-events-none" />
               <div className="text-[8px] md:text-[10px] opacity-40 uppercase font-bold mb-1 md:mb-2 text-center relative">Мощность</div>
-              <div className="flex justify-center relative">
+              <div className="flex justify-center relative mb-1 md:mb-2">
                 <DiceNotationDisplay rollStr={unitStats.power} color="orange" />
               </div>
+              {/* Penetration probability indicator */}
+              {penProb && (
+                <div className="flex justify-center fade-in-up">
+                  <CompactProbabilityIndicator
+                    type="penetration"
+                    probability={penProb.probability}
+                    className="text-[8px] md:text-[9px]"
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -212,6 +250,8 @@ export function ParameterInputs({
                 onMemoryUpdate?.({ distance: steps });
               }}
               rulesVersion={rulesVersion}
+              stepToCmFactor={stepToCmFactor}
+              defaultMode={distanceInputUnit}
             />
           )}
 

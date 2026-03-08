@@ -6,6 +6,7 @@ import { ImageModal } from './ImageModal';
 import { X, Shield, Sword, Zap, Target, Gauge, ShieldCheck, Info, Cpu, Crosshair, Activity, Users, Sparkles } from 'lucide-react';
 import type { Squad, Machine, Faction, Soldier, Weapon, SpeedSector } from '@/lib/types';
 import { useBottomSheet } from '@/hooks/useBottomSheet';
+import { formatRange } from '@/lib/distance-utils';
 
 interface UnitDetailsModalProps {
   unit: Squad | Machine;
@@ -13,6 +14,8 @@ interface UnitDetailsModalProps {
   faction: Faction;
   isOpen: boolean;
   onClose: () => void;
+  distanceInputUnit?: 'steps' | 'cm';
+  stepToCmFactor?: number;
 }
 
 // T014: Create SoldierStats subcomponent to display individual soldier stats
@@ -21,9 +24,11 @@ interface SoldierStatsProps {
   index: number;
   factionColor: string;
   onImageClick?: (src: string, alt: string) => void;
+  distanceInputUnit?: 'steps' | 'cm';
+  stepToCmFactor?: number;
 }
 
-function SoldierStats({ soldier, index, factionColor, onImageClick }: SoldierStatsProps) {
+function SoldierStats({ soldier, index, factionColor, onImageClick, distanceInputUnit = 'steps', stepToCmFactor = 5 }: SoldierStatsProps) {
   // T017: Tooltip/popover for special property explanation
   const propDescriptions: Record<string, string> = {
     'Г': 'Граната',
@@ -100,7 +105,7 @@ function SoldierStats({ soldier, index, factionColor, onImageClick }: SoldierSta
           <div className="min-w-0 flex-1">
             <div className="text-[10px] uppercase text-slate-500 font-bold">Дальность</div>
             <div className={`text-sm font-mono font-bold ${soldier.range ? 'text-green-400' : 'text-red-400'}`}>
-              {soldier.range || 'Н/Д'}
+              {soldier.range ? formatRange(soldier.range, distanceInputUnit, stepToCmFactor) : 'Н/Д'}
             </div>
           </div>
         </div>
@@ -369,6 +374,8 @@ export function UnitDetailsModal({
   faction,
   isOpen,
   onClose,
+  distanceInputUnit = 'steps',
+  stepToCmFactor = 5,
 }: UnitDetailsModalProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const backdropRef = useRef<HTMLDivElement>(null);
@@ -574,6 +581,8 @@ export function UnitDetailsModal({
                       index={index}
                       factionColor={faction.color}
                       onImageClick={handleImageClick}
+                      distanceInputUnit={distanceInputUnit}
+                      stepToCmFactor={stepToCmFactor}
                     />
                   ))}
                 </div>

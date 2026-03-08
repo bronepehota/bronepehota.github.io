@@ -8,6 +8,7 @@ import SoldierCard from './SoldierCard';
 import { formatUnitNumber } from '@/lib/unit-utils';
 import { getDefaultRulesVersion } from '@/lib/rules-registry';
 import { cn } from '@/lib/utils';
+import { formatRange } from '@/lib/distance-utils';
 import { BottomSheetCombatModal } from '../combat/BottomSheetCombatModal';
 import { useCombatFlowController } from '../combat/CombatFlowController';
 import { CombatLogEntry } from '@/lib/combat-types';
@@ -29,9 +30,23 @@ interface UnitCardProps {
   onPilotRemove?: (machineInstanceId: string) => void;
   onNavigateToUnit?: (unitInstanceId: string) => void; // Navigate to unit card
   strictPilotRankEnabled?: boolean;
+  distanceInputUnit?: 'steps' | 'cm';
+  stepToCmFactor?: number;
 }
 
-export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [], onCombatLogEntry, allUnits = [], onPilotAssign, onPilotRemove, onNavigateToUnit: _onNavigateToUnit, strictPilotRankEnabled = true }: UnitCardProps) {
+export default function UnitCard({
+  unit,
+  updateUnit,
+  combatLog: _combatLog = [],
+  onCombatLogEntry,
+  allUnits = [],
+  onPilotAssign,
+  onPilotRemove,
+  onNavigateToUnit: _onNavigateToUnit,
+  strictPilotRankEnabled = true,
+  distanceInputUnit = 'steps',
+  stepToCmFactor = 5
+}: UnitCardProps) {
   const [showImage, setShowImage] = useState(false);
   const [showSoldierImage, setShowSoldierImage] = useState<number | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -423,6 +438,8 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
           unitDisplayName={`${formatUnitNumber(unit)} - ${data.name}`}
           rememberMarkAsDone={rememberMarkAsDone}
           setRememberMarkAsDone={setRememberMarkAsDone}
+          distanceInputUnit={distanceInputUnit}
+          stepToCmFactor={stepToCmFactor}
         />
       )}
 
@@ -513,7 +530,10 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                 {/* Range */}
                 <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700">
                   <div className="text-[10px] font-mono opacity-50 uppercase mb-1">Дальность</div>
-                  <div className="text-lg font-mono font-bold text-amber-400">{selectedWeaponInfo.weapon.range}</div>
+                  <div className="font-mono font-bold text-amber-400">
+                    <div className="text-lg">{selectedWeaponInfo.weapon.range}</div>
+                    <div className="text-sm opacity-80">{formatRange(selectedWeaponInfo.weapon.range, 'cm', stepToCmFactor)}</div>
+                  </div>
                 </div>
 
                 {/* Power */}
@@ -651,23 +671,28 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
           <button
             onClick={() => {
               if (isSquad) {
-                // Mark all alive soldiers as done
+                // Toggle: mark all alive soldiers as done or undo
+                const targetState = !isSquadDone;
                 const newActions = (unit.actionsUsed || Array((data as Squad).soldiers.length).fill({ moved: false, shot: false, melee: false, done: false }))
                   .map((action, idx) => {
                     const isDead = unit.deadSoldiers?.includes(idx);
                     if (isDead) return action;
-                    return { ...action, done: true };
+                    return { ...action, done: targetState };
                   });
                 updateThisUnit((u) => ({ ...u, actionsUsed: newActions }));
               } else {
-                // Mark machine as done
-                updateThisUnit((u) => ({ ...u, isMachineDone: true }));
+                // Toggle: mark machine as done or undo
+                updateThisUnit((u) => ({ ...u, isMachineDone: !isMachineDone }));
               }
             }}
             className="p-1.5 md:p-1 hover:bg-white/10 rounded-sm transition-colors min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border border-slate-700/50"
-            title={isSquad ? "Завершить ход всех бойцов" : "Завершить ход машины"}
+            title={isSquad ? (isSquadDone ? "Отменить завершение хода" : "Завершить ход всех бойцов") : (isMachineDone ? "Отменить" : "Завершить ход машины")}
           >
-            <CheckCircle2 className="w-4 h-4 opacity-50" />
+            {(isSquadDone || isMachineDone) ? (
+              <X className="w-4 h-4 opacity-50 text-slate-400" />
+            ) : (
+              <CheckCircle2 className="w-4 h-4 opacity-50" />
+            )}
           </button>
         </div>
       </div>
@@ -688,6 +713,8 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                   setShowSoldierImage={setShowSoldierImage}
                   setShowPanicModal={setShowPanicModal}
                   getSoldierImage={getSoldierImage}
+                  distanceInputUnit={distanceInputUnit}
+                  stepToCmFactor={stepToCmFactor}
                 />
               ))}
             </div>
@@ -762,9 +789,10 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                       </div>
                     </div>
                     {/* Speed display - Tech Style */}
-                    <div className="flex items-center gap-0.5 shrink-0">
+                    <div className="flex flex-col items-center justify-center shrink-0">
+                      <Footprints className="w-3 h-3 md:w-4 md:h-4 text-yellow-400 mb-1 md:mb-0.5 shrink-0" />
                       <span className="text-sm md:text-base font-mono font-black text-yellow-400">
-                        {getMachineSpeed()}
+                        {distanceInputUnit === 'cm' ? `${getMachineSpeed() * stepToCmFactor}см` : `${getMachineSpeed()}шаг`}
                       </span>
                     </div>
                   </div>
@@ -1072,8 +1100,9 @@ export default function UnitCard({ unit, updateUnit, combatLog: _combatLog = [],
                                   {/* Range Stat Display */}
                                   <div className="relative flex flex-col items-center justify-center p-1.5 md:p-2 rounded-lg md:rounded-full bg-slate-900/40 shrink-0 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0">
                                     <Target className="w-3.5 h-3.5 md:w-4 md:h-4 text-amber-400 mb-0.5 shrink-0" />
-                                    <span className="text-[10px] md:text-xs font-mono font-bold text-amber-300 leading-tight truncate w-full text-center" title={weapon.range}>
-                                      {weapon.range}
+                                    <span className="text-[10px] md:text-xs font-mono font-bold text-amber-300 leading-tight flex flex-col items-center">
+                                      <span className="text-[9px] md:text-[10px]">{weapon.range}</span>
+                                      <span className="text-[8px] md:text-[9px] opacity-80">{formatRange(weapon.range, 'cm', stepToCmFactor)}</span>
                                     </span>
                                   </div>
 

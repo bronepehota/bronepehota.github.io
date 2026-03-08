@@ -25,6 +25,8 @@ interface BottomSheetCombatModalProps {
   unitDisplayName?: string;
   rememberMarkAsDone?: boolean;
   setRememberMarkAsDone?: (value: boolean) => void;
+  distanceInputUnit?: 'steps' | 'cm';
+  stepToCmFactor?: number;
 }
 
 // Action type colors for Military Tech Blueprint
@@ -81,6 +83,8 @@ export function BottomSheetCombatModal({
   unitDisplayName: _unitDisplayName,
   rememberMarkAsDone = false,
   setRememberMarkAsDone,
+  distanceInputUnit = 'steps',
+  stepToCmFactor = 5,
 }: BottomSheetCombatModalProps) {
   const { sheetRef, touchHandlers } = useBottomSheet({
     onClose,
@@ -89,16 +93,17 @@ export function BottomSheetCombatModal({
   });
 
   // Access combat target context for memory
-  const { targetMemory, updateTargetMemory, resetTargetMemory } = useCombatTargetContext();
+  const { getTargetMemory, updateTargetMemory } = useCombatTargetContext();
 
-  // Reset target memory when combat starts for a new unit
-  useEffect(() => {
-    if (state.phase !== 'IDLE' && state.unit) {
-      // Reset memory when opening combat for a new unit
-      resetTargetMemory();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.unit?.instanceId]); // Only when unit changes, not on every render
+  // Get memory for current unit
+  const currentUnitId = state.unit?.instanceId || '';
+  const targetMemory = currentUnitId ? getTargetMemory(currentUnitId) : {
+    distance: null,
+    targetArmor: null,
+    targetMelee: null,
+    lastUpdateTimestamp: 0,
+    isDirty: false,
+  };
 
   // Handle escape key
   useEffect(() => {
@@ -230,8 +235,10 @@ export function BottomSheetCombatModal({
                 unit={state.unit}
                 soldierIndex={state.soldierIndex}
                 targetMemory={targetMemory}
-                onMemoryUpdate={updateTargetMemory}
+                onMemoryUpdate={(params) => currentUnitId && updateTargetMemory(currentUnitId, params)}
                 isAimedShot={state.parameters.isAimedShot}
+                distanceInputUnit={distanceInputUnit}
+                stepToCmFactor={stepToCmFactor}
               />
 
               {/* Execute button with surprise attack toggle */}

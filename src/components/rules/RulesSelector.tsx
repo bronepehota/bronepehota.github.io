@@ -1,13 +1,15 @@
 'use client';
 
 import { useState, useEffect, useRef, KeyboardEvent } from 'react';
-import { Book, Check, ChevronDown } from 'lucide-react';
+import { Book, Check, ChevronDown, Settings } from 'lucide-react';
 import { clsx } from 'clsx';
 import type { RulesVersion, RulesVersionID } from '@/lib/types';
 import { PanicToggle } from '../toggles/PanicToggle';
 import { AimedShotToggle } from '../toggles/AimedShotToggle';
 import { SurpriseAttackToggle } from '../toggles/SurpriseAttackToggle';
 import { StrictPilotRankToggle } from '../toggles/StrictPilotRankToggle';
+import { DistanceUnitToggle } from '../toggles/DistanceUnitToggle';
+import { StepToCmFactorToggle } from '../toggles/StepToCmFactorToggle';
 
 interface RulesSelectorProps {
   versions: RulesVersion[];
@@ -22,6 +24,10 @@ interface RulesSelectorProps {
   onSurpriseAttackEnabledChange?: (enabled: boolean) => void;
   strictPilotRankEnabled?: boolean;
   onStrictPilotRankEnabledChange?: (enabled: boolean) => void;
+  distanceInputUnit?: 'steps' | 'cm';
+  onDistanceInputUnitChange?: (value: 'steps' | 'cm') => void;
+  stepToCmFactor?: '4' | '5';
+  onStepToCmFactorChange?: (value: '4' | '5') => void;
 }
 
 export function RulesSelector({
@@ -37,6 +43,10 @@ export function RulesSelector({
   onSurpriseAttackEnabledChange,
   strictPilotRankEnabled = true,
   onStrictPilotRankEnabledChange,
+  distanceInputUnit = 'steps',
+  onDistanceInputUnitChange,
+  stepToCmFactor = '5',
+  onStepToCmFactorChange,
 }: RulesSelectorProps) {
   const [expandedRulesId, setExpandedRulesId] = useState<RulesVersionID | null>(null);
   const debouncedSaveRef = useRef<NodeJS.Timeout>();
@@ -218,6 +228,34 @@ export function RulesSelector({
             <StrictPilotRankToggle
               enabled={strictPilotRankEnabled}
               onEnabledChange={onStrictPilotRankEnabledChange}
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Configuration Section - Distance settings */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 py-1">
+          <div className="h-px flex-1 bg-slate-700/30" />
+          <div className="flex items-center gap-1.5">
+            <Settings className="w-3 h-3 text-slate-500" />
+            <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">Конфигурация</span>
+          </div>
+          <div className="h-px flex-1 bg-slate-700/30" />
+        </div>
+
+        {/* Side-by-side toggles on desktop, stacked on mobile */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          {onDistanceInputUnitChange && (
+            <DistanceUnitToggle
+              value={distanceInputUnit}
+              onValueChange={onDistanceInputUnitChange}
+            />
+          )}
+          {onStepToCmFactorChange && (
+            <StepToCmFactorToggle
+              value={stepToCmFactor}
+              onValueChange={onStepToCmFactorChange}
             />
           )}
         </div>

@@ -65,6 +65,24 @@ export default function Home() {
     return true;
   });
 
+  // Distance input unit state - persisted in localStorage
+  const [distanceInputUnit, setDistanceInputUnit] = useState<'steps' | 'cm'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.DISTANCE_INPUT_UNIT);
+      return saved === 'cm' ? 'cm' : 'steps'; // Default to steps
+    }
+    return 'steps';
+  });
+
+  // Step to cm factor state - persisted in localStorage
+  const [stepToCmFactor, setStepToCmFactor] = useState<'4' | '5'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.STEP_TO_CM_FACTOR);
+      return saved === '4' ? '4' : '5'; // Default to 5
+    }
+    return '5';
+  });
+
   // Persist rules version to localStorage on change
   useEffect(() => {
     localStorage.setItem('bronepehota_rules_version', rulesVersion);
@@ -472,6 +490,10 @@ export default function Home() {
           onStartBattle={() => setView('game')}
           strictPilotRankEnabled={strictPilotRankEnabled}
           onStrictPilotRankEnabledChange={setStrictPilotRankEnabled}
+          distanceInputUnit={distanceInputUnit}
+          onDistanceInputUnitChange={setDistanceInputUnit}
+          stepToCmFactor={stepToCmFactor}
+          onStepToCmFactorChange={setStepToCmFactor}
         />
       ) : (
         <GameSession
@@ -483,6 +505,8 @@ export default function Home() {
           showCombatLog={showCombatLog}
           setShowCombatLog={setShowCombatLog}
           strictPilotRankEnabled={strictPilotRankEnabled}
+          distanceInputUnit={distanceInputUnit}
+          stepToCmFactor={parseInt(stepToCmFactor, 10)}
         />
       )}
       </div>

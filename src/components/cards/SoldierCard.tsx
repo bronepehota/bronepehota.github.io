@@ -20,6 +20,8 @@ interface SoldierCardProps {
   setShowSoldierImage: (idx: number | null) => void;
   setShowPanicModal: (show: boolean) => void;
   getSoldierImage: (idx: number) => string;
+  distanceInputUnit?: 'steps' | 'cm';
+  stepToCmFactor?: number;
 }
 
 function SoldierCard({
@@ -33,6 +35,8 @@ function SoldierCard({
   setShowSoldierImage,
   setShowPanicModal,
   getSoldierImage,
+  distanceInputUnit = 'steps',
+  stepToCmFactor = 5,
 }: SoldierCardProps) {
   const [isMounted, setIsMounted] = useState(false);
   const [isLongPressing, setIsLongPressing] = useState(false);
@@ -230,7 +234,7 @@ function SoldierCard({
         />
 
         {/* Row 2: Stats */}
-        <SoldierStats soldier={soldier} />
+        <SoldierStats soldier={soldier} distanceInputUnit={distanceInputUnit} stepToCmFactor={stepToCmFactor} />
       </div>
     </div>
   );

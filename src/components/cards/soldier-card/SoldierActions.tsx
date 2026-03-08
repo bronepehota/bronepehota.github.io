@@ -123,12 +123,8 @@ export function SoldierActions({
       {/* Visual separator - desktop only */}
       <div className="hidden md:block w-px h-8 bg-slate-700/50 mx-1" aria-hidden="true" />
 
-      {/* ГОТОВ button - gradient with long-press */}
-      {isInPanic ? (
-        <div className="relative p-1.5 md:p-2 rounded-sm min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border-2 overflow-hidden bg-orange-950/20 border-orange-700/30 text-orange-400/50" aria-hidden="true">
-          <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 opacity-50" />
-        </div>
-      ) : (
+      {/* ГОТОВ button - gradient with long-press (hidden when in panic) */}
+      {!isInPanic && (
         <button
           disabled={isDead}
           onMouseDown={handleDoneMouseDown}
