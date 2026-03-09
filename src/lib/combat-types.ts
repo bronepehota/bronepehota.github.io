@@ -106,11 +106,12 @@ export interface CombatFlowState {
   isRolling: boolean;
   // Grenade-specific state
   grenadeData?: {
-    distanceRoll: number;      // D6 roll for distance
+    distanceRoll: number;      // Final D6 roll selected (or single roll for tehnolog)
     soldierRank: number;       // Soldier's army rank
-    totalDistance: number;     // distanceRoll + soldierRank
+    totalDistance: number;     // Final distance (calculated differently per rules version)
     blastZone: { minSteps: number; maxSteps: number; minCm: number; maxCm: number };
     blastChecks: GrenadeBlastResult[];
+    allRolls?: number[];       // All D6 rolls made (for community_star_system display)
   };
 }
 

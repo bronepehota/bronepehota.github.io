@@ -18,6 +18,13 @@ const TEHNOLOG_CONTENT = (
     <p className="mb-2"><strong>Урон по технике</strong>: Каждый кубик, пробивающий броню, наносит 1 повреждение</p>
     <p className="mb-4"><strong>Паника</strong>: При получении любого урона каждый солдат бросает D6. Если результат равен броне (Бр), солдат паникует и бежит к границе поля</p>
 
+    <h4 className="font-semibold mb-2">Гранаты</h4>
+    <ul className="list-disc pl-5 mb-4 space-y-1">
+      <li><strong>Дистанция</strong>: Бросок D6</li>
+      <li><strong>Зона поражения</strong>: ±1 шаг от точки взрыва</li>
+      <li><strong>Проверка цели</strong>: 1D20 против брони цели (пробитие при D20 &gt; броня)</li>
+    </ul>
+
     <h4 className="font-semibold mb-2">Укрепления</h4>
     <ul className="list-disc pl-5 mb-4 space-y-1">
       <li>Без укрытия: +0 к броне</li>
@@ -36,6 +43,13 @@ const COMMUNITY_CONTENT = (
     <p className="mb-2"><strong>Урон по пехоте</strong>: Каждый кубик, пробивающий броню цели, наносит 1 ранение</p>
     <p className="mb-4"><strong>Урон по технике</strong>: Сравнение с зоной прочности<br />
       <span className="text-sm opacity-80">D6 = 1 урон, D12 = 2 урона, D20 = 3 урона при пробитии</span></p>
+
+    <h4 className="font-semibold mb-2">Гранаты</h4>
+    <ul className="list-disc pl-5 mb-4 space-y-1">
+      <li><strong>Дистанция</strong>: Бросок D6 столько раз, сколько указано в армейском ранге солдата. Из всех бросков выбирается наиболее подходящий результат</li>
+      <li><strong>Зона поражения</strong>: ±1 шаг от точки взрыва</li>
+      <li><strong>Проверка цели</strong>: 1D20 против брони цели (пробитие при D20 &gt; броня)</li>
+    </ul>
 
     <h4 className="font-semibold mb-2">Паника</h4>
     <ul className="list-disc pl-5 mb-4 space-y-1">

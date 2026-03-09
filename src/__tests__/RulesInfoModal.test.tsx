@@ -119,4 +119,32 @@ describe('RulesInfoModal', () => {
       return element?.tagName === 'LI' && content.includes('Полное') && content.includes('более');
     })).toBeInTheDocument();
   });
+
+  it('shows grenade mechanics for teknolog rules', () => {
+    render(
+      <RulesInfoModal
+        isOpen={true}
+        onClose={() => {}}
+        rulesVersion="tehnolog"
+      />
+    );
+
+    expect(screen.getByText('Гранаты')).toBeInTheDocument();
+    expect(screen.getByText(/Бросок D6/i)).toBeInTheDocument();
+    expect(screen.getByText(/пробитие при D20/i)).toBeInTheDocument();
+  });
+
+  it('shows grenade mechanics for community star system rules', () => {
+    render(
+      <RulesInfoModal
+        isOpen={true}
+        onClose={() => {}}
+        rulesVersion="community_star_system"
+      />
+    );
+
+    expect(screen.getByText('Гранаты')).toBeInTheDocument();
+    expect(screen.getByText(/Бросок D6 столько раз.*армейском ранге/i)).toBeInTheDocument();
+    expect(screen.getByText(/пробитие при D20/i)).toBeInTheDocument();
+  });
 });

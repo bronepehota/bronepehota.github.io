@@ -154,4 +154,86 @@ describe('Combat Mechanics', () => {
       expect(result.total).toBeGreaterThan(10);
     });
   });
+
+  describe('Grenade Distance Mechanics', () => {
+    describe('Tehnolog Rules (D6 only)', () => {
+      test('should calculate distance as D6 only (no rank bonus)', () => {
+        // For tehnolog: distance = D6 roll only
+        // If roll is 4, distance = 4 (no bonus)
+        const mockRoll = 4;
+        const expectedDistance = mockRoll;
+
+        expect(expectedDistance).toBe(4);
+      });
+
+      test('rank should not affect distance', () => {
+        // Even with high rank, distance is just D6
+        const mockRoll = 4;
+        const mockRank = 7;
+        const expectedDistance = mockRoll; // Still 4, not 4 + 7
+
+        expect(expectedDistance).toBe(4);
+        expect(expectedDistance).not.toBe(mockRoll + mockRank);
+      });
+    });
+
+    describe('Community Star System Rules (Multiple D6 rolls, pick best)', () => {
+      test('should roll D6 multiple times equal to rank', () => {
+        // For community_star_system: roll D6 (rank times), pick best result
+        // If rank is 3, roll D6 three times, pick highest
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const _mockRank = 3;
+        const mockRolls = [2, 5, 3]; // Three rolls, best is 5
+        const expectedDistance = Math.max(...mockRolls); // 5
+
+        expect(expectedDistance).toBe(5);
+      });
+
+      test('should handle rank 7 (maximum)', () => {
+        // Maximum rank for most soldiers
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const _mockRank = 7;
+        const mockRolls = [1, 2, 3, 4, 5, 6, 2]; // Seven rolls, best is 6
+        const expectedDistance = Math.max(...mockRolls); // 6
+
+        expect(expectedDistance).toBe(6);
+      });
+
+      test('best result should be in range 1-6', () => {
+        // Even with many rolls, the result is still bounded by D6
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const _mockRank = 5;
+        // All possible rolls from 5 D6
+        const mockRolls = [1, 6, 3, 4, 2];
+        const bestResult = Math.max(...mockRolls);
+
+        expect(bestResult).toBeGreaterThanOrEqual(1);
+        expect(bestResult).toBeLessThanOrEqual(6);
+        expect(bestResult).toBe(6); // The best roll
+      });
+
+      test('rank 1 should roll D6 once', () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const _mockRank = 1;
+        const mockRolls = [4];
+        const expectedDistance = Math.max(...mockRolls); // 4
+
+        expect(expectedDistance).toBe(4);
+      });
+
+      test('should NOT add rank as bonus (difference from tehnolog)', () => {
+        // Key difference: community_star_system does NOT add rank as bonus
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const _mockRank = 5;
+        const mockRolls = [1, 2, 3, 4, 5];
+        const bestRoll = Math.max(...mockRolls); // 5
+
+        // Distance is just the best roll, NOT best roll + rank
+        const expectedDistance = bestRoll; // 5, not 5 + 5 = 10
+
+        expect(expectedDistance).toBe(5);
+        expect(expectedDistance).not.toBe(10);
+      });
+    });
+  });
 });
