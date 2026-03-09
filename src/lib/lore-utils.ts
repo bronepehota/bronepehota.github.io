@@ -1,6 +1,12 @@
-import { KeyBattle, Location } from '@/lib/types';
+import { Location } from '@/lib/types';
 
-export function hasLoreExpansion(encyclopedia?: any): boolean {
+interface EncyclopediaLoreCheck {
+  traditions?: string;
+  keyBattles?: { length: number };
+  locations?: { length: number };
+}
+
+export function hasLoreExpansion(encyclopedia?: EncyclopediaLoreCheck): boolean {
   return Boolean(
     encyclopedia?.traditions ||
     (encyclopedia?.keyBattles && encyclopedia.keyBattles.length > 0) ||
@@ -8,8 +14,9 @@ export function hasLoreExpansion(encyclopedia?: any): boolean {
   );
 }
 
+// TODO: Implement year formatting logic (e.g., "3410 год" -> "3410")
+// Kept for future enhancement when we standardize date formats
 export function formatBattleYear(year: string): string {
-  // Could add formatting logic later
   return year;
 }
 
