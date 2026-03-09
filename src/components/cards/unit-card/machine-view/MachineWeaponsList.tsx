@@ -6,6 +6,7 @@ import { Weapon } from '@/lib/types';
 interface MachineWeaponsListProps {
   weapons: Weapon[];
   weaponShots: Record<number, number>;
+  fireRate: number;
   onWeaponAttack: (weaponIndex: number) => void;
   onWeaponInfo: (weaponIndex: number) => void;
   stepToCmFactor: number;
@@ -19,6 +20,7 @@ interface WeaponWithIndex {
 export function MachineWeaponsList({
   weapons,
   weaponShots,
+  fireRate,
   onWeaponAttack,
   onWeaponInfo,
   stepToCmFactor
@@ -85,14 +87,17 @@ export function MachineWeaponsList({
                 {/* Fire Button - Full width (flex-1) */}
                 <button
                   onClick={() => onWeaponAttack(weaponIdx)}
+                  disabled={shots >= fireRate}
                   className={cn(
                     "relative p-1.5 md:p-2 rounded-sm transition-all flex-1 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center gap-1 overflow-hidden",
                     "border-2 text-xs font-mono font-bold uppercase tracking-wider",
-                    shots > 0
-                      ? "bg-amber-950/40 border-amber-800/50 text-amber-700"
-                      : "bg-amber-950/20 hover:bg-amber-950/40 border-amber-700/50 text-amber-400 active:scale-95"
+                    shots >= fireRate
+                      ? "bg-slate-900/40 border-slate-700/50 text-slate-600 cursor-not-allowed opacity-50"
+                      : shots > 0
+                        ? "bg-amber-950/40 border-amber-800/50 text-amber-700"
+                        : "bg-amber-950/20 hover:bg-amber-950/40 border-amber-700/50 text-amber-400 active:scale-95"
                   )}
-                  title="Выстрел"
+                  title={shots >= fireRate ? "Лимит выстрелов исчерпан" : "Выстрел"}
                 >
                   {shots === 0 && (
                     <>

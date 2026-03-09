@@ -3,8 +3,6 @@ import { UnitCardHeader } from '@/components/cards/unit-card/UnitCardHeader';
 import { MachineStatsPanel } from '@/components/cards/unit-card/machine-view/MachineStatsPanel';
 import { MachineAmmoPanel } from '@/components/cards/unit-card/machine-view/MachineAmmoPanel';
 import { MachinePilotPanel } from '@/components/cards/unit-card/machine-view/MachinePilotPanel';
-import { MachineWeaponsList } from '@/components/cards/unit-card/machine-view/MachineWeaponsList';
-import { SquadView } from '@/components/cards/unit-card/SquadView';
 import { ArmyUnit, Squad, Machine, DurabilityZone } from '@/lib/types';
 
 describe('UnitCard Accessibility', () => {
@@ -92,11 +90,11 @@ describe('UnitCard Accessibility', () => {
           <MachineAmmoPanel
             currentAmmo={15}
             maxAmmo={20}
+            shotsUsed={0}
             fireRate={2}
             onUpdateAmmo={jest.fn()}
             usePerWeaponAmmo={false}
             weapons={[]}
-            currentWeaponAmmo={{}}
           />
         );
 
@@ -340,11 +338,11 @@ describe('UnitCard Accessibility', () => {
         <MachineAmmoPanel
           currentAmmo={15}
           maxAmmo={20}
+          shotsUsed={0}
           fireRate={2}
           onUpdateAmmo={jest.fn()}
           usePerWeaponAmmo={false}
           weapons={[]}
-          currentWeaponAmmo={{}}
         />
       );
 
@@ -440,7 +438,9 @@ function createMockSquadUnit(): ArmyUnit {
     instanceNumber: 1,
     type: 'squad',
     data: mockSquad,
-    actionsUsed: [{}]
+    actionsUsed: [
+      { moved: false, shot: false, melee: false, done: false }
+    ]
   };
 }
 
@@ -472,6 +472,8 @@ function createMockMachineUnit(): ArmyUnit {
     data: mockMachine,
     currentDurability: 12,
     currentAmmo: 15,
-    actionsUsed: [{}]
+    actionsUsed: [
+      { moved: false, shot: false, melee: false, done: false }
+    ]
   };
 }

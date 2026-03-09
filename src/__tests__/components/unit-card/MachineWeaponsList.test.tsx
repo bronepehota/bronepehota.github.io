@@ -11,6 +11,7 @@ describe('MachineWeaponsList', () => {
   const defaultProps = {
     weapons: mockWeapons,
     weaponShots: { 0: 0, 1: 0 },
+    fireRate: 2,
     onWeaponAttack: jest.fn(),
     onWeaponInfo: jest.fn(),
     distanceInputUnit: 'steps' as const,
@@ -44,5 +45,37 @@ describe('MachineWeaponsList', () => {
     fireEvent.click(infoButton);
 
     expect(onWeaponInfo).toHaveBeenCalledWith(0);
+  });
+
+  it('disables fire button when fire rate limit is reached', () => {
+    const props = {
+      ...defaultProps,
+      weaponShots: { 0: 2, 1: 0 }, // Weapon 0 has fired 2 times (equal to fireRate)
+      fireRate: 2
+    };
+    render(<MachineWeaponsList {...props} />);
+
+    // Find the fire button for weapon 0
+    const fireButtons = screen.getAllByTitle('Лимит выстрелов исчерпан');
+    expect(fireButtons.length).toBeGreaterThan(0);
+
+    // Button should be disabled
+    expect(fireButtons[0]).toBeDisabled();
+  });
+
+  it('keeps fire button enabled when shots are below fire rate limit', () => {
+    const props = {
+      ...defaultProps,
+      weaponShots: { 0: 1, 1: 0 }, // Weapon 0 has fired 1 time (below fireRate)
+      fireRate: 2
+    };
+    render(<MachineWeaponsList {...props} />);
+
+    // Find the fire button for weapon 0
+    const fireButtons = screen.getAllByTitle('Выстрел');
+    expect(fireButtons.length).toBeGreaterThan(0);
+
+    // Button should not be disabled
+    expect(fireButtons[0]).not.toBeDisabled();
   });
 });

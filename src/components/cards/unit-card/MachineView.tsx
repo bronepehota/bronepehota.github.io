@@ -46,8 +46,8 @@ export function MachineView({
   // Get pilot info from unit
   const pilotInfo: PilotInfo | null = (unit as any).pilotInfo || null;
 
-  // Calculate weapon shots (for now, initialize to empty - will be populated by state)
-  const weaponShots: Record<number, number> = (unit as any).weaponShots || {};
+  // Get weapon shots tracking from unit state
+  const weaponShots: Record<number, number> = unit.machineWeaponShots || {};
 
   return (
     <div className="space-y-2">
@@ -92,6 +92,7 @@ export function MachineView({
         <MachineWeaponsList
           weapons={machine.weapons}
           weaponShots={weaponShots}
+          fireRate={machine.fire_rate}
           onWeaponAttack={onWeaponAttack}
           onWeaponInfo={onWeaponInfo}
           stepToCmFactor={stepToCmFactor}

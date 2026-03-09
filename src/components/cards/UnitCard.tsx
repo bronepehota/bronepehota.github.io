@@ -186,6 +186,15 @@ export default function UnitCard({
     combatController.startCombat(unit, undefined, weaponIndex, 'shot');
   };
 
+  // Handle closing combat modal for machines - apply result before closing
+  const handleCloseMachineCombat = () => {
+    // For machines, auto-apply result if in RESULTS phase
+    if (combatController.state.phase === 'RESULTS' && combatController.state.result) {
+      handleApplyResult();
+    }
+    combatController.cancelCombat();
+  };
+
   // Handle pilot assignment
   const handlePilotAssign = (pilotInfo: PilotInfo) => {
     if (onPilotAssign) {
@@ -305,6 +314,11 @@ export default function UnitCard({
 
       // Mark this result as processed
       lastProcessedResultRef.current = result.timestamp;
+
+      // For machines, close combat after processing the result
+      if (!isSquad && combatController.state.phase === 'RESULTS') {
+        combatController.closeCombat();
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [combatController.state.phase, combatController.state.result, unit]);
@@ -350,7 +364,12 @@ export default function UnitCard({
       };
       onCombatLogEntry(entry);
     }
-    combatController.closeCombat();
+
+    // For squads, close combat immediately (shot marking is handled above)
+    // For machines, the useEffect will process the result and close combat
+    if (isSquad) {
+      combatController.closeCombat();
+    }
   };
 
   const getSoldierImage = useCallback((idx: number) => {
@@ -430,7 +449,7 @@ export default function UnitCard({
           state={combatController.state}
           rulesVersion={rulesVersion}
           onGoBack={combatController.goBack}
-          onClose={combatController.cancelCombat}
+          onClose={isSquad ? combatController.cancelCombat : handleCloseMachineCombat}
           onSelectAction={combatController.selectAction}
           onSetParameters={combatController.setParameters}
           onExecuteAction={combatController.executeAction}

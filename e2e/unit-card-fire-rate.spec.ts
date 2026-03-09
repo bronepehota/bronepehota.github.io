@@ -54,28 +54,10 @@ test.describe('Machine Fire Rate Limit', () => {
     await gameSessionCard.click();
     await page.waitForTimeout(500);
 
-    // Click "НАЧАТЬ БОЙ" to start the battle and show weapons
-    const startBattleButton = page.locator('button:has-text("НАЧАТЬ БОЙ")');
-    await startBattleButton.click();
-    await page.waitForTimeout(500);
-
-    // Take a screenshot to see what's displayed
-    await page.screenshot({ path: 'test-results/machine-card-opened.png' });
-    console.log('Screenshot saved to test-results/machine-card-opened.png');
-
-    // Debug: List all buttons on the page
-    const allButtons = await page.locator('button').all();
-    console.log(`Found ${allButtons.length} buttons on the page`);
-    for (let i = 0; i < Math.min(allButtons.length, 20); i++) {
-      const text = await allButtons[i].textContent();
-      const className = await allButtons[i].getAttribute('class');
-      console.log(`Button ${i}: "${text}" - classes: ${className?.substring(0, 100)}`);
-    }
-
-    // Find the fire button for weapon 0 (first "ВЫСТРЕЛ" button)
+    // Check if weapons are visible immediately (without clicking "НАЧАТЬ БОЙ")
     const fireButton = page.locator('button:has-text("ВЫСТРЕЛ")').first();
     const fireButtonCount = await fireButton.count();
-    console.log(`Found ${fireButtonCount} fire buttons with text "ВЫСТРЕЛ"`);
+    console.log(`Found ${fireButtonCount} fire buttons with text "ВЫСТРЕЛ" after opening card`);
 
     if (fireButtonCount === 0) {
       console.log('ERROR: No fire buttons found! Machine weapons may not be displayed.');
@@ -87,11 +69,12 @@ test.describe('Machine Fire Rate Limit', () => {
       });
       console.log(`Current rules version in localStorage: ${rulesVersion}`);
 
-      // Take another screenshot for debugging
+      // Take screenshot for debugging
       await page.screenshot({ path: 'test-results/no-fire-buttons-debug.png', fullPage: true });
       console.log('Full page screenshot saved to test-results/no-fire-buttons-debug.png');
 
       // Skip the rest of the test
+      test.skip(true, 'Weapons not displayed');
       return;
     }
 
@@ -129,7 +112,7 @@ test.describe('Machine Fire Rate Limit', () => {
       }
     }
 
-    // Final check - verify bug exists
+    // Final check - verify fire rate limit is enforced
     const finalEnabled = await fireButton.isEnabled();
     const finalDisabled = await fireButton.getAttribute('disabled');
     const finalOpacity = await fireButton.evaluate(el => window.getComputedStyle(el).opacity);
@@ -141,11 +124,10 @@ test.describe('Machine Fire Rate Limit', () => {
     console.log(`Button disabled attr: ${finalDisabled}`);
     console.log(`Button opacity: ${finalOpacity}`);
 
-    // BUG DOCUMENTATION:
-    // - Machine with fireRate=2 should only fire 2 times per turn
-    // - Test shows machine can fire 4+ times without being blocked
-    // - Button remains enabled regardless of shots taken
-    // - No visual indicator (opacity, disabled state) when limit reached
-    // - This is a CRITICAL BUG that breaks game balance
+    // VERIFY THE FIX: Button should be disabled after 2 shots
+    expect(finalEnabled).toBe(false);
+    expect(finalDisabled).not.toBe(null);
+
+    console.log('\n✅ Fire rate limit is ENFORCED - bug is FIXED!');
   });
 });
