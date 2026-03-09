@@ -7,6 +7,10 @@ interface MachineWeaponsListProps {
   weapons: Weapon[];
   weaponShots: Record<number, number>;
   fireRate: number;
+  totalShotsUsed: number; // Total shots used by the machine (machineShotsUsed)
+  currentAmmo: number; // Current ammo for tehnolog rules
+  weaponAmmo?: number[]; // Per-weapon ammo for community_star_system rules
+  usePerWeaponAmmo: boolean; // Whether to use per-weapon ammo system
   onWeaponAttack: (weaponIndex: number) => void;
   onWeaponInfo: (weaponIndex: number) => void;
   stepToCmFactor: number;
@@ -21,6 +25,10 @@ export function MachineWeaponsList({
   weapons,
   weaponShots,
   fireRate,
+  totalShotsUsed,
+  currentAmmo,
+  weaponAmmo,
+  usePerWeaponAmmo,
   onWeaponAttack,
   onWeaponInfo,
   stepToCmFactor
@@ -33,6 +41,22 @@ export function MachineWeaponsList({
     const powerStr = String(weapon.power);
     if (/^\d+$/.test(powerStr)) return true;
     return false;
+  };
+
+  // Helper to check if weapon has ammo left
+  const weaponHasAmmo = (weaponIdx: number, weapon: Weapon): boolean => {
+    // Melee weapons don't use ammo
+    if (isNonRangedWeapon(weapon)) return true;
+
+    // Always check global ammo first (both rules systems track it)
+    if (currentAmmo <= 0) return false;
+
+    if (usePerWeaponAmmo) {
+      // Community rules: also check per-weapon ammo
+      return (weaponAmmo?.[weaponIdx] ?? weapon.ammo ?? 0) > 0;
+    }
+    // Tehnolog rules: only global ammo checked above
+    return true;
   };
 
   const allWeapons: WeaponWithIndex[] = weapons.map((weapon, idx) => ({
@@ -87,17 +111,23 @@ export function MachineWeaponsList({
                 {/* Fire Button - Full width (flex-1) */}
                 <button
                   onClick={() => onWeaponAttack(weaponIdx)}
-                  disabled={shots >= fireRate}
+                  disabled={totalShotsUsed >= fireRate || !weaponHasAmmo(weaponIdx, weapon)}
                   className={cn(
                     "relative p-1.5 md:p-2 rounded-sm transition-all flex-1 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center gap-1 overflow-hidden",
                     "border-2 text-xs font-mono font-bold uppercase tracking-wider",
-                    shots >= fireRate
+                    totalShotsUsed >= fireRate || !weaponHasAmmo(weaponIdx, weapon)
                       ? "bg-slate-900/40 border-slate-700/50 text-slate-600 cursor-not-allowed opacity-50"
                       : shots > 0
                         ? "bg-amber-950/40 border-amber-800/50 text-amber-700"
                         : "bg-amber-950/20 hover:bg-amber-950/40 border-amber-700/50 text-amber-400 active:scale-95"
                   )}
-                  title={shots >= fireRate ? "Лимит выстрелов исчерпан" : "Выстрел"}
+                  title={
+                    !weaponHasAmmo(weaponIdx, weapon)
+                      ? "Нет боезапаса"
+                      : totalShotsUsed >= fireRate
+                        ? "Лимит выстрелов исчерпан"
+                        : "Выстрел"
+                  }
                 >
                   {shots === 0 && (
                     <>

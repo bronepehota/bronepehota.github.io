@@ -13,6 +13,10 @@ describe('MachineWeaponsList', () => {
     weapons: mockWeapons,
     weaponShots: { 0: 0, 1: 0, 2: 0 },
     fireRate: 2,
+    totalShotsUsed: 0,
+    currentAmmo: 10,
+    weaponAmmo: undefined,
+    usePerWeaponAmmo: false,
     onWeaponAttack: jest.fn(),
     onWeaponInfo: jest.fn(),
     stepToCmFactor: 5
@@ -94,7 +98,8 @@ describe('MachineWeaponsList', () => {
     it('disables fire button when fire rate limit is reached', () => {
       const props = {
         ...defaultProps,
-        weaponShots: { 0: 2, 1: 0, 2: 0 }, // Weapon 0 has fired 2 times (equal to fireRate)
+        weaponShots: { 0: 2, 1: 0, 2: 0 }, // Weapon 0 has fired 2 times
+        totalShotsUsed: 2, // Total shots equals fireRate
         fireRate: 2
       };
       render(<MachineWeaponsList {...props} />);
@@ -107,7 +112,8 @@ describe('MachineWeaponsList', () => {
     it('keeps fire button enabled when shots are below fire rate limit', () => {
       const props = {
         ...defaultProps,
-        weaponShots: { 0: 1, 1: 0, 2: 0 }, // Weapon 0 has fired 1 time (below fireRate)
+        weaponShots: { 0: 1, 1: 0, 2: 0 }, // Weapon 0 has fired 1 time
+        totalShotsUsed: 1, // Total shots below fireRate
         fireRate: 2
       };
       render(<MachineWeaponsList {...props} />);
@@ -121,6 +127,7 @@ describe('MachineWeaponsList', () => {
       const props = {
         ...defaultProps,
         weaponShots: { 0: 0, 1: 0, 2: 0 },
+        totalShotsUsed: 0,
         fireRate: 2
       };
       render(<MachineWeaponsList {...props} />);
@@ -132,46 +139,39 @@ describe('MachineWeaponsList', () => {
       });
     });
 
-    it('disables weapon when its shots equal fireRate', () => {
+    it('disables all weapons when total shots equal fireRate', () => {
       const props = {
         ...defaultProps,
-        weaponShots: { 0: 2, 1: 0, 2: 0 }, // Weapon 0 has 2 shots (equal to fireRate)
+        weaponShots: { 0: 2, 1: 0, 2: 0 }, // Weapon 0 has 2 shots
+        totalShotsUsed: 2, // Total equals fireRate - ALL weapons disabled
         fireRate: 2
       };
       render(<MachineWeaponsList {...props} />);
 
-      // Weapon 0 should be disabled
+      // ALL weapons should be disabled (not just weapon 0)
       const disabledButtons = screen.getAllByTitle('Лимит выстрелов исчерпан');
-      expect(disabledButtons.length).toBe(1);
-      expect(disabledButtons[0]).toBeDisabled();
-
-      // Weapon 1 should still be enabled
-      const enabledButtons = screen.getAllByTitle('Выстрел');
-      expect(enabledButtons.length).toBe(1);
+      expect(disabledButtons.length).toBe(2); // Both ranged weapons disabled
     });
 
     it('handles fire rate of 1', () => {
       const props = {
         ...defaultProps,
         weaponShots: { 0: 1, 1: 0, 2: 0 },
+        totalShotsUsed: 1, // Total equals fireRate
         fireRate: 1
       };
       render(<MachineWeaponsList {...props} />);
 
-      // Weapon 0 should be disabled
-      const disabledButton = screen.getAllByTitle('Лимит выстрелов исчерпан')[0];
-      expect(disabledButton).toBeDisabled();
-
-      // Weapon 1 should still be enabled (total shots = 1, which equals fireRate)
-      // Actually, with fireRate=1, all weapons should be disabled after any shot
+      // With fireRate=1 and totalShotsUsed=1, all weapons should be disabled
       const allFireButtons = screen.getAllByTitle('Лимит выстрелов исчерпан');
-      expect(allFireButtons.length).toBeGreaterThan(0);
+      expect(allFireButtons.length).toBe(2); // Both ranged weapons disabled
     });
 
     it('handles fire rate of 3', () => {
       const props = {
         ...defaultProps,
         weaponShots: { 0: 2, 1: 0, 2: 0 },
+        totalShotsUsed: 2, // Total shots below fireRate
         fireRate: 3
       };
       render(<MachineWeaponsList {...props} />);
@@ -185,6 +185,7 @@ describe('MachineWeaponsList', () => {
       const props = {
         ...defaultProps,
         weaponShots: { 0: 0, 1: 0, 2: 0 },
+        totalShotsUsed: 0,
         fireRate: 0
       };
 
@@ -199,6 +200,7 @@ describe('MachineWeaponsList', () => {
       const props = {
         ...defaultProps,
         weaponShots: { 0: 2, 1: 0, 2: 0 },
+        totalShotsUsed: 2, // Total equals fireRate
         fireRate: 2
       };
       render(<MachineWeaponsList {...props} />);
@@ -212,6 +214,7 @@ describe('MachineWeaponsList', () => {
       const props = {
         ...defaultProps,
         weaponShots: { 0: 1, 1: 0, 2: 0 },
+        totalShotsUsed: 1, // Below fireRate
         fireRate: 2
       };
       render(<MachineWeaponsList {...props} />);
@@ -225,6 +228,7 @@ describe('MachineWeaponsList', () => {
       const props = {
         ...defaultProps,
         weaponShots: { 0: 0, 1: 0, 2: 0 },
+        totalShotsUsed: 0,
         fireRate: 2
       };
       render(<MachineWeaponsList {...props} />);
@@ -236,33 +240,107 @@ describe('MachineWeaponsList', () => {
   });
 
   describe('Per-weapon shot tracking', () => {
-    it('tracks shots independently for each weapon', () => {
+    it('disables all weapons when total shots reach fireRate', () => {
       const props = {
         ...defaultProps,
-        weaponShots: { 0: 2, 1: 1, 2: 0 },
+        weaponShots: { 0: 2, 1: 1, 2: 0 }, // Weapon 0 has 2 shots, weapon 1 has 1
+        totalShotsUsed: 3, // Total exceeds fireRate
         fireRate: 2
       };
       render(<MachineWeaponsList {...props} />);
 
-      // Weapon 0 should be disabled (2 shots = fireRate)
+      // ALL weapons should be disabled when total shots >= fireRate
       const disabledButtons = screen.getAllByTitle('Лимит выстрелов исчерпан');
-      expect(disabledButtons.length).toBe(1);
-
-      // Weapon 1 should still be enabled (1 shot < fireRate)
-      const enabledButtons = screen.getAllByTitle('Выстрел');
-      expect(enabledButtons.length).toBe(1);
+      expect(disabledButtons.length).toBe(2); // Both ranged weapons disabled
     });
 
     it('handles missing weapon index in weaponShots', () => {
       const props = {
         ...defaultProps,
-        weaponShots: { 0: 1 } // Missing weapon 1 and 2
+        weaponShots: { 0: 1 }, // Missing weapon 1 and 2
+        totalShotsUsed: 1
       };
       render(<MachineWeaponsList {...props} />);
 
       // Should render without errors, treating missing as 0
       expect(screen.getByText('Cannon')).toBeInTheDocument();
       expect(screen.getByText('MG')).toBeInTheDocument();
+    });
+  });
+
+  describe('Ammo limiting', () => {
+    it('disables fire button when global ammo is 0 (tehnolog rules)', () => {
+      const props = {
+        ...defaultProps,
+        currentAmmo: 0,
+        usePerWeaponAmmo: false
+      };
+      render(<MachineWeaponsList {...props} />);
+
+      const disabledButtons = screen.getAllByTitle('Нет боезапаса');
+      expect(disabledButtons.length).toBe(2); // Both ranged weapons disabled
+      disabledButtons.forEach(button => {
+        expect(button).toBeDisabled();
+      });
+    });
+
+    it('keeps fire button enabled when ammo is available (tehnolog rules)', () => {
+      const props = {
+        ...defaultProps,
+        currentAmmo: 5,
+        usePerWeaponAmmo: false
+      };
+      render(<MachineWeaponsList {...props} />);
+
+      const fireButtons = screen.getAllByTitle('Выстрел');
+      expect(fireButtons.length).toBeGreaterThan(0);
+      fireButtons.forEach(button => {
+        expect(button).not.toBeDisabled();
+      });
+    });
+
+    it('disables fire button when per-weapon ammo is 0 (community rules)', () => {
+      const props = {
+        ...defaultProps,
+        currentAmmo: 10, // Global ammo available
+        weaponAmmo: [0, 5], // Weapon 0 has no ammo
+        usePerWeaponAmmo: true
+      };
+      render(<MachineWeaponsList {...props} />);
+
+      // Weapon 0 should be disabled (no per-weapon ammo)
+      const disabledButtons = screen.getAllByTitle('Нет боезапаса');
+      expect(disabledButtons.length).toBe(1);
+      expect(disabledButtons[0]).toBeDisabled();
+    });
+
+    it('disables all weapons when global ammo is 0 (community rules)', () => {
+      const props = {
+        ...defaultProps,
+        currentAmmo: 0, // No global ammo
+        weaponAmmo: [5, 5], // Per-weapon ammo available
+        usePerWeaponAmmo: true
+      };
+      render(<MachineWeaponsList {...props} />);
+
+      // ALL weapons should be disabled (global ammo check takes priority)
+      const disabledButtons = screen.getAllByTitle('Нет боезапаса');
+      expect(disabledButtons.length).toBe(2); // Both ranged weapons
+    });
+
+    it('allows melee weapons even when ammo is 0', () => {
+      const props = {
+        ...defaultProps,
+        currentAmmo: 0,
+        usePerWeaponAmmo: false
+      };
+      render(<MachineWeaponsList {...props} />);
+
+      // Melee weapons should be listed but ranged should be disabled
+      expect(screen.getByText('Melee Spike')).toBeInTheDocument();
+      // Info button for melee weapon should still be available
+      const infoButtons = screen.getAllByTitle('Информация об оружии');
+      expect(infoButtons.length).toBe(3); // All weapons have info buttons
     });
   });
 
