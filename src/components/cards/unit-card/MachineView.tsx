@@ -1,7 +1,6 @@
-import { MachineStatsPanel } from './machine-view/MachineStatsPanel';
 import { MachineAmmoPanel } from './machine-view/MachineAmmoPanel';
-import { MachinePilotPanel } from './machine-view/MachinePilotPanel';
 import { MachineWeaponsList } from './machine-view/MachineWeaponsList';
+import { TacticalDashboard } from './machine-view/TacticalDashboard';
 import { ArmyUnit, Machine, DurabilityZone, RulesVersionID, PilotInfo } from '@/lib/types';
 
 export interface MachineViewProps {
@@ -21,6 +20,10 @@ export interface MachineViewProps {
   usePerWeaponAmmo: boolean;
   distanceInputUnit: 'steps' | 'cm';
   stepToCmFactor: number;
+  imageUrl?: string;
+  machineName?: string;
+  isDestroyed?: boolean;
+  onShowImage?: () => void;
 }
 
 export function MachineView({
@@ -39,7 +42,11 @@ export function MachineView({
   rulesVersion,
   usePerWeaponAmmo,
   distanceInputUnit,
-  stepToCmFactor
+  stepToCmFactor,
+  imageUrl,
+  machineName,
+  isDestroyed,
+  onShowImage
 }: MachineViewProps) {
   const machine = unit.data as Machine;
 
@@ -51,41 +58,46 @@ export function MachineView({
 
   return (
     <div className="space-y-2">
-      {/* Grid layout: Stats | Pilot, Ammo | Pilot (pilot spans 2 rows) */}
-      <div className="grid grid-cols-[1fr_auto] gap-2">
-        {/* Row 1: Stats Panel */}
-        <MachineStatsPanel
+      {/* Tactical Dashboard - Unified panel with machine image, stats, and pilot */}
+      {imageUrl ? (
+        <TacticalDashboard
+          faction={machine.faction}
+          imageUrl={imageUrl}
+          machineName={machineName || machine.name}
+          isDestroyed={isDestroyed || false}
           currentDurability={unit.currentDurability || 0}
           maxDurability={machine.durability_max}
           speed={speed}
           zone={zone}
           onUpdateDurability={updateDurability}
-          distanceInputUnit={distanceInputUnit}
-          stepToCmFactor={stepToCmFactor}
-        />
-
-        {/* Pilot Panel - spans 2 rows */}
-        <MachinePilotPanel
           pilotInfo={pilotInfo}
           pilotImage={pilotImage}
           survivalTest={pilotSurvivalTest}
           onAssignPilot={onPilotAssign}
           onSurvivalTest={onPilotSurvivalTest}
-          isTestRunning={isPilotTestRunning}
+          isPilotTestRunning={isPilotTestRunning}
+          onImageClick={onShowImage || (() => {})}
+          distanceInputUnit={distanceInputUnit}
+          stepToCmFactor={stepToCmFactor}
         />
+      ) : (
+        /* Fallback: Original layout if no image */
+        <div className="relative bg-slate-900/60 p-2 rounded-sm border border-slate-700/50">
+          <div className="text-center text-xs font-mono opacity-50">Нет изображения</div>
+        </div>
+      )}
 
-        {/* Row 2: Ammo Panel */}
-        <MachineAmmoPanel
-          currentAmmo={unit.currentAmmo || 0}
-          maxAmmo={machine.ammo_max}
-          shotsUsed={unit.machineShotsUsed || 0}
-          fireRate={machine.fire_rate}
-          weapons={machine.weapons}
-          weaponAmmo={unit.weaponAmmo}
-          onUpdateAmmo={updateAmmo}
-          usePerWeaponAmmo={usePerWeaponAmmo}
-        />
-      </div>
+      {/* Ammo Panel - full width */}
+      <MachineAmmoPanel
+        currentAmmo={unit.currentAmmo || 0}
+        maxAmmo={machine.ammo_max}
+        shotsUsed={unit.machineShotsUsed || 0}
+        fireRate={machine.fire_rate}
+        weapons={machine.weapons}
+        weaponAmmo={unit.weaponAmmo}
+        onUpdateAmmo={updateAmmo}
+        usePerWeaponAmmo={usePerWeaponAmmo}
+      />
 
       {/* Weapons List - only for Tehnolog rules */}
       {rulesVersion === 'tehnolog' && (

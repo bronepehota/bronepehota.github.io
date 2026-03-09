@@ -57,7 +57,11 @@ describe('MachineView', () => {
     rulesVersion: 'tehnolog' as const,
     usePerWeaponAmmo: false,
     distanceInputUnit: 'steps' as const,
-    stepToCmFactor: 5
+    stepToCmFactor: 5,
+    imageUrl: mockMachine.image,
+    machineName: mockMachine.name,
+    isDestroyed: false,
+    onShowImage: jest.fn()
   };
 
   it('renders machine stats panel', () => {
