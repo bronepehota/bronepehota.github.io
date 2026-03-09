@@ -318,16 +318,40 @@ export function CombatResults({
                 Ваш бросок
               </div>
               <div className="flex flex-col items-center">
-                <AnimatedDice
-                  value={result.hitResult.roll ?? 0}
-                  maxSide={6}
-                  color={(result.hitResult.roll ?? 0) === 1 ? "red" : "emerald"}
-                  size="md"
-                  delay={0}
-                  isHit={(result.hitResult.roll ?? 0) !== 1}
-                  bonus={result.soldierRank || 0}
-                  total={result.grenadeDistance}
-                />
+                {result.hitResult?.rolls && result.hitResult.rolls.length > 1 ? (
+                  // Community Star System: Show all rolls, highlight best
+                  <div className="flex items-center gap-2 mb-2">
+                    {result.hitResult.rolls.map((roll, i) => {
+                      const rolls = result.hitResult?.rolls ?? [];
+                      const maxRoll = Math.max(...rolls);
+                      const isMax = roll === maxRoll;
+                      return (
+                        <AnimatedDice
+                          key={i}
+                          value={roll}
+                          maxSide={6}
+                          color={isMax ? "emerald" : "blue"}
+                          size="sm"
+                          delay={i * 100}
+                          isHit={isMax}
+                          className={cn(!isMax && "opacity-40")}
+                        />
+                      );
+                    })}
+                  </div>
+                ) : (
+                  // Tehnolog rules: Single dice, no bonus
+                  <AnimatedDice
+                    value={result.hitResult.roll ?? 0}
+                    maxSide={6}
+                    color={(result.hitResult.roll ?? 0) === 1 ? "red" : "emerald"}
+                    size="md"
+                    delay={0}
+                    isHit={(result.hitResult.roll ?? 0) !== 1}
+                    bonus={0}
+                    total={result.grenadeDistance}
+                  />
+                )}
               </div>
             </div>
 

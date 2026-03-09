@@ -354,8 +354,11 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
   }, [state, rulesVersion, animateDiceRoll]);
 
   /**
-   * Execute grenade attack - roll distance (D6 + soldier rank)
+   * Execute grenade attack - roll distance
    * Phase 1: Determine explosion location
+   *
+   * Tehnolog rules: D6 + rank (bonus)
+   * Community Star System rules: Roll D6 (rank times), pick best result
    */
   const executeGrenade = useCallback(async (): Promise<CombatResult> => {
     if (!state.unit || state.actionType !== 'grenade') {
@@ -364,7 +367,7 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
 
     dispatch({ type: 'EXECUTE_ROLL' });
 
-    // Get soldier rank for grenade throw bonus
+    // Get soldier rank for grenade throw
     let soldierRank = 0;
     if (state.unitType === 'squad' && state.soldierIndex !== null) {
       const soldiers = (state.unit.data as any).soldiers;
@@ -376,8 +379,27 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
     // Animate distance roll (D6)
     await animateDiceRoll();
 
-    const distanceRoll = rollDie(6);
-    const totalDistance = distanceRoll + soldierRank;
+    // Different mechanics for different rules versions
+    let distanceRoll: number;
+    const allRolls: number[] = [];
+    let totalDistance: number;
+
+    if (rulesVersion === 'community_star_system' && soldierRank > 0) {
+      // Community Star System: Roll D6 multiple times (equal to rank), pick best result
+      // "Указав цель, игрок бросает кубик Д6 столько раз, сколько указано в его
+      // характеристике «Армейского ранга», чтобы определить дальность. Из всех
+      // бросков выбирается результат наиболее подходящий, по мнению игрока."
+      for (let i = 0; i < soldierRank; i++) {
+        allRolls.push(rollDie(6));
+      }
+      // Pick the best result (highest for distance)
+      distanceRoll = Math.max(...allRolls);
+      totalDistance = distanceRoll;  // No bonus - distance is just the best roll
+    } else {
+      // Tehnolog rules (original): D6 only, no bonus
+      distanceRoll = rollDie(6);
+      totalDistance = distanceRoll;
+    }
 
     // Calculate blast zone (±1 step)
     const minSteps = Math.max(1, totalDistance - 1);
@@ -390,7 +412,11 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
     // Store grenade data in state for phase 2
     dispatch({
       type: 'UPDATE_DICE',
-      diceDisplay: { hit: distanceRoll }
+      diceDisplay: {
+        hit: distanceRoll,
+        hitRolls: allRolls.length > 0 ? allRolls : [distanceRoll],
+        hitTotal: totalDistance
+      }
     } as any);
 
     // Create result for phase 1 (distance roll)
@@ -401,7 +427,9 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
       hitResult: {
         success: true,
         roll: distanceRoll,
+        rolls: allRolls.length > 0 ? allRolls : [distanceRoll],
         total: totalDistance,
+        bonus: rulesVersion === 'community_star_system' ? 0 : soldierRank,
         isGrenade: true
       },
       timestamp: Date.now(),
@@ -418,18 +446,23 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
     (dispatch as any)({
       type: 'ROLL_COMPLETE',
       result,
-      diceDisplay: { hit: distanceRoll },
+      diceDisplay: {
+        hit: distanceRoll,
+        hitRolls: allRolls.length > 0 ? allRolls : [distanceRoll],
+        hitTotal: totalDistance
+      },
       grenadeData: {
         distanceRoll,
         soldierRank,
         totalDistance,
         blastZone,
         blastChecks: [],
+        allRolls,  // Store all rolls for display (for community_star_system)
       },
     });
 
     return result;
-  }, [state, animateDiceRoll]);
+  }, [state, rulesVersion, animateDiceRoll]);
 
   /**
    * Check a target in grenade blast zone (Phase 2)
