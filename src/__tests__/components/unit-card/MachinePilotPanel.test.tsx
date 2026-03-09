@@ -45,4 +45,83 @@ describe('MachinePilotPanel', () => {
 
     expect(onAssignPilot).toHaveBeenCalled();
   });
+
+  describe('dead pilot', () => {
+    it('shows pilot as dead when pilotInfo.alive=false', () => {
+      const deadPilot: PilotInfo = {
+        squadInstanceId: 'squad-1',
+        soldierIndex: 0,
+        pilotArmor: 2,
+        alive: false
+      };
+
+      render(
+        <MachinePilotPanel
+          {...defaultProps}
+          pilotInfo={deadPilot}
+          pilotImage="/images/pilot.jpg"
+        />
+      );
+
+      expect(screen.getByText('ПОГИБ')).toBeInTheDocument();
+    });
+  });
+
+  describe('survival test', () => {
+    const mockPilotInfo: PilotInfo = {
+      squadInstanceId: 'squad-1',
+      soldierIndex: 0,
+      pilotArmor: 2,
+      alive: true
+    };
+
+    it('shows survival test result with green background for survived', () => {
+      const survivalTest = { roll: 12, survived: true, testedAt: Date.now() };
+
+      render(
+        <MachinePilotPanel
+          {...defaultProps}
+          pilotInfo={mockPilotInfo}
+          pilotImage="/images/pilot.jpg"
+          survivalTest={survivalTest}
+        />
+      );
+
+      const buttons = screen.getAllByRole('button');
+      const testButton = buttons[1]; // Survival test button
+      expect(testButton).toHaveClass('bg-green-600');
+    });
+
+    it('shows survival test result with red background for died', () => {
+      const survivalTest = { roll: 3, survived: false, testedAt: Date.now() };
+
+      render(
+        <MachinePilotPanel
+          {...defaultProps}
+          pilotInfo={mockPilotInfo}
+          pilotImage="/images/pilot.jpg"
+          survivalTest={survivalTest}
+        />
+      );
+
+      const buttons = screen.getAllByRole('button');
+      const testButton = buttons[1]; // Survival test button
+      expect(testButton).toHaveClass('bg-red-600');
+    });
+
+    it('disables survival test button during test', () => {
+      render(
+        <MachinePilotPanel
+          {...defaultProps}
+          pilotInfo={mockPilotInfo}
+          pilotImage="/images/pilot.jpg"
+          isTestRunning={true}
+        />
+      );
+
+      const buttons = screen.getAllByRole('button');
+      const testButton = buttons[1]; // Survival test button
+      expect(testButton).toBeDisabled();
+    });
+  });
 });
