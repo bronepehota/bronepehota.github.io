@@ -61,16 +61,18 @@ export function useMachineStats(
 
   // Update durability with bounds checking
   const updateDurability = useCallback((delta: number) => {
-    const max = machine.durability_max;
-    const current = unit.currentDurability!;
-    const newVal = Math.max(0, Math.min(max, current + delta));
+    updateUnit((u) => {
+      if (u.type !== 'machine') return u;
+      const max = (u.data as Machine).durability_max;
+      const current = u.currentDurability || 0;
+      const newVal = Math.max(0, Math.min(max, current + delta));
 
-    if (newVal === 0) {
-      updateUnit((u) => ({ ...u, currentDurability: 0, isMachineDone: true }));
-    } else {
-      updateUnit((u) => ({ ...u, currentDurability: newVal }));
-    }
-  }, [machine.durability_max, unit.currentDurability, updateUnit]);
+      if (newVal === 0) {
+        return { ...u, currentDurability: 0, isMachineDone: true };
+      }
+      return { ...u, currentDurability: newVal };
+    });
+  }, [updateUnit]);
 
   return {
     currentDurability: unit.currentDurability || 0,
