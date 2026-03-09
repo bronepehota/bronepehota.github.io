@@ -18,6 +18,19 @@ export interface Faction {
   motto: string;
 }
 
+export interface KeyBattle {
+  name: string;
+  year: string;
+  description: string;
+  outcome: string;
+}
+
+export interface Location {
+  name: string;
+  type: 'base' | 'academy' | 'battlefield' | 'homeworld';
+  description: string;
+}
+
 export interface EncyclopediaData {
   class?: string;
   lore?: string;
@@ -25,6 +38,10 @@ export interface EncyclopediaData {
   history?: string;
   manufacturer?: string;
   sourceUrl?: string;
+  // NEW FIELDS - all optional:
+  traditions?: string;
+  keyBattles?: KeyBattle[];
+  locations?: Location[];
 }
 
 export interface Soldier {
