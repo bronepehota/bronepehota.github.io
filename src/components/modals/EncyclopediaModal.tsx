@@ -11,6 +11,7 @@ import PaintedExamples from '@/components/encyclopedia/PaintedExamples';
 import Image from 'next/image';
 import { Shield, Zap, Skull } from 'lucide-react';
 import { getFactionColors } from '@/lib/faction-colors';
+import { hasLoreExpansion, getLocationIcon } from '@/lib/lore-utils';
 
 interface EncyclopediaModalProps {
   unit: UnitWithType;
@@ -222,6 +223,65 @@ export function EncyclopediaModal({
               <p className="font-oswald text-military-sand leading-relaxed">
                 {unit.encyclopedia.history}
               </p>
+            </section>
+          )}
+
+          {/* Traditions section */}
+          {unit.encyclopedia?.traditions && (
+            <section className="folded-paper military-corners p-4">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="font-ibm-mono text-[10px] text-military-rust/60 uppercase tracking-wider">
+                  DATA_TRADITIONS
+                </span>
+              </div>
+              <p className="font-oswald text-military-sand leading-relaxed italic border-l-4 border-military-amber/60 pl-4">
+                {unit.encyclopedia.traditions}
+              </p>
+            </section>
+          )}
+
+          {/* Key Battles section */}
+          {unit.encyclopedia?.keyBattles && unit.encyclopedia.keyBattles.length > 0 && (
+            <section className="folded-paper military-corners p-4">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="font-ibm-mono text-[10px] text-military-rust/60 uppercase tracking-wider">
+                  DATA_BATTLES
+                </span>
+              </div>
+              <div className="space-y-4">
+                {unit.encyclopedia.keyBattles.map((battle, index) => (
+                  <div key={index} className="border-l-2 border-military-rust/40 pl-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-russo font-bold text-white">{battle.name}</h4>
+                      <span className="font-ibm-mono text-[10px] text-military-amber">{battle.year}</span>
+                    </div>
+                    <p className="font-oswald text-sm text-military-sand mb-2">{battle.description}</p>
+                    <p className="font-ibm-mono text-xs text-military-steel italic">{battle.outcome}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Locations section */}
+          {unit.encyclopedia?.locations && unit.encyclopedia.locations.length > 0 && (
+            <section className="folded-paper military-corners p-4">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="font-ibm-mono text-[10px] text-military-rust/60 uppercase tracking-wider">
+                  DATA_LOCATIONS
+                </span>
+              </div>
+              <div className="space-y-3">
+                {unit.encyclopedia.locations.map((location, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <span className="text-xl">{getLocationIcon(location.type)}</span>
+                    <div className="flex-1">
+                      <h4 className="font-russo font-bold text-white mb-1">{location.name}</h4>
+                      <p className="font-oswald text-sm text-military-sand">{location.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </section>
           )}
 
