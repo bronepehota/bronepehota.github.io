@@ -37,6 +37,7 @@ interface GameSessionProps {
   strictPilotRankEnabled?: boolean;
   distanceInputUnit?: 'steps' | 'cm';
   stepToCmFactor?: number;
+  autoCompleteEnabled?: boolean;
 }
 
 export default function GameSession({
@@ -47,7 +48,8 @@ export default function GameSession({
   setShowCombatLog,
   strictPilotRankEnabled = true,
   distanceInputUnit = 'steps',
-  stepToCmFactor = 5
+  stepToCmFactor = 5,
+  autoCompleteEnabled = true,
 }: GameSessionProps) {
   const [showInitiativeModal, setShowInitiativeModal] = useState(false);
   const [showTurnConfirmation, setShowTurnConfirmation] = useState(false);
@@ -484,6 +486,7 @@ export default function GameSession({
               strictPilotRankEnabled={strictPilotRankEnabled}
               distanceInputUnit={distanceInputUnit}
               stepToCmFactor={stepToCmFactor}
+              autoCompleteEnabled={autoCompleteEnabled}
             />
           </div>
         )}

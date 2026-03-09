@@ -83,6 +83,15 @@ export default function Home() {
     return '5';
   });
 
+  // Auto-complete enabled state - persisted in localStorage
+  const [autoCompleteEnabled, setAutoCompleteEnabled] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.AUTO_COMPLETE_ENABLED);
+      return saved !== null ? saved === 'true' : true; // Default to enabled
+    }
+    return true;
+  });
+
   // Persist rules version to localStorage on change
   useEffect(() => {
     localStorage.setItem('bronepehota_rules_version', rulesVersion);
@@ -494,6 +503,8 @@ export default function Home() {
           onDistanceInputUnitChange={setDistanceInputUnit}
           stepToCmFactor={stepToCmFactor}
           onStepToCmFactorChange={setStepToCmFactor}
+          autoCompleteEnabled={autoCompleteEnabled}
+          onAutoCompleteEnabledChange={setAutoCompleteEnabled}
         />
       ) : (
         <GameSession
@@ -507,6 +518,7 @@ export default function Home() {
           strictPilotRankEnabled={strictPilotRankEnabled}
           distanceInputUnit={distanceInputUnit}
           stepToCmFactor={parseInt(stepToCmFactor, 10)}
+          autoCompleteEnabled={autoCompleteEnabled}
         />
       )}
       </div>

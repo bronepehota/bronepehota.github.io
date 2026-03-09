@@ -10,6 +10,7 @@ import { SurpriseAttackToggle } from '../toggles/SurpriseAttackToggle';
 import { StrictPilotRankToggle } from '../toggles/StrictPilotRankToggle';
 import { DistanceUnitToggle } from '../toggles/DistanceUnitToggle';
 import { StepToCmFactorToggle } from '../toggles/StepToCmFactorToggle';
+import { AutoCompleteToggle } from '../toggles/AutoCompleteToggle';
 
 interface RulesSelectorProps {
   versions: RulesVersion[];
@@ -28,6 +29,8 @@ interface RulesSelectorProps {
   onDistanceInputUnitChange?: (value: 'steps' | 'cm') => void;
   stepToCmFactor?: '4' | '5';
   onStepToCmFactorChange?: (value: '4' | '5') => void;
+  autoCompleteEnabled?: boolean;
+  onAutoCompleteEnabledChange?: (enabled: boolean) => void;
 }
 
 export function RulesSelector({
@@ -47,6 +50,8 @@ export function RulesSelector({
   onDistanceInputUnitChange,
   stepToCmFactor = '5',
   onStepToCmFactorChange,
+  autoCompleteEnabled = true,
+  onAutoCompleteEnabledChange,
 }: RulesSelectorProps) {
   const [expandedRulesId, setExpandedRulesId] = useState<RulesVersionID | null>(null);
   const debouncedSaveRef = useRef<NodeJS.Timeout>();
@@ -256,6 +261,12 @@ export function RulesSelector({
             <StepToCmFactorToggle
               value={stepToCmFactor}
               onValueChange={onStepToCmFactorChange}
+            />
+          )}
+          {onAutoCompleteEnabledChange && (
+            <AutoCompleteToggle
+              enabled={autoCompleteEnabled}
+              onEnabledChange={onAutoCompleteEnabledChange}
             />
           )}
         </div>
