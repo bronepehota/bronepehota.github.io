@@ -32,6 +32,7 @@ interface UnitCardProps {
   strictPilotRankEnabled?: boolean;
   distanceInputUnit?: 'steps' | 'cm';
   stepToCmFactor?: number;
+  autoCompleteEnabled?: boolean;
 }
 
 export default function UnitCard({
@@ -45,7 +46,8 @@ export default function UnitCard({
   onNavigateToUnit: _onNavigateToUnit,
   strictPilotRankEnabled = true,
   distanceInputUnit = 'steps',
-  stepToCmFactor = 5
+  stepToCmFactor = 5,
+  autoCompleteEnabled = true,
 }: UnitCardProps) {
   const [showImage, setShowImage] = useState(false);
   const [showSoldierImage, setShowSoldierImage] = useState<number | null>(null);
@@ -55,8 +57,6 @@ export default function UnitCard({
   const [pilotSurvivalTest, setPilotSurvivalTest] = useState<{ roll: number; survived: boolean; testedAt: number } | null>(null);
   const [selectedWeaponInfo, setSelectedWeaponInfo] = useState<{ weapon: Weapon; weaponIdx: number } | null>(null);
   const [showPanicModal, setShowPanicModal] = useState(false);
-  // Remember user's choice for "mark as done" checkbox across combat actions
-  const [rememberMarkAsDone, setRememberMarkAsDone] = useState(false);
 
   const combatController = useCombatFlowController();
   const pilotTestFlow = usePilotTestFlow();
@@ -436,8 +436,7 @@ export default function UnitCard({
           onGrenadeCheckTarget={combatController.checkGrenadeTarget}
           grenadesAvailable={isSquad && !unit.grenadesUsed}
           unitDisplayName={`${formatUnitNumber(unit)} - ${data.name}`}
-          rememberMarkAsDone={rememberMarkAsDone}
-          setRememberMarkAsDone={setRememberMarkAsDone}
+          autoCompleteEnabled={autoCompleteEnabled}
           distanceInputUnit={distanceInputUnit}
           stepToCmFactor={stepToCmFactor}
         />

@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { CombatResult, CombatParameters } from '@/lib/combat-types';
 import { RulesVersionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { CheckCircle2, AlertTriangle, Skull, Shield, Footprints, Bomb } from 'lucide-react';
+import { AlertTriangle, Skull, Shield, Footprints, Bomb } from 'lucide-react';
 import { AnimatedDice } from './AnimatedDice';
 
 interface CombatResultsProps {
@@ -15,8 +15,7 @@ interface CombatResultsProps {
   onGoBack: () => void;
   unitType?: 'squad' | 'machine';
   onGrenadeCheckTarget?: (armor: number) => void;
-  rememberMarkAsDone?: boolean;
-  setRememberMarkAsDone?: (value: boolean) => void;
+  autoCompleteEnabled?: boolean;
 }
 
 export function CombatResults({
@@ -27,21 +26,14 @@ export function CombatResults({
   onGoBack: _onGoBack,
   unitType,
   onGrenadeCheckTarget,
-  rememberMarkAsDone = false,
-  setRememberMarkAsDone,
+  autoCompleteEnabled = true,
 }: CombatResultsProps) {
   const isShot = result.actionType === 'shot';
   const isGrenade = result.actionType === 'grenade';
   const isMelee = result.actionType === 'melee';
-  const [markAsDone, setMarkAsDone] = useState(rememberMarkAsDone);
+  // Auto-complete logic: mark as done if enabled and it's a squad (not a machine)
+  const markAsDone = autoCompleteEnabled && unitType === 'squad';
   const [grenadeTargetArmor, setGrenadeTargetArmor] = useState(2);
-
-  // Update local state when rememberMarkAsDone prop changes
-  useEffect(() => {
-    setMarkAsDone(rememberMarkAsDone);
-  }, [rememberMarkAsDone]);
-
-  const showMarkAsDone = unitType === 'squad';
 
   const getEffectiveDistance = () => {
     if (rulesVersion === 'community_star_system' && parameters.fortification !== 'none') {
@@ -621,27 +613,8 @@ export function CombatResults({
 
       {/* Action Buttons */}
       <div className="flex gap-3 pt-4">
-        {showMarkAsDone && (
-          <button
-            onClick={() => {
-              const newValue = !markAsDone;
-              setMarkAsDone(newValue);
-              setRememberMarkAsDone?.(newValue);
-            }}
-            className={cn(
-              "shrink-0 px-4 py-3 rounded-lg font-mono text-sm font-bold uppercase tracking-wider border-2 transition-all flex items-center justify-center gap-2 min-w-[110px]",
-              markAsDone
-                ? "bg-emerald-950/40 border-emerald-600/50 text-emerald-400"
-                : "bg-slate-800/60 border-slate-700 text-slate-500 hover:bg-slate-700/60"
-            )}
-          >
-            <CheckCircle2 className="w-4 h-4" />
-            <span>{markAsDone ? 'ГОТОВ' : 'ГОТОВ?'}</span>
-          </button>
-        )}
-
         <button
-          onClick={() => onApply(showMarkAsDone ? markAsDone : undefined)}
+          onClick={() => onApply(markAsDone || undefined)}
           className={cn(
             "flex-1 py-3 rounded-lg font-mono text-sm font-bold uppercase tracking-wider border-2 transition-all min-h-[52px]",
             (isShot || isGrenade) && result.hitResult?.success

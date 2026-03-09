@@ -37,6 +37,8 @@ interface ArmyBuilderProps {
   onDistanceInputUnitChange?: (value: 'steps' | 'cm') => void;
   stepToCmFactor?: '4' | '5';
   onStepToCmFactorChange?: (value: '4' | '5') => void;
+  autoCompleteEnabled?: boolean;
+  onAutoCompleteEnabledChange?: (enabled: boolean) => void;
 }
 
 export default function ArmyBuilder({
@@ -53,6 +55,8 @@ export default function ArmyBuilder({
   onDistanceInputUnitChange,
   stepToCmFactor = '5',
   onStepToCmFactorChange,
+  autoCompleteEnabled = true,
+  onAutoCompleteEnabledChange,
 }: ArmyBuilderProps) {
 
   // Panic enabled state - persisted in localStorage
@@ -178,6 +182,8 @@ export default function ArmyBuilder({
                     onDistanceInputUnitChange={onDistanceInputUnitChange}
                     stepToCmFactor={stepToCmFactor}
                     onStepToCmFactorChange={onStepToCmFactorChange}
+                    autoCompleteEnabled={autoCompleteEnabled}
+                    onAutoCompleteEnabledChange={onAutoCompleteEnabledChange}
                     onConfirm={() => {
                       setArmy({ ...army, currentStep: 'unit-select' });
                       setSetupStep('units');

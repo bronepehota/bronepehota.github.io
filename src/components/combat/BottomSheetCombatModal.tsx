@@ -23,8 +23,7 @@ interface BottomSheetCombatModalProps {
   onGrenadeCheckTarget?: (armor: number) => void; // For grenade blast checks
   grenadesAvailable?: boolean;
   unitDisplayName?: string;
-  rememberMarkAsDone?: boolean;
-  setRememberMarkAsDone?: (value: boolean) => void;
+  autoCompleteEnabled?: boolean;
   distanceInputUnit?: 'steps' | 'cm';
   stepToCmFactor?: number;
 }
@@ -81,8 +80,7 @@ export function BottomSheetCombatModal({
   onGrenadeCheckTarget,
   grenadesAvailable = true,
   unitDisplayName: _unitDisplayName,
-  rememberMarkAsDone = false,
-  setRememberMarkAsDone,
+  autoCompleteEnabled = true,
   distanceInputUnit = 'steps',
   stepToCmFactor = 5,
 }: BottomSheetCombatModalProps) {
@@ -342,8 +340,7 @@ export function BottomSheetCombatModal({
               onGoBack={onGoBack}
               unitType={state.unitType}
               onGrenadeCheckTarget={onGrenadeCheckTarget}
-              rememberMarkAsDone={rememberMarkAsDone}
-              setRememberMarkAsDone={setRememberMarkAsDone}
+              autoCompleteEnabled={autoCompleteEnabled}
             />
           )}
         </div>
