@@ -20,7 +20,6 @@ import { UnitCardHeader } from './unit-card/UnitCardHeader';
 import { SquadView } from './unit-card/SquadView';
 import { MachineView } from './unit-card/MachineView';
 import { useUnitCardState } from './unit-card/hooks/useUnitCardState';
-import { useMachineStats } from './unit-card/hooks/useMachineStats';
 
 interface UnitCardProps {
   unit: ArmyUnit;
@@ -344,7 +343,7 @@ export default function UnitCard({
 
     if (combatController.state.result && onCombatLogEntry) {
       const entry: CombatLogEntry = {
-        id: `${combatController.state.result.unitId}-${combatController.state.result.timestamp}-${Math.random().toString(36).substr(2, 9)}`,
+        id: `${combatController.state.result.unitId}-${combatController.state.result.timestamp}-${Math.random().toString(36).substring(2, 11)}`,
         timestamp: combatController.state.result.timestamp,
         result: combatController.state.result,
         applied: true,
