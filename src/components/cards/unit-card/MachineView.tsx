@@ -78,10 +78,10 @@ export function MachineView({
         <MachineAmmoPanel
           currentAmmo={unit.currentAmmo || 0}
           maxAmmo={machine.ammo_max}
-          shotsUsed={(unit as any).shotsUsed || 0}
+          shotsUsed={unit.machineShotsUsed || 0}
           fireRate={machine.fire_rate}
           weapons={machine.weapons}
-          weaponAmmo={(unit as any).weaponAmmo}
+          weaponAmmo={unit.weaponAmmo}
           onUpdateAmmo={updateAmmo}
           usePerWeaponAmmo={usePerWeaponAmmo}
         />
