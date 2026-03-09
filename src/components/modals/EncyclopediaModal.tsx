@@ -301,8 +301,11 @@ export function EncyclopediaModal({
           </section>
         </div>
 
-        {/* Footer - Close button only */}
+        {/* Footer - Notice and Close button */}
         <div className="sticky bottom-0 bg-military-dark/95 backdrop-blur-sm border-t border-military-rust/30 px-3 py-2 sm:px-4 sm:py-3 shrink-0">
+          <p className="text-[9px] text-military-steel/60 text-center mb-2 font-ibm-mono">
+            Весь лор для пехоты сгенерирован ИИ. Исправления и улучшения приветствуются.
+          </p>
           <button
             onClick={onClose}
             className="w-full px-4 py-3 border border-military-rust/30 font-mono text-sm hover:bg-military-steel/20 transition-colors rounded-sm min-h-[44px]"
