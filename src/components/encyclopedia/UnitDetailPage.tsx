@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { SoldierImages } from './UnitDetail/SoldierImages';
 import { MachineImages } from './UnitDetail/MachineImages';
 import PaintedExamples from './PaintedExamples';
+import { UnitLore } from './UnitDetail/UnitLore';
 
 interface UnitDetailPageProps {
   unit: UnitWithType;
@@ -252,68 +253,8 @@ export default function UnitDetailPage({ unit }: UnitDetailPageProps) {
               </div>
             </section>
 
-            {/* Lore section */}
-            {unit.encyclopedia?.lore && (
-              <section
-                className={cn(
-                  'folded-paper military-corners p-6',
-                  'fade-in-up opacity-0',
-                  isLoaded && 'opacity-100'
-                )}
-                style={{ animationFillMode: 'forwards', animationDelay: '0.5s' }}
-              >
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="font-ibm-mono text-[10px] text-military-rust/60 uppercase tracking-wider">
-                    DATA_LORE
-                  </span>
-                </div>
-                <p className="font-oswald text-military-sand leading-relaxed italic border-l-4 border-military-rust/60 pl-4">
-                  {unit.encyclopedia.lore}
-                </p>
-              </section>
-            )}
-
-            {/* Tactics section */}
-            {unit.encyclopedia?.tactics && (
-              <section
-                className={cn(
-                  'folded-paper military-corners p-6',
-                  'fade-in-up opacity-0',
-                  isLoaded && 'opacity-100'
-                )}
-                style={{ animationFillMode: 'forwards', animationDelay: '0.6s' }}
-              >
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="font-ibm-mono text-[10px] text-military-rust/60 uppercase tracking-wider">
-                    DATA_TACTICS
-                  </span>
-                </div>
-                <p className="font-oswald text-military-sand leading-relaxed">
-                  {unit.encyclopedia.tactics}
-                </p>
-              </section>
-            )}
-
-            {/* History section */}
-            {unit.encyclopedia?.history && (
-              <section
-                className={cn(
-                  'folded-paper military-corners p-6',
-                  'fade-in-up opacity-0',
-                  isLoaded && 'opacity-100'
-                )}
-                style={{ animationFillMode: 'forwards', animationDelay: '0.7s' }}
-              >
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="font-ibm-mono text-[10px] text-military-rust/60 uppercase tracking-wider">
-                    DATA_HISTORY
-                  </span>
-                </div>
-                <p className="font-oswald text-military-sand leading-relaxed">
-                  {unit.encyclopedia.history}
-                </p>
-              </section>
-            )}
+            {/* Lore, Traditions, Battles, Locations sections */}
+            <UnitLore unit={unit} />
 
             {/* Soldier Images section */}
             <section
