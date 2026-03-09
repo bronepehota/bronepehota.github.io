@@ -186,15 +186,6 @@ export default function UnitCard({
     combatController.startCombat(unit, undefined, weaponIndex, 'shot');
   };
 
-  // Handle closing combat modal for machines - apply result before closing
-  const handleCloseMachineCombat = () => {
-    // For machines, auto-apply result if in RESULTS phase
-    if (combatController.state.phase === 'RESULTS' && combatController.state.result) {
-      handleApplyResult();
-    }
-    combatController.cancelCombat();
-  };
-
   // Handle pilot assignment
   const handlePilotAssign = (pilotInfo: PilotInfo) => {
     if (onPilotAssign) {
@@ -241,7 +232,7 @@ export default function UnitCard({
     setPilotSurvivalTest(null);
   }, [unit.pilotInfo, unit.currentDurability, setPilotSurvivalTest]);
 
-  // Handle combat completion
+  // Handle combat completion - auto-apply grenades for squads
   useEffect(() => {
     if (combatController.state.phase === 'RESULTS' && combatController.state.result) {
       const result = combatController.state.result;
@@ -251,15 +242,54 @@ export default function UnitCard({
         return;
       }
 
-      // Update unit state based on combat result
-      if (result.actionType === 'shot' || result.actionType === 'grenade') {
-        // For grenades, mark as used immediately (no choice needed)
-        if (result.actionType === 'grenade' && result.unitType === 'squad') {
-          updateThisUnit((u) => ({ ...u, grenadesUsed: true }));
+      // Auto-apply grenades for squads (immediate effect, no choice)
+      if (result.actionType === 'grenade' && result.unitType === 'squad') {
+        updateThisUnit((u) => ({ ...u, grenadesUsed: true }));
+      }
+
+      // Mark this result as processed
+      lastProcessedResultRef.current = result.timestamp;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [combatController.state.phase, combatController.state.result]);
+
+  const handleApplyResult = (markAsDone?: boolean) => {
+    const result = combatController.state.result;
+
+    // Process the result for all unit types
+    if (result) {
+      // For squads: mark shot as used and optionally mark as done
+      if (isSquad && result.soldierIndex !== undefined) {
+        const soldierIdx = result.soldierIndex;
+        const newActions = [...(unit.actionsUsed || [])];
+
+        // Mark shot as used
+        if (result.actionType === 'shot') {
+          newActions[soldierIdx] = {
+            ...newActions[soldierIdx],
+            shot: true
+          };
+        } else if (result.actionType === 'melee') {
+          newActions[soldierIdx] = {
+            ...newActions[soldierIdx],
+            melee: true
+          };
         }
-        // For squads: don't auto-mark shot, let user choose via UI
-        // For machines: handle ammo/shot counting
-        if (result.unitType === 'machine') {
+
+        // Mark as done if checkbox was checked
+        if (markAsDone) {
+          newActions[soldierIdx] = {
+            ...newActions[soldierIdx],
+            done: true
+          };
+        }
+
+        updateThisUnit((u) => ({ ...u, actionsUsed: newActions }));
+      }
+
+      // For machines: handle ammo/shot counting
+      if (!isSquad && result.unitType === 'machine') {
+        if (result.actionType === 'shot' || result.actionType === 'grenade') {
           const weaponIndex = result.parameters.weaponIndex || 0;
           const weapon = (unit.data as Machine).weapons[weaponIndex];
           const isMeleeWeapon = weapon?.range === 'ББ';
@@ -269,6 +299,12 @@ export default function UnitCard({
             ...(unit.machineWeaponShots || {}),
             [weaponIndex]: (unit.machineWeaponShots?.[weaponIndex] || 0) + 1
           };
+
+          console.log('handleApplyResult: Updating machine shots', {
+            weaponIndex,
+            oldShots: unit.machineWeaponShots?.[weaponIndex] || 0,
+            newShots: newWeaponShots[weaponIndex]
+          });
 
           if (usePerWeaponAmmo && !isMeleeWeapon) {
             // Per-weapon ammo system (community_star_system): decrease weapon-specific ammo
@@ -298,61 +334,10 @@ export default function UnitCard({
               isMachineShot: true
             }));
           }
-        }
-      } else if (result.actionType === 'melee') {
-        if (result.unitType === 'squad' && result.soldierIndex !== undefined) {
-          const newActions = [...(unit.actionsUsed || [])];
-          newActions[result.soldierIndex] = {
-            ...newActions[result.soldierIndex],
-            melee: true
-          };
-          updateThisUnit((u) => ({ ...u, actionsUsed: newActions }));
-        } else if (result.unitType === 'machine') {
+        } else if (result.actionType === 'melee') {
           updateThisUnit((u) => ({ ...u, isMachineMelee: true }));
         }
       }
-
-      // Mark this result as processed
-      lastProcessedResultRef.current = result.timestamp;
-
-      // For machines, close combat after processing the result
-      if (!isSquad && combatController.state.phase === 'RESULTS') {
-        combatController.closeCombat();
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [combatController.state.phase, combatController.state.result, unit]);
-
-  const handleApplyResult = (markAsDone?: boolean) => {
-    const result = combatController.state.result;
-
-    // For squads: mark shot as used and optionally mark as done
-    if (isSquad && result?.soldierIndex !== undefined) {
-      const soldierIdx = result.soldierIndex;
-      const newActions = [...(unit.actionsUsed || [])];
-
-      // Mark shot as used
-      if (result.actionType === 'shot') {
-        newActions[soldierIdx] = {
-          ...newActions[soldierIdx],
-          shot: true
-        };
-      } else if (result.actionType === 'melee') {
-        newActions[soldierIdx] = {
-          ...newActions[soldierIdx],
-          melee: true
-        };
-      }
-
-      // Mark as done if checkbox was checked
-      if (markAsDone) {
-        newActions[soldierIdx] = {
-          ...newActions[soldierIdx],
-          done: true
-        };
-      }
-
-      updateThisUnit((u) => ({ ...u, actionsUsed: newActions }));
     }
 
     if (combatController.state.result && onCombatLogEntry) {
@@ -365,11 +350,8 @@ export default function UnitCard({
       onCombatLogEntry(entry);
     }
 
-    // For squads, close combat immediately (shot marking is handled above)
-    // For machines, the useEffect will process the result and close combat
-    if (isSquad) {
-      combatController.closeCombat();
-    }
+    // Close combat after processing
+    combatController.closeCombat();
   };
 
   const getSoldierImage = useCallback((idx: number) => {
@@ -449,7 +431,7 @@ export default function UnitCard({
           state={combatController.state}
           rulesVersion={rulesVersion}
           onGoBack={combatController.goBack}
-          onClose={isSquad ? combatController.cancelCombat : handleCloseMachineCombat}
+          onClose={combatController.cancelCombat}
           onSelectAction={combatController.selectAction}
           onSetParameters={combatController.setParameters}
           onExecuteAction={combatController.executeAction}
