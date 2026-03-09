@@ -372,7 +372,7 @@ describe('Machine Fire Rate Integration Tests', () => {
         fire_rate: 0
       };
 
-      let unit = createMockUnit({ data: machineZeroRate });
+      const unit = createMockUnit({ data: machineZeroRate });
 
       // Cannot shoot with fire_rate of 0
       const canShoot = (unit.machineShotsUsed || 0) < machineZeroRate.fire_rate;

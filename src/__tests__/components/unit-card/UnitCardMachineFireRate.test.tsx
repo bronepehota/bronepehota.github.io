@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import UnitCard from '@/components/cards/UnitCard';
 import { ArmyUnit, Machine, PilotInfo } from '@/lib/types';
 import { CombatResult } from '@/lib/combat-types';
@@ -107,7 +107,7 @@ describe('UnitCard - Machine Weapon Fire Rate', () => {
       );
 
       // Simulate shot being applied (this would normally be done via combat modal)
-      const mockResult: CombatResult = {
+      const _mockResult: CombatResult = {
         timestamp: Date.now(),
         unitId: unit.instanceId,
         unitName: unit.data.name,
@@ -370,7 +370,6 @@ describe('UnitCard - Machine Weapon Fire Rate', () => {
         weaponAmmo: [10, 20, 0]
       });
 
-      const usePerWeaponAmmo = true;
       const weaponIndex = 0;
 
       // Fire weapon 0
@@ -397,7 +396,6 @@ describe('UnitCard - Machine Weapon Fire Rate', () => {
         weaponAmmo: [10, 20, 0]
       });
 
-      const usePerWeaponAmmo = true;
       const weaponIndex = 2; // Melee weapon
       const isMeleeWeapon = true;
 
