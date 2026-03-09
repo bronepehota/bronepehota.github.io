@@ -1,4 +1,4 @@
-import { Target, Info, Sword, Flame } from 'lucide-react';
+import { Target, Sword, Flame } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatRange } from '@/lib/distance-utils';
 import { Weapon } from '@/lib/types';
@@ -8,7 +8,6 @@ interface MachineWeaponsListProps {
   weaponShots: Record<number, number>;
   onWeaponAttack: (weaponIndex: number) => void;
   onWeaponInfo: (weaponIndex: number) => void;
-  distanceInputUnit: 'steps' | 'cm';
   stepToCmFactor: number;
 }
 
@@ -22,7 +21,6 @@ export function MachineWeaponsList({
   weaponShots,
   onWeaponAttack,
   onWeaponInfo,
-  distanceInputUnit,
   stepToCmFactor
 }: MachineWeaponsListProps) {
   // Helper to check if weapon is non-ranged (melee/special)
@@ -48,7 +46,6 @@ export function MachineWeaponsList({
       {/* Ranged Weapons - Full cards */}
       {rangedWeapons.map(({ weapon, originalIndex: weaponIdx }) => {
         const shots = weaponShots[weaponIdx] || 0;
-        const isMeleeWeapon = weapon.range === 'ББ';
 
         return (
           <div
