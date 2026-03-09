@@ -94,4 +94,33 @@ describe('MachineAmmoPanel', () => {
     // Total ammo: 10 + 5 = 15, Max: 20 + 20 = 40 (weapons don't have ammo property, so uses maxAmmo)
     expect(screen.getByText(/15.*40/)).toBeInTheDocument();
   });
+
+  describe('empty state', () => {
+    it('shows empty state when ammo is 0', () => {
+      const { container } = render(
+        <MachineAmmoPanel {...defaultProps} currentAmmo={0} maxAmmo={20} usePerWeaponAmmo={false} />
+      );
+
+      // Check that no blue segments are rendered (all segments should be gray)
+      const blueSegments = container.querySelectorAll('.bg-blue-500');
+      expect(blueSegments.length).toBe(0);
+    });
+
+    it('disables decrement button when at 0 ammo', () => {
+      render(
+        <MachineAmmoPanel {...defaultProps} currentAmmo={0} maxAmmo={20} usePerWeaponAmmo={false} />
+      );
+
+      const decrementButton = screen.getByTitle('Уменьшить боезапас');
+      expect(decrementButton).toBeDisabled();
+    });
+  });
+
+  it('shows correct shots when maxed out', () => {
+    render(<MachineAmmoPanel {...defaultProps} shotsUsed={99} />);
+
+    // Should display 99 shots used
+    const shotsText = screen.getByText(/99/);
+    expect(shotsText).toBeInTheDocument();
+  });
 });
