@@ -1,0 +1,1238 @@
+'use client';
+
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { GitHubPagesImage as Image } from '../GitHubPagesImage';
+import { ArmyUnit, Squad, Machine, RulesVersionID, Weapon, PanicTestResult } from '@/lib/types';
+import { Shield, Sword, Target, CheckCircle2, Bomb, UserX, Plane, Skull, Wrench, Flame, Crosshair, X, Image as ImageIcon, Footprints } from 'lucide-react';
+import SoldierCard from './SoldierCard';
+import { formatUnitNumber } from '@/lib/unit-utils';
+import { getDefaultRulesVersion } from '@/lib/rules-registry';
+import { cn } from '@/lib/utils';
+import { formatRange } from '@/lib/distance-utils';
+import { BottomSheetCombatModal } from '../combat/BottomSheetCombatModal';
+import { useCombatFlowController } from '../combat/CombatFlowController';
+import { CombatLogEntry } from '@/lib/combat-types';
+import { PilotAssignmentModal } from '../modals/PilotAssignmentModal';
+import { PilotInfo } from '@/lib/types';
+import { PilotTestModal } from '../combat/PilotTestModal';
+import { usePilotTestFlow } from '@/hooks/usePilotTestFlow';
+import { EncyclopediaModal } from '../modals/EncyclopediaModal';
+import { PanicTestModal } from '../modals/PanicTestModal';
+import { UnitWithType } from '@/lib/encyclopedia-utils';
+
+interface UnitCardProps {
+  unit: ArmyUnit;
+  updateUnit: (instanceId: string, updateFn: (currentUnit: ArmyUnit) => ArmyUnit) => void;
+  combatLog?: CombatLogEntry[];
+  onCombatLogEntry?: (entry: CombatLogEntry) => void;
+  allUnits?: ArmyUnit[]; // All units in the army for pilot assignment
+  onPilotAssign?: (machineInstanceId: string, pilotInfo: PilotInfo) => void;
+  onPilotRemove?: (machineInstanceId: string) => void;
+  onNavigateToUnit?: (unitInstanceId: string) => void; // Navigate to unit card
+  strictPilotRankEnabled?: boolean;
+  distanceInputUnit?: 'steps' | 'cm';
+  stepToCmFactor?: number;
+  autoCompleteEnabled?: boolean;
+}
+
+export default function UnitCard({
+  unit,
+  updateUnit,
+  combatLog: _combatLog = [],
+  onCombatLogEntry,
+  allUnits = [],
+  onPilotAssign,
+  onPilotRemove,
+  onNavigateToUnit: _onNavigateToUnit,
+  strictPilotRankEnabled = true,
+  distanceInputUnit = 'steps',
+  stepToCmFactor = 5,
+  autoCompleteEnabled = true,
+}: UnitCardProps) {
+  const [showImage, setShowImage] = useState(false);
+  const [showSoldierImage, setShowSoldierImage] = useState<number | null>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [rulesVersion, setRulesVersion] = useState<RulesVersionID>(getDefaultRulesVersion());
+  const [showPilotModal, setShowPilotModal] = useState(false);
+  const [pilotSurvivalTest, setPilotSurvivalTest] = useState<{ roll: number; survived: boolean; testedAt: number } | null>(null);
+  const [selectedWeaponInfo, setSelectedWeaponInfo] = useState<{ weapon: Weapon; weaponIdx: number } | null>(null);
+  const [showPanicModal, setShowPanicModal] = useState(false);
+
+  const combatController = useCombatFlowController();
+  const pilotTestFlow = usePilotTestFlow();
+  // Track last processed result to prevent duplicate processing
+  const lastProcessedResultRef = useRef<number | null>(null);
+
+  // Load rules version from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('bronepehota_rules_version');
+    if (saved) {
+      setRulesVersion(saved as any);
+    }
+  }, []);
+
+  // Check if per-weapon ammo system should be used (only for community_star_system rules)
+  const usePerWeaponAmmo = rulesVersion === 'community_star_system';
+
+  const isSquad = unit.type === 'squad';
+  const data = unit.data;
+
+  // Helper to wrap the new updateUnit API for backward-compatible calls within UnitCard
+  const updateThisUnit = (updateFn: (currentUnit: ArmyUnit) => ArmyUnit) => {
+    updateUnit(unit.instanceId, updateFn);
+  };
+
+  const isSquadDone = isSquad && (data as Squad).soldiers.every((_, idx) => {
+    const isDead = unit.deadSoldiers?.includes(idx);
+    const isDone = unit.actionsUsed?.[idx]?.done;
+    return isDead || isDone;
+  });
+
+  const isAllDead = isSquad && unit.deadSoldiers?.length === (data as Squad).soldiers.length;
+  const isMachineDestroyed = !isSquad && (unit.currentDurability === 0);
+  const isMachineDone = !isSquad && (unit.isMachineDone || isMachineDestroyed);
+
+  const handlePanicTestComplete = (results: PanicTestResult[]) => {
+    const currentTurn = 1; // Default turn (will be updated when turn tracking is implemented)
+    const panicStates = results
+      .filter(r => r.isPanic)
+      .map(r => ({
+        soldierIndex: r.soldierIndex,
+        testRoll: r.roll,
+        rank: r.rank,
+        triggeredAtTurn: currentTurn,
+      }));
+
+    if (panicStates.length > 0) {
+      updateThisUnit((u) => ({ ...u, panicState: panicStates }));
+    }
+  };
+
+  const updateMachineStat = (stat: 'durability' | 'ammo', delta: number) => {
+    const max = stat === 'durability' ? (data as Machine).durability_max : (data as Machine).ammo_max;
+    const current = stat === 'durability' ? unit.currentDurability! : unit.currentAmmo!;
+    const newVal = Math.max(0, Math.min(max, current + delta));
+
+    if (stat === 'durability' && newVal === 0) {
+      updateThisUnit((u) => ({ ...u, currentDurability: 0, isMachineDone: true }));
+    } else {
+      updateThisUnit((u) => ({ ...u, [stat === 'durability' ? 'currentDurability' : 'currentAmmo']: newVal }));
+    }
+  };
+
+  const getMachineSpeed = () => {
+    if (!unit.currentDurability) return 0;
+    const m = data as Machine;
+    const sector = m.speed_sectors.find(s => unit.currentDurability! >= s.min_durability && unit.currentDurability! <= s.max_durability);
+    return sector ? sector.speed : 0;
+  };
+
+  const getDurabilityZone = () => {
+    const m = data as Machine;
+    const current = unit.currentDurability || 0;
+    const max = m.durability_max;
+
+    // Check if custom zones are defined
+    if (m.durabilityZones && m.durabilityZones.length > 0) {
+      const zone = m.durabilityZones.find(zone => current > zone.max) || m.durabilityZones[m.durabilityZones.length - 1];
+      // For green zone, use durability_max as the displayed value
+      if (zone.color === 'green') {
+        return { ...zone, max };
+      }
+      return zone;
+    }
+
+    // Default zones calculation (2/3 and 1/3)
+    const greenThreshold = Math.ceil(max * 2 / 3);
+    const yellowThreshold = Math.ceil(max / 3);
+
+    if (current > greenThreshold) return { max, color: 'green' as const, damagePerDie: { D6: 1, D12: 2, D20: 3 } };
+    if (current > yellowThreshold) return { max: greenThreshold, color: 'yellow' as const, damagePerDie: { D6: 1, D12: 2, D20: 3 } };
+    return { max: yellowThreshold, color: 'red' as const, damagePerDie: { D6: 1, D12: 2, D20: 3 } };
+  };
+
+  const getZoneColor = (color: 'green' | 'yellow' | 'red') => {
+    const colors = {
+      green: { bar: 'bg-green-500', text: 'text-green-400' },
+      yellow: { bar: 'bg-yellow-500', text: 'text-yellow-400' },
+      red: { bar: 'bg-red-500', text: 'text-red-400' }
+    };
+    return colors[color];
+  };
+
+  const handleOpenOriginal = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    // For machines, show details modal
+    // For squads, open external URL or show image
+    if (!isSquad) {
+      setShowDetailsModal(true);
+    } else if (data.originalUrl) {
+      window.open(data.originalUrl, '_blank');
+    } else {
+      setShowImage(true);
+    }
+  };
+
+  // Handle combat actions
+  const _handleSoldierAction = useCallback((soldierIndex: number) => {
+    combatController.startCombat(unit, soldierIndex);
+  }, [unit, combatController]);
+
+  const handleVehicleAttack = (weaponIndex: number) => {
+    combatController.startCombat(unit, undefined, weaponIndex, 'shot');
+  };
+
+  // Handle pilot assignment
+  const handlePilotAssign = (pilotInfo: PilotInfo) => {
+    if (onPilotAssign) {
+      onPilotAssign(unit.instanceId, pilotInfo);
+    }
+  };
+
+  const handlePilotRemove = () => {
+    if (onPilotRemove) {
+      onPilotRemove(unit.instanceId);
+    }
+  };
+
+  // Handle pilot survival test - start the modal flow
+  const handlePilotSurvivalTest = () => {
+    if (!unit.pilotInfo || !unit.pilotInfo.alive) return;
+
+    const machineArmor = unit.currentDurability || (unit.data as Machine).durability_max;
+    const pilotArmor = unit.pilotInfo.pilotArmor || 0;
+
+    pilotTestFlow.startTest(machineArmor, pilotArmor, (armorRoll, survivalRoll, survived) => {
+      // Store the result
+      setPilotSurvivalTest({
+        roll: survivalRoll ?? armorRoll,
+        survived,
+        testedAt: Date.now()
+      });
+
+      // Update pilot state if died
+      if (!survived && unit.pilotInfo) {
+        const updatedPilotInfo: PilotInfo = {
+          squadInstanceId: unit.pilotInfo.squadInstanceId || '',
+          soldierIndex: unit.pilotInfo.soldierIndex || 0,
+          pilotArmor: unit.pilotInfo.pilotArmor || 0,
+          alive: false
+        };
+        updateThisUnit((u) => ({ ...u, pilotInfo: updatedPilotInfo }));
+      }
+    });
+  };
+
+  // Reset survival test when pilot changes or durability increases
+  useEffect(() => {
+    setPilotSurvivalTest(null);
+  }, [unit.pilotInfo, unit.currentDurability]);
+
+  // Handle combat completion
+  useEffect(() => {
+    if (combatController.state.phase === 'RESULTS' && combatController.state.result) {
+      const result = combatController.state.result;
+
+      // Skip if we've already processed this result
+      if (lastProcessedResultRef.current === result.timestamp) {
+        return;
+      }
+
+      // Update unit state based on combat result
+      if (result.actionType === 'shot' || result.actionType === 'grenade') {
+        // For grenades, mark as used immediately (no choice needed)
+        if (result.actionType === 'grenade' && result.unitType === 'squad') {
+          updateThisUnit((u) => ({ ...u, grenadesUsed: true }));
+        }
+        // For squads: don't auto-mark shot, let user choose via UI
+        // For machines: handle ammo/shot counting
+        if (result.unitType === 'machine') {
+          const weaponIndex = result.parameters.weaponIndex || 0;
+          const weapon = (unit.data as Machine).weapons[weaponIndex];
+          const isMeleeWeapon = weapon?.range === 'ББ';
+
+          const newShotsUsed = (unit.machineShotsUsed || 0) + 1;
+          const newWeaponShots = {
+            ...(unit.machineWeaponShots || {}),
+            [weaponIndex]: (unit.machineWeaponShots?.[weaponIndex] || 0) + 1
+          };
+
+          if (usePerWeaponAmmo && !isMeleeWeapon) {
+            // Per-weapon ammo system (community_star_system): decrease weapon-specific ammo
+            const newWeaponAmmo = [...(unit.weaponAmmo || [])];
+            newWeaponAmmo[weaponIndex] = Math.max(0, (newWeaponAmmo[weaponIndex] || 0) - 1);
+
+            updateThisUnit((u) => ({
+              ...u,
+              weaponAmmo: newWeaponAmmo,
+              // Also update global ammo for display compatibility
+              currentAmmo: Math.max(0, (u.currentAmmo || 0) - 1),
+              machineShotsUsed: newShotsUsed,
+              machineWeaponShots: newWeaponShots,
+              isMachineShot: true
+            }));
+          } else {
+            // Original behavior for tehnolog or melee weapons
+            const newAmmo = isMeleeWeapon
+              ? (unit.currentAmmo || 0)  // Не списываем для ББ
+              : Math.max(0, (unit.currentAmmo || 0) - 1);
+
+            updateThisUnit((u) => ({
+              ...u,
+              currentAmmo: newAmmo,
+              machineShotsUsed: newShotsUsed,
+              machineWeaponShots: newWeaponShots,
+              isMachineShot: true
+            }));
+          }
+        }
+      } else if (result.actionType === 'melee') {
+        if (result.unitType === 'squad' && result.soldierIndex !== undefined) {
+          const newActions = [...(unit.actionsUsed || [])];
+          newActions[result.soldierIndex] = {
+            ...newActions[result.soldierIndex],
+            melee: true
+          };
+          updateThisUnit((u) => ({ ...u, actionsUsed: newActions }));
+        } else if (result.unitType === 'machine') {
+          updateThisUnit((u) => ({ ...u, isMachineMelee: true }));
+        }
+      }
+
+      // Mark this result as processed
+      lastProcessedResultRef.current = result.timestamp;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [combatController.state.phase, combatController.state.result, unit]);
+
+  const handleApplyResult = (markAsDone?: boolean) => {
+    const result = combatController.state.result;
+
+    // For squads: mark shot as used and optionally mark as done
+    if (isSquad && result?.soldierIndex !== undefined) {
+      const soldierIdx = result.soldierIndex;
+      const newActions = [...(unit.actionsUsed || [])];
+
+      // Mark shot as used
+      if (result.actionType === 'shot') {
+        newActions[soldierIdx] = {
+          ...newActions[soldierIdx],
+          shot: true
+        };
+      } else if (result.actionType === 'melee') {
+        newActions[soldierIdx] = {
+          ...newActions[soldierIdx],
+          melee: true
+        };
+      }
+
+      // Mark as done if checkbox was checked
+      if (markAsDone) {
+        newActions[soldierIdx] = {
+          ...newActions[soldierIdx],
+          done: true
+        };
+      }
+
+      updateThisUnit((u) => ({ ...u, actionsUsed: newActions }));
+    }
+
+    if (combatController.state.result && onCombatLogEntry) {
+      const entry: CombatLogEntry = {
+        id: `${combatController.state.result.unitId}-${combatController.state.result.timestamp}-${Math.random().toString(36).substr(2, 9)}`,
+        timestamp: combatController.state.result.timestamp,
+        result: combatController.state.result,
+        applied: true,
+      };
+      onCombatLogEntry(entry);
+    }
+    combatController.closeCombat();
+  };
+
+  const getSoldierImage = useCallback((idx: number) => {
+    if (!isSquad) return '/images/soldiers/empty.png';
+    const soldier = (data as Squad).soldiers[idx];
+    if (soldier.image) {
+      return soldier.image;
+    }
+    return '/images/soldiers/empty.png';
+  }, [isSquad, data]);
+
+  const getPilotImage = (): string | null => {
+    if (!unit.pilotInfo) return null;
+    const squad = allUnits.find(u => u.instanceId === unit.pilotInfo?.squadInstanceId);
+    if (!squad || squad.type !== 'squad') return null;
+    const soldier = (squad.data as Squad).soldiers[unit.pilotInfo.soldierIndex];
+    return soldier.image || null;
+  };
+
+  // Helper to get selected weapons for a machine
+  // Returns all weapons if selectedWeaponIndices is undefined (backward compatibility)
+  // Returns filtered weapons based on indices if provided
+  const getSelectedWeapons = (): Array<{ weapon: Weapon; originalIndex: number }> => {
+    if (isSquad) return [];
+    const machine = unit.data as Machine;
+    if (!unit.selectedWeaponIndices) {
+      // All weapons for backward compat
+      return machine.weapons.map((weapon, i) => ({ weapon, originalIndex: i }));
+    }
+    // Return only selected weapons with their original indices
+    return unit.selectedWeaponIndices.map(i => ({
+      weapon: machine.weapons[i],
+      originalIndex: i
+    }));
+  };
+
+  const machineImage = !isSquad ? (unit.data as Machine).image : null;
+
+  // Faction border color for tech corners
+  const factionBorderColor = data.faction === 'polaris'
+    ? 'rgba(220, 38, 38, 0.6)'
+    : data.faction === 'protectorate'
+    ? 'rgba(8, 145, 178, 0.6)'
+    : 'rgba(202, 138, 4, 0.6)';
+
+  return (
+    <div
+      onDoubleClick={handleOpenOriginal}
+      className={cn(
+        "bg-slate-900/80 rounded-sm border-2 border-slate-800 transition-all shadow-lg overflow-hidden relative cursor-default select-none",
+        (isSquadDone || (isMachineDone && !isMachineDestroyed)) ? "opacity-70 grayscale-[0.3]" : "",
+        isAllDead || isMachineDestroyed ? "opacity-40 grayscale" : "",
+        data.faction === 'polaris' ? "border-red-600/30" : data.faction === 'protectorate' ? "border-cyan-600/30" : "border-yellow-600/30"
+      )}
+    >
+      {/* Unit number badge - top left corner */}
+      {unit.instanceNumber && (
+        <div className={cn(
+          "absolute top-0 left-0 z-20 px-1.5 py-0.5 rounded-br-sm font-mono font-bold text-xs md:text-sm border border-r-2 border-b-2 pointer-events-none",
+          data.faction === 'polaris'
+            ? "bg-red-950/90 text-red-400 border-red-600/40"
+            : data.faction === 'protectorate'
+            ? "bg-cyan-950/90 text-cyan-400 border-cyan-600/40"
+            : "bg-yellow-950/90 text-yellow-400 border-yellow-600/40"
+        )}>
+          {formatUnitNumber(unit)}
+        </div>
+      )}
+
+      {/* Tech corners - faction colored */}
+      <div className="absolute top-0 left-0 w-3 h-3 border-l-2 border-t-2 -ml-px -mt-px pointer-events-none" style={{ borderColor: factionBorderColor }} />
+      <div className="absolute top-0 right-0 w-3 h-3 border-r-2 border-t-2 -mr-px -mt-px pointer-events-none" style={{ borderColor: factionBorderColor }} />
+      <div className="absolute bottom-0 left-0 w-3 h-3 border-l-2 border-b-2 -ml-px -mb-px pointer-events-none" style={{ borderColor: factionBorderColor }} />
+      <div className="absolute bottom-0 right-0 w-3 h-3 border-r-2 border-b-2 -mr-px -mb-px pointer-events-none" style={{ borderColor: factionBorderColor }} />
+
+      {/* Combat Modal */}
+      {combatController.isOpen && (
+        <BottomSheetCombatModal
+          state={combatController.state}
+          rulesVersion={rulesVersion}
+          onGoBack={combatController.goBack}
+          onClose={combatController.cancelCombat}
+          onSelectAction={combatController.selectAction}
+          onSetParameters={combatController.setParameters}
+          onExecuteAction={combatController.executeAction}
+          onApplyResult={handleApplyResult}
+          onGrenadeCheckTarget={combatController.checkGrenadeTarget}
+          grenadesAvailable={isSquad && !unit.grenadesUsed}
+          unitDisplayName={`${formatUnitNumber(unit)} - ${data.name}`}
+          autoCompleteEnabled={autoCompleteEnabled}
+          distanceInputUnit={distanceInputUnit}
+          stepToCmFactor={stepToCmFactor}
+        />
+      )}
+
+      {/* Pilot Assignment Modal */}
+      {!isSquad && showPilotModal && (
+        <PilotAssignmentModal
+          isOpen={showPilotModal}
+          onClose={() => setShowPilotModal(false)}
+          machine={unit as ArmyUnit & { data: Machine }}
+          allUnits={allUnits}
+          onAssignPilot={handlePilotAssign}
+          onRemovePilot={handlePilotRemove}
+          strictPilotRankEnabled={strictPilotRankEnabled}
+        />
+      )}
+
+      {/* Pilot Test Modal */}
+      {pilotTestFlow.isOpen && (
+        <PilotTestModal
+          isOpen={pilotTestFlow.isOpen}
+          state={pilotTestFlow.state}
+          onClose={pilotTestFlow.closeTest}
+          onApply={pilotTestFlow.onApply}
+        />
+      )}
+
+      {/* Machine Blueprint Modal */}
+      {showDetailsModal && !isSquad && (
+        <EncyclopediaModal
+          unit={{ ...data, type: 'machine' } as UnitWithType}
+          isOpen={showDetailsModal}
+          onClose={() => setShowDetailsModal(false)}
+          scrollTarget="machine-images"
+        />
+      )}
+
+      {/* Panic Test Modal */}
+      {showPanicModal && (
+        <PanicTestModal
+          isOpen={showPanicModal}
+          unit={unit}
+          rulesVersion={rulesVersion}
+          onTestComplete={handlePanicTestComplete}
+          onClose={() => setShowPanicModal(false)}
+        />
+      )}
+
+      {/* Weapon Info Modal */}
+      {selectedWeaponInfo && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-[200] flex items-center justify-center p-4"
+          onClick={() => setSelectedWeaponInfo(null)}
+        >
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-black/50" onClick={() => setSelectedWeaponInfo(null)} aria-hidden="true" />
+
+          {/* Modal */}
+          <div
+            className="relative bg-slate-900 rounded-2xl p-6 max-w-md w-full shadow-2xl border border-slate-700"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Crosshair className="w-5 h-5 text-blue-400" />
+                <h2 className="text-xl font-semibold">Информация об оружии</h2>
+              </div>
+              <button
+                onClick={() => setSelectedWeaponInfo(null)}
+                className="p-2 hover:bg-slate-700 rounded-full transition-colors"
+                aria-label="Закрыть"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="space-y-4">
+              {/* Weapon Name */}
+              <div>
+                <h3 className="font-mono font-bold text-lg text-white">{selectedWeaponInfo.weapon.name}</h3>
+              </div>
+
+              {/* Stats Grid */}
+              <div className="grid grid-cols-2 gap-3">
+                {/* Range */}
+                <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700">
+                  <div className="text-[10px] font-mono opacity-50 uppercase mb-1">Дальность</div>
+                  <div className="font-mono font-bold text-amber-400">
+                    <div className="text-lg">{selectedWeaponInfo.weapon.range}</div>
+                    <div className="text-sm opacity-80">{formatRange(selectedWeaponInfo.weapon.range, 'cm', stepToCmFactor)}</div>
+                  </div>
+                </div>
+
+                {/* Power */}
+                <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700">
+                  <div className="text-[10px] font-mono opacity-50 uppercase mb-1">Мощность</div>
+                  <div className="text-lg font-mono font-bold text-red-400">{selectedWeaponInfo.weapon.power}</div>
+                </div>
+              </div>
+
+              {/* Special Rules */}
+              {selectedWeaponInfo.weapon.special && (
+                <div className="bg-purple-950/20 rounded-lg p-3 border border-purple-700/30">
+                  <div className="text-[10px] font-mono opacity-50 uppercase mb-1">Особые правила</div>
+                  <div className="text-sm font-mono text-purple-300">
+                    {typeof selectedWeaponInfo.weapon.special === 'string'
+                      ? selectedWeaponInfo.weapon.special
+                      : 'Особый'}
+                  </div>
+                </div>
+              )}
+
+              {/* Weapon Type */}
+              <div className="text-xs font-mono opacity-40 uppercase">
+                {selectedWeaponInfo.weapon.range === 'ББ' ? 'Ближний бой' : 'Дальнобойное оружие'}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Image Overlay - Fixed to viewport */}
+      {showImage && data.image && (
+        <div
+          className="fixed inset-0 z-[100] bg-slate-950 flex flex-col p-2 animate-in fade-in duration-200"
+          onClick={() => setShowImage(false)}
+        >
+          <div className="flex justify-between items-center mb-1 px-2 shrink-0">
+            <span className="text-[10px] font-bold opacity-50 uppercase tracking-widest truncate max-w-[70%]">{data.name}</span>
+            <button className="text-[10px] bg-slate-800 px-2 py-1 rounded font-mono shrink-0">X</button>
+          </div>
+          <div className="flex-1 min-h-0 overflow-hidden rounded border border-slate-700 flex items-center justify-center bg-slate-900">
+            <Image src={data.image} alt={data.name} width={400} height={300} className="max-w-full max-h-full object-contain" unoptimized />
+          </div>
+          <p className="text-[9px] text-center opacity-40 mt-1 shrink-0">Нажмите, чтобы закрыть</p>
+        </div>
+      )}
+
+      {/* Soldier Image Overlay - Fixed to viewport */}
+      {showSoldierImage !== null && (
+        <div
+          className="fixed inset-0 z-[100] bg-slate-950 flex flex-col p-2 animate-in fade-in duration-200"
+          onClick={() => setShowSoldierImage(null)}
+        >
+          <div className="flex justify-between items-center mb-1 px-2 shrink-0">
+            <span className="text-[10px] font-bold opacity-50 uppercase tracking-widest truncate max-w-[70%]">
+              {data.name} - СОЛДАТ {showSoldierImage + 1}
+            </span>
+            <button className="text-[10px] bg-slate-800 px-2 py-1 rounded font-mono shrink-0">X</button>
+          </div>
+          <div className="flex-1 min-h-0 overflow-hidden rounded border border-slate-700 flex items-center justify-center bg-slate-900">
+            <Image
+              src={getSoldierImage(showSoldierImage)}
+              alt={`Солдат ${showSoldierImage + 1}`}
+              width={300}
+              height={400}
+              className="max-w-full max-h-full object-contain"
+              unoptimized
+            />
+          </div>
+          <p className="text-[9px] text-center opacity-40 mt-1 shrink-0">Нажмите, чтобы закрыть</p>
+        </div>
+      )}
+
+      {/* Unit Header - Tactical Style */}
+      <div
+        className={cn(
+          "p-2 md:p-3 flex justify-between items-center relative z-10 border-b border-slate-800/50",
+          data.faction === 'polaris' ? "bg-red-950/20" : data.faction === 'protectorate' ? "bg-cyan-950/20" : "bg-yellow-950/20"
+        )}
+      >
+        {/* Tech decoration - top line */}
+        <div className={cn(
+          "absolute top-0 left-0 right-0 h-px",
+          data.faction === 'polaris' ? "bg-red-600/20" : data.faction === 'protectorate' ? "bg-cyan-600/20" : "bg-yellow-600/20"
+        )} />
+
+        <div className={cn("flex-1 min-w-0", unit.instanceNumber && "pl-9 md:pl-11")}>
+          {/* Row 1: Name + Done badge */}
+          <div className="flex items-center gap-1 md:gap-2 min-w-0">
+            <h3 className="min-w-0 flex-1 font-mono font-bold text-xs md:text-sm uppercase tracking-wide truncate" title={data.name}>{data.name}</h3>
+            {((isSquadDone && !isAllDead) || (isMachineDone && !isMachineDestroyed)) && (
+              <span className="shrink-0 text-emerald-400">
+                <CheckCircle2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
+              </span>
+            )}
+          </div>
+
+          {/* Row 2: Status badges */}
+          <div className="flex items-center gap-1 mt-0.5">
+            {/* Cost */}
+            <span className="text-[10px] md:text-xs font-mono font-bold text-slate-500">{data.cost} очк</span>
+
+            {/* Grenade status - squads only */}
+            {isSquad && !isAllDead && (
+              <div className={cn(
+                "flex items-center justify-center w-4 h-4 md:w-5 md:h-5 rounded-sm border",
+                unit.grenadesUsed
+                  ? "bg-red-950/40 text-red-400 border-red-700/50"
+                  : "bg-emerald-950/40 text-emerald-400 border-emerald-700/50"
+              )}>
+                <Bomb className="w-2 h-2 md:w-2.5 md:h-2.5 shrink-0" />
+              </div>
+            )}
+
+            {/* All Dead badge */}
+            {isAllDead && (
+              <div className="bg-red-950/50 text-red-400 border border-red-700/70 px-1 py-0.5 rounded-sm text-[8px] md:text-[9px] font-mono font-black uppercase flex items-center gap-0.5">
+                <UserX className="w-2 h-2 md:w-2.5 md:h-2.5 shrink-0" />
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="flex gap-0.5 md:gap-1" onClick={e => e.stopPropagation()}>
+          {/* Machine Photo Button - Mobile only */}
+          {!isSquad && (
+            <button
+              onClick={() => setShowImage(true)}
+              className="p-1.5 md:p-1 hover:bg-white/10 rounded-sm transition-colors min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border border-slate-700/50 md:hidden"
+              title="Показать фото"
+              aria-label="Показать фото машины"
+            >
+              <ImageIcon className="w-4 h-4 opacity-50" />
+            </button>
+          )}
+          <button
+            onClick={() => {
+              if (isSquad) {
+                // Toggle: mark all alive soldiers as done or undo
+                const targetState = !isSquadDone;
+                const newActions = (unit.actionsUsed || Array((data as Squad).soldiers.length).fill({ moved: false, shot: false, melee: false, done: false }))
+                  .map((action, idx) => {
+                    const isDead = unit.deadSoldiers?.includes(idx);
+                    if (isDead) return action;
+                    return { ...action, done: targetState };
+                  });
+                updateThisUnit((u) => ({ ...u, actionsUsed: newActions }));
+              } else {
+                // Toggle: mark machine as done or undo
+                updateThisUnit((u) => ({ ...u, isMachineDone: !isMachineDone }));
+              }
+            }}
+            className="p-1.5 md:p-1 hover:bg-white/10 rounded-sm transition-colors min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border border-slate-700/50"
+            title={isSquad ? (isSquadDone ? "Отменить завершение хода" : "Завершить ход всех бойцов") : (isMachineDone ? "Отменить" : "Завершить ход машины")}
+          >
+            {(isSquadDone || isMachineDone) ? (
+              <X className="w-4 h-4 opacity-50 text-slate-400" />
+            ) : (
+              <CheckCircle2 className="w-4 h-4 opacity-50" />
+            )}
+          </button>
+        </div>
+      </div>
+
+      <div className="p-2 md:p-3 relative z-10">
+          {isSquad ? (
+            <div className="grid grid-cols-1 gap-1.5 md:gap-2">
+              {(data as Squad).soldiers.map((s, idx) => (
+                <SoldierCard
+                  key={`soldier-${unit.instanceId}-${idx}-${s.num}`}
+                  squad={data as Squad}
+                  unit={unit}
+                  soldierIndex={idx}
+                  allUnits={allUnits}
+                  rulesVersion={rulesVersion}
+                  updateUnit={updateUnit}
+                  onSoldierAction={_handleSoldierAction}
+                  setShowSoldierImage={setShowSoldierImage}
+                  setShowPanicModal={setShowPanicModal}
+                  getSoldierImage={getSoldierImage}
+                  distanceInputUnit={distanceInputUnit}
+                  stepToCmFactor={stepToCmFactor}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {/* Machine Stats Header - Tech Layout */}
+              <div className="grid grid-cols-[1fr_auto] gap-2">
+                {/* === ROW 1: Durability+Speed | PILOT (spans 2 rows) === */}
+                {/* Durability + Speed Combined - Tactical Display */}
+                <div className="relative bg-slate-900/60 p-2 rounded-sm">
+                  {/* Tech corners */}
+                  <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-slate-600/50" />
+                  <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-slate-600/50" />
+
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-[8px] md:text-[9px] font-mono opacity-40 uppercase flex items-center gap-1">
+                      <Shield className="w-2.5 h-2.5 md:w-3 md:h-3" /> Прочность
+                    </span>
+                    <span className="text-[8px] md:text-[9px] font-mono opacity-40 uppercase flex items-center gap-1">
+                      <Footprints className="w-2.5 h-2.5 md:w-3 md:h-3" /> Скорость
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {/* Durability controls - Tech Style */}
+                    <div className="flex-1 flex items-center gap-1">
+                      {/* Damage Button */}
+                      <button
+                        onClick={() => updateMachineStat('durability', -1)}
+                        disabled={unit.currentDurability === 0}
+                        className={cn(
+                          "relative w-9 h-9 md:w-10 md:h-10 rounded-sm bg-red-950/30 hover:bg-red-950/50 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors min-w-[40px] min-h-[40px] border-2 border-red-800/50 shrink-0 overflow-hidden",
+                          getZoneColor(getDurabilityZone().color).text
+                        )}
+                        title="Нанести урон"
+                      >
+                        <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-red-600/40" />
+                        <Flame className="w-4 h-4" />
+                      </button>
+
+                      {/* Durability Value */}
+                      <span className={cn("text-sm md:text-base font-mono font-black min-w-[20px] text-center shrink-0", getZoneColor(getDurabilityZone().color).text)}>
+                        {unit.currentDurability}
+                      </span>
+
+                      {/* Repair Button */}
+                      <button
+                        onClick={() => updateMachineStat('durability', 1)}
+                        disabled={unit.currentDurability === (data as Machine).durability_max}
+                        className={cn(
+                          "relative w-9 h-9 md:w-10 md:h-10 rounded-sm bg-emerald-950/30 hover:bg-emerald-950/50 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors min-w-[40px] min-h-[40px] border-2 border-emerald-800/50 shrink-0 overflow-hidden",
+                          getZoneColor(getDurabilityZone().color).text
+                        )}
+                        title="Ремонт"
+                      >
+                        <div className="absolute top-0 right-0 w-1 h-1 border-r border-t border-emerald-600/40" />
+                        <Wrench className="w-4 h-4" />
+                      </button>
+
+                      {/* Segmented Progress Bar - Military Style */}
+                      <div className="flex-1 flex items-center gap-px">
+                        {Array.from({ length: (data as Machine).durability_max }).map((_, i) => (
+                          <div
+                            key={i}
+                            className={cn(
+                              "h-2 rounded-sm transition-all flex-1",
+                              i < (unit.currentDurability || 0)
+                                ? getZoneColor(getDurabilityZone().color).bar
+                                : "bg-slate-800"
+                            )}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    {/* Speed display - Tech Style */}
+                    <div className="flex flex-col items-center justify-center shrink-0">
+                      <Footprints className="w-3 h-3 md:w-4 md:h-4 text-yellow-400 mb-1 md:mb-0.5 shrink-0" />
+                      <span className="text-sm md:text-base font-mono font-black text-yellow-400">
+                        {distanceInputUnit === 'cm' ? `${getMachineSpeed() * stepToCmFactor}см` : `${getMachineSpeed()}шаг`}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Pilot Button - Tech Frame with survival test overlay */}
+                <div className="row-span-2 w-12 h-28 md:w-14 md:h-28 shrink-0 relative">
+                  <button
+                    onClick={() => setShowPilotModal(true)}
+                    className="w-full h-full rounded-sm border-2 border-slate-700/50 overflow-hidden bg-slate-900/60 relative"
+                  >
+                    {/* Tech corners */}
+                    <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-slate-600/40" />
+                    <div className="absolute top-0 right-0 w-1 h-1 border-r border-t border-slate-600/40" />
+                    <div className="absolute bottom-0 left-0 w-1 h-1 border-l border-b border-slate-600/40" />
+                    <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-slate-600/40" />
+
+                    {unit.pilotInfo ? (
+                      <>
+                        <Image
+                          src={getPilotImage() || '/images/soldiers/empty.png'}
+                          width={48}
+                          height={64}
+                          className="w-full h-full object-cover object-center"
+                          unoptimized
+                          alt="Пилот"
+                        />
+                        {/* Status overlay - Tech Style */}
+                        <div className={cn(
+                          "absolute bottom-0 left-0 right-0 text-[7px] md:text-[8px] font-mono font-bold text-center py-0.5 border-t",
+                          unit.pilotInfo.alive
+                            ? "bg-emerald-950/90 text-emerald-300 border-emerald-700/50"
+                            : "bg-red-950/90 text-red-300 border-red-700/50"
+                        )}>
+                          {unit.pilotInfo.alive ? 'ЖИВ' : 'ПОГИБ'}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-slate-600 gap-0.5">
+                        <Plane className="w-5 h-5 md:w-6 md:h-6" />
+                        <span className="text-[8px] md:text-[9px] font-mono font-bold uppercase">Пилот</span>
+                      </div>
+                    )}
+                  </button>
+                  {/* Survival Test Button - Overlay at bottom-right corner */}
+                  {unit.pilotInfo && unit.pilotInfo.alive && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePilotSurvivalTest();
+                      }}
+                      disabled={pilotTestFlow.isOpen}
+                      className={cn(
+                        "absolute -bottom-1 -right-1 w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center transition-transform border-2 min-w-[36px] min-h-[36px]",
+                        pilotTestFlow.isOpen && "animate-pulse",
+                        pilotSurvivalTest
+                          ? pilotSurvivalTest.survived
+                            ? "bg-green-600 border-green-900 text-white"
+                            : "bg-red-600 border-red-900 text-white"
+                          : pilotTestFlow.isOpen
+                          ? "bg-purple-600 border-purple-900 text-white animate-spin"
+                          : "bg-purple-900 border-purple-950 text-purple-300 hover:bg-purple-800 hover:scale-110"
+                      )}
+                      title={pilotSurvivalTest ? `Повторить тест (последний: ${pilotSurvivalTest.survived ? 'ВЫЖИЛ' : 'ПОГИБ'})` : "Тест выживаемости пилота (D12 + D6)"}
+                    >
+                      <Skull className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                    </button>
+                  )}
+                </div>
+
+                {/* === ROW 2: Ammo+Shots | (pilot continues) === */}
+                {/* Ammo + Shots Combined - Tactical Display */}
+                <div className="relative bg-slate-900/60 p-2 rounded-sm">
+                  {/* Tech corners */}
+                  <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-slate-600/50" />
+                  <div className="absolute top-0 right-0 w-1 h-1 border-r border-t border-slate-600/50" />
+                  <div className="absolute bottom-0 left-0 w-1 h-1 border-l border-b border-slate-600/50" />
+                  <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-slate-600/50" />
+
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-[8px] md:text-[9px] font-mono opacity-40 uppercase flex items-center gap-1">
+                      <Bomb className="w-2.5 h-2.5 md:w-3 md:h-3" /> Боезапас
+                    </span>
+                    <span className="text-[8px] md:text-[9px] font-mono opacity-40 uppercase flex items-center gap-1">
+                      <Target className="w-2.5 h-2.5 md:w-3 md:h-3" /> Выстрелы
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {/* Ammo progress bar - Segmented (only for tehnolog rules) */}
+                    {!usePerWeaponAmmo ? (
+                      <div className="flex-1 flex items-center gap-1">
+                        <div className="flex-1 flex items-center gap-px">
+                          {Array.from({ length: (data as Machine).ammo_max }).map((_, i) => (
+                            <div
+                              key={i}
+                              className={cn(
+                                "h-2 rounded-sm transition-all flex-1",
+                                i < (unit.currentAmmo || 0)
+                                  ? "bg-blue-500"
+                                  : "bg-slate-800"
+                              )}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-[9px] md:text-xs font-mono font-black text-blue-400 min-w-[38px] text-right shrink-0">
+                          {unit.currentAmmo}/{(data as Machine).ammo_max}
+                        </span>
+                      </div>
+                    ) : (
+                      (() => {
+                        // Calculate total ammo from all weapons for community_star_system
+                        const machine = data as Machine;
+                        const totalWeaponAmmo = machine.weapons.reduce((sum, weapon, idx) => {
+                          return sum + (unit.weaponAmmo?.[idx] ?? weapon.ammo ?? machine.ammo_max);
+                        }, 0);
+                        const maxWeaponAmmo = machine.weapons.reduce((sum, weapon) => {
+                          return sum + (weapon.ammo ?? machine.ammo_max);
+                        }, 0);
+                        return (
+                          <div className="flex-1 flex items-center gap-1">
+                            <div className="flex-1 flex items-center gap-px">
+                              {Array.from({ length: Math.min(maxWeaponAmmo, 30) }).map((_, i) => (
+                                <div
+                                  key={i}
+                                  className={cn(
+                                    "h-2 rounded-sm transition-all flex-1",
+                                    i < totalWeaponAmmo
+                                      ? "bg-blue-500"
+                                      : "bg-slate-800"
+                                  )}
+                                />
+                              ))}
+                            </div>
+                            <span className="text-[9px] md:text-xs font-mono font-black text-blue-400 min-w-[38px] text-right shrink-0">
+                              {totalWeaponAmmo}/{maxWeaponAmmo}
+                            </span>
+                          </div>
+                        );
+                      })()
+                    )}
+
+                    {/* Shots count - Segmented */}
+                    <div className="flex items-center gap-1 shrink-0">
+                      <div className="flex gap-px">
+                        {Array.from({ length: (data as Machine).fire_rate }).map((_, i) => (
+                          <div
+                            key={i}
+                            className={cn(
+                              "h-2 rounded-sm transition-all flex-1",
+                              i < ((unit.machineShotsUsed || 0))
+                                ? "bg-amber-500"
+                                : "bg-slate-800"
+                            )}
+                          />
+                        ))}
+                      </div>
+                      <span className="text-[9px] md:text-xs font-mono font-black text-amber-400 min-w-[35px] text-right">
+                        {unit.machineShotsUsed || 0}/{(data as Machine).fire_rate}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Weapons List - Tactical Weapon Cards */}
+              <div className="flex gap-2">
+                {/* Machine Photo - Hidden on mobile, 1/4 width on desktop */}
+                <div className="relative w-1/4 h-auto shrink-0 hidden md:block">
+                  <div
+                    onClick={handleOpenOriginal}
+                    className="w-full h-full rounded-sm overflow-hidden bg-slate-900/60 relative cursor-pointer shadow-md"
+                  >
+                    {/* Tech corners */}
+                    <div className="absolute top-0 left-0 w-1.5 h-1.5 border-l border-t border-slate-600/40" />
+                    <div className="absolute top-0 right-0 w-1.5 h-1.5 border-r border-t border-slate-600/40" />
+                    <div className="absolute bottom-0 left-0 w-1.5 h-1.5 border-l border-b border-slate-600/40" />
+                    <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-r border-b border-slate-600/40" />
+
+                    {machineImage ? (
+                      <Image
+                        src={machineImage}
+                        alt={data.name}
+                        width={64}
+                        height={200}
+                        className="w-full h-auto object-cover object-center"
+                        unoptimized
+                      />
+                    ) : (
+                      <div className="w-full aspect-[3/10] flex items-center justify-center text-slate-700">
+                        <Plane className="w-6 h-6" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Weapons - Right side */}
+                <div className="flex-1 space-y-2">
+                  {(() => {
+                    const allWeapons = getSelectedWeapons();
+
+                    // Helper to check if weapon is non-ranged (melee/special)
+                    const isNonRangedWeapon = (weapon: Weapon) => {
+                      // Melee range (ББ)
+                      if (weapon.range === 'ББ') return true;
+                      // Power is a simple number (not dice notation like "2D6")
+                      const powerStr = String(weapon.power);
+                      if (/^\d+$/.test(powerStr)) return true;
+                      return false;
+                    };
+
+                    const rangedWeapons = allWeapons.filter(({ weapon }) => !isNonRangedWeapon(weapon));
+                    const meleeWeapons = allWeapons.filter(({ weapon }) => isNonRangedWeapon(weapon));
+
+                    return (
+                      <>
+                        {/* Ranged Weapons - Full cards */}
+                        {rangedWeapons.map(({ weapon, originalIndex: weaponIdx }) => {
+                          const weaponShots = unit.machineWeaponShots?.[weaponIdx] || 0;
+                          const totalShotsUsed = unit.machineShotsUsed || 0;
+                          const fireRate = (data as Machine).fire_rate;
+
+                          // Per-weapon ammo calculation for community_star_system rules
+                          const machine = data as Machine;
+                          const weaponAmmo = usePerWeaponAmmo
+                            ? (unit.weaponAmmo?.[weaponIdx] ?? weapon.ammo ?? machine.ammo_max)
+                            : (unit.currentAmmo || 0);
+                          const weaponMaxAmmo = usePerWeaponAmmo
+                            ? (weapon.ammo ?? machine.ammo_max)
+                            : machine.ammo_max;
+                          const hasAmmo = weaponAmmo > 0;
+                          const isMeleeWeapon = weapon.range === 'ББ';
+
+                          // Can shoot: not done/destroyed, has ammo (per-weapon or global), within fire rate
+                          const canShoot = !isMachineDone && !isMachineDestroyed &&
+                                          (usePerWeaponAmmo ? hasAmmo : (unit.currentAmmo || 0) > 0) &&
+                                          totalShotsUsed < fireRate;
+
+                          return (
+                            <div
+                              key={weaponIdx}
+                              className={cn(
+                                "relative p-1.5 md:p-2.5 rounded-sm flex gap-1.5 md:gap-3 transition-all overflow-hidden",
+                                isMachineDestroyed ? "bg-slate-950/80 opacity-40 grayscale" :
+                                isMachineDone ? "bg-slate-900/40 opacity-70" :
+                                usePerWeaponAmmo && !hasAmmo ? "bg-slate-950/60 opacity-50" :
+                                weaponShots > 0 ? "bg-amber-950/20" : "bg-slate-800/30"
+                              )}
+                            >
+                              {/* Tech corners for active weapon */}
+                              {canShoot && (
+                                <>
+                                  <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-amber-600/30" />
+                                  <div className="absolute top-0 right-0 w-1 h-1 border-r border-t border-amber-600/30" />
+                                </>
+                              )}
+
+                              <div className="flex-1 flex flex-col min-w-0 gap-1.5">
+                                {/* Weapon Name Label - Small at top */}
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="text-[8px] md:text-[9px] font-mono opacity-40 uppercase flex items-center gap-1">
+                                    <Crosshair className="w-2.5 h-2.5 md:w-3 md:h-3" /> {weapon.name}
+                                  </span>
+                                </div>
+
+                                {/* Weapon Actions Row - Following soldier card pattern */}
+                                <div className="flex gap-0.5 md:gap-1">
+                                  {/* Weapon Icon - Clickable for info */}
+                                  <button
+                                    onClick={() => setSelectedWeaponInfo({ weapon, weaponIdx })}
+                                    className="shrink-0 w-10 h-10 rounded-full bg-slate-900/60 flex items-center justify-center min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 hover:bg-slate-800/60 transition-all"
+                                    title="Информация об оружии"
+                                  >
+                                    <Crosshair className="w-5 h-5 text-slate-600" />
+                                  </button>
+
+                                  {/* Fire Button - Full width (flex-1) */}
+                                  <button
+                                    disabled={!canShoot}
+                                    onClick={() => handleVehicleAttack(weaponIdx)}
+                                    className={cn(
+                                      "relative p-1.5 md:p-2 rounded-sm transition-all flex-1 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center gap-1 overflow-hidden",
+                                      "border-2 text-xs font-mono font-bold uppercase tracking-wider",
+                                      weaponShots > 0
+                                        ? "bg-amber-950/40 border-amber-800/50 text-amber-700"
+                                        : canShoot
+                                        ? "bg-amber-950/20 hover:bg-amber-950/40 border-amber-700/50 text-amber-400 active:scale-95"
+                                        : "bg-slate-900/40 border-slate-700/30 text-slate-600 cursor-not-allowed"
+                                    )}
+                                    title="Выстрел"
+                                  >
+                                    {!weaponShots && !isMachineDone && !isMachineDestroyed && canShoot && (
+                                      <>
+                                        <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-amber-600/40" />
+                                        <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-amber-600/40" />
+                                      </>
+                                    )}
+                                    <Target className="w-4 h-4 md:w-5 md:h-5" />
+                                    <span className="hidden sm:inline">ВЫСТРЕЛ</span>
+                                    {/* Per-weapon ammo display */}
+                                    {usePerWeaponAmmo && !isMeleeWeapon && (
+                                      <span className="text-[9px] opacity-70 ml-1">({weaponAmmo}/{weaponMaxAmmo})</span>
+                                    )}
+                                  </button>
+
+                                  {/* Range Stat Display */}
+                                  <div className="relative flex flex-col items-center justify-center p-1.5 md:p-2 rounded-lg md:rounded-full bg-slate-900/40 shrink-0 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0">
+                                    <Target className="w-3.5 h-3.5 md:w-4 md:h-4 text-amber-400 mb-0.5 shrink-0" />
+                                    <span className="text-[10px] md:text-xs font-mono font-bold text-amber-300 leading-tight flex flex-col items-center">
+                                      <span className="text-[9px] md:text-[10px]">{weapon.range}</span>
+                                      <span className="text-[8px] md:text-[9px] opacity-80">{formatRange(weapon.range, 'cm', stepToCmFactor)}</span>
+                                    </span>
+                                  </div>
+
+                                  {/* Power Stat Display */}
+                                  <div className="relative flex flex-col items-center justify-center p-1.5 md:p-2 rounded-lg md:rounded-full bg-slate-900/40 shrink-0 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0">
+                                    <Flame className="w-3.5 h-3.5 md:w-4 md:h-4 text-red-400 mb-0.5 shrink-0" />
+                                    <span className="text-[10px] md:text-xs font-mono font-bold text-red-300 leading-tight truncate w-full text-center" title={weapon.power}>
+                                      {weapon.power}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* Weapon Special Badge - Only show special property badge */}
+                                {weapon.special && (
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-[8px] md:text-[9px] px-1.5 py-0.5 rounded-sm bg-purple-950/30 text-purple-400 font-mono font-bold uppercase border border-purple-700/50 truncate">
+                                      {typeof weapon.special === 'string' ? weapon.special : 'Особый'}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+
+                        {/* Melee Weapons - Compact section at bottom */}
+                        {meleeWeapons.length > 0 && (
+                          <div className={cn(
+                            "relative p-2 rounded-sm transition-all",
+                            isMachineDestroyed ? "bg-slate-950/80 opacity-40 grayscale" :
+                            isMachineDone ? "bg-slate-900/40 opacity-70" : "bg-red-950/10"
+                          )}>
+                            {/* Section Header */}
+                            <div className="flex items-center gap-1.5 mb-1.5">
+                              <Sword className="w-3 h-3 text-red-400" />
+                              <span className="text-[8px] font-mono font-bold uppercase tracking-wider text-red-400">Ближний бой</span>
+                            </div>
+
+                            {/* Melee weapons list - compact format */}
+                            <div className="space-y-1">
+                              {meleeWeapons.map(({ weapon, originalIndex: weaponIdx }) => (
+                                <div
+                                  key={weaponIdx}
+                                  className="flex items-center gap-2 text-[8px] md:text-[9px]"
+                                >
+                                  {/* Weapon name */}
+                                  <span className="font-mono text-slate-300 truncate flex-1">{weapon.name}</span>
+
+                                  {/* Power stat */}
+                                  <div className="flex items-center gap-1 shrink-0 bg-slate-950/60 px-1.5 py-0.5 rounded-full">
+                                    <span className="text-[7px] opacity-30 font-mono uppercase hidden sm:inline">МОЩН</span>
+                                    <span className="font-mono font-bold text-red-400">{weapon.power}</span>
+                                  </div>
+
+                                  {/* Info button */}
+                                  <button
+                                    onClick={() => setSelectedWeaponInfo({ weapon, weaponIdx })}
+                                    className="shrink-0 w-6 h-6 rounded border border-slate-700/50 bg-slate-900/60 flex items-center justify-center min-w-[36px] min-h-[36px] hover:bg-slate-800/60 transition-all"
+                                    title="Информация об оружии"
+                                  >
+                                    <Crosshair className="w-3 h-3 text-slate-500" />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
+                </div>
+              </div>
+
+              {/* Machine Actions Footer - Tactical Controls */}
+              <div className="flex gap-1 md:gap-1.5 mt-2 pt-2 border-t border-slate-700">
+                <button
+                  disabled={isMachineDone || isMachineDestroyed}
+                  onClick={() => {
+                    combatController.startCombat(unit);
+                    combatController.selectAction('melee');
+                  }}
+                  className={cn(
+                    "relative flex-1 p-2 md:p-2.5 rounded-sm transition-colors min-h-[44px] md:min-h-0 flex items-center justify-center gap-1.5 text-xs font-mono font-bold uppercase tracking-wider border-2 overflow-hidden",
+                    unit.isMachineMelee ? "bg-red-950/30 border-red-700 text-red-400" : "bg-slate-900/60 border-slate-700 text-slate-500 hover:bg-slate-800/60"
+                  )}
+                >
+                  {unit.isMachineMelee && (
+                    <>
+                      <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-red-600/40" />
+                      <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-red-600/40" />
+                    </>
+                  )}
+                  <Sword className="w-4 h-4" />
+                  <span className="hidden sm:inline">ТАРАН</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    if (isMachineDestroyed) return;
+                    if (unit.isMachineDone) {
+                      // Untoggling done - reset all actions to return to active state
+                      updateThisUnit((u) => ({
+                        ...u,
+                        isMachineMoved: false,
+                        isMachineShot: false,
+                        isMachineMelee: false,
+                        isMachineDone: false
+                      }));
+                    } else {
+                      updateThisUnit((u) => ({ ...u, isMachineDone: true }));
+                    }
+                  }}
+                  disabled={isMachineDestroyed || isMachineDone}
+                  className={cn(
+                    "relative flex-1 p-2 md:p-2.5 rounded-sm transition-colors min-h-[44px] md:min-h-0 flex items-center justify-center gap-1.5 text-xs font-mono font-bold uppercase tracking-wider border-2 overflow-hidden",
+                    isMachineDone ? "bg-emerald-950/30 border-emerald-700 text-emerald-400" : "bg-slate-900/60 border-slate-700 text-slate-500 hover:bg-slate-800/60"
+                  )}
+                >
+                  {isMachineDone && (
+                    <>
+                      <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-emerald-600/40" />
+                      <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-emerald-600/40" />
+                    </>
+                  )}
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span className="hidden sm:inline">{isMachineDone ? 'ГОТОВО' : 'ЗАВЕРШИТЬ'}</span>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+    </div>
+  );
+}
