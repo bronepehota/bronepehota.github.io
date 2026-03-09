@@ -618,7 +618,7 @@ export default function UnitCard({
         grenadesUsed={unit.grenadesUsed}
         onToggleDone={handleToggleDone}
         onOpenDetails={handleOpenOriginal}
-        showPhotoButton={!isSquad}
+        showPhotoButton={false}
         onShowPhoto={() => setShowImage(true)}
       />
 
@@ -663,6 +663,10 @@ export default function UnitCard({
             usePerWeaponAmmo={usePerWeaponAmmo}
             distanceInputUnit={distanceInputUnit}
             stepToCmFactor={stepToCmFactor}
+            imageUrl={(unit.data as Machine).image}
+            machineName={(unit.data as Machine).name}
+            isDestroyed={unit.currentDurability === 0}
+            onShowImage={() => setShowImage(true)}
           />
         )}
       </div>

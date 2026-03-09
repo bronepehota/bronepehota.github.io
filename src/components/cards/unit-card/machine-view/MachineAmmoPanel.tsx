@@ -58,7 +58,7 @@ export function MachineAmmoPanel({
                   />
                 ))}
               </div>
-              <span className="text-[9px] md:text-xs font-mono font-black text-blue-400 min-w-[38px] text-right shrink-0">
+              <span className="text-xs md:text-sm font-mono font-black text-blue-400 min-w-[42px] text-right shrink-0">
                 {currentAmmo}/{maxAmmo}
               </span>
               {/* Ammo increment/decrement buttons */}
@@ -107,7 +107,7 @@ export function MachineAmmoPanel({
                       />
                     ))}
                   </div>
-                  <span className="text-[9px] md:text-xs font-mono font-black text-blue-400 min-w-[38px] text-right shrink-0">
+                  <span className="text-xs md:text-sm font-mono font-black text-blue-400 min-w-[42px] text-right shrink-0">
                     {totalWeaponAmmo}/{maxWeaponAmmo}
                   </span>
                 </div>
@@ -130,7 +130,7 @@ export function MachineAmmoPanel({
                 />
               ))}
             </div>
-            <span className="text-[9px] md:text-xs font-mono font-black text-amber-400 min-w-[35px] text-right">
+            <span className="text-xs md:text-sm font-mono font-black text-amber-400 min-w-[38px] text-right">
               {shotsUsed}/{fireRate}
             </span>
           </div>
@@ -148,7 +148,7 @@ export function MachineAmmoPanel({
               <span className="text-[8px] md:text-[9px] font-mono opacity-60 uppercase">
                 {weapon.name}
               </span>
-              <span className="text-[9px] md:text-xs font-mono font-bold text-blue-400">
+              <span className="text-xs md:text-sm font-mono font-bold text-blue-400">
                 {weaponAmmoCount}/{weaponMaxAmmo}
               </span>
             </div>
