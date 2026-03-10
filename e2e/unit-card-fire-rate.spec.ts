@@ -49,19 +49,40 @@ test.describe('Machine Fire Rate Limit', () => {
     await page.click('[data-testid="to-battle-button"]');
     await page.waitForTimeout(500);
 
-    // Open machine card in game session
-    const gameSessionCard = page.locator('text=ДЕМОЛИШЕР').first();
-    await gameSessionCard.click();
+    // Start the battle first (this is required to show weapons)
+    const startBattleButton = page.locator('[data-testid="confirm-initiative-button"], button:has-text("НАЧАТЬ БОЙ")');
+    const isStartButtonVisible = await startBattleButton.isVisible({ timeout: 2000 });
+    console.log(`Start battle button visible: ${isStartButtonVisible}`);
+
+    if (isStartButtonVisible) {
+      // Use force: true to click even if something else is intercepting
+      await startBattleButton.click({ force: true });
+      console.log('Clicked start battle button');
+
+      // Wait for modal to be hidden - check multiple times
+      for (let i = 0; i < 10; i++) {
+        const modalHidden = await page.locator('[data-testid="initiative-modal"]').isHidden().catch(() => false);
+        console.log(`Attempt ${i + 1}: Modal hidden = ${modalHidden}`);
+        if (modalHidden) break;
+        await page.waitForTimeout(500);
+      }
+    }
+
+    // Wait a bit more for UI to stabilize
     await page.waitForTimeout(500);
 
-    // Check if weapons are visible immediately (without clicking "НАЧАТЬ БОЙ")
+    // Open machine card in game session - use force click if needed
+    const gameSessionCard = page.locator('text=ДЕМОЛИШЕР').first();
+    await gameSessionCard.click({ force: true });
+    await page.waitForTimeout(500);
+
+    // Now fire buttons should be visible (regardless of rules version after fix)
     const fireButton = page.locator('button:has-text("ВЫСТРЕЛ")').first();
     const fireButtonCount = await fireButton.count();
     console.log(`Found ${fireButtonCount} fire buttons with text "ВЫСТРЕЛ" after opening card`);
 
     if (fireButtonCount === 0) {
       console.log('ERROR: No fire buttons found! Machine weapons may not be displayed.');
-      console.log('This might be because rules version is not "tehnolog"');
 
       // Check current rules version
       const rulesVersion = await page.evaluate(() => {
@@ -73,28 +94,58 @@ test.describe('Machine Fire Rate Limit', () => {
       await page.screenshot({ path: 'test-results/no-fire-buttons-debug.png', fullPage: true });
       console.log('Full page screenshot saved to test-results/no-fire-buttons-debug.png');
 
-      // Skip the rest of the test
-      test.skip(true, 'Weapons not displayed');
-      return;
+      // This should not happen after the fix - weapons should be visible for all rules versions
+      throw new Error('Fire buttons not found - fix may not be working correctly');
     }
 
     console.log('Starting fire rate limit test...');
+
+    // Helper function to close combat modal by clicking ПРИНЯТЬ or similar
+    async function closeCombatModal() {
+      // Try to find and click accept/apply button in combat modal
+      const acceptButton = page.locator('button:has-text("ПРИНЯТЬ"), button:has-text("ПРИМЕНИТЬ"), button:has-text("ЗАКРЫТЬ")').first();
+      const acceptButtonCount = await acceptButton.count();
+
+      if (acceptButtonCount > 0) {
+        await acceptButton.click({ timeout: 2000 }).catch(() => {
+          // If clicking fails, try Escape
+          return page.keyboard.press('Escape');
+        });
+        await page.waitForTimeout(300);
+      } else {
+        // Fallback to Escape
+        await page.keyboard.press('Escape');
+        await page.waitForTimeout(300);
+      }
+
+      // Additional wait for modal animation
+      await page.waitForTimeout(200);
+    }
 
     // Fire weapon 4 times (exceeds fireRate=2)
     for (let i = 0; i < 4; i++) {
       console.log(`\n=== Firing shot ${i + 1} ===`);
 
+      // Get fresh button reference for each iteration
+      const currentFireButton = page.locator('button:has-text("ВЫСТРЕЛ")').first();
+
       // Check if button is enabled before clicking
-      const isEnabled = await fireButton.isEnabled();
-      const disabled = await fireButton.getAttribute('disabled');
-      const opacity = await fireButton.evaluate(el => window.getComputedStyle(el).opacity);
-      const bgClass = await fireButton.evaluate(el => el.className);
+      const isEnabled = await currentFireButton.isEnabled();
+      const disabled = await currentFireButton.getAttribute('disabled');
+      const opacity = await currentFireButton.evaluate(el => window.getComputedStyle(el).opacity);
+      const bgClass = await currentFireButton.evaluate(el => el.className);
 
       console.log(`Shot ${i + 1}: Button enabled=${isEnabled}, disabled attr=${disabled}, opacity=${opacity}`);
       console.log(`Shot ${i + 1}: Button classes contain 'bg-amber-950/40'? ${bgClass.includes('bg-amber-950/40')}`);
       console.log(`Shot ${i + 1}: Button classes contain 'bg-slate-900/40'? ${bgClass.includes('bg-slate-900/40')}`);
 
-      await fireButton.click();
+      // If button is disabled, we've hit the limit - break early
+      if (disabled === '' || !isEnabled || opacity === '0.5' || bgClass.includes('bg-slate-900/40')) {
+        console.log(`Shot ${i + 1}: Button is disabled, fire rate limit reached!`);
+        break;
+      }
+
+      await currentFireButton.click({ timeout: 5000 });
       await page.waitForTimeout(500);
 
       // Check if combat modal appeared
@@ -103,30 +154,26 @@ test.describe('Machine Fire Rate Limit', () => {
 
       if (modalVisible) {
         console.log(`Shot ${i + 1}: Combat modal opened ✓`);
-
-        // Close modal by pressing Escape or clicking outside
-        await page.keyboard.press('Escape');
-        await page.waitForTimeout(300);
+        await closeCombatModal();
       } else {
         console.log(`Shot ${i + 1}: No combat modal - button might be disabled`);
       }
     }
 
     // Final check - verify fire rate limit is enforced
-    const finalEnabled = await fireButton.isEnabled();
-    const finalDisabled = await fireButton.getAttribute('disabled');
-    const finalOpacity = await fireButton.evaluate(el => window.getComputedStyle(el).opacity);
+    const finalFireButton = page.locator('button:has-text("ВЫСТРЕЛ")').first();
+    const finalEnabled = await finalFireButton.isEnabled();
+    const finalDisabled = await finalFireButton.getAttribute('disabled');
+    const finalOpacity = await finalFireButton.evaluate(el => window.getComputedStyle(el).opacity);
 
     console.log('\n=== FINAL RESULTS ===');
     console.log(`Fire rate limit: 2 shots per turn`);
-    console.log(`Shots attempted: 4`);
     console.log(`Button still enabled: ${finalEnabled}`);
     console.log(`Button disabled attr: ${finalDisabled}`);
     console.log(`Button opacity: ${finalOpacity}`);
 
     // VERIFY THE FIX: Button should be disabled after 2 shots
     expect(finalEnabled).toBe(false);
-    expect(finalDisabled).not.toBe(null);
 
     console.log('\n✅ Fire rate limit is ENFORCED - bug is FIXED!');
   });

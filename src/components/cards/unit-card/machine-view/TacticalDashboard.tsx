@@ -75,14 +75,14 @@ export function TacticalDashboard({
         background: `linear-gradient(90deg, transparent 0%, ${colors.primary}80 50%, transparent 100%)`
       }} />
 
-      {/* Main content grid */}
-      <div className="relative grid grid-cols-[120px_1fr_80px] gap-3 p-3 items-start">
-        {/* LEFT: Machine Image Panel */}
-        <div className="relative">
-          {/* Image container with tactical frame */}
+      {/* Main content - responsive flex layout for mobile */}
+      <div className="relative flex gap-2 p-2 sm:p-3 items-start">
+        {/* LEFT: Machine Image Panel - responsive sizing */}
+        <div className="relative flex-shrink-0">
+          {/* Image container with tactical frame - mobile responsive */}
           <div
             onClick={onImageClick}
-            className="relative w-[120px] aspect-[3/4] rounded-sm overflow-hidden cursor-pointer group border-2 transition-all duration-300"
+            className="relative aspect-[3/4] rounded-sm overflow-hidden cursor-pointer group border-2 transition-all duration-300 w-[90px] sm:w-[100px] md:w-[120px]"
             style={{ borderColor: `${colors.primary}40` }}
           >
             {/* Tech corners */}
@@ -104,7 +104,7 @@ export function TacticalDashboard({
             {/* Destroyed overlay */}
             {isDestroyed && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                <Skull className="w-12 h-12 text-red-500" strokeWidth={2.5} />
+                <Skull className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-red-500" strokeWidth={2.5} />
               </div>
             )}
 
@@ -116,7 +116,7 @@ export function TacticalDashboard({
 
           {/* Status indicator below image */}
           <div className={cn(
-            "absolute -bottom-1 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-sm text-[8px] font-mono font-bold uppercase tracking-wider border transition-all",
+            "absolute -bottom-1 left-1/2 -translate-x-1/2 px-1.5 sm:px-2 py-0.5 rounded-sm text-[7px] sm:text-[8px] font-mono font-bold uppercase tracking-wider border transition-all whitespace-nowrap",
             isDestroyed
               ? "bg-red-950/90 text-red-400 border-red-700/70"
               : "bg-emerald-950/90 text-emerald-400 border-emerald-700/70"
@@ -125,28 +125,29 @@ export function TacticalDashboard({
           </div>
         </div>
 
-        {/* CENTER: Stats Panel */}
-        <div className="space-y-2">
+        {/* CENTER: Stats Panel - flexible width */}
+        <div className="flex-1 min-w-0 space-y-1.5 sm:space-y-2">
           {/* Durability Section */}
-          <div className="relative bg-slate-950/50 p-2 rounded-sm border border-slate-700/50">
+          <div className="relative bg-slate-950/50 p-1.5 sm:p-2 rounded-sm border border-slate-700/50">
             {/* Section header */}
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[8px] font-mono font-bold uppercase tracking-wider flex items-center gap-1" style={{ color: colors.primary }}>
-                <Shield className="w-2.5 h-2.5" />
-                Прочность
+            <div className="flex items-center justify-between mb-1 sm:mb-2">
+              <span className="text-[7px] sm:text-[8px] font-mono font-bold uppercase tracking-wider flex items-center gap-1" style={{ color: colors.primary }}>
+                <Shield className="w-2 h-2 sm:w-2.5 sm:h-2.5" />
+                <span className="hidden xs:inline">Прочность</span>
+                <span className="xs:hidden">Прочн</span>
               </span>
-              <span className={cn("text-xs font-mono font-black", zoneColor.text)}>
+              <span className={cn("text-[10px] sm:text-xs font-mono font-black", zoneColor.text)}>
                 {currentDurability}/{maxDurability}
               </span>
             </div>
 
             {/* Segmented durability bar */}
-            <div className="flex gap-px mb-2">
+            <div className="flex gap-px mb-1.5 sm:mb-2">
               {Array.from({ length: maxDurability }).map((_, i) => (
                 <div
                   key={i}
                   className={cn(
-                    "h-2 rounded-sm transition-all flex-1",
+                    "h-1.5 sm:h-2 rounded-sm transition-all flex-1",
                     i < currentDurability ? zoneColor.bar : "bg-slate-800"
                   )}
                 />
@@ -154,44 +155,45 @@ export function TacticalDashboard({
             </div>
 
             {/* Control buttons */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-1">
               <button
                 onClick={() => onUpdateDurability(-1)}
                 disabled={currentDurability === 0}
                 className={cn(
-                  "flex-1 flex items-center justify-center gap-1 py-1.5 rounded-sm transition-all text-[10px] font-mono font-bold uppercase disabled:opacity-30 disabled:cursor-not-allowed mr-1",
+                  "flex-1 flex items-center justify-center gap-1 py-1.5 sm:py-2 rounded-sm transition-all text-[10px] sm:text-xs font-mono font-bold uppercase disabled:opacity-30 disabled:cursor-not-allowed",
                   "bg-red-950/50 hover:bg-red-950/70 text-red-400 border border-red-800/50"
                 )}
               >
-                <Flame className="w-3 h-3" />
-                Урон
+                <Flame className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="hidden sm:inline">Урон</span>
               </button>
               <button
                 onClick={() => onUpdateDurability(1)}
                 disabled={currentDurability === maxDurability}
                 className={cn(
-                  "flex-1 flex items-center justify-center gap-1 py-1.5 rounded-sm transition-all text-[10px] font-mono font-bold uppercase disabled:opacity-30 disabled:cursor-not-allowed ml-1",
+                  "flex-1 flex items-center justify-center gap-1 py-1.5 sm:py-2 rounded-sm transition-all text-[10px] sm:text-xs font-mono font-bold uppercase disabled:opacity-30 disabled:cursor-not-allowed",
                   "bg-emerald-950/50 hover:bg-emerald-950/70 text-emerald-400 border border-emerald-800/50"
                 )}
               >
-                <Wrench className="w-3 h-3" />
-                Ремонт
+                <Wrench className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="hidden sm:inline">Ремонт</span>
               </button>
             </div>
           </div>
 
           {/* Speed Section */}
-          <div className="relative bg-slate-950/50 p-2 rounded-sm border border-slate-700/50">
+          <div className="relative bg-slate-950/50 p-1.5 sm:p-2 rounded-sm border border-slate-700/50">
             <div className="flex items-center justify-between">
-              <span className="text-[8px] font-mono font-bold uppercase tracking-wider flex items-center gap-1 text-yellow-400">
-                <Footprints className="w-2.5 h-2.5" />
-                Скорость
+              <span className="text-[7px] sm:text-[8px] font-mono font-bold uppercase tracking-wider flex items-center gap-1 text-yellow-400">
+                <Footprints className="w-2 h-2 sm:w-2.5 sm:h-2.5" />
+                <span className="hidden xs:inline">Скорость</span>
+                <span className="xs:hidden">Скр</span>
               </span>
               <div className="text-right">
-                <span className="text-lg font-mono font-black text-yellow-400">
+                <span className="text-sm sm:text-lg font-mono font-black text-yellow-400">
                   {distanceInputUnit === 'cm' ? `${speed * stepToCmFactor}` : speed}
                 </span>
-                <span className="text-[8px] font-mono opacity-60 ml-0.5">
+                <span className="text-[7px] sm:text-[8px] font-mono opacity-60 ml-0.5">
                   {distanceInputUnit === 'cm' ? 'см' : 'шаг'}
                 </span>
               </div>
@@ -199,16 +201,16 @@ export function TacticalDashboard({
           </div>
         </div>
 
-        {/* RIGHT: Pilot Status Panel */}
-        <div className="relative">
-          {/* Pilot container */}
-          <div className="relative w-[80px] h-[110px] rounded-sm overflow-hidden bg-slate-950/50 border-2 transition-all duration-300"
+        {/* RIGHT: Pilot Status Panel - compact on mobile */}
+        <div className="relative flex-shrink-0">
+          {/* Pilot container - mobile responsive */}
+          <div className="relative aspect-[4/5] w-[60px] sm:w-[70px] md:w-[80px] h-auto rounded-sm overflow-hidden bg-slate-950/50 border-2 transition-all duration-300"
                style={{ borderColor: pilotInfo ? `${colors.primary}60` : `${colors.primary}20` }}>
             {/* Tech corners */}
-            <div className="absolute top-0 left-0 w-1.5 h-1.5 border-l border-t z-10" style={{ borderColor: colors.primary }} />
-            <div className="absolute top-0 right-0 w-1.5 h-1.5 border-r border-t z-10" style={{ borderColor: colors.primary }} />
-            <div className="absolute bottom-0 left-0 w-1.5 h-1.5 border-l border-b z-10" style={{ borderColor: colors.primary }} />
-            <div className="absolute bottom-0 right-0 w-1.5 h-1.5 border-r border-b z-10" style={{ borderColor: colors.primary }} />
+            <div className="absolute top-0 left-0 w-1 h-1 border-l border-t z-10" style={{ borderColor: colors.primary }} />
+            <div className="absolute top-0 right-0 w-1 h-1 border-r border-t z-10" style={{ borderColor: colors.primary }} />
+            <div className="absolute bottom-0 left-0 w-1 h-1 border-l border-b z-10" style={{ borderColor: colors.primary }} />
+            <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b z-10" style={{ borderColor: colors.primary }} />
 
             <button
               onClick={onAssignPilot}
@@ -219,15 +221,15 @@ export function TacticalDashboard({
                   <GitHubPagesImage
                     src={pilotImage || '/images/soldiers/empty.png'}
                     width={80}
-                    height={110}
-                    className="w-full h-full object-cover object-center"
+                    height={100}
+                    className="w-full h-full object-cover object-center object-top"
                     alt="Пилот"
                     unoptimized
                   />
 
-                  {/* Status overlay */}
+                  {/* Status overlay - smaller on mobile */}
                   <div className={cn(
-                    "absolute bottom-0 left-0 right-0 text-[7px] font-mono font-bold text-center py-0.5 border-t backdrop-blur-sm",
+                    "absolute bottom-0 left-0 right-0 text-[6px] sm:text-[7px] font-mono font-bold text-center py-0.5 border-t backdrop-blur-sm",
                     pilotInfo.alive
                       ? "bg-emerald-950/90 text-emerald-300 border-emerald-700/50"
                       : "bg-red-950/90 text-red-300 border-red-700/50"
@@ -236,14 +238,14 @@ export function TacticalDashboard({
                   </div>
                 </>
               ) : (
-                <div className="w-full h-full flex flex-col items-center justify-center text-slate-600 gap-1">
-                  <Plane className="w-6 h-6" />
-                  <span className="text-[8px] font-mono font-bold uppercase">Пилот</span>
+                <div className="w-full h-full flex flex-col items-center justify-center text-slate-600 gap-0.5 sm:gap-1">
+                  <Plane className="w-4 h-4 sm:w-6 sm:h-6" />
+                  <span className="text-[7px] sm:text-[8px] font-mono font-bold uppercase">Пилот</span>
                 </div>
               )}
             </button>
 
-            {/* Survival Test Button - Overlay */}
+            {/* Survival Test Button - Overlay - compact on mobile */}
             {pilotInfo && pilotInfo.alive && (
               <button
                 onClick={(e) => {
@@ -252,7 +254,7 @@ export function TacticalDashboard({
                 }}
                 disabled={isPilotTestRunning}
                 className={cn(
-                  "absolute -bottom-1.5 -right-1.5 w-8 h-8 rounded-full flex items-center justify-center transition-all border-2 min-w-[36px] min-h-[36px] z-20",
+                  "absolute -bottom-1 -right-1 sm:-bottom-1.5 sm:-right-1.5 w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all border-2 min-w-[28px] min-h-[28px] sm:min-w-[36px] sm:min-h-[36px] z-20",
                   isPilotTestRunning && "animate-pulse",
                   survivalTest
                     ? survivalTest.survived
@@ -264,13 +266,13 @@ export function TacticalDashboard({
                 )}
                 title={survivalTest ? `Повторить тест (последний: ${survivalTest.survived ? 'ВЫЖИЛ' : 'ПОГИБ'})` : "Тест выживаемости пилота"}
               >
-                <Skull className="w-4 h-4" />
+                <Skull className="w-3 h-3 sm:w-4 sm:h-4" />
               </button>
             )}
           </div>
 
-          {/* Pilot label */}
-          <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 whitespace-nowrap">
+          {/* Pilot label - hidden on very small screens */}
+          <div className="absolute -bottom-4 sm:-bottom-5 left-1/2 -translate-x-1/2 whitespace-nowrap hidden sm:block">
             <span className="text-[7px] font-mono font-bold uppercase tracking-wider opacity-50">
               Экипаж
             </span>

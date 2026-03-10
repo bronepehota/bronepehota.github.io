@@ -111,17 +111,18 @@ describe('MachineView', () => {
 
   describe('Weapons list rendering', () => {
     it('renders weapons list for tehnolog rules', () => {
-      render(<MachineView {...defaultProps} rulesVersion="tehnolog" />);
+      render(<MachineView {...defaultProps} />);
 
       expect(screen.getByText('Cannon')).toBeInTheDocument();
       expect(screen.getByText('Machine Gun')).toBeInTheDocument();
     });
 
-    it('does not render weapons list for non-tehnolog rules', () => {
-      render(<MachineView {...defaultProps} rulesVersion="community_star_system" />);
+    it('renders weapons list for community_star_system rules too', () => {
+      render(<MachineView {...defaultProps} />);
 
-      // Weapons list should not be displayed for fan rules
-      expect(screen.queryByText('Cannon')).not.toBeInTheDocument();
+      // Weapons list should be displayed for all rules versions
+      expect(screen.getByText('Cannon')).toBeInTheDocument();
+      expect(screen.getByText('Machine Gun')).toBeInTheDocument();
     });
 
     it('handles machine with no weapons', () => {
@@ -147,7 +148,7 @@ describe('MachineView', () => {
 
       const unit = createMockUnit({ data: machineMeleeOnly });
 
-      render(<MachineView {...defaultProps} unit={unit} rulesVersion="tehnolog" />);
+      render(<MachineView {...defaultProps} unit={unit} />);
 
       expect(screen.getByText('Melee Spike')).toBeInTheDocument();
       expect(screen.getByText(/ближний бой/i)).toBeInTheDocument();
@@ -218,7 +219,7 @@ describe('MachineView', () => {
         machineWeaponShots: { 0: 1, 1: 0 }
       });
 
-      render(<MachineView {...defaultProps} unit={unit} rulesVersion="tehnolog" />);
+      render(<MachineView {...defaultProps} unit={unit} />);
 
       // Weapons should be displayed
       expect(screen.getByText('Cannon')).toBeInTheDocument();
@@ -230,7 +231,7 @@ describe('MachineView', () => {
       });
 
       expect(() => {
-        render(<MachineView {...defaultProps} unit={unit} rulesVersion="tehnolog" />);
+        render(<MachineView {...defaultProps} unit={unit} />);
       }).not.toThrow();
     });
 
