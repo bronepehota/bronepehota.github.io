@@ -82,6 +82,7 @@ export default function GameSession({
       // Apply update function only to matching unit
       const newArmy = {
         ...armyRef.current,
+        lastBattleDate: new Date().toISOString(), // Update last activity time
         units: armyRef.current.units.map(u =>
           u.instanceId === targetInstanceId ? arg2!(u) : u
         )
@@ -95,6 +96,7 @@ export default function GameSession({
       // We need to find which unit actually changed
       const newArmy = {
         ...armyRef.current,
+        lastBattleDate: new Date().toISOString(), // Update last activity time
         units: armyRef.current.units.map(u => {
           const result = arg1(u);
           // The function adds/removes the captured soldierIndex from deadSoldiers
@@ -116,6 +118,7 @@ export default function GameSession({
     // Direct update path
     const newArmy = {
       ...armyRef.current,
+      lastBattleDate: new Date().toISOString(), // Update last activity time
       units: armyRef.current.units.map(u => u.instanceId === targetInstanceId ? updatedUnit! : u)
     };
     armyRef.current = newArmy;

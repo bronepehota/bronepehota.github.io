@@ -1,7 +1,7 @@
 import { MachineAmmoPanel } from './machine-view/MachineAmmoPanel';
 import { MachineWeaponsList } from './machine-view/MachineWeaponsList';
 import { TacticalDashboard } from './machine-view/TacticalDashboard';
-import { ArmyUnit, Machine, DurabilityZone, RulesVersionID, PilotInfo } from '@/lib/types';
+import { ArmyUnit, Machine, DurabilityZone, PilotInfo } from '@/lib/types';
 
 export interface MachineViewProps {
   unit: ArmyUnit;
@@ -16,7 +16,6 @@ export interface MachineViewProps {
   pilotSurvivalTest: { roll: number; survived: boolean; testedAt: number } | null;
   pilotImage: string | null;
   isPilotTestRunning: boolean;
-  rulesVersion: RulesVersionID;
   usePerWeaponAmmo: boolean;
   distanceInputUnit: 'steps' | 'cm';
   stepToCmFactor: number;
@@ -39,7 +38,6 @@ export function MachineView({
   pilotSurvivalTest,
   pilotImage,
   isPilotTestRunning,
-  rulesVersion,
   usePerWeaponAmmo,
   distanceInputUnit,
   stepToCmFactor,
@@ -99,21 +97,19 @@ export function MachineView({
         usePerWeaponAmmo={usePerWeaponAmmo}
       />
 
-      {/* Weapons List - only for Tehnolog rules */}
-      {rulesVersion === 'tehnolog' && (
-        <MachineWeaponsList
-          weapons={machine.weapons}
-          weaponShots={weaponShots}
-          fireRate={machine.fire_rate}
-          totalShotsUsed={unit.machineShotsUsed || 0}
-          currentAmmo={unit.currentAmmo || 0}
-          weaponAmmo={unit.weaponAmmo}
-          usePerWeaponAmmo={usePerWeaponAmmo}
-          onWeaponAttack={onWeaponAttack}
-          onWeaponInfo={onWeaponInfo}
-          stepToCmFactor={stepToCmFactor}
-        />
-      )}
+      {/* Weapons List - always show for all rules versions */}
+      <MachineWeaponsList
+        weapons={machine.weapons}
+        weaponShots={weaponShots}
+        fireRate={machine.fire_rate}
+        totalShotsUsed={unit.machineShotsUsed || 0}
+        currentAmmo={unit.currentAmmo || 0}
+        weaponAmmo={unit.weaponAmmo}
+        usePerWeaponAmmo={usePerWeaponAmmo}
+        onWeaponAttack={onWeaponAttack}
+        onWeaponInfo={onWeaponInfo}
+        stepToCmFactor={stepToCmFactor}
+      />
     </div>
   );
 }

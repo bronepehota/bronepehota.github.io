@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import { Army, RulesVersionID } from '@/lib/types';
+import { Army, ArmyUnit, RulesVersionID } from '@/lib/types';
 import ArmyBuilder from '@/components/ArmyBuilder';
 import GameSession from '@/components/GameSession';
 import factionsData from '@/data/factions.json';
@@ -206,6 +206,44 @@ export default function Home() {
         if (!loadedArmy.currentTurn) {
           loadedArmy.currentTurn = 1;
         }
+
+        // Reset machine shot counters if battle is stale (more than 1 hour since last action)
+        // This prevents buttons being disabled after page reload in old sessions
+        const STALE_BATTLE_MS = 60 * 60 * 1000; // 1 hour
+        const now = Date.now();
+        const lastBattleTime = loadedArmy.lastBattleDate ? new Date(loadedArmy.lastBattleDate).getTime() : 0;
+        const isStaleBattle = loadedArmy.isInBattle && lastBattleTime && (now - lastBattleTime) > STALE_BATTLE_MS;
+
+        if (isStaleBattle) {
+          console.log('[Bronepehota] Stale battle detected, resetting machine shot counters');
+          loadedArmy.units = loadedArmy.units.map((unit: ArmyUnit) => {
+            if (unit.type === 'machine') {
+              return {
+                ...unit,
+                machineShotsUsed: 0,
+                machineWeaponShots: {},
+                isMachineShot: false,
+                isMachineMoved: false,
+                isMachineMelee: false,
+                isMachineDone: false,
+              };
+            }
+            // Also reset squad action states for stale battles
+            if (unit.type === 'squad' && unit.actionsUsed) {
+              return {
+                ...unit,
+                actionsUsed: (unit.data as any).soldiers.map(() => ({
+                  moved: false,
+                  shot: false,
+                  melee: false,
+                  done: false,
+                })),
+              };
+            }
+            return unit;
+          });
+        }
+
         setArmy(loadedArmy);
       } catch (e) {
         console.error('Failed to load army', e);

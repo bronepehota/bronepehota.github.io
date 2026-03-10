@@ -659,7 +659,6 @@ export default function UnitCard({
             pilotSurvivalTest={pilotSurvivalTest}
             pilotImage={getPilotImage()}
             isPilotTestRunning={pilotTestFlow.isOpen}
-            rulesVersion={rulesVersion}
             usePerWeaponAmmo={usePerWeaponAmmo}
             distanceInputUnit={distanceInputUnit}
             stepToCmFactor={stepToCmFactor}
