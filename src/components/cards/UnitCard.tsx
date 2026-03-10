@@ -400,6 +400,7 @@ export default function UnitCard({
       onDoubleClick={handleOpenOriginal}
       className={cn(
         "bg-slate-900/80 rounded-sm border-2 border-slate-800 transition-all shadow-lg overflow-hidden relative cursor-default select-none",
+        "flex flex-col h-full",
         (isSquadDone || (isMachineDone && !isMachineDestroyed)) ? "opacity-70 grayscale-[0.3]" : "",
         isAllDead || isMachineDestroyed ? "opacity-40 grayscale" : "",
         data.faction === 'polaris' ? "border-red-600/30" : data.faction === 'protectorate' ? "border-cyan-600/30" : "border-yellow-600/30"
@@ -609,21 +610,26 @@ export default function UnitCard({
         </div>
       )}
 
-      {/* Unit Header */}
-      <UnitCardHeader
-        unit={unit}
-        isDone={isSquadDone || isMachineDone}
-        isAllDead={isAllDead}
-        grenadesAvailable={isSquad && (data as Squad).soldiers.some(s => s.props?.includes('Г'))}
-        grenadesUsed={unit.grenadesUsed}
-        onToggleDone={handleToggleDone}
-        onOpenDetails={handleOpenOriginal}
-        showPhotoButton={false}
-        onShowPhoto={() => setShowImage(true)}
-      />
+      {/* Unit Header - Fixed height at top */}
+      <div className="shrink-0 z-20 bg-slate-900/95 backdrop-blur-sm border-b border-slate-800/50">
+        <UnitCardHeader
+          unit={unit}
+          isDone={isSquadDone || isMachineDone}
+          isAllDead={isAllDead}
+          grenadesAvailable={isSquad && (data as Squad).soldiers.some(s => s.props?.includes('Г'))}
+          grenadesUsed={unit.grenadesUsed}
+          onToggleDone={handleToggleDone}
+          onOpenDetails={handleOpenOriginal}
+          showPhotoButton={false}
+          onShowPhoto={() => setShowImage(true)}
+        />
+      </div>
 
-      {/* Unit Content */}
-      <div className="p-2 md:p-3 relative z-10">
+      {/* Unit Content - Scrollable on mobile */}
+      <div className={cn(
+        "p-2 md:p-3 pb-24 md:pb-4 relative z-10 min-h-0",
+        isSquad && "flex-1 overflow-y-auto mobile-squad-scroll"
+      )}>
         {isSquad ? (
           <SquadView
             unit={unit}

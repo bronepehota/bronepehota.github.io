@@ -29,23 +29,25 @@ export function SquadView({
   const data = unit.data as Squad;
 
   return (
-    <div className="grid grid-cols-1 gap-1.5 md:gap-2">
+    <div className="grid grid-cols-1 gap-1.5 md:gap-2 snap-y snap-mandatory">
       {data.soldiers.map((s, idx) => (
-        <SoldierCard
-          key={`soldier-${unit.instanceId}-${idx}-${s.num}`}
-          squad={data}
-          unit={unit}
-          soldierIndex={idx}
-          allUnits={allUnits}
-          rulesVersion={rulesVersion}
-          updateUnit={updateUnit}
-          onSoldierAction={onSoldierAction}
-          setShowSoldierImage={setShowSoldierImage}
-          setShowPanicModal={setShowPanicModal}
-          getSoldierImage={getSoldierImage}
-          distanceInputUnit={distanceInputUnit}
-          stepToCmFactor={stepToCmFactor}
-        />
+        <div key={`soldier-snap-${unit.instanceId}-${idx}`} className="snap-start snap-always">
+          <SoldierCard
+            key={`soldier-${unit.instanceId}-${idx}-${s.num}`}
+            squad={data}
+            unit={unit}
+            soldierIndex={idx}
+            allUnits={allUnits}
+            rulesVersion={rulesVersion}
+            updateUnit={updateUnit}
+            onSoldierAction={onSoldierAction}
+            setShowSoldierImage={setShowSoldierImage}
+            setShowPanicModal={setShowPanicModal}
+            getSoldierImage={getSoldierImage}
+            distanceInputUnit={distanceInputUnit}
+            stepToCmFactor={stepToCmFactor}
+          />
+        </div>
       ))}
     </div>
   );

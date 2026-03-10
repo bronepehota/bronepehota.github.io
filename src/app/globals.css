@@ -1033,3 +1033,35 @@ button, a, input, select, textarea {
     animation: none !important;
   }
 }
+
+/* ========================================
+   MOBILE SQUAD SCROLL CONTAINER
+   ======================================== */
+
+.mobile-squad-scroll {
+  /* Flex-1 with overflow-y-auto - height is determined by parent flex container */
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  overscroll-behavior-y: contain;
+  overscroll-behavior-x: none;
+}
+
+@media (min-width: 768px) {
+  .mobile-squad-scroll {
+    overflow: visible;
+  }
+}
+
+/* Scroll snap utilities */
+.snap-y { scroll-snap-type: y mandatory; }
+.snap-start { scroll-snap-align: start; }
+.snap-always { scroll-snap-stop: always; }
+
+/* Mobile scrollbar */
+.mobile-squad-scroll-container::-webkit-scrollbar {
+  width: 4px;
+}
+.mobile-squad-scroll-container::-webkit-scrollbar-thumb {
+  background-color: rgb(51 65 85);
+  border-radius: 2px;
+}
