@@ -34,7 +34,8 @@ export function UnitCardHeader({
     <div
       onDoubleClick={onOpenDetails}
       className={cn(
-        "p-2 md:p-3 flex justify-between items-center relative z-10 border-b border-slate-800/50",
+        "p-2 md:p-3 flex justify-between items-center relative z-20 border-b border-slate-800/50",
+        "sticky top-0 bg-slate-900/95",
         data.faction === 'polaris' ? "bg-red-950/20" : data.faction === 'protectorate' ? "bg-cyan-950/20" : "bg-yellow-950/20"
       )}
     >

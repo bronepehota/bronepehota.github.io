@@ -471,10 +471,10 @@ export default function GameSession({
       )}
 
       {/* Main Content */}
-      <div className="flex-1 overflow-y-auto p-3 md:p-4 pb-20 md:pb-24 min-h-0 custom-scrollbar">
+      <div className="flex-1 p-3 md:p-4 pb-28 md:pb-32 min-h-0 overflow-hidden">
         {army.units.length > 0 && (
           <div className={cn(
-            "w-full bg-transparent p-0.5 md:p-1 mx-auto",
+            "w-full bg-transparent p-0.5 md:p-1 mx-auto h-full",
             army.units[focusedUnitIdx]?.type === 'machine' ? "max-w-5xl" : "max-w-2xl"
           )}>
             <UnitCard
