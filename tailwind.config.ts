@@ -53,6 +53,7 @@ const config: Config = {
         'fade-in-up': 'fade-in-up 0.8s ease-out forwards',
         'slide-in-left': 'slide-in-left 0.6s ease-out forwards',
         'slide-in-right': 'slide-in-right 0.6s ease-out forwards',
+        'ping-slow': 'ping-slow 2s cubic-bezier(0, 0, 0.2, 1) infinite',
       },
       keyframes: {
         scan: {
@@ -128,6 +129,11 @@ const config: Config = {
         'slide-in-right': {
           '0%': { opacity: '0', transform: 'translateX(30px)' },
           '100%': { opacity: '1', transform: 'translateX(0)' },
+        },
+        'ping-slow': {
+          '0%, 100%': { transform: 'scale(1)', opacity: '0.8' },
+          '50%': { transform: 'scale(1.05)', opacity: '0.4' },
+          '75%': { transform: 'scale(1.5)', opacity: '0' },
         },
       },
     },

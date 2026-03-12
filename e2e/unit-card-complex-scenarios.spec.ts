@@ -11,6 +11,10 @@ test.describe('UnitCard Complex Scenarios', () => {
   });
 
   test('complete flow: add squad and verify in army', async ({ page }) => {
+    // Step 1: Rules is now first - confirm rules
+    await page.click('[data-testid="rules-confirm-button"]');
+    await page.waitForTimeout(500);
+
     // Select faction
     await page.click('[data-testid="faction-card-polaris"]');
     await page.waitForTimeout(300);
@@ -21,10 +25,6 @@ test.describe('UnitCard Complex Scenarios', () => {
     await page.click('button:has-text("350")');
     await page.waitForTimeout(300);
     await page.click('[data-testid="budget-next-button"]');
-    await page.waitForTimeout(500);
-
-    // Continue through rules
-    await page.click('[data-testid="rules-confirm-button"]');
     await page.waitForTimeout(500);
 
     // Verify we're on unit selector screen
@@ -49,7 +49,10 @@ test.describe('UnitCard Complex Scenarios', () => {
   });
 
   test('machine unit: add machine and switch to army view', async ({ page }) => {
-    // Navigate to unit selector
+    // Navigate to unit selector - Rules is now first
+    await page.click('[data-testid="rules-confirm-button"]');
+    await page.waitForTimeout(500);
+
     await page.click('[data-testid="faction-card-polaris"]');
     await page.waitForTimeout(300);
     await page.click('[data-testid="faction-continue-button"]');
@@ -57,8 +60,6 @@ test.describe('UnitCard Complex Scenarios', () => {
     await page.click('button:has-text("350")');
     await page.waitForTimeout(300);
     await page.click('[data-testid="budget-next-button"]');
-    await page.waitForTimeout(500);
-    await page.click('[data-testid="rules-confirm-button"]');
     await page.waitForTimeout(500);
 
     // Switch to machines tab
@@ -88,7 +89,10 @@ test.describe('UnitCard Complex Scenarios', () => {
   });
 
   test('navigate through unit selector filters', async ({ page }) => {
-    // Navigate to unit selector
+    // Navigate to unit selector - Rules is now first
+    await page.click('[data-testid="rules-confirm-button"]');
+    await page.waitForTimeout(500);
+
     await page.click('[data-testid="faction-card-polaris"]');
     await page.waitForTimeout(300);
     await page.click('[data-testid="faction-continue-button"]');
@@ -97,7 +101,6 @@ test.describe('UnitCard Complex Scenarios', () => {
     await page.waitForTimeout(300);
     await page.click('[data-testid="budget-next-button"]');
     await page.waitForTimeout(500);
-    await page.click('[data-testid="rules-confirm-button"]');
     await page.waitForTimeout(500);
 
     // Verify default "Отряды" tab is selected
@@ -119,14 +122,7 @@ test.describe('UnitCard Complex Scenarios', () => {
   });
 
   test('switching between rules versions', async ({ page }) => {
-    // Navigate to rules screen
-    await page.click('[data-testid="faction-card-polaris"]');
-    await page.waitForTimeout(300);
-    await page.click('[data-testid="faction-continue-button"]');
-    await page.waitForTimeout(500);
-    await page.click('button:has-text("350")');
-    await page.waitForTimeout(300);
-    await page.click('[data-testid="budget-next-button"]');
+    // Rules is now the first screen - just wait for it to load
     await page.waitForTimeout(500);
 
     // Verify we're on rules screen
