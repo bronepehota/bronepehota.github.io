@@ -13,9 +13,9 @@ interface Step {
 }
 
 const steps: Step[] = [
-  { id: 1, label: 'Фракция', description: 'Выберите сторону конфликта', icon: Shield },
-  { id: 2, label: 'Бюджет', description: 'Установите лимит очков армии', icon: Coins },
-  { id: 3, label: 'Правила', description: 'Выберите версию правил', icon: Book },
+  { id: 1, label: 'Правила', description: 'Выберите версию правил', icon: Book },
+  { id: 2, label: 'Фракция', description: 'Выберите сторону конфликта', icon: Shield },
+  { id: 3, label: 'Бюджет', description: 'Установите лимит очков армии', icon: Coins },
   { id: 4, label: 'Армия', description: 'Соберите свою армию', icon: Users },
   { id: 5, label: 'Расстановка', description: 'Подготовьте войска к бою', icon: Sword },
 ];
@@ -47,9 +47,9 @@ export function StepProgressIndicator({
 }: StepProgressIndicatorProps) {
   const getStepIndex = (): number => {
     switch (currentStep) {
-      case 'faction': return 0;
-      case 'budget': return 1;
-      case 'rules': return 2;
+      case 'rules': return 0;
+      case 'faction': return 1;
+      case 'budget': return 2;
       case 'units': return 3;
       case 'preparation':
       case 'complete': return 4;

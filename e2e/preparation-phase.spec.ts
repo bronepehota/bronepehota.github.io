@@ -15,7 +15,13 @@ test.describe('Preparation Phase', () => {
     await page.goto('/app');
     await page.waitForLoadState('networkidle');
 
-    // Step 1: Select faction (Polaris)
+    // Step 1: Rules is now first - confirm rules
+    const rulesConfirmButton = page.getByTestId('rules-confirm-button');
+    await expect(rulesConfirmButton).toBeVisible({ timeout: 5000 });
+    await rulesConfirmButton.click();
+    await page.waitForTimeout(500);
+
+    // Step 2: Select faction (Polaris)
     const polarisCard = page.getByTestId('faction-card-polaris');
     await expect(polarisCard).toBeVisible();
     await polarisCard.click();
@@ -27,22 +33,16 @@ test.describe('Preparation Phase', () => {
     await continueButton.click();
     await page.waitForTimeout(300);
 
-    // Step 2: Select budget (350 points)
+    // Step 3: Select budget (350 points)
     const budgetButton = page.getByRole('button', { name: '350' });
     await expect(budgetButton).toBeVisible();
     await budgetButton.click();
     await page.waitForTimeout(300);
 
-    // Step 3: Go to rules and confirm
+    // Step 4: Confirm budget and proceed to unit selection
     const budgetNextButton = page.getByTestId('budget-next-button');
     await expect(budgetNextButton).toBeVisible();
     await budgetNextButton.click();
-    await page.waitForTimeout(300);
-
-    // Step 4: Confirm rules and proceed to unit selection
-    const rulesConfirmButton = page.getByTestId('rules-confirm-button');
-    await expect(rulesConfirmButton).toBeVisible({ timeout: 5000 });
-    await rulesConfirmButton.click();
     await page.waitForTimeout(500);
 
     // Step 5: Add a squad to the army
@@ -76,6 +76,12 @@ test.describe('Preparation Phase', () => {
     await page.goto('/app');
     await page.waitForLoadState('networkidle');
 
+    // Step 1: Rules is now first - confirm rules
+    const rulesConfirmButton = page.getByTestId('rules-confirm-button');
+    await expect(rulesConfirmButton).toBeVisible({ timeout: 5000 });
+    await rulesConfirmButton.click();
+    await page.waitForTimeout(500);
+
     // Select faction
     const polarisCard = page.getByTestId('faction-card-polaris');
     await polarisCard.click();
@@ -92,12 +98,6 @@ test.describe('Preparation Phase', () => {
 
     const budgetNextButton = page.getByTestId('budget-next-button');
     await budgetNextButton.click();
-    await page.waitForTimeout(300);
-
-    // Confirm rules and proceed to unit selection
-    const rulesConfirmButton = page.getByTestId('rules-confirm-button');
-    await expect(rulesConfirmButton).toBeVisible({ timeout: 5000 });
-    await rulesConfirmButton.click();
     await page.waitForTimeout(500);
 
     // Add a squad (first one visible - should be Линейная клон-пехота for Polaris)
@@ -138,6 +138,12 @@ test.describe('Preparation Phase', () => {
     await page.goto('/app');
     await page.waitForLoadState('networkidle');
 
+    // Step 1: Rules is now first - confirm rules
+    const rulesConfirmButton = page.getByTestId('rules-confirm-button');
+    await expect(rulesConfirmButton).toBeVisible({ timeout: 5000 });
+    await rulesConfirmButton.click();
+    await page.waitForTimeout(500);
+
     // Complete setup to get to unit selection
     const polarisCard = page.getByTestId('faction-card-polaris');
     await polarisCard.click();
@@ -153,11 +159,6 @@ test.describe('Preparation Phase', () => {
 
     const budgetNextButton = page.getByTestId('budget-next-button');
     await budgetNextButton.click();
-    await page.waitForTimeout(300);
-
-    const rulesConfirmButton = page.getByTestId('rules-confirm-button');
-    await expect(rulesConfirmButton).toBeVisible({ timeout: 5000 });
-    await rulesConfirmButton.click();
     await page.waitForTimeout(500);
 
     // Switch to army view without adding any units
@@ -177,6 +178,12 @@ test.describe('Preparation Phase', () => {
     await page.goto('/app');
     await page.waitForLoadState('networkidle');
 
+    // Step 1: Rules is now first - confirm rules
+    const rulesConfirmButton = page.getByTestId('rules-confirm-button');
+    await expect(rulesConfirmButton).toBeVisible({ timeout: 5000 });
+    await rulesConfirmButton.click();
+    await page.waitForTimeout(500);
+
     // Select faction
     const polarisCard = page.getByTestId('faction-card-polaris');
     await polarisCard.click();
@@ -193,12 +200,6 @@ test.describe('Preparation Phase', () => {
 
     const budgetNextButton = page.getByTestId('budget-next-button');
     await budgetNextButton.click();
-    await page.waitForTimeout(300);
-
-    // Confirm rules and proceed to unit selection
-    const rulesConfirmButton = page.getByTestId('rules-confirm-button');
-    await expect(rulesConfirmButton).toBeVisible({ timeout: 5000 });
-    await rulesConfirmButton.click();
     await page.waitForTimeout(500);
 
     // Add a squad
@@ -236,14 +237,20 @@ test.describe('Preparation Phase', () => {
     await confirmButton.click();
     await page.waitForTimeout(300);
 
-    // Verify we're back to faction selection
-    await expect(page.getByTestId('faction-card-polaris')).toBeVisible();
+    // Verify we're back to rules (now the first step)
+    await expect(page.getByText('Выберите версию правил')).toBeVisible();
   });
 
   test('should enable start battle button when army has units', async ({ page }) => {
     // Navigate through setup and add a unit
     await page.goto('/app');
     await page.waitForLoadState('networkidle');
+
+    // Step 1: Rules is now first - confirm rules
+    const rulesConfirmButton = page.getByTestId('rules-confirm-button');
+    await expect(rulesConfirmButton).toBeVisible({ timeout: 5000 });
+    await rulesConfirmButton.click();
+    await page.waitForTimeout(500);
 
     // Select faction
     const polarisCard = page.getByTestId('faction-card-polaris');
@@ -261,12 +268,6 @@ test.describe('Preparation Phase', () => {
 
     const budgetNextButton = page.getByTestId('budget-next-button');
     await budgetNextButton.click();
-    await page.waitForTimeout(300);
-
-    // Confirm rules and proceed to unit selection
-    const rulesConfirmButton = page.getByTestId('rules-confirm-button');
-    await expect(rulesConfirmButton).toBeVisible({ timeout: 5000 });
-    await rulesConfirmButton.click();
     await page.waitForTimeout(500);
 
     // Add a squad
@@ -297,6 +298,12 @@ test.describe('Preparation Phase', () => {
     await page.goto('/app');
     await page.waitForLoadState('networkidle');
 
+    // Step 1: Rules is now first - confirm rules
+    const rulesConfirmButton = page.getByTestId('rules-confirm-button');
+    await expect(rulesConfirmButton).toBeVisible({ timeout: 5000 });
+    await rulesConfirmButton.click();
+    await page.waitForTimeout(500);
+
     // Select faction
     const polarisCard = page.getByTestId('faction-card-polaris');
     await polarisCard.click();
@@ -313,12 +320,6 @@ test.describe('Preparation Phase', () => {
 
     const budgetNextButton = page.getByTestId('budget-next-button');
     await budgetNextButton.click();
-    await page.waitForTimeout(300);
-
-    // Confirm rules and proceed to unit selection
-    const rulesConfirmButton = page.getByTestId('rules-confirm-button');
-    await expect(rulesConfirmButton).toBeVisible({ timeout: 5000 });
-    await rulesConfirmButton.click();
     await page.waitForTimeout(500);
 
     // Add a squad

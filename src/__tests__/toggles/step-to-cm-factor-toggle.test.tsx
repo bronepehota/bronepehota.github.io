@@ -30,21 +30,22 @@ describe('StepToCmFactorToggle', () => {
   it('should render with default value "5"', () => {
     render(<StepToCmFactorToggle value="5" onValueChange={onValueChangeMock} />);
 
-    expect(screen.getByText('МАСШТАБ')).toBeInTheDocument();
-    expect(screen.getByText('1 шаг = 5см')).toBeInTheDocument();
+    expect(screen.getByText('1 шаг = ?')).toBeInTheDocument();
+    expect(screen.getByText('5')).toBeInTheDocument();
+    expect(screen.getAllByText('см').length).toBeGreaterThan(0);
   });
 
   it('should render with value "4"', () => {
     render(<StepToCmFactorToggle value="4" onValueChange={onValueChangeMock} />);
 
-    expect(screen.getByText('МАСШТАБ')).toBeInTheDocument();
-    expect(screen.getByText('1 шаг = 4см')).toBeInTheDocument();
+    expect(screen.getByText('1 шаг = ?')).toBeInTheDocument();
+    expect(screen.getByText('4')).toBeInTheDocument();
   });
 
-  it('should toggle from "5" to "4" when clicked', async () => {
+  it('should select "4" option when clicked', async () => {
     render(<StepToCmFactorToggle value="5" onValueChange={onValueChangeMock} />);
 
-    const button = screen.getByRole('button', { name: /масштаб: 1 шаг = 5см/i });
+    const button = screen.getByRole('button', { name: /4см/i });
     fireEvent.click(button);
 
     await waitFor(() => {
@@ -53,10 +54,10 @@ describe('StepToCmFactorToggle', () => {
     expect(mockLocalStorage.getItem('bronepehota_step_to_cm_factor')).toBe('4');
   });
 
-  it('should toggle from "4" to "5" when clicked', async () => {
+  it('should select "5" option when clicked', async () => {
     render(<StepToCmFactorToggle value="4" onValueChange={onValueChangeMock} />);
 
-    const button = screen.getByRole('button', { name: /масштаб: 1 шаг = 4см/i });
+    const button = screen.getByRole('button', { name: /5см/i });
     fireEvent.click(button);
 
     await waitFor(() => {
@@ -100,22 +101,32 @@ describe('StepToCmFactorToggle', () => {
     expect(container.querySelector('[data-testid="step-to-cm-factor-toggle"]')).toBeInTheDocument();
   });
 
-  it('should have violet styling when in "4" mode', () => {
+  it('should have violet styling on "4" button when selected', () => {
     const { container } = render(
       <StepToCmFactorToggle value="4" onValueChange={onValueChangeMock} />
     );
 
-    const toggle = container.querySelector('[data-testid="step-to-cm-factor-toggle"]');
-    expect(toggle).toHaveClass('bg-violet-950/30', 'border-violet-600/60');
+    const button4cm = container.querySelector('button[aria-pressed="true"]');
+    expect(button4cm).toHaveClass('bg-violet-950/40', 'border-violet-500');
   });
 
-  it('should have slate styling when in "5" mode', () => {
+  it('should have emerald styling on "5" button when selected', () => {
     const { container } = render(
       <StepToCmFactorToggle value="5" onValueChange={onValueChangeMock} />
     );
 
-    const toggle = container.querySelector('[data-testid="step-to-cm-factor-toggle"]');
-    expect(toggle).toHaveClass('bg-slate-800/40', 'border-slate-700/50');
+    const button5cm = container.querySelector('button[aria-pressed="true"]');
+    expect(button5cm).toHaveClass('bg-emerald-950/40', 'border-emerald-500');
+  });
+
+  it('should show checkmark on selected option', () => {
+    const { container } = render(
+      <StepToCmFactorToggle value="4" onValueChange={onValueChangeMock} />
+    );
+
+    // Find the button with "4" text and Check icon
+    const checkmark = container.querySelector('button[aria-pressed="true"] svg');
+    expect(checkmark).toBeInTheDocument();
   });
 });
 

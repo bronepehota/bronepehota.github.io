@@ -87,16 +87,16 @@ export default function ArmyBuilder({
   });
 
   // Setup step state for guided flow - sync with army.currentStep
-  const [setupStep, setSetupStep] = useState<'faction' | 'budget' | 'rules' | 'units' | 'preparation'>(() => {
+  const [setupStep, setSetupStep] = useState<'rules' | 'faction' | 'budget' | 'units' | 'preparation'>(() => {
     if (army.currentStep === 'unit-select') return 'units';
     if (army.currentStep === 'preparation') return 'preparation';
-    return 'faction';
+    return 'rules';
   });
 
   // Sync setupStep when army.currentStep changes (e.g., after returning to faction select)
   useEffect(() => {
-    if (army.currentStep === 'faction-select' && (setupStep === 'units' || setupStep === 'rules' || setupStep === 'budget')) {
-      setSetupStep('faction');
+    if (army.currentStep === 'faction-select' && (setupStep === 'units' || setupStep === 'budget' || setupStep === 'faction')) {
+      setSetupStep('rules');
     } else if (army.currentStep === 'unit-select' && setupStep !== 'units') {
       setSetupStep('units');
     } else if (army.currentStep === 'preparation' && setupStep !== 'preparation') {
@@ -122,18 +122,53 @@ export default function ArmyBuilder({
               selectedRules={rulesVersion}
             />
 
-            {/* Step 1: Faction Selection */}
-            {setupStep === 'faction' && (
-              <FactionSelector
-                factions={typedFactions}
-                selectedFaction={army.faction}
-                onFactionSelect={(factionId) => setArmy({ ...army, faction: factionId })}
-                onNext={() => setSetupStep('budget')}
-                nextDisabled={!army.faction}
+            {/* Step 1: Rules Selection */}
+            {setupStep === 'rules' && (
+              <RulesSelector
+                versions={getAllRulesVersions()}
+                selectedVersion={rulesVersion}
+                onVersionChange={onRulesVersionChange}
+                panicEnabled={panicEnabled}
+                onPanicEnabledChange={setPanicEnabled}
+                aimedShotEnabled={aimedShotEnabled}
+                onAimedShotEnabledChange={setAimedShotEnabled}
+                surpriseAttackEnabled={surpriseAttackEnabled}
+                onSurpriseAttackEnabledChange={setSurpriseAttackEnabled}
+                strictPilotRankEnabled={strictPilotRankEnabled}
+                onStrictPilotRankEnabledChange={onStrictPilotRankEnabledChange}
+                distanceInputUnit={distanceInputUnit}
+                onDistanceInputUnitChange={onDistanceInputUnitChange}
+                stepToCmFactor={stepToCmFactor}
+                onStepToCmFactorChange={onStepToCmFactorChange}
+                autoCompleteEnabled={autoCompleteEnabled}
+                onAutoCompleteEnabledChange={onAutoCompleteEnabledChange}
+                onConfirm={() => setSetupStep('faction')}
               />
             )}
 
-            {/* Step 2: Budget Selection */}
+            {/* Step 2: Faction Selection */}
+            {setupStep === 'faction' && (
+              <div className="relative">
+                <button
+                  onClick={() => setSetupStep('rules')}
+                  className="absolute -top-4 left-0 flex items-center gap-2 text-sm text-slate-400 hover:text-slate-300 transition-colors"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Назад
+                </button>
+                <div className="pt-6">
+                  <FactionSelector
+                    factions={typedFactions}
+                    selectedFaction={army.faction}
+                    onFactionSelect={(factionId) => setArmy({ ...army, faction: factionId })}
+                    onNext={() => setSetupStep('budget')}
+                    nextDisabled={!army.faction}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Step 3: Budget Selection */}
             {setupStep === 'budget' && army.faction && (
               <div className="relative">
                 <button
@@ -148,46 +183,11 @@ export default function ArmyBuilder({
                     presets={[250, 350, 500, 1000]}
                     value={army.pointBudget}
                     onChange={(budget) => setArmy({ ...army, pointBudget: budget })}
-                    onNext={() => setSetupStep('rules')}
-                    disabled={false}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Step 3: Rules Confirmation */}
-            {setupStep === 'rules' && (
-              <div className="relative">
-                <button
-                  onClick={() => setSetupStep('budget')}
-                  className="absolute -top-4 left-0 flex items-center gap-2 text-sm text-slate-400 hover:text-slate-300 transition-colors"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  Назад
-                </button>
-                <div className="pt-6">
-                  <RulesSelector
-                    versions={getAllRulesVersions()}
-                    selectedVersion={rulesVersion}
-                    onVersionChange={onRulesVersionChange}
-                    panicEnabled={panicEnabled}
-                    onPanicEnabledChange={setPanicEnabled}
-                    aimedShotEnabled={aimedShotEnabled}
-                    onAimedShotEnabledChange={setAimedShotEnabled}
-                    surpriseAttackEnabled={surpriseAttackEnabled}
-                    onSurpriseAttackEnabledChange={setSurpriseAttackEnabled}
-                    strictPilotRankEnabled={strictPilotRankEnabled}
-                    onStrictPilotRankEnabledChange={onStrictPilotRankEnabledChange}
-                    distanceInputUnit={distanceInputUnit}
-                    onDistanceInputUnitChange={onDistanceInputUnitChange}
-                    stepToCmFactor={stepToCmFactor}
-                    onStepToCmFactorChange={onStepToCmFactorChange}
-                    autoCompleteEnabled={autoCompleteEnabled}
-                    onAutoCompleteEnabledChange={onAutoCompleteEnabledChange}
-                    onConfirm={() => {
+                    onNext={() => {
                       setArmy({ ...army, currentStep: 'unit-select' });
                       setSetupStep('units');
                     }}
+                    disabled={false}
                   />
                 </div>
               </div>
@@ -284,7 +284,7 @@ export default function ArmyBuilder({
               });
             }}
             onBackToFactionSelect={() => {
-              setSetupStep('faction');
+              setSetupStep('rules');
               setArmy({
                 ...army,
                 units: [],
