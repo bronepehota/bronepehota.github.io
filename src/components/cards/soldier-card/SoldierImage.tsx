@@ -10,6 +10,7 @@ interface SoldierImageProps {
   isDone: boolean;
   isInPanic: boolean;
   isMounted: boolean;
+  isPilot?: boolean;
   onImageClick: () => void;
 }
 
@@ -20,6 +21,7 @@ export function SoldierImage({
   isDone,
   isInPanic,
   isMounted,
+  isPilot = false,
   onImageClick,
 }: SoldierImageProps) {
   return (
@@ -34,6 +36,17 @@ export function SoldierImage({
           unoptimized
         />
       </div>
+
+      {/* Pilot badge - top left */}
+      {isPilot && (
+        <div className="absolute top-1 left-1 z-10">
+          <div className="px-1 py-0.5 backdrop-blur-md bg-cyan-950/80 border border-cyan-600/50 rounded-sm">
+            <span className="font-mono text-[8px] font-black text-cyan-300 uppercase tracking-wider">
+              ПИЛОТ
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Soldier number HUD */}
       <div className="absolute bottom-1 right-1 z-10">

@@ -223,6 +223,20 @@ export default function UnitCard({
           alive: false
         };
         updateThisUnit((u) => ({ ...u, pilotInfo: updatedPilotInfo }));
+
+        // Also mark the soldier as dead in their squad
+        const pilotSquad = allUnits.find(u => u.instanceId === unit.pilotInfo?.squadInstanceId);
+        if (pilotSquad && pilotSquad.type === 'squad') {
+          const soldierIndex = unit.pilotInfo.soldierIndex || 0;
+          updateUnit(pilotSquad.instanceId, (u) => {
+            if (u.type !== 'squad') return u;
+            const currentDead = u.deadSoldiers || [];
+            const newDead = currentDead.includes(soldierIndex)
+              ? currentDead
+              : [...currentDead, soldierIndex];
+            return { ...u, deadSoldiers: newDead };
+          });
+        }
       }
     });
   };
@@ -337,6 +351,11 @@ export default function UnitCard({
         } else if (result.actionType === 'melee') {
           updateThisUnit((u) => ({ ...u, isMachineMelee: true }));
         }
+
+        // Mark pilot as done if markAsDone was checked
+        if (markAsDone) {
+          setPilotDoneState(true);
+        }
       }
     }
 
@@ -371,6 +390,25 @@ export default function UnitCard({
     return soldier.image || null;
   };
 
+  // Helper to update pilot's done state when machine acts
+  const setPilotDoneState = (done: boolean) => {
+    if (!unit.pilotInfo) return;
+
+    const pilotSquad = allUnits.find(u => u.instanceId === unit.pilotInfo?.squadInstanceId);
+    if (!pilotSquad || pilotSquad.type !== 'squad') return;
+
+    const soldierIndex = unit.pilotInfo.soldierIndex;
+    updateUnit(pilotSquad.instanceId, (u) => {
+      if (u.type !== 'squad') return u;
+      const newActions = [...(u.actionsUsed || [])];
+      newActions[soldierIndex] = {
+        ...newActions[soldierIndex],
+        done
+      };
+      return { ...u, actionsUsed: newActions };
+    });
+  };
+
   const handleToggleDone = () => {
     if (isSquad) {
       // Toggle: mark all alive soldiers as done or undo
@@ -384,7 +422,11 @@ export default function UnitCard({
       updateThisUnit((u) => ({ ...u, actionsUsed: newActions }));
     } else {
       // Toggle: mark machine as done or undo
-      updateThisUnit((u) => ({ ...u, isMachineDone: !isMachineDone }));
+      const newMachineDoneState = !isMachineDone;
+      updateThisUnit((u) => ({ ...u, isMachineDone: newMachineDoneState }));
+
+      // Also update pilot's done state
+      setPilotDoneState(newMachineDoneState);
     }
   };
 
@@ -642,6 +684,7 @@ export default function UnitCard({
             stepToCmFactor={stepToCmFactor}
             allUnits={allUnits}
             getSoldierImage={getSoldierImage}
+            onNavigateToUnit={_onNavigateToUnit}
           />
         ) : (
           <MachineView

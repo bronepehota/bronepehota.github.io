@@ -51,6 +51,7 @@ export function MachineStatsPanel({
           <button
             onClick={() => onUpdateDurability(-1)}
             disabled={currentDurability === 0}
+            data-testid="durability-decrease"
             className={cn(
               "relative w-9 h-9 md:w-10 md:h-10 rounded-sm bg-red-950/30 hover:bg-red-950/50 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors min-w-[40px] min-h-[40px] border-2 border-red-800/50 shrink-0 overflow-hidden",
               getZoneColor(zone.color).text
@@ -70,6 +71,7 @@ export function MachineStatsPanel({
           <button
             onClick={() => onUpdateDurability(1)}
             disabled={currentDurability === maxDurability}
+            data-testid="durability-increase"
             className={cn(
               "relative w-9 h-9 md:w-10 md:h-10 rounded-sm bg-emerald-950/30 hover:bg-emerald-950/50 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors min-w-[40px] min-h-[40px] border-2 border-emerald-800/50 shrink-0 overflow-hidden",
               getZoneColor(zone.color).text

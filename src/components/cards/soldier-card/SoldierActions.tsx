@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CheckCircle2, Skull, Crosshair, Footprints } from 'lucide-react';
+import { CheckCircle2, Skull, Crosshair, Footprints, ArrowRightCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface SoldierActionState {
@@ -23,6 +23,8 @@ interface SoldierActionsProps {
   onStartLongPress: (callback: () => void) => void;
   onEndLongPress: () => void;
   isLongPressing: boolean;
+  isPilot?: boolean;
+  onNavigateToMachine?: () => void;
 }
 
 export function SoldierActions({
@@ -36,6 +38,8 @@ export function SoldierActions({
   onEndLongPress,
   isLongPressing,
   soldierIndex,
+  isPilot = false,
+  onNavigateToMachine,
 }: SoldierActionsProps) {
   const [wasLongPressTriggered, setWasLongPressTriggered] = useState(false);
 
@@ -90,7 +94,7 @@ export function SoldierActions({
 
   return (
     <div className="flex gap-2 md:gap-3 items-center">
-      {/* ДЕЙСТВИЕ button - disabled for dead/done/panic soldiers */}
+      {/* Pilot: К МАШИНЕ button or regular ДЕЙСТВИЕ button */}
       {isInPanic ? (
         <div className="relative flex-1 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 p-1.5 md:p-2 rounded-sm flex items-center justify-center gap-1.5 md:gap-2 overflow-hidden border-2 text-xs font-mono font-bold uppercase tracking-wider bg-orange-950/30 border-orange-700/50 text-orange-400">
           {/* Tech corners */}
@@ -99,6 +103,23 @@ export function SoldierActions({
           <Footprints className="w-4 h-4 md:w-5 md:h-5" />
           <span className="hidden sm:inline">В ПАНИКЕ</span>
         </div>
+      ) : isPilot ? (
+        <button
+          onClick={onNavigateToMachine}
+          className={cn(
+            "relative flex-1 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 p-1.5 md:p-2 rounded-sm transition-all flex items-center justify-center gap-1.5 md:gap-2 overflow-hidden",
+            "border-2 text-xs font-mono font-bold uppercase tracking-wider",
+            "bg-purple-950/20 hover:bg-purple-950/40 border-purple-700/50 text-purple-400 active:scale-95"
+          )}
+          type="button"
+          aria-label="Перейти к машине"
+        >
+          {/* Tech corners */}
+          <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-purple-600/40" aria-hidden="true" />
+          <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-purple-600/40" aria-hidden="true" />
+          <ArrowRightCircle className="w-4 h-4 md:w-5 md:h-5" />
+          <span className="hidden sm:inline">К МАШИНЕ →</span>
+        </button>
       ) : (
         <button
           disabled={isDone || isDead}

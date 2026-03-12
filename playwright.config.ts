@@ -40,7 +40,7 @@ export default defineConfig({
   webServer: {
     command: 'npm run dev:e2e',
     url: 'http://localhost:3001',
-    reuseExistingServer: true,
-    timeout: 120 * 1000,
+    reuseExistingServer: !process.env.CI, // Reuse locally, start fresh on CI
+    timeout: 60 * 1000, // 60 seconds is enough for Next.js to start
   },
 });
