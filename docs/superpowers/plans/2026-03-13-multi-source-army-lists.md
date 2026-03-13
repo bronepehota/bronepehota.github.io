@@ -1295,11 +1295,7 @@ Adding a new source:
 4. Register in `sources-registry.ts`
 ```
 
-- [ ] **Step 2: Update data directory structure documentation**
-
-Find the data directory section and update it to show the new `sources/` structure.
-
-- [ ] **Step 3: Commit**
+- [ ] **Step 2: Commit**
 
 ```bash
 git add CLAUDE.md
