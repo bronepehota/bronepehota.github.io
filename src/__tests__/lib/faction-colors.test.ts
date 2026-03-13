@@ -16,6 +16,7 @@ describe('faction-colors', () => {
         bgSolid: 'bg-red-500',
         progress: 'bg-red-500',
         accent: 'border-red-500',
+        ring: 'ring-red-500',
       });
     });
 
@@ -31,6 +32,7 @@ describe('faction-colors', () => {
         bgSolid: 'bg-cyan-500',
         progress: 'bg-cyan-500',
         accent: 'border-cyan-500',
+        ring: 'ring-cyan-500',
       });
     });
 
@@ -46,6 +48,7 @@ describe('faction-colors', () => {
         bgSolid: 'bg-yellow-500',
         progress: 'bg-yellow-500',
         accent: 'border-yellow-500',
+        ring: 'ring-yellow-500',
       });
     });
 

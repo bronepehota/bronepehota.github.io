@@ -6,7 +6,7 @@ export type RulesVersionID = 'tehnolog' | 'community_star_system';
 // UI Control types
 export type ViewMode = 'browse' | 'army';
 export type DisplayMode = 'compact' | 'detailed';
-export type FilterType = 'all' | 'squad' | 'machine' | 'mercenary';
+export type FilterType = 'all' | 'squad' | 'machine' | 'mercenary' | 'selected';
 
 export interface Faction {
   id: FactionID;

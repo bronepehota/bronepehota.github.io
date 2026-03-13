@@ -203,6 +203,7 @@ export default function ArmyBuilder({
               selectedBudget={army.pointBudget}
               selectedRules={rulesVersion}
             />
+
             <UnitSelector
             factions={typedFactions}
             squads={typedSquads}

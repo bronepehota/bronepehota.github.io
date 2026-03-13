@@ -51,10 +51,7 @@ test.describe('Preparation Phase', () => {
     await firstAddButton.click();
     await page.waitForTimeout(300);
 
-    // Step 6: Switch to army view
-    const armyTab = page.getByRole('tab', { name: /Армия/i });
-    await expect(armyTab).toBeVisible();
-    await armyTab.click();
+    // Step 6: FloatingContinueButton appears directly when units are in army
     await page.waitForTimeout(300);
 
     // Step 7: Click "В бой" to go to preparation
@@ -106,12 +103,6 @@ test.describe('Preparation Phase', () => {
     await firstAddButton.click();
     await page.waitForTimeout(300);
 
-    // Switch to army view
-    const armyTab = page.getByRole('tab', { name: /Армия/i });
-    await expect(armyTab).toBeVisible();
-    await armyTab.click();
-    await page.waitForTimeout(500);
-
     // Go to preparation
     const toBattleButton = page.getByTestId('to-battle-button');
     await expect(toBattleButton).toBeVisible({ timeout: 5000 });
@@ -133,8 +124,7 @@ test.describe('Preparation Phase', () => {
   });
 
   test('should display empty army message when no units', async ({ page }) => {
-    // This test verifies the empty state by checking the PrepArmyList component behavior
-    // We'll use the component's internal empty state rendering
+    // This test verifies that FloatingContinueButton is not visible when army is empty
     await page.goto('/app');
     await page.waitForLoadState('networkidle');
 
@@ -161,20 +151,16 @@ test.describe('Preparation Phase', () => {
     await budgetNextButton.click();
     await page.waitForTimeout(500);
 
-    // Switch to army view without adding any units
-    const armyTab = page.getByRole('tab', { name: /Армия/i });
-    await expect(armyTab).toBeVisible();
-    await armyTab.click();
-    await page.waitForTimeout(500);
+    // Verify FloatingContinueButton is NOT visible when army is empty
+    const toBattleButton = page.getByTestId('to-battle-button');
+    await expect(toBattleButton).not.toBeVisible();
 
-    // Verify empty army message is displayed (ArmySummaryView shows empty state)
-    await expect(page.getByText('АРМИЯ ПУСТА')).toBeVisible();
-    await expect(page.getByText('Перейдите на вкладку «Юниты», чтобы собрать свою армию')).toBeVisible();
+    // Verify budget display shows 0/350
+    await expect(page.getByText('0/350')).toBeVisible();
   });
 
   test('should navigate back to army builder', async ({ page }) => {
-    // Note: The preparation screen doesn't have a back button in the current implementation.
-    // This test verifies that users can navigate back from the army view (before preparation).
+    // This test verifies that users can navigate back from the unit selector
     await page.goto('/app');
     await page.waitForLoadState('networkidle');
 
@@ -207,13 +193,7 @@ test.describe('Preparation Phase', () => {
     await firstAddButton.click();
     await page.waitForTimeout(300);
 
-    // Switch to army view
-    const armyTab = page.getByRole('tab', { name: /Армия/i });
-    await expect(armyTab).toBeVisible();
-    await armyTab.click();
-    await page.waitForTimeout(500);
-
-    // Verify back button is visible on army view
+    // Verify back button is visible in control panel
     const backButton = page.getByTestId('back-to-faction-button');
     await expect(backButton).toBeVisible();
 
@@ -224,11 +204,11 @@ test.describe('Preparation Phase', () => {
     // Verify confirmation modal appears
     await expect(page.getByText('Вы уверены, что хотите сбросить армию?')).toBeVisible();
 
-    // Cancel and verify we're still on army view
+    // Cancel and verify we're still on unit selector
     const cancelButton = page.locator('button.bg-slate-700').filter({ hasText: 'Отмена' });
     await cancelButton.click();
     await page.waitForTimeout(200);
-    await expect(armyTab).toBeVisible();
+    await expect(page.getByText('Соберите свою армию')).toBeVisible();
 
     // Click back again and confirm
     await backButton.click();
@@ -275,10 +255,7 @@ test.describe('Preparation Phase', () => {
     await firstAddButton.click();
     await page.waitForTimeout(300);
 
-    // Switch to army view
-    const armyTab = page.getByRole('tab', { name: /Армия/i });
-    await expect(armyTab).toBeVisible();
-    await armyTab.click();
+    // FloatingContinueButton appears directly when units are in army
     await page.waitForTimeout(300);
 
     // Go to preparation
@@ -327,10 +304,7 @@ test.describe('Preparation Phase', () => {
     await firstAddButton.click();
     await page.waitForTimeout(300);
 
-    // Switch to army view
-    const armyTab = page.getByRole('tab', { name: /Армия/i });
-    await expect(armyTab).toBeVisible();
-    await armyTab.click();
+    // FloatingContinueButton appears directly when units are in army
     await page.waitForTimeout(300);
 
     // Go to preparation

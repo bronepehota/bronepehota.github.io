@@ -63,8 +63,7 @@ test.describe('Pilot Functionality', () => {
     await machineCardForAdd.locator('button:has-text("В АРМИЮ")').click();
     await page.waitForTimeout(1000);
 
-    // Switch to army tab to see "НА БОЙ" button
-    await page.click('[role="tab"]:has-text("АРМИЯ")');
+    // FloatingContinueButton appears directly when units are in army
     await page.waitForTimeout(500);
 
     // Click "НА БОЙ" to go to battle preparation

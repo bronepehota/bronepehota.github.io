@@ -19,8 +19,18 @@ export default function Home() {
   const [showCombatLog, setShowCombatLog] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
-  // Display mode state with localStorage persistence
-  const [displayMode, setDisplayMode] = useState<'detailed' | 'compact'>('detailed');
+  // Display mode state with localStorage persistence - default to compact on mobile
+  const [displayMode, setDisplayMode] = useState<'detailed' | 'compact'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('bronepehota_display_mode');
+      if (saved === 'compact' || saved === 'detailed') {
+        return saved;
+      }
+      // No saved value - detect mobile
+      return window.innerWidth < 768 ? 'compact' : 'detailed';
+    }
+    return 'detailed'; // SSR default
+  });
 
   // Load view and displayMode from localStorage after mount
   useEffect(() => {

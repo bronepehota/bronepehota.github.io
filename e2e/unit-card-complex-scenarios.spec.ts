@@ -40,11 +40,7 @@ test.describe('UnitCard Complex Scenarios', () => {
     await addButton.click();
     await page.waitForTimeout(500);
 
-    // Switch to "Армия" tab to see the added unit
-    await page.click('[role="tab"]:has-text("АРМИЯ")');
-    await page.waitForTimeout(500);
-
-    // Verify the unit is now in the army
+    // Verify the unit is now in the army (check for count badge)
     expect(await page.locator('text=ЛЁГКАЯ ШТУРМОВАЯ КЛОН-ПЕХОТА').isVisible()).toBe(true);
   });
 
@@ -80,12 +76,8 @@ test.describe('UnitCard Complex Scenarios', () => {
     await addButton.click();
     await page.waitForTimeout(500);
 
-    // Switch to "Армия" tab to see the added machine
-    await page.click('[role="tab"]:has-text("АРМИЯ")');
-    await page.waitForTimeout(500);
-
-    // Verify the machine is now in the army
-    expect(await page.locator('text=Хеликс').isVisible()).toBe(true);
+    // Verify the machine is now in the army (check for count badge)
+    expect(await page.locator('text=×1').isVisible()).toBe(true);
   });
 
   test('navigate through unit selector filters', async ({ page }) => {
