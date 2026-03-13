@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { Army, ArmyUnit, RulesVersionID } from '@/lib/types';
-import { ArrowLeft } from 'lucide-react';
 import { FactionSelector } from './controls/FactionSelector';
 import { PointBudgetInput } from './controls/PointBudgetInput';
 import { UnitSelector } from './UnitSelector';
@@ -131,6 +130,40 @@ export default function ArmyBuilder({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [army.currentStep]);
 
+  // Handle step navigation from StepProgressIndicator
+  const handleStepClick = (step: 'rules' | 'source' | 'faction' | 'budget' | 'units' | 'preparation') => {
+    // Allow navigating back to previous steps or to current step
+    const stepOrder = ['rules', 'source', 'faction', 'budget', 'units', 'preparation'];
+    const currentIndex = stepOrder.indexOf(setupStep);
+    const targetIndex = stepOrder.indexOf(step);
+
+    // Only allow navigation to current step or previous steps
+    if (targetIndex <= currentIndex) {
+      // Reset army when going back to rules/source/faction (invalidate current army)
+      if (targetIndex <= 2 && currentIndex >= 3) {
+        setArmy({
+          ...army,
+          units: [],
+          totalCost: 0,
+          pointBudget: undefined,
+          currentStep: 'faction-select',
+        });
+      }
+      // Reset faction when going back to rules/source
+      if (targetIndex <= 1 && currentIndex >= 2) {
+        setArmy({
+          ...army,
+          faction: undefined,
+          units: [],
+          totalCost: 0,
+          pointBudget: undefined,
+          currentStep: 'faction-select',
+        });
+      }
+      setSetupStep(step);
+    }
+  };
+
   // Validate currentStep - allow 'faction-select', 'unit-select', or 'preparation'
   const validStep = (army.currentStep === 'faction-select' || army.currentStep === 'unit-select' || army.currentStep === 'preparation')
     ? army.currentStep
@@ -146,6 +179,7 @@ export default function ArmyBuilder({
               selectedFaction={army.faction}
               selectedBudget={army.pointBudget}
               selectedRules={rulesVersion}
+              onStepClick={handleStepClick}
             />
 
             {/* Step 1: Rules Selection */}
@@ -174,70 +208,37 @@ export default function ArmyBuilder({
 
             {/* Step 2: Source Selection */}
             {setupStep === 'source' && (
-              <div className="relative">
-                <button
-                  onClick={() => setSetupStep('rules')}
-                  className="absolute -top-4 left-0 flex items-center gap-2 text-sm text-slate-400 hover:text-slate-300 transition-colors"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  Назад
-                </button>
-                <div className="pt-6">
-                  <SourceSelector
-                    sources={getAllSources()}
-                    selectedSource={selectedSource}
-                    onSourceChange={handleSourceChange}
-                    onConfirm={() => setSetupStep('faction')}
-                  />
-                </div>
-              </div>
+              <SourceSelector
+                sources={getAllSources()}
+                selectedSource={selectedSource}
+                onSourceChange={handleSourceChange}
+                onConfirm={() => setSetupStep('faction')}
+              />
             )}
 
             {/* Step 3: Faction Selection */}
             {setupStep === 'faction' && (
-              <div className="relative">
-                <button
-                  onClick={() => setSetupStep('source')}
-                  className="absolute -top-4 left-0 flex items-center gap-2 text-sm text-slate-400 hover:text-slate-300 transition-colors"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  Назад
-                </button>
-                <div className="pt-6">
-                  <FactionSelector
-                    factions={availableFactions}
-                    selectedFaction={army.faction}
-                    onFactionSelect={(factionId) => setArmy({ ...army, faction: factionId })}
-                    onNext={() => setSetupStep('budget')}
-                    _nextDisabled={!army.faction}
-                  />
-                </div>
-              </div>
+              <FactionSelector
+                factions={availableFactions}
+                selectedFaction={army.faction}
+                onFactionSelect={(factionId) => setArmy({ ...army, faction: factionId })}
+                onNext={() => setSetupStep('budget')}
+                _nextDisabled={!army.faction}
+              />
             )}
 
             {/* Step 3: Budget Selection */}
             {setupStep === 'budget' && army.faction && (
-              <div className="relative">
-                <button
-                  onClick={() => setSetupStep('faction')}
-                  className="absolute -top-4 left-0 flex items-center gap-2 text-sm text-slate-400 hover:text-slate-300 transition-colors"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  Назад
-                </button>
-                <div className="pt-6">
-                  <PointBudgetInput
-                    presets={[250, 350, 500, 1000]}
-                    value={army.pointBudget}
-                    onChange={(budget) => setArmy({ ...army, pointBudget: budget })}
-                    onNext={() => {
-                      setArmy({ ...army, currentStep: 'unit-select' });
-                      setSetupStep('units');
-                    }}
-                    disabled={false}
-                  />
-                </div>
-              </div>
+              <PointBudgetInput
+                presets={[250, 350, 500, 1000]}
+                value={army.pointBudget}
+                onChange={(budget) => setArmy({ ...army, pointBudget: budget })}
+                onNext={() => {
+                  setArmy({ ...army, currentStep: 'unit-select' });
+                  setSetupStep('units');
+                }}
+                disabled={false}
+              />
             )}
           </>
         )}
@@ -249,6 +250,7 @@ export default function ArmyBuilder({
               selectedFaction={army.faction}
               selectedBudget={army.pointBudget}
               selectedRules={rulesVersion}
+              onStepClick={handleStepClick}
             />
 
             <UnitSelector
@@ -329,17 +331,6 @@ export default function ArmyBuilder({
                 ...army,
                 isInBattle: true,
                 currentStep: 'preparation',
-              });
-            }}
-            onBackToFactionSelect={() => {
-              setSetupStep('rules');
-              setArmy({
-                ...army,
-                units: [],
-                totalCost: 0,
-                pointBudget: undefined,
-                currentStep: 'faction-select',
-                isInBattle: false,
               });
             }}
             displayMode={displayMode}

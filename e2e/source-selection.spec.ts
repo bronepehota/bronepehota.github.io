@@ -101,8 +101,8 @@ test.describe('Source Selection', () => {
     await page.click('[data-testid="rules-confirm-button"]');
     await page.waitForTimeout(500);
 
-    // Click back button
-    await page.click('button:has-text("Назад")');
+    // Click on Step 1 (Правила) in the progress indicator to go back
+    await page.click('button[aria-label*="Шаг 1"]');
     await page.waitForTimeout(300);
 
     // Should be back on rules screen

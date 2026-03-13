@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { GitHubPagesImage as Image } from './GitHubPagesImage';
 import type { Faction, Squad, Machine, ArmyUnit, FactionID, FilterType } from '@/lib/types';
-import { Plus, ArrowLeft, Users, Shield, BookOpen, X, Sword } from 'lucide-react';
+import { Plus, Users, Shield, BookOpen, X, Sword } from 'lucide-react';
 import { EncyclopediaModal } from './modals/EncyclopediaModal';
 import MachineCard from './machine/MachineCard';
 import { ArmyControlPanel } from './ArmyControlPanel';
@@ -24,7 +24,6 @@ interface UnitSelectorProps {
   onAddMachine?: (machine: Machine, selectedWeaponIndices?: number[]) => void;
   onRemoveUnit: (instanceId: string) => void;
   onToBattle: () => void;
-  onBackToFactionSelect?: () => void;
   isLoading?: boolean;
   loadError?: string | null;
   displayMode: 'detailed' | 'compact';
@@ -60,7 +59,6 @@ export function UnitSelector({
   onAddMachine,
   onRemoveUnit,
   onToBattle,
-  onBackToFactionSelect,
   isLoading = false,
   loadError = null,
   displayMode,
@@ -204,16 +202,7 @@ export function UnitSelector({
     return (
       <div className="text-center p-6 sm:p-12 bg-slate-700/40 rounded-lg space-y-6">
         <p className="text-slate-400 text-base sm:text-lg">Для этой фракции пока нет доступных юнитов</p>
-        {onBackToFactionSelect && (
-          <button
-            onClick={onBackToFactionSelect}
-            className="w-full sm:w-auto px-4 sm:px-6 py-3 bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white rounded-lg font-semibold transition-all flex items-center justify-center gap-2 mx-auto min-h-[48px] touch-manipulation"
-          >
-            <ArrowLeft size={20} className="flex-shrink-0" />
-            <span className="hidden sm:inline">Вернуться к выбору фракции</span>
-            <span className="sm:hidden">Назад к фракции</span>
-          </button>
-        )}
+        <p className="text-slate-500 text-sm">Используйте навигацию выше для выбора другой фракции</p>
       </div>
     );
   }
