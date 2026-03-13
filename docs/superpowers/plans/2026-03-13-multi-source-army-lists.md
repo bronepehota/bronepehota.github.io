@@ -170,7 +170,24 @@ cp src/data/mercenaries/squads.json src/data/sources/star_system/mercenaries/squ
 cp src/data/mercenaries/machines.json src/data/sources/star_system/mercenaries/machines.json
 ```
 
-- [ ] **Step 4: Create placeholder Tehnolog factions.json**
+- [ ] **Step 4: Validate all JSON files are well-formed**
+
+```bash
+# Validate all copied JSON files
+for file in src/data/sources/star_system/**/*.json; do
+  echo "Validating $file..."
+  python3 -m json.tool "$file" > /dev/null && echo "✓ Valid" || echo "✗ Invalid"
+done
+
+# Validate Tehnolog file
+python3 -m json.tool src/data/sources/tehnolog/factions.json > /dev/null && echo "✓ Tehnolog factions.json valid"
+```
+
+Expected: All files show "✓ Valid"
+
+If any file shows "✗ Invalid", fix the JSON syntax before proceeding.
+
+- [ ] **Step 5: Create placeholder Tehnolog factions.json**
 
 ```bash
 cat > src/data/sources/tehnolog/factions.json << 'EOF'
@@ -188,7 +205,7 @@ cat > src/data/sources/tehnolog/factions.json << 'EOF'
 EOF
 ```
 
-- [ ] **Step 5: Verify files exist**
+- [ ] **Step 6: Verify files exist**
 
 ```bash
 ls -la src/data/sources/star_system/
@@ -197,7 +214,7 @@ ls -la src/data/sources/tehnolog/
 
 Expected: All files listed
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 7: Commit**
 
 ```bash
 git add src/data/sources/
@@ -725,14 +742,24 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
 - [ ] **Step 1: Check for hardcoded faction imports**
 
 ```bash
-head -20 src/components/controls/FactionSelector.tsx | grep -i "import.*faction"
+head -20 src/components/controls/FactionSelector.tsx | grep -i "import"
 ```
 
-Expected: No direct `factions.json` imports (should only have type imports)
+Expected output should show:
+- `import type { Faction, FactionID } from '@/lib/types';` ✅ acceptable (type import)
+- ❌ NOT acceptable: `import factionsData from '@/data/factions.json';`
+- ❌ NOT acceptable: Any direct JSON import of faction data
+
+If unacceptable imports are found, remove them and use the `factions` prop instead.
 
 - [ ] **Step 2: Verify factions prop is used throughout**
 
-The component should use `factions` prop (line 35, 105, 240). No changes needed.
+Check these key usages:
+- Line 35: `factions` in props destructuring ✅
+- Line 105: `factions.map((faction) => ...)` ✅
+- Line 240: `factions.find(f => f.id === selectedFaction)` ✅
+
+No changes needed - component is ready.
 
 - [ ] **Step 3: Run type check**
 
@@ -742,17 +769,7 @@ npm run type-check
 
 Expected: PASS
 
-- [ ] **Step 4: Commit**
-
-```bash
-git add src/components/controls/FactionSelector.tsx
-git commit -m "refactor: verify FactionSelector accepts factions as prop
-
-FactionSelector already designed for dynamic faction loading.
-No changes needed - verified ready for source integration.
-
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
-```
+Note: No commit needed - no changes were made to this file.
 
 ---
 
@@ -804,6 +821,14 @@ Insert:
   // Load factions from selected source
   const sourceData = getSource(selectedSource);
   const availableFactions = sourceData?.factions || [];
+
+  // Error handling: if sourceData is null, getSource already fell back to default
+  // Log warning for debugging
+  useEffect(() => {
+    if (!sourceData) {
+      console.warn(`Source data not found for ${selectedSource}, using fallback`);
+    }
+  }, [selectedSource, sourceData]);
 ```
 
 - [ ] **Step 5: Add handleSourceChange function (after handleXxx functions)**
@@ -919,6 +944,12 @@ npm run type-check
 
 Expected: PASS
 
+If type check FAILS with errors about `FactionID` being incompatible:
+- This is expected if other components still use the old union type
+- Check the error messages for specific files that need updating
+- Most errors should be resolved by previous tasks (types.ts changes)
+- Fix any remaining errors by updating those components to use `string` type for faction IDs
+
 - [ ] **Step 14: Run lint**
 
 ```bash
@@ -949,27 +980,39 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
 **Files:**
 - Modify: `src/lib/encyclopedia-utils.ts`
 
-- [ ] **Step 1: Read current imports**
+- [ ] **Step 1: List all data imports to update**
 
 ```bash
-head -30 src/lib/encyclopedia-utils.ts
+grep "from '@/data/" src/lib/encyclopedia-utils.ts
 ```
 
-Note the current import paths for squad/machine data.
+Expected: List of imports from old paths like:
+- `from '@/data/polaris/squads.json'`
+- `from '@/data/polaris/machines.json'`
+- `from '@/data/protectorate/squads.json'`
+- `from '@/data/mercenaries/squads.json'`
+- etc.
+
+Document these patterns - you'll need to update each one.
 
 - [ ] **Step 2: Update import paths for new source structure**
 
-Change paths from:
-```typescript
-import polarisSquads from '@/data/polaris/squads.json';
+For each import found in Step 1, update the path:
+
+From: `@/data/{faction}/{squads|machines}.json`
+To: `@/data/sources/star_system/{faction}/{squads|machines}.json`
+
+Example using sed (or edit manually):
+```bash
+sed -i "s|from '@/data/|from '@/data/sources/star_system/|g" src/lib/encyclopedia-utils.ts
 ```
 
-To:
-```typescript
-import polarisSquads from '@/data/sources/star_system/polaris/squads.json';
+Verify the changes:
+```bash
+grep "from '@/data/" src/lib/encyclopedia-utils.ts
 ```
 
-Repeat for all faction imports (polaris, protectorate, mercenaries).
+Expected: All paths now include `sources/star_system/`
 
 - [ ] **Step 3: Run type check**
 
@@ -1153,7 +1196,7 @@ npm run type-check
 
 Expected: PASS - no import errors
 
-- [ ] **Step 2: Remove old data files**
+- [ ] **Step 3: Remove old data files**
 
 ```bash
 rm -rf src/data/factions.json
@@ -1162,7 +1205,7 @@ rm -rf src/data/protectorate/
 rm -rf src/data/mercenaries/
 ```
 
-- [ ] **Step 3: Run tests to ensure nothing broke**
+- [ ] **Step 4: Run tests to ensure nothing broke**
 
 ```bash
 npm run validate
@@ -1170,7 +1213,7 @@ npm run validate
 
 Expected: PASS
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 5: Commit**
 
 ```bash
 git add -A
@@ -1191,12 +1234,14 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
 
 - [ ] **Step 1: Add documentation for source system**
 
-Find the section about data organization (around "Data Layer" or "Adding a new faction"). Add a new subsection after the rules system documentation:
+Find the "### Rules System (`src/lib/rules/`)" section (around line 70-90). Add a new subsection immediately after it:
 
 ```markdown
-### Army List Sources System (`src/lib/`)
+### Army List Sources System (`src/lib/sources-registry.ts`)
 
-**Sources Registry** (`sources-registry.ts`): Manages multiple army list sources with different unit databases.
+Manages multiple army list sources with different unit databases.
+
+**Functions:**
 - `getAllSources()` - List all available sources
 - `getSource(id)` - Get specific source data (factions, squads, machines)
 - `getDefaultSource()` - Get default source ID
@@ -1205,6 +1250,43 @@ Find the section about data organization (around "Data Layer" or "Adding a new f
 **Source Implementations** (`src/data/sources/`):
 - `star_system/` - Star System community source
 - `tehnolog/` - Official Tehnolog source (disabled, coming soon)
+
+**Adding a new source:**
+1. Create directory `src/data/sources/{sourceId}/`
+2. Add `factions.json` with faction definitions
+3. Create faction directories with `squads.json` and `machines.json`
+4. Register in `sources-registry.ts`
+```
+
+- [ ] **Step 2: Update data directory structure documentation**
+
+Find the "### Data Layer" section (around line 25-35). Update the directory structure from:
+```markdown
+src/data/
+├── factions.json    - Faction definitions (3 factions)
+├── polaris/         - Polaris faction units
+│   ├── squads.json  - Polaris squad data
+│   └── machines.json - Polaris vehicle data
+```
+
+To:
+```markdown
+src/data/
+├── sources/         - Army list source directories
+│   ├── star_system/ - Star System community source
+│   │   ├── factions.json - Faction definitions
+│   │   ├── polaris/ - Polaris faction units
+│   │   │   ├── squads.json
+│   │   │   └── machines.json
+│   │   ├── protectorate/ - Protectorate faction units
+│   │   │   ├── squads.json
+│   │   │   └── machines.json
+│   │   └── mercenaries/ - Mercenaries faction units
+│   │       ├── squads.json
+│   │       └── machines.json
+│   └── tehnolog/   - Official Tehnolog source (disabled)
+│       └── factions.json
+```
 
 Adding a new source:
 1. Create directory `src/data/sources/{sourceId}/`
@@ -1253,18 +1335,55 @@ Expected: All E2E tests pass
 
 - [ ] **Step 3: Manual smoke test**
 
+**IMPORTANT:** This is a BREAKING CHANGE for existing users. Anyone with an existing army will find their army cleared when they upgrade, as the `sourceId` field is new.
+
 1. Start dev server: `npm run dev`
 2. Navigate to http://localhost:3000
-3. Verify:
-   - Rules step works
-   - Source step appears with Star System selected
-   - Can click to expand source details
-   - External link works
-   - Tehnolog shows disabled state with lock icon
-   - Continue button goes to Faction step
-   - Factions load from selected source
-   - Can build an army
-   - Refreshing page preserves source selection
+
+3. Verify each step with specific checks:
+
+   **Rules Step:**
+   - [ ] Page loads without errors
+   - [ ] Can select a rules version
+   - [ ] Toggle switches work
+   - [ ] Continue button enabled
+
+   **Source Step (NEW):**
+   - [ ] Appears after Rules step
+   - [ ] Star System is selected by default
+   - [ ] Card shows selection indicator (checkmark)
+   - [ ] Clicking card expands details
+   - [ ] External link "Подробнее →" opens VK in new tab
+   - [ ] Tehnolog card shows lock icon and is non-interactive
+   - [ ] Disabled card shows "🔒 Скоро. Требуется помощи сообщества."
+   - [ ] Continue button enabled
+
+   **Faction Step:**
+   - [ ] All 3 factions load (Polaris, Protectorate, Mercenaries)
+   - [ ] Clicking faction selects it
+   - [ ] Continue button enabled after selection
+
+   **Budget Step:**
+   - [ ] Budget options appear
+   - [ ] Can select budget
+
+   **Units Step:**
+   - [ ] Can add units to army
+   - [ ] Army cost updates correctly
+
+   **Persistence:**
+   - [ ] Refresh page (F5)
+   - [ ] Source selection preserved (Star System still selected)
+   - [ ] Can navigate back through steps
+
+4. Check browser console for errors:
+   - Open DevTools (F12)
+   - Check Console tab for red errors
+   - Expected: No errors
+
+5. Check localStorage:
+   - In DevTools Console, type: `localStorage.getItem('bronepehota_army_list_source')`
+   - Expected: `"star_system"`
 
 - [ ] **Step 4: Final commit**
 
