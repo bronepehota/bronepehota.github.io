@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, KeyboardEvent } from 'react';
-import { Coins, Star } from 'lucide-react';
+import { Coins, Star, ArrowRight } from 'lucide-react';
 import { clsx } from 'clsx';
+import { FloatingContinueButton } from './FloatingContinueButton';
 
 interface PointBudgetInputProps {
   presets: number[];
@@ -94,7 +95,7 @@ export function PointBudgetInput({
   const isPresetSelected = (preset: number) => value === preset && !customValue;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-32">
       {/* Header */}
       <div className="text-center space-y-2">
         <div className="flex items-center justify-center gap-2 mb-2">
@@ -174,25 +175,17 @@ export function PointBudgetInput({
         )}
       </div>
 
-      {/* Next button */}
+      {/* Floating continue button */}
       {onNext && (
-        <div className="pt-2 flex justify-center">
-          <button
-            onClick={onNext}
-            data-testid="budget-next-button"
-            disabled={disabled || !value || !!error}
-            aria-disabled={!value || !!error}
-            className={clsx(
-              'px-8 py-3 font-mono text-sm font-bold uppercase tracking-wider',
-              'border transition-all min-h-[48px] min-w-[44px]',
-              'hover:scale-105 active:scale-95',
-              'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100',
-              value ? 'border-blue-500 bg-blue-500/10 text-blue-400' : 'border-slate-600 bg-slate-700 text-slate-400'
-            )}
-          >
-            НАЧАТЬ СБОР АРМИИ
-          </button>
-        </div>
+        <FloatingContinueButton
+          text="Собрать армию"
+          tooltip="Собрать армию"
+          accentColor="#3b82f6"
+          onClick={onNext}
+          disabled={disabled || !value || !!error}
+          dataTestid="budget-next-button"
+          icon={<ArrowRight className="w-4 h-4" />}
+        />
       )}
     </div>
   );
