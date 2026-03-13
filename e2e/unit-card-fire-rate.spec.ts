@@ -34,11 +34,8 @@ test.describe('Machine Fire Rate Limit', () => {
     await demolisherCard.locator('button:has-text("В АРМИЮ")').click();
     await page.waitForTimeout(500);
 
-    // Switch to army tab
-    await page.click('[role="tab"]:has-text("АРМИЯ")');
-    await page.waitForTimeout(500);
-
-    expect(await page.locator('text=ДЕМОЛИШЕР').isVisible()).toBe(true);
+    // Verify machine is in army (check for count badge)
+    expect(await page.locator('text=×1').isVisible()).toBe(true);
 
     // Switch to game session
     await page.click('[data-testid="to-battle-button"]');

@@ -25,6 +25,8 @@ export const getFactionColors = (faction: FactionID) => {
                safeFaction === 'protectorate' ? 'bg-cyan-500' : 'bg-yellow-500',
     accent: safeFaction === 'polaris' ? 'border-red-500' :
              safeFaction === 'protectorate' ? 'border-cyan-500' : 'border-yellow-500',
+    ring: safeFaction === 'polaris' ? 'ring-red-500' :
+           safeFaction === 'protectorate' ? 'ring-cyan-500' : 'ring-yellow-500',
   };
 };
 

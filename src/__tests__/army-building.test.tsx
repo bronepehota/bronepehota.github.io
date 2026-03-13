@@ -320,12 +320,9 @@ describe('UnitSelector', () => {
       />
     );
 
-    // Switch to army view using TabBar
-    const armyViewButton = screen.getByRole('tab', { name: /армия/i });
-    armyViewButton.click();
-
+    // FloatingContinueButton appears directly when units are in army
     await waitFor(() => {
-      const battleButton = screen.getByText('В БОЙ');
+      const battleButton = screen.getByText('НАЧАТЬ БОЙ');
       expect(battleButton).toBeInTheDocument();
     });
   });
@@ -346,8 +343,8 @@ describe('UnitSelector', () => {
       />
     );
 
-    // "В БОЙ" button should not be in document when army is empty
-    expect(screen.queryByText('В БОЙ')).not.toBeInTheDocument();
+    // "НАЧАТЬ БОЙ" button should not be in document when army is empty
+    expect(screen.queryByText('НАЧАТЬ БОЙ')).not.toBeInTheDocument();
   });
 
   it('displays both squads and machines when machines prop is provided', () => {
