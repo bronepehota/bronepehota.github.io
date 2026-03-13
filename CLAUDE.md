@@ -202,6 +202,44 @@ src/components/
 - Grenades can be used once per battle (`grenadesUsed: true` after first use)
 - Soldier's army rank (0-7) is added to D6 roll for distance
 
+### Pilot Assignment System
+
+**Purpose**: Soldiers can be assigned as pilots to machines. When assigned, the pilot is blocked from independent actions and must navigate to the machine to operate it.
+
+**Pilot Navigation Flow**:
+1. Open machine view in game session
+2. Click pilot button (shield icon or pilot portrait)
+3. Select squad from modal
+4. Select soldier from squad
+5. Confirm assignment
+6. Pilot soldier now shows:
+   - "ПИЛОТ" badge on soldier card
+   - "К МАШИНЕ →" button instead of "ДЕЙСТВИЕ"
+   - Clicking navigates directly to the machine card
+7. Machine shows pilot portrait in TacticalDashboard
+
+**Implementation**:
+- `PilotAssignmentModal.tsx`: Two-step modal (squad → soldier selection)
+- `SoldierActions.tsx`: Shows "К МАШИНЕ →" button when `isPilot=true`
+- `TacticalDashboard.tsx`: Displays pilot status and portrait
+- Navigation: `onNavigateToUnit(instanceId)` prop chain from UnitCard → SquadView → SoldierCard
+
+**Type Definitions**:
+```typescript
+interface PilotInfo {
+  squadInstanceId: string;
+  soldierIndex: number;
+  pilotArmor: number;
+  alive: boolean;
+}
+
+// Soldier has pilot flags
+interface Soldier {
+  isPilot: boolean;
+  pilotOfInstanceId: string | null;  // Which machine this soldier pilots
+}
+```
+
 ### Adding New Units via JSON
 
 **To add a new squad or machine:**
@@ -455,39 +493,48 @@ GITHUB_PAGES=true npm run build
 - **Mobile Testing**: Use projects in `playwright.config.ts` to test mobile viewports
 - **Timeout Management**: Use explicit waits: `await page.waitForLoadState('networkidle')`
 - **Auto-webServer**: Playwright config automatically starts dev server - no manual setup needed
-- **Debugging**: Use `webapp-testing` skill to debug failing E2E tests - it can navigate the app, take screenshots, and inspect DOM in real-time
+- **Debugging E2E Tests**:
+  - Use `/webapp-testing` skill to debug failing E2E tests - it can navigate the app, take screenshots, and inspect DOM in real-time
+  - Use `/using-superpowers` systematic-debugging skill when encountering bugs, test failures, or unexpected behavior
+  - The `webapp-testing` skill provides interactive browser control for manual testing and debugging
 
 **App Navigation Flow** (critical for E2E tests):
 ```
-/app page flow:
-1. Faction Selection → click [data-testid="faction-continue-button"]
-2. Budget Selection → select points → click [data-testid="budget-next-button"]
-3. Rules Selection → optional rules toggles are HERE
-4. Army Builder → add units
-5. Game Session → battle mode
+/app page flow (army creation):
+1. Rules Selection → click [data-testid="rules-confirm-button"]
+2. Faction Selection → select faction → click [data-testid="faction-continue-button"]
+3. Budget Selection → select points → click [data-testid="budget-next-button"]
+4. Unit Selection (Army Builder) → add units → click [data-testid="to-battle-button"]
+5. Battle Preparation → click [data-testid="start-battle-button"]
+6. Game Session → battle mode
 ```
 
 **Common E2E Testing Pitfalls**:
-1. **Skipping steps**: The app has a multi-step flow. Tests cannot jump directly to Rules screen - must go through Faction → Budget → Rules
+1. **Skipping steps**: The app has a multi-step flow. Tests cannot jump directly to any screen - must follow the full sequence
 2. **Wrong selectors**: When testing toggle components, `data-testid` may be on a wrapper `<div>` while `aria-pressed` is on an inner `<button>`. Use: `container.locator('button[aria-pressed]')`
 3. **Async state**: Always use `await page.waitForTimeout(200)` after clicks to allow React state updates
 
 **Helper Functions for E2E Tests**:
 ```typescript
-// Navigate to Rules screen through the full flow
-async function navigateToRulesScreen(page: Page) {
-  // Step 1: Select faction
-  await page.click('[data-testid="faction-card-polaris"]');
-  await page.click('[data-testid="faction-continue-button"]');
-  await page.waitForTimeout(300);
+// Navigate to Army Builder (Unit Selection) through the full flow
+async function navigateToArmyBuilder(page: Page) {
+  // Step 1: Rules confirmation (first screen)
+  await page.click('[data-testid="rules-confirm-button"]');
+  await page.waitForTimeout(500);
 
-  // Step 2: Select budget
+  // Step 2: Select faction
+  await page.click('[data-testid="faction-card-polaris"]');
+  await page.waitForTimeout(300);
+  await page.click('[data-testid="faction-continue-button"]');
+  await page.waitForTimeout(500);
+
+  // Step 3: Select budget
   await page.click('button:has-text("350")');
   await page.waitForTimeout(300);
-
-  // Step 3: Proceed to Rules
   await page.click('[data-testid="budget-next-button"]');
-  await page.waitForTimeout(300);
+  await page.waitForTimeout(500);
+
+  // Now on Unit Selection (Army Builder) screen
 }
 ```
 
@@ -505,9 +552,17 @@ test.describe('Feature Name', () => {
     await page.waitForLoadState('networkidle');
   });
 
-  test('should toggle option', async ({ page }) => {
-    // Navigate through the flow
-    await navigateToRulesScreen(page);
+  test('should toggle option on Rules screen', async ({ page }) => {
+    // Step 1: Rules confirmation - first screen
+    await page.click('[data-testid="rules-confirm-button"]');
+    await page.waitForTimeout(500);
+
+    // Now on Faction screen - could test faction-specific features here
+
+    // Or continue to Budget
+    await page.click('[data-testid="faction-card-polaris"]');
+    await page.click('[data-testid="faction-continue-button"]');
+    await page.waitForTimeout(500);
 
     // Find toggle - data-testid is on container, aria-pressed on inner button
     const toggleContainer = page.getByTestId('some-toggle');
@@ -520,6 +575,13 @@ test.describe('Feature Name', () => {
   });
 });
 ```
+
+**Troubleshooting E2E Tests**:
+- **Tests hanging/timeouts**: Usually wrong selector or element not found. Use `/webapp-testing` to inspect live DOM
+- **"Element not found"**: Check if `data-testid` exists, or use text selectors like `button:has-text("ТЕКСТ")`
+- **Navigation issues**: Always follow the full flow sequence (Rules → Faction → Budget → Units → Battle → Game)
+- **Async state problems**: Add `await page.waitForTimeout(200)` after clicks to allow React state updates
+- **Toggle components**: `data-testid` may be on wrapper div, use `container.locator('button[aria-pressed]')` for the actual button
 
 **CI/CD Pipeline**:
 - Unit tests run on every commit (fast, ~30s)
