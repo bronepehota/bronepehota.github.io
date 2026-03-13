@@ -78,17 +78,15 @@ export function SoldierStats({
         </span>
       </div>
 
-      {/* Melee - disabled if no melee attack */}
+      {/* Melee - always available, melee stat is just a bonus */}
       <div className={cn(
-        'relative flex flex-col items-center justify-center p-0.5 md:p-1 rounded-lg md:rounded-full min-h-[44px] min-w-[42px] md:min-w-[56px]',
-        soldier.melee <= 0 && 'opacity-40'
+        'relative flex flex-col items-center justify-center p-0.5 md:p-1 rounded-lg md:rounded-full min-h-[44px] min-w-[42px] md:min-w-[56px]'
       )}>
-        <Sword className={cn('w-[14px] md:w-[18px] h-[14px] md:h-[18px] mb-1 md:mb-0 shrink-0', soldier.melee <= 0 ? 'text-slate-600' : 'text-red-400')} />
+        <Sword className={cn('w-[14px] md:w-[18px] h-[14px] md:h-[18px] mb-1 md:mb-0 shrink-0 text-red-400')} />
         <span className={cn(
-          'text-xs md:text-sm font-mono font-black leading-none truncate w-full text-center',
-          soldier.melee <= 0 ? 'text-slate-600' : 'text-red-300'
+          'text-xs md:text-sm font-mono font-black leading-none truncate w-full text-center text-red-300'
         )} title={soldier.melee.toString()}>
-          {soldier.melee > 0 ? soldier.melee : '—'}
+          {soldier.melee}
         </span>
       </div>
     </div>

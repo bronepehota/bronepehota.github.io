@@ -67,12 +67,8 @@ const canSoldierMelee = (unit?: ArmyUnit, soldierIndex?: number | null): boolean
     return true; // For machines, always allow
   }
 
-  const squad = unit.data as Squad;
-  const soldier = squad.soldiers[soldierIndex];
-
-  // Soldier can do melee if they have melee stat > 0
-  const melee = soldier.melee;
-  return Boolean(melee && melee > 0);
+  // Squads can always melee - melee stat is just a bonus
+  return true;
 };
 
 export function ActionSelector({
