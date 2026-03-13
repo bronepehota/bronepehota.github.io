@@ -139,18 +139,11 @@ export default function ArmyBuilder({
 
     // Only allow navigation to current step or previous steps
     if (targetIndex <= currentIndex) {
-      // Reset army when going back to rules/source/faction (invalidate current army)
-      if (targetIndex <= 2 && currentIndex >= 3) {
-        setArmy({
-          ...army,
-          units: [],
-          totalCost: 0,
-          pointBudget: undefined,
-          currentStep: 'faction-select',
-        });
-      }
-      // Reset faction when going back to rules/source
-      if (targetIndex <= 1 && currentIndex >= 2) {
+      // Only reset when going back to SOURCE (different source = different data)
+      // Going back to RULES/FACTION/BUDGET: keep everything, user can change if needed
+      if (targetIndex === 1 && currentIndex > 1) {
+        // Going back to SOURCE selection: clear faction and units
+        // (different source may have different factions)
         setArmy({
           ...army,
           faction: undefined,
@@ -160,6 +153,8 @@ export default function ArmyBuilder({
           currentStep: 'faction-select',
         });
       }
+      // All other navigation: preserve current state
+
       setSetupStep(step);
     }
   };
