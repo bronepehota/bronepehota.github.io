@@ -22,6 +22,7 @@ interface SoldierCardProps {
   getSoldierImage: (idx: number) => string;
   distanceInputUnit?: 'steps' | 'cm';
   stepToCmFactor?: number;
+  onNavigateToUnit?: (instanceId: string) => void;
 }
 
 function SoldierCard({
@@ -37,6 +38,7 @@ function SoldierCard({
   getSoldierImage,
   distanceInputUnit = 'steps',
   stepToCmFactor = 5,
+  onNavigateToUnit,
 }: SoldierCardProps) {
   const [isMounted, setIsMounted] = useState(false);
   const [isLongPressing, setIsLongPressing] = useState(false);
@@ -213,6 +215,7 @@ function SoldierCard({
         isDone={isDone}
         isInPanic={isInPanic}
         isMounted={isMounted}
+        isPilot={isPilot}
         onImageClick={() => setShowSoldierImage(soldierIndex)}
       />
 
@@ -231,6 +234,8 @@ function SoldierCard({
           onStartLongPress={startLongPress}
           onEndLongPress={cancelLongPress}
           isLongPressing={isLongPressing}
+          isPilot={soldier.isPilot || false}
+          onNavigateToMachine={soldier.pilotOfInstanceId ? () => onNavigateToUnit?.(soldier.pilotOfInstanceId!) : undefined}
         />
 
         {/* Row 2: Stats */}
@@ -252,6 +257,7 @@ export default memo(SoldierCard, (prevProps, nextProps) => {
     prevProps.soldierIndex === nextProps.soldierIndex &&
     prevProps.squad === nextProps.squad &&
     prevIsDead === nextIsDead &&
-    prevIsDone === nextIsDone
+    prevIsDone === nextIsDone &&
+    prevProps.onNavigateToUnit === nextProps.onNavigateToUnit
   );
 });

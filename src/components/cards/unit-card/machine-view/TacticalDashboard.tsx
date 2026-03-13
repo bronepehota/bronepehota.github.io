@@ -215,6 +215,7 @@ export function TacticalDashboard({
             <button
               onClick={onAssignPilot}
               className="w-full h-full relative"
+              data-testid="assign-pilot-button"
             >
               {pilotInfo ? (
                 <>
@@ -253,6 +254,7 @@ export function TacticalDashboard({
                   onSurvivalTest();
                 }}
                 disabled={isPilotTestRunning}
+                data-testid="pilot-survival-test-button"
                 className={cn(
                   "absolute -bottom-1 -right-1 sm:-bottom-1.5 sm:-right-1.5 w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all border-2 min-w-[28px] min-h-[28px] sm:min-w-[36px] sm:min-h-[36px] z-20",
                   isPilotTestRunning && "animate-pulse",

@@ -11,7 +11,7 @@ import PaintedExamples from '@/components/encyclopedia/PaintedExamples';
 import Image from 'next/image';
 import { Shield, Zap, Skull } from 'lucide-react';
 import { getFactionColors } from '@/lib/faction-colors';
-import { hasLoreExpansion, getLocationIcon } from '@/lib/lore-utils';
+import { getLocationIcon } from '@/lib/lore-utils';
 
 interface EncyclopediaModalProps {
   unit: UnitWithType;

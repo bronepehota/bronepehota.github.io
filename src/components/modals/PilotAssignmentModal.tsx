@@ -512,6 +512,7 @@ export function PilotAssignmentModal({
               <button
                 onClick={handleAssignPilot}
                 disabled={!selectedPilot}
+                data-testid="confirm-pilot-assignment"
                 className={cn(
                   "flex-1 px-4 py-2.5 rounded-lg font-bold text-sm transition-colors min-h-[44px]",
                   selectedPilot
