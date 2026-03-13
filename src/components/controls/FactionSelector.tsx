@@ -11,7 +11,7 @@ interface FactionSelectorProps {
   selectedFaction?: FactionID;
   onFactionSelect: (factionId: FactionID) => void;
   onNext?: () => void;
-  nextDisabled?: boolean;
+  _nextDisabled?: boolean; // Reserved for future use - button disabled state
   isLoading?: boolean;
   loadError?: string | null;
 }
@@ -36,7 +36,7 @@ export function FactionSelector({
   selectedFaction,
   onFactionSelect,
   onNext,
-  nextDisabled,
+  _nextDisabled,
   isLoading = false,
   loadError = null,
 }: FactionSelectorProps) {

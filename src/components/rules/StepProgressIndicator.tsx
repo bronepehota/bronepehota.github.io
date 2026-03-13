@@ -14,7 +14,7 @@ interface Step {
 
 const steps: Step[] = [
   { id: 1, label: 'Правила', description: 'Выберите версию правил', icon: Book },
-  { id: 2, label: 'Источник', description: 'Выберите армейские листы', icon: Shield },
+  { id: 2, label: 'Арм.Тех Листы', description: 'Выберите армейские листы', icon: Shield },
   { id: 3, label: 'Фракция', description: 'Выберите сторону конфликта', icon: Shield },
   { id: 4, label: 'Бюджет', description: 'Установите лимит очков армии', icon: Coins },
   { id: 5, label: 'Армия', description: 'Соберите свою армию', icon: Users },

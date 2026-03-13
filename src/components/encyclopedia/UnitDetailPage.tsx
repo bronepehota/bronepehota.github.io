@@ -10,35 +10,39 @@ import { SoldierImages } from './UnitDetail/SoldierImages';
 import { MachineImages } from './UnitDetail/MachineImages';
 import PaintedExamples from './PaintedExamples';
 import { UnitLore } from './UnitDetail/UnitLore';
+import { getFactionColors } from '@/lib/faction-colors';
 
 interface UnitDetailPageProps {
   unit: UnitWithType;
 }
 
-const factionData = {
-  polaris: {
-    name: 'Империя Полярис',
-    color: '#DC2626',
-    icon: Shield,
-    badge: 'ИМП',
-  },
-  protectorate: {
-    name: 'Торговый Протекторат',
-    color: '#3B82F6',
-    icon: Zap,
-    badge: 'ПРОТ',
-  },
-  mercenaries: {
-    name: 'Наёмники',
-    color: '#EAB308',
-    icon: Skull,
-    badge: 'НАЁМ',
-  },
+const factionIcons: Record<string, React.ComponentType<{ className?: string }>> = {
+  polaris: Shield,
+  protectorate: Zap,
+  mercenaries: Skull,
+};
+
+const factionBadges: Record<string, string> = {
+  polaris: 'ИМП',
+  protectorate: 'ПРОТ',
+  mercenaries: 'НАЁМ',
+};
+
+const factionNames: Record<string, string> = {
+  polaris: 'Империя Полярис',
+  protectorate: 'Торговый Протекторат',
+  mercenaries: 'Наёмники',
 };
 
 export default function UnitDetailPage({ unit }: UnitDetailPageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
-  const faction = factionData[unit.faction];
+  const factionColors = getFactionColors(unit.faction);
+  const faction = {
+    name: factionNames[unit.faction] || unit.faction,
+    color: factionColors.primary,
+    icon: factionIcons[unit.faction] || Shield,
+    badge: factionBadges[unit.faction] || '',
+  };
   const FactionIcon = faction.icon;
 
   useEffect(() => {
@@ -166,7 +170,9 @@ export default function UnitDetailPage({ unit }: UnitDetailPageProps) {
                       className="p-2 rounded-lg"
                       style={{ backgroundColor: `${faction.color}20` }}
                     >
-                      <FactionIcon className="w-5 h-5" style={{ color: faction.color }} />
+                      <div className="w-5 h-5" style={{ color: faction.color }}>
+                        <FactionIcon className="w-full h-full" />
+                      </div>
                     </div>
                     <span
                       className="font-oswald text-lg md:text-xl"
@@ -225,7 +231,9 @@ export default function UnitDetailPage({ unit }: UnitDetailPageProps) {
                 {/* Faction */}
                 <div className="text-center p-4 bg-military-charcoal/50 rounded">
                   <div className="mb-1">
-                    <FactionIcon className="w-6 h-6 mx-auto" style={{ color: faction.color }} />
+                    <div className="w-6 h-6 mx-auto" style={{ color: faction.color }}>
+                      <FactionIcon className="w-full h-full" />
+                    </div>
                   </div>
                   <div className="font-oswald text-sm text-military-sand">{faction.badge}</div>
                   <div className="font-ibm-mono text-xs text-military-steel">фракция</div>

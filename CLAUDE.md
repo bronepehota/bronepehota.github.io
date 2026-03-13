@@ -41,25 +41,57 @@ npm run test:e2e:debug   # Run E2E tests in debug mode with inspector
 
 ### Data Layer
 
-**File-based JSON storage** in `src/data/`:
+**Source-based JSON storage** in `src/data/sources/`:
 ```
-src/data/
-├── factions.json    - Faction definitions (3 factions)
-├── polaris/         - Polaris faction units
-│   ├── squads.json  - Polaris squad data
-│   └── machines.json - Polaris vehicle data
-├── protectorate/    - Protectorate faction units
-│   ├── squads.json
-│   └── machines.json
-└── mercenaries/     - Mercenaries faction units
-    ├── squads.json
-    └── machines.json
+src/data/sources/
+├── star_system/      - Star System community source
+│   ├── factions.json - Faction definitions (3 factions)
+│   ├── polaris/      - Polaris faction units
+│   │   ├── squads.json
+│   │   └── machines.json
+│   ├── protectorate/ - Protectorate faction units
+│   │   ├── squads.json
+│   │   └── machines.json
+│   └── mercenaries/  - Mercenaries faction units
+│       ├── squads.json
+│       └── machines.json
+└── tehnolog/         - Official Tehnolog source (placeholder for future data)
+    └── factions.json
+```
+
+**Source Registry** (`src/lib/sources-registry.ts`): Manages multiple army list sources.
+- `sourcesRegistry` - Registry of all available sources with their data
+- `getAllSources()` - List all available sources
+- `getSource(id)` - Get specific source with fallback to default
+- `getDefaultSource()` - Returns 'star_system' as default
+- `isValidSource(id)` - Validate source ID
+
+**Source Types**:
+```typescript
+type SourceID = string;  // Dynamic source identifiers
+type FactionID = string; // Dynamic faction identifiers (changed from union type)
+
+interface ArmyListSource {
+  id: SourceID;
+  name: string;
+  description: string;
+  link?: string;
+  version: string;
+}
+
+interface SourceData {
+  source: ArmyListSource;
+  factions: Faction[];
+  squads: Squad[];
+  machines: Machine[];
+}
 ```
 
 ### State Management
 
 **Client-side persistence** (localStorage keys):
-- `bronepehota_army` - Player's army state (units, totalCost, faction)
+- `bronepehota_army` - Player's army state (units, totalCost, faction, sourceId)
+- `bronepehota_army_list_source` - Selected army list source ('star_system' or 'tehnolog')
 - `bronepehota_rules_version` - Selected rules version for game session
 - `bronepehota_panic_enabled` - Panic rule toggle state
 - `bronepehota_aimed_shot_enabled` - Aimed shot rule toggle state
@@ -74,21 +106,27 @@ The main app page (`src/app/app/page.tsx`) manages the `Army` state and passes i
 ### Core Types (`src/lib/types.ts`)
 
 ```typescript
-FactionID = 'polaris' | 'protectorate' | 'mercenaries'
+type SourceID = string;  // Dynamic source identifier
+type FactionID = string; // Dynamic faction identifier (breaking change: was union type)
 
 Soldier      // Individual soldier stats (rank, speed, range, power, melee, props, armor)
 Squad        // Collection of 1-6 soldiers
 Machine      // Vehicle with weapons, speed_sectors, durability, ammo
 ArmyUnit     // Runtime instance of Squad or Machine with game state
-Army         // Player's army with units, totalCost, faction
+Army         // Player's army with units, totalCost, faction, sourceId
 ```
 
-**Adding a new faction**:
-1. Update `FactionID` type in `types.ts`
-2. Add entry to `factions.json`
-3. Create new directory `src/data/{faction}/`
-4. Add `squads.json` and `machines.json` files
-5. Update imports in `ArmyBuilder.tsx`
+**Adding a new source**:
+1. Create directory `src/data/sources/{source_id}/`
+2. Add `factions.json` with faction definitions
+3. Create faction subdirectories with `squads.json` and `machines.json`
+4. Add source metadata to `sources-registry.ts`
+5. Source will appear in SourceSelector UI
+
+**Adding a new faction to existing source**:
+1. Add faction definition to `{source}/factions.json`
+2. Create directory `{source}/{faction_id}/`
+3. Add `squads.json` and `machines.json` files
 
 ### Game Logic (`src/lib/game-logic.ts`)
 
@@ -114,6 +152,8 @@ Adding a new rules version:
 1. Create new file in `src/lib/rules/{version}.ts`
 2. Export rules object with required game mechanics
 3. Register in `rules-registry.ts`
+
+**Note**: Rules versions and army list sources are independent - any rules version can be used with any source.
 
 ### Component Structure
 
@@ -147,6 +187,7 @@ src/components/
 
 **Rules Components** (`src/components/rules/`):
 - `RulesSelector.tsx` - Rules version selection interface
+- `SourceSelector.tsx` - Army list source selection interface (Star System, Tehnolog, custom)
 - `RulesVersionSelector.tsx` - Dropdown/picker for rules version
 - `RulesInfoModal.tsx` - Modal displaying current rules details
 - `StepProgressIndicator.tsx` - Visual step progress for multi-step flows
@@ -244,7 +285,8 @@ interface Soldier {
 
 **To add a new squad or machine:**
 
-1. Navigate to the faction's directory: `src/data/{faction}/`
+1. Navigate to the source and faction directory: `src/data/sources/{source_id}/{faction}/`
+   - Default source: `star_system`
    - Available factions: `polaris`, `protectorate`, `mercenaries`
 
 2. Edit `squads.json` for infantry or `machines.json` for vehicles
@@ -254,7 +296,7 @@ interface Soldier {
 **Squad Structure:**
 ```json
 {
-  "id": "{faction}_{slugified_name}",
+  "id": "{source}_{faction}_{slugified_name}",
   "name": "Название на русском",
   "shortName": "Краткое название",
   "faction": "polaris|protectorate|mercenaries",
@@ -502,17 +544,19 @@ GITHUB_PAGES=true npm run build
 ```
 /app page flow (army creation):
 1. Rules Selection → click [data-testid="rules-confirm-button"]
-2. Faction Selection → select faction → click [data-testid="faction-continue-button"]
-3. Budget Selection → select points → click [data-testid="budget-next-button"]
-4. Unit Selection (Army Builder) → add units → click [data-testid="to-battle-button"]
-5. Battle Preparation → click [data-testid="start-battle-button"]
-6. Game Session → battle mode
+2. Source Selection → select army list source → click [data-testid="source-confirm-button"]
+3. Faction Selection → select faction → click [data-testid="faction-continue-button"]
+4. Budget Selection → select points → click [data-testid="budget-next-button"]
+5. Unit Selection (Army Builder) → add units → click [data-testid="to-battle-button"]
+6. Battle Preparation → click [data-testid="start-battle-button"]
+7. Game Session → battle mode
 ```
 
 **Common E2E Testing Pitfalls**:
-1. **Skipping steps**: The app has a multi-step flow. Tests cannot jump directly to any screen - must follow the full sequence
+1. **Skipping steps**: The app has a 6-step flow. Tests cannot jump directly to any screen - must follow the full sequence: Rules → Source → Faction → Budget → Units → Battle → Game
 2. **Wrong selectors**: When testing toggle components, `data-testid` may be on a wrapper `<div>` while `aria-pressed` is on an inner `<button>`. Use: `container.locator('button[aria-pressed]')`
 3. **Async state**: Always use `await page.waitForTimeout(200)` after clicks to allow React state updates
+4. **Missing Source step**: After Rules confirmation, always include Source Selection before Faction selection
 
 **Helper Functions for E2E Tests**:
 ```typescript
@@ -522,13 +566,17 @@ async function navigateToArmyBuilder(page: Page) {
   await page.click('[data-testid="rules-confirm-button"]');
   await page.waitForTimeout(500);
 
-  // Step 2: Select faction
+  // Step 2: Source selection (new step)
+  await page.click('[data-testid="source-confirm-button"]');
+  await page.waitForTimeout(500);
+
+  // Step 3: Select faction
   await page.click('[data-testid="faction-card-polaris"]');
   await page.waitForTimeout(300);
   await page.click('[data-testid="faction-continue-button"]');
   await page.waitForTimeout(500);
 
-  // Step 3: Select budget
+  // Step 4: Select budget
   await page.click('button:has-text("350")');
   await page.waitForTimeout(300);
   await page.click('[data-testid="budget-next-button"]');
@@ -579,9 +627,10 @@ test.describe('Feature Name', () => {
 **Troubleshooting E2E Tests**:
 - **Tests hanging/timeouts**: Usually wrong selector or element not found. Use `/webapp-testing` to inspect live DOM
 - **"Element not found"**: Check if `data-testid` exists, or use text selectors like `button:has-text("ТЕКСТ")`
-- **Navigation issues**: Always follow the full flow sequence (Rules → Faction → Budget → Units → Battle → Game)
+- **Navigation issues**: Always follow the full flow sequence (Rules → Source → Faction → Budget → Units → Battle → Game)
 - **Async state problems**: Add `await page.waitForTimeout(200)` after clicks to allow React state updates
 - **Toggle components**: `data-testid` may be on wrapper div, use `container.locator('button[aria-pressed]')` for the actual button
+- **Missing Source step**: After Rules confirmation, don't forget to click `[data-testid="source-confirm-button"]` before Faction selection
 
 **CI/CD Pipeline**:
 - Unit tests run on every commit (fast, ~30s)
@@ -656,3 +705,12 @@ test.describe('Feature Name', () => {
 - **Step Progress**: `StepProgressIndicator` component for multi-step flows
 - **Unit Selector**: `UnitSelector.tsx` component with filtering
 - **Mobile First**: MOBILE FIRST design approach documented, bottom sheet patterns established
+- **Multi-Source Architecture (2026-03)**: Added support for multiple army list sources
+  - New 6-step army creation flow: Rules → Source → Faction → Budget → Units → Battle
+  - `SourceSelector.tsx` component for selecting army list sources (Star System, Tehnolog, custom)
+  - `sources-registry.ts` for managing multiple data sources (mirrors rules-registry pattern)
+  - Breaking change: `FactionID` type changed from union (`'polaris' | 'protectorate' | 'mercenaries'`) to `string`
+  - All components now use `getFactionColors()` for dynamic faction color handling
+  - Source selection persisted in localStorage (`bronepehota_army_list_source`)
+  - Updated 11 E2E tests to include Source Selection step
+  - All 54 E2E tests passing, 732 unit tests passing

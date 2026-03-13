@@ -2,7 +2,7 @@
 
 import { Shield, Zap, Skull } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import factionsData from '@/data/factions.json';
+import factionsData from '@/data/sources/star_system/factions.json';
 
 interface FactionsSectionProps {
   className?: string;

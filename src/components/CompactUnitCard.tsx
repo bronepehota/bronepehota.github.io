@@ -6,6 +6,7 @@ import { GitHubPagesImage as Image } from './GitHubPagesImage';
 import { ImageModal } from './modals/ImageModal';
 import type { Squad, Machine, FactionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { getFactionColors } from '@/lib/faction-colors';
 
 interface CompactUnitCardProps {
   unit: Squad | Machine;
@@ -29,20 +30,10 @@ export function CompactUnitCard({
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [modalImageSrc, setModalImageSrc] = useState('');
   const [modalImageAlt, setModalImageAlt] = useState('');
-  const factionColors = {
-    polaris: 'bg-red-500',
-    protectorate: 'bg-cyan-500',
-    mercenaries: 'bg-yellow-500',
-  };
+  const colors = getFactionColors(factionId);
 
-  const factionBorders = {
-    polaris: 'border-l-red-500',
-    protectorate: 'border-l-cyan-500',
-    mercenaries: 'border-l-yellow-500',
-  };
-
-  const accentColor = factionColors[factionId] || factionColors.polaris;
-  const borderColor = factionBorders[factionId] || factionBorders.polaris;
+  const accentColor = colors.bgSolid;
+  const borderColor = colors.borderSolid.replace('border-', 'border-l-');
 
   const isMachine = type === 'machine';
   const Icon = isMachine ? Zap : User;

@@ -78,7 +78,7 @@ export function SourceSelector({
         <div className="flex items-center justify-center gap-3 py-2">
           <div className="h-px flex-1 bg-slate-700/50" />
           <div className="flex items-center gap-2">
-            <span className="text-lg font-bold text-slate-300 font-mono tracking-wider">ИСТОЧНИК</span>
+            <span className="text-lg font-bold text-slate-300 font-mono tracking-wider">АРМ.ТЕХ ЛИСТЫ</span>
           </div>
           <div className="h-px flex-1 bg-slate-700/50" />
         </div>

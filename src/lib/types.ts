@@ -223,7 +223,7 @@ export type ArmyCurrentStep = 'faction-select' | 'unit-select' | 'preparation' |
 
 export interface Army {
   name: string;
-  faction: FactionID;
+  faction?: FactionID; // Optional during army building flow
   sourceId?: SourceID; // Track which source this army uses
   units: ArmyUnit[];
   totalCost: number;

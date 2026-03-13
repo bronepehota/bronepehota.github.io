@@ -10,12 +10,12 @@ export interface FilterOptions {
 }
 
 // Direct imports for JSON files (works with Next.js static export)
-import polarisSquads from '@/data/polaris/squads.json';
-import polarisMachines from '@/data/polaris/machines.json';
-import protectorateSquads from '@/data/protectorate/squads.json';
-import protectorateMachines from '@/data/protectorate/machines.json';
-import mercenariesSquads from '@/data/mercenaries/squads.json';
-import mercenariesMachines from '@/data/mercenaries/machines.json';
+import polarisSquads from '@/data/sources/star_system/polaris/squads.json';
+import polarisMachines from '@/data/sources/star_system/polaris/machines.json';
+import protectorateSquads from '@/data/sources/star_system/protectorate/squads.json';
+import protectorateMachines from '@/data/sources/star_system/protectorate/machines.json';
+import mercenariesSquads from '@/data/sources/star_system/mercenaries/squads.json';
+import mercenariesMachines from '@/data/sources/star_system/mercenaries/machines.json';
 
 const squadData: Record<FactionID, Squad[]> = {
   polaris: polarisSquads as Squad[],

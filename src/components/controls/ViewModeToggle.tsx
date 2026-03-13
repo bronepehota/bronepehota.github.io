@@ -4,6 +4,7 @@ import React from 'react';
 import { FolderOpen, Shield } from 'lucide-react';
 import { FactionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { getFactionColors } from '@/lib/faction-colors';
 
 interface ViewModeToggleProps {
   mode: 'browse' | 'army';
@@ -14,13 +15,7 @@ interface ViewModeToggleProps {
 }
 
 export function ViewModeToggle({ mode, onChange, availableCount, armyCount, factionId }: ViewModeToggleProps) {
-  const factionColors = {
-    polaris: 'bg-red-500',
-    protectorate: 'bg-cyan-500',
-    mercenaries: 'bg-yellow-500',
-  };
-
-  const activeColor = factionColors[factionId] || factionColors.polaris;
+  const activeColor = getFactionColors(factionId).bgSolid;
 
   return (
     <div className="hidden md:flex items-center gap-2 p-1 bg-slate-800/50 rounded-lg border border-slate-700/50">

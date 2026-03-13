@@ -20,22 +20,22 @@ interface EncyclopediaModalProps {
   scrollTarget?: 'soldier-images' | 'machine-images';
 }
 
-const factionData = {
-  polaris: {
-    name: 'Империя Полярис',
-    icon: Shield,
-    badge: 'ИМП',
-  },
-  protectorate: {
-    name: 'Торговый Протекторат',
-    icon: Zap,
-    badge: 'ПРОТ',
-  },
-  mercenaries: {
-    name: 'Наёмники',
-    icon: Skull,
-    badge: 'НАЁМ',
-  },
+const factionIcons: Record<string, React.ComponentType<{ className?: string }>> = {
+  polaris: Shield,
+  protectorate: Zap,
+  mercenaries: Skull,
+};
+
+const factionBadges: Record<string, string> = {
+  polaris: 'ИМП',
+  protectorate: 'ПРОТ',
+  mercenaries: 'НАЁМ',
+};
+
+const factionNames: Record<string, string> = {
+  polaris: 'Империя Полярис',
+  protectorate: 'Торговый Протекторат',
+  mercenaries: 'Наёмники',
 };
 
 export function EncyclopediaModal({
@@ -67,9 +67,13 @@ export function EncyclopediaModal({
 
   if (!isOpen) return null;
 
-  const faction = factionData[unit.faction];
-  const FactionIcon = faction.icon;
   const colors = getFactionColors(unit.faction);
+  const faction = {
+    name: factionNames[unit.faction] || unit.faction,
+    icon: factionIcons[unit.faction] || Shield,
+    badge: factionBadges[unit.faction] || '',
+  };
+  const FactionIcon = faction.icon;
 
   return (
     <div
@@ -90,7 +94,9 @@ export function EncyclopediaModal({
         <div className="flex items-center justify-between px-3 py-2 sm:px-4 sm:py-3 border-b border-military-rust/30 shrink-0 relative z-10">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <div className="p-2 rounded-lg" style={{ backgroundColor: `${colors.bg}` }}>
-              <FactionIcon className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: colors.text }} />
+              <div className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: colors.text }}>
+                <FactionIcon className="w-full h-full" />
+              </div>
             </div>
             <div className="min-w-0 flex-1">
               <h2 className={cn("font-russo font-bold text-sm sm:text-base uppercase tracking-wider truncate", colors.text)}>
@@ -160,7 +166,9 @@ export function EncyclopediaModal({
               </div>
               <div className="text-center p-3 bg-military-charcoal/50 rounded">
                 <div className="mb-1">
-                  <FactionIcon className="w-5 h-5 mx-auto" style={{ color: colors.text }} />
+                  <div className="w-5 h-5 mx-auto" style={{ color: colors.text }}>
+                    <FactionIcon className="w-full h-full" />
+                  </div>
                 </div>
                 <div className="font-oswald text-sm text-military-sand">{faction.badge}</div>
                 <div className="font-ibm-mono text-xs text-military-steel">фракция</div>

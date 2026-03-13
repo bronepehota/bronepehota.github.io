@@ -17,7 +17,7 @@ interface UnitSelectorProps {
   factions: Faction[];
   squads: Squad[];
   machines?: Machine[];
-  selectedFaction: FactionID;
+  selectedFaction?: FactionID; // Optional to handle case where no faction is selected yet
   pointBudget: number;
   army: ArmyUnit[];
   onAddUnit: (squad: Squad) => void;
@@ -224,7 +224,7 @@ export function UnitSelector({
       <ArmyControlPanel
         viewMode="browse"
         filterType={filterType}
-        factionId={selectedFaction}
+        factionId={selectedFaction || ''}
         onFilterChange={setFilterType}
         squadCount={availableSquads.length}
         machineCount={availableMachines.length}
@@ -266,13 +266,13 @@ export function UnitSelector({
               const isInArmy = count > 0;
 
               return (
-                <div key={unit.data.id} className={clsx('relative', isInArmy && 'ring-2 ring-offset-2 ring-offset-slate-900', isInArmy && getFactionColors(unit.type === 'squad' ? (unit.data as Squad).faction as FactionID : selectedFaction).ring)}>
+                <div key={unit.data.id} className={clsx('relative', isInArmy && 'ring-2 ring-offset-2 ring-offset-slate-900', isInArmy && getFactionColors(unit.type === 'squad' ? (unit.data as Squad).faction as FactionID : selectedFaction || '').ring)}>
                   <CompactUnitCard
                     unit={unit.data}
                     type={unit.type}
                     onAdd={() => handleAddUnit(unit)}
                     onClick={() => handleUnitClick(unit)}
-                    factionId={unit.type === 'squad' ? (unit.data as Squad).faction as FactionID : selectedFaction}
+                    factionId={unit.type === 'squad' ? (unit.data as Squad).faction as FactionID : selectedFaction || ''}
                     canAfford={affordable}
                     countInArmy={count}
                   />
@@ -309,7 +309,7 @@ export function UnitSelector({
               const count = getInstanceCount(unit.data.id);
               const instance = getLatestInstance(unit.data.id);
               const isInArmy = count > 0;
-              const unitFaction = unit.type === 'squad' ? (unit.data as Squad).faction as FactionID : selectedFaction;
+              const unitFaction = unit.type === 'squad' ? (unit.data as Squad).faction as FactionID : selectedFaction || '';
               const colors = getFactionColors(unitFaction);
 
               // Render machines with MachineCard component
@@ -548,7 +548,7 @@ export function UnitSelector({
         <FloatingContinueButton
           text="НАЧАТЬ БОЙ"
           tooltip="Начать бой"
-          accentColor={getFactionColors(selectedFaction).primary}
+          accentColor={getFactionColors(selectedFaction || '').primary}
           onClick={onToBattle}
           dataTestid="to-battle-button"
           icon={<Sword className="w-4 h-4" />}

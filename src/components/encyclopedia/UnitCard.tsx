@@ -2,25 +2,29 @@ import Link from 'next/link';
 import SafeImage from '@/components/SafeImage';
 import { UnitWithType } from '@/lib/encyclopedia-utils';
 import { Squad } from '@/lib/types';
+import { getFactionColors } from '@/lib/faction-colors';
 
 interface UnitCardProps {
   unit: UnitWithType;
 }
 
-const factionColors = {
-  polaris: { bg: 'bg-red-500', border: '#DC2626', glow: 'rgba(220, 38, 38, 0.3)' },
-  protectorate: { bg: 'bg-cyan-500', border: '#3B82F6', glow: 'rgba(59, 130, 246, 0.3)' },
-  mercenaries: { bg: 'bg-yellow-500', border: '#EAB308', glow: 'rgba(234, 179, 8, 0.3)' },
-};
-
-const factionBadges = {
+const factionBadges: Record<string, string> = {
   polaris: 'ИМП',
   protectorate: 'ПРОТ',
   mercenaries: 'НАЁМ',
 };
 
 export function UnitCard({ unit }: UnitCardProps) {
-  const factionStyle = factionColors[unit.faction];
+  const factionColors = getFactionColors(unit.faction);
+  const factionStyle = {
+    bg: factionColors.bgSolid,
+    border: factionColors.primary,
+    glow: factionColors.primary.replace('#', 'rgba(').replace(/[^,]+/g, (m, i) => {
+      if (i === 0) return m;
+      const hex = parseInt(m, 16);
+      return hex.toString();
+    }) + ', 0.3)',
+  };
 
   // Get display image: unit image, first soldier's image (for squads), or placeholder
   const displayImage = unit.image ||

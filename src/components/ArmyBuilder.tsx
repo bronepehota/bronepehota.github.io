@@ -1,14 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Army, ArmyUnit, Faction, Squad, Machine, RulesVersionID } from '@/lib/types';
-import polairsSquads from '@/data/polaris/squads.json';
-import polairsMachines from '@/data/polaris/machines.json';
-import protectorateSquads from '@/data/protectorate/squads.json';
-import protectorateMachines from '@/data/protectorate/machines.json';
-import mercenariesSquads from '@/data/mercenaries/squads.json';
-import mercenariesMachines from '@/data/mercenaries/machines.json';
-import factionsData from '@/data/factions.json';
+import { Army, ArmyUnit, RulesVersionID } from '@/lib/types';
 import { ArrowLeft } from 'lucide-react';
 import { FactionSelector } from './controls/FactionSelector';
 import { PointBudgetInput } from './controls/PointBudgetInput';
@@ -16,12 +9,11 @@ import { UnitSelector } from './UnitSelector';
 import { RulesSelector } from './rules/RulesSelector';
 import { StepProgressIndicator } from './rules/StepProgressIndicator';
 import { getAllRulesVersions } from '@/lib/rules-registry';
+import { getAllSources, getSource, isValidSource, getDefaultSource } from '@/lib/sources-registry';
+import { SourceSelector } from './rules/SourceSelector';
 import { BattlePreparationScreen } from './preparation';
-
-// Type assertions for JSON imports
-const typedFactions = factionsData as Faction[];
-const typedSquads = [...polairsSquads, ...protectorateSquads, ...mercenariesSquads] as Squad[];
-const typedMachines = [...polairsMachines, ...protectorateMachines, ...mercenariesMachines] as Machine[];
+import { LOCAL_STORAGE_KEYS } from '@/lib/constants';
+import type { SourceID } from '@/lib/types';
 
 interface ArmyBuilderProps {
   army: Army;
@@ -86,16 +78,50 @@ export default function ArmyBuilder({
     return false;
   });
 
+  // Source selection state - persisted in localStorage
+  const [selectedSource, setSelectedSource] = useState<SourceID>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.ARMY_LIST_SOURCE);
+      return saved && isValidSource(saved) ? saved : getDefaultSource();
+    }
+    return getDefaultSource();
+  });
+
   // Setup step state for guided flow - sync with army.currentStep
-  const [setupStep, setSetupStep] = useState<'rules' | 'faction' | 'budget' | 'units' | 'preparation'>(() => {
+  const [setupStep, setSetupStep] = useState<'rules' | 'source' | 'faction' | 'budget' | 'units' | 'preparation'>(() => {
     if (army.currentStep === 'unit-select') return 'units';
     if (army.currentStep === 'preparation') return 'preparation';
     return 'rules';
   });
 
+  // Load source data and handle source changes
+  const sourceData = getSource(selectedSource);
+  const availableFactions = sourceData?.factions || [];
+  const typedSquads = sourceData?.squads || [];
+  const typedMachines = sourceData?.machines || [];
+
+  // Warn if source data is not found (shouldn't happen with fallback)
+  useEffect(() => {
+    if (!sourceData && selectedSource) {
+      console.warn(`Source data not found for ${selectedSource}, using fallback`);
+    }
+  }, [selectedSource, sourceData]);
+
+  const handleSourceChange = (sourceId: SourceID) => {
+    setSelectedSource(sourceId);
+    // Clear army when switching sources to prevent invalid state
+    setArmy({
+      ...army,
+      faction: undefined,
+      units: [],
+      totalCost: 0,
+      pointBudget: undefined,
+    });
+  };
+
   // Sync setupStep when army.currentStep changes (e.g., after returning to faction select)
   useEffect(() => {
-    if (army.currentStep === 'faction-select' && (setupStep === 'units' || setupStep === 'budget' || setupStep === 'faction')) {
+    if (army.currentStep === 'faction-select' && (setupStep === 'units' || setupStep === 'budget' || setupStep === 'faction' || setupStep === 'source')) {
       setSetupStep('rules');
     } else if (army.currentStep === 'unit-select' && setupStep !== 'units') {
       setSetupStep('units');
@@ -142,12 +168,12 @@ export default function ArmyBuilder({
                 onStepToCmFactorChange={onStepToCmFactorChange}
                 autoCompleteEnabled={autoCompleteEnabled}
                 onAutoCompleteEnabledChange={onAutoCompleteEnabledChange}
-                onConfirm={() => setSetupStep('faction')}
+                onConfirm={() => setSetupStep('source')}
               />
             )}
 
-            {/* Step 2: Faction Selection */}
-            {setupStep === 'faction' && (
+            {/* Step 2: Source Selection */}
+            {setupStep === 'source' && (
               <div className="relative">
                 <button
                   onClick={() => setSetupStep('rules')}
@@ -157,12 +183,33 @@ export default function ArmyBuilder({
                   Назад
                 </button>
                 <div className="pt-6">
+                  <SourceSelector
+                    sources={getAllSources()}
+                    selectedSource={selectedSource}
+                    onSourceChange={handleSourceChange}
+                    onConfirm={() => setSetupStep('faction')}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Step 3: Faction Selection */}
+            {setupStep === 'faction' && (
+              <div className="relative">
+                <button
+                  onClick={() => setSetupStep('source')}
+                  className="absolute -top-4 left-0 flex items-center gap-2 text-sm text-slate-400 hover:text-slate-300 transition-colors"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Назад
+                </button>
+                <div className="pt-6">
                   <FactionSelector
-                    factions={typedFactions}
+                    factions={availableFactions}
                     selectedFaction={army.faction}
                     onFactionSelect={(factionId) => setArmy({ ...army, faction: factionId })}
                     onNext={() => setSetupStep('budget')}
-                    nextDisabled={!army.faction}
+                    _nextDisabled={!army.faction}
                   />
                 </div>
               </div>
@@ -205,7 +252,7 @@ export default function ArmyBuilder({
             />
 
             <UnitSelector
-            factions={typedFactions}
+            factions={availableFactions}
             squads={typedSquads}
             machines={typedMachines}
             selectedFaction={army.faction}

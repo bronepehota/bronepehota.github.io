@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Army, ArmyUnit, RulesVersionID } from '@/lib/types';
 import ArmyBuilder from '@/components/ArmyBuilder';
 import GameSession from '@/components/GameSession';
-import factionsData from '@/data/factions.json';
+import factionsData from '@/data/sources/star_system/factions.json';
 import { Shield, ArrowLeft, CheckCircle2, MoreVertical, List, Grid, History, Heart, UserX, AlertTriangle, X, BookOpen } from 'lucide-react';
 import { isValidRulesVersion } from '@/lib/rules-registry';
 import { cn } from '@/lib/utils';
@@ -140,7 +140,7 @@ export default function Home() {
     return styles[factionId as keyof typeof styles] || styles.polaris;
   };
 
-  const factionStyles = getFactionStyles(army.faction);
+  const factionStyles = getFactionStyles(army.faction || 'polaris');
 
   // Handle return to faction selection (shows confirmation)
   const handleReturnToFactionSelect = () => {
