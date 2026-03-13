@@ -14,21 +14,22 @@ interface Step {
 
 const steps: Step[] = [
   { id: 1, label: 'Правила', description: 'Выберите версию правил', icon: Book },
-  { id: 2, label: 'Фракция', description: 'Выберите сторону конфликта', icon: Shield },
-  { id: 3, label: 'Бюджет', description: 'Установите лимит очков армии', icon: Coins },
-  { id: 4, label: 'Армия', description: 'Соберите свою армию', icon: Users },
-  { id: 5, label: 'Расстановка', description: 'Подготовьте войска к бою', icon: Sword },
+  { id: 2, label: 'Источник', description: 'Выберите армейские листы', icon: Shield },
+  { id: 3, label: 'Фракция', description: 'Выберите сторону конфликта', icon: Shield },
+  { id: 4, label: 'Бюджет', description: 'Установите лимит очков армии', icon: Coins },
+  { id: 5, label: 'Армия', description: 'Соберите свою армию', icon: Users },
+  { id: 6, label: 'Расстановка', description: 'Подготовьте войска к бою', icon: Sword },
 ];
 
 interface StepProgressIndicatorProps {
-  currentStep: 'faction' | 'budget' | 'rules' | 'units' | 'preparation' | 'complete';
+  currentStep: 'faction' | 'budget' | 'rules' | 'source' | 'units' | 'preparation' | 'complete';
   selectedFaction?: FactionID;
   selectedBudget?: number;
   selectedRules?: RulesVersionID;
 }
 
 /**
- * StepProgressIndicator - Visual progress indicator for 5-step army setup flow
+ * StepProgressIndicator - Visual progress indicator for 6-step army setup flow
  *
  * Accessibility:
  * - aria-current="step" for active step
@@ -48,11 +49,12 @@ export function StepProgressIndicator({
   const getStepIndex = (): number => {
     switch (currentStep) {
       case 'rules': return 0;
-      case 'faction': return 1;
-      case 'budget': return 2;
-      case 'units': return 3;
+      case 'source': return 1;
+      case 'faction': return 2;
+      case 'budget': return 3;
+      case 'units': return 4;
       case 'preparation':
-      case 'complete': return 4;
+      case 'complete': return 5;
       default: return 0;
     }
   };
