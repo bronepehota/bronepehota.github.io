@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle2, X, ImageIcon, Bomb, UserX } from 'lucide-react';
+import { CheckCircle2, X, ImageIcon, Bomb, UserX, BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ArmyUnit } from '@/lib/types';
 
@@ -32,7 +32,6 @@ export function UnitCardHeader({
 
   return (
     <div
-      onDoubleClick={onOpenDetails}
       className={cn(
         "p-2 md:p-3 flex justify-between items-center relative z-20 border-b border-slate-800/50",
         "sticky top-0 bg-slate-900/95",
@@ -91,6 +90,20 @@ export function UnitCardHeader({
             aria-label="Показать фото машины"
           >
             <ImageIcon className="w-4 h-4 opacity-50" />
+          </button>
+        )}
+        {/* Encyclopedia button */}
+        {onOpenDetails && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenDetails();
+            }}
+            className="p-1.5 md:p-1 hover:bg-white/10 rounded-sm transition-colors min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border border-slate-700/50"
+            title="Энциклопедия"
+            aria-label="Открыть энциклопедию"
+          >
+            <BookOpen className="w-4 h-4 opacity-50" />
           </button>
         )}
         <button

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { User, Zap, Plus } from 'lucide-react';
+import { User, Zap, Plus, BookOpen } from 'lucide-react';
 import { GitHubPagesImage as Image } from './GitHubPagesImage';
 import { ImageModal } from './modals/ImageModal';
 import type { Squad, Machine, FactionID } from '@/lib/types';
@@ -87,7 +87,6 @@ export function CompactUnitCard({
         canAfford ? 'cursor-pointer' : 'opacity-60 cursor-not-allowed',
         borderColor
       )}
-      onClick={canAfford ? onClick : undefined}
       data-testid={`compact-unit-card-${unit.id}`}
     >
       {/* Type icon zone - with image fallback */}
@@ -179,6 +178,29 @@ export function CompactUnitCard({
             </span>
           </div>
         </div>
+      </div>
+
+      {/* Info button zone */}
+      <div className="w-10 flex items-center justify-center flex-shrink-0">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            if (canAfford) {
+              onClick();
+            }
+          }}
+          disabled={!canAfford}
+          aria-label="Подробнее"
+          className={cn(
+            'w-9 h-9 rounded-full flex items-center justify-center',
+            'transition-all duration-200 active:scale-95 touch-manipulation',
+            canAfford
+              ? 'bg-slate-700/30 hover:bg-slate-700 border border-slate-600/50'
+              : 'bg-slate-800/50 cursor-not-allowed opacity-50'
+          )}
+        >
+          <BookOpen className={cn('w-4 h-4', canAfford ? 'text-slate-400' : 'text-slate-600')} />
+        </button>
       </div>
 
       {/* Add button zone */}

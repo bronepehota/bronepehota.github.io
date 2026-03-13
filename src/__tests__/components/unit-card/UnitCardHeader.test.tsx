@@ -67,7 +67,7 @@ describe('UnitCardHeader', () => {
     expect(onToggleDone).toHaveBeenCalledTimes(1);
   });
 
-  it('calls onOpenDetails on double click', () => {
+  it('calls onOpenDetails when encyclopedia button clicked', () => {
     const onOpenDetails = jest.fn();
     render(
       <UnitCardHeader
@@ -78,8 +78,9 @@ describe('UnitCardHeader', () => {
       />
     );
 
-    const header = document.querySelector('.border-b'); // The header div with border
-    fireEvent.doubleClick(header!);
+    // Find the encyclopedia button (has aria-label="Открыть энциклопедию")
+    const encyclopediaButton = screen.getByLabelText('Открыть энциклопедию');
+    fireEvent.click(encyclopediaButton);
 
     expect(onOpenDetails).toHaveBeenCalledTimes(1);
   });
