@@ -2,8 +2,9 @@
 
 import React, { useState, KeyboardEvent, useEffect } from 'react';
 import type { Faction, FactionID } from '@/lib/types';
-import { Shield, Swords, Star } from 'lucide-react';
+import { Shield, Swords, Star, ArrowRight } from 'lucide-react';
 import { clsx } from 'clsx';
+import { FloatingContinueButton } from './FloatingContinueButton';
 
 interface FactionSelectorProps {
   factions: Faction[];
@@ -88,7 +89,7 @@ export function FactionSelector({
   }
 
   return (
-    <div className="space-y-6" data-testid="faction-selector">
+    <div className="space-y-6 pb-32" data-testid="faction-selector">
       {/* Header */}
       <div className="text-center space-y-2">
         <div className="flex items-center justify-center gap-2 mb-2">
@@ -231,33 +232,17 @@ export function FactionSelector({
         })}
       </div>
 
-      {/* Next button */}
+      {/* Floating continue button */}
       {onNext && (
-        <div className="pt-4 flex justify-center">
-          <button
-            onClick={onNext}
-            disabled={nextDisabled || !selectedFaction}
-            aria-disabled={!selectedFaction}
-            data-testid="faction-continue-button"
-            className={clsx(
-              'px-8 py-3 font-mono text-sm font-bold uppercase tracking-wider',
-              'border transition-all min-h-[48px] min-w-[44px]',
-              'hover:scale-105 active:scale-95',
-              'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100',
-              selectedFaction ? 'bg-opacity-10' : 'bg-slate-700',
-              selectedFaction && factions.find(f => f.id === selectedFaction)?.color
-                ? `border-[${factions.find(f => f.id === selectedFaction)?.color}]`
-                : 'border-slate-600'
-            )}
-            style={{
-              backgroundColor: selectedFaction ? `${factions.find(f => f.id === selectedFaction)?.color}20` : undefined,
-              borderColor: selectedFaction ? factions.find(f => f.id === selectedFaction)?.color : undefined,
-              color: selectedFaction ? factions.find(f => f.id === selectedFaction)?.color : undefined
-            }}
-          >
-            ПРОДОЛЖИТЬ
-          </button>
-        </div>
+        <FloatingContinueButton
+          text="Выбрать фракцию"
+          tooltip="Выбрать фракцию"
+          accentColor={selectedFaction ? factions.find(f => f.id === selectedFaction)?.color || '#3b82f6' : '#64748b'}
+          onClick={onNext}
+          disabled={!selectedFaction}
+          dataTestid="faction-continue-button"
+          icon={<ArrowRight className="w-4 h-4" />}
+        />
       )}
     </div>
   );

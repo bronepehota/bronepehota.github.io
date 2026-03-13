@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, KeyboardEvent } from 'react';
 import { Book, Check, ChevronDown, Settings, ArrowRight } from 'lucide-react';
 import { clsx } from 'clsx';
 import type { RulesVersion, RulesVersionID } from '@/lib/types';
+import { FloatingContinueButton } from '../controls/FloatingContinueButton';
 import { PanicToggle } from '../toggles/PanicToggle';
 import { AimedShotToggle } from '../toggles/AimedShotToggle';
 import { SurpriseAttackToggle } from '../toggles/SurpriseAttackToggle';
@@ -280,87 +281,14 @@ export function RulesSelector({
 
       {/* Floating confirm button - fixed at bottom */}
       {onConfirm && (
-        <div className="fixed bottom-6 left-0 right-0 z-[100] flex justify-center px-4">
-          <div className="relative group" style={{ maxWidth: '400px', width: '100%' }}>
-            {/* Scroll indicator at top - gradient fade showing content continues */}
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
-              <div className="w-12 h-0.5 bg-gradient-to-r from-transparent via-slate-500 to-transparent rounded-full" />
-              <div className="w-8 h-0.5 bg-gradient-to-r from-transparent via-slate-600 to-transparent rounded-full" />
-              <div className="w-4 h-0.5 bg-slate-700 rounded-full animate-pulse" />
-            </div>
-
-            {/* Outer glow */}
-            <div
-              className="absolute -inset-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm"
-              style={{
-                backgroundColor: accentColor,
-                opacity: 0.3
-              }}
-            />
-
-            {/* Main button - more transparent to show content behind */}
-            <button
-              onClick={onConfirm}
-              data-testid="rules-confirm-button"
-              className={clsx(
-                "relative w-full pointer-events-auto",
-                "py-4 px-6 rounded-lg",
-                "flex items-center justify-center gap-3",
-                "font-mono text-base md:text-lg font-bold uppercase tracking-wider",
-                "transition-all duration-200",
-                "border-2",
-                // More transparent background
-                "bg-slate-900/80 backdrop-blur-md text-white",
-                "hover:scale-[1.02] hover:bg-slate-900/90",
-                "active:scale-95",
-                "shadow-lg hover:shadow-xl"
-              )}
-              style={{ borderColor: accentColor }}
-            >
-              {/* Top fade indicator - subtle gradient showing content behind */}
-              <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-b from-slate-950/50 to-transparent pointer-events-none rounded-t-lg" />
-
-              {/* Animated background effect */}
-              <div
-                className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity"
-                style={{ backgroundColor: accentColor, opacity: 0.15 }}
-              />
-
-              {/* Scanline effect */}
-              <div className="absolute inset-0 opacity-10 pointer-events-none">
-                <div
-                  className="absolute inset-0 bg-gradient-to-b from-transparent via-white to-transparent h-full w-full animate-pulse"
-                  style={{ animationDuration: '2s' }}
-                />
-              </div>
-
-              {/* Icon */}
-              <ArrowRight className="w-5 h-5 relative z-10" />
-
-              {/* Text */}
-              <span className="relative z-10">Продолжить</span>
-
-              {/* Tech corners */}
-              <div className="absolute top-0 left-0 w-2 h-2 border-l-2 border-t-2 opacity-50" style={{ borderColor: accentColor }} />
-              <div className="absolute top-0 right-0 w-2 h-2 border-r-2 border-t-2 opacity-50" style={{ borderColor: accentColor }} />
-              <div className="absolute bottom-0 left-0 w-2 h-2 border-l-2 border-b-2 opacity-50" style={{ borderColor: accentColor }} />
-              <div className="absolute bottom-0 right-0 w-2 h-2 border-r-2 border-b-2 opacity-50" style={{ borderColor: accentColor }} />
-            </button>
-
-            {/* Tooltip on hover */}
-            <div className={clsx(
-              "absolute -top-12 left-1/2 -translate-x-1/2",
-              "whitespace-nowrap px-3 py-1.5 rounded",
-              "bg-slate-900/95 text-slate-300 text-xs font-mono font-medium",
-              "opacity-0 group-hover:opacity-100 transition-opacity duration-200",
-              "border border-slate-700/50 shadow-lg",
-              "pointer-events-none"
-            )}>
-              Выбрать фракцию
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 rotate-45 w-2 h-2 bg-slate-900 border-r border-b border-slate-700/50" />
-            </div>
-          </div>
-        </div>
+        <FloatingContinueButton
+          text="Выбрать правила"
+          tooltip="Выбрать правила"
+          accentColor={accentColor}
+          onClick={onConfirm}
+          dataTestid="rules-confirm-button"
+          icon={<ArrowRight className="w-4 h-4" />}
+        />
       )}
     </>
   );
