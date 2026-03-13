@@ -166,15 +166,8 @@ export default function UnitCard({
 
   const handleOpenOriginal = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    // For machines, show details modal
-    // For squads, open external URL or show image
-    if (!isSquad) {
-      setShowDetailsModal(true);
-    } else if (data.originalUrl) {
-      window.open(data.originalUrl, '_blank');
-    } else {
-      setShowImage(true);
-    }
+    // Open encyclopedia modal for all units
+    setShowDetailsModal(true);
   };
 
   // Handle combat actions
@@ -439,7 +432,6 @@ export default function UnitCard({
 
   return (
     <div
-      onDoubleClick={handleOpenOriginal}
       className={cn(
         "bg-slate-900/80 rounded-sm border-2 border-slate-800 transition-all shadow-lg overflow-hidden relative cursor-default select-none",
         "flex flex-col h-full",
@@ -511,13 +503,23 @@ export default function UnitCard({
         />
       )}
 
-      {/* Machine Blueprint Modal */}
+      {/* Encyclopedia Modal - Machines */}
       {showDetailsModal && !isSquad && (
         <EncyclopediaModal
           unit={{ ...data, type: 'machine' } as UnitWithType}
           isOpen={showDetailsModal}
           onClose={() => setShowDetailsModal(false)}
           scrollTarget="machine-images"
+        />
+      )}
+
+      {/* Encyclopedia Modal - Squads */}
+      {showDetailsModal && isSquad && (
+        <EncyclopediaModal
+          unit={{ ...data, type: 'squad' } as UnitWithType}
+          isOpen={showDetailsModal}
+          onClose={() => setShowDetailsModal(false)}
+          scrollTarget="soldier-images"
         />
       )}
 

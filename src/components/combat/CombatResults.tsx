@@ -518,15 +518,15 @@ export function CombatResults({
                   data-testid="grenade-explode-button"
                   onClick={() => onGrenadeCheckTarget(grenadeTargetArmor)}
                   className={cn(
-                    "relative w-full py-4 rounded-lg font-mono text-base font-bold uppercase tracking-wider border-2 transition-all min-h-[56px]",
+                    "relative w-full py-2 md:py-3 rounded-lg font-mono text-base font-bold uppercase tracking-wider border-2 transition-all min-h-[48px] md:min-h-[52px]",
                     "active:scale-95",
                     "bg-emerald-950/20 border-emerald-600/50 text-emerald-400 hover:bg-emerald-950/40"
                   )}
                 >
                   <div className="flex items-center justify-center gap-3">
-                    <span className="text-2xl">💣</span>
+                    <span className="text-xl md:text-2xl">💣</span>
                     <span>ВЗРЫВ</span>
-                    <span className="text-emerald-500/60 text-sm font-mono">1D20</span>
+                    <span className="text-emerald-500/60 text-sm font-mono hidden md:inline">1D20</span>
                   </div>
                 </button>
               </div>
@@ -636,11 +636,11 @@ export function CombatResults({
       })()}
 
       {/* Action Buttons */}
-      <div className="flex gap-3 pt-4">
+      <div className="flex gap-2 md:gap-3 pt-4">
         <button
           onClick={() => onApply(markAsDone || undefined)}
           className={cn(
-            "flex-1 py-3 rounded-lg font-mono text-sm font-bold uppercase tracking-wider border-2 transition-all min-h-[52px]",
+            "flex-1 px-2 md:px-6 py-2 md:py-3 rounded-lg font-mono text-sm font-bold uppercase tracking-wider border-2 transition-all min-h-[44px] md:min-h-[48px]",
             (isShot || isGrenade) && result.hitResult?.success
               ? "bg-emerald-600 hover:bg-emerald-500 border-emerald-500 text-white"
               : isMelee && result.meleeResult?.winner === 'attacker'

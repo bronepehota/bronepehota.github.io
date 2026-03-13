@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Shield, Zap, Plus } from 'lucide-react';
+import { Shield, Zap, Plus, BookOpen } from 'lucide-react';
 import { clsx } from 'clsx';
 import type { Machine } from '@/lib/types';
 import SafeImage from '@/components/SafeImage';
@@ -43,12 +43,11 @@ export default function MachineCard({ machine, onAdd, onViewDetails, testId }: M
   return (
     <div
       className={clsx(
-        'relative group cursor-pointer transition-all duration-300',
+        'relative group transition-all duration-300',
         'border bg-slate-800/80 backdrop-blur-sm overflow-hidden',
         colors.border,
         colors.bg
       )}
-      onClick={() => onViewDetails(machine)}
     >
       {/* Corner accents */}
       <div className={clsx(
@@ -97,6 +96,18 @@ export default function MachineCard({ machine, onAdd, onViewDetails, testId }: M
         )}>
           R{machine.rank}
         </div>
+
+        {/* Info button - top left */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onViewDetails(machine);
+          }}
+          className="absolute top-2 left-2 p-1.5 rounded-sm font-mono text-xs bg-slate-900/90 backdrop-blur-sm border hover:bg-slate-800 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center md:min-w-0 md:min-h-0"
+          aria-label="Подробнее"
+        >
+          <BookOpen className={clsx('w-4 h-4', colors.accent)} />
+        </button>
 
         {/* Holographic overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent pointer-events-none" />

@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { GitHubPagesImage as Image } from './GitHubPagesImage';
 import type { Faction, Squad, Machine, ArmyUnit, FactionID, FilterType } from '@/lib/types';
-import { Plus, ArrowLeft, Users, Zap, Shield } from 'lucide-react';
+import { Plus, ArrowLeft, Users, Zap, Shield, BookOpen } from 'lucide-react';
 // import { WeaponSelectorModal } from './modals/WeaponSelectorModal'; // Preserved for potential future use
 import { EncyclopediaModal } from './modals/EncyclopediaModal';
 import { countByUnitType } from '@/lib/unit-utils';
@@ -368,10 +368,9 @@ export function UnitSelector({
                 return (
                   <div key={unit.data.id} className="relative">
                     <div
-                      onClick={() => handleUnitClick(unit)}
                       data-testid={`unit-card-${unit.data.id}`}
                       className={clsx(
-                        'relative group cursor-pointer transition-all duration-300',
+                        'relative group transition-all duration-300',
                         'border bg-slate-800/80 backdrop-blur-sm overflow-hidden',
                         affordable ? borderWithHover : disabledColors,
                         affordable ? bgHover : ''
@@ -436,6 +435,18 @@ export function UnitSelector({
                         )}>
                           R{getSquadMaxRank(squad)}
                         </div>
+
+                        {/* Info button - top left */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleUnitClick(unit);
+                          }}
+                          className="absolute top-2 left-2 p-1.5 rounded-sm font-mono text-xs bg-slate-900/90 backdrop-blur-sm border hover:bg-slate-800 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center md:min-w-0 md:min-h-0 z-10"
+                          aria-label="Подробнее"
+                        >
+                          <BookOpen className={clsx('w-4 h-4', affordable ? colors.text : 'text-slate-500')} />
+                        </button>
 
                         {/* Holographic overlay */}
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent pointer-events-none" />

@@ -240,14 +240,14 @@ export function BottomSheetCombatModal({
               />
 
               {/* Execute button with surprise attack toggle */}
-              <div className="flex gap-3">
+              <div className="flex gap-2 md:gap-3">
                 {/* Surprise Attack toggle - shot and melee only */}
                 {(state.actionType === 'shot' || state.actionType === 'melee') && (
                   <button
                     type="button"
                     onClick={() => onSetParameters({ isSurpriseAttack: !state.parameters.isSurpriseAttack })}
                     className={cn(
-                      'relative h-14 w-14 min-h-[56px] min-w-[56px] rounded-lg border-2 flex items-center justify-center shrink-0',
+                      'relative h-12 w-12 min-h-[48px] min-w-[48px] rounded-lg border-2 flex items-center justify-center shrink-0',
                       'touch-manipulation active:scale-95 transition-all duration-200',
                       state.parameters.isSurpriseAttack
                         ? 'bg-purple-600/20 border-purple-500 shadow-lg shadow-purple-500/20'
@@ -257,11 +257,11 @@ export function BottomSheetCombatModal({
                   >
                     <EyeOff
                       className={cn('transition-colors duration-200', state.parameters.isSurpriseAttack ? 'text-purple-400' : 'text-slate-400')}
-                      size={22}
+                      size={18}
                     />
                     {/* Pulsing status indicator when active */}
                     {state.parameters.isSurpriseAttack && (
-                      <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-purple-400 rounded-full animate-pulse" />
+                      <span className="absolute top-1 right-1 w-2 h-2 bg-purple-400 rounded-full animate-pulse" />
                     )}
                   </button>
                 )}
@@ -272,7 +272,7 @@ export function BottomSheetCombatModal({
                     type="button"
                     onClick={() => onSetParameters({ isAimedShot: !state.parameters.isAimedShot })}
                     className={cn(
-                      'relative h-14 w-14 min-h-[56px] min-w-[56px] rounded-lg border-2 flex items-center justify-center shrink-0',
+                      'relative h-12 w-12 min-h-[48px] min-w-[48px] rounded-lg border-2 flex items-center justify-center shrink-0',
                       'touch-manipulation active:scale-95 transition-all duration-200',
                       state.parameters.isAimedShot
                         ? 'bg-cyan-600/20 border-cyan-500 shadow-lg shadow-cyan-500/20'
@@ -282,10 +282,10 @@ export function BottomSheetCombatModal({
                   >
                     <Crosshair
                       className={cn('transition-colors duration-200', state.parameters.isAimedShot ? 'text-cyan-400' : 'text-slate-400')}
-                      size={22}
+                      size={18}
                     />
                     {state.parameters.isAimedShot && (
-                      <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-cyan-400 rounded-full animate-pulse" />
+                      <span className="absolute top-1 right-1 w-2 h-2 bg-cyan-400 rounded-full animate-pulse" />
                     )}
                   </button>
                 )}
@@ -294,7 +294,7 @@ export function BottomSheetCombatModal({
                 <button
                   onClick={onExecuteAction}
                   className={cn(
-                    "relative flex-1 font-mono text-sm md:text-base font-bold uppercase tracking-wider border-2 transition-all min-h-[56px]",
+                    "relative flex-1 font-mono text-sm md:text-base font-bold uppercase tracking-wider border-2 transition-all min-h-[48px] md:min-h-[52px]",
                     "hover:scale-[1.02] active:scale-95 overflow-hidden shimmer-effect",
                     "shadow-lg",
                     actionColors.button
@@ -312,14 +312,14 @@ export function BottomSheetCombatModal({
                   {/* Inner shadow for depth */}
                   <div className="absolute inset-0 shadow-inner pointer-events-none" />
 
-                  <div className="relative flex items-center justify-center gap-2 py-3 md:py-4">
+                  <div className="relative flex items-center justify-center gap-2 px-2 md:px-6 py-2 md:py-3">
                     <span>
                       {state.actionType === 'shot' ? 'ВЫСТРЕЛИТЬ' :
                        state.actionType === 'melee' ? 'АТАКОВАТЬ' : 'БРОСИТЬ'}
                     </span>
                     {/* Show modifiers in button */}
                     {(state.parameters.isSurpriseAttack || state.parameters.isAimedShot) && (
-                      <span className="text-purple-300 text-[10px] opacity-80">
+                      <span className="text-purple-300 text-[10px] opacity-80 hidden md:inline">
                         {state.parameters.isSurpriseAttack && 'с тыла'}
                         {state.parameters.isSurpriseAttack && state.parameters.isAimedShot && ' + '}
                         {state.parameters.isAimedShot && 'прицельный'}

@@ -120,7 +120,7 @@ describe('CompactUnitCard', () => {
     expect(screen.queryByText('0')).not.toBeInTheDocument();
   });
 
-  it('calls onClick when card clicked and can afford', async () => {
+  it('calls onClick when info button clicked and can afford', async () => {
     const handleClick = jest.fn();
     const user = userEvent.setup();
 
@@ -135,13 +135,14 @@ describe('CompactUnitCard', () => {
       />
     );
 
-    const card = screen.getByTestId('compact-unit-card-polaris_lineynaya_klon_pehota');
-    await user.click(card);
+    // Find the info button (has aria-label="Подробнее")
+    const infoButton = screen.getByLabelText('Подробнее');
+    await user.click(infoButton);
 
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
 
-  it('does not call onClick when cannot afford', async () => {
+  it('does not call onClick when info button clicked and cannot afford', async () => {
     const handleClick = jest.fn();
     const user = userEvent.setup();
 
@@ -156,8 +157,9 @@ describe('CompactUnitCard', () => {
       />
     );
 
-    const card = screen.getByTestId('compact-unit-card-polaris_lineynaya_klon_pehota');
-    await user.click(card);
+    // Find the info button (has aria-label="Подробнее")
+    const infoButton = screen.getByLabelText('Подробнее');
+    await user.click(infoButton);
 
     expect(handleClick).not.toHaveBeenCalled();
   });

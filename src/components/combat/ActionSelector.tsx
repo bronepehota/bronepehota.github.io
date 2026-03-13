@@ -163,7 +163,7 @@ export function ActionSelector({
                 )}
               >
                 <div className={cn(
-                  "relative p-4 rounded-lg border-2",
+                  "relative p-2 md:p-3 rounded-lg border-2",
                   "bg-slate-900/80 backdrop-blur-sm",
                   disabled
                     ? "border-slate-700/50"
@@ -172,10 +172,10 @@ export function ActionSelector({
                   "shadow-md transition-all duration-200",
                 )}>
                   {/* Content */}
-                  <div className="relative flex items-center gap-4">
+                  <div className="relative flex items-center gap-2 md:gap-3">
                     {/* Icon */}
                     <div className={cn(
-                      "relative p-3 rounded-lg border shrink-0",
+                      "relative p-1.5 md:p-2 rounded-lg border shrink-0",
                       disabled
                         ? "bg-slate-800/50 border-slate-700"
                         : `${style.bg} ${style.border}`
@@ -191,19 +191,19 @@ export function ActionSelector({
                     {/* Text content */}
                     <div className="text-left flex-1 min-w-0">
                       <div className={cn(
-                        "font-mono font-black text-base uppercase tracking-wider",
+                        "font-mono font-black text-sm md:text-base uppercase tracking-wider",
                         disabled ? "text-slate-600" : style.primary
                       )}>
                         {action.label}
                       </div>
-                      <div className="text-xs text-slate-500 mt-1 font-mono uppercase tracking-wider truncate">
+                      <div className="text-[10px] md:text-xs text-slate-500 mt-0.5 font-mono uppercase tracking-wider truncate">
                         {action.description}
                       </div>
                     </div>
 
                     {/* Arrow indicator */}
                     {!disabled && (
-                      <div className="text-slate-700 group-hover:text-slate-500 transition-all font-mono text-lg duration-200">
+                      <div className="text-slate-700 group-hover:text-slate-500 transition-all font-mono text-base md:text-lg duration-200">
                         →
                       </div>
                     )}
