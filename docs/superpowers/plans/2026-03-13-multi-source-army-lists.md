@@ -406,6 +406,7 @@ import { ExternalLink, Lock, ArrowRight } from 'lucide-react';
 import { clsx } from 'clsx';
 import type { ArmyListSource, SourceID } from '@/lib/types';
 import { FloatingContinueButton } from '../controls/FloatingContinueButton';
+import { LOCAL_STORAGE_KEYS } from '@/lib/constants';
 
 interface SourceSelectorProps {
   sources: ArmyListSource[];
@@ -452,7 +453,7 @@ export function SourceSelector({
       clearTimeout(debouncedSaveRef.current);
     }
     debouncedSaveRef.current = setTimeout(() => {
-      localStorage.setItem('bronepehota_army_list_source', sourceId);
+      localStorage.setItem(LOCAL_STORAGE_KEYS.ARMY_LIST_SOURCE, sourceId);
     }, 300);
   };
 
@@ -636,31 +637,102 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
 **Files:**
 - Modify: `src/components/rules/StepProgressIndicator.tsx`
 
-- [ ] **Step 1: Read current StepProgressIndicator to understand structure**
+- [ ] **Step 1: Update steps array (lines 15-21)**
 
-```bash
-cat src/components/rules/StepProgressIndicator.tsx
-```
-
-Note the current steps structure and styling.
-
-- [ ] **Step 2: Add 'source' step to the steps array**
-
-Find where steps are defined (likely a `steps` array or similar). Add `'source'` between `'rules'` and `'faction'`.
-
-The component likely has something like:
+Replace the existing `steps` array:
 ```typescript
-const steps = [
-  { id: 'rules', label: 'Правила', ... },
-  { id: 'faction', label: 'Фракция', ... },
-  // ...
+const steps: Step[] = [
+  { id: 1, label: 'Правила', description: 'Выберите версию правил', icon: Book },
+  { id: 2, label: 'Фракция', description: 'Выберите сторону конфликта', icon: Shield },
+  { id: 3, label: 'Бюджет', description: 'Установите лимит очков армии', icon: Coins },
+  { id: 4, label: 'Армия', description: 'Соберите свою армию', icon: Users },
+  { id: 5, label: 'Расстановка', description: 'Подготовьте войска к бою', icon: Sword },
 ];
 ```
 
-Add after `'rules'`:
+With:
 ```typescript
-{ id: 'source', label: 'Источник', ... },
+const steps: Step[] = [
+  { id: 1, label: 'Правила', description: 'Выберите версию правил', icon: Book },
+  { id: 2, label: 'Источник', description: 'Выберите армейские листы', icon: Shield },
+  { id: 3, label: 'Фракция', description: 'Выберите сторону конфликта', icon: Shield },
+  { id: 4, label: 'Бюджет', description: 'Установите лимит очков армии', icon: Coins },
+  { id: 5, label: 'Армия', description: 'Соберите свою армию', icon: Users },
+  { id: 6, label: 'Расстановка', description: 'Подготовьте войска к бою', icon: Sword },
+];
 ```
+
+- [ ] **Step 2: Update currentStep type (line 24)**
+
+Replace:
+```typescript
+currentStep: 'faction' | 'budget' | 'rules' | 'units' | 'preparation' | 'complete';
+```
+
+With:
+```typescript
+currentStep: 'faction' | 'budget' | 'rules' | 'source' | 'units' | 'preparation' | 'complete';
+```
+
+- [ ] **Step 3: Update getStepIndex function (lines 48-58)**
+
+Replace the entire `getStepIndex` function with:
+```typescript
+  const getStepIndex = (): number => {
+    switch (currentStep) {
+      case 'rules': return 0;
+      case 'source': return 1;
+      case 'faction': return 2;
+      case 'budget': return 3;
+      case 'units': return 4;
+      case 'preparation':
+      case 'complete': return 5;
+      default: return 0;
+    }
+  };
+```
+
+- [ ] **Step 4: Run type check**
+
+```bash
+npm run type-check
+```
+
+Expected: PASS
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/components/rules/StepProgressIndicator.tsx
+git commit -m "feat: add Source step to StepProgressIndicator
+
+- Add 'source' step between rules and faction
+- Update step indices for 6-step flow
+- Update currentStep type to include 'source'
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
+```
+
+---
+
+### Task 4.2: Update FactionSelector
+
+**Files:**
+- Modify: `src/components/controls/FactionSelector.tsx`
+
+**Note:** FactionSelector already accepts `factions` as a prop (line 10). This task verifies it's ready for dynamic use and removes any hardcoded imports if present.
+
+- [ ] **Step 1: Check for hardcoded faction imports**
+
+```bash
+head -20 src/components/controls/FactionSelector.tsx | grep -i "import.*faction"
+```
+
+Expected: No direct `factions.json` imports (should only have type imports)
+
+- [ ] **Step 2: Verify factions prop is used throughout**
+
+The component should use `factions` prop (line 35, 105, 240). No changes needed.
 
 - [ ] **Step 3: Run type check**
 
@@ -673,59 +745,11 @@ Expected: PASS
 - [ ] **Step 4: Commit**
 
 ```bash
-git add src/components/rules/StepProgressIndicator.tsx
-git commit -m "feat: add Source step to StepProgressIndicator
-
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
-```
-
----
-
-### Task 4.2: Update FactionSelector
-
-**Files:**
-- Modify: `src/components/controls/FactionSelector.tsx`
-
-- [ ] **Step 1: Read current FactionSelector to understand structure**
-
-```bash
-cat src/components/controls/FactionSelector.tsx
-```
-
-Note the props interface and how factions are used.
-
-- [ ] **Step 2: Add factions prop to FactionSelector**
-
-Update props to accept `factions` as a prop instead of importing:
-
-```typescript
-interface FactionSelectorProps {
-  factions: Faction[]; // Add this
-  selectedFaction: FactionID;
-  onFactionChange: (factionId: FactionID) => void;
-  // ... rest of props
-}
-```
-
-- [ ] **Step 3: Use factions prop instead of imported data**
-
-Replace any direct usage of imported `factionsData` with the `factions` prop.
-
-- [ ] **Step 4: Run type check**
-
-```bash
-npm run type-check
-```
-
-Expected: May show errors in ArmyBuilder where FactionSelector is used — we'll fix that in the next task.
-
-- [ ] **Step 5: Commit**
-
-```bash
 git add src/components/controls/FactionSelector.tsx
-git commit -m "refactor: FactionSelector accepts factions as prop
+git commit -m "refactor: verify FactionSelector accepts factions as prop
 
-Prepare for dynamic faction loading from sources.
+FactionSelector already designed for dynamic faction loading.
+No changes needed - verified ready for source integration.
 
 Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
 ```
@@ -737,111 +761,157 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
 **Files:**
 - Modify: `src/components/ArmyBuilder.tsx`
 
-- [ ] **Step 1: Read current ArmyBuilder implementation**
+- [ ] **Step 1: Add source-related imports (after line 19)**
 
-```bash
-cat src/components/ArmyBuilder.tsx
-```
-
-Note the setup step state, imports, and flow.
-
-- [ ] **Step 2: Add source-related imports**
-
-Add at top with other imports:
+Add after existing imports:
 ```typescript
 import { getAllSources, getSource, isValidSource, getDefaultSource } from '@/lib/sources-registry';
 import { SourceSelector } from './rules/SourceSelector';
 import { LOCAL_STORAGE_KEYS } from '@/lib/constants';
+import type { SourceID } from '@/lib/types';
 ```
 
-- [ ] **Step 3: Add source state and update setup step type**
+- [ ] **Step 2: Update setupStep state type (line 90)**
 
-Find the `setupStep` state type and add `'source'`:
+Replace:
+```typescript
+const [setupStep, setSetupStep] = useState<'rules' | 'faction' | 'budget' | 'units' | 'preparation'>(() => {
+```
 
+With:
 ```typescript
 const [setupStep, setSetupStep] = useState<'rules' | 'source' | 'faction' | 'budget' | 'units' | 'preparation'>(() => {
-  // ... existing logic
-});
 ```
 
-- [ ] **Step 4: Add selectedSource state**
+- [ ] **Step 3: Add selectedSource state (after line 87, before setupStep)**
 
-Add after other state declarations:
+Insert:
 ```typescript
-const [selectedSource, setSelectedSource] = useState<SourceID>(() => {
-  if (typeof window !== 'undefined') {
-    const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.ARMY_LIST_SOURCE);
-    return saved && isValidSource(saved) ? saved : getDefaultSource();
-  }
-  return getDefaultSource();
-});
-```
-
-- [ ] **Step 5: Add source data loading**
-
-Add after source state:
-```typescript
-const sourceData = getSource(selectedSource);
-const availableFactions = sourceData?.factions || [];
-```
-
-- [ ] **Step 6: Add handleSourceChange function**
-
-```typescript
-const handleSourceChange = (sourceId: SourceID) => {
-  setSelectedSource(sourceId);
-  localStorage.setItem(LOCAL_STORAGE_KEYS.ARMY_LIST_SOURCE, sourceId);
-
-  // Clear army - start fresh with new source
-  setArmy({
-    name: army.name,
-    faction: '',
-    units: [],
-    totalCost: 0,
-    sourceId,
-    currentStep: 'faction-select',
+  // Source selection state - persisted in localStorage
+  const [selectedSource, setSelectedSource] = useState<SourceID>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.ARMY_LIST_SOURCE);
+      return saved && isValidSource(saved) ? saved : getDefaultSource();
+    }
+    return getDefaultSource();
   });
-  setSetupStep('faction');
-};
 ```
 
-- [ ] **Step 7: Update FactionSelector usage**
+- [ ] **Step 4: Add source data loading (after selectedSource state)**
 
-Find where `<FactionSelector>` is used and add `factions` prop:
+Insert:
 ```typescript
-<FactionSelector
-  factions={availableFactions}
-  // ... other props
-/>
+  // Load factions from selected source
+  const sourceData = getSource(selectedSource);
+  const availableFactions = sourceData?.factions || [];
 ```
 
-- [ ] **Step 8: Remove hardcoded faction imports**
+- [ ] **Step 5: Add handleSourceChange function (after handleXxx functions)**
 
-Remove imports like:
+Find the end of the toggle handler functions and insert:
 ```typescript
+  const handleSourceChange = (sourceId: SourceID) => {
+    setSelectedSource(sourceId);
+    localStorage.setItem(LOCAL_STORAGE_KEYS.ARMY_LIST_SOURCE, sourceId);
+
+    // Clear army - start fresh with new source
+    setArmy({
+      name: army.name,
+      faction: '',
+      units: [],
+      totalCost: 0,
+      sourceId,
+      pointBudget: army.pointBudget,
+      currentStep: 'faction-select',
+    });
+    setSetupStep('faction');
+  };
+```
+
+- [ ] **Step 6: Remove hardcoded faction imports (lines 5-11)**
+
+Remove these lines:
+```typescript
+import polairsSquads from '@/data/polaris/squads.json';
+import polairsMachines from '@/data/polaris/machines.json';
+import protectorateSquads from '@/data/protectorate/squads.json';
+import protectorateMachines from '@/data/protectorate/machines.json';
+import mercenariesSquads from '@/data/mercenaries/squads.json';
+import mercenariesMachines from '@/data/mercenaries/machines.json';
 import factionsData from '@/data/factions.json';
 ```
 
-- [ ] **Step 9: Add SourceSelector to render**
+- [ ] **Step 7: Remove type assertions (lines 21-24)**
 
-Add after RulesSelector in the render:
+Remove:
 ```typescript
-{setupStep === 'source' && (
-  <SourceSelector
-    sources={getAllSources()}
-    selectedSource={selectedSource}
-    onSourceChange={handleSourceChange}
-    onConfirm={() => setSetupStep('faction')}
-  />
-)}
+// Type assertions for JSON imports
+const typedFactions = factionsData as Faction[];
+const typedSquads = [...polairsSquads, ...protectorateSquads, ...mercenariesSquads] as Squad[];
+const typedMachines = [...polairsMachines, ...protectorateMachines, ...mercenariesMachines] as Machine[];
 ```
 
-- [ ] **Step 10: Update flow logic**
+- [ ] **Step 8: Update RulesSelector onConfirm callback (line ~145)**
 
-Find the navigation logic and update to include source step. The flow should be:
-- `'rules'` → `'source'` → `'faction'` → ...
+Find:
+```typescript
+onConfirm={() => setSetupStep('faction')}
+```
 
-- [ ] **Step 11: Run type check**
+Replace with:
+```typescript
+onConfirm={() => setSetupStep('source')}
+```
+
+- [ ] **Step 9: Add SourceSelector render (after RulesSelector block)**
+
+After the closing `}` of the RulesSelector block (around line 147), insert:
+```typescript
+            {/* Step 2: Source Selection */}
+            {setupStep === 'source' && (
+              <SourceSelector
+                sources={getAllSources()}
+                selectedSource={selectedSource}
+                onSourceChange={handleSourceChange}
+                onConfirm={() => setSetupStep('faction')}
+              />
+            )}
+
+            {/* Step 3: Faction Selection */}
+```
+
+- [ ] **Step 10: Update FactionSelector props (find FactionSelector usage)**
+
+Find the `<FactionSelector>` component and add `factions` prop:
+```typescript
+              <FactionSelector
+                factions={availableFactions}
+                selectedFaction={army.faction}
+                // ... rest of existing props
+              />
+```
+
+- [ ] **Step 11: Update useEffect sync logic (lines 96-106)**
+
+Find the useEffect that syncs setupStep with army.currentStep. Update the conditions:
+
+Replace:
+```typescript
+    if (army.currentStep === 'faction-select' && (setupStep === 'units' || setupStep === 'budget' || setupStep === 'faction')) {
+      setSetupStep('rules');
+```
+
+With:
+```typescript
+    if (army.currentStep === 'faction-select' && (setupStep === 'units' || setupStep === 'budget' || setupStep === 'faction' || setupStep === 'source')) {
+      setSetupStep('rules');
+```
+
+- [ ] **Step 12: Update StepProgressIndicator currentStep prop (find it)**
+
+The StepProgressIndicator `currentStep` prop already supports the values we use. No changes needed.
+
+- [ ] **Step 13: Run type check**
 
 ```bash
 npm run type-check
@@ -849,7 +919,7 @@ npm run type-check
 
 Expected: PASS
 
-- [ ] **Step 12: Run lint**
+- [ ] **Step 14: Run lint**
 
 ```bash
 npm run lint
@@ -857,7 +927,7 @@ npm run lint
 
 Expected: PASS
 
-- [ ] **Step 13: Commit**
+- [ ] **Step 15: Commit**
 
 ```bash
 git add src/components/ArmyBuilder.tsx
@@ -866,7 +936,8 @@ git commit -m "feat: integrate source selection into ArmyBuilder flow
 - Add source selection step between Rules and Faction
 - Load factions dynamically from selected source
 - Clear army when source changes
-- Update FactionSelector to receive factions as prop
+- Remove hardcoded faction/unit imports
+- Update flow: rules → source → faction → budget → units
 
 Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
 ```
@@ -1068,10 +1139,19 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
 - [ ] **Step 1: Verify all components use new paths**
 
 ```bash
+# Check for old paths
 grep -r "data/polaris\|data/protectorate\|data/mercenaries\|data/factions.json" src/ --include="*.ts" --include="*.tsx"
 ```
 
 Expected: Only references to `sources/star_system/...` should remain (from encyclopedia-utils which we already updated)
+
+- [ ] **Step 2: Run type check to verify no broken imports**
+
+```bash
+npm run type-check
+```
+
+Expected: PASS - no import errors
 
 - [ ] **Step 2: Remove old data files**
 
