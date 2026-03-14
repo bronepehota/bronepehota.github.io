@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { GitHubPagesImage } from '@/components/GitHubPagesImage';
-import { UnitWithType } from '@/lib/encyclopedia-utils';
+import { EnrichedUnit } from '@/lib/encyclopedia-utils';
 import { Squad } from '@/lib/types';
 import { Users, ChevronDown, ChevronUp, Footprints, Target, Zap, Sword, Shield } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface SoldierImagesProps {
-  unit: UnitWithType;
+  unit: EnrichedUnit;
 }
 
 export function SoldierImages({ unit }: SoldierImagesProps) {

@@ -4,6 +4,7 @@ import React from 'react';
 import { FolderOpen, Shield, Sword } from 'lucide-react';
 import { FactionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { getFactionColors } from '@/lib/faction-colors';
 
 interface TabBarProps {
   activeTab: 'browse' | 'army';
@@ -28,13 +29,13 @@ export function TabBar({
   hasUnits = false,
   onStartBattle
 }: TabBarProps) {
-  const factionColors = {
-    polaris: { bg: 'bg-red-500', text: 'text-red-400', border: 'border-red-500', glow: 'shadow-red-500/20' },
-    protectorate: { bg: 'bg-cyan-500', text: 'text-cyan-400', border: 'border-cyan-500', glow: 'shadow-cyan-500/20' },
-    mercenaries: { bg: 'bg-yellow-500', text: 'text-yellow-400', border: 'border-yellow-500', glow: 'shadow-yellow-500/20' },
+  const factionColors = getFactionColors(factionId);
+  const colors = {
+    bg: factionColors.bgSolid,
+    text: factionColors.text,
+    border: factionColors.borderSolid,
+    glow: factionColors.glow,
   };
-
-  const colors = factionColors[factionId] || factionColors.polaris;
 
   // Calculate budget color based on remaining points
   const remainingPoints = pointBudget - currentCost;

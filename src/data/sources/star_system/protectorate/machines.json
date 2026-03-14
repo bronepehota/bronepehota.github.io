@@ -1,0 +1,573 @@
+[
+  {
+    "id": "griffin",
+    "name": "Грифон",
+    "shortName": "Грифон",
+    "faction": "protectorate",
+    "cost": 1000,
+    "image": "/images/machines/griffin.jpg",
+    "weapons": [
+      {
+        "name": "Спаренная пусковая установка Алебарда",
+        "range": "D6+3",
+        "power": "2D20",
+        "ammo": 4
+      },
+      {
+        "name": "Легкий 3-х ствольный пулемет Триплет Mk56",
+        "range": "D6",
+        "power": "1D6",
+        "ammo": 6,
+        "special": "3 выстрела в 3х направлениях"
+      },
+      {
+        "name": "Лазерная пушка Световой меч LG-25",
+        "range": "D20",
+        "power": "1D12",
+        "ammo": 4
+      },
+      {
+        "name": "Плазменная пушка Драконье пламя PGM-13 Mk1",
+        "range": "D12",
+        "power": "2D12",
+        "ammo": 5
+      }
+    ],
+    "speed_sectors": [
+      {
+        "min_durability": 6,
+        "max_durability": 11,
+        "speed": 6
+      },
+      {
+        "min_durability": 4,
+        "max_durability": 5,
+        "speed": 5
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 3,
+        "speed": 4
+      }
+    ],
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 14,
+    "durability_max": 11
+  },
+  {
+    "id": "trex",
+    "name": "Ти-Рэкс",
+    "shortName": "Ти-Рэкс",
+    "faction": "protectorate",
+    "cost": 320,
+    "image": "/images/machines/trex.jpg",
+    "weapons": [
+      {
+        "name": "Автоматическая пушка Тайфун S&W Mk40",
+        "range": "D12",
+        "power": "2D12",
+        "ammo": 10
+      },
+      {
+        "name": "Пусковая установка Гарпун для ракет Mk12",
+        "range": "D12",
+        "power": "D20",
+        "ammo": 6
+      }
+    ],
+    "speed_sectors": [
+      {
+        "min_durability": 9,
+        "max_durability": 14,
+        "speed": 4
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 8,
+        "speed": 3
+      }
+    ],
+    "rank": 3,
+    "fire_rate": 2,
+    "ammo_max": 16,
+    "durability_max": 14
+  },
+  {
+    "id": "bronekhod",
+    "name": "Бронеход",
+    "shortName": "Бронеход",
+    "faction": "protectorate",
+    "cost": 190,
+    "image": "/images/machines/bronekhod.jpg",
+    "weapons": [
+      {
+        "name": "Спаренная пусковая установка Алебарда",
+        "range": "D12",
+        "power": "D20",
+        "ammo": 6
+      }
+    ],
+    "speed_sectors": [
+      {
+        "min_durability": 7,
+        "max_durability": 10,
+        "speed": 4
+      },
+      {
+        "min_durability": 4,
+        "max_durability": 6,
+        "speed": 3
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 3,
+        "speed": 2
+      }
+    ],
+    "rank": 2,
+    "fire_rate": 1,
+    "ammo_max": 12,
+    "durability_max": 10
+  },
+  {
+    "id": "werewolf",
+    "name": "Вервольф",
+    "shortName": "Вервольф",
+    "faction": "protectorate",
+    "cost": 250,
+    "image": "/images/machines/werewolf.jpg",
+    "weapons": [
+      {
+        "name": "Шестиствольная автоматическая пушка Гатлинг Mk20",
+        "range": "D12",
+        "power": "3D12",
+        "ammo": 5
+      },
+      {
+        "name": "Боевая клешня",
+        "range": "ББ",
+        "power": "1",
+        "ammo": 14
+      },
+      {
+        "name": "Боевой кулак-манипулятор",
+        "range": "ББ",
+        "power": "2",
+        "ammo": 14
+      }
+    ],
+    "speed_sectors": [
+      {
+        "min_durability": 8,
+        "max_durability": 14,
+        "speed": 4
+      },
+      {
+        "min_durability": 4,
+        "max_durability": 7,
+        "speed": 3
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 3,
+        "speed": 2
+      }
+    ],
+    "rank": 3,
+    "fire_rate": 1,
+    "ammo_max": 14,
+    "durability_max": 12
+  },
+  {
+    "id": "tornado",
+    "name": "Торнадо",
+    "shortName": "Торнадо",
+    "faction": "protectorate",
+    "cost": 310,
+    "image": "/images/machines/tornado.jpg",
+    "weapons": [
+      {
+        "name": "Спаренная шестиствольная автоматическая пушка Гатлинг Mk20",
+        "range": "D12",
+        "power": "3D20",
+        "ammo": 10
+      },
+      {
+        "name": "Боевая клешня",
+        "range": "ББ",
+        "power": "1",
+        "ammo": 16
+      },
+      {
+        "name": "Циркулярная пила",
+        "range": "ББ",
+        "power": "2",
+        "ammo": 16
+      }
+    ],
+    "speed_sectors": [
+      {
+        "min_durability": 9,
+        "max_durability": 13,
+        "speed": 3
+      },
+      {
+        "min_durability": 5,
+        "max_durability": 8,
+        "speed": 2
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 4,
+        "speed": 1
+      }
+    ],
+    "rank": 3,
+    "fire_rate": 2,
+    "ammo_max": 16,
+    "durability_max": 13
+  },
+  {
+    "id": "salamander",
+    "name": "Саламандра",
+    "shortName": "Саламандра",
+    "faction": "protectorate",
+    "cost": 160,
+    "image": "/images/machines/salamander.jpg",
+    "weapons": [
+      {
+        "name": "Пусковая установка Гарпун для ракет Mk12",
+        "range": "D12",
+        "power": "D20",
+        "ammo": 6
+      }
+    ],
+    "speed_sectors": [
+      {
+        "min_durability": 6,
+        "max_durability": 8,
+        "speed": 5
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 5,
+        "speed": 4
+      }
+    ],
+    "rank": 2,
+    "fire_rate": 1,
+    "ammo_max": 10,
+    "durability_max": 8
+  },
+  {
+    "id": "hurricane",
+    "name": "Харрикейн",
+    "shortName": "Харрикейн",
+    "faction": "protectorate",
+    "cost": 390,
+    "image": "/images/machines/hurricane.jpg",
+    "weapons": [
+      {
+        "name": "Спаренная шестиствольная автоматическая пушка Гатлинг Mk20",
+        "range": "D12",
+        "power": "3D12",
+        "ammo": 10
+      },
+      {
+        "name": "Спаренная ракетная установка Длинный лук Mk25",
+        "range": "D12",
+        "power": "D20",
+        "ammo": 2
+      },
+      {
+        "name": "Шестиствольный пулемет Вулкан Mk29",
+        "range": "D12",
+        "power": "3D12",
+        "ammo": 5
+      }
+    ],
+    "speed_sectors": [
+      {
+        "min_durability": 10,
+        "max_durability": 15,
+        "speed": 3
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 9,
+        "speed": 2
+      }
+    ],
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 18,
+    "durability_max": 15
+  },
+  {
+    "id": "predator",
+    "name": "Предатор",
+    "shortName": "Предатор",
+    "faction": "protectorate",
+    "cost": 415,
+    "image": "/images/machines/predator.jpg",
+    "weapons": [
+      {
+        "name": "Лазерная пушка Световой меч LG-25",
+        "range": "2D12",
+        "power": "D12",
+        "ammo": 4
+      },
+      {
+        "name": "Плазменная пушка Драконье пламя PGM-13 Mk1",
+        "range": "D12",
+        "power": "D20+3",
+        "ammo": 4
+      },
+      {
+        "name": "Спаренная пусковая установка Боевой пес для ракет Mk11",
+        "range": "D12",
+        "power": "2D20",
+        "ammo": 2
+      }
+    ],
+    "speed_sectors": [
+      {
+        "min_durability": 8,
+        "max_durability": 12,
+        "speed": 5
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 7,
+        "speed": 4
+      }
+    ],
+    "rank": 3,
+    "fire_rate": 2,
+    "ammo_max": 14,
+    "durability_max": 12
+  },
+  {
+    "id": "varan",
+    "name": "Варан",
+    "shortName": "Варан",
+    "faction": "protectorate",
+    "cost": 250,
+    "image": "/images/machines/varan.jpg",
+    "weapons": [
+      {
+        "name": "Спаренная пусковая установка MDB-17 Громовая стрела",
+        "range": "D20",
+        "power": "2D20",
+        "ammo": 5
+      }
+    ],
+    "speed_sectors": [
+      {
+        "min_durability": 9,
+        "max_durability": 16,
+        "speed": 2
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 8,
+        "speed": 1
+      }
+    ],
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 16,
+    "durability_max": 16
+  },
+  {
+    "id": "carnivore",
+    "name": "Карнивор",
+    "shortName": "Карнивор",
+    "faction": "protectorate",
+    "cost": 295,
+    "image": "/images/machines/carnivore.jpg",
+    "weapons": [
+      {
+        "name": "Спаренная пусковая установка Алебарда",
+        "range": "D12",
+        "power": "D20",
+        "ammo": 6
+      },
+      {
+        "name": "Легкая бронебойная пушка ApC-20S",
+        "range": "D20",
+        "power": "D20",
+        "ammo": 5
+      },
+      {
+        "name": "Плазменная пушка Драконье пламя PGM-13 Mk1",
+        "range": "D12",
+        "power": "D20+3",
+        "ammo": 4
+      }
+    ],
+    "speed_sectors": [
+      {
+        "min_durability": 9,
+        "max_durability": 13,
+        "speed": 4
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 8,
+        "speed": 3
+      }
+    ],
+    "rank": 3,
+    "fire_rate": 2,
+    "ammo_max": 14,
+    "durability_max": 13
+  },
+  {
+    "id": "octopus",
+    "name": "Спрут",
+    "shortName": "Спрут",
+    "faction": "protectorate",
+    "cost": 1000,
+    "image": "/images/machines/octopus.jpg",
+    "weapons": [
+      {
+        "name": "Импульсная пушка Огненный кинжал ImC-1 Mk1",
+        "range": "D12",
+        "power": "2D20",
+        "ammo": 4
+      },
+      {
+        "name": "Двуствольный пулемет S&W Mk95",
+        "range": "D20",
+        "power": "2D12",
+        "ammo": 4
+      },
+      {
+        "name": "4 управляемые ракеты Арбалет Mk24",
+        "range": "D12",
+        "power": "2D20",
+        "ammo": 4
+      }
+    ],
+    "speed_sectors": [
+      {
+        "min_durability": 9,
+        "max_durability": 13,
+        "speed": 6
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 8,
+        "speed": 5
+      }
+    ],
+    "rank": 4,
+    "fire_rate": 2,
+    "ammo_max": 16,
+    "durability_max": 13
+  },
+  {
+    "id": "condor",
+    "name": "Кондор",
+    "shortName": "Кондор",
+    "faction": "protectorate",
+    "cost": 800,
+    "image": "/images/machines/condor.jpg",
+    "weapons": [
+      {
+        "name": "4 пусковые установки Шип для ракет Mk14M",
+        "range": "D12",
+        "power": "2D20",
+        "ammo": 4
+      },
+      {
+        "name": "Спаренная пусковая установка Алебарда",
+        "range": "D12",
+        "power": "D20",
+        "ammo": 14
+      }
+    ],
+    "speed_sectors": [
+      {
+        "min_durability": 8,
+        "max_durability": 12,
+        "speed": 6
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 7,
+        "speed": 5
+      }
+    ],
+    "rank": 4,
+    "fire_rate": 2,
+    "ammo_max": 14,
+    "durability_max": 12
+  },
+  {
+    "id": "puma",
+    "name": "Пума",
+    "shortName": "Пума",
+    "faction": "protectorate",
+    "cost": 200,
+    "image": "/images/machines/puma.jpg",
+    "weapons": [
+      {
+        "name": "Пусковая установка Гарпун для ракет Mk12",
+        "range": "D12",
+        "power": "D20",
+        "ammo": 6
+      }
+    ],
+    "speed_sectors": [
+      {
+        "min_durability": 6,
+        "max_durability": 10,
+        "speed": 5
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 5,
+        "speed": 4
+      }
+    ],
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 10,
+    "durability_max": 9
+  },
+  {
+    "id": "viper",
+    "name": "Вайпер",
+    "shortName": "Вайпер",
+    "faction": "protectorate",
+    "cost": 200,
+    "image": "/images/machines/viper.jpg",
+    "weapons": [
+      {
+        "name": "Пусковая установка Гарпун для ракет Mk12",
+        "range": "D12",
+        "power": "D20",
+        "ammo": 6
+      }
+    ],
+    "speed_sectors": [
+      {
+        "min_durability": 5,
+        "max_durability": 8,
+        "speed": 7
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 4,
+        "speed": 5
+      }
+    ],
+    "rank": 1,
+    "fire_rate": 1,
+    "ammo_max": 10,
+    "durability_max": 8
+  }
+]

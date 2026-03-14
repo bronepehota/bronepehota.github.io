@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { GitHubPagesImage as Image } from './GitHubPagesImage';
 import type { Faction, Squad, Machine, ArmyUnit, FactionID, FilterType } from '@/lib/types';
-import { Plus, ArrowLeft, Users, Shield, BookOpen, X, Sword } from 'lucide-react';
+import { Plus, Users, Shield, BookOpen, X, Sword } from 'lucide-react';
 import { EncyclopediaModal } from './modals/EncyclopediaModal';
 import MachineCard from './machine/MachineCard';
 import { ArmyControlPanel } from './ArmyControlPanel';
@@ -11,20 +11,19 @@ import { CompactUnitCard } from './CompactUnitCard';
 import { FloatingContinueButton } from './controls/FloatingContinueButton';
 import { clsx } from 'clsx';
 import { getFactionColors } from '@/lib/faction-colors';
-import { UnitWithType } from '@/lib/encyclopedia-utils';
+import { EnrichedUnit } from '@/lib/encyclopedia-utils';
 
 interface UnitSelectorProps {
   factions: Faction[];
   squads: Squad[];
   machines?: Machine[];
-  selectedFaction: FactionID;
+  selectedFaction?: FactionID; // Optional to handle case where no faction is selected yet
   pointBudget: number;
   army: ArmyUnit[];
   onAddUnit: (squad: Squad) => void;
   onAddMachine?: (machine: Machine, selectedWeaponIndices?: number[]) => void;
   onRemoveUnit: (instanceId: string) => void;
   onToBattle: () => void;
-  onBackToFactionSelect?: () => void;
   isLoading?: boolean;
   loadError?: string | null;
   displayMode: 'detailed' | 'compact';
@@ -60,7 +59,6 @@ export function UnitSelector({
   onAddMachine,
   onRemoveUnit,
   onToBattle,
-  onBackToFactionSelect,
   isLoading = false,
   loadError = null,
   displayMode,
@@ -204,16 +202,7 @@ export function UnitSelector({
     return (
       <div className="text-center p-6 sm:p-12 bg-slate-700/40 rounded-lg space-y-6">
         <p className="text-slate-400 text-base sm:text-lg">Для этой фракции пока нет доступных юнитов</p>
-        {onBackToFactionSelect && (
-          <button
-            onClick={onBackToFactionSelect}
-            className="w-full sm:w-auto px-4 sm:px-6 py-3 bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white rounded-lg font-semibold transition-all flex items-center justify-center gap-2 mx-auto min-h-[48px] touch-manipulation"
-          >
-            <ArrowLeft size={20} className="flex-shrink-0" />
-            <span className="hidden sm:inline">Вернуться к выбору фракции</span>
-            <span className="sm:hidden">Назад к фракции</span>
-          </button>
-        )}
+        <p className="text-slate-500 text-sm">Используйте навигацию выше для выбора другой фракции</p>
       </div>
     );
   }
@@ -224,7 +213,7 @@ export function UnitSelector({
       <ArmyControlPanel
         viewMode="browse"
         filterType={filterType}
-        factionId={selectedFaction}
+        factionId={selectedFaction || ''}
         onFilterChange={setFilterType}
         squadCount={availableSquads.length}
         machineCount={availableMachines.length}
@@ -266,13 +255,13 @@ export function UnitSelector({
               const isInArmy = count > 0;
 
               return (
-                <div key={unit.data.id} className={clsx('relative', isInArmy && 'ring-2 ring-offset-2 ring-offset-slate-900', isInArmy && getFactionColors(unit.type === 'squad' ? (unit.data as Squad).faction as FactionID : selectedFaction).ring)}>
+                <div key={unit.data.id} className={clsx('relative', isInArmy && 'ring-2 ring-offset-2 ring-offset-slate-900', isInArmy && getFactionColors(unit.type === 'squad' ? (unit.data as Squad).faction as FactionID : selectedFaction || '').ring)}>
                   <CompactUnitCard
                     unit={unit.data}
                     type={unit.type}
                     onAdd={() => handleAddUnit(unit)}
                     onClick={() => handleUnitClick(unit)}
-                    factionId={unit.type === 'squad' ? (unit.data as Squad).faction as FactionID : selectedFaction}
+                    factionId={unit.type === 'squad' ? (unit.data as Squad).faction as FactionID : selectedFaction || ''}
                     canAfford={affordable}
                     countInArmy={count}
                   />
@@ -309,7 +298,7 @@ export function UnitSelector({
               const count = getInstanceCount(unit.data.id);
               const instance = getLatestInstance(unit.data.id);
               const isInArmy = count > 0;
-              const unitFaction = unit.type === 'squad' ? (unit.data as Squad).faction as FactionID : selectedFaction;
+              const unitFaction = unit.type === 'squad' ? (unit.data as Squad).faction as FactionID : selectedFaction || '';
               const colors = getFactionColors(unitFaction);
 
               // Render machines with MachineCard component
@@ -536,7 +525,12 @@ export function UnitSelector({
       {/* Unit details modal */}
       {selectedUnit && (
         <EncyclopediaModal
-          unit={{ ...selectedUnit.data, type: selectedUnit.type } as UnitWithType}
+          unit={{
+            ...selectedUnit.data,
+            type: selectedUnit.type,
+            sources: [{ id: 'star_system', cost: selectedUnit.data.cost }],
+            cost: selectedUnit.data.cost,
+          } as EnrichedUnit}
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           scrollTarget={selectedUnit.type === 'squad' ? 'soldier-images' : 'machine-images'}
@@ -548,7 +542,7 @@ export function UnitSelector({
         <FloatingContinueButton
           text="НАЧАТЬ БОЙ"
           tooltip="Начать бой"
-          accentColor={getFactionColors(selectedFaction).primary}
+          accentColor={getFactionColors(selectedFaction || '').primary}
           onClick={onToBattle}
           dataTestid="to-battle-button"
           icon={<Sword className="w-4 h-4" />}

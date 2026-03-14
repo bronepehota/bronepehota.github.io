@@ -1,0 +1,590 @@
+[
+  {
+    "id": "demolisher",
+    "name": "Демолишер",
+    "shortName": "Демолишер",
+    "faction": "polaris",
+    "cost": 400,
+    "image": "/images/machines/demolisher.jpg",
+    "weapons": [
+      {
+        "name": "Шестиствольная автоматическая пушка ARC-20X6",
+        "range": "D12",
+        "power": "3D20",
+        "ammo": 5
+      },
+      {
+        "name": "Спаренная пусковая установка Шторм для ракет R-9",
+        "range": "D12",
+        "power": "2D20",
+        "ammo": 2
+      },
+      {
+        "name": "Боевой кулак-манипулятор",
+        "range": "ББ",
+        "power": "2",
+        "ammo": 20
+      },
+      {
+        "name": "Бронированный бульдозерный отвал",
+        "range": "ББ",
+        "power": "3",
+        "ammo": 20
+      }
+    ],
+    "speed_sectors": [
+      {
+        "min_durability": 9,
+        "max_durability": 16,
+        "speed": 2
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 8,
+        "speed": 1
+      }
+    ],
+    "rank": 3,
+    "fire_rate": 2,
+    "ammo_max": 5,
+    "durability_max": 16
+  },
+  {
+    "id": "helix",
+    "name": "Хеликс",
+    "shortName": "Хеликс",
+    "faction": "polaris",
+    "cost": 220,
+    "image": "/images/machines/helix.jpg",
+    "weapons": [
+      {
+        "name": "Спаренная пусковая установка Двойной Молот",
+        "range": "D12",
+        "power": "D20",
+        "ammo": 6
+      },
+      {
+        "name": "Ремонтно-транспортная платформа",
+        "range": "ББ",
+        "power": "0",
+        "ammo": 16,
+        "special": {
+          "type": "repair",
+          "amount": 2
+        }
+      }
+    ],
+    "speed_sectors": [
+      {
+        "min_durability": 10,
+        "max_durability": 12,
+        "speed": 4
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 9,
+        "speed": 3
+      }
+    ],
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 16,
+    "durability_max": 12
+  },
+  {
+    "id": "locust",
+    "name": "Локуст",
+    "shortName": "Локуст",
+    "faction": "polaris",
+    "cost": 255,
+    "image": "/images/machines/locust.jpg",
+    "weapons": [
+      {
+        "name": "Скорострельная автоматическая бронебойная пушка Бамбук ATC-40",
+        "range": "D12",
+        "power": "2D12",
+        "ammo": 10
+      }
+    ],
+    "speed_sectors": [
+      {
+        "min_durability": 10,
+        "max_durability": 12,
+        "speed": 5
+      },
+      {
+        "min_durability": 7,
+        "max_durability": 9,
+        "speed": 4
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 6,
+        "speed": 3
+      }
+    ],
+    "rank": 3,
+    "fire_rate": 2,
+    "ammo_max": 16,
+    "durability_max": 12
+  },
+  {
+    "id": "madbull",
+    "name": "Мэд Булл",
+    "shortName": "Мэд Булл",
+    "faction": "polaris",
+    "cost": 340,
+    "image": "/images/machines/madbull.jpg",
+    "weapons": [
+      {
+        "name": "Спаренная пусковая установка Двойной Молот",
+        "range": "D12",
+        "power": "D20",
+        "ammo": 6
+      },
+      {
+        "name": "Импульсная пушка Power Dart IMG-1M",
+        "range": "2D12",
+        "power": "D20",
+        "ammo": 4
+      },
+      {
+        "name": "Энергетический гарпун Power Bolt PB-1M",
+        "range": "D6+2",
+        "power": "2D20",
+        "ammo": 4
+      },
+      {
+        "name": "Механическая пила",
+        "range": "ББ",
+        "power": "2",
+        "ammo": 20
+      }
+    ],
+    "speed_sectors": [
+      {
+        "min_durability": 10,
+        "max_durability": 15,
+        "speed": 3
+      },
+      {
+        "min_durability": 7,
+        "max_durability": 9,
+        "speed": 2
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 6,
+        "speed": 1
+      }
+    ],
+    "rank": 3,
+    "fire_rate": 2,
+    "ammo_max": 20,
+    "durability_max": 15
+  },
+  {
+    "id": "raptor",
+    "name": "Раптор",
+    "shortName": "Раптор",
+    "faction": "polaris",
+    "cost": 190,
+    "image": "/images/machines/raptor.jpg",
+    "weapons": [
+      {
+        "name": "Пусковая установка Молот для ракет R-6",
+        "range": "D12",
+        "power": "D20",
+        "ammo": 3
+      },
+      {
+        "name": "Пусковая установка Молот для ракет R-6 (вторая)",
+        "range": "D12",
+        "power": "D20",
+        "ammo": 3
+      }
+    ],
+    "speed_sectors": [
+      {
+        "min_durability": 6,
+        "max_durability": 9,
+        "speed": 5
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 5,
+        "speed": 4
+      }
+    ],
+    "rank": 2,
+    "fire_rate": 1,
+    "ammo_max": 10,
+    "durability_max": 8
+  },
+  {
+    "id": "wildbear",
+    "name": "Вайлд Беар",
+    "shortName": "Вайлд Беар",
+    "faction": "polaris",
+    "cost": 455,
+    "image": "/images/machines/wildbear.jpg",
+    "weapons": [
+      {
+        "name": "Шестиствольная автоматическая пушка ARC-20X6",
+        "range": "D12",
+        "power": "3D12",
+        "ammo": 5
+      },
+      {
+        "name": "Четырехствольный пулемет MG-442X4",
+        "range": "D12",
+        "power": "3D12",
+        "ammo": 5
+      },
+      {
+        "name": "Спаренная пусковая установка Шторм для ракет R-9",
+        "range": "D12",
+        "power": "2D20",
+        "ammo": 2
+      }
+    ],
+    "speed_sectors": [
+      {
+        "min_durability": 10,
+        "max_durability": 14,
+        "speed": 3
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 9,
+        "speed": 2
+      }
+    ],
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 18,
+    "durability_max": 14
+  },
+  {
+    "id": "ravingbeast",
+    "name": "Рэвинг Бист",
+    "shortName": "Рэвинг Бист",
+    "faction": "polaris",
+    "cost": 450,
+    "image": "/images/machines/ravingbeast.jpg",
+    "weapons": [
+      {
+        "name": "Спаренная пусковая установка Шторм для ракет R-9",
+        "range": "D12",
+        "power": "2D20",
+        "ammo": 2
+      },
+      {
+        "name": "Импульсная пушка Power Dart IMG-1M",
+        "range": "2D12",
+        "power": "D20",
+        "ammo": 4
+      },
+      {
+        "name": "Энергетический гарпун Power Bolt PB-1M",
+        "range": "D6+2",
+        "power": "2D20",
+        "ammo": 4
+      }
+    ],
+    "speed_sectors": [
+      {
+        "min_durability": 9,
+        "max_durability": 13,
+        "speed": 3
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 8,
+        "speed": 2
+      }
+    ],
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 16,
+    "durability_max": 13
+  },
+  {
+    "id": "thunder",
+    "name": "Тандер",
+    "shortName": "Тандер",
+    "faction": "polaris",
+    "cost": 500,
+    "image": "/images/machines/thunder.jpg",
+    "weapons": [
+      {
+        "name": "Импульсная пушка Power Dart IMG-1M",
+        "range": "D12",
+        "power": "2D20",
+        "ammo": 4
+      },
+      {
+        "name": "4 управляемые ракеты Копье R-22",
+        "range": "D12",
+        "power": "3D20",
+        "ammo": 4
+      },
+      {
+        "name": "Двуствольный пулемет MG-127X2",
+        "range": "D20",
+        "power": "2D12",
+        "ammo": 4
+      }
+    ],
+    "speed_sectors": [
+      {
+        "min_durability": 9,
+        "max_durability": 13,
+        "speed": 6
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 8,
+        "speed": 5
+      }
+    ],
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 16,
+    "durability_max": 13
+  },
+  {
+    "id": "eraser",
+    "name": "Эрайзер",
+    "shortName": "Эрайзер",
+    "faction": "polaris",
+    "cost": 375,
+    "image": "/images/machines/eraser.jpg",
+    "weapons": [
+      {
+        "name": "Двуствольная бронебойная пушка АТС-35Х2",
+        "range": "D20",
+        "power": "2D20",
+        "ammo": 4
+      },
+      {
+        "name": "Спаренная пусковая установка Двойной Молот",
+        "range": "D12",
+        "power": "3D20",
+        "ammo": 18
+      },
+      {
+        "name": "Энергетический гарпун Power Bolt PB-1M",
+        "range": "D6+2",
+        "power": "2D20",
+        "ammo": 4
+      }
+    ],
+    "speed_sectors": [
+      {
+        "min_durability": 9,
+        "max_durability": 14,
+        "speed": 2
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 8,
+        "speed": 1
+      }
+    ],
+    "rank": 3,
+    "fire_rate": 2,
+    "ammo_max": 18,
+    "durability_max": 14
+  },
+  {
+    "id": "devastator",
+    "name": "Девастатор",
+    "shortName": "Девастатор",
+    "faction": "polaris",
+    "cost": 455,
+    "image": "/images/machines/devastator.jpg",
+    "weapons": [
+      {
+        "name": "Двуствольная бронебойная пушка АТС-35Х2",
+        "range": "D20",
+        "power": "2D20",
+        "ammo": 4
+      },
+      {
+        "name": "Спаренная пусковая установка Шторм для ракет R-9",
+        "range": "D12",
+        "power": "2D20",
+        "ammo": 2
+      },
+      {
+        "name": "Двуствольный пулемет MG-127X2",
+        "range": "D12",
+        "power": "2D12",
+        "ammo": 4
+      }
+    ],
+    "speed_sectors": [
+      {
+        "min_durability": 10,
+        "max_durability": 15,
+        "speed": 2
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 9,
+        "speed": 1
+      }
+    ],
+    "rank": 3,
+    "fire_rate": 2,
+    "ammo_max": 18,
+    "durability_max": 15
+  },
+  {
+    "id": "spider",
+    "name": "Спайдер",
+    "shortName": "Спайдер",
+    "faction": "polaris",
+    "cost": 240,
+    "image": "/images/machines/spider.jpg",
+    "weapons": [
+      {
+        "name": "Спаренная автоматическая бронебойная пушка АТС-56X2",
+        "range": "D12",
+        "power": "D20",
+        "ammo": 8
+      },
+      {
+        "name": "Легкий двуствольный пулемет MG-546X2",
+        "range": "D12",
+        "power": "2D6",
+        "ammo": 6
+      }
+    ],
+    "speed_sectors": [
+      {
+        "min_durability": 8,
+        "max_durability": 12,
+        "speed": 5
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 7,
+        "speed": 4
+      }
+    ],
+    "rank": 3,
+    "fire_rate": 2,
+    "ammo_max": 14,
+    "durability_max": 11
+  },
+  {
+    "id": "superlocust",
+    "name": "Супер Локуст",
+    "shortName": "Супер Локуст",
+    "faction": "polaris",
+    "cost": 220,
+    "image": "/images/machines/superlocust.jpg",
+    "weapons": [
+      {
+        "name": "Тяжелая бронебойная пушка АТС-76",
+        "range": "D12",
+        "power": "D20",
+        "ammo": 8
+      }
+    ],
+    "speed_sectors": [
+      {
+        "min_durability": 10,
+        "max_durability": 14,
+        "speed": 4
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 9,
+        "speed": 3
+      }
+    ],
+    "rank": 3,
+    "fire_rate": 2,
+    "ammo_max": 16,
+    "durability_max": 14
+  },
+  {
+    "id": "hunter",
+    "name": "Хантер",
+    "shortName": "Хантер",
+    "faction": "polaris",
+    "cost": 200,
+    "image": "/images/machines/hunter.jpg",
+    "weapons": [
+      {
+        "name": "Скорострельная автоматическая пушка АТСМ-56д",
+        "range": "D12",
+        "power": "D20",
+        "ammo": 4
+      }
+    ],
+    "speed_sectors": [
+      {
+        "min_durability": 7,
+        "max_durability": 10,
+        "speed": 6
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 6,
+        "speed": 5
+      }
+    ],
+    "rank": 2,
+    "fire_rate": 1,
+    "ammo_max": 14,
+    "durability_max": 10
+  },
+  {
+    "id": "hornet",
+    "name": "Хорнет",
+    "shortName": "Хорнет",
+    "faction": "polaris",
+    "cost": 1000,
+    "image": "/images/machines/hornet.jpg",
+    "weapons": [
+      {
+        "name": "2 скорострельные автоматические пушки АСТМ-58А",
+        "range": "D12",
+        "power": "D20",
+        "ammo": 8
+      },
+      {
+        "name": "Легкий двуствольный пулемет MG-546X2A",
+        "range": "D6",
+        "power": "D12",
+        "ammo": 6
+      },
+      {
+        "name": "4 управляемые ракеты Пламенный молот ALS-30",
+        "range": "D12",
+        "power": "D20",
+        "ammo": 4
+      }
+    ],
+    "speed_sectors": [
+      {
+        "min_durability": 9,
+        "max_durability": 13,
+        "speed": 6
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 8,
+        "speed": 5
+      }
+    ],
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 16,
+    "durability_max": 13
+  }
+]

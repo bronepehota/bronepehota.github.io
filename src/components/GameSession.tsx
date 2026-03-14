@@ -373,7 +373,7 @@ export default function GameSession({
     setIsDockExpanded(prev => !prev);
   }, []);
 
-  const factionColors = getFactionColors(army.faction);
+  const factionColors = getFactionColors(army.faction || 'polaris');
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden" data-testid="game-session">
@@ -382,7 +382,7 @@ export default function GameSession({
         isOpen={showInitiativeModal}
         onClose={() => setShowInitiativeModal(false)}
         onConfirm={startNewTurn}
-        factionId={army.faction}
+        factionId={army.faction || 'polaris'}
         activeUnitsCount={activeUnitsCount}
         context="turn"
       />
@@ -535,7 +535,7 @@ export default function GameSession({
             <div className="flex-1 overflow-y-auto p-3 custom-scrollbar">
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
                 {army.units.map((unit, idx) => {
-                  const dockStyles = getUnitDockStyles(army.faction);
+                  const dockStyles = getUnitDockStyles(army.faction || 'polaris');
                   const isActive = focusedUnitIdx === idx;
                   const isMachine = unit.type === 'machine';
 
@@ -619,7 +619,7 @@ export default function GameSession({
             let lastStatus = -1;
 
             sortedUnits.forEach(({ unit, idx: originalIndex }, _arrayIndex) => {
-              const dockStyles = getUnitDockStyles(army.faction);
+              const dockStyles = getUnitDockStyles(army.faction || 'polaris');
               const isActive = focusedUnitIdx === originalIndex;
               const isMachine = unit.type === 'machine';
 

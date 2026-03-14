@@ -23,7 +23,7 @@ export function BattlePreparationScreen({
   const [showInitiativeModal, setShowInitiativeModal] = useState(false);
 
   // Получаем фракционные цвета
-  const colors = getFactionColors(army.faction);
+  const colors = getFactionColors(army.faction || 'polaris');
 
   // Обработка начала боя после инициативы
   const handleStartBattle = () => {
@@ -212,7 +212,7 @@ export function BattlePreparationScreen({
           isOpen={showInitiativeModal}
           onClose={() => setShowInitiativeModal(false)}
           onConfirm={handleStartBattle}
-          factionId={army.faction}
+          factionId={army.faction || 'polaris'}
           activeUnitsCount={activeUnitsCount}
           context="preparation"
         />

@@ -5,12 +5,12 @@ import Link from 'next/link';
 import { Army, ArmyUnit, RulesVersionID } from '@/lib/types';
 import ArmyBuilder from '@/components/ArmyBuilder';
 import GameSession from '@/components/GameSession';
-import factionsData from '@/data/factions.json';
 import { Shield, ArrowLeft, CheckCircle2, MoreVertical, List, Grid, History, Heart, UserX, AlertTriangle, X, BookOpen } from 'lucide-react';
 import { isValidRulesVersion } from '@/lib/rules-registry';
 import { cn } from '@/lib/utils';
 import { LOCAL_STORAGE_KEYS } from '@/lib/constants';
 import { CombatTargetProvider } from '@/contexts/CombatTargetContext';
+import { getEncyclopediaFaction } from '@/lib/encyclopedia-registry';
 
 export default function Home() {
   // View state - use URL hash for persistence instead of localStorage to avoid race conditions
@@ -113,7 +113,7 @@ export default function Home() {
     triggerInitiativeRef.current?.();
   }, []);
 
-  const activeFaction = factionsData.find(f => f.id === army.faction);
+  const activeFaction = army.faction ? getEncyclopediaFaction(army.faction) : undefined;
 
   // Faction styles for tech blueprint design
   const getFactionStyles = (factionId: string | null) => {
@@ -140,7 +140,7 @@ export default function Home() {
     return styles[factionId as keyof typeof styles] || styles.polaris;
   };
 
-  const factionStyles = getFactionStyles(army.faction);
+  const factionStyles = getFactionStyles(army.faction || 'polaris');
 
   // Handle return to faction selection (shows confirmation)
   const handleReturnToFactionSelect = () => {

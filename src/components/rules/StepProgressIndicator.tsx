@@ -14,21 +14,23 @@ interface Step {
 
 const steps: Step[] = [
   { id: 1, label: 'Правила', description: 'Выберите версию правил', icon: Book },
-  { id: 2, label: 'Фракция', description: 'Выберите сторону конфликта', icon: Shield },
-  { id: 3, label: 'Бюджет', description: 'Установите лимит очков армии', icon: Coins },
-  { id: 4, label: 'Армия', description: 'Соберите свою армию', icon: Users },
-  { id: 5, label: 'Расстановка', description: 'Подготовьте войска к бою', icon: Sword },
+  { id: 2, label: 'Арм.Тех Листы', description: 'Выберите армейские листы', icon: Shield },
+  { id: 3, label: 'Фракция', description: 'Выберите сторону конфликта', icon: Shield },
+  { id: 4, label: 'Бюджет', description: 'Установите лимит очков армии', icon: Coins },
+  { id: 5, label: 'Армия', description: 'Соберите свою армию', icon: Users },
+  { id: 6, label: 'Расстановка', description: 'Подготовьте войска к бою', icon: Sword },
 ];
 
 interface StepProgressIndicatorProps {
-  currentStep: 'faction' | 'budget' | 'rules' | 'units' | 'preparation' | 'complete';
+  currentStep: 'faction' | 'budget' | 'rules' | 'source' | 'units' | 'preparation' | 'complete';
   selectedFaction?: FactionID;
   selectedBudget?: number;
   selectedRules?: RulesVersionID;
+  onStepClick?: (step: 'rules' | 'source' | 'faction' | 'budget' | 'units' | 'preparation') => void;
 }
 
 /**
- * StepProgressIndicator - Visual progress indicator for 5-step army setup flow
+ * StepProgressIndicator - Visual progress indicator for 6-step army setup flow
  *
  * Accessibility:
  * - aria-current="step" for active step
@@ -44,15 +46,17 @@ export function StepProgressIndicator({
   selectedFaction,
   selectedBudget: _selectedBudget,
   selectedRules: _selectedRules,
+  onStepClick,
 }: StepProgressIndicatorProps) {
   const getStepIndex = (): number => {
     switch (currentStep) {
       case 'rules': return 0;
-      case 'faction': return 1;
-      case 'budget': return 2;
-      case 'units': return 3;
+      case 'source': return 1;
+      case 'faction': return 2;
+      case 'budget': return 3;
+      case 'units': return 4;
       case 'preparation':
-      case 'complete': return 4;
+      case 'complete': return 5;
       default: return 0;
     }
   };
@@ -78,16 +82,30 @@ export function StepProgressIndicator({
               {/* Step circle */}
               <div className="flex flex-col items-center gap-2">
                 <button
+                  onClick={() => {
+                    // Allow clicking on completed steps or current step (to navigate back)
+                    if (isCompleted || isActive) {
+                      const stepMap: Record<number, 'rules' | 'source' | 'faction' | 'budget' | 'units' | 'preparation'> = {
+                        0: 'rules',
+                        1: 'source',
+                        2: 'faction',
+                        3: 'budget',
+                        4: 'units',
+                        5: 'preparation',
+                      };
+                      onStepClick?.(stepMap[index]);
+                    }
+                  }}
                   aria-current={isActive ? 'step' : undefined}
                   aria-label={`Шаг ${step.id}: ${step.label}${isActive ? `, текущий шаг` : isCompleted ? `, завершен` : ''}`}
                   className={`
                     relative flex items-center justify-center
                     rounded-full font-semibold transition-all duration-300
                     ${isActive
-                      ? 'w-11 h-11 md:w-14 md:h-14 text-white scale-110'
+                      ? 'w-11 h-11 md:w-14 md:h-14 text-white scale-110 cursor-pointer'
                       : isCompleted
-                        ? 'w-9 h-9 md:w-12 md:h-12 text-green-400 bg-green-500/20 border-2 border-green-500'
-                        : 'w-9 h-9 md:w-12 md:h-12 text-slate-500 bg-slate-800/50 border-2 border-slate-700 opacity-60'
+                        ? 'w-9 h-9 md:w-12 md:h-12 text-green-400 bg-green-500/20 border-2 border-green-500 cursor-pointer hover:scale-105'
+                        : 'w-9 h-9 md:w-12 md:h-12 text-slate-500 bg-slate-800/50 border-2 border-slate-700 opacity-60 cursor-not-allowed'
                     }
                   `}
                   style={isActive ? {

@@ -11,17 +11,21 @@ test.describe('UnitCard Complex Scenarios', () => {
   });
 
   test('complete flow: add squad and verify in army', async ({ page }) => {
-    // Step 1: Rules is now first - confirm rules
+    // Step 1: Rules confirmation
     await page.click('[data-testid="rules-confirm-button"]');
     await page.waitForTimeout(500);
 
-    // Select faction
+    // Step 2: Source selection
+    await page.click('[data-testid="source-confirm-button"]');
+    await page.waitForTimeout(500);
+
+    // Step 3: Select faction
     await page.click('[data-testid="faction-card-polaris"]');
     await page.waitForTimeout(300);
     await page.click('[data-testid="faction-continue-button"]');
     await page.waitForTimeout(500);
 
-    // Select budget
+    // Step 4: Select budget
     await page.click('button:has-text("350")');
     await page.waitForTimeout(300);
     await page.click('[data-testid="budget-next-button"]');
@@ -45,10 +49,15 @@ test.describe('UnitCard Complex Scenarios', () => {
   });
 
   test('machine unit: add machine and switch to army view', async ({ page }) => {
-    // Navigate to unit selector - Rules is now first
+    // Step 1: Rules confirmation
     await page.click('[data-testid="rules-confirm-button"]');
     await page.waitForTimeout(500);
 
+    // Step 2: Source selection
+    await page.click('[data-testid="source-confirm-button"]');
+    await page.waitForTimeout(500);
+
+    // Step 3-4: Select faction and budget
     await page.click('[data-testid="faction-card-polaris"]');
     await page.waitForTimeout(300);
     await page.click('[data-testid="faction-continue-button"]');
@@ -81,10 +90,15 @@ test.describe('UnitCard Complex Scenarios', () => {
   });
 
   test('navigate through unit selector filters', async ({ page }) => {
-    // Navigate to unit selector - Rules is now first
+    // Step 1: Rules confirmation
     await page.click('[data-testid="rules-confirm-button"]');
     await page.waitForTimeout(500);
 
+    // Step 2: Source selection
+    await page.click('[data-testid="source-confirm-button"]');
+    await page.waitForTimeout(500);
+
+    // Step 3-4: Select faction and budget
     await page.click('[data-testid="faction-card-polaris"]');
     await page.waitForTimeout(300);
     await page.click('[data-testid="faction-continue-button"]');

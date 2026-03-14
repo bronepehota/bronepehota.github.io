@@ -23,20 +23,24 @@ test.describe('Pilot Functionality', () => {
 
   /**
    * Helper to navigate through setup flow to game session
-   * Flow: Rules → Faction → Budget → Army Builder → Game Session
+   * Flow: Rules → Source → Faction → Budget → Army Builder → Game Session
    */
   async function navigateToGameSession(page: any) {
-    // First: Rules confirmation (rules is now the first screen)
+    // First: Rules confirmation
     await page.click('[data-testid="rules-confirm-button"]');
     await page.waitForTimeout(500);
 
-    // Second: Select faction
+    // Second: Source selection
+    await page.click('[data-testid="source-confirm-button"]');
+    await page.waitForTimeout(500);
+
+    // Third: Select faction
     await page.click('[data-testid="faction-card-polaris"]');
     await page.waitForTimeout(300);
     await page.click('[data-testid="faction-continue-button"]');
     await page.waitForTimeout(500);
 
-    // Third: Select budget
+    // Fourth: Select budget
     await page.click('button:has-text("350")');
     await page.waitForTimeout(300);
     await page.click('[data-testid="budget-next-button"]');

@@ -2,14 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { UnitWithType } from '@/lib/encyclopedia-utils';
+import { EncyclopediaUnit } from '@/lib/encyclopedia-registry';
 import { FactionID } from '@/lib/types';
 import { Search } from 'lucide-react';
 import { UnitCard } from './UnitCard';
 import { cn } from '@/lib/utils';
 
 interface EncyclopediaPageProps {
-  initialUnits: UnitWithType[];
+  initialUnits: EncyclopediaUnit[];
 }
 
 const factions: { value: FactionID | 'all'; label: string; color: string }[] = [
@@ -26,8 +26,8 @@ const types: { value: 'all' | 'squad' | 'machine'; label: string; icon: string }
 ];
 
 export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps) {
-  const [units] = useState<UnitWithType[]>(initialUnits);
-  const [filteredUnits, setFilteredUnits] = useState<UnitWithType[]>(initialUnits);
+  const [units] = useState<EncyclopediaUnit[]>(initialUnits);
+  const [filteredUnits, setFilteredUnits] = useState<EncyclopediaUnit[]>(initialUnits);
   const [selectedFaction, setSelectedFaction] = useState<FactionID | 'all'>('all');
   const [selectedType, setSelectedType] = useState<'all' | 'squad' | 'machine'>('all');
   const [searchQuery, setSearchQuery] = useState('');

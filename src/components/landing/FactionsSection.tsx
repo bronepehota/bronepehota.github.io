@@ -2,7 +2,7 @@
 
 import { Shield, Zap, Skull } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import factionsData from '@/data/factions.json';
+import { getEncyclopediaFaction } from '@/lib/encyclopedia-registry';
 
 interface FactionsSectionProps {
   className?: string;
@@ -13,6 +13,8 @@ const iconMap = {
   Zap,
   Skull,
 } as const;
+
+const factionIds = ['polaris', 'protectorate', 'mercenaries'] as const;
 
 export default function FactionsSection({ className }: FactionsSectionProps) {
   return (
@@ -35,7 +37,10 @@ export default function FactionsSection({ className }: FactionsSectionProps) {
 
       {/* Factions grid */}
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-        {factionsData.map((faction, index) => {
+        {factionIds.map((factionId, index) => {
+          const faction = getEncyclopediaFaction(factionId);
+          if (!faction) return null;
+
           const IconComponent = iconMap[faction.symbol as keyof typeof iconMap];
 
           return (

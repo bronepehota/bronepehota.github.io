@@ -9,10 +9,15 @@ test.describe('Machine Fire Rate Limit', () => {
   });
 
   test('machine fire buttons should be visible in battle', async ({ page }) => {
-    // Navigate to army builder - Rules is now first
+    // Step 1: Rules confirmation
     await page.click('[data-testid="rules-confirm-button"]');
     await page.waitForTimeout(500);
 
+    // Step 2: Source selection
+    await page.click('[data-testid="source-confirm-button"]');
+    await page.waitForTimeout(500);
+
+    // Step 3-4: Select faction and budget
     await page.click('[data-testid="faction-card-polaris"]');
     await page.click('[data-testid="faction-continue-button"]');
     await page.waitForTimeout(300);

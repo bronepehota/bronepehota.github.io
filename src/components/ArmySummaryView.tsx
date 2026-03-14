@@ -7,6 +7,7 @@ import { CompactArmyCard } from './CompactArmyCard';
 import SquadCard from './SquadCard';
 import MachineCard from './machine/MachineCard';
 import { cn } from '@/lib/utils';
+import { getFactionColors } from '@/lib/faction-colors';
 
 interface ArmySummaryViewProps {
   units: ArmyUnit[];
@@ -18,33 +19,6 @@ interface ArmySummaryViewProps {
   factionId: FactionID;
 }
 
-const factionColors = {
-  polaris: {
-    primary: 'red',
-    accent: 'bg-red-500',
-    accentText: 'text-red-400',
-    accentBorder: 'border-red-500',
-    accentGlow: 'shadow-red-500/20',
-    bg: 'bg-red-950/20',
-  },
-  protectorate: {
-    primary: 'cyan',
-    accent: 'bg-cyan-500',
-    accentText: 'text-cyan-400',
-    accentBorder: 'border-cyan-500',
-    accentGlow: 'shadow-cyan-500/20',
-    bg: 'bg-cyan-950/20',
-  },
-  mercenaries: {
-    primary: 'yellow',
-    accent: 'bg-yellow-500',
-    accentText: 'text-yellow-400',
-    accentBorder: 'border-yellow-500',
-    accentGlow: 'shadow-yellow-500/20',
-    bg: 'bg-yellow-950/20',
-  },
-};
-
 export function ArmySummaryView({
   units,
   onRemoveUnit,
@@ -54,7 +28,17 @@ export function ArmySummaryView({
   displayMode,
   factionId,
 }: ArmySummaryViewProps) {
-  const colors = factionColors[factionId] || factionColors.polaris;
+  const factionColors = getFactionColors(factionId);
+  const colors = {
+    primary: factionColors.primary === '#ef4444' ? 'red' :
+              factionColors.primary === '#06b6d4' ? 'cyan' : 'yellow',
+    accent: factionColors.bgSolid,
+    accentText: factionColors.text,
+    accentBorder: factionColors.borderSolid,
+    accentGlow: factionColors.glow,
+    bg: factionColors.primary === '#ef4444' ? 'bg-red-950/20' :
+         factionColors.primary === '#06b6d4' ? 'bg-cyan-950/20' : 'bg-yellow-950/20',
+  };
   const isEmpty = units.length === 0;
   const canGoToBattle = !isEmpty && onToBattle;
 

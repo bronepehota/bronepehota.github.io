@@ -1,31 +1,36 @@
 import Link from 'next/link';
 import SafeImage from '@/components/SafeImage';
-import { UnitWithType } from '@/lib/encyclopedia-utils';
-import { Squad } from '@/lib/types';
+import { EncyclopediaUnit } from '@/lib/encyclopedia-registry';
+import { getFactionColors } from '@/lib/faction-colors';
+import { SourceAvailability } from './SourceAvailability';
 
 interface UnitCardProps {
-  unit: UnitWithType;
+  unit: EncyclopediaUnit;
 }
 
-const factionColors = {
-  polaris: { bg: 'bg-red-500', border: '#DC2626', glow: 'rgba(220, 38, 38, 0.3)' },
-  protectorate: { bg: 'bg-cyan-500', border: '#3B82F6', glow: 'rgba(59, 130, 246, 0.3)' },
-  mercenaries: { bg: 'bg-yellow-500', border: '#EAB308', glow: 'rgba(234, 179, 8, 0.3)' },
-};
-
-const factionBadges = {
+const factionBadges: Record<string, string> = {
   polaris: 'ИМП',
   protectorate: 'ПРОТ',
   mercenaries: 'НАЁМ',
 };
 
 export function UnitCard({ unit }: UnitCardProps) {
-  const factionStyle = factionColors[unit.faction];
+  const factionColors = getFactionColors(unit.faction);
+  const factionStyle = {
+    bg: factionColors.bgSolid,
+    border: factionColors.primary,
+    glow: factionColors.primary.replace('#', 'rgba(').replace(/[^,]+/g, (m, i) => {
+      if (i === 0) return m;
+      const hex = parseInt(m, 16);
+      return hex.toString();
+    }) + ', 0.3)',
+  };
 
-  // Get display image: unit image, first soldier's image (for squads), or placeholder
-  const displayImage = unit.image ||
-    (unit.type === 'squad' ? (unit as Squad).soldiers[0]?.image : null) ||
-    '/images/placeholder.png';
+  // Get cost from first source (or default to 0)
+  const cost = unit.sources[0]?.cost || 0;
+
+  // Get display image: unit image, or placeholder
+  const displayImage = unit.image || '/images/placeholder.png';
 
   return (
     <Link
@@ -81,7 +86,7 @@ export function UnitCard({ unit }: UnitCardProps) {
             <div className="flex items-center gap-1 backdrop-blur-sm bg-military-dark/80 px-2 py-1 rounded border border-military-rust/30">
               <span className="text-military-amber text-sm">⬡</span>
               <span className="font-ibm-mono text-xs font-bold text-white">
-                {unit.cost}
+                {cost}
               </span>
             </div>
           </div>
@@ -104,14 +109,15 @@ export function UnitCard({ unit }: UnitCardProps) {
           </h3>
 
           {/* Unit class/type */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-1.5">
             <span className="font-oswald text-xs text-military-taupe truncate">
               {unit.encyclopedia?.class || (unit.type === 'squad' ? 'Отряд' : 'Машина')}
             </span>
+            <SourceAvailability unit={unit} variant="card" size="compact" />
           </div>
 
           {/* Tactical decoration line */}
-          <div className="mt-2 h-px bg-gradient-to-r from-military-rust/50 via-military-amber/30 to-transparent" />
+          <div className="h-px bg-gradient-to-r from-military-rust/50 via-military-amber/30 to-transparent" />
         </div>
 
         {/* Corner bracket accents */}

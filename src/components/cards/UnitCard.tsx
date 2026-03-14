@@ -15,7 +15,7 @@ import { PilotTestModal } from '../combat/PilotTestModal';
 import { usePilotTestFlow } from '@/hooks/usePilotTestFlow';
 import { EncyclopediaModal } from '../modals/EncyclopediaModal';
 import { PanicTestModal } from '../modals/PanicTestModal';
-import { UnitWithType } from '@/lib/encyclopedia-utils';
+import { EnrichedUnit, getEnrichedUnit } from '@/lib/encyclopedia-utils';
 import { UnitCardHeader } from './unit-card/UnitCardHeader';
 import { SquadView } from './unit-card/SquadView';
 import { MachineView } from './unit-card/MachineView';
@@ -66,6 +66,7 @@ export default function UnitCard({
   const [showSoldierImage, setShowSoldierImage] = useState<number | null>(null);
   const [selectedWeaponInfo, setSelectedWeaponInfo] = useState<{ weapon: Weapon; weaponIdx: number } | null>(null);
   const [showPanicModal, setShowPanicModal] = useState(false);
+  const [enrichedUnit, setEnrichedUnit] = useState<EnrichedUnit | null>(null);
 
   const combatController = useCombatFlowController();
   const pilotTestFlow = usePilotTestFlow();
@@ -166,9 +167,15 @@ export default function UnitCard({
 
   const handleOpenOriginal = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    // Open encyclopedia modal for all units
     setShowDetailsModal(true);
   };
+
+  // Load encyclopedia data when modal opens
+  useEffect(() => {
+    if (showDetailsModal && !enrichedUnit) {
+      getEnrichedUnit(unit.data.id).then(setEnrichedUnit);
+    }
+  }, [showDetailsModal, unit.data.id]);
 
   // Handle combat actions
   const _handleSoldierAction = useCallback((soldierIndex: number) => {
@@ -503,23 +510,19 @@ export default function UnitCard({
         />
       )}
 
-      {/* Encyclopedia Modal - Machines */}
-      {showDetailsModal && !isSquad && (
+      {/* Encyclopedia Modal */}
+      {showDetailsModal && (
         <EncyclopediaModal
-          unit={{ ...data, type: 'machine' } as UnitWithType}
+          key={enrichedUnit?.id || 'loading'}
+          unit={enrichedUnit || ({
+            ...data,
+            type: unit.type,
+            sources: [{ id: 'star_system', cost: data.cost }],
+            encyclopedia: undefined,
+          } as EnrichedUnit)}
           isOpen={showDetailsModal}
           onClose={() => setShowDetailsModal(false)}
-          scrollTarget="machine-images"
-        />
-      )}
-
-      {/* Encyclopedia Modal - Squads */}
-      {showDetailsModal && isSquad && (
-        <EncyclopediaModal
-          unit={{ ...data, type: 'squad' } as UnitWithType}
-          isOpen={showDetailsModal}
-          onClose={() => setShowDetailsModal(false)}
-          scrollTarget="soldier-images"
+          scrollTarget={isSquad ? 'soldier-images' : 'machine-images'}
         />
       )}
 

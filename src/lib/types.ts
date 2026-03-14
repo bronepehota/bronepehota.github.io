@@ -1,4 +1,6 @@
-export type FactionID = 'polaris' | 'protectorate' | 'mercenaries';
+// Army List Source types
+export type SourceID = string; // 'star_system', 'tehnolog', or custom IDs
+export type FactionID = string; // Dynamic per source (was union type)
 
 // Rules version selection
 export type RulesVersionID = 'tehnolog' | 'community_star_system';
@@ -42,6 +44,21 @@ export interface EncyclopediaData {
   traditions?: string;
   keyBattles?: KeyBattle[];
   locations?: Location[];
+}
+
+export interface ArmyListSource {
+  id: SourceID;
+  name: string;
+  description: string;
+  link?: string;
+  version: string;
+}
+
+export interface SourceData {
+  source: ArmyListSource;
+  factions: Faction[];
+  squads: Squad[];
+  machines: Machine[];
 }
 
 export interface Soldier {
@@ -206,7 +223,8 @@ export type ArmyCurrentStep = 'faction-select' | 'unit-select' | 'preparation' |
 
 export interface Army {
   name: string;
-  faction: FactionID;
+  faction?: FactionID; // Optional during army building flow
+  sourceId?: SourceID; // Track which source this army uses
   units: ArmyUnit[];
   totalCost: number;
   // Army Building Flow extensions

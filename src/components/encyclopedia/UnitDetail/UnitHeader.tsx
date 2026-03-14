@@ -1,25 +1,21 @@
 import Image from 'next/image';
 import { UnitWithType } from '@/lib/encyclopedia-utils';
+import { getFactionColors } from '@/lib/faction-colors';
 
 interface UnitHeaderProps {
   unit: UnitWithType;
 }
 
-const factionColors = {
-  polaris: 'text-red-400',
-  protectorate: 'text-cyan-400',
-  mercenaries: 'text-yellow-400',
-};
-
-const factionNames = {
+const factionNames: Record<string, string> = {
   polaris: 'Империя Полярис',
   protectorate: 'Торговый Протекторат',
   mercenaries: 'Наёмники',
 };
 
 export function UnitHeader({ unit }: UnitHeaderProps) {
-  const factionColor = factionColors[unit.faction];
-  const factionName = factionNames[unit.faction];
+  const factionColors = getFactionColors(unit.faction);
+  const factionColor = factionColors.text;
+  const factionName = factionNames[unit.faction] || unit.faction;
 
   if (!unit.image) {
     return (

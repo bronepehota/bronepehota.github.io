@@ -3,10 +3,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { GitHubPagesImage as Image } from '../GitHubPagesImage';
 import { ImageModal } from './ImageModal';
-import { X, Shield, Sword, Zap, Target, Gauge, ShieldCheck, Info, Cpu, Crosshair, Activity, Users, Sparkles } from 'lucide-react';
+import { X, Shield, Sword, Zap, Target, Gauge, ShieldCheck, Info, Cpu, Crosshair, Activity, Users, Sparkles, BookOpen, ChevronDown, ChevronUp, MapPin, Trophy, ScrollText } from 'lucide-react';
 import type { Squad, Machine, Faction, Soldier, Weapon, SpeedSector } from '@/lib/types';
 import { useBottomSheet } from '@/hooks/useBottomSheet';
 import { formatRange } from '@/lib/distance-utils';
+import { getEncyclopediaUnit } from '@/lib/encyclopedia-registry';
 
 interface UnitDetailsModalProps {
   unit: Squad | Machine;
@@ -310,6 +311,134 @@ function WeaponCard({ weapon, index: _index }: WeaponCardProps) {
   );
 }
 
+// Encyclopedia lore section component
+interface EncyclopediaLoreProps {
+  unitId: string;
+}
+
+function EncyclopediaLore({ unitId }: EncyclopediaLoreProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const encyclopediaUnit = getEncyclopediaUnit(unitId);
+
+  if (!encyclopediaUnit?.encyclopedia) return null;
+
+  const { encyclopedia } = encyclopediaUnit;
+  const hasContent = encyclopedia.lore || encyclopedia.tactics || encyclopedia.history ||
+                      encyclopedia.traditions || encyclopedia.keyBattles || encyclopedia.locations;
+
+  if (!hasContent) return null;
+
+  return (
+    <div className="bg-slate-700/30 rounded-xl border border-slate-600/50 overflow-hidden">
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full px-4 py-3 flex items-center justify-between hover:bg-slate-700/50 transition-colors"
+      >
+        <div className="flex items-center gap-2">
+          <BookOpen className="w-5 h-5 text-amber-400" />
+          <span className="font-bold text-white">Описание</span>
+        </div>
+        {isExpanded ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
+      </button>
+
+      {isExpanded && (
+        <div className="px-4 pb-4 space-y-4 animate-fadeIn">
+          {/* Lore */}
+          {encyclopedia.lore && (
+            <div>
+              <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Описание</h4>
+              <p className="text-sm text-slate-200 leading-relaxed">{encyclopedia.lore}</p>
+            </div>
+          )}
+
+          {/* Tactics */}
+          {encyclopedia.tactics && (
+            <div>
+              <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Тактика</h4>
+              <p className="text-sm text-slate-200 leading-relaxed">{encyclopedia.tactics}</p>
+            </div>
+          )}
+
+          {/* History */}
+          {encyclopedia.history && (
+            <div>
+              <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <ScrollText className="w-4 h-4" />
+                История
+              </h4>
+              <p className="text-sm text-slate-200 leading-relaxed">{encyclopedia.history}</p>
+            </div>
+          )}
+
+          {/* Traditions */}
+          {encyclopedia.traditions && (
+            <div>
+              <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Традиции</h4>
+              <p className="text-sm text-slate-200 leading-relaxed">{encyclopedia.traditions}</p>
+            </div>
+          )}
+
+          {/* Key Battles */}
+          {encyclopedia.keyBattles && encyclopedia.keyBattles.length > 0 && (
+            <div>
+              <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <Trophy className="w-4 h-4" />
+                Ключевые сражения
+              </h4>
+              <div className="space-y-2">
+                {encyclopedia.keyBattles.map((battle, idx) => (
+                  <div key={idx} className="bg-slate-800/50 rounded-lg p-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-semibold text-white text-sm">{battle.name}</span>
+                      <span className="text-xs text-slate-400">{battle.year}</span>
+                    </div>
+                    <p className="text-xs text-slate-300 mb-1">{battle.description}</p>
+                    <span className={`text-xs font-medium ${
+                      battle.outcome === 'Победа' ? 'text-green-400' :
+                      battle.outcome === 'Поражение' ? 'text-red-400' :
+                      'text-slate-400'
+                    }`}>{battle.outcome}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Locations */}
+          {encyclopedia.locations && encyclopedia.locations.length > 0 && (
+            <div>
+              <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <MapPin className="w-4 h-4" />
+                Места дислокации
+              </h4>
+              <div className="space-y-1">
+                {encyclopedia.locations.map((location, idx) => (
+                  <div key={idx} className="text-sm text-slate-300 flex items-start gap-2">
+                    <span className="text-amber-400 mt-0.5">•</span>
+                    <div>
+                      <span className="font-medium text-white">{location.name}</span>
+                      {location.description && <span className="text-slate-400"> — {location.description}</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Class/Type info */}
+          {encyclopedia.class && (
+            <div className="pt-2 border-t border-slate-600/50">
+              <span className="inline-block px-2 py-1 bg-slate-800/50 rounded text-xs text-slate-300">
+                Класс: {encyclopedia.class}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Key stats card component for bottom sheet hero section
 interface KeyStatsCardProps {
   unit: Squad | Machine;
@@ -561,8 +690,11 @@ export function UnitDetailsModal({
 
         {/* Scrollable content area */}
         <div key={`${unitType}-${unit.id}`} className="flex-1 overflow-y-auto p-4 md:p-6 animate-fadeIn">
+          {/* Encyclopedia lore section */}
+          <EncyclopediaLore unitId={unit.id} />
+
           {unitType === 'squad' ? (
-            <div className="space-y-4">
+            <div className="space-y-4 mt-4">
               <h3 className="text-lg font-bold text-white flex items-center gap-2">
                 <Shield className="w-5 h-5" style={{ color: faction.color }} />
                 Состав отряда
@@ -589,7 +721,7 @@ export function UnitDetailsModal({
               )}
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-4 mt-4">
               {/* Machine basic stats */}
               <MachineStats machine={unit as Machine} factionColor={faction.color} />
 
