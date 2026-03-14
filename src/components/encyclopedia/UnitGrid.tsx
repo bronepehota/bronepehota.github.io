@@ -1,8 +1,8 @@
-import { UnitWithType } from '@/lib/encyclopedia-utils';
+import { EncyclopediaUnit } from '@/lib/encyclopedia-registry';
 import { UnitCard } from './UnitCard';
 
 interface UnitGridProps {
-  units: UnitWithType[];
+  units: EncyclopediaUnit[];
 }
 
 export function UnitGrid({ units }: UnitGridProps) {

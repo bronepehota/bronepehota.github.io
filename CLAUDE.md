@@ -41,6 +41,32 @@ npm run test:e2e:debug   # Run E2E tests in debug mode with inspector
 
 ### Data Layer
 
+**Encyclopedia Data** (`src/data/encyclopedia/`):
+```
+src/data/encyclopedia/
+├── units/              # Centralized lore database (split by faction/type)
+│   ├── polaris/
+│   │   ├── squads.json
+│   │   └── machines.json
+│   ├── protectorate/
+│   │   ├── squads.json
+│   │   └── machines.json
+│   └── mercenaries/
+│       ├── squads.json
+│       └── machines.json
+└── factions.json       # Faction lore (name, description, motto, etc.)
+```
+
+**Encyclopedia Registry** (`src/lib/encyclopedia-registry.ts`): Central access to lore data.
+- `getEncyclopediaUnit(id)` - Get unit with lore by ID
+- `getEncyclopediaFaction(id)` - Get faction with lore by ID
+- `getUnitsForFaction(factionId)` - Get all units for a faction
+- `getUnitSources(id)` - Get which army lists contain this unit with costs
+- `isUnitInSource(unitId, sourceId)` - Check unit availability
+- `getUnitCostForSource(unitId, sourceId)` - Get cost for specific source
+
+**Key Pattern**: Game data (cost, soldiers, weapons) lives in `sources/`. Lore data (descriptions, history, tactics) lives in `encyclopedia/`. `encyclopedia-utils.ts` merges them for display.
+
 **Source-based JSON storage** in `src/data/sources/`:
 ```
 src/data/sources/
@@ -714,3 +740,10 @@ test.describe('Feature Name', () => {
   - Source selection persisted in localStorage (`bronepehota_army_list_source`)
   - Updated 11 E2E tests to include Source Selection step
   - All 54 E2E tests passing, 732 unit tests passing
+- **Encyclopedia Data Separation (2026-03)**: Separated lore data from army list sources
+  - Created centralized `src/data/encyclopedia/` with `units/` and `factions.json`
+  - Split `units.json` into 6 files by faction and type (squads/machines)
+  - `encyclopedia-registry.ts` for centralized access to lore data
+  - Source files now contain only game data (cost, soldiers, weapons)
+  - `SourceAvailability` component shows which army lists contain each unit
+  - All 732 unit tests passing, 54 E2E tests passing

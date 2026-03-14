@@ -10,6 +10,7 @@ import { StepProgressIndicator } from './rules/StepProgressIndicator';
 import { getAllRulesVersions } from '@/lib/rules-registry';
 import { getAllSources, getSource, isValidSource, getDefaultSource } from '@/lib/sources-registry';
 import { SourceSelector } from './rules/SourceSelector';
+import { getEncyclopediaFaction } from '@/lib/encyclopedia-registry';
 import { BattlePreparationScreen } from './preparation';
 import { LOCAL_STORAGE_KEYS } from '@/lib/constants';
 import type { SourceID } from '@/lib/types';
@@ -95,7 +96,23 @@ export default function ArmyBuilder({
 
   // Load source data and handle source changes
   const sourceData = getSource(selectedSource);
-  const availableFactions = sourceData?.factions || [];
+  // Enrich factions with data from encyclopedia registry
+  const availableFactions = (sourceData?.factions || [])
+    .map(f => {
+      const encyclopediaFaction = getEncyclopediaFaction(f.id);
+      if (!encyclopediaFaction) return null;
+      // Provide default values for missing fields
+      return {
+        id: encyclopediaFaction.id,
+        name: encyclopediaFaction.name,
+        color: encyclopediaFaction.color || '#94a3b8',
+        symbol: encyclopediaFaction.symbol,
+        description: encyclopediaFaction.description || '',
+        homeWorld: encyclopediaFaction.homeWorld || '',
+        motto: encyclopediaFaction.motto || '',
+      };
+    })
+    .filter((f): f is NonNullable<typeof f> => f !== null);
   const typedSquads = sourceData?.squads || [];
   const typedMachines = sourceData?.machines || [];
 

@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getUnitById, getAllUnits } from '@/lib/encyclopedia-utils';
+import { getEnrichedUnit, getAllUnits } from '@/lib/encyclopedia-utils';
 import UnitDetailPage from '@/components/encyclopedia/UnitDetailPage';
 
 interface PageProps {
@@ -13,7 +13,7 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const unit = await getUnitById(params.id);
+  const unit = await getEnrichedUnit(params.id);
 
   if (!unit) {
     return {
@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function Page({ params }: PageProps) {
-  const unit = await getUnitById(params.id);
+  const unit = await getEnrichedUnit(params.id);
 
   if (!unit) {
     notFound();

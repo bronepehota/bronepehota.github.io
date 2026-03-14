@@ -1,9 +1,9 @@
-import { UnitWithType } from '@/lib/encyclopedia-utils';
+import { EncyclopediaUnit } from '@/lib/encyclopedia-registry';
 import { BookOpen } from 'lucide-react';
 import { getLocationIcon } from '@/lib/lore-utils';
 
 interface UnitLoreProps {
-  unit: UnitWithType;
+  unit: EncyclopediaUnit;
 }
 
 export function UnitLore({ unit }: UnitLoreProps) {
@@ -68,7 +68,7 @@ export function UnitLore({ unit }: UnitLoreProps) {
           <div className="space-y-2">
             {unit.encyclopedia.locations.map((location, index) => (
               <div key={index} className="flex items-start gap-2">
-                <span className="text-lg">{getLocationIcon(location.type)}</span>
+                <span className="text-lg">{getLocationIcon((location as any).type || 'default')}</span>
                 <div>
                   <h4 className="font-semibold text-white">{location.name}</h4>
                   <p className="text-sm text-slate-300">{location.description}</p>

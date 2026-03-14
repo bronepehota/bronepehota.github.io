@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
-import { UnitWithType } from '@/lib/encyclopedia-utils';
+import { EnrichedUnit } from '@/lib/encyclopedia-utils';
 import { cn } from '@/lib/utils';
 import { useBottomSheet } from '@/hooks/useBottomSheet';
 import { SoldierImages } from '@/components/encyclopedia/UnitDetail/SoldierImages';
@@ -11,10 +11,9 @@ import PaintedExamples from '@/components/encyclopedia/PaintedExamples';
 import Image from 'next/image';
 import { Shield, Zap, Skull } from 'lucide-react';
 import { getFactionColors } from '@/lib/faction-colors';
-import { getLocationIcon } from '@/lib/lore-utils';
 
 interface EncyclopediaModalProps {
-  unit: UnitWithType;
+  unit: EnrichedUnit;
   isOpen: boolean;
   onClose: () => void;
   scrollTarget?: 'soldier-images' | 'machine-images';
@@ -248,78 +247,14 @@ export function EncyclopediaModal({
             </section>
           )}
 
-          {/* Key Battles section */}
-          {unit.encyclopedia?.keyBattles && unit.encyclopedia.keyBattles.length > 0 && (
-            <section className="folded-paper military-corners p-4">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="font-ibm-mono text-[10px] text-military-rust/60 uppercase tracking-wider">
-                  DATA_BATTLES
-                </span>
-              </div>
-              <div className="space-y-4">
-                {unit.encyclopedia.keyBattles.map((battle, index) => (
-                  <div key={index} className="border-l-2 border-military-rust/40 pl-4">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-russo font-bold text-white">{battle.name}</h4>
-                      <span className="font-ibm-mono text-[10px] text-military-amber">{battle.year}</span>
-                    </div>
-                    <p className="font-oswald text-sm text-military-sand mb-2">{battle.description}</p>
-                    <p className="font-ibm-mono text-xs text-military-steel italic">{battle.outcome}</p>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Locations section */}
-          {unit.encyclopedia?.locations && unit.encyclopedia.locations.length > 0 && (
-            <section className="folded-paper military-corners p-4">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="font-ibm-mono text-[10px] text-military-rust/60 uppercase tracking-wider">
-                  DATA_LOCATIONS
-                </span>
-              </div>
-              <div className="space-y-3">
-                {unit.encyclopedia.locations.map((location, index) => (
-                  <div key={index} className="flex items-start gap-3">
-                    <span className="text-xl">{getLocationIcon(location.type)}</span>
-                    <div className="flex-1">
-                      <h4 className="font-russo font-bold text-white mb-1">{location.name}</h4>
-                      <p className="font-oswald text-sm text-military-sand">{location.description}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
           {/* Soldier Images section */}
-          <section id="soldier-images">
-            <SoldierImages unit={unit} />
-          </section>
+          <SoldierImages unit={unit} />
 
           {/* Machine Images section */}
-          <section id="machine-images">
-            <MachineImages unit={unit} />
-          </section>
+          <MachineImages unit={unit} />
 
           {/* Painted Examples section */}
-          <section>
-            <PaintedExamples unit={unit} />
-          </section>
-        </div>
-
-        {/* Footer - Notice and Close button */}
-        <div className="sticky bottom-0 bg-military-dark/95 backdrop-blur-sm border-t border-military-rust/30 px-3 py-2 sm:px-4 sm:py-3 shrink-0">
-          <p className="text-[9px] text-military-steel/60 text-center mb-2 font-ibm-mono">
-            Весь лор для пехоты сгенерирован ИИ. Исправления и улучшения приветствуются.
-          </p>
-          <button
-            onClick={onClose}
-            className="w-full px-4 py-3 border border-military-rust/30 font-mono text-sm hover:bg-military-steel/20 transition-colors rounded-sm min-h-[44px]"
-          >
-            ЗАКРЫТЬ
-          </button>
+          <PaintedExamples unit={unit} />
         </div>
       </div>
     </div>

@@ -4,16 +4,17 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Shield, Zap, Skull } from 'lucide-react';
 import { GitHubPagesImage } from '@/components/GitHubPagesImage';
-import { UnitWithType } from '@/lib/encyclopedia-utils';
+import { EnrichedUnit } from '@/lib/encyclopedia-utils';
 import { cn } from '@/lib/utils';
 import { SoldierImages } from './UnitDetail/SoldierImages';
 import { MachineImages } from './UnitDetail/MachineImages';
 import PaintedExamples from './PaintedExamples';
 import { UnitLore } from './UnitDetail/UnitLore';
+import { SourceAvailability } from './SourceAvailability';
 import { getFactionColors } from '@/lib/faction-colors';
 
 interface UnitDetailPageProps {
-  unit: UnitWithType;
+  unit: EnrichedUnit;
 }
 
 const factionIcons: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -128,16 +129,6 @@ export default function UnitDetailPage({ unit }: UnitDetailPageProps) {
                       </span>
                     </div>
                   </div>
-
-                  {/* Cost badge */}
-                  <div className="absolute bottom-3 left-3">
-                    <div className="flex items-center gap-2 backdrop-blur-sm bg-military-dark/80 px-3 py-2 rounded border border-military-rust/30">
-                      <span className="text-military-amber text-lg">⬡</span>
-                      <span className="font-russo text-xl font-bold text-white">
-                        {unit.cost}
-                      </span>
-                    </div>
-                  </div>
                 </div>
               )}
 
@@ -205,7 +196,7 @@ export default function UnitDetailPage({ unit }: UnitDetailPageProps) {
         {/* Content sections */}
         <main className="px-4 pb-20">
           <div className="max-w-6xl mx-auto space-y-8">
-            {/* Stats section */}
+            {/* Source Availability section */}
             <section
               className={cn(
                 'folded-paper military-corners p-6',
@@ -214,51 +205,7 @@ export default function UnitDetailPage({ unit }: UnitDetailPageProps) {
               )}
               style={{ animationFillMode: 'forwards', animationDelay: '0.4s' }}
             >
-              <div className="flex items-center gap-2 mb-4">
-                <span className="font-ibm-mono text-[10px] text-military-rust/60 uppercase tracking-wider">
-                  DATA_STATS
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {/* Cost */}
-                <div className="text-center p-4 bg-military-charcoal/50 rounded">
-                  <div className="text-military-amber text-2xl mb-1">⬡</div>
-                  <div className="font-russo text-2xl font-bold text-white">{unit.cost}</div>
-                  <div className="font-ibm-mono text-xs text-military-steel">очков</div>
-                </div>
-
-                {/* Faction */}
-                <div className="text-center p-4 bg-military-charcoal/50 rounded">
-                  <div className="mb-1">
-                    <div className="w-6 h-6 mx-auto" style={{ color: faction.color }}>
-                      <FactionIcon className="w-full h-full" />
-                    </div>
-                  </div>
-                  <div className="font-oswald text-sm text-military-sand">{faction.badge}</div>
-                  <div className="font-ibm-mono text-xs text-military-steel">фракция</div>
-                </div>
-
-                {/* Type */}
-                <div className="text-center p-4 bg-military-charcoal/50 rounded">
-                  <div className="text-military-amber text-2xl mb-1">
-                    {unit.type === 'squad' ? '◆' : '▲'}
-                  </div>
-                  <div className="font-oswald text-sm text-military-sand">
-                    {unit.type === 'squad' ? 'Пехота' : 'Техника'}
-                  </div>
-                  <div className="font-ibm-mono text-xs text-military-steel">тип</div>
-                </div>
-
-                {/* ID */}
-                <div className="text-center p-4 bg-military-charcoal/50 rounded">
-                  <div className="text-military-rust text-2xl mb-1">#</div>
-                  <div className="font-ibm-mono text-sm text-military-sand truncate px-2">
-                    {unit.id}
-                  </div>
-                  <div className="font-ibm-mono text-xs text-military-steel">ID</div>
-                </div>
-              </div>
+              <SourceAvailability unit={unit} variant="detail" />
             </section>
 
             {/* Lore, Traditions, Battles, Locations sections */}

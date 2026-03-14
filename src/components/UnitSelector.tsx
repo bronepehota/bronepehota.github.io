@@ -11,7 +11,7 @@ import { CompactUnitCard } from './CompactUnitCard';
 import { FloatingContinueButton } from './controls/FloatingContinueButton';
 import { clsx } from 'clsx';
 import { getFactionColors } from '@/lib/faction-colors';
-import { UnitWithType } from '@/lib/encyclopedia-utils';
+import { EnrichedUnit } from '@/lib/encyclopedia-utils';
 
 interface UnitSelectorProps {
   factions: Faction[];
@@ -525,7 +525,12 @@ export function UnitSelector({
       {/* Unit details modal */}
       {selectedUnit && (
         <EncyclopediaModal
-          unit={{ ...selectedUnit.data, type: selectedUnit.type } as UnitWithType}
+          unit={{
+            ...selectedUnit.data,
+            type: selectedUnit.type,
+            sources: [{ id: 'star_system', cost: selectedUnit.data.cost }],
+            cost: selectedUnit.data.cost,
+          } as EnrichedUnit}
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           scrollTarget={selectedUnit.type === 'squad' ? 'soldier-images' : 'machine-images'}

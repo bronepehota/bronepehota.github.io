@@ -1,4 +1,19 @@
+/**
+ * Encyclopedia Utilities
+ *
+ * Utilities for encyclopedia pages that combine game data from sources
+ * with lore data from the centralized encyclopedia registry.
+ */
+
 import { Squad, Machine, FactionID } from './types';
+import {
+  getEncyclopediaUnit,
+  getEncyclopediaFaction,
+  getAllUnits as getAllEncyclopediaUnits,
+  EncyclopediaUnit,
+  EncyclopediaFaction,
+} from './encyclopedia-registry';
+import { getSource } from './sources-registry';
 
 export type UnitWithType = (Squad | Machine) & { type: 'squad' | 'machine' };
 
@@ -7,51 +22,117 @@ export interface FilterOptions {
   type?: 'squad' | 'machine';
   class?: string;
   search?: string;
+  sourceId?: string;
 }
 
-// Direct imports for JSON files (works with Next.js static export)
-import polarisSquads from '@/data/sources/star_system/polaris/squads.json';
-import polarisMachines from '@/data/sources/star_system/polaris/machines.json';
-import protectorateSquads from '@/data/sources/star_system/protectorate/squads.json';
-import protectorateMachines from '@/data/sources/star_system/protectorate/machines.json';
-import mercenariesSquads from '@/data/sources/star_system/mercenaries/squads.json';
-import mercenariesMachines from '@/data/sources/star_system/mercenaries/machines.json';
+export interface EnrichedUnit extends EncyclopediaUnit {
+  // Required game data from source
+  cost: number;
+  // Squad-specific data
+  soldiers?: Squad['soldiers'];
+  // Machine-specific data
+  rank?: Machine['rank'];
+  fire_rate?: Machine['fire_rate'];
+  ammo_max?: Machine['ammo_max'];
+  durability_max?: Machine['durability_max'];
+  weapons?: Machine['weapons'];
+  speed_sectors?: Machine['speed_sectors'];
+}
 
-const squadData: Record<FactionID, Squad[]> = {
-  polaris: polarisSquads as Squad[],
-  protectorate: protectorateSquads as Squad[],
-  mercenaries: mercenariesSquads as Squad[],
-};
+/**
+ * Get all units from encyclopedia (lore data only)
+ */
+export async function getAllUnits(): Promise<EncyclopediaUnit[]> {
+  return getAllEncyclopediaUnits();
+}
 
-const machineData: Record<FactionID, Machine[]> = {
-  polaris: polarisMachines as Machine[],
-  protectorate: protectorateMachines as Machine[],
-  mercenaries: mercenariesMachines as Machine[],
-};
-
-export async function getAllUnits(): Promise<UnitWithType[]> {
-  const factions: FactionID[] = ['polaris', 'protectorate', 'mercenaries'];
-  const units: UnitWithType[] = [];
-
-  for (const faction of factions) {
-    const squads = squadData[faction];
-    const machines = machineData[faction];
-
-    units.push(
-      ...squads.map(s => ({ ...s, type: 'squad' as const })),
-      ...machines.map(m => ({ ...m, type: 'machine' as const }))
-    );
+/**
+ * Get enriched unit with both lore and game data
+ * Combines encyclopedia data with source game data
+ */
+export async function getEnrichedUnit(id: string, sourceId?: string): Promise<EnrichedUnit | null> {
+  // Get encyclopedia unit (lore, sources, etc.)
+  const encyclopediaUnit = getEncyclopediaUnit(id);
+  if (!encyclopediaUnit) {
+    return null;
   }
 
-  return units;
+  // Determine which source to use for game data and cost
+  const targetSourceId = sourceId || encyclopediaUnit.sources[0]?.id;
+  const costEntry = encyclopediaUnit.sources.find(s => s.id === targetSourceId) || encyclopediaUnit.sources[0];
+  const cost = costEntry?.cost || 0;
+
+  if (!targetSourceId) {
+    return { ...encyclopediaUnit, cost } as EnrichedUnit;
+  }
+
+  // Get source data and find the unit
+  const sourceData = getSource(targetSourceId);
+  if (!sourceData) {
+    return { ...encyclopediaUnit, cost } as EnrichedUnit;
+  }
+
+  // Find game data from source
+  let gameData: Squad | Machine | undefined;
+  if (encyclopediaUnit.type === 'squad') {
+    gameData = sourceData.squads.find((s: Squad) => s.id === id);
+  } else {
+    gameData = sourceData.machines.find((m: Machine) => m.id === id);
+  }
+
+  // Merge encyclopedia data with game data, ensuring cost is included
+  // Destructure to remove cost from gameData if present, use our calculated cost
+  const { cost: _gameDataCost, ...gameDataWithoutCost } = gameData || ({} as Squad | Machine);
+  return {
+    ...encyclopediaUnit,
+    cost,
+    ...gameDataWithoutCost,
+  } as EnrichedUnit;
 }
 
-export async function getUnitById(id: string): Promise<UnitWithType | null> {
-  const units = await getAllUnits();
-  return units.find(u => u.id === id) || null;
+/**
+ * Get unit by ID (encyclopedia data only)
+ * @deprecated Use getEnrichedUnit for combined data, or getEncyclopediaUnit from registry
+ */
+export async function getUnitById(id: string): Promise<EncyclopediaUnit | null> {
+  const unit = getEncyclopediaUnit(id);
+  if (!unit) {
+    return null;
+  }
+
+  // Return encyclopedia unit (legacy behavior)
+  return unit;
 }
 
-export function filterUnits(units: UnitWithType[], options: FilterOptions): UnitWithType[] {
+/**
+ * Get all factions from encyclopedia
+ */
+export async function getAllFactions(): Promise<EncyclopediaFaction[]> {
+  const factions: EncyclopediaFaction[] = [];
+  const factionIds = ['polaris', 'protectorate', 'mercenaries'];
+
+  for (const id of factionIds) {
+    const faction = getEncyclopediaFaction(id);
+    if (faction) {
+      factions.push(faction);
+    }
+  }
+
+  return factions;
+}
+
+/**
+ * Get faction by ID
+ */
+export function getFactionById(id: string): EncyclopediaFaction | undefined {
+  return getEncyclopediaFaction(id);
+}
+
+/**
+ * Filter units based on options
+ * Works with EncyclopediaUnit[] from registry
+ */
+export function filterUnits(units: EncyclopediaUnit[], options: FilterOptions): EncyclopediaUnit[] {
   return units.filter(unit => {
     // Faction filter
     if (options.faction && unit.faction !== options.faction) {
@@ -68,6 +149,14 @@ export function filterUnits(units: UnitWithType[], options: FilterOptions): Unit
       return false;
     }
 
+    // Source filter - check if unit is available in source
+    if (options.sourceId) {
+      const inSource = unit.sources.some((s: { id: string; cost: number }) => s.id === options.sourceId);
+      if (!inSource) {
+        return false;
+      }
+    }
+
     // Search filter (name or shortName, case insensitive)
     if (options.search) {
       const searchLower = options.search.toLowerCase();
@@ -80,4 +169,17 @@ export function filterUnits(units: UnitWithType[], options: FilterOptions): Unit
 
     return true;
   });
+}
+
+/**
+ * Get unique classes from units
+ */
+export function getUnitClasses(units: EncyclopediaUnit[]): string[] {
+  const classes = new Set<string>();
+  for (const unit of units) {
+    if (unit.encyclopedia?.class) {
+      classes.add(unit.encyclopedia.class);
+    }
+  }
+  return Array.from(classes).sort();
 }

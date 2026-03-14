@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { GitHubPagesImage } from '@/components/GitHubPagesImage';
-import { UnitWithType } from '@/lib/encyclopedia-utils';
+import { EnrichedUnit } from '@/lib/encyclopedia-utils';
 import { Machine } from '@/lib/types';
 import { Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface MachineImagesProps {
-  unit: UnitWithType;
+  unit: EnrichedUnit;
 }
 
 export function MachineImages({ unit }: MachineImagesProps) {

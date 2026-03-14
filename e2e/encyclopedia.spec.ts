@@ -82,15 +82,15 @@ test.describe('Энциклопедия', () => {
     await expect(page.locator('h1')).toBeVisible();
   });
 
-  test('детальная страница показывает характеристики', async ({ page }) => {
+  test('детальная страница показывает источники', async ({ page }) => {
     await page.goto('/encyclopedia/unit/polaris_lineynaya_klon_pehota');
     await page.waitForLoadState('networkidle');
 
     // Проверить наличие заголовка
     await expect(page.locator('h1')).toContainText('Линейная клон-пехота');
 
-    // Проверить наличие секций (DATA_STATS label instead of "Характеристики")
-    await expect(page.locator('text=DATA_STATS')).toBeVisible();
+    // Проверить наличие секции с источниками
+    await expect(page.locator('text=ДОСТУПНОСТЬ В ИСТОЧНИКАХ')).toBeVisible();
   });
 
   test('несуществующий ID возвращает 404', async ({ page }) => {

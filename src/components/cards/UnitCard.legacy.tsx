@@ -18,7 +18,7 @@ import { PilotTestModal } from '../combat/PilotTestModal';
 import { usePilotTestFlow } from '@/hooks/usePilotTestFlow';
 import { EncyclopediaModal } from '../modals/EncyclopediaModal';
 import { PanicTestModal } from '../modals/PanicTestModal';
-import { UnitWithType } from '@/lib/encyclopedia-utils';
+import { EnrichedUnit } from '@/lib/encyclopedia-utils';
 
 interface UnitCardProps {
   unit: ArmyUnit;
@@ -468,7 +468,12 @@ export default function UnitCard({
       {/* Machine Blueprint Modal */}
       {showDetailsModal && !isSquad && (
         <EncyclopediaModal
-          unit={{ ...data, type: 'machine' } as UnitWithType}
+          unit={{
+            ...data,
+            type: 'machine',
+            sources: [{ id: 'star_system', cost: data.cost }],
+            cost: data.cost,
+          } as EnrichedUnit}
           isOpen={showDetailsModal}
           onClose={() => setShowDetailsModal(false)}
           scrollTarget="machine-images"

@@ -1,11 +1,11 @@
 [
   {
-    "id": "polis",
-    "name": "Полис",
-    "color": "#ef4444",
-    "symbol": "Temple",
-    "description": "Скоро. Требуется помощь сообщества.",
-    "homeWorld": "Полис-Прайм",
-    "motto": "TBD"
+    "id": "polaris"
+  },
+  {
+    "id": "protectorate"
+  },
+  {
+    "id": "mercenaries"
   }
 ]

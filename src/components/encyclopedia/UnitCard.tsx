@@ -1,11 +1,11 @@
 import Link from 'next/link';
 import SafeImage from '@/components/SafeImage';
-import { UnitWithType } from '@/lib/encyclopedia-utils';
-import { Squad } from '@/lib/types';
+import { EncyclopediaUnit } from '@/lib/encyclopedia-registry';
 import { getFactionColors } from '@/lib/faction-colors';
+import { SourceAvailability } from './SourceAvailability';
 
 interface UnitCardProps {
-  unit: UnitWithType;
+  unit: EncyclopediaUnit;
 }
 
 const factionBadges: Record<string, string> = {
@@ -26,10 +26,11 @@ export function UnitCard({ unit }: UnitCardProps) {
     }) + ', 0.3)',
   };
 
-  // Get display image: unit image, first soldier's image (for squads), or placeholder
-  const displayImage = unit.image ||
-    (unit.type === 'squad' ? (unit as Squad).soldiers[0]?.image : null) ||
-    '/images/placeholder.png';
+  // Get cost from first source (or default to 0)
+  const cost = unit.sources[0]?.cost || 0;
+
+  // Get display image: unit image, or placeholder
+  const displayImage = unit.image || '/images/placeholder.png';
 
   return (
     <Link
@@ -85,7 +86,7 @@ export function UnitCard({ unit }: UnitCardProps) {
             <div className="flex items-center gap-1 backdrop-blur-sm bg-military-dark/80 px-2 py-1 rounded border border-military-rust/30">
               <span className="text-military-amber text-sm">⬡</span>
               <span className="font-ibm-mono text-xs font-bold text-white">
-                {unit.cost}
+                {cost}
               </span>
             </div>
           </div>
@@ -108,14 +109,15 @@ export function UnitCard({ unit }: UnitCardProps) {
           </h3>
 
           {/* Unit class/type */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-1.5">
             <span className="font-oswald text-xs text-military-taupe truncate">
               {unit.encyclopedia?.class || (unit.type === 'squad' ? 'Отряд' : 'Машина')}
             </span>
+            <SourceAvailability unit={unit} variant="card" size="compact" />
           </div>
 
           {/* Tactical decoration line */}
-          <div className="mt-2 h-px bg-gradient-to-r from-military-rust/50 via-military-amber/30 to-transparent" />
+          <div className="h-px bg-gradient-to-r from-military-rust/50 via-military-amber/30 to-transparent" />
         </div>
 
         {/* Corner bracket accents */}

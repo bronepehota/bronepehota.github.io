@@ -1,8 +1,8 @@
-import { UnitWithType } from '@/lib/encyclopedia-utils';
+import { EncyclopediaUnit } from '@/lib/encyclopedia-registry';
 import Image from 'next/image';
 
 interface PaintedExamplesProps {
-  unit: UnitWithType;
+  unit: EncyclopediaUnit;
 }
 
 export default function PaintedExamples({ unit }: PaintedExamplesProps) {
@@ -72,7 +72,7 @@ export default function PaintedExamples({ unit }: PaintedExamplesProps) {
     <section className="mt-8 border-t border-slate-700 pt-6">
       <h3 className="text-lg font-russo text-military-amber mb-4 flex items-center gap-2">
         <svg className="w-5 h-5 text-military-rust" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0 4.172 4.172a4 4 0 00-.586 4.172 2 2 0 012.828 0 4.172-4.172 4.172 4.4 4.4 0 00-.586 4.172 4.172 4.172 4 4 0 00-.586 4.172-4.172 4.172M9 12H6m6 0H9" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0 4.172 4.172a4 4 0 00-.586 4.172 2 2 0 012.828 0 4.172-4.172 4.4 4.4 0 00-.586 4.172 4.172 4.172 4 4 0 00-.586 4.172-4.172 4.172M9 12H6m6 0H9" />
         </svg>
         Примеры покраски
       </h3>
