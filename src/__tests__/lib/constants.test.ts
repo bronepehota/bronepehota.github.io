@@ -42,13 +42,14 @@ describe('constants', () => {
       expect(LOCAL_STORAGE_KEYS.STEP_TO_CM_FACTOR).toBe('bronepehota_step_to_cm_factor');
       expect(LOCAL_STORAGE_KEYS.AUTO_COMPLETE_ENABLED).toBe('bronepehota_auto_complete_enabled');
       expect(LOCAL_STORAGE_KEYS.ARMY_LIST_SOURCE).toBe('bronepehota_army_list_source');
+      expect(LOCAL_STORAGE_KEYS.CUSTOM_SOURCES).toBe('bronepehota_custom_sources');
     });
 
     it('should have correct types (as const provides compile-time readonly)', () => {
       // as const ensures TypeScript treats these as readonly literals
       // Note: Runtime immutability would require Object.freeze()
       expect(typeof LOCAL_STORAGE_KEYS.ARMY).toBe('string');
-      expect(Object.keys(LOCAL_STORAGE_KEYS)).toHaveLength(10);
+      expect(Object.keys(LOCAL_STORAGE_KEYS)).toHaveLength(11);
     });
   });
 
