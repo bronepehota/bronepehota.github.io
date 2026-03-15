@@ -9,6 +9,7 @@ import { CustomSource, CustomFaction, CustomSquad, CustomMachine } from '@/lib/e
 import { getCustomSourcesStorage } from '@/lib/editor/storage';
 import { generateSourceId, generateFactionId } from '@/lib/editor/id-generator';
 import { getSource } from '@/lib/sources-registry';
+import { getEncyclopediaFaction } from '@/lib/encyclopedia-registry';
 import { SourcesList } from './SourcesList';
 import { FactionsList } from './FactionsList';
 import { UnitsList } from './UnitsList';
@@ -47,13 +48,17 @@ export function EditorLayout() {
         const customFactionIds = new Set(selectedSource.factions.map(f => f.id));
         const baseFactions = baseSourceData.factions
           .filter(f => !customFactionIds.has(f.id))
-          .map(f => ({
-            id: f.id,
-            name: f.name,
-            color: f.color || '#6b7280',
-            description: f.description,
-            isFromBase: true,
-          } as CustomFaction));
+          .map(f => {
+            // Get full faction data from encyclopedia
+            const encFaction = getEncyclopediaFaction(f.id);
+            return {
+              id: f.id,
+              name: encFaction?.name || f.name || f.id,
+              color: encFaction?.color || f.color || '#6b7280',
+              description: encFaction?.description,
+              isFromBase: true,
+            } as CustomFaction;
+          });
 
         factions = [...factions, ...baseFactions];
       }
@@ -76,13 +81,17 @@ export function EditorLayout() {
     if (data.baseSource) {
       const baseSourceData = getSource(data.baseSource);
       if (baseSourceData) {
-        factions = baseSourceData.factions.map(f => ({
-          id: f.id,
-          name: f.name,
-          color: f.color || '#6b7280',
-          description: f.description,
-          isFromBase: true,
-        }));
+        factions = baseSourceData.factions.map(f => {
+          // Get full faction data from encyclopedia
+          const encFaction = getEncyclopediaFaction(f.id);
+          return {
+            id: f.id,
+            name: encFaction?.name || f.name || f.id,
+            color: encFaction?.color || f.color || '#6b7280',
+            description: encFaction?.description,
+            isFromBase: true,
+          };
+        });
       }
     }
 
