@@ -23,6 +23,7 @@
     "@types/nprogress": "^0.2.3",
     "clsx": "^2.1.0",
     "lucide-react": "^0.330.0",
+    "nanoid": "^5.1.6",
     "next": "14.2.35",
     "nprogress": "^0.2.0",
     "react": "^18",

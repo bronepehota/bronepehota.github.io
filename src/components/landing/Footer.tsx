@@ -43,6 +43,17 @@ export default function Footer({ className }: FooterProps) {
           </span>
         </Link>
 
+        {/* Editor link */}
+        <Link
+          href="/editor"
+          data-testid="editor-link"
+          className="flex items-center gap-2 px-4 py-2 rounded-sm border border-slate-700/50 hover:border-hud-green/50 transition-all duration-300 group touch-manipulation min-h-[44px]"
+        >
+          <span className="font-russo text-xs text-slate-400 group-hover:text-hud-green transition-colors">
+            РЕДАКТОР АРМЛИСТОВ
+          </span>
+        </Link>
+
         {/* GitHub link */}
         <a
           href="https://github.com/Luxor/bronepehota"
