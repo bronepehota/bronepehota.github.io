@@ -75,11 +75,6 @@ export function FactionsList({
                     )}
                   </div>
                 </div>
-                {faction.description && (
-                  <div className="text-xs text-slate-500 mt-0.5">
-                    {faction.description}
-                  </div>
-                )}
               </button>
             ))}
           </div>
