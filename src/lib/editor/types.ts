@@ -12,6 +12,8 @@ export interface CustomFaction {
   name: string;
   color: string;
   description?: string;
+  /** Фракция из базового источника (для расширений) */
+  isFromBase?: boolean;
 }
 
 /**

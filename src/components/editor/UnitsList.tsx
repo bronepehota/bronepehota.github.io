@@ -12,12 +12,16 @@ interface UnitsListProps {
   source: CustomSource;
   factionId: string;
   onSelectUnit: (unitId: string, type: 'squad' | 'machine') => void;
+  onCreateSquad: () => void;
+  onCreateMachine: () => void;
 }
 
 export function UnitsList({
   source,
   factionId,
   onSelectUnit,
+  onCreateSquad,
+  onCreateMachine,
 }: UnitsListProps) {
   const [tab, setTab] = useState<'squad' | 'machine'>('squad');
 
@@ -32,12 +36,14 @@ export function UnitsList({
         <h2 className="text-sm font-medium text-slate-300">Юниты</h2>
         <div className="flex gap-1">
           <button
+            onClick={onCreateSquad}
             className="p-1.5 rounded-md bg-slate-700 hover:bg-slate-600 transition-colors"
             title="Создать отряд"
           >
             <Plus className="w-4 h-4" />
           </button>
           <button
+            onClick={onCreateMachine}
             className="p-1.5 rounded-md bg-slate-700 hover:bg-slate-600 transition-colors"
             title="Создать технику"
           >

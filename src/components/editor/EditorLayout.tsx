@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { CustomSource, CustomFaction, CustomSquad, CustomMachine } from '@/lib/editor/types';
 import { getCustomSourcesStorage } from '@/lib/editor/storage';
 import { generateSourceId, generateFactionId } from '@/lib/editor/id-generator';
+import { getSource } from '@/lib/sources-registry';
 import { SourcesList } from './SourcesList';
 import { FactionsList } from './FactionsList';
 import { UnitsList } from './UnitsList';
@@ -15,7 +16,7 @@ import { SquadEditor } from './SquadEditor';
 import { MachineEditor } from './MachineEditor';
 import { CreateSourceModal } from './CreateSourceModal';
 
-type EditorView = 'list' | 'edit-squad' | 'edit-machine';
+type EditorView = 'list' | 'edit-squad' | 'edit-machine' | 'create-squad' | 'create-machine';
 
 export function EditorLayout() {
   // State
@@ -35,6 +36,29 @@ export function EditorLayout() {
   const selectedSource = sources.find(s => s.id === selectedSourceId) || null;
   const selectedFaction = selectedSource?.factions.find(f => f.id === selectedFactionId) || null;
 
+  // Get base source factions for extensions
+  const getAllFactions = () => {
+    if (!selectedSource) return [];
+
+    let allFactions = [...selectedSource.factions];
+
+    // If this is an extension, add base source factions
+    if (selectedSource.baseSource) {
+      const baseSourceData = getSource(selectedSource.baseSource);
+      if (baseSourceData) {
+        // Add base factions that aren't already in custom source
+        const customFactionIds = new Set(selectedSource.factions.map(f => f.id));
+        const baseFactions = baseSourceData.factions
+          .filter(f => !customFactionIds.has(f.id))
+          .map(f => ({ ...f, isFromBase: true }));
+
+        allFactions = [...allFactions, ...baseFactions];
+      }
+    }
+
+    return allFactions;
+  };
+
   // Handlers
   const handleCreateSource = (data: {
     name: string;
@@ -44,13 +68,25 @@ export function EditorLayout() {
     const storage = getCustomSourcesStorage();
     const now = new Date().toISOString();
 
+    // If creating an extension, copy base source factions
+    let factions: CustomFaction[] = [];
+    if (data.baseSource) {
+      const baseSourceData = getSource(data.baseSource);
+      if (baseSourceData) {
+        factions = baseSourceData.factions.map(f => ({
+          ...f,
+          isFromBase: true,
+        }));
+      }
+    }
+
     const newSource: CustomSource = {
       id: generateSourceId(),
       name: data.name,
       description: data.description,
       version: '1.0',
       baseSource: data.baseSource,
-      factions: [],
+      factions,
       squads: [],
       machines: [],
       createdAt: now,
@@ -79,6 +115,28 @@ export function EditorLayout() {
       setSelectedFactionId(null);
       setSelectedUnitId(null);
     }
+  };
+
+  const handleCreateSquad = () => {
+    if (!selectedSource || !selectedFaction) {
+      alert('Сначала выберите фракцию');
+      return;
+    }
+
+    setSelectedUnitId(null);
+    setSelectedUnitType('squad');
+    setView('create-squad');
+  };
+
+  const handleCreateMachine = () => {
+    if (!selectedSource || !selectedFaction) {
+      alert('Сначала выберите фракцию');
+      return;
+    }
+
+    setSelectedUnitId(null);
+    setSelectedUnitType('machine');
+    setView('create-machine');
   };
 
   const handleSelectUnit = (unitId: string, type: 'squad' | 'machine') => {
@@ -112,7 +170,7 @@ export function EditorLayout() {
       <div className="w-64 border-r border-slate-700 overflow-y-auto">
         {selectedSource ? (
           <FactionsList
-            factions={selectedSource.factions}
+            factions={getAllFactions()}
             selectedId={selectedFactionId}
             onSelect={setSelectedFactionId}
             onCreateNew={() => {
@@ -141,6 +199,8 @@ export function EditorLayout() {
             source={selectedSource}
             factionId={selectedFaction.id}
             onSelectUnit={handleSelectUnit}
+            onCreateSquad={handleCreateSquad}
+            onCreateMachine={handleCreateMachine}
           />
         )}
 
@@ -148,6 +208,36 @@ export function EditorLayout() {
           <div className="p-4 text-slate-500 text-center">
             Выберите фракцию для просмотра юнитов
           </div>
+        )}
+
+        {view === 'create-squad' && selectedSource && selectedFaction && (
+          <SquadEditor
+            source={selectedSource}
+            onSave={(newSquad: CustomSquad) => {
+              const updated = {
+                ...selectedSource,
+                squads: [...selectedSource.squads, newSquad],
+              };
+              handleUpdateSource(updated);
+              handleBackToList();
+            }}
+            onCancel={handleBackToList}
+          />
+        )}
+
+        {view === 'create-machine' && selectedSource && selectedFaction && (
+          <MachineEditor
+            source={selectedSource}
+            onSave={(newMachine: CustomMachine) => {
+              const updated = {
+                ...selectedSource,
+                machines: [...selectedSource.machines, newMachine],
+              };
+              handleUpdateSource(updated);
+              handleBackToList();
+            }}
+            onCancel={handleBackToList}
+          />
         )}
 
         {view === 'edit-squad' && selectedSource && selectedSquad && (
