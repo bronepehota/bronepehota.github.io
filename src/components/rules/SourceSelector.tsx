@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useEffect, useRef, KeyboardEvent } from 'react';
-import { ExternalLink, Lock, ArrowRight } from 'lucide-react';
+import { useState, useEffect, useRef, KeyboardEvent, useMemo } from 'react';
+import { ExternalLink, Lock, ArrowRight, Star } from 'lucide-react';
 import { clsx } from 'clsx';
 import type { ArmyListSource, SourceID } from '@/lib/types';
 import { FloatingContinueButton } from '../controls/FloatingContinueButton';
 import { LOCAL_STORAGE_KEYS } from '@/lib/constants';
+import { getCustomSourcesStorage, from '@/lib/editor/storage';
+import type { CustomSource } from '@/lib/editor/types';
 
 interface SourceSelectorProps {
   sources: ArmyListSource[];
