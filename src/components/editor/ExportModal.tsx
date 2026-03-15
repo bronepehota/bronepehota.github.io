@@ -95,7 +95,7 @@ export function ExportModal({ source, onClose }: ExportModalProps) {
           {tab === 'json' ? (
             <div className="space-y-4">
               <p className="text-sm text-slate-300">
-                Скачать источник "{source.name}" в формате JSON.
+                Скачать источник &quot;{source.name}&quot; в формате JSON.
               </p>
               <button
                 onClick={handleDownloadJson}
