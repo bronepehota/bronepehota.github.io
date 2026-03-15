@@ -175,6 +175,7 @@ export default function UnitCard({
     if (showDetailsModal && !enrichedUnit) {
       getEnrichedUnit(unit.data.id).then(setEnrichedUnit);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showDetailsModal, unit.data.id]);
 
   // Handle combat actions

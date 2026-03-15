@@ -91,6 +91,25 @@ export function isValidSource(id: string): boolean {
 }
 
 /**
+ * Validate if a string is a valid source ID, including custom sources
+ * Checks both built-in sources and custom sources from localStorage
+ */
+export function isValidSourceWithCustom(id: string): boolean {
+  // Check built-in sources
+  if (Object.keys(sourcesRegistry).includes(id)) {
+    return true;
+  }
+
+  // Check custom sources (must start with 'custom_' prefix)
+  if (id.startsWith('custom_')) {
+    const storage = getCustomSourcesStorage();
+    return storage.getById(id) !== null;
+  }
+
+  return false;
+}
+
+/**
  * Check if a source ID is a custom source
  */
 export function isCustomSource(id: string): boolean {

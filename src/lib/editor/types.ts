@@ -34,6 +34,8 @@ export interface CustomSource {
   squads: CustomSquad[];
   /** Техника */
   machines: CustomMachine[];
+  /** Скрытые юниты из базового источника (IDs) */
+  hiddenUnits?: string[];
   /** ISO дата создания */
   createdAt: string;
   /** ISO дата обновления */

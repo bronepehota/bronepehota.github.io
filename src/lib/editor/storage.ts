@@ -6,6 +6,7 @@
 
 import { CustomSource } from './types';
 import { LOCAL_STORAGE_KEYS } from '@/lib/constants';
+import { getSource } from '@/lib/sources-registry';
 
 const STORAGE_KEY = LOCAL_STORAGE_KEYS.CUSTOM_SOURCES;
 
@@ -107,9 +108,34 @@ export class CustomSourcesStorage {
 
   /**
    * Экспорт источника в JSON строку
+   * Переопределённые юниты (с тем же ID, что в базе) не включаются в экспорт
    */
   exportToJson(source: CustomSource): string {
-    return JSON.stringify(source, null, 2);
+    let squads = source.squads;
+    let machines = source.machines;
+
+    // Если это расширение, фильтруем переопределённые юниты
+    if (source.baseSource) {
+      const baseData = getSource(source.baseSource);
+      if (baseData) {
+        const baseSquadIds = new Set(baseData.squads.map(s => s.id));
+        const baseMachineIds = new Set(baseData.machines.map(m => m.id));
+
+        // Исключаем переопределённые отряды (с тем же ID, что в базе)
+        squads = source.squads.filter(s => !baseSquadIds.has(s.id));
+        // Исключаем переопределённую технику (с тем же ID, что в базе)
+        machines = source.machines.filter(m => !baseMachineIds.has(m.id));
+      }
+    }
+
+    // Создаём экспортируемую версию источника
+    const exportData = {
+      ...source,
+      squads,
+      machines,
+    };
+
+    return JSON.stringify(exportData, null, 2);
   }
 
   /**

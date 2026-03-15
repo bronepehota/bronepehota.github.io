@@ -63,13 +63,13 @@ export function ImportModal({ onClose, onImport }: ImportModalProps) {
       const source = storage.importFromJson(content);
       onImport(source);
       onClose();
-    } catch (err) {
+    } catch {
       setError('Неверный формат JSON');
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" data-testid="import-source-modal">
       <div className="bg-slate-800 rounded-lg shadow-xl w-full max-w-lg mx-4">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">

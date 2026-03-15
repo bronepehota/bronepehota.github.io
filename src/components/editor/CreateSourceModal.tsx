@@ -40,7 +40,7 @@ export function CreateSourceModal({ onClose, onCreate }: CreateSourceModalProps)
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" data-testid="create-source-modal">
       <div className="bg-slate-800 rounded-lg shadow-xl w-full max-w-md mx-4">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
@@ -66,6 +66,7 @@ export function CreateSourceModal({ onClose, onCreate }: CreateSourceModalProps)
               onChange={(e) => setName(e.target.value)}
               className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-md"
               placeholder="Мой армлист"
+              data-testid="source-name-input"
             />
           </div>
 

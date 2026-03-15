@@ -215,5 +215,80 @@ describe('CustomSourcesStorage', () => {
 
       expect(() => storage.importFromJson(invalidJson)).toThrow('Invalid source structure');
     });
+
+    it('filters out overridden units in export for extension sources', () => {
+      const storage = new CustomSourcesStorage();
+
+      // Source with overridden squad (same ID as in base)
+      const source: CustomSource = {
+        id: 'custom_override',
+        name: 'Override Test',
+        description: 'Testing override export',
+        version: '1.0',
+        baseSource: 'star_system', // Extension source
+        factions: [],
+        squads: [
+          {
+            id: 'polaris_lineynaya_klon_pehota', // Same ID as base squad in star_system
+            name: 'Линейная клон-пехота (Modified)',
+            faction: 'polaris',
+            cost: 150, // Modified cost (base is 50)
+            soldiers: [],
+          },
+          {
+            id: 'custom_new_squad', // New custom squad
+            name: 'New Squad',
+            faction: 'polaris',
+            cost: 200,
+            soldiers: [],
+          },
+        ],
+        machines: [],
+        createdAt: '2026-03-15T00:00:00Z',
+        updatedAt: '2026-03-15T00:00:00Z',
+      };
+
+      const json = storage.exportToJson(source);
+      const exported = JSON.parse(json);
+
+      // Overridden squad should be filtered out (exists in base)
+      expect(exported.squads).toHaveLength(1);
+      expect(exported.squads[0].id).toBe('custom_new_squad');
+      // Only custom squads remain
+      expect(exported.squads.find((s: any) => s.id === 'polaris_lineynaya_klon_pehota')).toBeUndefined();
+    });
+
+    it('does not filter units for non-extension sources', () => {
+      const storage = new CustomSourcesStorage();
+
+      // Source without baseSource (not an extension)
+      const source: CustomSource = {
+        id: 'custom_new_source',
+        name: 'New Source',
+        description: 'Testing non-extension',
+        version: '1.0',
+        baseSource: null,
+        factions: [],
+        squads: [
+          {
+            id: 'my_squad',
+            name: 'My Squad',
+            faction: 'custom',
+            cost: 100,
+            soldiers: [],
+          },
+        ],
+        machines: [],
+        createdAt: '2026-03-15T00:00:00Z',
+        updatedAt: '2026-03-15T00:00:00Z',
+      };
+
+      const json = storage.exportToJson(source);
+      const exported = JSON.parse(json);
+
+      // All squads should be exported
+      expect(exported.squads).toHaveLength(1);
+      expect(exported.squads[0].id).toBe('my_squad');
+    });
   });
 });

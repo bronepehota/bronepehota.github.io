@@ -46,7 +46,7 @@ export function ExportModal({ source, onClose }: ExportModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" data-testid="export-source-modal">
       <div className="bg-slate-800 rounded-lg shadow-xl w-full max-w-md mx-4">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
@@ -110,6 +110,7 @@ export function ExportModal({ source, onClose }: ExportModalProps) {
               {qrChunks.length > 0 ? (
                 <>
                   <div className="flex items-center justify-center">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={qrChunks[currentQr]}
                       alt={`QR код ${currentQr + 1}`}
