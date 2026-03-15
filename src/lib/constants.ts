@@ -17,6 +17,7 @@ export const LOCAL_STORAGE_KEYS = {
   AUTO_COMPLETE_ENABLED: 'bronepehota_auto_complete_enabled',
   ARMY_LIST_SOURCE: 'bronepehota_army_list_source',
   CUSTOM_SOURCES: 'bronepehota_custom_sources',
+  EDITOR_SHOW_BASE_UNITS: 'bronepehota_editor_show_base_units',
 } as const;
 
 export const DEFAULT_POINT_BUDGETS = [250, 350, 500, 1000];

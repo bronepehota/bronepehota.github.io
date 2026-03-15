@@ -4,10 +4,11 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { CustomSource, CustomSquad, CustomMachine } from '@/lib/editor/types';
 import { getSource } from '@/lib/sources-registry';
-import { Plus, Users, Truck, Edit, Copy, Lock } from 'lucide-react';
+import { Plus, Users, Truck, Edit, Copy, Lock, Eye, EyeOff } from 'lucide-react';
+import { LOCAL_STORAGE_KEYS } from '@/lib/constants';
 
 interface UnitsListProps {
   source: CustomSource;
@@ -19,6 +20,8 @@ interface UnitsListProps {
   onCreateMachine: () => void;
 }
 
+const STORAGE_KEY = LOCAL_STORAGE_KEYS.EDITOR_SHOW_BASE_UNITS;
+
 export function UnitsList({
   source,
   baseSourceId,
@@ -29,6 +32,19 @@ export function UnitsList({
   onCreateMachine,
 }: UnitsListProps) {
   const [tab, setTab] = useState<'squad' | 'machine'>('squad');
+  const [showBaseUnits, setShowBaseUnits] = useState(() => {
+    // Load preference from localStorage
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved !== 'false'; // Default to true
+    }
+    return true;
+  });
+
+  // Save preference to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, String(showBaseUnits));
+  }, [showBaseUnits]);
 
   // Get all squads: custom + base source squads for this faction
   const { customSquads, baseSquads } = useMemo(() => {
@@ -62,12 +78,18 @@ export function UnitsList({
     return { customMachines: custom, baseMachines: base };
   }, [source, baseSourceId, factionId]);
 
+  // Filtered lists based on showBaseUnits toggle
+  const displaySquads = showBaseUnits ? [...customSquads, ...baseSquads] : customSquads;
+  const displayMachines = showBaseUnits ? [...customMachines, ...baseMachines] : customMachines;
+
+  const hasBaseUnits = baseSquads.length > 0 || baseMachines.length > 0;
+
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-slate-700">
         <h2 className="text-sm font-medium text-slate-300">Юниты</h2>
-        <div className="flex gap-1">
+        <div className="flex items-center gap-2">
           <button
             onClick={onCreateSquad}
             className="p-1.5 rounded-md bg-slate-700 hover:bg-slate-600 transition-colors"
@@ -85,6 +107,32 @@ export function UnitsList({
         </div>
       </div>
 
+      {/* Show base units toggle */}
+      {hasBaseUnits && (
+        <div className="flex items-center justify-between px-3 py-2 border-b border-slate-700/50 bg-slate-800/30">
+          <span className="text-xs text-slate-400">Юниты из базы</span>
+          <button
+            onClick={() => setShowBaseUnits(!showBaseUnits)}
+            className={`
+              flex items-center gap-1.5 px-2 py-1 rounded-md text-xs transition-colors
+              ${showBaseUnits ? 'bg-slate-700 text-slate-300' : 'bg-slate-800 text-slate-500'}
+            `}
+          >
+            {showBaseUnits ? (
+              <>
+                <Eye className="w-3.5 h-3.5" />
+                <span>Показаны</span>
+              </>
+            ) : (
+              <>
+                <EyeOff className="w-3.5 h-3.5" />
+                <span>Скрыты</span>
+              </>
+            )}
+          </button>
+        </div>
+      )}
+
       {/* Tabs */}
       <div className="flex border-b border-slate-700">
         <button
@@ -100,7 +148,7 @@ export function UnitsList({
           <div className="flex items-center justify-center gap-1.5">
             <Users className="w-4 h-4" />
             <span>Отряды</span>
-            <span className="text-xs text-slate-500">({customSquads.length + baseSquads.length})</span>
+            <span className="text-xs text-slate-500">({displaySquads.length})</span>
           </div>
         </button>
         <button
@@ -116,7 +164,7 @@ export function UnitsList({
           <div className="flex items-center justify-center gap-1.5">
             <Truck className="w-4 h-4" />
             <span>Техника</span>
-            <span className="text-xs text-slate-500">({customMachines.length + baseMachines.length})</span>
+            <span className="text-xs text-slate-500">({displayMachines.length})</span>
           </div>
         </button>
       </div>
@@ -124,9 +172,11 @@ export function UnitsList({
       {/* Units list */}
       <div className="flex-1 overflow-y-auto">
         {tab === 'squad' ? (
-          customSquads.length + baseSquads.length === 0 ? (
+          displaySquads.length === 0 ? (
             <div className="p-4 text-center text-slate-500 text-sm">
-              Нет отрядов в этой фракции
+              {showBaseUnits
+                ? 'Нет отрядов в этой фракции'
+                : 'Нет собственных отрядов. Включите показ юнитов из базы.'}
             </div>
           ) : (
             <div className="p-2 space-y-1">
@@ -142,7 +192,7 @@ export function UnitsList({
                 />
               ))}
               {/* Base squads */}
-              {baseSquads.map((squad) => (
+              {showBaseUnits && baseSquads.map((squad) => (
                 <UnitCard
                   key={squad.id}
                   id={squad.id}
@@ -155,9 +205,11 @@ export function UnitsList({
             </div>
           )
         ) : (
-          customMachines.length + baseMachines.length === 0 ? (
+          displayMachines.length === 0 ? (
             <div className="p-4 text-center text-slate-500 text-sm">
-              Нет техники в этой фракции
+              {showBaseUnits
+                ? 'Нет техники в этой фракции'
+                : 'Нет собственной техники. Включите показ юнитов из базы.'}
             </div>
           ) : (
             <div className="p-2 space-y-1">
@@ -173,7 +225,7 @@ export function UnitsList({
                 />
               ))}
               {/* Base machines */}
-              {baseMachines.map((machine) => (
+              {showBaseUnits && baseMachines.map((machine) => (
                 <UnitCard
                   key={machine.id}
                   id={machine.id}
