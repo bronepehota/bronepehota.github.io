@@ -121,21 +121,46 @@ export const LOCAL_STORAGE_KEYS = {
 } as const;
 ```
 
-### QR-код: ограничения
+### QR-код: мульти-QR для больших источников
 
-QR-коды ограничены по ёмкости (~3 КБ для максимального размера). Стратегия:
-
-1. **Маленькие источники (до 10 юнитов):** QR содержит полный JSON
-2. **Большие источники:** QR недоступен, показываем сообщение "Для больших источников используйте JSON файл"
+QR-коды ограничены по ёмкости (~2-3 КБ). Решение: **мульти-QR** — разбиваем данные на части.
 
 ```typescript
-const QR_SIZE_LIMIT = 3000; // байт
+const QR_CHUNK_SIZE = 2000; // байт на один QR
 
-function canUseQrCode(source: CustomSource): boolean {
+function splitForQr(source: CustomSource): QrChunk[] {
   const json = JSON.stringify(source);
-  return json.length <= QR_SIZE_LIMIT;
+  const chunks: QrChunk[] = [];
+
+  for (let i = 0; i < json.length; i += QR_CHUNK_SIZE) {
+    chunks.push({
+      index: i / QR_CHUNK_SIZE + 1,
+      total: Math.ceil(json.length / QR_CHUNK_SIZE),
+      data: json.slice(i, i + QR_CHUNK_SIZE)
+    });
+  }
+  return chunks;
+}
+
+interface QrChunk {
+  index: number;    // Номер части (1-based)
+  total: number;    // Всего частей
+  data: string;     // Данные чанка
 }
 ```
+
+**Формат QR данных:** `{index}/{total}:{data}`
+
+**Примеры:**
+- 5 юнитов (~2 КБ) → 1 QR
+- 15 юнитов (~6 КБ) → 3 QR
+- 30 юнитов (~12 КБ) → 6 QR
+- 50+ юнитов → рекомендация использовать JSON файл
+
+**UI на телефоне:**
+- Прогресс-бар с количеством полученных частей
+- Анимация при сканировании каждой части
+- Автоматическая сборка после последней части
 
 ### Интеграция с sources-registry
 
