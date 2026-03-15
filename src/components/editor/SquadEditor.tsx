@@ -13,11 +13,12 @@ import { SoldiersTable } from './SoldiersTable';
 interface SquadEditorProps {
   squad?: CustomSquad;
   source: CustomSource;
+  factionId: string;
   onSave: (squad: CustomSquad) => void;
   onCancel: () => void;
 }
 
-export function SquadEditor({ squad, source, onSave, onCancel }: SquadEditorProps) {
+export function SquadEditor({ squad, source, factionId, onSave, onCancel }: SquadEditorProps) {
   const [name, setName] = useState(squad?.name || '');
   const [shortName, setShortName] = useState(squad?.shortName || '');
   const [cost, setCost] = useState(squad?.cost || 100);
@@ -53,7 +54,6 @@ export function SquadEditor({ squad, source, onSave, onCancel }: SquadEditorProp
       return;
     }
 
-    const factionId = source.factions[0]?.id || 'custom';
     const squadData: CustomSquad = {
       id: squad?.id || generateUnitId(factionId, name),
       name: name.trim(),

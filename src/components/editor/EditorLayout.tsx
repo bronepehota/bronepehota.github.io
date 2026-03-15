@@ -290,6 +290,7 @@ export function EditorLayout() {
         {view === 'create-squad' && selectedSource && selectedFactionId && (
           <SquadEditor
             source={selectedSource}
+            factionId={selectedFactionId}
             onSave={(newSquad: CustomSquad) => {
               const updated = {
                 ...selectedSource,
@@ -305,6 +306,7 @@ export function EditorLayout() {
         {view === 'create-machine' && selectedSource && selectedFactionId && (
           <MachineEditor
             source={selectedSource}
+            factionId={selectedFactionId}
             onSave={(newMachine: CustomMachine) => {
               const updated = {
                 ...selectedSource,
@@ -321,6 +323,7 @@ export function EditorLayout() {
           <SquadEditor
             squad={selectedSquad}
             source={selectedSource}
+            factionId={selectedSquad.faction}
             onSave={(updatedSquad: CustomSquad) => {
               const updated = {
                 ...selectedSource,
@@ -339,6 +342,7 @@ export function EditorLayout() {
           <MachineEditor
             machine={selectedMachine}
             source={selectedSource}
+            factionId={selectedMachine.faction}
             onSave={(updatedMachine: CustomMachine) => {
               const updated = {
                 ...selectedSource,

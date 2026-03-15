@@ -12,11 +12,12 @@ import { Save, X, Plus, Trash2 } from 'lucide-react';
 interface MachineEditorProps {
   machine?: CustomMachine;
   source: CustomSource;
+  factionId: string;
   onSave: (machine: CustomMachine) => void;
   onCancel: () => void;
 }
 
-export function MachineEditor({ machine, source, onSave, onCancel }: MachineEditorProps) {
+export function MachineEditor({ machine, source, factionId, onSave, onCancel }: MachineEditorProps) {
   const [name, setName] = useState(machine?.name || '');
   const [shortName, setShortName] = useState(machine?.shortName || '');
   const [cost, setCost] = useState(machine?.cost || 200);
@@ -57,7 +58,6 @@ export function MachineEditor({ machine, source, onSave, onCancel }: MachineEdit
       return;
     }
 
-    const factionId = source.factions[0]?.id || 'custom';
     const machineData: CustomMachine = {
       id: machine?.id || generateUnitId(factionId, name),
       name: name.trim(),
