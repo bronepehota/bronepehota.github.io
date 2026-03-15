@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import HUDOverlay from './HUDOverlay';
 import CTAButton from './CTAButton';
 import { cn } from '@/lib/utils';
@@ -81,7 +80,7 @@ export default function HeroSection({ className }: HeroSectionProps) {
           Тактический помощник для варгейма
         </p>
 
-        {/* Lore description - more condensed */}
+        {/* Lore description */}
         <div
           className={cn(
             'mx-auto mb-3 md:mb-5 lg:mb-6',
@@ -90,16 +89,10 @@ export default function HeroSection({ className }: HeroSectionProps) {
             showText ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
           )}
         >
-          {/* Desktop: Short version */}
-          <p className="border-l-2 md:border-l-3 border-military-rust/50 pl-2 md:pl-4 italic font-oswald text-military-sand text-[10px] sm:text-xs md:text-sm leading-snug hidden sm:block">
+          <p className="border-l-2 md:border-l-3 border-military-rust/50 pl-2 md:pl-4 italic font-oswald text-military-sand text-[10px] sm:text-xs md:text-sm leading-snug">
             Несмотря на перемирие, сражения не прекратились. Спорадические битвы между
             Империей и Протекторатом происходили по всему Доминиону. Флоты сталкивались в космосе,
             бои шли на сотнях планет. Исход должен быть определён.
-            <span className="text-military-amber font-semibold"> Кто победит?</span>
-          </p>
-          {/* Mobile: Ultra-short version */}
-          <p className="border-l-2 border-military-rust/50 pl-2 italic font-oswald text-military-sand text-[9px] leading-snug sm:hidden">
-            Перемирие нарушено. Империя против Протектората — бой за Доминион продолжается.
             <span className="text-military-amber font-semibold"> Кто победит?</span>
           </p>
         </div>
@@ -112,23 +105,6 @@ export default function HeroSection({ className }: HeroSectionProps) {
           )}
         >
           <CTAButton />
-        </div>
-
-        {/* Encyclopedia link - more compact */}
-        <div
-          className={cn(
-            'mt-2 md:mt-3',
-            'transition-all duration-700 delay-200',
-            showCTA ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-          )}
-        >
-          <Link
-            href="/encyclopedia"
-            data-testid="encyclopedia-link"
-            className="font-ibm-mono text-[9px] md:text-xs text-military-rust/60 hover:text-military-amber transition-colors duration-200 tracking-widest uppercase"
-          >
-            Энциклопедия
-          </Link>
         </div>
       </div>
     </section>
