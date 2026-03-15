@@ -60,9 +60,9 @@ export default function Footer({ className }: FooterProps) {
         </a>
         </div>
 
-        {/* Scroll indicator arrow */}
-        <div className="animate-bounce flex flex-col items-center gap-1 text-slate-500/50">
-          <ChevronDown className="w-5 h-5" />
+        {/* Scroll indicator */}
+        <div className="animate-bounce flex flex-col items-center gap-0.5 text-slate-500/40">
+          <ChevronDown className="w-4 h-4" />
           <span className="text-[8px] tracking-widest">ЛИСТАЙТЕ</span>
         </div>
       </div>
