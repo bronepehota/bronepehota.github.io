@@ -164,13 +164,13 @@ export default function CTAButton({ className }: CTAButtonProps) {
             href="/app"
             onClick={handleRestart}
             data-testid="landing-restart-button"
-            className="group flex-1 flex items-center justify-center gap-1.5 px-3 py-2
+            className="group flex-1 flex items-center justify-center gap-1.5 px-2 sm:px-3 py-2
               bg-slate-800/30 hover:bg-slate-700/50
               transition-all duration-200 touch-manipulation no-underline"
           >
             <RotateCcw className="w-3.5 h-3.5 text-slate-500 group-hover:text-slate-400 transition-colors" />
-            <span className="font-russo text-xs text-slate-400 group-hover:text-slate-300 transition-colors uppercase">
-              Заново
+            <span className="font-russo text-[10px] sm:text-xs text-slate-400 group-hover:text-slate-300 transition-colors uppercase">
+              Начать заново
             </span>
           </Link>
 
@@ -179,7 +179,7 @@ export default function CTAButton({ className }: CTAButtonProps) {
             href="/app"
             onClick={handleContinueBattle}
             data-testid="landing-continue-button"
-            className="group flex-1 flex items-center justify-center gap-1.5 px-3 py-2
+            className="group flex-1 flex items-center justify-center gap-1.5 px-2 sm:px-3 py-2
               bg-amber-950/40 hover:bg-amber-950/60
               relative overflow-hidden
               transition-all duration-200 touch-manipulation no-underline"
@@ -188,8 +188,9 @@ export default function CTAButton({ className }: CTAButtonProps) {
             <span className="absolute inset-0 bg-gradient-to-r from-amber-500/5 via-amber-500/10 to-amber-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
 
             <Sword className="w-3.5 h-3.5 text-amber-500 group-hover:text-amber-400 transition-colors" />
-            <span className="font-russo text-xs text-amber-400 group-hover:text-amber-300 transition-colors uppercase font-semibold">
-              В бой
+            <span className="font-russo text-[10px] sm:text-xs text-amber-400 group-hover:text-amber-300 transition-colors uppercase font-semibold">
+              <span className="hidden sm:inline">Продолжить бой</span>
+              <span className="sm:hidden">В бой</span>
             </span>
           </Link>
         </div>
