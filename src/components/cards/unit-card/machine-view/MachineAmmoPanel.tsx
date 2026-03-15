@@ -2,6 +2,16 @@ import { Bomb, Target, Plus, Minus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Weapon } from '@/lib/types';
 
+// Helper to check if weapon is non-ranged (melee/special) - same logic as MachineWeaponsList
+const isNonRangedWeapon = (weapon: Weapon) => {
+  // Melee range (ББ)
+  if (weapon.range === 'ББ') return true;
+  // Power is a simple number (not dice notation like "2D6")
+  const powerStr = String(weapon.power);
+  if (/^\d+$/.test(powerStr)) return true;
+  return false;
+};
+
 interface MachineAmmoPanelProps {
   currentAmmo: number;
   maxAmmo: number;
@@ -138,7 +148,10 @@ export function MachineAmmoPanel({
       </div>
 
       {/* Per-weapon ammo bars for community_star_system */}
-      {usePerWeaponAmmo && weapons.map((weapon, idx) => {
+      {usePerWeaponAmmo && weapons
+        .map((weapon, idx) => ({ weapon, idx }))
+        .filter(({ weapon }) => !isNonRangedWeapon(weapon))
+        .map(({ weapon, idx }) => {
         const weaponAmmoCount = weaponAmmo?.[idx] ?? weapon.ammo ?? maxAmmo;
         const weaponMaxAmmo = weapon.ammo ?? maxAmmo;
 
