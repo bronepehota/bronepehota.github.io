@@ -8,7 +8,7 @@ import { UnitSelector } from './UnitSelector';
 import { RulesSelector } from './rules/RulesSelector';
 import { StepProgressIndicator } from './rules/StepProgressIndicator';
 import { getAllRulesVersions } from '@/lib/rules-registry';
-import { getAllSources, getSource, isValidSource, getDefaultSource } from '@/lib/sources-registry';
+import { getAllSourcesWithCustom, getSourceWithCustom, isValidSourceWithCustom, getDefaultSource } from '@/lib/sources-registry';
 import { SourceSelector } from './rules/SourceSelector';
 import { getEncyclopediaFaction } from '@/lib/encyclopedia-registry';
 import { BattlePreparationScreen } from './preparation';
@@ -82,7 +82,7 @@ export default function ArmyBuilder({
   const [selectedSource, setSelectedSource] = useState<SourceID>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.ARMY_LIST_SOURCE);
-      return saved && isValidSource(saved) ? saved : getDefaultSource();
+      return saved && isValidSourceWithCustom(saved) ? saved : getDefaultSource();
     }
     return getDefaultSource();
   });
@@ -95,7 +95,7 @@ export default function ArmyBuilder({
   });
 
   // Load source data and handle source changes
-  const sourceData = getSource(selectedSource);
+  const sourceData = getSourceWithCustom(selectedSource);
   // Enrich factions with data from encyclopedia registry
   const availableFactions = (sourceData?.factions || [])
     .map(f => {
@@ -221,7 +221,7 @@ export default function ArmyBuilder({
             {/* Step 2: Source Selection */}
             {setupStep === 'source' && (
               <SourceSelector
-                sources={getAllSources()}
+                sources={getAllSourcesWithCustom()}
                 selectedSource={selectedSource}
                 onSourceChange={handleSourceChange}
                 onConfirm={() => setSetupStep('faction')}
