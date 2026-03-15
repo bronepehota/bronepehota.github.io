@@ -21,24 +21,24 @@ function formatBattleDate(isoString: string): string {
 
   // Less than an hour
   if (diffMinutes < 60) {
-    return `${diffMinutes} мин назад`;
+    return `${diffMinutes}мин`;
   }
 
   // Less than a day
   if (diffHours < 24) {
     const remainingMinutes = diffMinutes % 60;
     if (remainingMinutes > 0) {
-      return `${diffHours}ч ${remainingMinutes}мин назад`;
+      return `${diffHours}ч ${remainingMinutes}мин`;
     }
-    return `${diffHours}ч назад`;
+    return `${diffHours}ч`;
   }
 
   // Days and hours
   const remainingHours = diffHours % 24;
   if (remainingHours > 0) {
-    return `${diffDays}д ${remainingHours}ч назад`;
+    return `${diffDays}д ${remainingHours}ч`;
   }
-  return `${diffDays}д назад`;
+  return `${diffDays}д`;
 }
 
 export default function CTAButton({ className }: CTAButtonProps) {
@@ -127,92 +127,69 @@ export default function CTAButton({ className }: CTAButtonProps) {
     );
   }
 
-  // Active battle state - show two buttons with date info
+  // Active battle state - compact battle card
   if (hasActiveBattle) {
     const dateText = lastBattleDate ? formatBattleDate(lastBattleDate) : null;
 
     return (
-      <div className={cn('flex flex-col gap-3 items-center', className)}>
-        {/* Battle date indicator */}
-        {dateText && (
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-950/40 border border-amber-500/30 rounded-sm">
-            <Clock className="w-3.5 h-3.5 text-amber-500/70" />
-            <span className="font-ibm-mono text-xs text-amber-400/80 tracking-wide">
-              Бой начат: {dateText}
+      <div className={cn(
+        'relative w-full max-w-sm mx-auto',
+        'bg-slate-900/60 backdrop-blur-sm',
+        'border border-slate-700/50',
+        'rounded-lg overflow-hidden',
+        className
+      )}>
+        {/* Status bar with date */}
+        <div className="flex items-center justify-between px-3 py-1.5 bg-slate-800/50 border-b border-slate-700/50">
+          <div className="flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
+            <span className="font-ibm-mono text-[10px] text-amber-400/90 tracking-wide uppercase">
+              Бой идёт
             </span>
           </div>
-        )}
+          {dateText && (
+            <div className="flex items-center gap-1 text-slate-500">
+              <Clock className="w-3 h-3" />
+              <span className="font-ibm-mono text-[10px] text-slate-400">
+                {dateText}
+              </span>
+            </div>
+          )}
+        </div>
 
-        {/* Buttons row */}
-        <div className="flex flex-col sm:flex-row gap-3 items-center justify-center">
-          {/* Restart button - secondary */}
+        {/* Action buttons - horizontal, compact */}
+        <div className="flex items-stretch divide-x divide-slate-700/50">
+          {/* Restart - secondary, compact */}
           <Link
             href="/app"
             onClick={handleRestart}
             data-testid="landing-restart-button"
-            className={cn(
-              'group relative inline-flex items-center justify-center',
-              'px-4 py-2 sm:px-5 sm:py-3',
-              'bg-slate-800/80 border-2 border-slate-600/60',
-              'font-russo font-bold text-sm sm:text-base',
-              'uppercase tracking-wider',
-              'text-slate-400',
-              'hover:border-slate-500 hover:text-slate-200',
-              'hover:bg-slate-700/80',
-              'transition-all duration-300',
-              'overflow-hidden touch-manipulation',
-              'min-h-[44px] sm:min-h-[48px]',
-              'rounded-sm',
-              'no-underline'
-            )}
+            className="group flex-1 flex items-center justify-center gap-1.5 px-3 py-2
+              bg-slate-800/30 hover:bg-slate-700/50
+              transition-all duration-200 touch-manipulation no-underline"
           >
-            <span className="absolute inset-0 bg-slate-600/10 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300" />
-            <span className="relative flex items-center gap-2">
-              <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span>Начать заново</span>
+            <RotateCcw className="w-3.5 h-3.5 text-slate-500 group-hover:text-slate-400 transition-colors" />
+            <span className="font-russo text-xs text-slate-400 group-hover:text-slate-300 transition-colors uppercase">
+              Заново
             </span>
           </Link>
 
-          {/* Continue battle button - primary, highlighted */}
+          {/* Continue - primary, emphasized */}
           <Link
             href="/app"
             onClick={handleContinueBattle}
             data-testid="landing-continue-button"
-            className={cn(
-              'group relative inline-flex items-center justify-center',
-              'px-4 py-2 sm:px-6 sm:py-3',
-              'bg-amber-950/50 border-2 border-amber-500/70',
-              'font-russo font-bold text-sm sm:text-base',
-              'uppercase tracking-wider',
-              'text-amber-400',
-              'hover:border-amber-400 hover:text-amber-300',
-              'hover:bg-amber-950/70',
-              'hover:shadow-[0_0_25px_rgba(245,158,11,0.4)]',
-              'transition-all duration-300',
-              'overflow-hidden touch-manipulation',
-              'min-h-[44px] sm:min-h-[48px]',
-              'rounded-sm',
-              'animate-pulse-slow',
-              'no-underline'
-            )}
+            className="group flex-1 flex items-center justify-center gap-1.5 px-3 py-2
+              bg-amber-950/40 hover:bg-amber-950/60
+              relative overflow-hidden
+              transition-all duration-200 touch-manipulation no-underline"
           >
-            {/* Pulsing glow effect */}
-            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-500/20 to-transparent transform -translate-x-full group-hover:animate-shine" />
+            {/* Active glow effect */}
+            <span className="absolute inset-0 bg-gradient-to-r from-amber-500/5 via-amber-500/10 to-amber-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
 
-            {/* Corner accents */}
-            <span className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-amber-500" />
-            <span className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-amber-500" />
-            <span className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-amber-500" />
-            <span className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-amber-500" />
-
-            {/* Alert icon indicator */}
-            <span className="absolute -top-1 -right-1 w-3 h-3 bg-amber-500 rounded-full animate-ping" />
-            <span className="absolute -top-1 -right-1 w-3 h-3 bg-amber-500 rounded-full" />
-
-            <span className="relative flex items-center gap-2">
-              <Sword className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="hidden sm:inline">Продолжить бой</span>
-              <span className="sm:hidden">В бой</span>
+            <Sword className="w-3.5 h-3.5 text-amber-500 group-hover:text-amber-400 transition-colors" />
+            <span className="font-russo text-xs text-amber-400 group-hover:text-amber-300 transition-colors uppercase font-semibold">
+              В бой
             </span>
           </Link>
         </div>
