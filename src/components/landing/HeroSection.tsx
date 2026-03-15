@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import HUDOverlay from './HUDOverlay';
 import CTAButton from './CTAButton';
 import { cn } from '@/lib/utils';
@@ -105,6 +106,23 @@ export default function HeroSection({ className }: HeroSectionProps) {
           )}
         >
           <CTAButton />
+        </div>
+
+        {/* GitHub help link */}
+        <div
+          className={cn(
+            'transition-all duration-700 delay-200',
+            showCTA ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          )}
+        >
+          <Link
+            href="https://github.com/Luxor/bronepehota"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-ibm-mono text-[9px] md:text-xs text-military-rust/50 hover:text-military-amber transition-colors duration-200 tracking-widest uppercase"
+          >
+            Помочь с проектом
+          </Link>
         </div>
       </div>
     </section>
