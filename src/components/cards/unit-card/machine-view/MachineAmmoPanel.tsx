@@ -34,9 +34,9 @@ export function MachineAmmoPanel({
   usePerWeaponAmmo
 }: MachineAmmoPanelProps) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-1.5">
       {/* Ammo + Shots Combined - Tactical Display */}
-      <div className="relative bg-slate-900/60 p-2 rounded-sm">
+      <div className="relative bg-slate-900/60 p-1.5 rounded-sm">
         {/* Tech corners */}
         <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-slate-600/50" />
         <div className="absolute top-0 right-0 w-1 h-1 border-r border-t border-slate-600/50" />

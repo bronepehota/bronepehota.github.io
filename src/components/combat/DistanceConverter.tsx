@@ -80,42 +80,29 @@ export function DistanceConverter({
   const displayCm = mode === 'cm' ? cmValue : stepsToCm(steps, stepToCmFactor);
 
   return (
-    <div className={cn('space-y-1', className)}>
-      {/* Main input row - matches ParameterInputs style */}
-      <div className="grid grid-cols-[100px_1fr] gap-3 items-center">
-        {/* Label with mode toggle and sublabel */}
-        <button
-          type="button"
-          onClick={toggleMode}
+    <div className={cn('flex flex-col gap-1.5', className)}>
+      {/* Label row */}
+      <div className="text-[10px] md:text-xs opacity-50 uppercase font-bold">
+        Дистанция
+      </div>
+
+      {/* Input row with inline hint */}
+      <div className="flex items-center gap-2">
+        <NumberStepper
+          value={displaySteps}
+          onChange={handleStepsChange}
+          min={1}
+          max={20}
+          step={1}
+          size="sm"
           disabled={disabled}
-          className="text-left"
-        >
-          <div className="text-xs opacity-50 uppercase font-bold whitespace-nowrap hover:opacity-80 transition-opacity">
-            {isEditingSteps ? 'Дистанция' : 'Расстояние'}
-          </div>
-          <div className="text-[9px] opacity-40 font-mono normal-case">
-            {isEditingSteps ? 'шагов' : 'сантиметров'}
-          </div>
-        </button>
+          className="flex-1"
+        />
 
-        {/* Input field */}
-        <div className="relative">
-          <NumberStepper
-            value={isEditingSteps ? displaySteps : displayCm}
-            onChange={isEditingSteps ? handleStepsChange : handleCmChange}
-            min={isEditingSteps ? 1 : stepToCmFactor}
-            max={isEditingSteps ? 20 : 20 * stepToCmFactor}
-            step={isEditingSteps ? 1 : stepToCmFactor}
-            size="lg"
-            disabled={disabled}
-            className="flex-1 justify-start"
-          />
-
-          {/* Other value hint */}
-          <span className="absolute -bottom-4 left-0 text-[9px] text-slate-600 font-mono whitespace-nowrap">
-            {isEditingSteps ? `${displayCm} см` : `${displaySteps} шаг`}
-          </span>
-        </div>
+        {/* CM value - larger */}
+        <span className="text-sm md:text-base text-slate-500 font-mono whitespace-nowrap shrink-0">
+          ({displayCm} см)
+        </span>
       </div>
     </div>
   );

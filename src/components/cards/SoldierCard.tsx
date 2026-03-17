@@ -180,7 +180,7 @@ function SoldierCard({
   return (
     <div
       className={cn(
-        "relative p-1 md:p-1.5 rounded-sm border flex gap-1.5 md:gap-2 transition-all overflow-hidden",
+        "relative p-0.5 md:p-1 rounded-sm border flex gap-1 md:gap-1.5 transition-all overflow-hidden",
         isDead ? "bg-slate-950/80 border-slate-800 opacity-40 grayscale" :
         isDone ? "bg-slate-900/40 border-slate-700/50 opacity-90" : "bg-slate-800/30 border-slate-700/50",
         isPilot && !isDead ? "border-cyan-700/40" : ""

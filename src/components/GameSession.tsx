@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { Army, ArmyUnit, Squad, PilotInfo, FactionID } from '@/lib/types';
+import { Army, ArmyUnit, Squad, Machine, PilotInfo, FactionID } from '@/lib/types';
 import { resolvePanic } from '@/lib/panic-logic';
 import { getFactionColors } from '@/lib/faction-colors';
 import UnitCard from './cards/UnitCard';
-import { History, X } from 'lucide-react';
+import { History, X, Bomb, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CombatLogEntry } from '@/lib/combat-types';
 import { useCombatTargetContext } from '@/contexts/CombatTargetContext';
@@ -38,6 +38,11 @@ interface GameSessionProps {
   distanceInputUnit?: 'steps' | 'cm';
   stepToCmFactor?: number;
   autoCompleteEnabled?: boolean;
+  // New props for external action control
+  triggerOpenEncyclopedia?: boolean;
+  onToggleUnitDoneRef?: (trigger: () => void) => void;
+  // Callback to report current unit state
+  onCurrentUnitChange?: (unit: ArmyUnit | null, isDone: boolean, isDead: boolean) => void;
 }
 
 export default function GameSession({
@@ -50,12 +55,16 @@ export default function GameSession({
   distanceInputUnit = 'steps',
   stepToCmFactor = 5,
   autoCompleteEnabled = true,
+  triggerOpenEncyclopedia = false,
+  onToggleUnitDoneRef,
+  onCurrentUnitChange,
 }: GameSessionProps) {
   const [showInitiativeModal, setShowInitiativeModal] = useState(false);
   const [showTurnConfirmation, setShowTurnConfirmation] = useState(false);
   const [focusedUnitIdx, setFocusedUnitIdx] = useState(0);
   const [isDockExpanded, setIsDockExpanded] = useState(false);
   const [dockDragProgress, setDockDragProgress] = useState(0);
+  const [triggerEncyclopediaOpen, setTriggerEncyclopediaOpen] = useState(false);
   const { clearAllMemory } = useCombatTargetContext();
 
   // Keep ref to current army for immediate access in updateUnit
@@ -289,6 +298,35 @@ export default function GameSession({
     return !isDead && !isDone;
   }, []);
 
+  // Helper to check unit status
+  const getUnitStatus = useCallback((unit: ArmyUnit) => {
+    const isSquad = unit.type === 'squad';
+    const isDead = isSquad
+      ? (unit.deadSoldiers?.length || 0) === (unit.data as Squad).soldiers.length
+      : (unit.currentDurability || 0) === 0;
+    const isDone = isSquad
+      ? (unit.data as Squad).soldiers.every((_, idx) => unit.deadSoldiers?.includes(idx) || unit.actionsUsed?.[idx]?.done)
+      : unit.isMachineDone;
+    return { isDead, isDone };
+  }, []);
+
+  // Notify parent about current unit changes
+  useEffect(() => {
+    if (onCurrentUnitChange && army.units.length > 0 && focusedUnitIdx < army.units.length) {
+      const currentUnit = army.units[focusedUnitIdx];
+      const { isDead, isDone } = getUnitStatus(currentUnit);
+      onCurrentUnitChange(currentUnit, isDone ?? false, isDead);
+    }
+  }, [focusedUnitIdx, army.units, onCurrentUnitChange, getUnitStatus]);
+
+  // Handle encyclopedia trigger from parent
+  useEffect(() => {
+    if (triggerOpenEncyclopedia && army.units.length > 0 && focusedUnitIdx < army.units.length) {
+      setTriggerEncyclopediaOpen(true);
+      setTimeout(() => setTriggerEncyclopediaOpen(false), 100);
+    }
+  }, [triggerOpenEncyclopedia, army.units, focusedUnitIdx]);
+
   // Get indices of active units only
   const activeUnitIndices = useCallback(() => {
     return army.units.map((u, idx) => isUnitActive(u) ? idx : -1).filter(idx => idx !== -1);
@@ -372,6 +410,65 @@ export default function GameSession({
   const toggleDockExpanded = useCallback(() => {
     setIsDockExpanded(prev => !prev);
   }, []);
+
+  // Handle toggle done for current unit - called from header button
+  const handleToggleUnitDone = useCallback(() => {
+    if (army.units.length === 0 || focusedUnitIdx >= army.units.length) return;
+
+    const currentUnit = army.units[focusedUnitIdx];
+    const { isDone } = getUnitStatus(currentUnit);
+    const newDoneState = !isDone;
+
+    if (currentUnit.type === 'squad') {
+      // Toggle all alive soldiers
+      const squad = currentUnit.data as Squad;
+      const newActions = (currentUnit.actionsUsed || Array(squad.soldiers.length).fill({ moved: false, shot: false, melee: false, done: false }))
+        .map((action, idx) => {
+          const isDead = currentUnit.deadSoldiers?.includes(idx);
+          if (isDead) return action;
+          return { ...action, done: newDoneState };
+        });
+      setArmy({
+        ...army,
+        units: army.units.map(u => u.instanceId === currentUnit.instanceId ? { ...u, actionsUsed: newActions } : u)
+      });
+    } else {
+      // Toggle machine done
+      setArmy({
+        ...army,
+        units: army.units.map(u => u.instanceId === currentUnit.instanceId ? { ...u, isMachineDone: newDoneState } : u)
+      });
+
+      // Also update pilot's done state if exists
+      if (currentUnit.pilotInfo) {
+        const pilotSquad = army.units.find(u => u.instanceId === currentUnit.pilotInfo?.squadInstanceId);
+        if (pilotSquad && pilotSquad.type === 'squad') {
+          const soldierIndex = currentUnit.pilotInfo.soldierIndex;
+          setArmy({
+            ...army,
+            units: army.units.map(u => {
+              if (u.instanceId === pilotSquad.instanceId) {
+                const newActions = [...(u.actionsUsed || [])];
+                newActions[soldierIndex] = { ...newActions[soldierIndex], done: newDoneState };
+                return { ...u, actionsUsed: newActions };
+              }
+              if (u.instanceId === currentUnit.instanceId) {
+                return { ...u, isMachineDone: newDoneState };
+              }
+              return u;
+            })
+          });
+        }
+      }
+    }
+  }, [army, focusedUnitIdx, getUnitStatus, setArmy]);
+
+  // Expose toggle done to parent via callback ref
+  useEffect(() => {
+    if (onToggleUnitDoneRef) {
+      onToggleUnitDoneRef(handleToggleUnitDone);
+    }
+  }, [handleToggleUnitDone, onToggleUnitDoneRef]);
 
   const factionColors = getFactionColors(army.faction || 'polaris');
 
@@ -470,12 +567,12 @@ export default function GameSession({
         </div>
       )}
 
-      {/* Main Content */}
-      <div className="flex-1 p-3 md:p-4 pb-28 md:pb-32 min-h-0 overflow-hidden">
+      {/* Main Content - Full viewport height utilization */}
+      <div className="flex-1 min-h-0 overflow-hidden">
         {army.units.length > 0 && (
           <div className={cn(
-            "w-full bg-transparent p-0.5 md:p-1 mx-auto h-full",
-            army.units[focusedUnitIdx]?.type === 'machine' ? "max-w-5xl" : "max-w-2xl"
+            "w-full",
+            army.units[focusedUnitIdx]?.type === 'machine' ? "max-w-6xl mx-auto" : "max-w-3xl mx-auto"
           )}>
             <UnitCard
               unit={army.units[focusedUnitIdx]}
@@ -490,44 +587,109 @@ export default function GameSession({
               distanceInputUnit={distanceInputUnit}
               stepToCmFactor={stepToCmFactor}
               autoCompleteEnabled={autoCompleteEnabled}
+              triggerEncyclopediaOpen={triggerEncyclopediaOpen}
             />
           </div>
         )}
       </div>
 
-      {/* Military Tech Unit Dock - Fixed at bottom with Tactical HUD styling */}
+      {/* Compact Unit Dock - Technical HUD styling */}
       {army.units.length > 0 && (
         <div
           className={cn(
-            "fixed left-0 right-0 z-50 bg-slate-950/95 backdrop-blur-md border-t border-slate-700/50 transition-all duration-300 ease-out",
-            isDockExpanded ? "top-20 bottom-0" : "bottom-0 h-auto"
+            "fixed left-0 right-0 z-50 bg-slate-950 border-t transition-all duration-200 ease-out",
+            isDockExpanded ? "top-16 bottom-0" : "bottom-0",
+            "border-slate-800/80"
           )}
           onMouseDown={handleDockMouseDown}
           onTouchStart={handleDockTouchStart}
         >
-          {/* Expand/collapse handle indicator */}
+          {/* Expand/collapse handle - minimal */}
           <div
-            className="flex justify-center py-0 active:bg-slate-800/30 transition-colors"
+            className="flex justify-center py-1 active:bg-slate-800/50 transition-colors cursor-pointer"
             onClick={toggleDockExpanded}
           >
-            {/* Minimal touch target */}
-            <div className="w-5 h-3 flex items-center justify-center">
-              <div className={cn(
-                "w-5 h-px rounded-full transition-all duration-200",
-                isDockExpanded ? "bg-slate-400" : factionColors.bgSolid.replace('bg-', 'bg-').replace('500', '400')
-              )} />
-            </div>
+            <div className={cn(
+              "w-8 h-0.5 rounded-full transition-all duration-200",
+              isDockExpanded ? "bg-slate-600 w-12" : factionColors.bgSolid
+            )} />
           </div>
 
-          {/* Dock top decorative line with faction color */}
-          <div className={cn(
-            "h-0.5 w-full transition-all duration-300",
-            !isDockExpanded && factionColors.bgSolid.replace('bg-', 'bg-').replace('500', '600/40')
-          )} />
+          {/* Current unit info bar - ultra compact */}
+          {!isDockExpanded && army.units[focusedUnitIdx] && (
+            <div className="px-2 py-1 border-b border-slate-800/50 flex items-center gap-2">
+              {army.units[focusedUnitIdx].instanceNumber && (
+                <span className={cn(
+                  "shrink-0 px-1 py-0.5 text-[9px] font-mono font-bold",
+                  factionColors.bg,
+                  factionColors.text
+                )}>
+                  {army.units[focusedUnitIdx].instanceNumber}
+                </span>
+              )}
+              <span className={cn(
+                "text-xs font-mono font-bold uppercase tracking-wider truncate",
+                factionColors.text
+              )}>
+                {army.units[focusedUnitIdx].data.name}
+              </span>
+              {/* Grenade indicator - only for squads */}
+              {army.units[focusedUnitIdx].type === 'squad' && (() => {
+                const grenadesUsed = army.units[focusedUnitIdx].grenadesUsed;
+                return (
+                  <span className={cn(
+                    "flex items-center justify-center w-5 h-5 rounded-sm",
+                    grenadesUsed ? "bg-slate-800" : "bg-amber-950/50"
+                  )}>
+                    <Bomb className={cn(
+                      "w-3 h-3",
+                      grenadesUsed ? "text-slate-500" : "text-amber-400"
+                    )} />
+                  </span>
+                );
+              })()}
+              {/* Durability indicator - only for machines */}
+              {army.units[focusedUnitIdx].type === 'machine' && (() => {
+                const machine = army.units[focusedUnitIdx].data as Machine;
+                const currentDurability = army.units[focusedUnitIdx].currentDurability || 0;
+                const maxDurability = machine.durability_max;
+                const durabilityPercent = currentDurability / maxDurability;
 
-          {/* Dock tactical decorations */}
-          <div className="absolute top-4 left-4 w-2 h-2 bg-slate-600/30 rounded-full animate-pulse" />
-          <div className="absolute top-4 right-4 w-2 h-2 bg-slate-600/30 rounded-full animate-pulse" />
+                let durabilityColor = "text-emerald-500";
+                let durabilityBg = "bg-emerald-950/50";
+
+                if (currentDurability === 0) {
+                  durabilityColor = "text-slate-600";
+                  durabilityBg = "bg-slate-800";
+                } else if (durabilityPercent < 0.3) {
+                  durabilityColor = "text-red-500";
+                  durabilityBg = "bg-red-950/50";
+                } else if (durabilityPercent < 0.6) {
+                  durabilityColor = "text-amber-500";
+                  durabilityBg = "bg-amber-950/50";
+                }
+
+                return (
+                  <span className={cn(
+                    "flex items-center justify-center gap-1 w-5 h-5 rounded-sm",
+                    durabilityBg
+                  )}>
+                    <Heart className={cn("w-3 h-3", durabilityColor)} />
+                    <span className={cn("text-[9px] font-mono font-bold", durabilityColor)}>
+                      {currentDurability}/{maxDurability}
+                    </span>
+                  </span>
+                );
+              })()}
+              {(() => {
+                const currentUnit = army.units[focusedUnitIdx];
+                const { isDead, isDone } = getUnitStatus(currentUnit);
+                if (isDead) return <span className="text-[9px] text-red-500 font-mono font-bold ml-auto">†</span>;
+                if (isDone) return <span className="text-[9px] text-emerald-500 font-mono font-bold ml-auto">✓</span>;
+                return null;
+              })()}
+            </div>
+          )}
 
           {/* Content based on expanded state */}
           {isDockExpanded ? (
@@ -579,19 +741,7 @@ export default function GameSession({
           ) : (
             /* Compact view - horizontal scroll */
             <div className="relative">
-              {/* Left fade indicator */}
-              <div
-                className="absolute left-0 top-0 bottom-0 w-8 z-10 pointer-events-none"
-                style={{ background: 'linear-gradient(to right, rgb(2 6 23 / 0.95), transparent)' }}
-              />
-
-              {/* Right fade indicator */}
-              <div
-                className="absolute right-0 top-0 bottom-0 w-8 z-10 pointer-events-none"
-                style={{ background: 'linear-gradient(to left, rgb(2 6 23 / 0.95), transparent)' }}
-              />
-
-              <div className="flex overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-hide items-center px-1.5 py-0.5">
+              <div className="flex overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-hide items-center px-1 py-1.5 gap-1">
             {(() => {
               // Sort and group units: active first, then done/dead
               const sortedUnits = army.units

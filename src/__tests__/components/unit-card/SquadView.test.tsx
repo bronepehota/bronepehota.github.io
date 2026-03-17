@@ -41,8 +41,8 @@ describe('SquadView', () => {
     const grid = container.querySelector('.grid');
     expect(grid).toBeInTheDocument();
 
-    // Check that SoldierCard components are rendered (they have specific class names)
-    const soldierCards = container.querySelectorAll('.relative.p-1');
-    expect(soldierCards.length).toBe(1);
+    // Check that SoldierCard components are rendered by looking for the status stripe
+    const statusStripes = container.querySelectorAll('[data-testid="soldier-status-stripe"]');
+    expect(statusStripes.length).toBe(1);
   });
 });
