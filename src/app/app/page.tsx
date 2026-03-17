@@ -1,11 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import Link from 'next/link';
 import { Army, ArmyUnit, RulesVersionID } from '@/lib/types';
 import ArmyBuilder from '@/components/ArmyBuilder';
 import GameSession from '@/components/GameSession';
-import { Shield, ArrowLeft, CheckCircle2, MoreVertical, List, Grid, History, Heart, UserX, AlertTriangle, X, BookOpen } from 'lucide-react';
+import { Shield, CheckCircle2, MoreVertical, List, Grid, History, AlertTriangle, X, BookOpen } from 'lucide-react';
 import { isValidRulesVersion } from '@/lib/rules-registry';
 import { cn } from '@/lib/utils';
 import { LOCAL_STORAGE_KEYS } from '@/lib/constants';
@@ -113,6 +112,22 @@ export default function Home() {
     triggerInitiativeRef.current?.();
   }, []);
 
+  // Current unit state from GameSession for header actions
+  const [currentUnitInfo, setCurrentUnitInfo] = useState<{ unit: ArmyUnit | null; isDone: boolean; isDead: boolean }>({
+    unit: null,
+    isDone: false,
+    isDead: false
+  });
+  const [triggerOpenEncyclopedia, setTriggerOpenEncyclopedia] = useState(false);
+  const toggleUnitDoneRef = useRef<(() => void) | null>(null);
+  const handleToggleUnitDone = useCallback(() => {
+    toggleUnitDoneRef.current?.();
+  }, []);
+  const handleOpenEncyclopedia = useCallback(() => {
+    setTriggerOpenEncyclopedia(true);
+    setTimeout(() => setTriggerOpenEncyclopedia(false), 100);
+  }, []);
+
   const activeFaction = army.faction ? getEncyclopediaFaction(army.faction) : undefined;
 
   // Faction styles for tech blueprint design
@@ -122,18 +137,21 @@ export default function Home() {
         primary: 'text-red-400',
         border: 'border-red-600/40',
         bg: 'bg-red-950/20',
+        bgSolid: 'bg-red-600',
         accent: 'border-red-500'
       },
       protectorate: {
         primary: 'text-cyan-400',
         border: 'border-cyan-600/40',
         bg: 'bg-cyan-950/20',
+        bgSolid: 'bg-cyan-600',
         accent: 'border-cyan-500'
       },
       mercenaries: {
         primary: 'text-yellow-400',
         border: 'border-yellow-600/40',
         bg: 'bg-yellow-950/20',
+        bgSolid: 'bg-yellow-600',
         accent: 'border-yellow-500'
       }
     };
@@ -141,11 +159,6 @@ export default function Home() {
   };
 
   const factionStyles = getFactionStyles(army.faction || 'polaris');
-
-  // Handle return to faction selection (shows confirmation)
-  const handleReturnToFactionSelect = () => {
-    setShowResetConfirm(true);
-  };
 
   // Handle ending battle phase (shows confirmation)
   const handleEndBattle = () => {
@@ -274,157 +287,114 @@ export default function Home() {
       <main className="h-screen flex flex-col bg-slate-900 text-slate-100 overflow-hidden">
         {/* Scrollable wrapper containing both header and content */}
         <div className="flex-1 overflow-auto min-h-0">
-          {/* Header - Tech Blueprint Style - Optimized for mobile */}
+          {/* Header - Clean Tech Style */}
           <header className={cn(
-            "backdrop-blur-sm border-b px-2 md:px-3 py-1 md:py-2 sticky top-0 z-50 transition-all duration-300",
-            view === 'game' && army.isInBattle
-              ? "bg-slate-950/95 border-slate-700/70"
-              : "bg-slate-900/90 border-slate-800/50"
+            "bg-slate-950/95 border-b border-slate-800/80",
+            "px-2 md:px-3 py-2 sticky top-0 z-50",
+            "backdrop-blur-sm"
           )}>
-        {/* Battle mode: additional tactical HUD elements */}
-        {view === 'game' && army.isInBattle && (
-          <>
-            {/* Scanline effect overlay on header */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-30">
-              <div className="w-full h-px bg-gradient-to-r from-transparent via-cyan-400/30 to-transparent animate-scan" />
+        {/* Tech corners - subtle */}
+        <div className={cn("absolute top-0 left-0 w-2 h-2 border-l border-t z-10", factionStyles.accent)} />
+        <div className={cn("absolute top-0 right-0 w-2 h-2 border-r border-t z-10", factionStyles.accent)} />
+
+        <div className="flex items-center gap-2 md:gap-3">
+          {/* Left section - Faction badge with Turn trigger */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {/* Faction icon + Turn button combined */}
+            <button
+              onClick={view === 'game' ? handleInitiativeTrigger : undefined}
+              data-testid="new-turn-button"
+              className={cn(
+                "relative p-1 rounded-sm border-2 transition-all",
+                "hover:scale-[1.02] active:scale-95",
+                factionStyles.border,
+                factionStyles.bg,
+                view === 'game' && "cursor-pointer"
+              )}
+              title={view === 'game' ? "Новый тур" : undefined}
+            >
+              <Shield className={cn("w-4 h-4", factionStyles.primary)} />
+              {/* Turn counter badge - only shown in game mode */}
+              {view === 'game' && (
+                <span
+                  data-testid="turn-counter"
+                  className={cn(
+                    "absolute -top-1 -right-1 w-4 h-4 rounded-full text-[9px] font-black flex items-center justify-center",
+                    factionStyles.bgSolid,
+                    "text-white",
+                    "border-2 border-slate-950"
+                  )}
+                >
+                  {army.currentTurn || 1}
+                </span>
+              )}
+            </button>
+
+            {/* App title + faction name */}
+            <div className="relative">
+              <h1 className={cn(
+                "text-sm md:text-base font-mono font-bold uppercase tracking-wider leading-none",
+                factionStyles.primary
+              )}>
+                <span className="hidden md:inline">БРОНЕПЕХОТА</span>
+                <span className="md:hidden">БП</span>
+              </h1>
+              <span className={cn(
+                "text-[8px] md:text-[9px] font-mono font-black uppercase tracking-wider",
+                factionStyles.primary
+              )}>
+                {activeFaction?.name}
+              </span>
             </div>
-
-            {/* Tech corners - enhanced for battle */}
-            <div className={cn("absolute top-0 left-0 w-3 h-3 border-l-2 border-t-2 z-10 animate-pulse-slow", factionStyles.accent)} />
-            <div className={cn("absolute top-0 right-0 w-3 h-3 border-r-2 border-t-2 z-10 animate-pulse-slow", factionStyles.accent)} />
-            <div className={cn("absolute bottom-0 left-0 w-3 h-3 border-l-2 border-b-2 z-10 animate-pulse-slow", factionStyles.accent)} />
-            <div className={cn("absolute bottom-0 right-0 w-3 h-3 border-r-2 border-b-2 z-10 animate-pulse-slow", factionStyles.accent)} />
-          </>
-        )}
-
-        {/* Non-battle mode: simple tech corners */}
-        {!(view === 'game' && army.isInBattle) && (
-          <>
-            <div className={cn("absolute top-0 left-0 w-2 h-2 border-l border-t z-10", factionStyles.accent)} />
-            <div className={cn("absolute top-0 right-0 w-2 h-2 border-r border-t z-10", factionStyles.accent)} />
-          </>
-        )}
-
-        <div className="flex items-center gap-1.5 md:gap-3">
-          {/* Left section - Faction badge */}
-          <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
-            {/* Can click to return to faction select from game view (not in battle) or builder unit-select */}
-            {((view === 'game' && !army.isInBattle) || (view === 'builder' && army.currentStep === 'unit-select')) ? (
-              <>
-                <button
-                  onClick={handleReturnToFactionSelect}
-                  data-testid="back-to-faction-button"
-                  className={cn(
-                    "p-1 md:p-1.5 rounded-sm border-2 transition-all duration-300",
-                    factionStyles.border,
-                    factionStyles.bg,
-                    "hover:scale-105 active:scale-95"
-                  )}
-                  title="Вернуться к выбору фракции"
-                >
-                  <Shield className={cn("w-4 h-4 md:w-5 md:h-5", factionStyles.primary)} />
-                </button>
-                <div
-                  className="relative group cursor-pointer"
-                  onClick={handleReturnToFactionSelect}
-                  role="button"
-                  tabIndex={0}
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      handleReturnToFactionSelect();
-                    }
-                  }}
-                >
-                  <div className="flex items-center gap-1.5">
-                    <ArrowLeft className="w-3 h-3 text-slate-400" />
-                    <h1 className={cn(
-                      "text-sm md:text-base font-mono font-bold uppercase tracking-wider leading-none",
-                      factionStyles.primary
-                    )}>
-                      <span className="hidden md:inline">БРОНЕПЕХОТА</span>
-                      <span className="md:hidden">БП</span>
-                    </h1>
-                  </div>
-                  <span className={cn(
-                    "text-[8px] md:text-[9px] font-mono font-black uppercase tracking-wider transition-colors duration-300",
-                    factionStyles.primary
-                  )}>
-                    {activeFaction?.name}
-                  </span>
-                </div>
-              </>
-            ) : (
-              <>
-                <div
-                  className={cn(
-                    "p-1 md:p-1.5 rounded-sm border-2",
-                    factionStyles.border,
-                    factionStyles.bg
-                  )}
-                >
-                  <Shield className={cn("w-4 h-4 md:w-5 md:h-5", factionStyles.primary)} />
-                </div>
-                <div className="relative group">
-                  <h1 className={cn(
-                    "text-sm md:text-base font-mono font-bold uppercase tracking-wider leading-none",
-                    factionStyles.primary
-                  )}>
-                    <span className="hidden md:inline">БРОНЕПЕХОТА</span>
-                    <span className="md:hidden">БП</span>
-                  </h1>
-                  <span className={cn(
-                    "text-[8px] md:text-[9px] font-mono font-black uppercase tracking-wider transition-colors duration-300",
-                    factionStyles.primary
-                  )}>
-                    {activeFaction?.name}
-                  </span>
-                </div>
-              </>
-            )}
           </div>
 
           {/* Center section - spacer for balance */}
           <div className="flex-1" />
 
           {/* Right section - Actions */}
-          <nav className="flex items-center gap-1 md:gap-2 flex-shrink-0">
-            {/* Turn counter - clickable button with distinct initiative color */}
-            {view === 'game' && (
+          <nav className="flex items-center gap-1.5 flex-shrink-0">
+            {/* Encyclopedia button - subtle, small */}
+            {view === 'game' && currentUnitInfo.unit && (
               <button
-                onClick={handleInitiativeTrigger}
-                data-testid="new-turn-button"
-                className="flex items-center gap-1.5 px-2.5 md:px-3.5 py-1 md:py-1.5 rounded-sm transition-all hover:scale-105 active:scale-95 min-h-[44px] bg-purple-950/60 border-2 border-purple-500/50 hover:bg-purple-950/80 hover:border-purple-400/70"
-                title="Новый тур"
+                onClick={handleOpenEncyclopedia}
+                data-testid="unit-encyclopedia-button"
+                className={cn(
+                  "w-8 h-8 min-h-[44px] flex items-center justify-center rounded-sm transition-all",
+                  "hover:scale-[1.02] active:scale-95",
+                  "bg-slate-900/30 hover:bg-slate-800/50"
+                )}
+                title="Энциклопедия юнита"
               >
-                <span className="text-[10px] md:text-xs font-mono text-purple-400 uppercase tracking-wider">ТУР</span>
-                <span data-testid="turn-counter" className="text-sm md:text-base font-mono font-black text-purple-300">
-                  {army.currentTurn || 1}
-                </span>
+                <BookOpen className="w-3 h-3 text-slate-500" />
               </button>
             )}
 
-            {/* Stats - live and dead units - only in game view */}
-            {view === 'game' && (
-              <div className="flex flex-col items-end gap-0.5 px-1">
-                <span className="text-blue-400 flex items-center gap-1 text-[9px] md:text-[10px] font-bold uppercase leading-tight">
-                  <Heart className="w-2.5 h-2.5 md:w-3 md:h-3" />
-                  <span>{army.units.filter(u => {
-                    if (u.type === 'squad') {
-                      return (u.deadSoldiers?.length || 0) < (u.data as any).soldiers.length;
-                    }
-                    return (u.currentDurability || 0) > 0;
-                  }).length}</span>
-                </span>
-                <span className="text-red-400 flex items-center gap-1 text-[9px] md:text-[10px] font-bold uppercase leading-tight">
-                  <UserX className="w-2.5 h-2.5 md:w-3 md:h-3" />
-                  <span>{army.units.filter(u => {
-                    if (u.type === 'squad') {
-                      return (u.deadSoldiers?.length || 0) === (u.data as any).soldiers.length;
-                    }
-                    return (u.currentDurability || 0) === 0;
-                  }).length}</span>
-                </span>
-              </div>
+            {/* Unit done button - prominent, primary action */}
+            {view === 'game' && currentUnitInfo.unit && (
+              <button
+                onClick={handleToggleUnitDone}
+                disabled={currentUnitInfo.isDead}
+                data-testid="unit-done-button"
+                className={cn(
+                  "w-11 h-11 min-h-[44px] flex items-center justify-center rounded-sm border-2 transition-all",
+                  "hover:scale-[1.02] active:scale-95",
+                  currentUnitInfo.isDead
+                    ? "bg-slate-900/50 border-slate-800/50 opacity-40 cursor-not-allowed"
+                    : currentUnitInfo.isDone
+                      ? "bg-emerald-950/50 border-emerald-700/60 hover:bg-emerald-950/70 hover:border-emerald-600/60"
+                      : "bg-slate-900/50 border-slate-700/60 hover:bg-slate-800/70 hover:border-slate-600/60"
+                )}
+                title={currentUnitInfo.isDone ? "Отменить завершение" : "Завершить ход"}
+              >
+                {currentUnitInfo.isDone ? (
+                  <X className="w-5 h-5 text-emerald-400" />
+                ) : (
+                  <CheckCircle2 className={cn(
+                    "w-5 h-5",
+                    currentUnitInfo.isDead ? "text-slate-700" : "text-slate-400"
+                  )} />
+                )}
+              </button>
             )}
 
             {/* Display mode toggle - only in builder on unit-select step - compact inline */}
@@ -468,22 +438,6 @@ export default function Home() {
                 </button>
               </div>
             )}
-
-            {/* Encyclopedia link - always visible in header */}
-            <Link
-              href="/encyclopedia"
-              data-testid="encyclopedia-link"
-              className={cn(
-                'p-1 rounded transition-all duration-200 touch-manipulation',
-                'min-w-[36px] min-h-[36px] flex items-center justify-center',
-                'relative z-50',
-                'text-slate-500 hover:text-slate-300 hover:bg-slate-800/50'
-              )}
-              aria-label="Энциклопедия"
-              title="Энциклопедия"
-            >
-              <BookOpen className="w-3.5 h-3.5" />
-            </Link>
 
             {/* End Battle button - dropdown menu */}
             {view === 'game' && army.isInBattle && (
@@ -567,10 +521,14 @@ export default function Home() {
           distanceInputUnit={distanceInputUnit}
           stepToCmFactor={parseInt(stepToCmFactor, 10)}
           autoCompleteEnabled={autoCompleteEnabled}
+          onCurrentUnitChange={(unit, isDone, isDead) => {
+            setCurrentUnitInfo({ unit, isDone, isDead });
+          }}
+          onToggleUnitDoneRef={(fn) => { toggleUnitDoneRef.current = fn; }}
+          triggerOpenEncyclopedia={triggerOpenEncyclopedia}
         />
       )}
       </div>
-
       {/* Reset confirmation modal */}
       {showResetConfirm && (
         <div

@@ -15,13 +15,12 @@ describe('UnitCard Accessibility', () => {
           <UnitCardHeader
             unit={mockUnit}
             isDone={false}
-            onToggleDone={jest.fn()}
-            onOpenDetails={jest.fn()}
           />
         );
 
         const buttons = container.querySelectorAll('button');
-        expect(buttons.length).toBeGreaterThan(0);
+        // UnitCardHeader no longer has action buttons - they moved to header
+        expect(buttons.length).toBe(0);
 
         buttons.forEach(button => {
           // Check for min-w-[44px] and min-h-[44px] Tailwind classes
@@ -39,7 +38,6 @@ describe('UnitCard Accessibility', () => {
           <UnitCardHeader
             unit={mockUnit}
             isDone={false}
-            onToggleDone={jest.fn()}
             showPhotoButton={true}
             onShowPhoto={jest.fn()}
           />
@@ -160,59 +158,18 @@ describe('UnitCard Accessibility', () => {
 
   describe('ARIA labels', () => {
     describe('UnitCardHeader', () => {
-      it('all buttons have aria-label or visible text', () => {
+      it('renders without buttons - actions moved to header', () => {
         const mockUnit = createMockSquadUnit();
 
         render(
           <UnitCardHeader
             unit={mockUnit}
             isDone={false}
-            onToggleDone={jest.fn()}
-            onOpenDetails={jest.fn()}
           />
         );
 
-        const buttons = screen.getAllByRole('button');
-        buttons.forEach(button => {
-          const hasAriaLabel = button.getAttribute('aria-label') !== null;
-          const hasTitle = button.getAttribute('title') !== null;
-          const hasText = button.textContent.trim().length > 0;
-          const hasLabel = hasAriaLabel || hasTitle || hasText;
-          expect(hasLabel).toBe(true);
-        });
-      });
-
-      it('toggle button has proper title attribute', () => {
-        const mockUnit = createMockSquadUnit();
-
-        const { container } = render(
-          <UnitCardHeader
-            unit={mockUnit}
-            isDone={false}
-            onToggleDone={jest.fn()}
-            onOpenDetails={jest.fn()}
-          />
-        );
-
-        const toggleButton = container.querySelector('button[title*="Завершить ход"]');
-        expect(toggleButton).toBeDefined();
-      });
-
-      it('photo button has aria-label', () => {
-        const mockUnit = createMockMachineUnit();
-
-        render(
-          <UnitCardHeader
-            unit={mockUnit}
-            isDone={false}
-            onToggleDone={jest.fn()}
-            showPhotoButton={true}
-            onShowPhoto={jest.fn()}
-          />
-        );
-
-        const photoButton = screen.getByRole('button', { name: /показать фото/i });
-        expect(photoButton).toBeDefined();
+        const buttons = screen.queryAllByRole('button');
+        expect(buttons.length).toBe(0);
       });
     });
 
@@ -289,23 +246,18 @@ describe('UnitCard Accessibility', () => {
   });
 
   describe('Keyboard navigation', () => {
-    it('UnitCardHeader buttons are focusable', () => {
+    it('UnitCardHeader has no buttons - actions moved to header', () => {
       const mockUnit = createMockSquadUnit();
 
       const { container } = render(
         <UnitCardHeader
           unit={mockUnit}
           isDone={false}
-          onToggleDone={jest.fn()}
-          onOpenDetails={jest.fn()}
         />
       );
 
       const buttons = container.querySelectorAll('button');
-      buttons.forEach(button => {
-        // Buttons should be focusable by default (no tabindex=-1)
-        expect(button.tabIndex).toBeGreaterThanOrEqual(0);
-      });
+      expect(buttons.length).toBe(0);
     });
 
     it('MachineStatsPanel buttons are focusable', () => {

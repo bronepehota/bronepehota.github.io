@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle2, X, ImageIcon, Bomb, UserX, BookOpen } from 'lucide-react';
+import { CheckCircle2, X, ImageIcon, Bomb, UserX } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ArmyUnit } from '@/lib/types';
 
@@ -10,8 +10,6 @@ interface UnitCardHeaderProps {
   isAllDead?: boolean;
   grenadesAvailable?: boolean;
   grenadesUsed?: boolean;
-  onToggleDone: () => void;
-  onOpenDetails?: () => void;
   showPhotoButton?: boolean;
   onShowPhoto?: () => void;
 }
@@ -22,8 +20,6 @@ export function UnitCardHeader({
   isAllDead = false,
   grenadesAvailable = false,
   grenadesUsed = false,
-  onToggleDone,
-  onOpenDetails,
   showPhotoButton = false,
   onShowPhoto,
 }: UnitCardHeaderProps) {
@@ -57,9 +53,6 @@ export function UnitCardHeader({
 
         {/* Row 2: Status badges */}
         <div className="flex items-center gap-1 mt-0.5">
-          {/* Cost */}
-          <span className="text-[10px] md:text-xs font-mono font-bold text-slate-500">{data.cost} очк</span>
-
           {/* Grenade status - squads only */}
           {isSquad && grenadesAvailable && !isAllDead && (
             <div className={cn(
@@ -92,31 +85,6 @@ export function UnitCardHeader({
             <ImageIcon className="w-4 h-4 opacity-50" />
           </button>
         )}
-        {/* Encyclopedia button */}
-        {onOpenDetails && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onOpenDetails();
-            }}
-            className="p-1.5 md:p-1 hover:bg-white/10 rounded-sm transition-colors min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border border-slate-700/50"
-            title="Энциклопедия"
-            aria-label="Открыть энциклопедию"
-          >
-            <BookOpen className="w-4 h-4 opacity-50" />
-          </button>
-        )}
-        <button
-          onClick={onToggleDone}
-          className="p-1.5 md:p-1 hover:bg-white/10 rounded-sm transition-colors min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center border border-slate-700/50"
-          title={isDone ? "Отменить завершение хода" : "Завершить ход"}
-        >
-          {isDone ? (
-            <X className="w-4 h-4 opacity-50 text-slate-400" />
-          ) : (
-            <CheckCircle2 className="w-4 h-4 opacity-50" />
-          )}
-        </button>
       </div>
     </div>
   );

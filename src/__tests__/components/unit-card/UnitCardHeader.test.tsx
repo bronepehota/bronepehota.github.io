@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { UnitCardHeader } from '@/components/cards/unit-card/UnitCardHeader';
 import { ArmyUnit, Squad } from '@/lib/types';
 
@@ -21,18 +21,15 @@ describe('UnitCardHeader', () => {
     grenadesUsed: false
   };
 
-  it('renders unit name and cost', () => {
+  it('renders unit name', () => {
     render(
       <UnitCardHeader
         unit={mockUnit}
         isDone={false}
-        onToggleDone={jest.fn()}
-        onOpenDetails={jest.fn()}
       />
     );
 
     expect(screen.getByText('Test Squad')).toBeInTheDocument();
-    expect(screen.getByText('100 очк')).toBeInTheDocument();
   });
 
   it('shows done icon when done', () => {
@@ -40,8 +37,6 @@ describe('UnitCardHeader', () => {
       <UnitCardHeader
         unit={mockUnit}
         isDone={true}
-        onToggleDone={jest.fn()}
-        onOpenDetails={jest.fn()}
       />
     );
 
@@ -49,39 +44,15 @@ describe('UnitCardHeader', () => {
     expect(doneIcon).toBeInTheDocument();
   });
 
-  it('calls onToggleDone when done button clicked', () => {
-    const onToggleDone = jest.fn();
+  it('does not show done icon when not done', () => {
     render(
       <UnitCardHeader
         unit={mockUnit}
         isDone={false}
-        onToggleDone={onToggleDone}
-        onOpenDetails={jest.fn()}
       />
     );
 
-    const buttons = screen.getAllByRole('button');
-    const doneButton = buttons[buttons.length - 1]; // Last button is done toggle
-    fireEvent.click(doneButton);
-
-    expect(onToggleDone).toHaveBeenCalledTimes(1);
-  });
-
-  it('calls onOpenDetails when encyclopedia button clicked', () => {
-    const onOpenDetails = jest.fn();
-    render(
-      <UnitCardHeader
-        unit={mockUnit}
-        isDone={false}
-        onToggleDone={jest.fn()}
-        onOpenDetails={onOpenDetails}
-      />
-    );
-
-    // Find the encyclopedia button (has aria-label="Открыть энциклопедию")
-    const encyclopediaButton = screen.getByLabelText('Открыть энциклопедию');
-    fireEvent.click(encyclopediaButton);
-
-    expect(onOpenDetails).toHaveBeenCalledTimes(1);
+    const doneIcon = document.querySelector('svg');
+    expect(doneIcon).not.toBeInTheDocument();
   });
 });

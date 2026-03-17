@@ -195,6 +195,15 @@ export function MachineWeaponsList({
                   <span className="font-mono font-bold text-red-400">{weapon.power}</span>
                 </div>
 
+                {/* Attack button */}
+                <button
+                  onClick={() => onWeaponAttack(weaponIdx)}
+                  className="shrink-0 w-7 h-7 rounded border-2 border-red-700/50 bg-red-950/30 flex items-center justify-center min-w-[40px] min-h-[40px] hover:bg-red-950/50 hover:border-red-600/60 transition-all"
+                  title="Атака"
+                >
+                  <Sword className="w-3.5 h-3.5 text-red-400" />
+                </button>
+
                 {/* Info button */}
                 <button
                   onClick={() => onWeaponInfo(weaponIdx)}

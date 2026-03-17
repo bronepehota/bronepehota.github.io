@@ -122,12 +122,12 @@ export function BottomSheetCombatModal({
   const actionColors = getActionColors(state.actionType, state.parameters.isSurpriseAttack);
 
   return (
-    <div className="fixed inset-0 z-[100] bg-slate-950/95 backdrop-blur-sm flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[100] bg-slate-950/95 backdrop-blur-sm flex items-center justify-center p-2 md:p-4">
       <div
         ref={sheetRef}
         {...touchHandlers}
         className={cn(
-          "w-full max-w-[600px] combat-glass combat-border-glow border-2 shadow-2xl max-h-[85vh] overflow-hidden flex flex-col relative",
+          "w-full max-w-[600px] combat-glass combat-border-glow border-2 shadow-2xl max-h-[90vh] overflow-hidden flex flex-col relative",
           actionColors.border
         )}
       >
@@ -135,18 +135,18 @@ export function BottomSheetCombatModal({
         {/* Previously: grid animation, scanlines, vignette, noise - all removed */}
 
         {/* Corner accents with pulsing glow */}
-        <div className={cn("absolute top-0 left-0 w-3 h-3 border-l-2 border-t-2 z-10", actionColors.accent)} />
-        <div className={cn("absolute top-0 right-0 w-3 h-3 border-r-2 border-t-2 z-10", actionColors.accent)} />
-        <div className={cn("absolute bottom-0 left-0 w-3 h-3 border-l-2 border-b-2 z-10", actionColors.accent)} />
-        <div className={cn("absolute bottom-0 right-0 w-3 h-3 border-r-2 border-b-2 z-10", actionColors.accent)} />
+        <div className={cn("absolute top-0 left-0 w-2 h-2 border-l-2 border-t-2 z-10", actionColors.accent)} />
+        <div className={cn("absolute top-0 right-0 w-2 h-2 border-r-2 border-t-2 z-10", actionColors.accent)} />
+        <div className={cn("absolute bottom-0 left-0 w-2 h-2 border-l-2 border-b-2 z-10", actionColors.accent)} />
+        <div className={cn("absolute bottom-0 right-0 w-2 h-2 border-r-2 border-b-2 z-10", actionColors.accent)} />
 
         {/* Drag Handle */}
-        <div className="flex justify-center pt-3 pb-2 shrink-0 relative z-10">
-          <div className="w-16 h-1 bg-slate-700 rounded-full" />
+        <div className="flex justify-center pt-2 pb-1 shrink-0 relative z-10">
+          <div className="w-12 h-1 bg-slate-700 rounded-full" />
         </div>
 
         {/* Tech Header with faction branding */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800/50 shrink-0 relative z-10 bg-gradient-to-r from-slate-900/50 to-transparent">
+        <div className="flex items-center justify-between px-2 md:px-4 py-2 border-b border-slate-800/50 shrink-0 relative z-10 bg-gradient-to-r from-slate-900/50 to-transparent">
           {/* Tech decoration line */}
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent" />
 
@@ -213,7 +213,7 @@ export function BottomSheetCombatModal({
         </div>
 
         {/* Content - Scrollable */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-3 md:p-4">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-2 md:p-3">
           {state.phase === 'ACTION_SELECT' && (
             <ActionSelector
               onSelect={(action) => onSelectAction(action)}
@@ -224,7 +224,7 @@ export function BottomSheetCombatModal({
           )}
 
           {state.phase === 'PARAMETERS' && (
-            <div className="space-y-4">
+            <div className="space-y-2 md:space-y-3">
               <ParameterInputs
                 actionType={state.actionType!}
                 parameters={state.parameters}
@@ -247,7 +247,7 @@ export function BottomSheetCombatModal({
                     type="button"
                     onClick={() => onSetParameters({ isSurpriseAttack: !state.parameters.isSurpriseAttack })}
                     className={cn(
-                      'relative h-12 w-12 min-h-[48px] min-w-[48px] rounded-lg border-2 flex items-center justify-center shrink-0',
+                      'relative h-10 w-10 min-h-[40px] min-w-[40px] md:h-12 md:w-12 md:min-h-[48px] md:min-w-[48px] rounded-lg border-2 flex items-center justify-center shrink-0',
                       'touch-manipulation active:scale-95 transition-all duration-200',
                       state.parameters.isSurpriseAttack
                         ? 'bg-purple-600/20 border-purple-500 shadow-lg shadow-purple-500/20'
@@ -257,11 +257,11 @@ export function BottomSheetCombatModal({
                   >
                     <EyeOff
                       className={cn('transition-colors duration-200', state.parameters.isSurpriseAttack ? 'text-purple-400' : 'text-slate-400')}
-                      size={18}
+                      size={16}
                     />
                     {/* Pulsing status indicator when active */}
                     {state.parameters.isSurpriseAttack && (
-                      <span className="absolute top-1 right-1 w-2 h-2 bg-purple-400 rounded-full animate-pulse" />
+                      <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-purple-400 rounded-full animate-pulse" />
                     )}
                   </button>
                 )}
@@ -272,7 +272,7 @@ export function BottomSheetCombatModal({
                     type="button"
                     onClick={() => onSetParameters({ isAimedShot: !state.parameters.isAimedShot })}
                     className={cn(
-                      'relative h-12 w-12 min-h-[48px] min-w-[48px] rounded-lg border-2 flex items-center justify-center shrink-0',
+                      'relative h-10 w-10 min-h-[40px] min-w-[40px] md:h-12 md:w-12 md:min-h-[48px] md:min-w-[48px] rounded-lg border-2 flex items-center justify-center shrink-0',
                       'touch-manipulation active:scale-95 transition-all duration-200',
                       state.parameters.isAimedShot
                         ? 'bg-cyan-600/20 border-cyan-500 shadow-lg shadow-cyan-500/20'
@@ -282,10 +282,10 @@ export function BottomSheetCombatModal({
                   >
                     <Crosshair
                       className={cn('transition-colors duration-200', state.parameters.isAimedShot ? 'text-cyan-400' : 'text-slate-400')}
-                      size={18}
+                      size={16}
                     />
                     {state.parameters.isAimedShot && (
-                      <span className="absolute top-1 right-1 w-2 h-2 bg-cyan-400 rounded-full animate-pulse" />
+                      <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-cyan-400 rounded-full animate-pulse" />
                     )}
                   </button>
                 )}
@@ -294,7 +294,7 @@ export function BottomSheetCombatModal({
                 <button
                   onClick={onExecuteAction}
                   className={cn(
-                    "relative flex-1 font-mono text-sm md:text-base font-bold uppercase tracking-wider border-2 transition-all min-h-[48px] md:min-h-[52px]",
+                    "relative flex-1 font-mono text-xs md:text-sm font-bold uppercase tracking-wider border-2 transition-all min-h-[44px] md:min-h-[48px]",
                     "hover:scale-[1.02] active:scale-95 overflow-hidden shimmer-effect",
                     "shadow-lg",
                     actionColors.button
