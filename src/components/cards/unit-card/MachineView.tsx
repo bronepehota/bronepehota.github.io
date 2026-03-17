@@ -2,6 +2,8 @@ import { MachineAmmoPanel } from './machine-view/MachineAmmoPanel';
 import { MachineWeaponsList } from './machine-view/MachineWeaponsList';
 import { TacticalDashboard } from './machine-view/TacticalDashboard';
 import { ArmyUnit, Machine, DurabilityZone, PilotInfo } from '@/lib/types';
+import { Sword } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export interface MachineViewProps {
   unit: ArmyUnit;
@@ -54,8 +56,14 @@ export function MachineView({
   // Get weapon shots tracking from unit state
   const weaponShots: Record<number, number> = unit.machineWeaponShots || {};
 
+  // Calculate total melee bonus from ББ weapons
+  const meleeBonus = machine.weapons
+    .filter(w => w.range === 'ББ')
+    .map(w => parseInt(w.power, 10) || 0)
+    .reduce((sum, bonus) => sum + bonus, 0);
+
   return (
-    <div className="space-y-2">
+    <div className="space-y-1.5">
       {/* Tactical Dashboard - Unified panel with machine image, stats, and pilot */}
       {imageUrl ? (
         <TacticalDashboard
@@ -110,6 +118,23 @@ export function MachineView({
         onWeaponInfo={onWeaponInfo}
         stepToCmFactor={stepToCmFactor}
       />
+
+      {/* Ram attack button - disabled, not implemented */}
+      <div
+        className={cn(
+          "relative w-full flex items-center justify-center gap-2 px-3 py-2 rounded-sm border-2",
+          "bg-slate-900/30 border-slate-700/50 opacity-50 min-h-[48px]"
+        )}
+        title="Таран пехоты - в разработке"
+      >
+        <Sword className="w-5 h-5 text-slate-600" />
+        <span className="text-sm font-mono font-bold uppercase tracking-wider text-slate-600">
+          ТАРАН {meleeBonus > 0 && `+${meleeBonus}`}
+        </span>
+        <span className="absolute -top-1 -right-1 px-1.5 py-0.5 text-[8px] font-mono font-bold bg-amber-600 text-white rounded-sm">
+          СКОРО
+        </span>
+      </div>
     </div>
   );
 }

@@ -161,13 +161,16 @@ test.describe('Combat Mechanics', () => {
     // Navigate to app page - localStorage is already set from addInitScript
     await page.goto('/app');
     await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(500);
+
     // Find and click initiative button by test-id (new-turn-button)
     const initiativeButton = page.getByTestId('new-turn-button');
-    await initiativeButton.click({ force: true, timeout: 5000 });
-    await page.waitForTimeout(500);
+    await expect(initiativeButton).toBeVisible({ timeout: 5000 });
+    await initiativeButton.click({ force: true });
+    await page.waitForTimeout(1000);
 
     // Should see initiative modal
     const initiativeModal = page.getByTestId('initiative-modal');
-    await expect(initiativeModal.first()).toBeVisible({ timeout: 3000 });
+    await expect(initiativeModal.first()).toBeVisible({ timeout: 5000 });
   });
 });

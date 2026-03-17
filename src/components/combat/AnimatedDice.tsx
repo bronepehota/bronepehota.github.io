@@ -182,7 +182,7 @@ export function AnimatedDice({
             "relative z-10 transition-all duration-200",
             sizes.text,
             colors.text,
-            isRolling && "blur-sm opacity-70",
+            isRolling && "opacity-90",
             hasLanded && "animate-bounce-subtle"
           )}
         >
@@ -206,21 +206,6 @@ export function AnimatedDice({
             )}
           >
             +{bonus}
-          </div>
-        )}
-
-        {/* Success/failure indicator */}
-        {hasLanded && isHit !== undefined && bonus === undefined && (
-          <div
-            className={cn(
-              "absolute -top-1 -right-1 w-4 h-4 rounded-full border-2 flex items-center justify-center",
-              isHit ? "bg-emerald-500 border-emerald-300" : "bg-red-500 border-red-300",
-              "animate-pop-in"
-            )}
-          >
-            <span className="text-[8px] font-black text-white">
-              {isHit ? '✓' : '✗'}
-            </span>
           </div>
         )}
       </div>
