@@ -8,7 +8,7 @@ export default function manifest(): MetadataRoute.Manifest {
     description: 'Приложение для варгейма Бронепехота',
     start_url: BASE_PATH + '/',
     scope: BASE_PATH + '/',
-    display: 'standalone',
+    display: 'fullscreen',
     theme_color: '#0f172a',
     background_color: '#0f172a',
     lang: 'ru',

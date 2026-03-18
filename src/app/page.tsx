@@ -3,6 +3,7 @@ import LoreSection from '@/components/landing/LoreSection';
 import FactionsSection from '@/components/landing/FactionsSection';
 import FinalCTA from '@/components/landing/FinalCTA';
 import Footer from '@/components/landing/Footer';
+import PWAInstallHint from '@/components/landing/PWAInstallHint';
 
 export default function Home() {
   return (
@@ -12,6 +13,7 @@ export default function Home() {
       <FactionsSection />
       <FinalCTA />
       <Footer />
+      <PWAInstallHint />
     </main>
   );
 }
