@@ -24,8 +24,8 @@ const sourceConfig: Record<string, { name: string; icon: any; color: string; bgC
   },
 };
 
-export function SourceAvailability({ unit, variant = 'card', size = 'compact' }: SourceAvailabilityProps) {
-  const sources = getAllSources();
+export function SourceAvailability({ unit, variant = 'card', size: _size = 'compact' }: SourceAvailabilityProps) {
+  const _sources = getAllSources();
 
   if (variant === 'card') {
     return (

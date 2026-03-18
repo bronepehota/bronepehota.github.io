@@ -16,7 +16,6 @@ import { usePilotTestFlow } from '@/hooks/usePilotTestFlow';
 import { EncyclopediaModal } from '../modals/EncyclopediaModal';
 import { PanicTestModal } from '../modals/PanicTestModal';
 import { EnrichedUnit, getEnrichedUnit } from '@/lib/encyclopedia-utils';
-import { UnitCardHeader } from './unit-card/UnitCardHeader';
 import { SquadView } from './unit-card/SquadView';
 import { MachineView } from './unit-card/MachineView';
 import { useUnitCardState } from './unit-card/hooks/useUnitCardState';
@@ -34,6 +33,7 @@ interface UnitCardProps {
   distanceInputUnit?: 'steps' | 'cm';
   stepToCmFactor?: number;
   autoCompleteEnabled?: boolean;
+  triggerEncyclopediaOpen?: boolean;
 }
 
 export default function UnitCard({
@@ -49,6 +49,7 @@ export default function UnitCard({
   distanceInputUnit = 'steps',
   stepToCmFactor = 5,
   autoCompleteEnabled = true,
+  triggerEncyclopediaOpen = false,
 }: UnitCardProps) {
   // Custom hooks for state management
   const {
@@ -175,7 +176,15 @@ export default function UnitCard({
     if (showDetailsModal && !enrichedUnit) {
       getEnrichedUnit(unit.data.id).then(setEnrichedUnit);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showDetailsModal, unit.data.id]);
+
+  // Handle external trigger to open encyclopedia
+  useEffect(() => {
+    if (triggerEncyclopediaOpen) {
+      setShowDetailsModal(true);
+    }
+  }, [triggerEncyclopediaOpen]);
 
   // Handle combat actions
   const _handleSoldierAction = useCallback((soldierIndex: number) => {
@@ -184,6 +193,11 @@ export default function UnitCard({
 
   const handleVehicleAttack = (weaponIndex: number) => {
     combatController.startCombat(unit, undefined, weaponIndex, 'shot');
+  };
+
+  // Handle ram attack (melee) for machines
+  const handleRamAttack = () => {
+    combatController.startCombat(unit, undefined, undefined, 'melee');
   };
 
   // Handle pilot assignment
@@ -440,32 +454,12 @@ export default function UnitCard({
   return (
     <div
       className={cn(
-        "bg-slate-900/80 rounded-sm border-2 border-slate-800 transition-all shadow-lg overflow-hidden relative cursor-default select-none",
-        "flex flex-col h-full",
+        "bg-transparent transition-all relative cursor-default select-none",
+        "flex flex-col min-h-0",
         (isSquadDone || (isMachineDone && !isMachineDestroyed)) ? "opacity-70 grayscale-[0.3]" : "",
-        isAllDead || isMachineDestroyed ? "opacity-40 grayscale" : "",
-        data.faction === 'polaris' ? "border-red-600/30" : data.faction === 'protectorate' ? "border-cyan-600/30" : "border-yellow-600/30"
+        isAllDead || isMachineDestroyed ? "opacity-40 grayscale" : ""
       )}
     >
-      {/* Unit number badge - top left corner */}
-      {unit.instanceNumber && (
-        <div className={cn(
-          "absolute top-0 left-0 z-20 px-1.5 py-0.5 rounded-br-sm font-mono font-bold text-xs md:text-sm border border-r-2 border-b-2 pointer-events-none",
-          data.faction === 'polaris'
-            ? "bg-red-950/90 text-red-400 border-red-600/40"
-            : data.faction === 'protectorate'
-            ? "bg-cyan-950/90 text-cyan-400 border-cyan-600/40"
-            : "bg-yellow-950/90 text-yellow-400 border-yellow-600/40"
-        )}>
-          {formatUnitNumber(unit)}
-        </div>
-      )}
-
-      {/* Tech corners - faction colored */}
-      <div className="absolute top-0 left-0 w-3 h-3 border-l-2 border-t-2 -ml-px -mt-px pointer-events-none" style={{ borderColor: factionBorderColor }} />
-      <div className="absolute top-0 right-0 w-3 h-3 border-r-2 border-t-2 -mr-px -mt-px pointer-events-none" style={{ borderColor: factionBorderColor }} />
-      <div className="absolute bottom-0 left-0 w-3 h-3 border-l-2 border-b-2 -ml-px -mb-px pointer-events-none" style={{ borderColor: factionBorderColor }} />
-      <div className="absolute bottom-0 right-0 w-3 h-3 border-r-2 border-b-2 -mr-px -mb-px pointer-events-none" style={{ borderColor: factionBorderColor }} />
 
       {/* Combat Modal */}
       {combatController.isOpen && (
@@ -657,25 +651,10 @@ export default function UnitCard({
         </div>
       )}
 
-      {/* Unit Header - Fixed height at top */}
-      <div className="shrink-0 z-20 bg-slate-900/95 backdrop-blur-sm border-b border-slate-800/50">
-        <UnitCardHeader
-          unit={unit}
-          isDone={isSquadDone || isMachineDone}
-          isAllDead={isAllDead}
-          grenadesAvailable={isSquad && (data as Squad).soldiers.some(s => s.props?.includes('Г'))}
-          grenadesUsed={unit.grenadesUsed}
-          onToggleDone={handleToggleDone}
-          onOpenDetails={handleOpenOriginal}
-          showPhotoButton={false}
-          onShowPhoto={() => setShowImage(true)}
-        />
-      </div>
-
-      {/* Unit Content - Scrollable on mobile */}
+      {/* Unit Content - Full height utilization */}
       <div className={cn(
-        "p-2 md:p-3 pb-24 md:pb-4 relative z-10 min-h-0",
-        isSquad && "flex-1 overflow-y-auto mobile-squad-scroll"
+        "px-1 md:px-2 py-1 md:py-2 relative z-10 min-h-0",
+        isSquad ? "pb-20 md:pb-2 overflow-y-auto" : "pb-2 overflow-hidden"
       )}>
         {isSquad ? (
           <SquadView

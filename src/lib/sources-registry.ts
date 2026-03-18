@@ -7,6 +7,8 @@ import starSystemProtectorateMachines from '@/data/sources/star_system/protector
 import starSystemMercenariesSquads from '@/data/sources/star_system/mercenaries/squads.json';
 import starSystemMercenariesMachines from '@/data/sources/star_system/mercenaries/machines.json';
 import tehnologFactions from '@/data/sources/tehnolog/factions.json';
+import { getCustomSourcesStorage } from './editor/storage';
+import { getCustomSourceData } from './editor/converters';
 
 // Type assertions
 const typedStarSystemFactions = starSystemFactions as Faction[];
@@ -86,4 +88,78 @@ export function getAllSources(): ArmyListSource[] {
 // Validate if a string is a valid source ID
 export function isValidSource(id: string): boolean {
   return Object.keys(sourcesRegistry).includes(id);
+}
+
+/**
+ * Validate if a string is a valid source ID, including custom sources
+ * Checks both built-in sources and custom sources from localStorage
+ */
+export function isValidSourceWithCustom(id: string): boolean {
+  // Check built-in sources
+  if (Object.keys(sourcesRegistry).includes(id)) {
+    return true;
+  }
+
+  // Check custom sources (must start with 'custom_' prefix)
+  if (id.startsWith('custom_')) {
+    const storage = getCustomSourcesStorage();
+    return storage.getById(id) !== null;
+  }
+
+  return false;
+}
+
+/**
+ * Check if a source ID is a custom source
+ */
+export function isCustomSource(id: string): boolean {
+  return id.startsWith('custom_');
+}
+
+/**
+ * Get source by ID, including custom sources
+ * Custom sources are loaded from localStorage and merged with base sources if needed
+ */
+export function getSourceWithCustom(id: SourceID): SourceData | null {
+  // Check built-in sources first
+  if (sourcesRegistry[id]) {
+    return sourcesRegistry[id];
+  }
+
+  // Check custom sources
+  if (isCustomSource(id)) {
+    const storage = getCustomSourcesStorage();
+    const customSource = storage.getById(id);
+
+    if (customSource) {
+      return getCustomSourceData(customSource, (baseId) => {
+        // Recursively get base source (can be built-in or another custom)
+        return getSourceWithCustom(baseId);
+      });
+    }
+  }
+
+  // Fallback to default
+  console.warn(`Source ${id} not found, falling back to default`);
+  return sourcesRegistry[getDefaultSource()] || null;
+}
+
+/**
+ * Get all available sources, including custom sources from localStorage
+ */
+export function getAllSourcesWithCustom(): ArmyListSource[] {
+  const builtIn = getAllSources();
+
+  // Load custom sources from storage
+  const storage = getCustomSourcesStorage();
+  const customSources = storage.getAll();
+
+  const custom: ArmyListSource[] = customSources.map(cs => ({
+    id: cs.id,
+    name: cs.name,
+    description: cs.description,
+    version: cs.version,
+  }));
+
+  return [...builtIn, ...custom];
 }

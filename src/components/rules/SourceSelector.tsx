@@ -17,6 +17,133 @@ interface SourceSelectorProps {
 // Sources that are disabled
 const DISABLED_SOURCES: Set<SourceID> = new Set(['tehnolog']);
 
+// Component to render a single source card
+function SourceCard({
+  source,
+  selectedSource,
+  expandedSourceId,
+  onSourceClick,
+  onKeyDown,
+}: {
+  source: ArmyListSource;
+  selectedSource: SourceID;
+  expandedSourceId: SourceID | null;
+  onSourceClick: (sourceId: SourceID, isDisabled: boolean) => void;
+  onKeyDown: (e: KeyboardEvent<HTMLDivElement>, sourceId: SourceID, isDisabled: boolean) => void;
+}) {
+  const isSelected = selectedSource === source.id;
+  const isExpanded = expandedSourceId === source.id;
+  const isDisabled = DISABLED_SOURCES.has(source.id);
+  const isCustom = source.id.startsWith('custom_');
+
+  return (
+    <div
+      key={source.id}
+      role="button"
+      tabIndex={isDisabled ? -1 : 0}
+      aria-pressed={isSelected}
+      aria-expanded={isExpanded}
+      onKeyDown={(e) => onKeyDown(e, source.id, isDisabled)}
+      onClick={() => onSourceClick(source.id, isDisabled)}
+      data-testid={`source-card-${source.id}`}
+      className={clsx(
+        'relative group transition-all duration-200',
+        'rounded-lg border overflow-hidden',
+        isSelected ? 'ring-1' : 'hover:border-slate-600',
+        isDisabled && 'opacity-50 cursor-not-allowed'
+      )}
+      style={{
+        borderColor: isSelected
+          ? (isCustom ? '#22c55e' : source.id === 'tehnolog' ? '#f59e0b' : '#10b981')
+          : (isCustom ? '#22c55e40' : '#334155'),
+        backgroundColor: isSelected
+          ? `${(isCustom ? '#22c55e' : source.id === 'tehnolog' ? '#f59e0b' : '#10b981')}10`
+          : 'rgba(30, 41, 59, 0.6)',
+        ...(isSelected && { ringColor: `${(isCustom ? '#22c55e' : source.id === 'tehnolog' ? '#f59e0b' : '#10b981')}50` })
+      }}
+    >
+      {/* Main row - always visible */}
+      <div className="flex items-center justify-between p-3">
+        <div className="flex items-center gap-3">
+          {/* Selection indicator */}
+          <div
+            className={clsx(
+              'w-5 h-5 rounded flex items-center justify-center border-2 transition-all',
+              isSelected ? 'border-current' : 'border-slate-600'
+            )}
+            style={{ borderColor: isSelected ? (isCustom ? '#22c55e' : source.id === 'tehnolog' ? '#f59e0b' : '#10b981') : undefined }}
+          >
+            {isSelected && (
+              <svg className="w-3 h-3" style={{ color: isCustom ? '#22c55e' : source.id === 'tehnolog' ? '#f59e0b' : '#10b981' }} fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+            )}
+          </div>
+
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className={clsx(
+                'font-mono font-bold text-sm tracking-wide',
+                isSelected ? '' : 'text-slate-400'
+              )} style={isSelected ? { color: isCustom ? '#22c55e' : source.id === 'tehnolog' ? '#f59e0b' : '#10b981' } : undefined}>
+                {source.name}
+              </h3>
+              {isCustom && (
+                <span className="text-[9px] px-1.5 py-0.5 rounded bg-green-500/20 text-green-400 border border-green-500/40">
+                  МОЙ
+                </span>
+              )}
+            </div>
+          </div>
+
+          {isDisabled && (
+            <Lock className="w-4 h-4 text-amber-400 ml-2" />
+          )}
+        </div>
+
+        {!isDisabled && (
+          <svg className={clsx(
+            'w-4 h-4 text-slate-500 transition-transform duration-200',
+            isExpanded && 'rotate-180'
+          )} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        )}
+      </div>
+
+      {/* Expanded details */}
+      {isExpanded && !isDisabled && (
+        <div className="px-3 pb-3 pt-0 border-t border-slate-700/30">
+          <p className="text-xs text-slate-400 leading-relaxed mb-2">
+            {source.description}
+          </p>
+          {source.link && (
+            <a
+              href={source.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-blue-400 hover:text-blue-300 underline flex items-center gap-1"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ExternalLink className="w-3 h-3" />
+              Подробнее →
+            </a>
+          )}
+        </div>
+      )}
+
+      {/* Disabled message */}
+      {isDisabled && (
+        <div className="px-3 pb-3 pt-0 border-t border-slate-700/30">
+          <p className="text-xs text-amber-400 leading-relaxed">
+            🔒 Скоро. Требуется помощь сообщества.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function SourceSelector({
   sources,
   selectedSource,
@@ -69,7 +196,13 @@ export function SourceSelector({
 
   // Get selected source for styling
   const selectedSourceData = sources.find(s => s.id === selectedSource);
-  const accentColor = selectedSourceData?.id === 'tehnolog' ? '#f59e0b' : '#10b981';
+  const accentColor = selectedSourceData?.id.startsWith('custom_')
+    ? '#22c55e'
+    : selectedSourceData?.id === 'tehnolog' ? '#f59e0b' : '#10b981';
+
+  // Separate sources into official and custom
+  const officialSources = sources.filter(s => !s.id.startsWith('custom_'));
+  const customSources = sources.filter(s => s.id.startsWith('custom_'));
 
   return (
     <>
@@ -83,110 +216,46 @@ export function SourceSelector({
           <div className="h-px flex-1 bg-slate-700/50" />
         </div>
 
-        {/* Source Version Selector - Compact accordion style */}
+        {/* Official Sources */}
         <div className="space-y-2">
-          {sources.map((source) => {
-            const isSelected = selectedSource === source.id;
-            const isExpanded = expandedSourceId === source.id;
-            const isDisabled = DISABLED_SOURCES.has(source.id);
-
-            return (
-              <div
-                key={source.id}
-                role="button"
-                tabIndex={isDisabled ? -1 : 0}
-                aria-pressed={isSelected}
-                aria-expanded={isExpanded}
-                onKeyDown={(e) => handleKeyDown(e, source.id, isDisabled)}
-                onClick={() => handleSourceClick(source.id, isDisabled)}
-                data-testid={`source-card-${source.id}`}
-                className={clsx(
-                  'relative group transition-all duration-200',
-                  'rounded-lg border overflow-hidden',
-                  isSelected ? 'ring-1' : 'hover:border-slate-600',
-                  isDisabled && 'opacity-50 cursor-not-allowed'
-                )}
-                style={{
-                  borderColor: isSelected ? (source.id === 'tehnolog' ? '#f59e0b' : '#10b981') : '#334155',
-                  backgroundColor: isSelected ? `${(source.id === 'tehnolog' ? '#f59e0b' : '#10b981')}10` : 'rgba(30, 41, 59, 0.6)',
-                  ...(isSelected && { ringColor: `${(source.id === 'tehnolog' ? '#f59e0b' : '#10b981')}50` })
-                }}
-              >
-                {/* Main row - always visible */}
-                <div className="flex items-center justify-between p-3">
-                  <div className="flex items-center gap-3">
-                    {/* Selection indicator */}
-                    <div
-                      className={clsx(
-                        'w-5 h-5 rounded flex items-center justify-center border-2 transition-all',
-                        isSelected ? 'border-current' : 'border-slate-600'
-                      )}
-                      style={{ borderColor: isSelected ? (source.id === 'tehnolog' ? '#f59e0b' : '#10b981') : undefined }}
-                    >
-                      {isSelected && (
-                        <svg className="w-3 h-3" style={{ color: source.id === 'tehnolog' ? '#f59e0b' : '#10b981' }} fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                      )}
-                    </div>
-
-                    <div>
-                      <h3 className={clsx(
-                        'font-mono font-bold text-sm tracking-wide',
-                        isSelected ? '' : 'text-slate-400'
-                      )} style={isSelected ? { color: source.id === 'tehnolog' ? '#f59e0b' : '#10b981' } : undefined}>
-                        {source.name}
-                      </h3>
-                    </div>
-
-                    {isDisabled && (
-                      <Lock className="w-4 h-4 text-amber-400 ml-2" />
-                    )}
-                  </div>
-
-                  {!isDisabled && (
-                    <svg className={clsx(
-                      'w-4 h-4 text-slate-500 transition-transform duration-200',
-                      isExpanded && 'rotate-180'
-                    )} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  )}
-                </div>
-
-                {/* Expanded details */}
-                {isExpanded && !isDisabled && (
-                  <div className="px-3 pb-3 pt-0 border-t border-slate-700/30">
-                    <p className="text-xs text-slate-400 leading-relaxed mb-2">
-                      {source.description}
-                    </p>
-                    {source.link && (
-                      <a
-                        href={source.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-blue-400 hover:text-blue-300 underline flex items-center gap-1"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <ExternalLink className="w-3 h-3" />
-                        Подробнее →
-                      </a>
-                    )}
-                  </div>
-                )}
-
-                {/* Disabled message */}
-                {isDisabled && (
-                  <div className="px-3 pb-3 pt-0 border-t border-slate-700/30">
-                    <p className="text-xs text-amber-400 leading-relaxed">
-                      🔒 Скоро. Требуется помощь сообщества.
-                    </p>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+          {officialSources.map((source) => (
+            <SourceCard
+              key={source.id}
+              source={source}
+              selectedSource={selectedSource}
+              expandedSourceId={expandedSourceId}
+              onSourceClick={handleSourceClick}
+              onKeyDown={handleKeyDown}
+            />
+          ))}
         </div>
+
+        {/* Custom Sources Section */}
+        {customSources.length > 0 && (
+          <>
+            {/* Divider */}
+            <div className="flex items-center gap-3 py-2">
+              <div className="h-px flex-1 bg-green-500/30" />
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold text-green-400 font-mono tracking-wider">МОИ ИСТОЧНИКИ</span>
+              </div>
+              <div className="h-px flex-1 bg-green-500/30" />
+            </div>
+
+            <div className="space-y-2">
+              {customSources.map((source) => (
+                <SourceCard
+                  key={source.id}
+                  source={source}
+                  selectedSource={selectedSource}
+                  expandedSourceId={expandedSourceId}
+                  onSourceClick={handleSourceClick}
+                  onKeyDown={handleKeyDown}
+                />
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
       {/* Floating confirm button - fixed at bottom */}

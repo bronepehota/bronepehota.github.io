@@ -44,5 +44,4 @@ Thumbs.db
 
 # Temporary data
 src/data/*.json.tmp
-/test-results/
-/playwright-report/
+/.superpowers/

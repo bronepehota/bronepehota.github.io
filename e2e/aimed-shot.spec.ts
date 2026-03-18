@@ -5,15 +5,9 @@ import { test, expect } from '@playwright/test';
  * Tests the aimed shot feature for squad shooting attacks
  */
 test.describe('Aimed Shot - Combat Modal', () => {
-  test.beforeEach(async ({ page }) => {
-    // Navigate to app page first
-    await page.goto('/app');
-    await page.waitForLoadState('networkidle');
-  });
-
   test('should show aimed shot toggle for squad shots', async ({ page }) => {
-    // Set up game session state
-    await page.evaluate(() => {
+    // Set up game session state BEFORE page loads (using addInitScript)
+    await page.addInitScript(() => {
       const army = {
         name: 'Aimed Shot Test Army',
         faction: 'polaris',
@@ -51,7 +45,8 @@ test.describe('Aimed Shot - Combat Modal', () => {
       localStorage.setItem('bronepehota_display_mode', 'detailed');
     });
 
-    await page.reload();
+    // Navigate to app page - localStorage is already set from addInitScript
+    await page.goto('/app');
     await page.waitForLoadState('networkidle');
 
     // Check if game session is visible
@@ -90,12 +85,8 @@ test.describe('Aimed Shot - Combat Modal', () => {
     await page.close();
     const newPage = await context.newPage();
 
-    // Navigate first
-    await newPage.goto('/app');
-    await newPage.waitForLoadState('networkidle');
-
-    // Set up machine army state
-    await newPage.evaluate(() => {
+    // Set up machine army state BEFORE page loads (using addInitScript)
+    await newPage.addInitScript(() => {
       const army = {
         name: 'Machine Test Army',
         faction: 'polaris',
@@ -142,7 +133,8 @@ test.describe('Aimed Shot - Combat Modal', () => {
       localStorage.setItem('bronepehota_display_mode', 'detailed');
     });
 
-    await newPage.reload();
+    // Navigate to app page - localStorage is already set from addInitScript
+    await newPage.goto('/app');
     await newPage.waitForLoadState('networkidle');
 
     // Check if game session is visible
@@ -161,8 +153,8 @@ test.describe('Aimed Shot - Combat Modal', () => {
   });
 
   test('should toggle aimed shot off after being enabled', async ({ page }) => {
-    // Set up game session state
-    await page.evaluate(() => {
+    // Set up game session state BEFORE page loads (using addInitScript)
+    await page.addInitScript(() => {
       const army = {
         name: 'Aimed Shot Test Army',
         faction: 'polaris',
@@ -200,7 +192,8 @@ test.describe('Aimed Shot - Combat Modal', () => {
       localStorage.setItem('bronepehota_display_mode', 'detailed');
     });
 
-    await page.reload();
+    // Navigate to app page - localStorage is already set from addInitScript
+    await page.goto('/app');
     await page.waitForLoadState('networkidle');
 
     // Check if game session is visible

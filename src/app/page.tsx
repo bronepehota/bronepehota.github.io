@@ -8,11 +8,16 @@ import PWAInstallHint from '@/components/landing/PWAInstallHint';
 export default function Home() {
   return (
     <main className="min-h-screen flex flex-col bg-military-dark text-military-sand">
-      <HeroSection />
+      {/* First screen - Hero + Footer */}
+      <div className="flex flex-col relative" style={{ height: '100dvh' }}>
+        <HeroSection className="flex-1" />
+        <Footer />
+      </div>
+
+      {/* Rest of the content below - partially visible to hint at scroll */}
       <LoreSection />
       <FactionsSection />
       <FinalCTA />
-      <Footer />
       <PWAInstallHint />
     </main>
   );

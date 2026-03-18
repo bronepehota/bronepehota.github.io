@@ -26,6 +26,7 @@ const StatusStripe: React.FC<StatusStripeProps> = ({ state, className }) => {
         stripeStyles[state],
         className
       )}
+      data-testid="soldier-status-stripe"
       aria-hidden="true"
     />
   );
