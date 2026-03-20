@@ -40,7 +40,7 @@ describe('BattlePreparationScreen', () => {
     renderComponent();
 
     expect(screen.getByText('Готовьте войска!')).toBeInTheDocument();
-    expect(screen.getByText('Соберите миниатюры и расставьте их на поле.')).toBeInTheDocument();
+    expect(screen.getByText('Расставьте миниатюры на столе и бросьте кубик инициативы.')).toBeInTheDocument();
   });
 
   it('должен отображать кнопку "Начать бой"', () => {
