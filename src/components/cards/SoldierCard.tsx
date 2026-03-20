@@ -180,7 +180,7 @@ function SoldierCard({
   return (
     <div
       className={cn(
-        "relative p-0.5 md:p-1 rounded-sm border flex gap-1 md:gap-1.5 transition-all overflow-hidden",
+        "relative p-1 md:p-1.5 rounded-sm border flex items-center gap-1.5 md:gap-2 transition-all overflow-hidden",
         isDead ? "bg-slate-950/80 border-slate-800 opacity-40 grayscale" :
         isDone ? "bg-slate-900/40 border-slate-700/50 opacity-90" : "bg-slate-800/30 border-slate-700/50",
         isPilot && !isDead ? "border-cyan-700/40" : ""
@@ -207,7 +207,7 @@ function SoldierCard({
         </>
       )}
 
-      {/* Soldier image (right side) */}
+      {/* Soldier image (left side) */}
       <SoldierImage
         imageUrl={getSoldierImage(soldierIndex)}
         soldierIndex={soldierIndex}
@@ -219,28 +219,32 @@ function SoldierCard({
         onImageClick={() => setShowSoldierImage(soldierIndex)}
       />
 
-      {/* Left side: actions and stats */}
-      <div className="flex-1 flex flex-col justify-between min-w-0 gap-1.5 md:gap-2">
-        {/* Row 1: Action buttons */}
-        <SoldierActions
-          isDead={isDead}
-          isDone={isDone}
-          isInPanic={isInPanic}
-          actions={actions}
-          onActionClick={() => onSoldierAction(soldierIndex)}
-          onToggleDone={handleToggleAction}
-          onToggleDead={handleToggleDead}
-          soldierIndex={soldierIndex}
-          onStartLongPress={startLongPress}
-          onEndLongPress={cancelLongPress}
-          isLongPressing={isLongPressing}
-          isPilot={soldier.isPilot || false}
-          onNavigateToMachine={soldier.pilotOfInstanceId ? () => onNavigateToUnit?.(soldier.pilotOfInstanceId!) : undefined}
-        />
+      {/* Stats (center - clickable for action) */}
+      <SoldierStats
+        soldier={soldier}
+        distanceInputUnit={distanceInputUnit}
+        stepToCmFactor={stepToCmFactor}
+        disabled={isDone || isDead || isInPanic}
+        onClick={() => onSoldierAction(soldierIndex)}
+        className="flex-1"
+      />
 
-        {/* Row 2: Stats */}
-        <SoldierStats soldier={soldier} distanceInputUnit={distanceInputUnit} stepToCmFactor={stepToCmFactor} />
-      </div>
+      {/* Action buttons (right - stacked vertically) */}
+      <SoldierActions
+        isDead={isDead}
+        isDone={isDone}
+        isInPanic={isInPanic}
+        actions={actions}
+        onActionClick={() => onSoldierAction(soldierIndex)}
+        onToggleDone={handleToggleAction}
+        onToggleDead={handleToggleDead}
+        soldierIndex={soldierIndex}
+        onStartLongPress={startLongPress}
+        onEndLongPress={cancelLongPress}
+        isLongPressing={isLongPressing}
+        isPilot={soldier.isPilot || false}
+        onNavigateToMachine={soldier.pilotOfInstanceId ? () => onNavigateToUnit?.(soldier.pilotOfInstanceId!) : undefined}
+      />
     </div>
   );
 }
@@ -252,12 +256,15 @@ export default memo(SoldierCard, (prevProps, nextProps) => {
   const nextIsDead = nextProps.unit.deadSoldiers?.includes(nextProps.soldierIndex) || false;
   const prevIsDone = prevProps.unit.actionsUsed?.[prevProps.soldierIndex]?.done || false;
   const nextIsDone = nextProps.unit.actionsUsed?.[nextProps.soldierIndex]?.done || false;
+  const prevIsInPanic = prevProps.unit.panicState?.some(p => p.soldierIndex === prevProps.soldierIndex) || false;
+  const nextIsInPanic = nextProps.unit.panicState?.some(p => p.soldierIndex === nextProps.soldierIndex) || false;
 
   return (
     prevProps.soldierIndex === nextProps.soldierIndex &&
     prevProps.squad === nextProps.squad &&
     prevIsDead === nextIsDead &&
     prevIsDone === nextIsDone &&
+    prevIsInPanic === nextIsInPanic &&
     prevProps.onNavigateToUnit === nextProps.onNavigateToUnit
   );
 });

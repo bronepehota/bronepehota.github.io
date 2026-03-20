@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Army, ArmyUnit, RulesVersionID } from '@/lib/types';
 import { FactionSelector } from './controls/FactionSelector';
 import { PointBudgetInput } from './controls/PointBudgetInput';
@@ -89,10 +89,16 @@ export default function ArmyBuilder({
 
   // Setup step state for guided flow - sync with army.currentStep
   const [setupStep, setSetupStep] = useState<'rules' | 'source' | 'faction' | 'budget' | 'units' | 'preparation'>(() => {
-    if (army.currentStep === 'unit-select') return 'units';
-    if (army.currentStep === 'preparation') return 'preparation';
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.SETUP_STEP);
+      if (saved && ['rules', 'source', 'faction', 'budget', 'units', 'preparation'].includes(saved)) {
+        return saved as any;
+      }
+    }
     return 'rules';
   });
+  const [showBackConfirm, setShowBackConfirm] = useState(false);
+  const [pendingBackStep, setPendingBackStep] = useState<string | null>(null);
 
   // Load source data and handle source changes
   const sourceData = getSourceWithCustom(selectedSource);
@@ -135,46 +141,83 @@ export default function ArmyBuilder({
     });
   };
 
-  // Sync setupStep when army.currentStep changes (e.g., after returning to faction select)
+  // Sync setupStep when army.currentStep changes externally (e.g., loaded from localStorage)
   useEffect(() => {
-    if (army.currentStep === 'faction-select' && (setupStep === 'units' || setupStep === 'budget' || setupStep === 'faction' || setupStep === 'source')) {
-      setSetupStep('rules');
-    } else if (army.currentStep === 'unit-select' && setupStep !== 'units') {
+    if (army.currentStep === 'unit-select' && setupStep !== 'units') {
       setSetupStep('units');
     } else if (army.currentStep === 'preparation' && setupStep !== 'preparation') {
       setSetupStep('preparation');
     }
+    // Don't force setupStep when currentStep is 'faction-select' -
+    // handleStepClick manages this explicitly
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [army.currentStep]);
 
   // Handle step navigation from StepProgressIndicator
-  const handleStepClick = (step: 'rules' | 'source' | 'faction' | 'budget' | 'units' | 'preparation') => {
-    // Allow navigating back to previous steps or to current step
+  const handleStepClick = useCallback((step: 'rules' | 'source' | 'faction' | 'budget' | 'units' | 'preparation') => {
     const stepOrder = ['rules', 'source', 'faction', 'budget', 'units', 'preparation'];
     const currentIndex = stepOrder.indexOf(setupStep);
     const targetIndex = stepOrder.indexOf(step);
 
     // Only allow navigation to current step or previous steps
-    if (targetIndex <= currentIndex) {
-      // Only reset when going back to SOURCE (different source = different data)
-      // Going back to RULES/FACTION/BUDGET: keep everything, user can change if needed
-      if (targetIndex === 1 && currentIndex > 1) {
-        // Going back to SOURCE selection: clear faction and units
-        // (different source may have different factions)
-        setArmy({
-          ...army,
-          faction: undefined,
-          units: [],
-          totalCost: 0,
-          pointBudget: undefined,
-          currentStep: 'faction-select',
-        });
-      }
-      // All other navigation: preserve current state
+    if (targetIndex > currentIndex) return;
 
-      setSetupStep(step);
+    // If on units/preparation step and army has units, show confirmation
+    if (army.units.length > 0 && currentIndex >= stepOrder.indexOf('units')) {
+      setPendingBackStep(step);
+      setShowBackConfirm(true);
+      return;
     }
-  };
+
+    // Going back from units/preparation to setup steps - update currentStep
+    if (currentIndex >= stepOrder.indexOf('units') && targetIndex < stepOrder.indexOf('units')) {
+      setArmy({
+        ...army,
+        currentStep: 'faction-select',
+      });
+    }
+
+    // Going back to SOURCE or earlier: clear faction and units
+    if (targetIndex <= 1 && currentIndex > 1) {
+      setArmy({
+        ...army,
+        faction: undefined,
+        units: [],
+        totalCost: 0,
+        pointBudget: undefined,
+        currentStep: 'faction-select',
+      });
+    }
+
+    setSetupStep(step);
+  }, [setupStep, army, setArmy]);
+
+  const confirmBackNavigation = useCallback(() => {
+    if (!pendingBackStep) return;
+
+    const step = pendingBackStep as 'rules' | 'source' | 'faction' | 'budget' | 'units' | 'preparation';
+    const stepOrder = ['rules', 'source', 'faction', 'budget', 'units', 'preparation'];
+    const targetIndex = stepOrder.indexOf(step);
+
+    // Reset army completely
+    setArmy({
+      ...army,
+      units: [],
+      totalCost: 0,
+      pointBudget: undefined,
+      faction: targetIndex <= 1 ? undefined : army.faction,
+      currentStep: 'faction-select',
+    });
+
+    setSetupStep(step);
+    setShowBackConfirm(false);
+    setPendingBackStep(null);
+  }, [pendingBackStep, army, setArmy]);
+
+  const cancelBackNavigation = useCallback(() => {
+    setShowBackConfirm(false);
+    setPendingBackStep(null);
+  }, []);
 
   // Validate currentStep - allow 'faction-select', 'unit-select', or 'preparation'
   const validStep = (army.currentStep === 'faction-select' || army.currentStep === 'unit-select' || army.currentStep === 'preparation')
@@ -183,6 +226,7 @@ export default function ArmyBuilder({
 
   // Always render new UI - old fallback removed
   return (
+    <>
     <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
       {validStep === 'faction-select' && (
           <>
@@ -379,5 +423,39 @@ export default function ArmyBuilder({
           </>
         )}
       </div>
+
+      {/* Back navigation confirmation dialog */}
+      {showBackConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-slate-800 border border-slate-700 rounded-lg p-5 max-w-sm w-full shadow-xl">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center shrink-0">
+                <svg className="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <h3 className="text-base font-bold text-slate-100">Сбросить армию?</h3>
+            </div>
+            <p className="text-sm text-slate-400 mb-5">
+              При возврате назад все добавленные юниты будут удалены. Это действие нельзя отменить.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={cancelBackNavigation}
+                className="flex-1 px-4 py-2.5 rounded-md bg-slate-700 hover:bg-slate-600 text-slate-300 text-sm font-medium transition-colors"
+              >
+                Отмена
+              </button>
+              <button
+                onClick={confirmBackNavigation}
+                className="flex-1 px-4 py-2.5 rounded-md bg-red-600 hover:bg-red-500 text-white text-sm font-bold transition-colors"
+              >
+                Сбросить
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      </>
     );
 }

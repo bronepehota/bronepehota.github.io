@@ -1,10 +1,11 @@
-import { useState } from 'react';
-import { Sword, ChevronUp } from 'lucide-react';
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Sword, ChevronUp, Shield, Users, Zap, Target, Timer } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Army } from '@/lib/types';
 import { PrepArmyList } from './PrepArmyList';
 import InitiativeModal from '../modals/InitiativeModal';
-import { BASE_PATH } from '@/lib/constants';
 import { getFactionColors } from '@/lib/faction-colors';
 
 interface BattlePreparationScreenProps {
@@ -21,11 +22,15 @@ export function BattlePreparationScreen({
   onBackToBuilder: _onBackToBuilder,
 }: BattlePreparationScreenProps) {
   const [showInitiativeModal, setShowInitiativeModal] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  // Получаем фракционные цвета
   const colors = getFactionColors(army.faction || 'polaris');
 
-  // Обработка начала боя после инициативы
+  useEffect(() => {
+    const t = setTimeout(() => setIsLoaded(true), 50);
+    return () => clearTimeout(t);
+  }, []);
+
   const handleStartBattle = () => {
     setArmy({
       ...army,
@@ -36,7 +41,6 @@ export function BattlePreparationScreen({
     onStartBattle();
   };
 
-  // Количество боеспособных юнитов
   const activeUnitsCount = army.units.filter(unit => {
     if (unit.type === 'squad') {
       return (unit.deadSoldiers?.length || 0) < (unit.data as any).soldiers.length;
@@ -44,69 +48,147 @@ export function BattlePreparationScreen({
     return (unit.currentDurability || 0) > 0;
   }).length;
 
+  const squadCount = army.units.filter(u => u.type === 'squad').length;
+  const machineCount = army.units.filter(u => u.type === 'machine').length;
+  const totalSoldiers = army.units.reduce((acc, u) => {
+    if (u.type === 'squad') {
+      const squad = u.data as any;
+      return acc + (squad.soldiers?.length || 0) - (u.deadSoldiers?.length || 0);
+    }
+    return acc;
+  }, 0);
   const hasUnits = army.units.length > 0;
 
   return (
-    <div className="relative min-h-screen pb-36">
-      {/* Фоновое изображение */}
+    <div className="relative min-h-screen pb-36 overflow-hidden bg-slate-950">
+      {/* Animated tactical grid background */}
+      <div className="absolute inset-0 opacity-[0.04]">
+        <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="tactical-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-slate-400" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#tactical-grid)" />
+        </svg>
+      </div>
+
+      {/* Animated scan line */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div
+          className="absolute left-0 right-0 h-px opacity-20"
+          style={{
+            background: `linear-gradient(90deg, transparent, ${colors.primary}, transparent)`,
+            animation: 'scanDown 4s linear infinite',
+          }}
+        />
+        <style>{`
+          @keyframes scanDown {
+            0% { top: -2px; opacity: 0; }
+            5% { opacity: 0.2; }
+            95% { opacity: 0.2; }
+            100% { top: 100%; opacity: 0; }
+          }
+          @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes pulseGlow {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+          }
+          @keyframes countUp {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+          }
+        `}</style>
+      </div>
+
+      {/* Radial glow behind header */}
       <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${BASE_PATH}/images/hero-art.jpg)` }}
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] pointer-events-none opacity-10 blur-3xl"
+        style={{
+          background: `radial-gradient(ellipse at center, ${colors.primary}, transparent 70%)`,
+        }}
       />
 
-      {/* Затемнение для читаемости */}
-      <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-sm" />
-
-      {/* Контент поверх фона */}
+      {/* Content */}
       <div className="relative z-10" data-testid="battle-preparation-screen">
-        {/* Основной контент */}
-        <div className="max-w-4xl mx-auto px-4 py-6 space-y-8">
-          {/* Иммерсивный текст */}
-          <div className="text-center space-y-3 px-2">
-            <h2 className="text-2xl md:text-3xl font-mono font-black uppercase tracking-wider text-white">
+        <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
+          {/* Header section */}
+          <div
+            className={cn(
+              "text-center space-y-4 px-2 transition-all duration-700",
+              isLoaded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+            )}
+          >
+            {/* Tactical classification tag */}
+            <div className="flex justify-center">
+              <div className={cn(
+                "inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-mono uppercase tracking-[0.2em]",
+                "border bg-slate-900/80",
+                colors.border, colors.text
+              )}>
+                <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: colors.primary }} />
+                Оперативная готовность
+              </div>
+            </div>
+
+            {/* Main title */}
+            <h2 className="text-3xl md:text-4xl font-mono font-black uppercase tracking-wider text-white">
               Готовьте войска!
             </h2>
 
-            <div className="max-w-2xl mx-auto space-y-2">
-              <p className="text-base md:text-lg text-slate-200 leading-relaxed">
-                Соберите миниатюры и расставьте их на поле.
-              </p>
+            <div className="max-w-md mx-auto space-y-1">
               <p className="text-sm md:text-base text-slate-400 leading-relaxed">
-                Бросьте кубик для определения первого хода.
+                Расставьте миниатюры на столе и бросьте кубик инициативы.
               </p>
             </div>
 
-            {/* Декоративная линия */}
-            <div className="flex items-center justify-center gap-4 pt-2">
-              <div className="h-px flex-1 bg-gradient-to-r from-transparent via-slate-600 to-transparent max-w-xs" />
-              <div className="w-2 h-2 border border-slate-500 rotate-45" />
-              <div className="h-px flex-1 bg-gradient-to-r from-transparent via-slate-600 to-transparent max-w-xs" />
+            {/* Tactical stats row */}
+            {hasUnits && (
+              <div
+                className="flex justify-center gap-4 pt-2"
+                style={{
+                  animation: isLoaded ? 'fadeSlideUp 0.6s ease-out 0.3s both' : 'none',
+                }}
+              >
+                <StatChip icon={<Users className="w-3.5 h-3.5" />} value={squadCount} label="отряд" />
+                <StatChip icon={<Zap className="w-3.5 h-3.5" />} value={machineCount} label="машина" />
+                <StatChip icon={<Shield className="w-3.5 h-3.5" />} value={totalSoldiers} label="боец" />
+                <StatChip icon={<Target className="w-3.5 h-3.5" />} value={army.totalCost} label="очков" />
+              </div>
+            )}
+
+            {/* Divider */}
+            <div className="flex items-center justify-center gap-3 pt-2">
+              <div className="h-px flex-1 max-w-[80px]" style={{ background: `linear-gradient(90deg, transparent, ${colors.primary}40)` }} />
+              <Timer className="w-4 h-4 opacity-30" style={{ color: colors.primary }} />
+              <div className="h-px flex-1 max-w-[80px]" style={{ background: `linear-gradient(90deg, ${colors.primary}40, transparent)` }} />
             </div>
           </div>
 
-          {/* Список армии */}
-          <PrepArmyList army={army} />
+          {/* Army list */}
+          <div style={{
+            animation: isLoaded ? 'fadeSlideUp 0.6s ease-out 0.2s both' : 'none',
+          }}>
+            <PrepArmyList army={army} />
+          </div>
         </div>
 
-        {/* Плавающая кнопка "Начать бой" - в стиле приложения */}
+        {/* Floating "Start Battle" button */}
         <div className="fixed bottom-6 left-0 right-0 z-[100] flex justify-center px-4">
           <div className="relative group" style={{ maxWidth: '400px', width: '100%' }}>
-            {/* Scroll indicator at top - gradient fade showing content continues */}
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
-              <div className="w-12 h-0.5 bg-gradient-to-r from-transparent via-slate-500 to-transparent rounded-full" />
-              <div className="w-8 h-0.5 bg-gradient-to-r from-transparent via-slate-600 to-transparent rounded-full" />
-              <div className="w-4 h-0.5 bg-slate-700 rounded-full animate-pulse" />
-            </div>
-
-            {/* Внешнее свечение */}
+            {/* Glow behind button */}
             <div
-              className={cn(
-                "absolute -inset-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm",
-                colors.glow
-              )}
+              className="absolute -inset-1 rounded-xl blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+              style={{ backgroundColor: colors.primary, opacity: 0 }}
+            />
+            <div
+              className="absolute -inset-0.5 rounded-xl blur-md opacity-0 group-hover:opacity-30 transition-opacity duration-500"
+              style={{ backgroundColor: colors.primary }}
             />
 
-            {/* Основная кнопка - более прозрачная */}
             <button
               onClick={() => {
                 if (hasUnits) {
@@ -115,99 +197,64 @@ export function BattlePreparationScreen({
               }}
               className={cn(
                 "relative w-full pointer-events-auto",
-                "py-4 px-6 rounded-lg",
+                "py-4 px-6 rounded-xl",
                 "flex items-center justify-center gap-3",
                 "font-mono text-base md:text-lg font-bold uppercase tracking-wider",
-                "transition-all duration-200",
+                "transition-all duration-300",
                 "border-2",
-                // Более прозрачный фон
-                "bg-slate-900/80 backdrop-blur-md",
+                "bg-slate-900/90 backdrop-blur-md",
                 colors.border,
                 colors.text,
-                // Hover эффекты - только если есть юниты
-                hasUnits && "hover:scale-[1.02] hover:bg-slate-900/90",
-                hasUnits && "active:scale-95",
-                // Тень
-                "shadow-lg hover:shadow-xl",
-                hasUnits && colors.glow.replace('shadow-', 'hover:shadow-'),
-                // Disabled state - визуально отключена
-                !hasUnits && "opacity-40 cursor-not-allowed"
+                hasUnits && "hover:scale-[1.02] hover:bg-slate-800/90",
+                hasUnits && "active:scale-[0.98]",
+                "shadow-2xl",
+                !hasUnits && "opacity-30 cursor-not-allowed"
               )}
               data-testid="start-battle-button"
             >
-              {/* Top fade indicator - subtle gradient showing content behind */}
-              <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-b from-slate-950/50 to-transparent pointer-events-none rounded-t-lg" />
-
-              {/* Animated background effect */}
+              {/* Shimmer sweep on hover */}
               {hasUnits && (
-                <div className={cn(
-                  "absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity",
-                  colors.bg.replace('/10', '/20')
-                )} />
-              )}
-
-              {/* Scanline effect */}
-              {hasUnits && (
-                <div className="absolute inset-0 opacity-10 pointer-events-none">
+                <div className="absolute inset-0 overflow-hidden rounded-xl pointer-events-none">
                   <div
-                    className="absolute inset-0 bg-gradient-to-b from-transparent via-white to-transparent h-full w-full animate-pulse"
-                    style={{ animationDuration: '2s' }}
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    style={{
+                      background: `linear-gradient(105deg, transparent 40%, ${colors.primary}15 45%, ${colors.primary}25 50%, ${colors.primary}15 55%, transparent 60%)`,
+                      animation: 'shimmer 2s ease-in-out infinite',
+                    }}
                   />
+                  <style>{`
+                    @keyframes shimmer {
+                      0% { transform: translateX(-100%); }
+                      100% { transform: translateX(100%); }
+                    }
+                  `}</style>
                 </div>
               )}
 
-              {/* Иконка меча */}
-              <Sword className="w-6 h-6 relative z-10" />
-
-              {/* Текст */}
+              <Sword className="w-5 h-5 relative z-10" />
               <span className="relative z-10">Начать бой</span>
-
-              {/* Иконка стрелки вверх (подсказка) */}
               {hasUnits && (
-                <ChevronUp className="w-5 h-5 relative z-10 animate-bounce" />
+                <ChevronUp className="w-4 h-4 relative z-10 animate-bounce opacity-60" />
               )}
-
-              {/* Tech corners - технические уголки в стиле приложения */}
-              <div className={cn(
-                "absolute top-0 left-0 w-2 h-2 border-l-2 border-t-2",
-                colors.text.replace('text-', 'border-'),
-                "opacity-50"
-              )} />
-              <div className={cn(
-                "absolute top-0 right-0 w-2 h-2 border-r-2 border-t-2",
-                colors.text.replace('text-', 'border-'),
-                "opacity-50"
-              )} />
-              <div className={cn(
-                "absolute bottom-0 left-0 w-2 h-2 border-l-2 border-b-2",
-                colors.text.replace('text-', 'border-'),
-                "opacity-50"
-              )} />
-              <div className={cn(
-                "absolute bottom-0 right-0 w-2 h-2 border-r-2 border-b-2",
-                colors.text.replace('text-', 'border-'),
-                "opacity-50"
-              )} />
             </button>
 
-            {/* Подсказка при наведении */}
+            {/* Tooltip */}
             {hasUnits && (
               <div className={cn(
-                "absolute -top-12 left-1/2 -translate-x-1/2",
-                "whitespace-nowrap px-3 py-1.5 rounded",
-                "bg-slate-900/95 text-slate-300 text-xs font-mono font-medium",
+                "absolute -top-10 left-1/2 -translate-x-1/2",
+                "whitespace-nowrap px-3 py-1 rounded-md",
+                "bg-slate-900/95 text-slate-400 text-xs font-mono",
                 "opacity-0 group-hover:opacity-100 transition-opacity duration-200",
                 "border border-slate-700/50 shadow-lg",
                 "pointer-events-none"
               )}>
                 Бросить кубик инициативы
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 rotate-45 w-2 h-2 bg-slate-900 border-r border-b border-slate-700/50" />
               </div>
             )}
           </div>
         </div>
 
-        {/* Модальное окно инициативы */}
+        {/* Initiative modal */}
         <InitiativeModal
           isOpen={showInitiativeModal}
           onClose={() => setShowInitiativeModal(false)}
@@ -217,6 +264,17 @@ export function BattlePreparationScreen({
           context="preparation"
         />
       </div>
+    </div>
+  );
+}
+
+function StatChip({ icon, value, label }: { icon: React.ReactNode; value: number; label: string }) {
+  const suffix = value === 1 && label !== 'очков' ? '' : (label === 'очков' ? '' : '');
+  return (
+    <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-900/60 border border-slate-800/60 text-slate-400">
+      <span className="opacity-50">{icon}</span>
+      <span className="text-sm font-mono font-bold text-white">{value}</span>
+      <span className="text-[10px] font-mono uppercase tracking-wide hidden sm:inline">{label}{suffix}</span>
     </div>
   );
 }

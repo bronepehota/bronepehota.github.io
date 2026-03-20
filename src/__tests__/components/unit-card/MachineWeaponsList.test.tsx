@@ -59,13 +59,14 @@ describe('MachineWeaponsList', () => {
     });
   });
 
-  describe('Fire button interactions', () => {
-    it('calls onWeaponAttack when fire button clicked', () => {
+  describe('Click-to-fire interactions', () => {
+    it('calls onWeaponAttack when weapon card is clicked', () => {
       const onWeaponAttack = jest.fn();
       render(<MachineWeaponsList {...defaultProps} onWeaponAttack={onWeaponAttack} />);
 
-      const fireButton = screen.getAllByTitle('Выстрел')[0];
-      fireEvent.click(fireButton);
+      // Weapon cards now have role="button" with aria-label
+      const weaponCard = screen.getByRole('button', { name: /Выстрел: Cannon/i });
+      fireEvent.click(weaponCard);
 
       expect(onWeaponAttack).toHaveBeenCalledWith(0);
     });
@@ -74,8 +75,8 @@ describe('MachineWeaponsList', () => {
       const onWeaponInfo = jest.fn();
       render(<MachineWeaponsList {...defaultProps} onWeaponInfo={onWeaponInfo} />);
 
-      const infoButton = screen.getAllByTitle('Информация об оружии')[0];
-      fireEvent.click(infoButton);
+      const infoButtons = screen.getAllByTitle('Информация об оружии');
+      fireEvent.click(infoButtons[0]);
 
       expect(onWeaponInfo).toHaveBeenCalledWith(0);
     });
@@ -84,43 +85,45 @@ describe('MachineWeaponsList', () => {
       const onWeaponAttack = jest.fn();
       render(<MachineWeaponsList {...defaultProps} onWeaponAttack={onWeaponAttack} />);
 
-      const fireButtons = screen.getAllByTitle('Выстрел');
-
-      fireEvent.click(fireButtons[0]);
+      const cannonCard = screen.getByRole('button', { name: /Выстрел: Cannon/i });
+      fireEvent.click(cannonCard);
       expect(onWeaponAttack).toHaveBeenCalledWith(0);
 
-      fireEvent.click(fireButtons[1]);
+      const mgCard = screen.getByRole('button', { name: /Выстрел: MG/i });
+      fireEvent.click(mgCard);
       expect(onWeaponAttack).toHaveBeenCalledWith(1);
     });
   });
 
   describe('Fire rate limiting', () => {
-    it('disables fire button when fire rate limit is reached', () => {
+    it('disables weapon card when fire rate limit is reached', () => {
       const props = {
         ...defaultProps,
-        weaponShots: { 0: 2, 1: 0, 2: 0 }, // Weapon 0 has fired 2 times
-        totalShotsUsed: 2, // Total shots equals fireRate
+        weaponShots: { 0: 2, 1: 0, 2: 0 },
+        totalShotsUsed: 2,
         fireRate: 2
       };
       render(<MachineWeaponsList {...props} />);
 
-      const fireButtons = screen.getAllByTitle('Лимит выстрелов исчерпан');
-      expect(fireButtons.length).toBeGreaterThan(0);
-      expect(fireButtons[0]).toBeDisabled();
+      // Disabled weapons show "Оружие недоступно" aria-label
+      const disabledCards = screen.getAllByRole('button', { name: /Оружие недоступно/i });
+      expect(disabledCards.length).toBe(2);
     });
 
-    it('keeps fire button enabled when shots are below fire rate limit', () => {
+    it('keeps weapon card enabled when shots are below fire rate limit', () => {
       const props = {
         ...defaultProps,
-        weaponShots: { 0: 1, 1: 0, 2: 0 }, // Weapon 0 has fired 1 time
-        totalShotsUsed: 1, // Total shots below fireRate
+        weaponShots: { 0: 1, 1: 0, 2: 0 },
+        totalShotsUsed: 1,
         fireRate: 2
       };
       render(<MachineWeaponsList {...props} />);
 
-      const fireButtons = screen.getAllByTitle('Выстрел');
-      expect(fireButtons.length).toBeGreaterThan(0);
-      expect(fireButtons[0]).not.toBeDisabled();
+      const weaponCards = screen.getAllByRole('button', { name: /Выстрел:/i });
+      expect(weaponCards.length).toBe(2);
+      weaponCards.forEach(card => {
+        expect(card).not.toHaveAttribute('aria-disabled');
+      });
     });
 
     it('enables all weapons when shotsUsed is below fireRate', () => {
@@ -132,53 +135,47 @@ describe('MachineWeaponsList', () => {
       };
       render(<MachineWeaponsList {...props} />);
 
-      const fireButtons = screen.getAllByTitle('Выстрел');
-      expect(fireButtons.length).toBe(2); // Two ranged weapons
-      fireButtons.forEach(button => {
-        expect(button).not.toBeDisabled();
-      });
+      const weaponCards = screen.getAllByRole('button', { name: /Выстрел:/i });
+      expect(weaponCards.length).toBe(2);
     });
 
     it('disables all weapons when total shots equal fireRate', () => {
       const props = {
         ...defaultProps,
-        weaponShots: { 0: 2, 1: 0, 2: 0 }, // Weapon 0 has 2 shots
-        totalShotsUsed: 2, // Total equals fireRate - ALL weapons disabled
+        weaponShots: { 0: 2, 1: 0, 2: 0 },
+        totalShotsUsed: 2,
         fireRate: 2
       };
       render(<MachineWeaponsList {...props} />);
 
-      // ALL weapons should be disabled (not just weapon 0)
-      const disabledButtons = screen.getAllByTitle('Лимит выстрелов исчерпан');
-      expect(disabledButtons.length).toBe(2); // Both ranged weapons disabled
+      const disabledCards = screen.getAllByRole('button', { name: /Оружие недоступно/i });
+      expect(disabledCards.length).toBe(2);
     });
 
     it('handles fire rate of 1', () => {
       const props = {
         ...defaultProps,
         weaponShots: { 0: 1, 1: 0, 2: 0 },
-        totalShotsUsed: 1, // Total equals fireRate
+        totalShotsUsed: 1,
         fireRate: 1
       };
       render(<MachineWeaponsList {...props} />);
 
-      // With fireRate=1 and totalShotsUsed=1, all weapons should be disabled
-      const allFireButtons = screen.getAllByTitle('Лимит выстрелов исчерпан');
-      expect(allFireButtons.length).toBe(2); // Both ranged weapons disabled
+      const disabledCards = screen.getAllByRole('button', { name: /Оружие недоступно/i });
+      expect(disabledCards.length).toBe(2);
     });
 
     it('handles fire rate of 3', () => {
       const props = {
         ...defaultProps,
         weaponShots: { 0: 2, 1: 0, 2: 0 },
-        totalShotsUsed: 2, // Total shots below fireRate
+        totalShotsUsed: 2,
         fireRate: 3
       };
       render(<MachineWeaponsList {...props} />);
 
-      // Weapons should still be enabled (2 < 3)
-      const fireButtons = screen.getAllByTitle('Выстрел');
-      expect(fireButtons.length).toBeGreaterThan(0);
+      const weaponCards = screen.getAllByRole('button', { name: /Выстрел:/i });
+      expect(weaponCards.length).toBeGreaterThan(0);
     });
 
     it('handles zero fire rate', () => {
@@ -200,42 +197,27 @@ describe('MachineWeaponsList', () => {
       const props = {
         ...defaultProps,
         weaponShots: { 0: 2, 1: 0, 2: 0 },
-        totalShotsUsed: 2, // Total equals fireRate
+        totalShotsUsed: 2,
         fireRate: 2
       };
       render(<MachineWeaponsList {...props} />);
 
-      const disabledButton = screen.getAllByTitle('Лимит выстрелов исчерпан')[0];
-      expect(disabledButton).toHaveClass('opacity-50');
-      expect(disabledButton).toHaveClass('cursor-not-allowed');
+      const disabledCards = screen.getAllByRole('button', { name: /Оружие недоступно/i });
+      expect(disabledCards[0]).toHaveClass('opacity-50');
+      expect(disabledCards[0]).toHaveClass('cursor-not-allowed');
     });
 
     it('shows active state when weapon has been fired', () => {
       const props = {
         ...defaultProps,
         weaponShots: { 0: 1, 1: 0, 2: 0 },
-        totalShotsUsed: 1, // Below fireRate
+        totalShotsUsed: 1,
         fireRate: 2
       };
       render(<MachineWeaponsList {...props} />);
 
-      // Check that weapon card has active background
       const weaponCards = document.querySelectorAll('.bg-amber-950\\/20');
       expect(weaponCards.length).toBeGreaterThan(0);
-    });
-
-    it('shows default state when no shots fired', () => {
-      const props = {
-        ...defaultProps,
-        weaponShots: { 0: 0, 1: 0, 2: 0 },
-        totalShotsUsed: 0,
-        fireRate: 2
-      };
-      render(<MachineWeaponsList {...props} />);
-
-      // Check for tech corners on active weapons
-      const techCorners = document.querySelectorAll('.border-amber-600\\/30');
-      expect(techCorners.length).toBeGreaterThan(0);
     });
   });
 
@@ -243,33 +225,31 @@ describe('MachineWeaponsList', () => {
     it('disables all weapons when total shots reach fireRate', () => {
       const props = {
         ...defaultProps,
-        weaponShots: { 0: 2, 1: 1, 2: 0 }, // Weapon 0 has 2 shots, weapon 1 has 1
-        totalShotsUsed: 3, // Total exceeds fireRate
+        weaponShots: { 0: 2, 1: 1, 2: 0 },
+        totalShotsUsed: 3,
         fireRate: 2
       };
       render(<MachineWeaponsList {...props} />);
 
-      // ALL weapons should be disabled when total shots >= fireRate
-      const disabledButtons = screen.getAllByTitle('Лимит выстрелов исчерпан');
-      expect(disabledButtons.length).toBe(2); // Both ranged weapons disabled
+      const disabledCards = screen.getAllByRole('button', { name: /Оружие недоступно/i });
+      expect(disabledCards.length).toBe(2);
     });
 
     it('handles missing weapon index in weaponShots', () => {
       const props = {
         ...defaultProps,
-        weaponShots: { 0: 1 }, // Missing weapon 1 and 2
+        weaponShots: { 0: 1 },
         totalShotsUsed: 1
       };
       render(<MachineWeaponsList {...props} />);
 
-      // Should render without errors, treating missing as 0
       expect(screen.getByText('Cannon')).toBeInTheDocument();
       expect(screen.getByText('MG')).toBeInTheDocument();
     });
   });
 
   describe('Ammo limiting', () => {
-    it('disables fire button when global ammo is 0 (tehnolog rules)', () => {
+    it('disables weapon card when global ammo is 0 (tehnolog rules)', () => {
       const props = {
         ...defaultProps,
         currentAmmo: 0,
@@ -277,14 +257,11 @@ describe('MachineWeaponsList', () => {
       };
       render(<MachineWeaponsList {...props} />);
 
-      const disabledButtons = screen.getAllByTitle('Нет боезапаса');
-      expect(disabledButtons.length).toBe(2); // Both ranged weapons disabled
-      disabledButtons.forEach(button => {
-        expect(button).toBeDisabled();
-      });
+      const disabledCards = screen.getAllByRole('button', { name: /Оружие недоступно/i });
+      expect(disabledCards.length).toBe(2);
     });
 
-    it('keeps fire button enabled when ammo is available (tehnolog rules)', () => {
+    it('keeps weapon card enabled when ammo is available (tehnolog rules)', () => {
       const props = {
         ...defaultProps,
         currentAmmo: 5,
@@ -292,40 +269,35 @@ describe('MachineWeaponsList', () => {
       };
       render(<MachineWeaponsList {...props} />);
 
-      const fireButtons = screen.getAllByTitle('Выстрел');
-      expect(fireButtons.length).toBeGreaterThan(0);
-      fireButtons.forEach(button => {
-        expect(button).not.toBeDisabled();
-      });
+      const weaponCards = screen.getAllByRole('button', { name: /Выстрел:/i });
+      expect(weaponCards.length).toBeGreaterThan(0);
     });
 
-    it('disables fire button when per-weapon ammo is 0 (community rules)', () => {
+    it('disables weapon card when per-weapon ammo is 0 (community rules)', () => {
       const props = {
         ...defaultProps,
-        currentAmmo: 10, // Global ammo available
-        weaponAmmo: [0, 5], // Weapon 0 has no ammo
+        currentAmmo: 10,
+        weaponAmmo: [0, 5],
         usePerWeaponAmmo: true
       };
       render(<MachineWeaponsList {...props} />);
 
-      // Weapon 0 should be disabled (no per-weapon ammo)
-      const disabledButtons = screen.getAllByTitle('Нет боезапаса');
-      expect(disabledButtons.length).toBe(1);
-      expect(disabledButtons[0]).toBeDisabled();
+      // Weapon 0 disabled (no per-weapon ammo)
+      const disabledCards = screen.getAllByRole('button', { name: /Оружие недоступно/i });
+      expect(disabledCards.length).toBe(1);
     });
 
     it('disables all weapons when global ammo is 0 (community rules)', () => {
       const props = {
         ...defaultProps,
-        currentAmmo: 0, // No global ammo
-        weaponAmmo: [5, 5], // Per-weapon ammo available
+        currentAmmo: 0,
+        weaponAmmo: [5, 5],
         usePerWeaponAmmo: true
       };
       render(<MachineWeaponsList {...props} />);
 
-      // ALL weapons should be disabled (global ammo check takes priority)
-      const disabledButtons = screen.getAllByTitle('Нет боезапаса');
-      expect(disabledButtons.length).toBe(2); // Both ranged weapons
+      const disabledCards = screen.getAllByRole('button', { name: /Оружие недоступно/i });
+      expect(disabledCards.length).toBe(2);
     });
 
     it('allows melee weapons even when ammo is 0', () => {
@@ -336,32 +308,28 @@ describe('MachineWeaponsList', () => {
       };
       render(<MachineWeaponsList {...props} />);
 
-      // Melee weapons should be listed but ranged should be disabled
       expect(screen.getByText('Melee Spike')).toBeInTheDocument();
-      // Info button for melee weapon should still be available
       const infoButtons = screen.getAllByTitle('Информация об оружии');
-      expect(infoButtons.length).toBe(3); // All weapons have info buttons
+      expect(infoButtons.length).toBe(3);
     });
   });
 
   describe('Melee weapons', () => {
-    it('does not show fire button for melee weapons', () => {
+    it('does not show click-to-fire for melee weapons', () => {
       render(<MachineWeaponsList {...defaultProps} />);
 
-      // Melee weapons should not have fire buttons
-      const meleeWeapon = screen.getByText('Melee Spike');
-      expect(meleeWeapon).toBeInTheDocument();
+      expect(screen.getByText('Melee Spike')).toBeInTheDocument();
 
-      // Should not find fire button for melee weapon
-      const fireButtons = screen.getAllByTitle('Выстрел');
-      expect(fireButtons.length).toBe(2); // Only ranged weapons
+      // Only ranged weapons have role="button" with "Выстрел:" aria-label
+      const rangedCards = screen.getAllByRole('button', { name: /Выстрел:/i });
+      expect(rangedCards.length).toBe(2);
     });
 
     it('shows info button for melee weapons', () => {
       render(<MachineWeaponsList {...defaultProps} />);
 
       const infoButtons = screen.getAllByTitle('Информация об оружии');
-      expect(infoButtons.length).toBe(3); // All weapons have info buttons
+      expect(infoButtons.length).toBe(3);
     });
 
     it('handles machine with only melee weapons', () => {
@@ -399,28 +367,12 @@ describe('MachineWeaponsList', () => {
       expect(screen.getAllByText('1D12').length).toBeGreaterThan(0);
     });
 
-    it('formats range in cm based on stepToCmFactor', () => {
-      const props = {
-        ...defaultProps,
-        stepToCmFactor: 5
-      };
+    it('no longer displays cm range (removed)', () => {
+      render(<MachineWeaponsList {...defaultProps} stepToCmFactor={5} />);
 
-      render(<MachineWeaponsList {...props} />);
-
-      // D12 with factor 5 should show 60см
-      expect(screen.getByText('60см')).toBeInTheDocument();
-    });
-
-    it('handles different stepToCmFactor values', () => {
-      const props = {
-        ...defaultProps,
-        stepToCmFactor: 4
-      };
-
-      render(<MachineWeaponsList {...props} />);
-
-      // D12 with factor 4 should show 48см
-      expect(screen.getByText('48см')).toBeInTheDocument();
+      // CM values were removed from the UI
+      expect(screen.queryByText('60см')).not.toBeInTheDocument();
+      expect(screen.queryByText('48см')).not.toBeInTheDocument();
     });
   });
 
