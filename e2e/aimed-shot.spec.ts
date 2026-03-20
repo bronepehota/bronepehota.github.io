@@ -141,10 +141,10 @@ test.describe('Aimed Shot - Combat Modal', () => {
     const gameSession = newPage.getByTestId('game-session');
     await expect(gameSession.first()).toBeVisible({ timeout: 10000 });
 
-    // Machines have a "ВЫСТРЕЛ" button directly for each weapon
-    const weaponFireButton = newPage.locator('button[title="Выстрел"]').first();
-    await expect(weaponFireButton).toBeVisible({ timeout: 5000 });
-    await weaponFireButton.click({ force: true });
+    // Machines have clickable weapon cards (role="button" with aria-label "Выстрел: ...")
+    const weaponCard = newPage.getByRole('button', { name: /Выстрел:/i }).first();
+    await expect(weaponCard).toBeVisible({ timeout: 5000 });
+    await weaponCard.click({ force: true });
     await newPage.waitForTimeout(500);
 
     // Check aimed shot button is NOT visible for machines

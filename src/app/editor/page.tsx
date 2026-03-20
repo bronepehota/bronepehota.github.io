@@ -35,6 +35,12 @@ export default function EditorPage() {
             </Link>
             <h1 className="text-lg font-semibold">Редактор армлистов</h1>
           </div>
+          <Link
+            href="/editor/bonuses"
+            className="text-sm text-emerald-400 hover:text-emerald-300 transition-colors"
+          >
+            Бонусы
+          </Link>
         </div>
       </header>
 

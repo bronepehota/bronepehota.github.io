@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { SoldierActions } from '@/components/cards/soldier-card/SoldierActions';
 import { SoldierActionState } from '@/components/cards/soldier-card/SoldierActions';
 
-describe('SoldierActions - Pilot Button', () => {
+describe('SoldierActions', () => {
   const defaultProps = {
     isDead: false,
     isDone: false,
@@ -18,23 +18,8 @@ describe('SoldierActions - Pilot Button', () => {
   };
 
   describe('Pilot soldier rendering', () => {
-    it('should show "К МАШИНЕ →" button for pilot', () => {
-      render(
-        <SoldierActions
-          {...defaultProps}
-          isPilot={true}
-          onNavigateToMachine={jest.fn()}
-        />
-      );
-
-      // Check for the navigation button text (visible on larger screens)
-      const buttonText = screen.queryByText('К МАШИНЕ →');
-      expect(buttonText).toBeInTheDocument();
-    });
-
-    it('should call onNavigateToMachine when pilot clicks navigation button', () => {
+    it('should show navigation button for pilot', () => {
       const onNavigateToMachine = jest.fn();
-
       render(
         <SoldierActions
           {...defaultProps}
@@ -43,8 +28,23 @@ describe('SoldierActions - Pilot Button', () => {
         />
       );
 
-      const buttonText = screen.getByText('К МАШИНЕ →');
-      fireEvent.click(buttonText);
+      // Pilot shows navigation button (ArrowRightCircle icon, aria-label)
+      const navButton = screen.getByLabelText('Перейти к машине');
+      expect(navButton).toBeInTheDocument();
+    });
+
+    it('should call onNavigateToMachine when pilot clicks navigation button', () => {
+      const onNavigateToMachine = jest.fn();
+      render(
+        <SoldierActions
+          {...defaultProps}
+          isPilot={true}
+          onNavigateToMachine={onNavigateToMachine}
+        />
+      );
+
+      const navButton = screen.getByLabelText('Перейти к машине');
+      fireEvent.click(navButton);
 
       expect(onNavigateToMachine).toHaveBeenCalledTimes(1);
     });
@@ -58,30 +58,39 @@ describe('SoldierActions - Pilot Button', () => {
         />
       );
 
-      // Should NOT contain "ДЕЙСТВИЕ" text
+      // Should NOT contain "ДЕЙСТВИЕ" text (button was removed)
       const actionButton = screen.queryByText('ДЕЙСТВИЕ');
       expect(actionButton).not.toBeInTheDocument();
     });
   });
 
   describe('Regular soldier rendering', () => {
-    it('should show "ДЕЙСТВИЕ" button for regular soldier', () => {
+    it('should show ГОТОВ and УБИТЬ buttons for regular soldier', () => {
+      render(<SoldierActions {...defaultProps} isPilot={false} />);
+
+      const doneButton = screen.getByRole('button', { name: /Завершить ход бойца/i });
+      expect(doneButton).toBeInTheDocument();
+      const killButton = screen.getByRole('button', { name: /Пометить бойца как убитого/i });
+      expect(killButton).toBeInTheDocument();
+    });
+
+    it('should not show action button (removed)', () => {
       render(<SoldierActions {...defaultProps} isPilot={false} />);
 
       const actionButton = screen.queryByText('ДЕЙСТВИЕ');
-      expect(actionButton).toBeInTheDocument();
+      expect(actionButton).not.toBeInTheDocument();
     });
 
     it('should not show navigation button for regular soldier', () => {
       render(<SoldierActions {...defaultProps} isPilot={false} />);
 
-      const navigateButton = screen.queryByText('К МАШИНЕ →');
+      const navigateButton = screen.queryByLabelText('Перейти к машине');
       expect(navigateButton).not.toBeInTheDocument();
     });
   });
 
   describe('Pilot with panic state', () => {
-    it('should show panic state instead of navigation button when pilot is in panic', () => {
+    it('should still show navigation button for pilot even in panic (navigation takes priority)', () => {
       render(
         <SoldierActions
           {...defaultProps}
@@ -91,85 +100,14 @@ describe('SoldierActions - Pilot Button', () => {
         />
       );
 
-      // Should show "В ПАНИКЕ"
-      const panicText = screen.queryByText('В ПАНИКЕ');
-      expect(panicText).toBeInTheDocument();
-
-      // Should NOT show navigation button
-      const navigateButton = screen.queryByText('К МАШИНЕ →');
-      expect(navigateButton).not.toBeInTheDocument();
-    });
-  });
-
-  describe('GOТОВ and УБИТЬ buttons work for pilots', () => {
-    it('should render ГОТОВ button for pilot', () => {
-      render(
-        <SoldierActions
-          {...defaultProps}
-          isPilot={true}
-          onNavigateToMachine={jest.fn()}
-        />
-      );
-
-      // Check for the ГОТОВ button (accessible via aria-label)
-      const doneButton = screen.getByRole('button', { name: /Завершить ход бойца/i });
-      expect(doneButton).toBeInTheDocument();
-    });
-
-    it('should call onToggleDone when ГОТОВ is clicked for pilot', () => {
-      const onToggleDone = jest.fn();
-
-      render(
-        <SoldierActions
-          {...defaultProps}
-          isPilot={true}
-          onNavigateToMachine={jest.fn()}
-          onToggleDone={onToggleDone}
-        />
-      );
-
-      const doneButton = screen.getByRole('button', { name: /Завершить ход бойца/i });
-      fireEvent.click(doneButton);
-
-      expect(onToggleDone).toHaveBeenCalledTimes(1);
-    });
-
-    it('should render УБИТЬ button for pilot', () => {
-      render(
-        <SoldierActions
-          {...defaultProps}
-          isPilot={true}
-          onNavigateToMachine={jest.fn()}
-        />
-      );
-
-      // Check for the УБИТЬ button (accessible via aria-label)
-      const killButton = screen.getByRole('button', { name: /Пометить бойца как убитого/i });
-      expect(killButton).toBeInTheDocument();
-    });
-
-    it('should call onToggleDead when УБИТЬ is clicked for pilot', () => {
-      const onToggleDead = jest.fn();
-
-      render(
-        <SoldierActions
-          {...defaultProps}
-          isPilot={true}
-          onNavigateToMachine={jest.fn()}
-          onToggleDead={onToggleDead}
-        />
-      );
-
-      const killButton = screen.getByRole('button', { name: /Пометить бойца как убитого/i });
-      fireEvent.click(killButton);
-
-      expect(onToggleDead).toHaveBeenCalledTimes(1);
+      // Pilot navigation takes priority over panic display
+      const navigateButton = screen.getByLabelText('Перейти к машине');
+      expect(navigateButton).toBeInTheDocument();
     });
   });
 
   describe('Navigation button without callback', () => {
     it('should render button but onNavigateToMachine is optional', () => {
-      // This should not throw an error
       expect(() => {
         render(
           <SoldierActions

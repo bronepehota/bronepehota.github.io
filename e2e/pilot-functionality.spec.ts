@@ -125,8 +125,8 @@ test.describe('Pilot Functionality', () => {
       .locator('text=/ПИЛОТ/i');
     await expect(pilotBadge).toBeVisible();
 
-    // Check for "К МАШИНЕ →" button instead of "ДЕЙСТВИЕ"
-    const navigateButton = page.locator('text=/К МАШИНЕ/i');
+    // Check for pilot navigation button (aria-label)
+    const navigateButton = page.getByLabel('Перейти к машине');
     await expect(navigateButton).toBeVisible();
 
     // Should NOT have regular action button
