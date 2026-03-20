@@ -44,13 +44,14 @@ describe('constants', () => {
       expect(LOCAL_STORAGE_KEYS.ARMY_LIST_SOURCE).toBe('bronepehota_army_list_source');
       expect(LOCAL_STORAGE_KEYS.CUSTOM_SOURCES).toBe('bronepehota_custom_sources');
       expect(LOCAL_STORAGE_KEYS.EDITOR_SHOW_BASE_UNITS).toBe('bronepehota_editor_show_base_units');
+      expect(LOCAL_STORAGE_KEYS.SETUP_STEP).toBe('bronepehota_setup_step');
     });
 
     it('should have correct types (as const provides compile-time readonly)', () => {
       // as const ensures TypeScript treats these as readonly literals
       // Note: Runtime immutability would require Object.freeze()
       expect(typeof LOCAL_STORAGE_KEYS.ARMY).toBe('string');
-      expect(Object.keys(LOCAL_STORAGE_KEYS)).toHaveLength(12);
+      expect(Object.keys(LOCAL_STORAGE_KEYS)).toHaveLength(13);
     });
   });
 

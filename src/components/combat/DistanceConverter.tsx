@@ -71,13 +71,10 @@ export function DistanceConverter({
     setCmValue(newCm);
   };
 
-  const toggleMode = () => {
-    setMode((prev) => (prev === 'steps' ? 'cm' : 'steps'));
-  };
-
   const isEditingSteps = mode === 'steps';
-  const displaySteps = mode === 'steps' ? steps : cmToSteps(cmValue, stepToCmFactor);
-  const displayCm = mode === 'cm' ? cmValue : stepsToCm(steps, stepToCmFactor);
+  const stepperValue = isEditingSteps ? steps : cmValue;
+  const hintCm = stepsToCm(steps, stepToCmFactor);
+  const hintSteps = cmToSteps(cmValue, stepToCmFactor);
 
   return (
     <div className={cn('flex flex-col gap-1.5', className)}>
@@ -89,19 +86,19 @@ export function DistanceConverter({
       {/* Input row with inline hint */}
       <div className="flex items-center gap-2">
         <NumberStepper
-          value={displaySteps}
-          onChange={handleStepsChange}
+          value={stepperValue}
+          onChange={isEditingSteps ? handleStepsChange : handleCmChange}
           min={1}
-          max={20}
+          max={isEditingSteps ? 20 : 100}
           step={1}
           size="sm"
           disabled={disabled}
           className="flex-1"
         />
 
-        {/* CM value - larger */}
+        {/* Secondary value hint */}
         <span className="text-sm md:text-base text-slate-500 font-mono whitespace-nowrap shrink-0">
-          ({displayCm} см)
+          ({isEditingSteps ? `${hintCm} см` : `${hintSteps}шаг`})
         </span>
       </div>
     </div>
