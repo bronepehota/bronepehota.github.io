@@ -5,9 +5,11 @@
 
 'use client';
 
+import { Fragment } from 'react';
 import { CustomSoldier } from '@/lib/editor/types';
-import { Trash2, User } from 'lucide-react';
+import { Trash2, User, ImageIcon } from 'lucide-react';
 import { getFactionColors } from '@/lib/faction-colors';
+import { GitHubPagesImage } from '@/components/GitHubPagesImage';
 import { cn } from '@/lib/utils';
 
 interface SoldiersTableProps {
@@ -22,12 +24,12 @@ interface SoldiersTableProps {
 
 // Soldier field definitions with labels and validation
 const soldierFields = [
-  { key: 'rank' as const, label: 'Ранг', type: 'number', min: 0, max: 7, width: 'w-16' },
-  { key: 'speed' as const, label: 'Скор', type: 'number', min: 0, max: 8, width: 'w-14' },
-  { key: 'range' as const, label: 'Дальн', type: 'text', placeholder: 'D6', width: 'w-16' },
-  { key: 'power' as const, label: 'Мощн', type: 'text', placeholder: '1D6', width: 'w-16' },
-  { key: 'melee' as const, label: 'ББ', type: 'number', min: 0, max: 9, width: 'w-14' },
-  { key: 'armor' as const, label: 'Броня', type: 'number', min: 0, max: 9, width: 'w-14' },
+  { key: 'rank' as const, label: 'Ранг', type: 'number' as const, min: 0, max: 7, width: 'w-16' },
+  { key: 'speed' as const, label: 'Скор', type: 'number' as const, min: 0, max: 8, width: 'w-16' },
+  { key: 'range' as const, label: 'Дальн', type: 'text' as const, placeholder: 'D6', width: 'w-16' },
+  { key: 'power' as const, label: 'Мощн', type: 'text' as const, placeholder: '1D6', width: 'w-16' },
+  { key: 'melee' as const, label: 'ББ', type: 'number' as const, min: 0, max: 9, width: 'w-16' },
+  { key: 'armor' as const, label: 'Броня', type: 'number' as const, min: 0, max: 9, width: 'w-16' },
 ];
 
 // Props options with hints
@@ -85,12 +87,11 @@ export function SoldiersTable({
             <label className="block text-[10px] text-slate-500 uppercase">{field.label}</label>
             {field.type === 'number' ? (
               <input
-                type="number"
+                type="text"
+                inputMode="numeric"
                 value={soldier[field.key]}
                 onChange={(e) => onUpdate(index, { [field.key]: parseInt(e.target.value) || 0 })}
                 className="w-full px-2 py-1 bg-slate-900 border border-slate-700 rounded text-sm text-center focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20"
-                min={field.min}
-                max={field.max}
               />
             ) : (
               <input
@@ -128,16 +129,37 @@ export function SoldiersTable({
         </div>
       </div>
 
-      {/* Image URL */}
+      {/* Image URL with preview */}
       <div className="space-y-1">
         <label className="block text-[10px] text-slate-500 uppercase">Изображение</label>
-        <input
-          type="text"
-          value={soldier.image || ''}
-          onChange={(e) => onUpdate(index, { image: e.target.value })}
-          className="w-full px-2 py-1 bg-slate-900 border border-slate-700 rounded text-xs focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20"
-          placeholder="/images/soldiers/..."
-        />
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            value={soldier.image || ''}
+            onChange={(e) => onUpdate(index, { image: e.target.value })}
+            className="flex-1 px-2 py-1 bg-slate-900 border border-slate-700 rounded text-xs focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20"
+            placeholder="/images/soldiers/..."
+          />
+          {soldier.image ? (
+            <div className="w-16 md:w-20 aspect-[3/4] rounded border border-slate-700 overflow-hidden shrink-0 bg-slate-900 shadow-md">
+              <GitHubPagesImage
+                src={soldier.image}
+                alt=""
+                width={80}
+                height={107}
+                className="w-full h-full object-cover object-center"
+                unoptimized
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+            </div>
+          ) : (
+            <div className="w-16 md:w-20 aspect-[3/4] rounded border border-slate-700/50 bg-slate-900/50 flex items-center justify-center shrink-0">
+              <ImageIcon className="w-5 h-5 text-slate-600" />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -156,21 +178,45 @@ export function SoldiersTable({
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-700 text-xs text-slate-400">
+              <th className="w-14 px-1"></th>
               <th className="w-10 px-2 text-center">№</th>
               {soldierFields.map(field => (
                 <th key={field.key} className="px-2 text-center">{field.label}</th>
               ))}
               <th className="px-2 text-center">Свойства</th>
-              <th className="px-2">Изображение</th>
               <th className="w-16 px-2"></th>
             </tr>
           </thead>
           <tbody>
             {soldiers.map((soldier, index) => (
-              <tr key={index} className={cn(
+              <Fragment key={index}>
+              <tr className={cn(
                 "border-b border-slate-700/50 group hover:bg-slate-800/30 transition-colors",
                 colors.border
               )}>
+                {/* Preview */}
+                <td className="px-1 py-1">
+                  {soldier.image ? (
+                    <div className="w-12 aspect-[3/4] rounded border border-slate-700 overflow-hidden bg-slate-900">
+                      <GitHubPagesImage
+                        src={soldier.image}
+                        alt=""
+                        width={48}
+                        height={64}
+                        className="w-full h-full object-cover object-center"
+                        unoptimized
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-12 aspect-[3/4] rounded border border-slate-700/50 bg-slate-900/50 flex items-center justify-center">
+                      <ImageIcon className="w-4 h-4 text-slate-600" />
+                    </div>
+                  )}
+                </td>
+                {/* Number */}
                 <td className="px-2 text-center text-slate-500 font-mono text-xs">
                   {index + 1}
                 </td>
@@ -178,12 +224,11 @@ export function SoldiersTable({
                   <td key={field.key} className="px-1">
                     {field.type === 'number' ? (
                       <input
-                        type="number"
+                        type="text"
+                        inputMode="numeric"
                         value={soldier[field.key]}
                         onChange={(e) => onUpdate(index, { [field.key]: parseInt(e.target.value) || 0 })}
                         className="w-full px-1.5 py-1 bg-slate-900 border border-slate-700 rounded text-center text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20"
-                        min={field.min}
-                        max={field.max}
                       />
                     ) : (
                       <input
@@ -216,15 +261,6 @@ export function SoldiersTable({
                     ))}
                   </div>
                 </td>
-                <td className="px-1">
-                  <input
-                    type="text"
-                    value={soldier.image || ''}
-                    onChange={(e) => onUpdate(index, { image: e.target.value })}
-                    className="w-full px-1.5 py-1 bg-slate-900 border border-slate-700 rounded text-xs focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20"
-                    placeholder="/images/..."
-                  />
-                </td>
                 <td className="px-2">
                   <button
                     onClick={() => onRemove(index)}
@@ -236,6 +272,19 @@ export function SoldiersTable({
                   </button>
                 </td>
               </tr>
+              {/* Second row: image URL input spanning all columns */}
+              <tr className={cn("border-b border-slate-700/50", colors.border)}>
+                <td colSpan={soldierFields.length + 3}>
+                  <input
+                    type="text"
+                    value={soldier.image || ''}
+                    onChange={(e) => onUpdate(index, { image: e.target.value })}
+                    className="w-full px-2 py-1 bg-slate-900 border border-slate-700 rounded text-xs focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20"
+                    placeholder="/images/..."
+                  />
+                </td>
+              </tr>
+              </Fragment>
             ))}
           </tbody>
         </table>

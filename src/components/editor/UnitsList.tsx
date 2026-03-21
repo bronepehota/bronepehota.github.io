@@ -103,7 +103,6 @@ export function UnitsList({
     // For MY_UNITS view: show ALL custom squads and ALL hidden base squads
     if (isMyUnitsView) {
       const custom = source.squads;
-      const _customIds = new Set(custom.map(s => s.id));
 
       let hidden: CustomSquad[] = [];
       let allBaseIds = new Set<string>();
@@ -161,7 +160,6 @@ export function UnitsList({
     // For MY_UNITS view: show ALL custom machines and ALL hidden base machines
     if (isMyUnitsView) {
       const custom = source.machines;
-      const _customIds = new Set(custom.map(m => m.id));
 
       let hidden: CustomMachine[] = [];
       let allBaseIds = new Set<string>();
@@ -226,10 +224,6 @@ export function UnitsList({
   const hasBaseUnits = baseSquads.length > 0 || baseMachines.length > 0;
   const hasHiddenUnits = hiddenSquads.length > 0 || hiddenMachines.length > 0;
 
-  // Calculate total modified units count for MY_UNITS badge
-  const _myUnitsCount = source.squads.length + source.machines.length +
-    (source.hiddenUnits?.length || 0);
-
   const handleUnitClick = (unitId: string, type: 'squad' | 'machine') => {
     const isCustom = type === 'squad'
       ? customSquads.some(s => s.id === unitId)
@@ -250,7 +244,7 @@ export function UnitsList({
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-900/50">
+    <div className="flex flex-col h-full min-h-0 overflow-hidden bg-slate-900/50">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700/50 bg-slate-900/80 backdrop-blur-sm">
         <h2 className="text-sm font-semibold text-slate-200 tracking-wide uppercase">
@@ -343,7 +337,7 @@ export function UnitsList({
       </div>
 
       {/* Units list */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-2">
+      <div className="flex-1 min-h-0 overflow-y-auto p-3 space-y-2">
         {tab === 'squad' ? (
           displaySquads.length === 0 ? (
             <div className="p-6 text-center">

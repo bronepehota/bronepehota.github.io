@@ -1,6 +1,6 @@
 /**
  * Squad preview - shows how squad will look in battle card
- * Reuses existing SoldierCard components with minimal props
+ * Mirrors the exact layout of SoldierCard from battle view
  */
 
 'use client';
@@ -8,6 +8,7 @@
 import { CustomSoldier } from '@/lib/editor/types';
 import { SoldierImage } from '@/components/cards/soldier-card/SoldierImage';
 import { SoldierStats } from '@/components/cards/soldier-card/SoldierStats';
+import { getFactionColors } from '@/lib/faction-colors';
 import { cn } from '@/lib/utils';
 
 interface SquadPreviewProps {
@@ -23,66 +24,36 @@ export function SquadPreview({
   squadCost,
   faction = 'mercenaries',
 }: SquadPreviewProps) {
-  // Faction colors
-  const getFactionColors = () => {
-    switch (faction) {
-      case 'polaris':
-        return {
-          border: 'border-red-600/30',
-          badge: 'bg-red-950/90 text-red-400 border-red-600/40',
-          corner: 'rgba(220, 38, 38, 0.6)',
-        };
-      case 'protectorate':
-        return {
-          border: 'border-cyan-600/30',
-          badge: 'bg-cyan-950/90 text-cyan-400 border-cyan-600/40',
-          corner: 'rgba(8, 145, 178, 0.6)',
-        };
-      default:
-        return {
-          border: 'border-yellow-600/30',
-          badge: 'bg-yellow-950/90 text-yellow-400 border-yellow-600/40',
-          corner: 'rgba(202, 138, 4, 0.6)',
-        };
-    }
-  };
-
-  const colors = getFactionColors();
+  const colors = getFactionColors(faction);
 
   return (
-    <div className="w-full max-w-4xl bg-slate-900/80 rounded-sm border-2 shadow-lg overflow-hidden relative"
-      style={{ borderColor: colors.corner }}
-    >
-      {/* Tech corners */}
-      <div className="absolute top-0 left-0 w-3 h-3 border-l-2 border-t-2 -ml-px -mt-px pointer-events-none" style={{ borderColor: colors.corner }} />
-      <div className="absolute top-0 right-0 w-3 h-3 border-r-2 border-t-2 -mr-px -mt-px pointer-events-none" style={{ borderColor: colors.corner }} />
-      <div className="absolute bottom-0 left-0 w-3 h-3 border-l-2 border-b-2 -ml-px -mb-px pointer-events-none" style={{ borderColor: colors.corner }} />
-      <div className="absolute bottom-0 right-0 w-3 h-3 border-r-2 border-b-2 -mr-px -mb-px pointer-events-none" style={{ borderColor: colors.corner }} />
-
-      {/* Unit Header */}
-      <div className="bg-slate-900/95 backdrop-blur-sm border-b border-slate-800/50 px-3 py-2">
-        <div className="flex justify-between items-start">
-          <div className="flex-1 min-w-0">
-            <div className="text-xs text-slate-500 font-mono uppercase tracking-wider">{squadName}</div>
-            <div className="text-2xl font-bold text-white mt-0.5">{squadCost} очков</div>
-          </div>
+    <div className="w-full max-w-4xl">
+      {/* Unit Header - matches UnitCardHeader style */}
+      <div className={cn(
+        "px-2 md:px-3 py-2 flex justify-between items-center relative z-20 border-b border-slate-800/50",
+        "sticky top-0 bg-slate-900/95",
+        colors.bg
+      )}>
+        <div className="flex-1 min-w-0">
+          <h3 className="min-w-0 font-mono font-bold text-xs md:text-sm uppercase tracking-wide truncate text-slate-200">{squadName}</h3>
         </div>
+        <div className="text-lg font-bold text-white ml-3 shrink-0">{squadCost}</div>
       </div>
 
-      {/* Soldiers - reusing SoldierCard layout */}
-      <div className="p-2 md:p-3 space-y-1.5">
+      {/* Soldiers - exact copy of SoldierCard layout */}
+      <div className="grid grid-cols-1 gap-1 md:gap-1.5 p-1 md:p-1.5">
         {soldiers.map((soldier, index) => (
           <div
             key={index}
             className={cn(
-              "relative p-1 md:p-1.5 rounded-sm border flex gap-1.5 md:gap-2 transition-all overflow-hidden",
+              "relative p-1 md:p-1.5 rounded-sm border flex items-center gap-1.5 md:gap-2 transition-all overflow-hidden",
               "bg-slate-800/30 border-slate-700/50"
             )}
           >
-            {/* Status stripe - green for preview */}
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500" />
+            {/* Status stripe - active (transparent) for preview */}
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
 
-            {/* Soldier image - reusing component */}
+            {/* Soldier image - reusing battle component */}
             <SoldierImage
               imageUrl={soldier.image || '/images/soldiers/empty.png'}
               soldierIndex={index}
@@ -93,17 +64,19 @@ export function SquadPreview({
               onImageClick={() => {}}
             />
 
-            {/* Left side: placeholder for actions (none in preview) + stats */}
-            <div className="flex-1 flex flex-col justify-center min-w-0 gap-1.5">
-              {/* Actions placeholder - grayed out */}
-              <div className="flex gap-1 opacity-30">
-                <div className="flex-1 h-6 bg-emerald-900/30 rounded flex items-center justify-center text-xs text-emerald-400/50">
-                  ДЕЙСТВИЕ
-                </div>
-              </div>
+            {/* Stats - reusing battle component */}
+            <SoldierStats
+              soldier={soldier}
+              distanceInputUnit="steps"
+              stepToCmFactor={5}
+              className="flex-1"
+            />
 
-              {/* Stats - reusing component */}
-              <SoldierStats soldier={soldier} distanceInputUnit="steps" stepToCmFactor={5} />
+            {/* Action button placeholder - mirrors SoldierActions position */}
+            <div className="flex flex-col items-center gap-0.5 shrink-0">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-emerald-900/20 border border-emerald-700/30 flex items-center justify-center">
+                <span className="text-[8px] md:text-[9px] font-mono font-bold text-emerald-400/40 uppercase tracking-wider">ДЕЙСТВИЕ</span>
+              </div>
             </div>
           </div>
         ))}
