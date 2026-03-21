@@ -7,9 +7,10 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { ChevronLeft } from 'lucide-react';
 import { CustomSource, CustomFaction, CustomSquad, CustomMachine } from '@/lib/editor/types';
 import { getCustomSourcesStorage } from '@/lib/editor/storage';
-import { generateSourceId, generateFactionId } from '@/lib/editor/id-generator';
+import { generateSourceId, generateFactionId, generateUnitId } from '@/lib/editor/id-generator';
 import { getSource } from '@/lib/sources-registry';
 import { getEncyclopediaFaction } from '@/lib/encyclopedia-registry';
 import { SourcesList } from './SourcesList';
@@ -86,17 +87,23 @@ export function EditorLayout() {
     name: string;
     description: string;
     baseSource: string | null;
+    factionIds?: string[];
+    importSourceId?: string;
+    importFactionIds?: string[];
   }) => {
     const storage = getCustomSourcesStorage();
     const now = new Date().toISOString();
 
-    // If creating an extension, copy base source factions
+    // Build factions list
     let factions: CustomFaction[] = [];
+    const importedSquads: CustomSquad[] = [];
+    const importedMachines: CustomMachine[] = [];
+
     if (data.baseSource) {
+      // Extension: copy base source factions
       const baseSourceData = getSource(data.baseSource);
       if (baseSourceData) {
         factions = baseSourceData.factions.map(f => {
-          // Get full faction data from encyclopedia
           const encFaction = getEncyclopediaFaction(f.id);
           return {
             id: f.id,
@@ -107,6 +114,67 @@ export function EditorLayout() {
           };
         });
       }
+    } else if (data.importSourceId && data.importFactionIds) {
+      // Import: copy factions and units from selected source
+      const sourceData = getSource(data.importSourceId);
+      if (sourceData) {
+        factions = data.importFactionIds.map(fId => {
+          const encFaction = getEncyclopediaFaction(fId);
+          const srcFaction = sourceData.factions.find(f => f.id === fId);
+          return {
+            id: fId,
+            name: encFaction?.name || srcFaction?.name || fId,
+            color: encFaction?.color || srcFaction?.color || '#6b7280',
+            description: encFaction?.description,
+          };
+        });
+
+        // Copy squads for selected factions
+        const importedSquadIds = new Set<string>();
+        for (const factionId of data.importFactionIds) {
+          for (const squad of sourceData.squads) {
+            if (squad.faction !== factionId) continue;
+            const newId = generateUnitId(factionId, squad.name);
+            if (importedSquadIds.has(newId)) {
+              // Avoid duplicates by appending timestamp
+              const uniqueId = `${newId}_${Date.now()}`;
+              importedSquadIds.add(uniqueId);
+              importedSquads.push({ ...squad, id: uniqueId, faction: factionId });
+            } else {
+              importedSquadIds.add(newId);
+              importedSquads.push({ ...squad, id: newId, faction: factionId });
+            }
+          }
+        }
+
+        // Copy machines for selected factions
+        const importedMachineIds = new Set<string>();
+        for (const factionId of data.importFactionIds) {
+          for (const machine of sourceData.machines) {
+            if (machine.faction !== factionId) continue;
+            const newId = generateUnitId(factionId, machine.name);
+            if (importedMachineIds.has(newId)) {
+              const uniqueId = `${newId}_${Date.now()}`;
+              importedMachineIds.add(uniqueId);
+              importedMachines.push({ ...machine, id: uniqueId, faction: factionId });
+            } else {
+              importedMachineIds.add(newId);
+              importedMachines.push({ ...machine, id: newId, faction: factionId });
+            }
+          }
+        }
+      }
+    } else if (data.factionIds && data.factionIds.length > 0) {
+      // New source: use selected standard factions
+      factions = data.factionIds.map(fId => {
+        const encFaction = getEncyclopediaFaction(fId);
+        return {
+          id: fId,
+          name: encFaction?.name || fId,
+          color: encFaction?.color || '#6b7280',
+          description: encFaction?.description,
+        };
+      });
     }
 
     const newSource: CustomSource = {
@@ -116,8 +184,8 @@ export function EditorLayout() {
       version: '1.0',
       baseSource: data.baseSource,
       factions,
-      squads: [],
-      machines: [],
+      squads: importedSquads,
+      machines: importedMachines,
       hiddenUnits: [],
       createdAt: now,
       updatedAt: now,
@@ -386,368 +454,272 @@ export function EditorLayout() {
     }
   };
 
+  // Shared editor views (used by both desktop full-width and mobile)
+  const renderEditorView = () => {
+    if (view === 'create-squad' && selectedSource && selectedFactionId) {
+      return (
+        <SquadEditor
+          source={selectedSource}
+          factionId={selectedFactionId}
+          onSave={(newSquad: CustomSquad) => {
+            const updated = {
+              ...selectedSource,
+              squads: [...selectedSource.squads, newSquad],
+            };
+            handleUpdateSource(updated);
+            handleBackToList();
+          }}
+          onCancel={handleBackToList}
+        />
+      );
+    }
+
+    if (view === 'create-machine' && selectedSource && selectedFactionId) {
+      return (
+        <MachineEditor
+          source={selectedSource}
+          factionId={selectedFactionId}
+          onSave={(newMachine: CustomMachine) => {
+            const updated = {
+              ...selectedSource,
+              machines: [...selectedSource.machines, newMachine],
+            };
+            handleUpdateSource(updated);
+            handleBackToList();
+          }}
+          onCancel={handleBackToList}
+        />
+      );
+    }
+
+    if (view === 'edit-squad' && selectedSource && selectedSquad) {
+      return (
+        <SquadEditor
+          squad={selectedSquad}
+          source={selectedSource}
+          factionId={selectedSquad.faction}
+          onSave={(updatedSquad: CustomSquad) => {
+            const updated = {
+              ...selectedSource,
+              squads: selectedSource.squads.map(s =>
+                s.id === updatedSquad.id ? updatedSquad : s
+              ),
+            };
+            handleUpdateSource(updated);
+            handleBackToList();
+          }}
+          onCancel={handleBackToList}
+        />
+      );
+    }
+
+    if (view === 'edit-machine' && selectedSource && selectedMachine) {
+      return (
+        <MachineEditor
+          machine={selectedMachine}
+          source={selectedSource}
+          factionId={selectedMachine.faction}
+          onSave={(updatedMachine: CustomMachine) => {
+            const updated = {
+              ...selectedSource,
+              machines: selectedSource.machines.map(m =>
+                m.id === updatedMachine.id ? updatedMachine : m
+              ),
+            };
+            handleUpdateSource(updated);
+            handleBackToList();
+          }}
+          onCancel={handleBackToList}
+        />
+      );
+    }
+
+    if (view === 'override-squad' && selectedSource && selectedFactionId && overrideSquadData) {
+      return (
+        <SquadEditor
+          squad={overrideSquadData}
+          source={selectedSource}
+          factionId={selectedFactionId}
+          isOverride={true}
+          onSave={(overrideSquad: CustomSquad) => {
+            const existingIndex = selectedSource.squads.findIndex(s => s.id === overrideSquadData.id);
+            const customSquad: CustomSquad = {
+              ...overrideSquad,
+              id: overrideSquadData.id,
+              faction: selectedFactionId,
+            };
+
+            let newSquads: CustomSquad[];
+            if (existingIndex >= 0) {
+              newSquads = selectedSource.squads.map((s, i) =>
+                i === existingIndex ? customSquad : s
+              );
+            } else {
+              newSquads = [...selectedSource.squads, customSquad];
+            }
+
+            const updated = {
+              ...selectedSource,
+              squads: newSquads,
+            };
+            handleUpdateSource(updated);
+            handleBackToList();
+          }}
+          onCancel={handleBackToList}
+        />
+      );
+    }
+
+    if (view === 'override-machine' && selectedSource && selectedFactionId && overrideMachineData) {
+      return (
+        <MachineEditor
+          machine={overrideMachineData}
+          source={selectedSource}
+          factionId={selectedFactionId}
+          isOverride={true}
+          onSave={(overrideMachine: CustomMachine) => {
+            const existingIndex = selectedSource.machines.findIndex(m => m.id === overrideMachineData.id);
+            const customMachine: CustomMachine = {
+              ...overrideMachine,
+              id: overrideMachineData.id,
+              faction: selectedFactionId,
+            };
+
+            let newMachines: CustomMachine[];
+            if (existingIndex >= 0) {
+              newMachines = selectedSource.machines.map((m, i) =>
+                i === existingIndex ? customMachine : m
+              );
+            } else {
+              newMachines = [...selectedSource.machines, customMachine];
+            }
+
+            const updated = {
+              ...selectedSource,
+              machines: newMachines,
+            };
+            handleUpdateSource(updated);
+            handleBackToList();
+          }}
+          onCancel={handleBackToList}
+        />
+      );
+    }
+
+    return null;
+  };
+
+  // Breadcrumb info for context
+  const factionName = allFactions.find(f => f.id === selectedFactionId)?.name;
+
   return (
-    <div className="flex flex-col h-[calc(100vh-120px)] bg-slate-950">
+    <div className="flex flex-col flex-1 min-h-0 bg-slate-950">
       {/* Desktop layout */}
-      <div className="hidden md:flex flex-1">
-        <div className="flex w-full">
-          {/* Left column: Sources list */}
-          <div className="w-72 border-r border-slate-800/50 overflow-y-auto">
-            <SourcesList
-              sources={sources}
-              selectedId={selectedSourceId}
-              onSelect={setSelectedSourceId}
-              onCreateNew={() => setShowCreateModal(true)}
-              onDelete={handleDeleteSource}
-              onExport={() => selectedSource && setShowExportModal(true)}
-              onImport={() => setShowImportModal(true)}
-            />
+      <div className="hidden md:flex flex-1 min-h-0">
+        {view === 'list' ? (
+          <div className="flex w-full h-full min-h-0">
+            {/* Left column: Sources list */}
+            <div className="w-72 border-r border-slate-800/50 overflow-y-auto min-h-0">
+              <SourcesList
+                sources={sources}
+                selectedId={selectedSourceId}
+                onSelect={setSelectedSourceId}
+                onCreateNew={() => setShowCreateModal(true)}
+                onDelete={handleDeleteSource}
+                onExport={() => selectedSource && setShowExportModal(true)}
+                onImport={() => setShowImportModal(true)}
+              />
+            </div>
+
+            {/* Middle column: Factions list */}
+            <div className="w-80 border-r border-slate-800/50 overflow-y-auto min-h-0">
+              {selectedSource ? (
+                <FactionsList
+                  factions={allFactions}
+                  selectedId={selectedFactionId}
+                  onSelect={setSelectedFactionId}
+                  onCreateNew={() => {
+                    const newFaction: CustomFaction = {
+                      id: generateFactionId('Новая фракция'),
+                      name: 'Новая фракция',
+                      color: '#6b7280',
+                    };
+                    handleUpdateSource({
+                      ...selectedSource,
+                      factions: [...selectedSource.factions, newFaction],
+                    });
+                  }}
+                  myUnitsCount={selectedSource.squads.length + selectedSource.machines.length + (selectedSource.hiddenUnits?.length || 0)}
+                />
+              ) : (
+                <div className="p-4 text-slate-500 text-center">
+                  Выберите источник для просмотра фракций
+                </div>
+              )}
+            </div>
+
+            {/* Right column: Units list */}
+            <div className="flex-1 min-h-0 overflow-hidden bg-slate-900/30">
+              {selectedFactionId && selectedSource ? (
+                <UnitsList
+                  source={selectedSource}
+                  baseSourceId={selectedSource.baseSource}
+                  factionId={selectedFactionId}
+                  factions={allFactions}
+                  onSelectUnit={handleSelectUnit}
+                  onCloneUnit={handleCloneUnit}
+                  onOverrideUnit={handleOverrideUnit}
+                  onHideUnit={handleHideUnit}
+                  onRestoreUnit={handleRestoreUnit}
+                  onCreateSquad={handleCreateSquad}
+                  onCreateMachine={handleCreateMachine}
+                />
+              ) : (
+                <div className="p-4 text-slate-500 text-center">
+                  Выберите фракцию для просмотра юнитов
+                </div>
+              )}
+            </div>
           </div>
-
-          {/* Middle column: Factions list */}
-          <div className="w-80 border-r border-slate-800/50 overflow-y-auto">
-            {selectedSource ? (
-              <FactionsList
-                factions={allFactions}
-                selectedId={selectedFactionId}
-                onSelect={setSelectedFactionId}
-                onCreateNew={() => {
-                  const newFaction: CustomFaction = {
-                    id: generateFactionId('Новая фракция'),
-                    name: 'Новая фракция',
-                    color: '#6b7280',
-                  };
-                  handleUpdateSource({
-                    ...selectedSource,
-                    factions: [...selectedSource.factions, newFaction],
-                  });
-                }}
-                myUnitsCount={selectedSource.squads.length + selectedSource.machines.length + (selectedSource.hiddenUnits?.length || 0)}
-              />
-            ) : (
-              <div className="p-4 text-slate-500 text-center">
-                Выберите источник для просмотра фракций
-              </div>
-            )}
+        ) : (
+          /* Full-width editor */
+          <div className="flex flex-col flex-1 overflow-hidden">
+            {/* Breadcrumb bar */}
+            <div className="flex items-center gap-2 px-4 py-2 border-b border-slate-800/50 bg-slate-900/80 shrink-0">
+              <button
+                onClick={handleBackToList}
+                className="flex items-center gap-1 text-sm text-slate-400 hover:text-white transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                Назад
+              </button>
+              <span className="text-slate-700">/</span>
+              <span className="text-sm text-slate-400">{selectedSource?.name}</span>
+              {factionName && (
+                <>
+                  <span className="text-slate-700">/</span>
+                  <span className="text-sm text-slate-400">{factionName}</span>
+                </>
+              )}
+            </div>
+            {/* Editor content */}
+            <div className="flex-1 overflow-hidden">
+              {renderEditorView()}
+            </div>
           </div>
-
-          {/* Right column: Units list or Editor */}
-          <div className="flex-1 overflow-hidden bg-slate-900/30">
-            {view === 'list' && selectedFactionId && selectedSource && (
-              <UnitsList
-                source={selectedSource}
-                baseSourceId={selectedSource.baseSource}
-                factionId={selectedFactionId}
-                factions={allFactions}
-                onSelectUnit={handleSelectUnit}
-                onCloneUnit={handleCloneUnit}
-                onOverrideUnit={handleOverrideUnit}
-                onHideUnit={handleHideUnit}
-                onRestoreUnit={handleRestoreUnit}
-                onCreateSquad={handleCreateSquad}
-                onCreateMachine={handleCreateMachine}
-              />
-            )}
-
-            {view === 'list' && !selectedFactionId && (
-              <div className="p-4 text-slate-500 text-center">
-                Выберите фракцию для просмотра юнитов
-              </div>
-            )}
-
-            {view === 'create-squad' && selectedSource && selectedFactionId && (
-              <SquadEditor
-                source={selectedSource}
-                factionId={selectedFactionId}
-                onSave={(newSquad: CustomSquad) => {
-                  const updated = {
-                    ...selectedSource,
-                    squads: [...selectedSource.squads, newSquad],
-                  };
-                  handleUpdateSource(updated);
-                  handleBackToList();
-                }}
-                onCancel={handleBackToList}
-              />
-            )}
-
-            {view === 'create-machine' && selectedSource && selectedFactionId && (
-              <MachineEditor
-                source={selectedSource}
-                factionId={selectedFactionId}
-                onSave={(newMachine: CustomMachine) => {
-                  const updated = {
-                    ...selectedSource,
-                    machines: [...selectedSource.machines, newMachine],
-                  };
-                  handleUpdateSource(updated);
-                  handleBackToList();
-                }}
-                onCancel={handleBackToList}
-              />
-            )}
-
-            {view === 'edit-squad' && selectedSource && selectedSquad && (
-              <SquadEditor
-                squad={selectedSquad}
-                source={selectedSource}
-                factionId={selectedSquad.faction}
-                onSave={(updatedSquad: CustomSquad) => {
-                  const updated = {
-                    ...selectedSource,
-                    squads: selectedSource.squads.map(s =>
-                      s.id === updatedSquad.id ? updatedSquad : s
-                    ),
-                  };
-                  handleUpdateSource(updated);
-                  handleBackToList();
-                }}
-                onCancel={handleBackToList}
-              />
-            )}
-
-            {view === 'edit-machine' && selectedSource && selectedMachine && (
-              <MachineEditor
-                machine={selectedMachine}
-                source={selectedSource}
-                factionId={selectedMachine.faction}
-                onSave={(updatedMachine: CustomMachine) => {
-                  const updated = {
-                    ...selectedSource,
-                    machines: selectedSource.machines.map(m =>
-                      m.id === updatedMachine.id ? updatedMachine : m
-                    ),
-                  };
-                  handleUpdateSource(updated);
-                  handleBackToList();
-                }}
-                onCancel={handleBackToList}
-              />
-            )}
-
-            {view === 'override-squad' && selectedSource && selectedFactionId && overrideSquadData && (
-              <SquadEditor
-                squad={overrideSquadData}
-                source={selectedSource}
-                factionId={selectedFactionId}
-                isOverride={true}
-                onSave={(overrideSquad: CustomSquad) => {
-                  // Override: keep same ID as base unit, replace if already exists
-                  const existingIndex = selectedSource.squads.findIndex(s => s.id === overrideSquadData.id);
-                  const customSquad: CustomSquad = {
-                    ...overrideSquad,
-                    id: overrideSquadData.id, // Keep base unit ID
-                    faction: selectedFactionId,
-                  };
-
-                  let newSquads: CustomSquad[];
-                  if (existingIndex >= 0) {
-                    // Replace existing override
-                    newSquads = selectedSource.squads.map((s, i) =>
-                      i === existingIndex ? customSquad : s
-                    );
-                  } else {
-                    // Add new override
-                    newSquads = [...selectedSource.squads, customSquad];
-                  }
-
-                  const updated = {
-                    ...selectedSource,
-                    squads: newSquads,
-                  };
-                  handleUpdateSource(updated);
-                  handleBackToList();
-                }}
-                onCancel={handleBackToList}
-              />
-            )}
-
-            {view === 'override-machine' && selectedSource && selectedFactionId && overrideMachineData && (
-              <MachineEditor
-                machine={overrideMachineData}
-                source={selectedSource}
-                factionId={selectedFactionId}
-                isOverride={true}
-                onSave={(overrideMachine: CustomMachine) => {
-                  // Override: keep same ID as base unit, replace if already exists
-                  const existingIndex = selectedSource.machines.findIndex(m => m.id === overrideMachineData.id);
-                  const customMachine: CustomMachine = {
-                    ...overrideMachine,
-                    id: overrideMachineData.id, // Keep base unit ID
-                    faction: selectedFactionId,
-                  };
-
-                  let newMachines: CustomMachine[];
-                  if (existingIndex >= 0) {
-                    // Replace existing override
-                    newMachines = selectedSource.machines.map((m, i) =>
-                      i === existingIndex ? customMachine : m
-                    );
-                  } else {
-                    // Add new override
-                    newMachines = [...selectedSource.machines, customMachine];
-                  }
-
-                  const updated = {
-                    ...selectedSource,
-                    machines: newMachines,
-                  };
-                  handleUpdateSource(updated);
-                  handleBackToList();
-                }}
-                onCancel={handleBackToList}
-              />
-            )}
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Mobile layout */}
-      <div className="md:hidden flex flex-col flex-1">
+      <div className="md:hidden flex flex-col flex-1 min-h-0">
         {/* Tab content */}
         <div className="flex-1 overflow-hidden">
           {view === 'list' ? (
             renderMobileContent()
           ) : (
-            /* Editor as bottom sheet on mobile */
+            /* Editor on mobile */
             <div className="h-full overflow-y-auto">
-              {view === 'create-squad' && selectedSource && selectedFactionId && (
-                <SquadEditor
-                  source={selectedSource}
-                  factionId={selectedFactionId}
-                  onSave={(newSquad: CustomSquad) => {
-                    const updated = {
-                      ...selectedSource,
-                      squads: [...selectedSource.squads, newSquad],
-                    };
-                    handleUpdateSource(updated);
-                    handleBackToList();
-                  }}
-                  onCancel={handleBackToList}
-                />
-              )}
-
-              {view === 'create-machine' && selectedSource && selectedFactionId && (
-                <MachineEditor
-                  source={selectedSource}
-                  factionId={selectedFactionId}
-                  onSave={(newMachine: CustomMachine) => {
-                    const updated = {
-                      ...selectedSource,
-                      machines: [...selectedSource.machines, newMachine],
-                    };
-                    handleUpdateSource(updated);
-                    handleBackToList();
-                  }}
-                  onCancel={handleBackToList}
-                />
-              )}
-
-              {view === 'edit-squad' && selectedSource && selectedSquad && (
-                <SquadEditor
-                  squad={selectedSquad}
-                  source={selectedSource}
-                  factionId={selectedSquad.faction}
-                  onSave={(updatedSquad: CustomSquad) => {
-                    const updated = {
-                      ...selectedSource,
-                      squads: selectedSource.squads.map(s =>
-                        s.id === updatedSquad.id ? updatedSquad : s
-                      ),
-                    };
-                    handleUpdateSource(updated);
-                    handleBackToList();
-                  }}
-                  onCancel={handleBackToList}
-                />
-              )}
-
-              {view === 'edit-machine' && selectedSource && selectedMachine && (
-                <MachineEditor
-                  machine={selectedMachine}
-                  source={selectedSource}
-                  factionId={selectedMachine.faction}
-                  onSave={(updatedMachine: CustomMachine) => {
-                    const updated = {
-                      ...selectedSource,
-                      machines: selectedSource.machines.map(m =>
-                        m.id === updatedMachine.id ? updatedMachine : m
-                      ),
-                    };
-                    handleUpdateSource(updated);
-                    handleBackToList();
-                  }}
-                  onCancel={handleBackToList}
-                />
-              )}
-
-              {view === 'override-squad' && selectedSource && selectedFactionId && overrideSquadData && (
-                <SquadEditor
-                  squad={overrideSquadData}
-                  source={selectedSource}
-                  factionId={selectedFactionId}
-                  isOverride={true}
-                  onSave={(overrideSquad: CustomSquad) => {
-                    const existingIndex = selectedSource.squads.findIndex(s => s.id === overrideSquadData.id);
-                    const customSquad: CustomSquad = {
-                      ...overrideSquad,
-                      id: overrideSquadData.id,
-                      faction: selectedFactionId,
-                    };
-
-                    let newSquads: CustomSquad[];
-                    if (existingIndex >= 0) {
-                      newSquads = selectedSource.squads.map((s, i) =>
-                        i === existingIndex ? customSquad : s
-                      );
-                    } else {
-                      newSquads = [...selectedSource.squads, customSquad];
-                    }
-
-                    const updated = {
-                      ...selectedSource,
-                      squads: newSquads,
-                    };
-                    handleUpdateSource(updated);
-                    handleBackToList();
-                  }}
-                  onCancel={handleBackToList}
-                />
-              )}
-
-              {view === 'override-machine' && selectedSource && selectedFactionId && overrideMachineData && (
-                <MachineEditor
-                  machine={overrideMachineData}
-                  source={selectedSource}
-                  factionId={selectedFactionId}
-                  isOverride={true}
-                  onSave={(overrideMachine: CustomMachine) => {
-                    const existingIndex = selectedSource.machines.findIndex(m => m.id === overrideMachineData.id);
-                    const customMachine: CustomMachine = {
-                      ...overrideMachine,
-                      id: overrideMachineData.id,
-                      faction: selectedFactionId,
-                    };
-
-                    let newMachines: CustomMachine[];
-                    if (existingIndex >= 0) {
-                      newMachines = selectedSource.machines.map((m, i) =>
-                        i === existingIndex ? customMachine : m
-                      );
-                    } else {
-                      newMachines = [...selectedSource.machines, customMachine];
-                    }
-
-                    const updated = {
-                      ...selectedSource,
-                      machines: newMachines,
-                    };
-                    handleUpdateSource(updated);
-                    handleBackToList();
-                  }}
-                  onCancel={handleBackToList}
-                />
-              )}
+              {renderEditorView()}
             </div>
           )}
         </div>

@@ -4,22 +4,55 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { X, Check } from 'lucide-react';
-import { getAllSources } from '@/lib/sources-registry';
+import { getAllSources, getSource } from '@/lib/sources-registry';
+import { getFactions } from '@/lib/encyclopedia-registry';
 
 interface CreateSourceModalProps {
   onClose: () => void;
-  onCreate: (data: { name: string; description: string; baseSource: string | null }) => void;
+  onCreate: (data: {
+    name: string;
+    description: string;
+    baseSource: string | null;
+    factionIds?: string[];
+    importSourceId?: string;
+    importFactionIds?: string[];
+  }) => void;
 }
 
 export function CreateSourceModal({ onClose, onCreate }: CreateSourceModalProps) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [type, setType] = useState<'new' | 'extension'>('new');
+  const [type, setType] = useState<'new' | 'extension' | 'import'>('new');
   const [baseSource, setBaseSource] = useState<string | null>(null);
+  const [selectedFactionIds, setSelectedFactionIds] = useState<string[]>([]);
+  const [importSourceId, setImportSourceId] = useState<string | null>(null);
+  const [importFactionIds, setImportFactionIds] = useState<string[]>([]);
 
   const allSources = getAllSources();
+  const standardFactions = getFactions();
+
+  // Factions from the selected import source with unit counts
+  const importFactions = useMemo(() => {
+    if (type !== 'import' || !importSourceId) return [];
+    const sourceData = getSource(importSourceId);
+    if (!sourceData) return [];
+    const factionSet = new Set<string>();
+    sourceData.factions.forEach(f => factionSet.add(f.id));
+    return Array.from(factionSet).map(fId => {
+      const encFaction = getFactions().find(f => f.id === fId);
+      const squadsCount = sourceData.squads.filter(s => s.faction === fId).length;
+      const machinesCount = sourceData.machines.filter(m => m.faction === fId).length;
+      return {
+        id: fId,
+        name: encFaction?.name || fId,
+        squadsCount,
+        machinesCount,
+        totalUnits: squadsCount + machinesCount,
+      };
+    });
+  }, [type, importSourceId]);
 
   const handleSubmit = () => {
     if (!name.trim()) {
@@ -32,10 +65,18 @@ export function CreateSourceModal({ onClose, onCreate }: CreateSourceModalProps)
       return;
     }
 
+    if (type === 'import' && !importSourceId) {
+      alert('Выберите источник для импорта');
+      return;
+    }
+
     onCreate({
       name: name.trim(),
       description: description.trim(),
       baseSource: type === 'extension' ? baseSource : null,
+      factionIds: type === 'new' ? selectedFactionIds : undefined,
+      importSourceId: type === 'import' ? importSourceId! : undefined,
+      importFactionIds: type === 'import' ? importFactionIds : undefined,
     });
   };
 
@@ -102,7 +143,7 @@ export function CreateSourceModal({ onClose, onCreate }: CreateSourceModalProps)
               >
                 <div className="font-medium">Новый источник</div>
                 <div className="text-sm text-slate-400 mt-0.5">
-                  Создать новый источник с пустыми фракциями
+                  Создать новый источник
                 </div>
               </button>
 
@@ -121,8 +162,67 @@ export function CreateSourceModal({ onClose, onCreate }: CreateSourceModalProps)
                   Добавить юнитов к существующему источнику
                 </div>
               </button>
+
+              <button
+                onClick={() => setType('import')}
+                className={`
+                  w-full px-4 py-3 rounded-md border text-left transition-colors
+                  ${type === 'import'
+                    ? 'border-blue-500 bg-blue-500/10 text-white'
+                    : 'border-slate-700 bg-slate-900 text-slate-300 hover:bg-slate-800'
+                  }
+                `}
+              >
+                <div className="font-medium">Импорт из источника</div>
+                <div className="text-sm text-slate-400 mt-0.5">
+                  Скопировать юниты из существующего источника
+                </div>
+              </button>
             </div>
           </div>
+
+          {/* Faction selection for new source */}
+          {type === 'new' && (
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Фракции
+              </label>
+              <div className="space-y-1.5">
+                {standardFactions.map(faction => {
+                  const isSelected = selectedFactionIds.includes(faction.id);
+                  return (
+                    <label
+                      key={faction.id}
+                      className={`
+                        flex items-center gap-3 px-3 py-2.5 rounded-md border cursor-pointer transition-colors
+                        ${isSelected
+                          ? 'border-blue-500 bg-blue-500/10'
+                          : 'border-slate-700 bg-slate-900 hover:bg-slate-800'
+                        }
+                      `}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => {
+                          setSelectedFactionIds(prev =>
+                            isSelected
+                              ? prev.filter(id => id !== faction.id)
+                              : [...prev, faction.id]
+                          );
+                        }}
+                        className="rounded border-slate-600 bg-slate-800 text-blue-500 focus:ring-blue-500/20"
+                      />
+                      <span className="text-sm text-slate-200">{faction.name}</span>
+                    </label>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-slate-500 mt-1.5">
+                Выберите фракции для включения в источник
+              </p>
+            </div>
+          )}
 
           {/* Base source selector */}
           {type === 'extension' && (
@@ -143,6 +243,99 @@ export function CreateSourceModal({ onClose, onCreate }: CreateSourceModalProps)
                 ))}
               </select>
             </div>
+          )}
+
+          {/* Import source selector */}
+          {type === 'import' && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">
+                  Источник для импорта
+                </label>
+                <select
+                  value={importSourceId || ''}
+                  onChange={(e) => {
+                    const newSourceId = e.target.value || null;
+                    setImportSourceId(newSourceId);
+                    setImportFactionIds([]);
+                  }}
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-md"
+                >
+                  <option value="">Выберите источник</option>
+                  {allSources.map(source => (
+                    <option key={source.id} value={source.id}>
+                      {source.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Faction selection for import */}
+              {importFactions.length > 0 && (
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-medium text-slate-300">
+                      Фракции для импорта
+                    </label>
+                    <button
+                      onClick={() => {
+                        if (importFactionIds.length === importFactions.length) {
+                          setImportFactionIds([]);
+                        } else {
+                          setImportFactionIds(importFactions.map(f => f.id));
+                        }
+                      }}
+                      className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
+                    >
+                      {importFactionIds.length === importFactions.length
+                        ? 'Снять все'
+                        : 'Все фракции'}
+                    </button>
+                  </div>
+                  <div className="space-y-1.5">
+                    {importFactions.map(faction => {
+                      const isSelected = importFactionIds.includes(faction.id);
+                      return (
+                        <label
+                          key={faction.id}
+                          className={`
+                            flex items-center justify-between gap-3 px-3 py-2.5 rounded-md border cursor-pointer transition-colors
+                            ${isSelected
+                              ? 'border-blue-500 bg-blue-500/10'
+                              : 'border-slate-700 bg-slate-900 hover:bg-slate-800'
+                            }
+                          `}
+                        >
+                          <div className="flex items-center gap-3">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => {
+                                setImportFactionIds(prev =>
+                                  isSelected
+                                    ? prev.filter(id => id !== faction.id)
+                                    : [...prev, faction.id]
+                                );
+                              }}
+                              className="rounded border-slate-600 bg-slate-800 text-blue-500 focus:ring-blue-500/20"
+                            />
+                            <span className="text-sm text-slate-200">{faction.name}</span>
+                          </div>
+                          <span className="text-xs text-slate-500 shrink-0">
+                            {faction.totalUnits > 0
+                              ? `${faction.squadsCount} отр. / ${faction.machinesCount} тех.`
+                              : 'нет юнитов'}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1.5">
+                    Юниты будут скопированы как кастомные
+                  </p>
+                </div>
+              )}
+            </>
           )}
         </div>
 
