@@ -8,6 +8,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Primary Target Device**: Mobile phones (MOBILE FIRST design approach). All UI components should be designed with mobile touch interactions in mind first, then enhanced for desktop.
 
+**Exception**: The editor (`/editor`) is desktop-only. On mobile it shows a notice with import/export buttons.
+
 **Frontend Design**: When building new UI components or pages, use the `frontend-design` skill to ensure production-grade, visually polished interfaces that avoid generic AI aesthetics.
 
 ## Development Commands
@@ -135,7 +137,7 @@ The main app page (`src/app/app/page.tsx`) manages the `Army` state and passes i
 type SourceID = string;  // Dynamic source identifier
 type FactionID = string; // Dynamic faction identifier (breaking change: was union type)
 
-Soldier      // Individual soldier stats (rank, speed, range, power, melee, props, armor)
+Soldier      // Individual soldier stats (rank, speed, range, power, melee, armor, modifiers)
 Squad        // Collection of 1-6 soldiers
 Machine      // Vehicle with weapons, speed_sectors, durability, ammo
 ArmyUnit     // Runtime instance of Squad or Machine with game state
@@ -186,62 +188,18 @@ Adding a new rules version:
 **Component Organization** (`src/components/`):
 ```
 src/components/
-├── cards/           - Card components (UnifiedCompactCard, types)
-├── controls/        - Control panels and input components
-├── modals/          - Modal components (ImageModal, WeaponSelectorModal, etc.)
-├── rules/           - Rules selection and toggle components
-├── toggles/         - Toggle components (PanicToggle, AimedShotToggle, etc.)
-├── combat/          - Combat-related components
+├── cards/           - Unit/soldier card components (UnifiedCompactCard, SoldierCard)
+├── combat/          - Combat modals, results, dice animation
+├── editor/          - Desktop-only unit editor (SourcesList, SquadEditor, ModifiersEditor)
 ├── encyclopedia/    - Encyclopedia page components
-├── landing/         - Landing page components
-├── machine/         - Machine-specific components
-└── *.tsx           - Other top-level components
+├── game-session/    - Game session components (ActiveBuffsIndicator)
+├── landing/         - Landing page
+├── modals/          - Shared modals (DebuffModal, ApplyBuffModal)
+├── rules/           - Rules/source selectors, toggles
+└── *.tsx           - Top-level components (ArmyBuilder, GameSession, UnitCard)
 ```
 
-**Main Page** (`src/app/app/page.tsx`):
-- Header with faction branding, view toggle (Штаб/В Бой)
-- ArmyBuilder (construction) OR GameSession (gameplay)
-- Footer with army stats
-
-**Key Components**:
-- `ArmyBuilder.tsx` - Filter/search units, add to army, export/import JSON
-- `GameSession.tsx` - Two tabs: "Войска" (units) and "Атака" (combat)
-- `UnitCard.tsx` - Individual unit display, combat modal, animated dice
-- `CombatAssistant.tsx` - Standalone combat calculator
-- `UnitDetailsModal.tsx` - Bottom sheet modal for unit details (mobile swipe-to-close)
-- `UnitSelector.tsx` - Unit selection interface with filters
-
-**Rules Components** (`src/components/rules/`):
-- `RulesSelector.tsx` - Rules version selection interface
-- `SourceSelector.tsx` - Army list source selection interface (Star System, Tehnolog, custom)
-- `RulesVersionSelector.tsx` - Dropdown/picker for rules version
-- `RulesInfoModal.tsx` - Modal displaying current rules details
-- `StepProgressIndicator.tsx` - Visual step progress for multi-step flows
-
-**Toggle Components** (`src/components/toggles/`):
-- `PanicToggle.tsx` - Toggle for panic rule with info modal
-- `AimedShotToggle.tsx` - Toggle for aimed shot rule (infantry range x2)
-- `SurpriseAttackToggle.tsx` - Toggle for rear attack rule (damage x2)
-
-**Card Components** (`src/components/cards/`):
-- `UnifiedCompactCard.tsx` - Unified card component for add/remove/view modes
-- `types.ts` - TypeScript types for card components
-
-**UI Components**:
-- `FactionSelector.tsx` - Faction selection with visual branding
-- `PointBudgetInput.tsx` - Army point budget input
-- `FortificationSelector.tsx` - Fortification selection for units
-- `DiceRoller.tsx` - Animated dice rolling component
-- `SafeImage.tsx` - Image component with error handling
-- `DisplayModeToggle.tsx` - Toggle between detailed/compact display modes
-- `TabBar.tsx` - Bottom tab navigation for mobile
-
-**Combat Components** (`src/components/combat/`):
-- `BottomSheetCombatModal.tsx` - Modal for all combat actions (shot, melee, grenade)
-- `ActionSelector.tsx` - Choose action type: ВЫСТРЕЛ/БЛИЖНИЙ БОЙ/ГРАНАТА
-- `ParameterInputs.tsx` - Set distance, armor, cover before attack
-- `CombatResults.tsx` - Display attack results with grenade blast zone and target checks
-- `DiceAnimation.tsx` - Animated dice rolling visuals
+**Main Page** (`src/app/app/page.tsx`): ArmyBuilder (construction) OR GameSession (gameplay).
 
 ### Grenade Combat Mechanics
 
@@ -378,7 +336,7 @@ interface Soldier {
 **Dice Notation**:
 - Range: "D6", "D12", "D20", "D6+2"
 - Power: "1D6", "2D12", "ББ" (melee)
-- Props: ["Г"] for grenade, ["БЫ"] for medic, [] for none
+- Modifiers: IDs from catalog, e.g., `["grenade", "medic"]`
 
 **Speed Sectors**: Must cover full range 1 to durability_max without gaps
 
@@ -401,83 +359,10 @@ interface Soldier {
 
 ### Long-Press Pattern
 
-**Purpose**: Allow users to undo state changes (marking done/dead) via long-press gesture.
-
-**Usage in SoldierCard** (`src/components/cards/SoldierCard.tsx`):
-
-```typescript
-const [isLongPressing, setIsLongPressing] = useState(false);
-const [longPressProgress, setLongPressProgress] = useState(0);
-const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-const startLongPress = (callback: () => void) => {
-  // Show progress bar only after 100ms of holding
-  const progressDelay = 100;
-
-  // Long press callback after 600ms
-  longPressTimerRef.current = setTimeout(() => {
-    callback();
-    setIsLongPressing(false);
-    setLongPressProgress(1);
-  }, 600);
-
-  // Show progress bar after delay
-  longPressProgressRef.current = setTimeout(() => {
-    setIsLongPressing(true);
-    setLongPressProgress(0);
-
-    // Animate progress
-    let progress = progressDelay / 600;
-    const progressInterval = setInterval(() => {
-      progress += 0.05;
-      if (progress >= 1) {
-        progress = 1;
-        clearInterval(progressInterval);
-      }
-      setLongPressProgress(progress);
-    }, 30);
-  }, progressDelay);
-};
-
-const cancelLongPress = () => {
-  if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
-  if (longPressProgressRef.current) clearTimeout(longPressProgressRef.current);
-  setIsLongPressing(false);
-  setLongPressProgress(0);
-};
-```
-
-**Button Logic** (`src/components/cards/soldier-card/SoldierActions.tsx`):
-
-```typescript
-// Only start long-press if in the "active" state (for cancellation)
-if (isDone) {
-  onMouseDown={() => {
-    setWasLongPressTriggered(false);
-    onStartLongPress(() => {
-      setWasLongPressTriggered(true);
-      onToggleDone(); // Cancel: reset done state
-    });
-  }
-}
-
-// Short click for activation
-onClick={() => {
-  if (wasLongPressTriggered) return; // Ignore if long-press fired
-  if (!isDone) {
-    onToggleDone(); // Activate: mark as done
-  }
-  setWasLongPressTriggered(false);
-}
-```
-
-**Behavior**:
-- Short click (< 100ms): Activates state (mark done/kill), NO progress bar
-- Long press (> 100ms): Progress bar appears, after 600ms → cancels state (reset/resurrect)
-
-**Visual feedback**:
-- Progress bar: `h-0.5 bg-gradient-to-r from-emerald-500 to-emerald-600` at bottom of card
-- Button: `scale-95 opacity-80` during press
+**Purpose**: Undo state changes (marking done/dead) via long-press on SoldierCard.
+- Short click (< 100ms): Activates state. Long press (> 600ms): Cancels state (shows progress bar after 100ms).
+- Implementation: `src/components/cards/SoldierCard.tsx` + `src/components/cards/soldier-card/SoldierActions.tsx`
+- See `useLongPress.ts` hook for the gesture detection logic.
 
 ### Utilities (`src/lib/`)
 
@@ -517,9 +402,6 @@ onClick={() => {
 - `getSoldierModifiers(unit, soldierIndex, army)` - Get modifiers for specific soldier
 - `resolveModifierSummary()` - Calculate all active modifiers for combat
 - `cleanupExpiredModifiers(army)` - Remove expired modifiers at turn start
-  - LOCAL_STORAGE_KEYS - All localStorage key names
-  - DEFAULT_POINT_BUDGETS - Available point budget options
-  - Use import { LOCAL_STORAGE_KEYS, DEFAULT_POINT_BUDGETS } from '@/lib/constants'
 
 ### Styling
 
@@ -586,121 +468,52 @@ GITHUB_PAGES=true npm run build
 
 **E2E Testing Best Practices**:
 - **Selector Priority**: `getByTestId()` > `getByRole()` > `getByText()` > CSS selectors
-- **Test ID Strategy**: Add `data-testid` attributes to interactive elements for reliable testing
-- **Local Cleanup**: Always add `beforeEach` hooks to clear localStorage between tests
-- **Mobile Testing**: Use projects in `playwright.config.ts` to test mobile viewports
-- **Timeout Management**: Use explicit waits: `await page.waitForLoadState('networkidle')`
-- **Auto-webServer**: Playwright config automatically starts dev server - no manual setup needed
-- **Debugging E2E Tests**:
-  - Use `/webapp-testing` skill to debug failing E2E tests - it can navigate the app, take screenshots, and inspect DOM in real-time
-  - Use `/using-superpowers` systematic-debugging skill when encountering bugs, test failures, or unexpected behavior
-  - The `webapp-testing` skill provides interactive browser control for manual testing and debugging
+- **Local Cleanup**: Always clear localStorage in `beforeEach`
+- **Async state**: Always use `await page.waitForTimeout(200)` after clicks
 
-**App Navigation Flow** (critical for E2E tests):
+**App Navigation Flow** (critical — tests must follow this sequence):
 ```
-/app page flow (army creation):
-1. Rules Selection → click [data-testid="rules-confirm-button"]
-2. Source Selection → select army list source → click [data-testid="source-confirm-button"]
-3. Faction Selection → select faction → click [data-testid="faction-continue-button"]
-4. Budget Selection → select points → click [data-testid="budget-next-button"]
-5. Unit Selection (Army Builder) → add units → click [data-testid="to-battle-button"]
+1. Rules → click [data-testid="rules-confirm-button"]
+2. Source → select source → click [data-testid="source-confirm-button"]
+3. Faction → select faction → click [data-testid="faction-continue-button"]
+4. Budget → select points → click [data-testid="budget-next-button"]
+5. Army Builder → add units → click [data-testid="to-battle-button"]
 6. Battle Preparation → click [data-testid="start-battle-button"]
-7. Game Session → battle mode
 ```
 
-**Common E2E Testing Pitfalls**:
-1. **Skipping steps**: The app has a 6-step flow. Tests cannot jump directly to any screen - must follow the full sequence: Rules → Source → Faction → Budget → Units → Battle → Game
-2. **Wrong selectors**: When testing toggle components, `data-testid` may be on a wrapper `<div>` while `aria-pressed` is on an inner `<button>`. Use: `container.locator('button[aria-pressed]')`
-3. **Async state**: Always use `await page.waitForTimeout(200)` after clicks to allow React state updates
-4. **Missing Source step**: After Rules confirmation, always include Source Selection before Faction selection
+**Common Pitfalls**:
+1. **Cannot skip steps** — must follow the full 6-step sequence
+2. **Toggle selectors**: `data-testid` on wrapper, `aria-pressed` on inner button — use `container.locator('button[aria-pressed]')`
+3. **Missing Source step**: After Rules, always click source-confirm before Faction
 
-**Helper Functions for E2E Tests**:
+**Helper — navigate to Army Builder**:
 ```typescript
-// Navigate to Army Builder (Unit Selection) through the full flow
 async function navigateToArmyBuilder(page: Page) {
-  // Step 1: Rules confirmation (first screen)
   await page.click('[data-testid="rules-confirm-button"]');
   await page.waitForTimeout(500);
-
-  // Step 2: Source selection (new step)
   await page.click('[data-testid="source-confirm-button"]');
   await page.waitForTimeout(500);
-
-  // Step 3: Select faction
   await page.click('[data-testid="faction-card-polaris"]');
   await page.waitForTimeout(300);
   await page.click('[data-testid="faction-continue-button"]');
   await page.waitForTimeout(500);
-
-  // Step 4: Select budget
   await page.click('button:has-text("350")');
   await page.waitForTimeout(300);
   await page.click('[data-testid="budget-next-button"]');
   await page.waitForTimeout(500);
-
-  // Now on Unit Selection (Army Builder) screen
 }
 ```
 
-**Example Test Structure**:
-```typescript
-import { test, expect } from '@playwright/test';
-
-test.describe('Feature Name', () => {
-  test.beforeEach(async ({ page }) => {
-    // Clear localStorage before each test
-    await page.addInitScript(() => {
-      localStorage.clear();
-    });
-    await page.goto('/app');
-    await page.waitForLoadState('networkidle');
-  });
-
-  test('should toggle option on Rules screen', async ({ page }) => {
-    // Step 1: Rules confirmation - first screen
-    await page.click('[data-testid="rules-confirm-button"]');
-    await page.waitForTimeout(500);
-
-    // Now on Faction screen - could test faction-specific features here
-
-    // Or continue to Budget
-    await page.click('[data-testid="faction-card-polaris"]');
-    await page.click('[data-testid="faction-continue-button"]');
-    await page.waitForTimeout(500);
-
-    // Find toggle - data-testid is on container, aria-pressed on inner button
-    const toggleContainer = page.getByTestId('some-toggle');
-    const toggleButton = toggleContainer.locator('button[aria-pressed]');
-
-    await expect(toggleButton).toHaveAttribute('aria-pressed', 'false');
-    await toggleButton.click();
-    await page.waitForTimeout(200);
-    await expect(toggleButton).toHaveAttribute('aria-pressed', 'true');
-  });
-});
-```
-
-**Troubleshooting E2E Tests**:
-- **Tests hanging/timeouts**: Usually wrong selector or element not found. Use `/webapp-testing` to inspect live DOM
-- **"Element not found"**: Check if `data-testid` exists, or use text selectors like `button:has-text("ТЕКСТ")`
-- **Navigation issues**: Always follow the full flow sequence (Rules → Source → Faction → Budget → Units → Battle → Game)
-- **Async state problems**: Add `await page.waitForTimeout(200)` after clicks to allow React state updates
-- **Toggle components**: `data-testid` may be on wrapper div, use `container.locator('button[aria-pressed]')` for the actual button
-- **Missing Source step**: After Rules confirmation, don't forget to click `[data-testid="source-confirm-button"]` before Faction selection
-
-**CI/CD Pipeline**:
-- Unit tests run on every commit (fast, ~30s)
-- E2E tests run only in CI after deployment (slow, ~2-5min)
-- See `.github/workflows/test.yml` for pipeline configuration
+**CI/CD**: Unit tests on every commit (~30s). E2E tests in CI after deployment (~2-5min). See `.github/workflows/test.yml`.
 
 ## Important Notes
 
-1. **MOBILE FIRST DESIGN**: Primary target device is mobile phone. Always design UI for mobile first, then enhance for desktop. Use bottom sheets for modals, large tap targets (min 44x44px), swipe gestures where appropriate.
+1. **MOBILE FIRST DESIGN**: Primary target device is mobile phone. Exception: the editor is desktop-only.
 2. **Frontend Design Skill**: Use `frontend-design` skill when building new UI components to ensure production-grade, visually polished interfaces.
 3. **All API error messages must be in Russian** (e.g., `Ошибка чтения данных`)
 4. **Dice notation**: "D6", "D12", "D20" for range; "1D6", "2D12" for power; "ББ" for melee
 5. **Speed sectors** must cover full range from 1 to `durability_max` without gaps
-6. **Props** are string arrays: `["Г"]` for grenade, `[]` for none
+6. **Soldier modifiers**: Replaced old `props` field. Use `modifiers: string[]` with IDs from modifier catalog.
 7. **Images**: Place images in `public/images/squads/` or `public/images/machines/`
 
 ## Active Technologies
@@ -723,69 +536,3 @@ test.describe('Feature Name', () => {
 **Utilities**:
 - clsx, tailwind-merge for conditional styling
 
-## Recent Changes
-- **PWA Installability Fix (2026-02)**: Fixed PWA manifest for GitHub Pages deployment
-  - Changed from `NODE_ENV` to `GITHUB_PAGES` environment variable for basePath control
-  - Dynamic manifest generation using Next.js route handler (`src/app/manifest.ts`)
-  - Updated `.github/workflows/deploy.yml` to build with `GITHUB_PAGES=true`
-  - Local testing: `npm run build` (no basePath)
-  - GitHub Pages: `GITHUB_PAGES=true npm run build` (basePath: `/bronepehota`)
-- **Code Refactoring (2026-02)**: Major refactoring to eliminate code duplication and improve organization
-  - Created centralized `getFactionColors()` utility in `src/lib/faction-colors.ts`
-  - Created `constants.ts` for application-wide constants (localStorage keys, point budgets)
-  - Organized components into logical directories: `cards/`, `controls/`, `modals/`, `rules/`, `toggles/`
-  - Added comprehensive unit tests (370+ tests passing)
-  - Replaced duplicate `cn()` implementations with shared utility from `@/lib/utils`
-  - Updated faction colors: Protectorate blue→cyan, Mercenaries green→yellow
-- **GitHub Pages Fixes (2026-02)**: Fixed encyclopedia images and navigation on GitHub Pages
-  - Added `unoptimized` prop to Image components for compatibility
-  - Fixed Footer.tsx to use Next.js Link component for proper basePath handling
-- **Aimed Shot Feature (2025-02)**: Implemented "11.1 Прицельная стрельба пехотинцев" from official rules
-  - Doubles range for infantry when using aimed shot (not moving)
-  - Toggle on Rules screen and in combat modal
-  - `multiplyRange()` function in game-logic.ts handles D6, D12, D6+2 notation
-  - Only available for squads (not machines)
-- **Optional Rules Toggles**: Redesigned rules screen with compact toggles
-  - `PanicToggle`, `AimedShotToggle`, `SurpriseAttackToggle` components
-  - Info modals with detailed rule descriptions
-  - States persisted in localStorage
-- **E2E Testing Migration (2025-02)**: Migrated from Cucumber BDD to Playwright TypeScript
-  - Removed complex Cucumber feature files and step definitions
-  - Added `playwright.config.ts` with automatic dev server startup
-  - TypeScript-based tests are simpler to write and maintain
-  - Auto-starts dev server before tests - no manual setup needed
-- **CI/CD Pipeline**: GitHub Actions workflow with parallel quality checks and E2E tests
-- **Bottom Sheet Redesign**: `UnitDetailsModal` redesigned as mobile bottom sheet with swipe-to-close gesture (`useBottomSheet` hook)
-- **Rules System**: Added multi-version rules support with `rules-registry.ts` and rule implementations (fan, tehno)
-- **Rules Selector**: `RulesSelector`, `RulesVersionSelector`, `RulesInfoModal` components
-- **Step Progress**: `StepProgressIndicator` component for multi-step flows
-- **Unit Selector**: `UnitSelector.tsx` component with filtering
-- **Mobile First**: MOBILE FIRST design approach documented, bottom sheet patterns established
-- **Multi-Source Architecture (2026-03)**: Added support for multiple army list sources
-  - New 6-step army creation flow: Rules → Source → Faction → Budget → Units → Battle
-  - `SourceSelector.tsx` component for selecting army list sources (Star System, Tehnolog, custom)
-  - `sources-registry.ts` for managing multiple data sources (mirrors rules-registry pattern)
-  - Breaking change: `FactionID` type changed from union (`'polaris' | 'protectorate' | 'mercenaries'`) to `string`
-  - All components now use `getFactionColors()` for dynamic faction color handling
-  - Source selection persisted in localStorage (`bronepehota_army_list_source`)
-  - Updated 11 E2E tests to include Source Selection step
-  - All 54 E2E tests passing, 732 unit tests passing
-- **Encyclopedia Data Separation (2026-03)**: Separated lore data from army list sources
-  - Created centralized `src/data/encyclopedia/` with `units/` and `factions.json`
-  - Split `units.json` into 6 files by faction and type (squads/machines)
-  - `encyclopedia-registry.ts` for centralized access to lore data
-  - Source files now contain only game data (cost, soldiers, weapons)
-  - `SourceAvailability` component shows which army lists contain each unit
-  - All 732 unit tests passing, 54 E2E tests passing
-- **Modifier System (2026-03)**: Added buff/debuff system with duration and soldier-level support
-  - `modifier-types.ts`: BuffDefinition, ActiveDebuff, ActiveBuff, SoldierModifier types
-  - `modifier-utils.ts`: Collection, resolution, cleanup of modifiers per turn
-  - `standard-modifiers.json`: 10 buffs (4 static, 6 temporary) + 8 debuffs with duration
-  - Duration system: `ModifierDuration = 1 | 2 | 3` turns, cleanup at turn start
-  - Soldier modifiers: apply buffs/debuffs to individual soldiers within squads
-  - `ModifiersEditor.tsx`: Editor UI with icon picker, duration selector, soldier-level toggle
-  - `BuffSelector.tsx`: Inline component for selecting buffs on units in editor
-  - `ApplyBuffModal.tsx`: Modal for applying temporary buffs during battle
-  - `ModifierIcon.tsx`: Shared icon component (Lucide names or external URLs)
-  - `ModifierIndicator.tsx`: Shows soldier modifiers on soldier card stats
-  - All 815 unit tests passing, 60 E2E tests passing
