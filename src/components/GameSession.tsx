@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Army, ArmyUnit, Squad, Machine, PilotInfo, FactionID } from '@/lib/types';
 import { resolvePanic } from '@/lib/panic-logic';
+import { cleanupExpiredModifiers } from '@/lib/modifier-utils';
 import { getFactionColors } from '@/lib/faction-colors';
 import UnitCard from './cards/UnitCard';
 import { History, X, Bomb, Heart } from 'lucide-react';
@@ -248,10 +249,18 @@ export default function GameSession({
 
     const newTurn = (army.currentTurn || 1) + 1;
 
-    setArmy({
+    // Create army with new turn value first
+    const armyWithNewTurn = {
       ...army,
       currentTurn: newTurn,
-      units: army.units.map(u => {
+    };
+
+    // Remove expired modifiers
+    const cleanedArmy = cleanupExpiredModifiers(armyWithNewTurn);
+
+    setArmy({
+      ...cleanedArmy,
+      units: cleanedArmy.units.map(u => {
         // Resolve panic at the start of new turn
         const unitWithoutPanic = resolvePanic(u, newTurn);
 

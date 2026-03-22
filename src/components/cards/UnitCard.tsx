@@ -166,11 +166,6 @@ export default function UnitCard({
     }
   };
 
-  const handleOpenOriginal = (e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    setShowDetailsModal(true);
-  };
-
   // Load encyclopedia data when modal opens
   useEffect(() => {
     if (showDetailsModal && !enrichedUnit) {
@@ -184,7 +179,7 @@ export default function UnitCard({
     if (triggerEncyclopediaOpen) {
       setShowDetailsModal(true);
     }
-  }, [triggerEncyclopediaOpen]);
+  }, [triggerEncyclopediaOpen, setShowDetailsModal]);
 
   // Handle combat actions
   const _handleSoldierAction = useCallback((soldierIndex: number) => {
@@ -193,11 +188,6 @@ export default function UnitCard({
 
   const handleVehicleAttack = (weaponIndex: number) => {
     combatController.startCombat(unit, undefined, weaponIndex, 'shot');
-  };
-
-  // Handle ram attack (melee) for machines
-  const handleRamAttack = () => {
-    combatController.startCombat(unit, undefined, undefined, 'melee');
   };
 
   // Handle pilot assignment
@@ -422,34 +412,6 @@ export default function UnitCard({
       return { ...u, actionsUsed: newActions };
     });
   };
-
-  const handleToggleDone = () => {
-    if (isSquad) {
-      // Toggle: mark all alive soldiers as done or undo
-      const targetState = !isSquadDone;
-      const newActions = (unit.actionsUsed || Array((data as Squad).soldiers.length).fill({ moved: false, shot: false, melee: false, done: false }))
-        .map((action, idx) => {
-          const isDead = unit.deadSoldiers?.includes(idx);
-          if (isDead) return action;
-          return { ...action, done: targetState };
-        });
-      updateThisUnit((u) => ({ ...u, actionsUsed: newActions }));
-    } else {
-      // Toggle: mark machine as done or undo
-      const newMachineDoneState = !isMachineDone;
-      updateThisUnit((u) => ({ ...u, isMachineDone: newMachineDoneState }));
-
-      // Also update pilot's done state
-      setPilotDoneState(newMachineDoneState);
-    }
-  };
-
-  // Faction border color for tech corners
-  const factionBorderColor = data.faction === 'polaris'
-    ? 'rgba(220, 38, 38, 0.6)'
-    : data.faction === 'protectorate'
-    ? 'rgba(8, 145, 178, 0.6)'
-    : 'rgba(202, 138, 4, 0.6)';
 
   return (
     <div

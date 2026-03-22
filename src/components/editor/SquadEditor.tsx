@@ -1,7 +1,6 @@
 /**
- * Squad editor component - fluid layout
- * Desktop: fixed sidebar (300px) + flexible soldiers area
- * Mobile: stacked single-column
+ * Squad editor component - desktop layout
+ * Fixed sidebar (300px) + flexible soldiers area
  */
 
 'use client';
@@ -13,8 +12,10 @@ import { getFactionColors } from '@/lib/faction-colors';
 import { Save, X, Plus, Eye, Users, Star, ImageIcon } from 'lucide-react';
 import { SoldiersTable } from './SoldiersTable';
 import { SquadPreview } from './SquadPreview';
+import { BuffSelector } from './BuffSelector';
 import { GitHubPagesImage } from '@/components/GitHubPagesImage';
 import { cn } from '@/lib/utils';
+import type { BuffDefinition } from '@/lib/modifier-types';
 
 interface SquadEditorProps {
   squad?: CustomSquad;
@@ -35,6 +36,7 @@ export function SquadEditor({ squad, source: _source, factionId, isOverride = fa
       { rank: 7, speed: 4, range: 'D6', power: '1D6', melee: 0, props: [], armor: 2 }
     ]
   );
+  const [buffs, setBuffs] = useState<BuffDefinition[]>(squad?.buffs || []);
   const [showPreview, setShowPreview] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -88,6 +90,7 @@ export function SquadEditor({ squad, source: _source, factionId, isOverride = fa
       cost,
       image: image.trim() || undefined,
       soldiers,
+      buffs: buffs.length > 0 ? buffs : undefined,
     };
 
     onSave(squadData);
@@ -119,7 +122,7 @@ export function SquadEditor({ squad, source: _source, factionId, isOverride = fa
           </div>
           <div className="flex items-center gap-2 shrink-0">
             {/* Quick stats in header */}
-            <div className="hidden md:flex items-center gap-3 mr-3 text-xs text-slate-500">
+            <div className="flex items-center gap-3 mr-3 text-xs text-slate-500">
               <span className={cn("px-2 py-1 rounded-md border", colors.bg, colors.border)}>
                 {soldiers.length} <span className="text-slate-600 ml-0.5">солд.</span>
               </span>
@@ -155,11 +158,10 @@ export function SquadEditor({ squad, source: _source, factionId, isOverride = fa
 
       {/* Scrollable content - fluid width, no max-w constraint */}
       <div className="flex-1 overflow-y-auto">
-        <div className="p-4 md:p-6">
-          {/* Desktop: sidebar + main, Mobile: stacked */}
-          <div className="flex flex-col md:flex-row gap-4 md:gap-6">
-            {/* Sidebar: basic info - fixed 300px on desktop */}
-            <div className="md:w-[300px] md:shrink-0 space-y-4">
+        <div className="p-6">
+          <div className="flex gap-6">
+            {/* Sidebar: basic info */}
+            <div className="w-[300px] shrink-0 space-y-4">
               {/* Basic info card */}
               <div className="bg-slate-900/50 rounded-lg border border-slate-800/50 p-4 space-y-3">
                 <div className="flex items-center gap-2 pb-3 border-b border-slate-700/50">
@@ -223,7 +225,7 @@ export function SquadEditor({ squad, source: _source, factionId, isOverride = fa
                       />
                     </div>
                     {image ? (
-                      <div className="relative w-48 md:w-64 aspect-[3/4] rounded-lg border border-slate-700 overflow-hidden bg-slate-800 shadow-md">
+                      <div className="relative w-64 aspect-[3/4] rounded-lg border border-slate-700 overflow-hidden bg-slate-800 shadow-md">
                         <GitHubPagesImage
                           src={image}
                           alt=""
@@ -236,7 +238,7 @@ export function SquadEditor({ squad, source: _source, factionId, isOverride = fa
                         />
                       </div>
                     ) : (
-                      <div className="w-48 md:w-64 aspect-[3/4] rounded-lg border border-slate-700/50 border-dashed bg-slate-800/30 flex flex-col items-center justify-center gap-2">
+                      <div className="w-64 aspect-[3/4] rounded-lg border border-slate-700/50 border-dashed bg-slate-800/30 flex flex-col items-center justify-center gap-2">
                         <ImageIcon className="w-8 h-8 text-slate-700" />
                         <span className="text-[10px] text-slate-600">Нет изображения</span>
                       </div>
@@ -245,25 +247,18 @@ export function SquadEditor({ squad, source: _source, factionId, isOverride = fa
                 </div>
               </div>
 
-              {/* Mobile-only: preview button */}
-              <button
-                onClick={() => setShowPreview(true)}
-                className="md:hidden w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-blue-600/20 hover:bg-blue-600/40 border border-blue-600/30 transition-all"
-              >
-                <Eye className="w-4 h-4 text-blue-400" />
-                <span className="text-sm font-semibold text-blue-300">Предпросмотр</span>
-              </button>
-
-              {/* Mobile-only: stats */}
-              <div className="md:hidden grid grid-cols-2 gap-2">
-                <div className={cn("rounded-lg p-3 text-center", colors.bg, "border", colors.border)}>
-                  <div className="text-[10px] text-slate-500 uppercase">Солдат</div>
-                  <div className="text-xl font-bold text-white">{soldiers.length}<span className="text-xs text-slate-500">/6</span></div>
+              {/* Buffs section */}
+              <div className="bg-slate-900/50 rounded-lg border border-slate-800/50 p-4 space-y-3">
+                <div className="flex items-center gap-2 pb-3 border-b border-slate-700/50">
+                  <div className="w-1 h-4 rounded-full bg-emerald-500" />
+                  <h3 className="text-xs font-semibold text-slate-300 uppercase tracking-wider">Бафы</h3>
+                  {buffs.length > 0 && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-medium">
+                      {buffs.length}
+                    </span>
+                  )}
                 </div>
-                <div className={cn("rounded-lg p-3 text-center", colors.bg, "border", colors.border)}>
-                  <div className="text-[10px] text-slate-500 uppercase">Стоимость</div>
-                  <div className={cn("text-xl font-bold", colors.text)}>{cost}</div>
-                </div>
+                <BuffSelector selectedBuffs={buffs} onChange={setBuffs} />
               </div>
             </div>
 

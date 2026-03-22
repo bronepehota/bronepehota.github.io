@@ -3,6 +3,7 @@
  */
 
 import type { SourceID } from '@/lib/types';
+import type { BuffDefinition } from '@/lib/modifier-types';
 
 /**
  * Упрощённый интерфей фракции для пользовательских источников
@@ -43,18 +44,6 @@ export interface CustomSource {
 }
 
 /**
- * Чанк данных для QR-кода
- */
-export interface QrChunk {
-  /** Номер части (1-based) */
-  index: number;
-  /** Всего частей */
-  total: number;
-  /** Данные чанка */
-  data: string;
-}
-
-/**
  * Расширенный отряд с опциональными полями
  */
 export interface CustomSquad {
@@ -65,6 +54,7 @@ export interface CustomSquad {
   cost: number;
   image?: string;
   soldiers: CustomSoldier[];
+  buffs?: BuffDefinition[];
 }
 
 /**
@@ -80,6 +70,7 @@ export interface CustomSoldier {
   props: string[];
   armor: number;
   image?: string;
+  modifiers?: string[];  // Modifier IDs from catalog (canApplyToSoldier)
 }
 
 /**
@@ -98,6 +89,7 @@ export interface CustomMachine {
   image?: string;
   weapons: CustomWeapon[];
   speed_sectors: CustomSpeedSector[];
+  buffs?: BuffDefinition[];
 }
 
 /**
@@ -143,16 +135,6 @@ export interface ValidationWarning {
   field: string;
   message: string;
   severity: 'warning' | 'error';
-}
-
-/**
- * Состоя импорта QR
- */
-export interface QrImportState {
-  chunks: Map<number, QrChunk>;
-  total: number;
-  received: number;
-  complete: boolean;
 }
 
 /**

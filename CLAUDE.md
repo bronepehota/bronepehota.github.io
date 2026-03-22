@@ -487,6 +487,36 @@ onClick={() => {
   - Polaris: red tones, Protectorate: cyan tones, Mercenaries: yellow tones
   - Returns object with all color variants (text, bg, border, glow, etc.)
 - `constants.ts` - Application-wide constants
+
+### Modifier System (`src/lib/modifier-types.ts`, `src/lib/modifier-utils.ts`)
+
+**Modifier Types:**
+- **Buffs** (positive): Static bonuses from unit data OR temporary effects applied during battle
+- **Debuffs** (negative): Applied during combat, always time-limited (1-3 turns)
+- **Soldier Modifiers**: Can be applied to individual soldiers (not just whole squads)
+
+**Duration System:**
+- `ModifierDuration = 1 | 2 | 3` (turns)
+- Static buffs: no `duration` field = permanent bonus
+- Temporary buffs/debuffs: `duration` + `expiresAtTurn` calculated automatically
+- Cleanup happens at start of each turn via `cleanupExpiredModifiers()`
+
+**Storage:**
+- Unit-level: `activeBuffs`, `activeDebuffs` on `ArmyUnit`
+- Soldier-level: `soldierModifiers[]` with `soldierIndex` for squads
+- Custom modifiers stored in localStorage via `modifier-storage.ts`
+
+**Catalog:**
+- `src/data/modifiers/standard-modifiers.json` - Built-in buffs/debuffs
+- Access via `getStandardBuffs()`, `getStandardDebuffs()`
+- Custom modifiers created via editor (UI at `/editor`)
+
+**Key Functions (`src/lib/modifier-utils.ts`):**
+- `collectBuffsForUnit()` - Collect static buffs from army
+- `collectActiveBuffsForUnit()` - Collect temporary buffs for a unit
+- `getSoldierModifiers(unit, soldierIndex, army)` - Get modifiers for specific soldier
+- `resolveModifierSummary()` - Calculate all active modifiers for combat
+- `cleanupExpiredModifiers(army)` - Remove expired modifiers at turn start
   - LOCAL_STORAGE_KEYS - All localStorage key names
   - DEFAULT_POINT_BUDGETS - Available point budget options
   - Use import { LOCAL_STORAGE_KEYS, DEFAULT_POINT_BUDGETS } from '@/lib/constants'
@@ -747,3 +777,15 @@ test.describe('Feature Name', () => {
   - Source files now contain only game data (cost, soldiers, weapons)
   - `SourceAvailability` component shows which army lists contain each unit
   - All 732 unit tests passing, 54 E2E tests passing
+- **Modifier System (2026-03)**: Added buff/debuff system with duration and soldier-level support
+  - `modifier-types.ts`: BuffDefinition, ActiveDebuff, ActiveBuff, SoldierModifier types
+  - `modifier-utils.ts`: Collection, resolution, cleanup of modifiers per turn
+  - `standard-modifiers.json`: 10 buffs (4 static, 6 temporary) + 8 debuffs with duration
+  - Duration system: `ModifierDuration = 1 | 2 | 3` turns, cleanup at turn start
+  - Soldier modifiers: apply buffs/debuffs to individual soldiers within squads
+  - `ModifiersEditor.tsx`: Editor UI with icon picker, duration selector, soldier-level toggle
+  - `BuffSelector.tsx`: Inline component for selecting buffs on units in editor
+  - `ApplyBuffModal.tsx`: Modal for applying temporary buffs during battle
+  - `ModifierIcon.tsx`: Shared icon component (Lucide names or external URLs)
+  - `ModifierIndicator.tsx`: Shows soldier modifiers on soldier card stats
+  - All 815 unit tests passing, 60 E2E tests passing

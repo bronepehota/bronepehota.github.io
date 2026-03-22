@@ -83,6 +83,7 @@ export interface Squad {
   cost: number;
   encyclopedia?: EncyclopediaData;
   soldiers: Soldier[];
+  buffs?: import('./modifier-types').BuffDefinition[];
   image?: string;
   originalUrl?: string;
 }
@@ -176,6 +177,7 @@ export interface Machine {
   description?: string;     // Краткое описание машины (1-2 предложения)
   sourceUrl?: string;       // Ссылка на оригинальную статью с полным описанием
   lore?: string;            // Полная история и лор (не используется, оставлен для совместимости)
+  buffs?: import('./modifier-types').BuffDefinition[];
 }
 
 // Pilot information for machines
@@ -217,6 +219,11 @@ export interface ArmyUnit {
   // [0, 2, 4] = only weapons at indices 0, 2, 4 are equipped
   selectedWeaponIndices?: number[]; // Indices into machine.weapons array
   panicState?: PanicState[]; // Список паникующих солдат
+  // Modifier system
+  activeDebuffs?: import('./modifier-types').ActiveDebuff[];
+  activeBuffs?: import('./modifier-types').ActiveBuff[];  // Temporary buffs applied during battle
+  soldierModifiers?: import('./modifier-types').SoldierModifier[];  // Modifiers applied to individual soldiers
+  buffsUsed?: string[];      // IDs of consumed one-time-use buffs
 }
 
 export type ArmyCurrentStep = 'faction-select' | 'unit-select' | 'preparation' | 'battle';

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, memo } from 'react';
+import { useState, useEffect, useRef, useMemo, memo } from 'react';
 import { SoldierActions } from './soldier-card/SoldierActions';
 import { SoldierStats } from './soldier-card/SoldierStats';
 import { SoldierImage } from './soldier-card/SoldierImage';
@@ -8,6 +8,7 @@ import StatusStripe, { type SoldierState } from './soldier-card/StatusStripe';
 import { cn } from '@/lib/utils';
 import type { Squad, ArmyUnit, RulesVersionID } from '@/lib/types';
 import { checkPanicTrigger } from '@/lib/panic-logic';
+import { collectBuffsForUnit, getSoldierModifiers } from '@/lib/modifier-utils';
 
 interface SoldierCardProps {
   squad: Squad;
@@ -177,6 +178,16 @@ function SoldierCard({
   // Check if this soldier is a pilot
   const isPilot = soldier.isPilot || false;
 
+  // Compute modifier counts for the modifier indicator
+  const { buffCount, debuffCount, soldierModifiers } = useMemo(() => {
+    // Build a minimal army-like structure from allUnits for buff collection
+    const armyLike = { units: _allUnits, currentTurn: unit.currentDurability ? 1 : undefined };
+    const buffs = collectBuffsForUnit(unit, armyLike as any, 'shot');
+    const debuffs = unit.activeDebuffs || [];
+    const soldierMods = getSoldierModifiers(unit, soldierIndex, armyLike as any);
+    return { buffCount: buffs.length, debuffCount: debuffs.length, soldierModifiers: soldierMods };
+  }, [unit, _allUnits, soldierIndex]);
+
   return (
     <div
       className={cn(
@@ -227,6 +238,9 @@ function SoldierCard({
         disabled={isDone || isDead || isInPanic}
         onClick={() => onSoldierAction(soldierIndex)}
         className="flex-1"
+        buffCount={buffCount}
+        debuffCount={debuffCount}
+        soldierModifiers={soldierModifiers}
       />
 
       {/* Action buttons (right - stacked vertically) */}
@@ -262,9 +276,11 @@ export default memo(SoldierCard, (prevProps, nextProps) => {
   return (
     prevProps.soldierIndex === nextProps.soldierIndex &&
     prevProps.squad === nextProps.squad &&
+    prevProps.allUnits === nextProps.allUnits &&
     prevIsDead === nextIsDead &&
     prevIsDone === nextIsDone &&
     prevIsInPanic === nextIsInPanic &&
+    prevProps.unit.activeDebuffs === nextProps.unit.activeDebuffs &&
     prevProps.onNavigateToUnit === nextProps.onNavigateToUnit
   );
 });

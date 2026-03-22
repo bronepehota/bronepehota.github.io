@@ -1,4 +1,5 @@
 import { FortificationType, HitResult, DamageResult, MeleeResult } from './types';
+import type { ModifierSummary } from './modifier-types';
 
 /**
  * Combat flow phases for the state machine
@@ -33,6 +34,7 @@ export interface CombatParameters {
   weaponIndex?: number;       // For machines: which weapon to use
   isSurpriseAttack?: boolean; // Attack from behind (Fan rules: roll twice, take best; machine's BB ignored)
   isAimedShot?: boolean;      // Aimed shot: squad only shoots (no movement/melee), doubles range
+  activeModifiers?: ModifierSummary; // Resolved buffs/debuffs for this combat action
 }
 
 /**

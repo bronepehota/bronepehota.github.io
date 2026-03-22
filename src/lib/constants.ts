@@ -19,6 +19,7 @@ export const LOCAL_STORAGE_KEYS = {
   CUSTOM_SOURCES: 'bronepehota_custom_sources',
   EDITOR_SHOW_BASE_UNITS: 'bronepehota_editor_show_base_units',
   SETUP_STEP: 'bronepehota_setup_step',
+  CUSTOM_MODIFIERS: 'bronepehota_custom_modifiers',
 } as const;
 
 export const DEFAULT_POINT_BUDGETS = [250, 350, 500, 1000];

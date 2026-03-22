@@ -3,6 +3,8 @@
 import { Shield, Footprints, Target, Flame, Sword } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Soldier } from '@/lib/types';
+import type { SoldierModifier } from '@/lib/modifier-types';
+import { ModifierIndicator } from './ModifierIndicator';
 
 interface SoldierStatsProps {
   soldier: Soldier;
@@ -11,6 +13,10 @@ interface SoldierStatsProps {
   stepToCmFactor?: number;
   disabled?: boolean;
   onClick?: () => void;
+  buffCount?: number;
+  debuffCount?: number;
+  soldierModifiers?: SoldierModifier[];
+  onModifierClick?: () => void;
 }
 
 function StatBadge({ icon: Icon, value, color, subValue, disabled }: {
@@ -43,6 +49,10 @@ export function SoldierStats({
   stepToCmFactor = 5,
   disabled = false,
   onClick,
+  buffCount,
+  debuffCount,
+  soldierModifiers = [],
+  onModifierClick,
 }: SoldierStatsProps) {
   const noRange = !soldier.range || soldier.range === '0';
   const noPower = !soldier.power || soldier.power === '0';
@@ -68,7 +78,13 @@ export function SoldierStats({
         value={distanceInputUnit === 'cm' ? `${soldier.speed * stepToCmFactor}см` : soldier.speed.toString()}
         color="text-cyan-400"
       />
-      <div className="min-h-[40px] min-w-[44px]" />
+      <ModifierIndicator
+        buffCount={buffCount ?? 0}
+        debuffCount={debuffCount ?? 0}
+        soldierModifiers={soldierModifiers}
+        onClick={onModifierClick}
+        disabled={disabled}
+      />
 
       {/* Row 2: Range, Power, Melee */}
       <StatBadge
