@@ -640,6 +640,7 @@ export default function UnitCard({
             onNavigateToUnit={_onNavigateToUnit}
             onSoldierModifierClick={onSoldierModifierClick}
             sourceId={army?.sourceId}
+            currentTurn={army?.currentTurn}
           />
         ) : (
           <MachineView

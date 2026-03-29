@@ -12,6 +12,8 @@ import {
   getAllBuffs,
   getAllDebuffs,
   resolveSoldierEffects,
+  cleanupExpiredModifiers,
+  isModifierActive,
 } from '@/lib/modifier-utils';
 import type { BuffDefinition, ActiveDebuff, SoldierModifier, DebuffTemplate } from '@/lib/modifier-types';
 
@@ -61,8 +63,8 @@ function makeUnit(overrides: Record<string, any> = {}) {
   };
 }
 
-function makeArmy(units: any[]) {
-  return { name: 'Test Army', totalCost: 0, units };
+function makeArmy(units: any[], currentTurn?: number) {
+  return { name: 'Test Army', totalCost: 0, units, ...(currentTurn !== undefined ? { currentTurn } : {}) };
 }
 
 describe('getUnitBuffs', () => {
@@ -706,5 +708,184 @@ describe('resolveSoldierEffects', () => {
     const all = [...result.buffs, ...result.abilities];
     expect(all).toHaveLength(1);
     expect(all[0].id).toBe('mechanic');
+  });
+});
+
+describe('isModifierActive', () => {
+  it('should keep permanent modifiers (no duration) always active', () => {
+    expect(isModifierActive(1, undefined, 5)).toBe(true);
+    expect(isModifierActive(1, undefined, 100)).toBe(true);
+  });
+
+  it('should keep modifiers active when currentTurn is undefined', () => {
+    expect(isModifierActive(1, 1, undefined)).toBe(true);
+  });
+
+  it('should be active on the turn it was applied', () => {
+    expect(isModifierActive(1, 1, 1)).toBe(true); // applied turn 1, current turn 1
+  });
+
+  it('should expire duration-1 modifier after appliedAtTurn + 1', () => {
+    // Duration=1 means "1 extra turn after application"
+    expect(isModifierActive(1, 1, 1)).toBe(true);  // turn applied — active
+    expect(isModifierActive(1, 1, 2)).toBe(true);  // 1 extra turn — active
+    expect(isModifierActive(1, 1, 3)).toBe(false);  // expired
+  });
+
+  it('should expire duration-2 modifier after appliedAtTurn + 2', () => {
+    expect(isModifierActive(1, 2, 1)).toBe(true);
+    expect(isModifierActive(1, 2, 2)).toBe(true);
+    expect(isModifierActive(1, 2, 3)).toBe(true);
+    expect(isModifierActive(1, 2, 4)).toBe(false);
+  });
+
+  it('should expire duration-3 modifier after appliedAtTurn + 3', () => {
+    expect(isModifierActive(2, 3, 2)).toBe(true);
+    expect(isModifierActive(2, 3, 5)).toBe(true);
+    expect(isModifierActive(2, 3, 6)).toBe(false);
+  });
+});
+
+describe('cleanupExpiredModifiers', () => {
+  it('should remove expired soldierModifiers', () => {
+    const unit = makeUnit({
+      soldierModifiers: [
+        { id: 'perm', name: 'Permanent', description: '', target: 'custom', value: 0, phase: 'always', appliedAtTurn: 1, soldierIndex: 0 },
+        { id: 'exp1', name: 'Expires T2', description: '', target: 'armor_bonus', value: 2, phase: 'always', appliedAtTurn: 1, duration: 1, expiresAtTurn: 2, soldierIndex: 0 },
+        { id: 'active1', name: 'Active T3', description: '', target: 'range_bonus', value: 1, phase: 'shot', appliedAtTurn: 2, duration: 2, expiresAtTurn: 4, soldierIndex: 0 },
+      ],
+    });
+    const army = { name: 'Test', totalCost: 0, units: [unit], currentTurn: 3 };
+
+    const result = cleanupExpiredModifiers(army);
+    const cleaned = result.units[0];
+
+    // perm: no duration → always active
+    // exp1: appliedAtTurn=1, duration=1 → active while currentTurn<=2 → expired at turn 3
+    // active1: appliedAtTurn=2, duration=2 → active while currentTurn<=4 → still active at turn 3
+    expect(cleaned.soldierModifiers).toHaveLength(2);
+    expect(cleaned.soldierModifiers!.map(m => m.id).sort()).toEqual(['active1', 'perm']);
+  });
+
+  it('should remove expired activeDebuffs', () => {
+    const unit = makeUnit({
+      activeDebuffs: [
+        { id: 'd1', name: 'Slow', description: '', target: 'speed_multiply', value: 0.5, phase: 'always', appliedAtTurn: 1, duration: 1, expiresAtTurn: 2 },
+        { id: 'd2', name: 'Active Slow', description: '', target: 'speed_multiply', value: 0.5, phase: 'always', appliedAtTurn: 2, duration: 2, expiresAtTurn: 4 },
+      ],
+    });
+    const army = { name: 'Test', totalCost: 0, units: [unit], currentTurn: 3 };
+
+    const result = cleanupExpiredModifiers(army);
+    const cleaned = result.units[0];
+
+    // d1: appliedAtTurn=1, duration=1 → expired at turn 3
+    // d2: appliedAtTurn=2, duration=2 → active while currentTurn<=4
+    expect(cleaned.activeDebuffs).toHaveLength(1);
+    expect(cleaned.activeDebuffs![0].id).toBe('d2');
+  });
+
+  it('should remove expired activeBuffs', () => {
+    const unit = makeUnit({
+      activeBuffs: [
+        { id: 'b1', name: 'Rage', description: '', applyTo: ['soldier'], target: 'melee_bonus', value: 2, phase: 'melee', appliedAtTurn: 1, duration: 1, expiresAtTurn: 2 },
+        { id: 'b2', name: 'Shield', description: '', applyTo: ['soldier'], target: 'armor_bonus', value: 1, phase: 'always', appliedAtTurn: 2, duration: 3, expiresAtTurn: 5 },
+      ],
+    });
+    const army = { name: 'Test', totalCost: 0, units: [unit], currentTurn: 3 };
+
+    const result = cleanupExpiredModifiers(army);
+    const cleaned = result.units[0];
+
+    // b1: appliedAtTurn=1, duration=1 → expired at turn 3
+    // b2: appliedAtTurn=2, duration=3 → active while currentTurn<=5
+    expect(cleaned.activeBuffs).toHaveLength(1);
+    expect(cleaned.activeBuffs![0].id).toBe('b2');
+  });
+
+  it('should set array to undefined when all modifiers expire', () => {
+    const unit = makeUnit({
+      soldierModifiers: [
+        { id: 'sm1', name: 'Temp', description: '', target: 'armor_bonus', value: 1, phase: 'always', appliedAtTurn: 1, duration: 1, expiresAtTurn: 2, soldierIndex: 0 },
+      ],
+      activeDebuffs: [
+        { id: 'd1', name: 'Slow', description: '', target: 'speed_multiply', value: 0.5, phase: 'always', appliedAtTurn: 1, duration: 1, expiresAtTurn: 2 },
+      ],
+    });
+    const army = { name: 'Test', totalCost: 0, units: [unit], currentTurn: 5 };
+
+    const result = cleanupExpiredModifiers(army);
+    const cleaned = result.units[0];
+
+    expect(cleaned.soldierModifiers).toBeUndefined();
+    expect(cleaned.activeDebuffs).toBeUndefined();
+    expect(cleaned.activeBuffs).toBeUndefined();
+  });
+
+  it('should keep permanent modifiers (no duration) across many turns', () => {
+    const unit = makeUnit({
+      soldierModifiers: [
+        { id: 'perm', name: 'Mechanic', description: 'Repair', target: 'custom', value: 0, phase: 'always', appliedAtTurn: 1, soldierIndex: 0 },
+      ],
+    });
+    const army = { name: 'Test', totalCost: 0, units: [unit], currentTurn: 100 };
+
+    const result = cleanupExpiredModifiers(army);
+    expect(result.units[0].soldierModifiers).toHaveLength(1);
+    expect(result.units[0].soldierModifiers![0].id).toBe('perm');
+  });
+
+  it('should return army unchanged if currentTurn is not set', () => {
+    const unit = makeUnit({
+      soldierModifiers: [
+        { id: 'sm1', name: 'Temp', description: '', target: 'armor_bonus', value: 1, phase: 'always', appliedAtTurn: 1, duration: 1, expiresAtTurn: 2, soldierIndex: 0 },
+      ],
+    });
+    const army = { name: 'Test', totalCost: 0, units: [unit] };
+
+    const result = cleanupExpiredModifiers(army as any);
+    expect(result.units[0].soldierModifiers).toHaveLength(1);
+  });
+
+  it('should handle multiple units independently', () => {
+    const unit1 = makeUnit({
+      instanceId: 'u1',
+      soldierModifiers: [
+        { id: 'sm1', name: 'Temp', description: '', target: 'armor_bonus', value: 1, phase: 'always', appliedAtTurn: 1, duration: 1, expiresAtTurn: 2, soldierIndex: 0 },
+      ],
+    });
+    const unit2 = makeUnit({
+      instanceId: 'u2',
+      soldierModifiers: [
+        { id: 'sm2', name: 'Active', description: '', target: 'range_bonus', value: 2, phase: 'shot', appliedAtTurn: 3, duration: 2, expiresAtTurn: 5, soldierIndex: 0 },
+      ],
+    });
+    const army = { name: 'Test', totalCost: 0, units: [unit1, unit2], currentTurn: 4 };
+
+    const result = cleanupExpiredModifiers(army);
+
+    // unit1: appliedAtTurn=1, duration=1 → expired at turn 4 (4 > 2)
+    expect(result.units[0].soldierModifiers).toBeUndefined();
+    // unit2: appliedAtTurn=3, duration=2 → active while 4<=5 → still active
+    expect(result.units[1].soldierModifiers).toHaveLength(1);
+  });
+
+  it('should simulate a full game: apply → play turns → expire', () => {
+    // Turn 1: Apply a duration-1 modifier
+    const unit = makeUnit({
+      soldierModifiers: [
+        { id: 'sm_turn1', name: 'Aim Boost', description: '+1 range', target: 'range_bonus', value: 1, phase: 'shot', appliedAtTurn: 1, duration: 1, expiresAtTurn: 2, soldierIndex: 0 },
+      ],
+    });
+
+    // Turn 2: cleanup should keep it (1+1=2, currentTurn=2 <= 2)
+    let army = { name: 'Test', totalCost: 0, units: [unit], currentTurn: 2 };
+    let result = cleanupExpiredModifiers(army);
+    expect(result.units[0].soldierModifiers).toHaveLength(1);
+
+    // Turn 3: cleanup should remove it (3 > 2)
+    army = { ...army, units: result.units as any[], currentTurn: 3 };
+    result = cleanupExpiredModifiers(army as any);
+    expect(result.units[0].soldierModifiers).toBeUndefined();
   });
 });

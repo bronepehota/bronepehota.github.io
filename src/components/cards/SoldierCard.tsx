@@ -8,7 +8,7 @@ import StatusStripe, { type SoldierState } from './soldier-card/StatusStripe';
 import { cn } from '@/lib/utils';
 import type { Squad, ArmyUnit, RulesVersionID } from '@/lib/types';
 import { checkPanicTrigger } from '@/lib/panic-logic';
-import { collectBuffsForUnit, getSoldierModifiers } from '@/lib/modifier-utils';
+import { collectBuffsForUnit, getSoldierModifiers, resolveModifierSummary } from '@/lib/modifier-utils';
 import { getSourceWithCustom } from '@/lib/sources-registry';
 
 interface SoldierCardProps {
@@ -27,6 +27,7 @@ interface SoldierCardProps {
   onNavigateToUnit?: (instanceId: string) => void;
   onSoldierModifierClick?: (unitId: string, soldierIndex: number, soldierName: string) => void;
   sourceId?: string;
+  currentTurn?: number;
 }
 
 function SoldierCard({
@@ -45,6 +46,7 @@ function SoldierCard({
   onNavigateToUnit,
   onSoldierModifierClick,
   sourceId,
+  currentTurn,
 }: SoldierCardProps) {
   const [isMounted, setIsMounted] = useState(false);
   const [isLongPressing, setIsLongPressing] = useState(false);
@@ -184,9 +186,9 @@ function SoldierCard({
   const isPilot = soldier.isPilot || false;
 
   // Compute modifier counts for the modifier indicator
-  const { buffCount, debuffCount, soldierModifiers, availableBuffCount } = useMemo(() => {
+  const { buffCount, debuffCount, soldierModifiers, availableBuffCount, statBonuses } = useMemo(() => {
     // Build a minimal army-like structure from allUnits for buff collection
-    const armyLike = { units: _allUnits, currentTurn: unit.currentDurability ? 1 : undefined };
+    const armyLike = { name: '', totalCost: 0, units: _allUnits, currentTurn };
     const buffs = collectBuffsForUnit(unit, armyLike as any, 'shot');
     const debuffs = unit.activeDebuffs || [];
     const soldierMods = getSoldierModifiers(unit, soldierIndex, armyLike as any);
@@ -195,8 +197,22 @@ function SoldierCard({
     const liveSquad = sourceData?.squads.find(s => s.id === squad.id);
     const available = (liveSquad?.buffs || squad.buffs || [])
       .filter((b: any) => b.applyTo?.includes('soldier')).length;
-    return { buffCount: buffs.length, debuffCount: debuffs.length, soldierModifiers: soldierMods, availableBuffCount: available };
-  }, [unit, _allUnits, soldierIndex, squad.buffs, squad.id, sourceId]);
+
+    // Compute stat bonuses for display (merge shot + melee + always phases)
+    const shotSummary = resolveModifierSummary(unit, armyLike as any, 'shot', soldierIndex);
+    const meleeSummary = resolveModifierSummary(unit, armyLike as any, 'melee', soldierIndex);
+    const alwaysSummary = resolveModifierSummary(unit, armyLike as any, 'always', soldierIndex);
+
+    const statBonuses = {
+      rangeBonus: shotSummary.rangeBonus,
+      powerBonus: shotSummary.powerBonus,
+      meleeBonus: meleeSummary.meleeBonus,
+      armorBonus: alwaysSummary.armorBonus,
+      speedMultiplier: alwaysSummary.speedMultiplier !== 1 ? alwaysSummary.speedMultiplier : undefined,
+    };
+
+    return { buffCount: buffs.length, debuffCount: debuffs.length, soldierModifiers: soldierMods, availableBuffCount: available, statBonuses };
+  }, [unit, _allUnits, soldierIndex, squad.buffs, squad.id, sourceId, currentTurn]);
 
   return (
     <div
@@ -253,6 +269,7 @@ function SoldierCard({
         soldierModifiers={soldierModifiers}
         availableBuffCount={availableBuffCount}
         onModifierClick={onSoldierModifierClick ? () => onSoldierModifierClick(unit.instanceId, soldierIndex, `#${soldier.num || soldierIndex + 1}`) : undefined}
+        statBonuses={statBonuses}
       />
 
       {/* Action buttons (right - stacked vertically) */}
@@ -295,6 +312,7 @@ export default memo(SoldierCard, (prevProps, nextProps) => {
     prevProps.unit.activeDebuffs === nextProps.unit.activeDebuffs &&
     prevProps.unit.soldierModifiers === nextProps.unit.soldierModifiers &&
     prevProps.onNavigateToUnit === nextProps.onNavigateToUnit &&
-    prevProps.onSoldierModifierClick === nextProps.onSoldierModifierClick
+    prevProps.onSoldierModifierClick === nextProps.onSoldierModifierClick &&
+    prevProps.currentTurn === nextProps.currentTurn
   );
 });
