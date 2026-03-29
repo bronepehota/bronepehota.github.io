@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Army, ArmyUnit, Squad, Machine, PilotInfo, FactionID } from '@/lib/types';
 import { resolvePanic } from '@/lib/panic-logic';
-import { cleanupExpiredModifiers, getAllBuffs, getAllDebuffs } from '@/lib/modifier-utils';
+import { cleanupExpiredModifiers, getAllDebuffs } from '@/lib/modifier-utils';
 import { getSourceWithCustom } from '@/lib/sources-registry';
 import { SoldierEffectsModal } from './modals/SoldierEffectsModal';
 import { getFactionColors } from '@/lib/faction-colors';
@@ -511,13 +511,10 @@ export default function GameSession({
       {effectsModalState && (() => {
         const unit = army.units.find(u => u.instanceId === effectsModalState.unitId);
         if (!unit) return null;
-        // Resolve buffs: squad-level + full catalog (standard + custom), deduplicated
+        // Resolve buffs: only squad-level buffs (set via editor), no catalog fallback
         const sourceData = army.sourceId ? getSourceWithCustom(army.sourceId) : null;
         const liveSquad = sourceData?.squads.find(s => s.id === unit.data.id);
-        const squadBuffsRaw = (liveSquad?.buffs || (unit.data as any).buffs || []);
-        const catalogBuffs = getAllBuffs().filter((b: any) => b.applyTo?.includes('soldier'));
-        const seenIds = new Set(squadBuffsRaw.map((b: any) => b.id));
-        const squadBuffs = [...squadBuffsRaw, ...catalogBuffs.filter((b: any) => !seenIds.has(b.id))];
+        const squadBuffs = (liveSquad?.buffs || (unit.data as any).buffs || []);
         const modalBuffs = squadBuffs.filter((b: any) => b.duration);
         const modalAbilities = squadBuffs.filter((b: any) => !b.duration);
         const si = effectsModalState.soldierIndex;

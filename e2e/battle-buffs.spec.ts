@@ -169,7 +169,7 @@ test.describe('Battle buffs availability', () => {
     await expect(abilitiesTab).toBeVisible();
   });
 
-  test('should show available buffs from catalog (not "Нет доступных эффектов")', async ({ page }) => {
+  test('should show only squad-assigned buffs (not full catalog)', async ({ page }) => {
     // Open modal
     const indicator = page.locator(
       '[role="button"][aria-label*="доступно"], ' +
@@ -182,11 +182,9 @@ test.describe('Battle buffs availability', () => {
     const modal = page.locator('[role="dialog"][aria-modal="true"]');
     await expect(modal).toBeVisible();
 
-    // Should show "ДОСТУПНЫ" section (catalog items exist)
-    await expect(modal.getByText('ДОСТУПНЫ')).toBeVisible();
-
-    // Should NOT show "Нет доступных эффектов" — this was the bug
-    await expect(modal.getByText('Нет доступных эффектов')).not.toBeVisible();
+    // Squad "Линейная клон-пехота" has NO buffs assigned in editor
+    // So buffs tab should show "Нет доступных эффектов"
+    await expect(modal.getByText('Нет доступных эффектов')).toBeVisible();
   });
 
   test('should switch to debuffs tab and show available debuffs', async ({ page }) => {
