@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { GitHubPagesImage as Image } from '../GitHubPagesImage';
-import { ArmyUnit, Squad, Machine, RulesVersionID, Weapon, PanicTestResult } from '@/lib/types';
+import { ArmyUnit, Squad, Machine, RulesVersionID, Weapon, PanicTestResult, Army } from '@/lib/types';
 import { Shield, Sword, Target, CheckCircle2, Bomb, UserX, Plane, Skull, Wrench, Flame, Crosshair, X, Image as ImageIcon, Footprints } from 'lucide-react';
 import SoldierCard from './SoldierCard';
 import { formatUnitNumber } from '@/lib/unit-utils';
@@ -427,6 +427,7 @@ export default function UnitCard({
         <BottomSheetCombatModal
           state={combatController.state}
           rulesVersion={rulesVersion}
+          army={{ name: '', totalCost: 0, units: allUnits, currentTurn: undefined }}
           onGoBack={combatController.goBack}
           onClose={combatController.cancelCombat}
           onSelectAction={combatController.selectAction}

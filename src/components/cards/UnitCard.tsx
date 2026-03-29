@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { GitHubPagesImage as Image } from '../GitHubPagesImage';
-import { ArmyUnit, Squad, Machine, Weapon, PanicTestResult, PilotInfo } from '@/lib/types';
+import { ArmyUnit, Squad, Machine, Weapon, PanicTestResult, PilotInfo, Army } from '@/lib/types';
 import { Crosshair, X } from 'lucide-react';
 import { formatUnitNumber } from '@/lib/unit-utils';
 import { cn } from '@/lib/utils';
@@ -34,7 +34,11 @@ interface UnitCardProps {
   stepToCmFactor?: number;
   autoCompleteEnabled?: boolean;
   triggerEncyclopediaOpen?: boolean;
+  onSoldierModifierClick?: (unitId: string, soldierIndex: number, soldierName: string) => void;
+  army?: Army;
 }
+
+
 
 export default function UnitCard({
   unit,
@@ -50,6 +54,8 @@ export default function UnitCard({
   stepToCmFactor = 5,
   autoCompleteEnabled = true,
   triggerEncyclopediaOpen = false,
+  onSoldierModifierClick,
+  army,
 }: UnitCardProps) {
   // Custom hooks for state management
   const {
@@ -428,6 +434,7 @@ export default function UnitCard({
         <BottomSheetCombatModal
           state={combatController.state}
           rulesVersion={rulesVersion}
+          army={army || { name: '', totalCost: 0, units: allUnits || [] }}
           onGoBack={combatController.goBack}
           onClose={combatController.cancelCombat}
           onSelectAction={combatController.selectAction}
@@ -631,6 +638,8 @@ export default function UnitCard({
             allUnits={allUnits}
             getSoldierImage={getSoldierImage}
             onNavigateToUnit={_onNavigateToUnit}
+            onSoldierModifierClick={onSoldierModifierClick}
+            sourceId={army?.sourceId}
           />
         ) : (
           <MachineView

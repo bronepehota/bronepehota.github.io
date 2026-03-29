@@ -8,7 +8,8 @@ import StatusStripe, { type SoldierState } from './soldier-card/StatusStripe';
 import { cn } from '@/lib/utils';
 import type { Squad, ArmyUnit, RulesVersionID } from '@/lib/types';
 import { checkPanicTrigger } from '@/lib/panic-logic';
-import { collectBuffsForUnit, getSoldierModifiers } from '@/lib/modifier-utils';
+import { collectBuffsForUnit, getSoldierModifiers, getAllBuffs } from '@/lib/modifier-utils';
+import { getSourceWithCustom } from '@/lib/sources-registry';
 
 interface SoldierCardProps {
   squad: Squad;
@@ -24,6 +25,8 @@ interface SoldierCardProps {
   distanceInputUnit?: 'steps' | 'cm';
   stepToCmFactor?: number;
   onNavigateToUnit?: (instanceId: string) => void;
+  onSoldierModifierClick?: (unitId: string, soldierIndex: number, soldierName: string) => void;
+  sourceId?: string;
 }
 
 function SoldierCard({
@@ -40,6 +43,8 @@ function SoldierCard({
   distanceInputUnit = 'steps',
   stepToCmFactor = 5,
   onNavigateToUnit,
+  onSoldierModifierClick,
+  sourceId,
 }: SoldierCardProps) {
   const [isMounted, setIsMounted] = useState(false);
   const [isLongPressing, setIsLongPressing] = useState(false);
@@ -179,14 +184,22 @@ function SoldierCard({
   const isPilot = soldier.isPilot || false;
 
   // Compute modifier counts for the modifier indicator
-  const { buffCount, debuffCount, soldierModifiers } = useMemo(() => {
+  const { buffCount, debuffCount, soldierModifiers, availableBuffCount } = useMemo(() => {
     // Build a minimal army-like structure from allUnits for buff collection
     const armyLike = { units: _allUnits, currentTurn: unit.currentDurability ? 1 : undefined };
     const buffs = collectBuffsForUnit(unit, armyLike as any, 'shot');
     const debuffs = unit.activeDebuffs || [];
     const soldierMods = getSoldierModifiers(unit, soldierIndex, armyLike as any);
-    return { buffCount: buffs.length, debuffCount: debuffs.length, soldierModifiers: soldierMods };
-  }, [unit, _allUnits, soldierIndex]);
+    // Resolve buffs: squad-level + unified catalog (standard + custom), deduplicated
+    const sourceData = sourceId ? getSourceWithCustom(sourceId) : null;
+    const liveSquad = sourceData?.squads.find(s => s.id === squad.id);
+    const squadBuffs = (liveSquad?.buffs || squad.buffs || [])
+      .filter((b: any) => b.applyTo?.includes('soldier'));
+    const catalogBuffs = getAllBuffs().filter((b: any) => b.applyTo?.includes('soldier'));
+    const seenIds = new Set(squadBuffs.map((b: any) => b.id));
+    const available = squadBuffs.length + catalogBuffs.filter((b: any) => !seenIds.has(b.id)).length;
+    return { buffCount: buffs.length, debuffCount: debuffs.length, soldierModifiers: soldierMods, availableBuffCount: available };
+  }, [unit, _allUnits, soldierIndex, squad.buffs, squad.id, sourceId]);
 
   return (
     <div
@@ -241,6 +254,8 @@ function SoldierCard({
         buffCount={buffCount}
         debuffCount={debuffCount}
         soldierModifiers={soldierModifiers}
+        availableBuffCount={availableBuffCount}
+        onModifierClick={onSoldierModifierClick ? () => onSoldierModifierClick(unit.instanceId, soldierIndex, `#${soldier.num || soldierIndex + 1}`) : undefined}
       />
 
       {/* Action buttons (right - stacked vertically) */}
@@ -281,6 +296,8 @@ export default memo(SoldierCard, (prevProps, nextProps) => {
     prevIsDone === nextIsDone &&
     prevIsInPanic === nextIsInPanic &&
     prevProps.unit.activeDebuffs === nextProps.unit.activeDebuffs &&
-    prevProps.onNavigateToUnit === nextProps.onNavigateToUnit
+    prevProps.unit.soldierModifiers === nextProps.unit.soldierModifiers &&
+    prevProps.onNavigateToUnit === nextProps.onNavigateToUnit &&
+    prevProps.onSoldierModifierClick === nextProps.onSoldierModifierClick
   );
 });

@@ -70,7 +70,7 @@ export interface CustomSoldier {
   props: string[];
   armor: number;
   image?: string;
-  modifiers?: string[];  // Modifier IDs from catalog (canApplyToSoldier)
+  modifiers?: string[];  // Modifier IDs from catalog (see applyTo for target types)
 }
 
 /**

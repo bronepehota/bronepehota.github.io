@@ -14,6 +14,7 @@ import type {
 import { EMPTY_MODIFIER_SUMMARY } from './modifier-types';
 export { EMPTY_MODIFIER_SUMMARY } from './modifier-types';
 import standardModifiers from '@/data/modifiers/standard-modifiers.json';
+import { getCustomModifiers } from './editor/modifier-storage';
 
 // Re-export types for convenience
 export type { ModifierDuration, ActiveBuff, SoldierModifier } from './modifier-types';
@@ -46,13 +47,38 @@ export function getStandardBuffs(): BuffDefinition[] {
   return getStandardCatalog().buffs;
 }
 
+// === Unified catalog access ===
+
 /**
- * Merge standard and custom debuff templates.
+ * Get ALL buff definitions — standard + custom merged, deduplicated by ID.
+ * Custom buffs override standard ones with the same ID.
+ */
+export function getAllBuffs(): BuffDefinition[] {
+  const standard = getStandardBuffs();
+  const custom = getCustomModifiers().buffs;
+  if (custom.length === 0) return standard;
+  const customIds = new Set(custom.map(b => b.id));
+  return [...standard.filter(b => !customIds.has(b.id)), ...custom];
+}
+
+/**
+ * Get ALL debuff templates — standard + custom merged, deduplicated by ID.
+ * Custom debuffs override standard ones with the same ID.
+ */
+export function getAllDebuffs(): DebuffTemplate[] {
+  const standard = getStandardDebuffs();
+  const custom = getCustomModifiers().debuffs;
+  if (custom.length === 0) return standard;
+  const customIds = new Set(custom.map(d => d.id));
+  return [...standard.filter(d => !customIds.has(d.id)), ...custom];
+}
+
+/**
+ * @deprecated Use getAllDebuffs() instead.
  */
 export function getAllDebuffTemplates(customDebuffs?: DebuffTemplate[]): DebuffTemplate[] {
-  const standard = getStandardDebuffs();
-  if (!customDebuffs || customDebuffs.length === 0) return standard;
-  return [...standard, ...customDebuffs];
+  if (customDebuffs) return getAllDebuffs();
+  return getAllDebuffs();
 }
 
 // === Unit state helpers ===
@@ -94,12 +120,12 @@ export function isUnitAlive(unit: ArmyUnit): boolean {
  */
 export function isModifierActive(
   appliedAtTurn: number,
-  duration: ModifierDuration,
+  duration: ModifierDuration | undefined,
   currentTurn?: number
 ): boolean {
+  if (duration === undefined) return true; // Permanent modifier
   if (!currentTurn) return true; // Game hasn't started yet
-  const expiresAtTurn = appliedAtTurn + duration;
-  return currentTurn <= expiresAtTurn;
+  return currentTurn <= appliedAtTurn + duration;
 }
 
 /**
@@ -155,8 +181,8 @@ export function collectBuffsForUnit(
       // Phase filter: skip if buff doesn't match requested phase
       if (phase && phase !== 'always' && buff.phase !== 'always' && buff.phase !== phase) continue;
 
-      // Personal: only for the buff-giver itself
-      if (buff.scope === 'personal' && armyUnit.instanceId !== unit.instanceId) continue;
+      // Army-level: only for the buff-giver itself unless applyTo includes 'army'
+      if (!buff.applyTo.includes('army') && armyUnit.instanceId !== unit.instanceId) continue;
 
       buffs.push(buff);
     }
@@ -283,20 +309,25 @@ function applyModifier(
 
 /**
  * Resolve all modifiers into a ModifierSummary for combat calculation.
- * Combines static buffs (from army), active buffs (temporary), and debuffs (from unit runtime state).
+ * Combines static buffs (from army), active buffs (temporary), debuffs (from unit runtime state),
+ * and soldier-level modifiers (if soldierIndex provided).
  */
 export function resolveModifierSummary(
   unit: ArmyUnit,
   army: Army,
   phase: ModifierPhase,
-  _currentTurn?: number
+  soldierIndex?: number
 ): ModifierSummary {
   const buffs = collectBuffsForUnit(unit, army, phase);
   const activeBuffs = collectActiveBuffsForUnit(unit, army, phase);
   const debuffs = collectDebuffsForUnit(unit, army, phase);
+  const soldierMods = soldierIndex !== undefined
+    ? getSoldierModifiers(unit, soldierIndex, army).filter(
+        m => m.phase === 'always' || m.phase === phase
+      )
+    : [];
 
-  // If no modifiers, return empty summary (avoid creating descriptions array)
-  if (buffs.length === 0 && activeBuffs.length === 0 && debuffs.length === 0) {
+  if (buffs.length === 0 && activeBuffs.length === 0 && debuffs.length === 0 && soldierMods.length === 0) {
     return EMPTY_MODIFIER_SUMMARY;
   }
 
@@ -310,6 +341,9 @@ export function resolveModifierSummary(
   }
   for (const debuff of debuffs) {
     applyModifier(summary, debuff.target, debuff.value, debuff.name, false);
+  }
+  for (const mod of soldierMods) {
+    applyModifier(summary, mod.target, mod.value, mod.name, true);
   }
 
   return summary;

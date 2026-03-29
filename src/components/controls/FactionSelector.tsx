@@ -2,7 +2,7 @@
 
 import React, { useState, KeyboardEvent, useEffect } from 'react';
 import type { Faction, FactionID } from '@/lib/types';
-import { Shield, Swords, Star, ArrowRight } from 'lucide-react';
+import { Shield, Swords, ArrowRight } from 'lucide-react';
 import { clsx } from 'clsx';
 import { FloatingContinueButton } from './FloatingContinueButton';
 
@@ -178,14 +178,6 @@ export function FactionSelector({
                 'absolute bottom-0 right-0 w-3 h-3 border-r-2 border-b-2 transition-all duration-300',
                 styles.corner
               )} />
-
-              {/* Recommended badge */}
-              {!selectedFaction && faction.id === 'polaris' && (
-                <div className="absolute top-2 right-2 bg-yellow-500 text-slate-900 text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg z-10 flex items-center gap-1">
-                  <Star className="w-3 h-3" />
-                  РЕКОМЕНДОВАНО
-                </div>
-              )}
 
               {/* Shield icon */}
               <div className="absolute top-3 left-3 opacity-20">

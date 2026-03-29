@@ -235,9 +235,11 @@ export default function UnitDetailPage({ unit }: UnitDetailPageProps) {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-oswald text-sm text-white">{buff.name}</span>
-                          <span className="text-[10px] px-2 py-0.5 rounded-full font-ibm-mono bg-emerald-900/40 border border-emerald-600/30 text-emerald-400 uppercase">
-                            {buff.scope === 'team' ? 'командный' : 'личный'}
-                          </span>
+                          {buff.applyTo.map(t => (
+                            <span key={t} className="text-[10px] px-2 py-0.5 rounded-full font-ibm-mono bg-emerald-900/40 border border-emerald-600/30 text-emerald-400 uppercase">
+                              {t === 'army' ? 'армия' : t === 'machine' ? 'машина' : 'солдат'}
+                            </span>
+                          ))}
                           <span className="text-[10px] px-2 py-0.5 rounded-full font-ibm-mono bg-military-steel/30 border border-military-steel/40 text-military-steel uppercase">
                             {buff.phase === 'always' ? 'всегда' : buff.phase === 'shot' ? 'стрельба' : buff.phase === 'melee' ? 'ББ' : buff.phase}
                           </span>

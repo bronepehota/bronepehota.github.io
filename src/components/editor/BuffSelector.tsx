@@ -7,9 +7,9 @@
 
 import { useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
-import type { BuffDefinition } from '@/lib/modifier-types';
-import { getStandardBuffs } from '@/lib/modifier-utils';
-import { getCustomModifiers } from '@/lib/editor/modifier-storage';
+import type { BuffDefinition, ModifierApplyTarget } from '@/lib/modifier-types';
+import { getAllBuffs } from '@/lib/modifier-utils';
+import { APPLY_TARGET_OPTIONS } from '@/lib/modifier-types';
 import { ModifierIcon } from './ModifierIcons';
 
 interface BuffSelectorProps {
@@ -17,8 +17,8 @@ interface BuffSelectorProps {
   onChange: (buffs: BuffDefinition[]) => void;
 }
 
-function scopeLabel(scope: string): string {
-  return scope === 'team' ? 'командный' : 'личный';
+function applyToLabel(targets: ModifierApplyTarget[]): string {
+  return targets.map(t => APPLY_TARGET_OPTIONS.find(o => o.value === t)?.label || t).join(', ');
 }
 
 function phaseLabel(phase: string): string {
@@ -33,17 +33,11 @@ function phaseLabel(phase: string): string {
 
 export function BuffSelector({ selectedBuffs, onChange }: BuffSelectorProps) {
   const [showDropdown, setShowDropdown] = useState(false);
-  const [catalog, setCatalog] = useState<BuffDefinition[]>(() => {
-    const custom = getCustomModifiers();
-    const standard = getStandardBuffs();
-    return [...standard, ...custom.buffs];
-  });
+  const [catalog, setCatalog] = useState<BuffDefinition[]>(() => getAllBuffs());
 
   const handleToggleDropdown = () => {
     if (!showDropdown) {
-      const custom = getCustomModifiers();
-      const standard = getStandardBuffs();
-      setCatalog([...standard, ...custom.buffs]);
+      setCatalog(getAllBuffs());
     }
     setShowDropdown(!showDropdown);
   };
@@ -74,8 +68,8 @@ export function BuffSelector({ selectedBuffs, onChange }: BuffSelectorProps) {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="text-xs font-semibold text-slate-200">{buff.name}</span>
-                  <span className="text-[9px] px-1.5 py-0.5 rounded-full font-medium bg-blue-950/40 border border-blue-600/30 text-blue-400">
-                    {scopeLabel(buff.scope)}
+                  <span className="text-[9px] px-1.5 py-0.5 rounded-full font-medium bg-slate-700/80 text-slate-400">
+                    {applyToLabel(buff.applyTo)}
                   </span>
                   <span className="text-[9px] px-1.5 py-0.5 rounded-full font-medium bg-slate-700/80 text-slate-400">
                     {phaseLabel(buff.phase)}
@@ -121,7 +115,7 @@ export function BuffSelector({ selectedBuffs, onChange }: BuffSelectorProps) {
                 >
                   <ModifierIcon name={buff.icon} size={14} className="shrink-0 text-emerald-500" />
                   <span className="text-xs text-slate-200 truncate">{buff.name}</span>
-                  <span className="text-[9px] text-slate-500 shrink-0">{scopeLabel(buff.scope)}</span>
+                  <span className="text-[9px] text-slate-500 shrink-0">{applyToLabel(buff.applyTo)}</span>
                 </button>
               ))}
             </div>

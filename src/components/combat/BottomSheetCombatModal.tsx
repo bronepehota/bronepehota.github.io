@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { X, ChevronLeft, Target, Sword, Bomb, EyeOff, Crosshair } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useBottomSheet } from '@/hooks/useBottomSheet';
@@ -8,12 +8,15 @@ import { CombatFlowState, CombatActionType, CombatParameters } from '@/lib/comba
 import { ActionSelector } from './ActionSelector';
 import { ParameterInputs } from './ParameterInputs';
 import { CombatResults } from './CombatResults';
-import { RulesVersionID } from '@/lib/types';
+import ActiveModifiersDisplay from './ActiveModifiersDisplay';
+import { RulesVersionID, Army } from '@/lib/types';
+import { resolveModifierSummary } from '@/lib/modifier-utils';
 import { useCombatTargetContext } from '@/contexts/CombatTargetContext';
 
 interface BottomSheetCombatModalProps {
   state: CombatFlowState;
   rulesVersion: RulesVersionID;
+  army: Army;
   onGoBack: () => void;
   onClose: () => void;
   onSelectAction: (action: CombatActionType) => void;
@@ -71,6 +74,7 @@ const getPhaseTitle = () => 'БОЕВАЯ СИСТЕМА';
 export function BottomSheetCombatModal({
   state,
   rulesVersion,
+  army,
   onGoBack,
   onClose,
   onSelectAction,
@@ -92,6 +96,19 @@ export function BottomSheetCombatModal({
 
   // Access combat target context for memory
   const { getTargetMemory, updateTargetMemory } = useCombatTargetContext();
+
+  // Compute active modifiers for the current combat phase
+  const modifierPhase = state.actionType === 'melee' ? 'melee' as const : 'shot';
+  const soldierIdx = state.unitType === 'squad' ? (state.soldierIndex ?? undefined) : undefined;
+  const modifierSummary = useMemo(
+    () => resolveModifierSummary(state.unit, army, modifierPhase, soldierIdx),
+    [state.unit, army, modifierPhase, soldierIdx]
+  );
+
+  // Sync modifiers to combat state so executeShot/executeMelee can use them
+  useEffect(() => {
+    onSetParameters({ activeModifiers: modifierSummary });
+  }, [modifierSummary, onSetParameters]);
 
   // Get memory for current unit
   const currentUnitId = state.unit?.instanceId || '';
@@ -238,6 +255,15 @@ export function BottomSheetCombatModal({
                 distanceInputUnit={distanceInputUnit}
                 stepToCmFactor={stepToCmFactor}
               />
+
+              {/* Active Modifiers Display */}
+              {modifierSummary.descriptions.length > 0 && (
+                <ActiveModifiersDisplay
+                  summary={modifierSummary}
+                  isAimedShot={state.parameters.isAimedShot}
+                  isSurpriseAttack={state.parameters.isSurpriseAttack}
+                />
+              )}
 
               {/* Execute button with surprise attack toggle */}
               <div className="flex gap-2 md:gap-3">

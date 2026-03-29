@@ -29,10 +29,10 @@ import type {
   DebuffTemplate,
   ModifierTarget,
   ModifierPhase,
-  BuffScope,
+  ModifierApplyTarget,
   ModifierDuration,
 } from '@/lib/modifier-types';
-import { DURATION_OPTIONS } from '@/lib/modifier-types';
+import { DURATION_OPTIONS, APPLY_TARGET_OPTIONS } from '@/lib/modifier-types';
 import { ModifierExportImport } from './ModifierExportImport';
 import { ModifierIcon, MODIFIER_ICON_OPTIONS } from './ModifierIcons';
 
@@ -68,11 +68,6 @@ const PHASE_OPTIONS: { value: ModifierPhase; label: string }[] = [
   { value: 'grenade', label: 'Граната' },
 ];
 
-const SCOPE_OPTIONS: { value: BuffScope; label: string }[] = [
-  { value: 'personal', label: 'Личный' },
-  { value: 'team', label: 'Командный' },
-];
-
 // ---------------------------------------------------------------------------
 // Icon helpers (use shared ModifierIcon)
 // ---------------------------------------------------------------------------
@@ -103,10 +98,6 @@ function phaseLabel(phase: ModifierPhase): string {
   }
 }
 
-function scopeLabel(scope: BuffScope): string {
-  return scope === 'personal' ? 'личный' : 'командный';
-}
-
 // ---------------------------------------------------------------------------
 // Form state
 // ---------------------------------------------------------------------------
@@ -117,11 +108,10 @@ interface FormData {
   target: ModifierTarget;
   value: number;
   phase: ModifierPhase;
-  scope: BuffScope;
+  applyTo: ModifierApplyTarget[];
   oneTimeUse: boolean;
   isTemporary: boolean;      // If true, requires duration (for battle use)
   duration?: ModifierDuration; // 1, 2, or 3 turns (required if isTemporary)
-  canApplyToSoldier: boolean; // If true, can be applied to individual soldiers
   icon: string;
 }
 
@@ -131,10 +121,9 @@ const EMPTY_BUFF_FORM: FormData = {
   target: 'range_bonus',
   value: 1,
   phase: 'always',
-  scope: 'personal',
+  applyTo: ['soldier'],
   oneTimeUse: false,
   isTemporary: false,
-  canApplyToSoldier: false,
   icon: 'Sparkles',
 };
 
@@ -144,11 +133,10 @@ const EMPTY_DEBUFF_FORM: FormData = {
   target: 'speed_multiply',
   value: 0.5,
   phase: 'always',
-  scope: 'personal',
+  applyTo: ['soldier', 'machine'],
   oneTimeUse: false,
   isTemporary: true,   // Debuffs are always temporary
   duration: 1,         // Default duration for debuffs
-  canApplyToSoldier: false,
   icon: 'ShieldOff',
 };
 
@@ -215,11 +203,10 @@ export function ModifiersEditor({ onRefresh }: ModifiersEditorProps) {
       target: item.target,
       value: item.value,
       phase: item.phase,
-      scope: 'scope' in item ? item.scope : 'personal',
+      applyTo: ('applyTo' in item ? item.applyTo : []) as ModifierApplyTarget[],
       oneTimeUse: 'oneTimeUse' in item ? !!item.oneTimeUse : false,
       isTemporary: 'duration' in item,  // Has duration = temporary effect
       duration: 'duration' in item ? item.duration : undefined,
-      canApplyToSoldier: 'canApplyToSoldier' in item ? !!item.canApplyToSoldier : false,
       icon: item.icon || (tab === 'buffs' ? 'Sparkles' : 'ShieldOff'),
     });
     setFormErrors({});
@@ -246,14 +233,13 @@ export function ModifiersEditor({ onRefresh }: ModifiersEditorProps) {
         id: isCreating ? `custom_buff_${Date.now()}` : (editingId || `custom_buff_${Date.now()}`),
         name: form.name.trim(),
         description: form.description.trim(),
-        scope: form.scope,
+        applyTo: form.applyTo,
         target: form.target,
         value: form.value,
         phase: form.phase,
         icon: form.icon || undefined,
         oneTimeUse: form.oneTimeUse || undefined,
         duration: form.isTemporary ? form.duration : undefined,
-        canApplyToSoldier: form.canApplyToSoldier || undefined,
         isCustom: true,
       };
       addCustomBuff(buff);
@@ -262,11 +248,12 @@ export function ModifiersEditor({ onRefresh }: ModifiersEditorProps) {
         id: isCreating ? `custom_debuff_${Date.now()}` : (editingId || `custom_debuff_${Date.now()}`),
         name: form.name.trim(),
         description: form.description.trim(),
+        applyTo: form.applyTo,
         target: form.target,
         value: form.value,
         phase: form.phase,
+        duration: form.duration || 1,
         icon: form.icon || undefined,
-        canApplyToSoldier: form.canApplyToSoldier || undefined,
         isCustom: true,
       };
       addCustomDebuff(debuff);
@@ -428,6 +415,7 @@ export function ModifiersEditor({ onRefresh }: ModifiersEditorProps) {
                     </option>
                   ))}
                 </select>
+                <div className="text-[10px] text-slate-600 mt-1">Какая характеристика изменяется</div>
               </div>
 
               {/* Value */}
@@ -440,6 +428,7 @@ export function ModifiersEditor({ onRefresh }: ModifiersEditorProps) {
                   value={form.value}
                   onChange={e => updateForm({ value: parseFloat(e.target.value) || 0 })}
                 />
+                <div className="text-[10px] text-slate-600 mt-1">Плюс/минус для аддитивных, множитель для xN</div>
               </div>
 
               {/* Phase */}
@@ -456,25 +445,39 @@ export function ModifiersEditor({ onRefresh }: ModifiersEditorProps) {
                     </option>
                   ))}
                 </select>
+                <div className="text-[10px] text-slate-600 mt-1">В какой фазе боя действует эффект</div>
               </div>
 
-              {/* Scope (buffs only) */}
-              {isBuffTab && (
-                <div>
-                  <label className={labelCls}>Область действия</label>
-                  <select
-                    className={selectCls}
-                    value={form.scope}
-                    onChange={e => updateForm({ scope: e.target.value as BuffScope })}
-                  >
-                    {SCOPE_OPTIONS.map(o => (
-                      <option key={o.value} value={o.value}>
-                        {o.label}
-                      </option>
-                    ))}
-                  </select>
+              {/* Apply To targets */}
+              <div className="sm:col-span-2">
+                <label className={labelCls}>Применяется к</label>
+                <div className="flex flex-wrap gap-1.5 mt-1">
+                  {APPLY_TARGET_OPTIONS.map(opt => {
+                    const selected = form.applyTo.includes(opt.value);
+                    return (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => {
+                          updateForm({
+                            applyTo: selected
+                              ? form.applyTo.filter(v => v !== opt.value)
+                              : [...form.applyTo, opt.value],
+                          });
+                        }}
+                        className={`px-2.5 py-1 rounded-md text-xs font-medium border transition-all ${
+                          selected
+                            ? 'bg-emerald-600/20 border-emerald-600/40 text-emerald-400'
+                            : 'bg-slate-800 border-slate-700 text-slate-500 hover:text-slate-300 hover:border-slate-600'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    );
+                  })}
                 </div>
-              )}
+                <div className="text-[10px] text-slate-600 mt-1">К каким типам юнитов можно применить модификатор</div>
+              </div>
 
               {/* Icon */}
               <div>
@@ -519,7 +522,7 @@ export function ModifiersEditor({ onRefresh }: ModifiersEditorProps) {
 
               {/* One-time use (buffs only) */}
               {isBuffTab && (
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col gap-1">
                   <label className="flex items-center gap-2 cursor-pointer text-sm text-slate-300">
                     <input
                       type="checkbox"
@@ -529,11 +532,12 @@ export function ModifiersEditor({ onRefresh }: ModifiersEditorProps) {
                     />
                     Одноразовый
                   </label>
+                  <div className="text-[10px] text-slate-600">Истощается после первого использования за бой</div>
                 </div>
               )}
 
               {/* Temporary effect (for battle use) */}
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-1">
                 <label className="flex items-center gap-2 cursor-pointer text-sm text-slate-300">
                   <input
                     type="checkbox"
@@ -549,6 +553,7 @@ export function ModifiersEditor({ onRefresh }: ModifiersEditorProps) {
                   />
                   Временный эффект (для применения в бою)
                 </label>
+                <div className="text-[10px] text-slate-600">Действует N ходов, затем автоматически снимается</div>
 
                 {/* Duration dropdown (shown when isTemporary is true) */}
                 {form.isTemporary && (
@@ -565,21 +570,6 @@ export function ModifiersEditor({ onRefresh }: ModifiersEditorProps) {
                   </select>
                 )}
               </div>
-
-              {/* Apply to soldier option (squad-specific) */}
-              {isBuffTab && (
-                <div className="flex items-center gap-2">
-                  <label className="flex items-center gap-2 cursor-pointer text-sm text-slate-300">
-                    <input
-                      type="checkbox"
-                      checked={form.canApplyToSoldier}
-                      onChange={e => updateForm({ canApplyToSoldier: e.target.checked })}
-                      className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-blue-500 focus:ring-blue-500 focus:ring-offset-0"
-                    />
-                    Можно применять на солдата
-                  </label>
-                </div>
-              )}
             </div>
 
             {/* Form actions */}
@@ -651,17 +641,14 @@ export function ModifiersEditor({ onRefresh }: ModifiersEditorProps) {
                         МОЙ
                       </span>
                     )}
-                    {isBuffTab && 'scope' in item && (
+                    {'applyTo' in item && item.applyTo.map(t => (
                       <span
-                        className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
-                          (item as BuffDefinition).scope === 'team'
-                            ? 'bg-blue-950/40 border border-blue-600/30 text-blue-400'
-                            : 'bg-slate-800/80 border border-slate-600/30 text-slate-400'
-                        }`}
+                        key={t}
+                        className="text-[10px] px-1.5 py-0.5 rounded-full font-medium bg-slate-800/80 border border-slate-600/30 text-slate-400"
                       >
-                        {scopeLabel((item as BuffDefinition).scope)}
+                        {APPLY_TARGET_OPTIONS.find(o => o.value === t)?.label || t}
                       </span>
-                    )}
+                    ))}
                   </div>
                   {item.description && (
                     <div className="text-xs text-slate-500 mt-0.5 truncate">{item.description}</div>

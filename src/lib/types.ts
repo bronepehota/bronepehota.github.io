@@ -224,6 +224,7 @@ export interface ArmyUnit {
   activeBuffs?: import('./modifier-types').ActiveBuff[];  // Temporary buffs applied during battle
   soldierModifiers?: import('./modifier-types').SoldierModifier[];  // Modifiers applied to individual soldiers
   buffsUsed?: string[];      // IDs of consumed one-time-use buffs
+  soldierAbilitiesUsed?: string[];  // "catalogId_soldierIndex" — abilities consumed this battle
 }
 
 export type ArmyCurrentStep = 'faction-select' | 'unit-select' | 'preparation' | 'battle';

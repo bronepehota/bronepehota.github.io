@@ -5,6 +5,8 @@ import type { ModifierSummary } from '@/lib/modifier-types';
 
 interface ActiveModifiersDisplayProps {
   summary: ModifierSummary;
+  isAimedShot?: boolean;
+  isSurpriseAttack?: boolean;
   className?: string;
 }
 
@@ -36,9 +38,12 @@ function getBadgeColor(text: string): string {
 
 export default function ActiveModifiersDisplay({
   summary,
+  isAimedShot,
+  isSurpriseAttack,
   className,
 }: ActiveModifiersDisplayProps) {
-  if (summary.descriptions.length === 0) {
+  const hasContent = summary.descriptions.length > 0 || isAimedShot || isSurpriseAttack;
+  if (!hasContent) {
     return null;
   }
 
@@ -59,6 +64,16 @@ export default function ActiveModifiersDisplay({
             {desc}
           </span>
         ))}
+        {isAimedShot && (
+          <span className="bg-cyan-950/30 text-cyan-400 border border-cyan-700/30 text-[10px] font-mono px-1.5 py-0.5 rounded uppercase">
+            Прицельный x2 дальность
+          </span>
+        )}
+        {isSurpriseAttack && (
+          <span className="bg-purple-950/30 text-purple-400 border border-purple-700/30 text-[10px] font-mono px-1.5 py-0.5 rounded uppercase">
+            С тыла x2 урон
+          </span>
+        )}
       </div>
     </div>
   );

@@ -16,6 +16,7 @@ interface SoldierStatsProps {
   buffCount?: number;
   debuffCount?: number;
   soldierModifiers?: SoldierModifier[];
+  availableBuffCount?: number;
   onModifierClick?: () => void;
 }
 
@@ -52,6 +53,7 @@ export function SoldierStats({
   buffCount,
   debuffCount,
   soldierModifiers = [],
+  availableBuffCount,
   onModifierClick,
 }: SoldierStatsProps) {
   const noRange = !soldier.range || soldier.range === '0';
@@ -82,6 +84,7 @@ export function SoldierStats({
         buffCount={buffCount ?? 0}
         debuffCount={debuffCount ?? 0}
         soldierModifiers={soldierModifiers}
+        availableCount={availableBuffCount}
         onClick={onModifierClick}
         disabled={disabled}
       />

@@ -188,13 +188,15 @@ Adding a new rules version:
 **Component Organization** (`src/components/`):
 ```
 src/components/
-├── cards/           - Unit/soldier card components (UnifiedCompactCard, SoldierCard)
-├── combat/          - Combat modals, results, dice animation
-├── editor/          - Desktop-only unit editor (SourcesList, SquadEditor, ModifiersEditor)
-├── encyclopedia/    - Encyclopedia page components
+├── cards/           - Unit/soldier card components (UnitCard, SoldierCard, SquadView, MachineView)
+│   └── soldier-card/ - Soldier sub-components (ModifierIndicator, SoldierActions, SoldierStats)
+│   └── unit-card/   - Unit sub-components + hooks (useUnitCardState)
+├── combat/          - Combat modals (BottomSheetCombatModal, ActionSelector, ParameterInputs, CombatResults, ActiveModifiersDisplay)
+├── editor/          - Desktop-only unit editor (SourcesList, SquadEditor, ModifiersEditor, BuffSelector)
+├── encyclopedia/    - Encyclopedia page components (UnitDetailPage)
 ├── game-session/    - Game session components (ActiveBuffsIndicator)
 ├── landing/         - Landing page
-├── modals/          - Shared modals (DebuffModal, ApplyBuffModal)
+├── modals/          - Shared modals (SoldierEffectsModal, PilotAssignmentModal, PanicTestModal, EncyclopediaModal, ApplyBuffModal)
 ├── rules/           - Rules/source selectors, toggles
 └── *.tsx           - Top-level components (ArmyBuilder, GameSession, UnitCard)
 ```
@@ -351,18 +353,19 @@ interface Soldier {
 - `useBottomSheet.ts` - Swipe-down gesture hook for mobile bottom sheets
   - Configurable close threshold (default: 100px)
   - Touch handlers for drag-to-close
-  - Smooth snap-back animation
 - `useCombatFlow.ts` - Combat state machine for shots, melee, grenades
   - `executeShot()`, `executeMelee()`, `executeGrenade()`, `checkGrenadeTarget()`
-  - Manages combat parameters, dice rolls, and results
 - `useLongPress.ts` - Long-press gesture detection for undo actions
+- `usePilotTestFlow.ts` - Pilot survival test state machine (D12 + D6 rolls)
+- `usePanicTestFlow.ts` - Panic test state for squads
+- `useEditorState.ts` - Editor form state management (desktop-only)
 
 ### Long-Press Pattern
 
 **Purpose**: Undo state changes (marking done/dead) via long-press on SoldierCard.
 - Short click (< 100ms): Activates state. Long press (> 600ms): Cancels state (shows progress bar after 100ms).
 - Implementation: `src/components/cards/SoldierCard.tsx` + `src/components/cards/soldier-card/SoldierActions.tsx`
-- See `useLongPress.ts` hook for the gesture detection logic.
+- Hook: `src/hooks/useLongPress.ts`
 
 ### Utilities (`src/lib/`)
 
@@ -378,17 +381,20 @@ interface Soldier {
 **Modifier Types:**
 - **Buffs** (positive): Static bonuses from unit data OR temporary effects applied during battle
 - **Debuffs** (negative): Applied during combat, always time-limited (1-3 turns)
-- **Soldier Modifiers**: Can be applied to individual soldiers (not just whole squads)
+- **Soldier Modifiers**: Applied to individual soldiers via `SoldierEffectsModal`, tracked with `catalogId` for one-time-use enforcement
 
 **Duration System:**
 - `ModifierDuration = 1 | 2 | 3` (turns)
-- Static buffs: no `duration` field = permanent bonus
-- Temporary buffs/debuffs: `duration` + `expiresAtTurn` calculated automatically
+- No `duration` field = permanent (abilities). `SoldierModifier.duration` and `expiresAtTurn` are optional
+- One-time-use abilities tracked via `soldierAbilitiesUsed: string[]` on ArmyUnit (format: `"catalogId_soldierIndex"`)
 - Cleanup happens at start of each turn via `cleanupExpiredModifiers()`
+
+**Apply Target**: `ModifierApplyTarget = 'machine' | 'soldier' | 'army'` (no 'squad' — removed)
 
 **Storage:**
 - Unit-level: `activeBuffs`, `activeDebuffs` on `ArmyUnit`
-- Soldier-level: `soldierModifiers[]` with `soldierIndex` for squads
+- Soldier-level: `soldierModifiers[]` with `soldierIndex` for squads, `catalogId` for tracking
+- One-time tracking: `soldierAbilitiesUsed[]` — persists independently from active modifiers
 - Custom modifiers stored in localStorage via `modifier-storage.ts`
 
 **Catalog:**
@@ -400,8 +406,21 @@ interface Soldier {
 - `collectBuffsForUnit()` - Collect static buffs from army
 - `collectActiveBuffsForUnit()` - Collect temporary buffs for a unit
 - `getSoldierModifiers(unit, soldierIndex, army)` - Get modifiers for specific soldier
-- `resolveModifierSummary()` - Calculate all active modifiers for combat
+- `resolveModifierSummary(unit, army, phase, soldierIndex?)` - Calculate ALL active modifiers for combat (buffs + debuffs + soldier mods, filtered by phase)
 - `cleanupExpiredModifiers(army)` - Remove expired modifiers at turn start
+- `isModifierActive(appliedAtTurn, duration?, currentTurn?)` - Returns `true` for `duration === undefined` (permanent)
+
+**Combat Integration:**
+- `BottomSheetCombatModal` receives `army` prop, computes `modifierSummary` via `useMemo`
+- Syncs to `state.parameters.activeModifiers` via `useEffect`
+- `ActiveModifiersDisplay` shown in PARAMETERS phase (between inputs and execute button)
+- For squads: `soldierIndex` passed; for machines: `soldierIndex = undefined`
+- Phase mapping: `actionType === 'melee'` → `'melee'`, otherwise → `'shot'`
+
+**Soldier Effects Flow:**
+- `ModifierIndicator` on SoldierCard → click opens `SoldierEffectsModal` (3 tabs: buffs/debuffs/abilities)
+- Buffs/abilities filtered from `squad.buffs` (not global catalog); debuffs from catalog
+- GameSession manages `effectsModalState` and `onSoldierModifierClick` prop chain
 
 ### Styling
 
@@ -513,7 +532,7 @@ async function navigateToArmyBuilder(page: Page) {
 3. **All API error messages must be in Russian** (e.g., `Ошибка чтения данных`)
 4. **Dice notation**: "D6", "D12", "D20" for range; "1D6", "2D12" for power; "ББ" for melee
 5. **Speed sectors** must cover full range from 1 to `durability_max` without gaps
-6. **Soldier modifiers**: Replaced old `props` field. Use `modifiers: string[]` with IDs from modifier catalog.
+6. **Soldier modifiers**: Soldiers have `modifiers: string[]` with IDs from modifier catalog (replaced old `props` field). Applied per-soldier via `SoldierEffectsModal`.
 7. **Images**: Place images in `public/images/squads/` or `public/images/machines/`
 
 ## Active Technologies

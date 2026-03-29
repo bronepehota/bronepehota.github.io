@@ -13,6 +13,8 @@ interface SquadViewProps {
   allUnits?: ArmyUnit[];
   getSoldierImage: (idx: number) => string;
   onNavigateToUnit?: (instanceId: string) => void;
+  onSoldierModifierClick?: (unitId: string, soldierIndex: number, soldierName: string) => void;
+  sourceId?: string;
 }
 
 export function SquadView({
@@ -27,6 +29,8 @@ export function SquadView({
   allUnits = [],
   getSoldierImage,
   onNavigateToUnit,
+  onSoldierModifierClick,
+  sourceId,
 }: SquadViewProps) {
   const data = unit.data as Squad;
 
@@ -49,6 +53,8 @@ export function SquadView({
             distanceInputUnit={distanceInputUnit}
             stepToCmFactor={stepToCmFactor}
             onNavigateToUnit={onNavigateToUnit}
+            onSoldierModifierClick={onSoldierModifierClick}
+            sourceId={sourceId}
           />
         </div>
       ))}

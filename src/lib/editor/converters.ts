@@ -49,6 +49,7 @@ export function convertSquad(custom: CustomSquad): Squad {
     cost: custom.cost,
     image: custom.image,
     soldiers: custom.soldiers.map(convertSoldier),
+    buffs: custom.buffs,
   };
 }
 

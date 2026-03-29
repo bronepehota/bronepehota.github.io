@@ -53,7 +53,7 @@ export function ApplyBuffModal({
       id: `${selectedBuff.id}_${Date.now()}`,
       name: selectedBuff.name,
       description: selectedBuff.description,
-      scope: selectedBuff.scope,
+      applyTo: selectedBuff.applyTo,
       target: selectedBuff.target,
       value: selectedBuff.value,
       phase: selectedBuff.phase,

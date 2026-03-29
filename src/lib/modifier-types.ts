@@ -17,8 +17,16 @@ export type ModifierTarget =
   | 'distance_penalty' // Additive: +N to effective distance (makes hitting harder)
   | 'custom';          // Free-text description, no automatic calculation
 
-// === Scope & Phase ===
-export type BuffScope = 'personal' | 'team';
+// === Apply Target — where a modifier can be applied ===
+export type ModifierApplyTarget = 'machine' | 'soldier' | 'army';
+
+export const APPLY_TARGET_OPTIONS: { value: ModifierApplyTarget; label: string }[] = [
+  { value: 'machine', label: 'Машина' },
+  { value: 'soldier', label: 'Солдат' },
+  { value: 'army', label: 'Армия' },
+] as const;
+
+// === Phase ===
 export type ModifierPhase = 'always' | 'shot' | 'melee' | 'grenade';
 
 // === Duration for temporary effects ===
@@ -35,14 +43,13 @@ export interface BuffDefinition {
   id: string;
   name: string;
   description: string;
-  scope: BuffScope;
+  applyTo: ModifierApplyTarget[]; // Where this modifier can be applied
   target: ModifierTarget;
   value: number;
   phase: ModifierPhase;
   icon?: string;             // Lucide icon name or external URL
   oneTimeUse?: boolean;      // Can only be used once per battle
   duration?: ModifierDuration; // If set - temporary effect for battle use; if undefined - static bonus
-  canApplyToSoldier?: boolean; // If true, can be applied to individual soldiers (not just whole squad)
   isCustom?: boolean;        // User-created via editor
 }
 
@@ -66,7 +73,7 @@ export interface ActiveBuff {
   id: string;
   name: string;
   description: string;
-  scope: BuffScope;
+  applyTo: ModifierApplyTarget[];
   target: ModifierTarget;
   value: number;
   phase: ModifierPhase;
@@ -79,14 +86,15 @@ export interface ActiveBuff {
 // === SoldierModifier (applied to individual soldier within a squad) ===
 export interface SoldierModifier {
   id: string;
+  catalogId?: string;        // Catalog item ID for one-time-use tracking
   name: string;
   description: string;
   target: ModifierTarget;
   value: number;
   phase: ModifierPhase;
   appliedAtTurn: number;     // Which turn it was applied
-  duration: ModifierDuration; // REQUIRED for soldier modifiers (1-3 turns)
-  expiresAtTurn: number;      // Calculated: appliedAtTurn + duration
+  duration?: ModifierDuration; // If undefined — permanent ability (no expiry)
+  expiresAtTurn?: number;      // Calculated: appliedAtTurn + duration (absent for permanent)
   icon?: string;
   soldierIndex: number;       // Which soldier in the squad (0-based index)
 }
@@ -96,11 +104,12 @@ export interface DebuffTemplate {
   id: string;
   name: string;
   description: string;
+  applyTo: ModifierApplyTarget[];
   target: ModifierTarget;
   value: number;
   phase: ModifierPhase;
+  duration: ModifierDuration;
   icon?: string;
-  canApplyToSoldier?: boolean; // If true, can be applied to individual soldiers
   isCustom?: boolean;
 }
 
