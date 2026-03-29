@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Army, ArmyUnit, Squad, Machine, PilotInfo, FactionID } from '@/lib/types';
 import { resolvePanic } from '@/lib/panic-logic';
-import { cleanupExpiredModifiers, getAllDebuffs } from '@/lib/modifier-utils';
+import { cleanupExpiredModifiers, getAllDebuffs, resolveSoldierEffects } from '@/lib/modifier-utils';
 import { getSourceWithCustom } from '@/lib/sources-registry';
 import { SoldierEffectsModal } from './modals/SoldierEffectsModal';
 import { getFactionColors } from '@/lib/faction-colors';
@@ -511,13 +511,15 @@ export default function GameSession({
       {effectsModalState && (() => {
         const unit = army.units.find(u => u.instanceId === effectsModalState.unitId);
         if (!unit) return null;
-        // Resolve buffs: only squad-level buffs (set via editor), no catalog fallback
+        // Resolve buffs: squad-level + soldier-level modifiers from catalog
         const sourceData = army.sourceId ? getSourceWithCustom(army.sourceId) : null;
         const liveSquad = sourceData?.squads.find(s => s.id === unit.data.id);
         const squadBuffs = (liveSquad?.buffs || (unit.data as any).buffs || []);
-        const modalBuffs = squadBuffs.filter((b: any) => b.duration);
-        const modalAbilities = squadBuffs.filter((b: any) => !b.duration);
         const si = effectsModalState.soldierIndex;
+        // Resolve per-soldier modifier IDs against catalog
+        const soldier = (unit.data as Squad).soldiers[si];
+        const soldierModIds = soldier?.modifiers || [];
+        const { buffs: modalBuffs, abilities: modalAbilities } = resolveSoldierEffects(squadBuffs, soldierModIds);
         const abilitiesUsed = (unit.soldierAbilitiesUsed || [])
           .filter(k => k.endsWith(`_${si}`))
           .map(k => k.split('_').slice(0, -1).join('_'));

@@ -81,6 +81,33 @@ export function getAllDebuffTemplates(customDebuffs?: DebuffTemplate[]): DebuffT
   return getAllDebuffs();
 }
 
+/**
+ * Resolve available effects for a specific soldier in a squad.
+ * Merges squad-level buffs with soldier-level modifier IDs (resolved from catalog).
+ * Deduplicates by ID, then splits into temporary buffs and permanent abilities.
+ */
+export function resolveSoldierEffects(
+  squadBuffs: BuffDefinition[],
+  soldierModifierIds: string[],
+): { buffs: BuffDefinition[]; abilities: BuffDefinition[] } {
+  const catalog = new Map(getAllBuffs().map(b => [b.id, b]));
+  const resolved = soldierModifierIds
+    .map(id => catalog.get(id))
+    .filter((b): b is BuffDefinition => !!b);
+  const merged = [...squadBuffs, ...resolved];
+  // Deduplicate by ID (first occurrence wins)
+  const seen = new Set<string>();
+  const deduped = merged.filter(b => {
+    if (seen.has(b.id)) return false;
+    seen.add(b.id);
+    return true;
+  });
+  return {
+    buffs: deduped.filter(b => b.duration),
+    abilities: deduped.filter(b => !b.duration),
+  };
+}
+
 // === Unit state helpers ===
 
 /**

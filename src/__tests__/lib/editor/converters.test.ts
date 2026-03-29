@@ -1,4 +1,4 @@
-import { mergeWithBaseSource, getCustomSourceData } from '@/lib/editor/converters';
+import { mergeWithBaseSource, getCustomSourceData, convertSoldier } from '@/lib/editor/converters';
 import type { CustomSource } from '@/lib/editor/types';
 import type { SourceData } from '@/lib/types';
 
@@ -197,5 +197,58 @@ describe('getCustomSourceData', () => {
 
     expect(result.squads).toHaveLength(1);
     expect(result.squads[0].id).toBe('solo_squad');
+  });
+});
+
+describe('convertSoldier', () => {
+  test('should preserve modifiers field', () => {
+    const customSoldier = {
+      num: 1,
+      rank: 3,
+      speed: 5,
+      range: 'D12',
+      power: '2D6',
+      melee: 3,
+      props: ['Рм'],
+      armor: 2,
+      modifiers: ['mechanic', 'jump_boost_4'],
+    };
+    const result = convertSoldier(customSoldier as any);
+    expect(result.modifiers).toEqual(['mechanic', 'jump_boost_4']);
+  });
+
+  test('should handle soldier without modifiers (undefined)', () => {
+    const customSoldier = {
+      num: 1,
+      rank: 3,
+      speed: 5,
+      range: 'D12',
+      power: '2D6',
+      melee: 3,
+      props: [],
+      armor: 2,
+    };
+    const result = convertSoldier(customSoldier as any);
+    expect(result.modifiers).toBeUndefined();
+  });
+
+  test('should preserve basic soldier fields alongside modifiers', () => {
+    const customSoldier = {
+      num: 2,
+      rank: 5,
+      speed: 4,
+      range: 'D6',
+      power: '1D12',
+      melee: 6,
+      props: ['Г'],
+      armor: 3,
+      modifiers: ['medic'],
+    };
+    const result = convertSoldier(customSoldier as any);
+    expect(result.rank).toBe(5);
+    expect(result.speed).toBe(4);
+    expect(result.armor).toBe(3);
+    expect(result.props).toEqual(['Г']);
+    expect(result.modifiers).toEqual(['medic']);
   });
 });

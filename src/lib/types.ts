@@ -69,6 +69,7 @@ export interface Soldier {
   power: string;
   melee: number;
   props: string[];
+  modifiers?: string[];  // Modifier IDs from catalog
   armor: number;
   image?: string;
   isPilot?: boolean;        // Marks soldier as currently piloting a machine

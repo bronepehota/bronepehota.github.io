@@ -11,6 +11,7 @@ import {
   getStandardDebuffs,
   getAllBuffs,
   getAllDebuffs,
+  resolveSoldierEffects,
 } from '@/lib/modifier-utils';
 import type { BuffDefinition, ActiveDebuff, SoldierModifier, DebuffTemplate } from '@/lib/modifier-types';
 
@@ -628,5 +629,82 @@ describe('getAllDebuffs', () => {
     // Buffs should not contain debuffs and vice versa
     expect(getAllBuffs().find(b => b.id === 'cd1')).toBeUndefined();
     expect(getAllDebuffs().find(d => d.id === 'cb1')).toBeUndefined();
+  });
+});
+
+describe('resolveSoldierEffects', () => {
+  // Helper to build a BuffDefinition
+  const makeBuff = (id: string, duration?: 1 | 2 | 3): BuffDefinition => ({
+    id,
+    name: id,
+    description: `desc ${id}`,
+    applyTo: ['soldier'],
+    target: 'range_bonus',
+    value: 1,
+    phase: 'shot',
+    ...(duration !== undefined ? { duration } : {}),
+  });
+
+  test('should return empty buffs and abilities for no inputs', () => {
+    const result = resolveSoldierEffects([], []);
+    expect(result.buffs).toEqual([]);
+    expect(result.abilities).toEqual([]);
+  });
+
+  test('should return only squad buffs when no soldier modifiers', () => {
+    const buff = makeBuff('squad_buff', 2);
+    const result = resolveSoldierEffects([buff], []);
+    expect(result.buffs).toHaveLength(1);
+    expect(result.buffs[0].id).toBe('squad_buff');
+    expect(result.abilities).toHaveLength(0);
+  });
+
+  test('should resolve soldier modifier IDs from catalog', () => {
+    // 'mechanic' is a standard buff with no duration → ability
+    const result = resolveSoldierEffects([], ['mechanic']);
+    expect(result.abilities).toHaveLength(1);
+    expect(result.abilities[0].id).toBe('mechanic');
+    expect(result.abilities[0].name).toBe('Рм');
+    expect(result.buffs).toHaveLength(0);
+  });
+
+  test('should split into buffs (with duration) and abilities (without duration)', () => {
+    // 'adrenaline_shot' has duration → buff
+    // 'mechanic' has no duration → ability
+    const result = resolveSoldierEffects([], ['adrenaline_shot', 'mechanic']);
+    expect(result.buffs).toHaveLength(1);
+    expect(result.buffs[0].id).toBe('adrenaline_shot');
+    expect(result.abilities).toHaveLength(1);
+    expect(result.abilities[0].id).toBe('mechanic');
+  });
+
+  test('should merge squad buffs with soldier modifiers and deduplicate', () => {
+    const squadBuff = makeBuff('adrenaline_shot', 2); // same ID as catalog entry
+    const result = resolveSoldierEffects([squadBuff], ['adrenaline_shot']);
+    // Deduped: only one 'adrenaline_shot'
+    const all = [...result.buffs, ...result.abilities];
+    expect(all.filter(b => b.id === 'adrenaline_shot')).toHaveLength(1);
+  });
+
+  test('should ignore unknown modifier IDs', () => {
+    const result = resolveSoldierEffects([], ['nonexistent_modifier']);
+    expect(result.buffs).toHaveLength(0);
+    expect(result.abilities).toHaveLength(0);
+  });
+
+  test('should handle soldier with multiple different modifiers', () => {
+    const result = resolveSoldierEffects([], ['mechanic', 'jump_boost_4', 'adrenaline_shot']);
+    // mechanic → ability, jump_boost_4 → ability (oneTimeUse, no duration), adrenaline_shot → buff
+    expect(result.buffs).toHaveLength(1);
+    expect(result.abilities).toHaveLength(2);
+    expect(result.abilities.map(a => a.id).sort()).toEqual(['jump_boost_4', 'mechanic']);
+  });
+
+  test('should only show soldier-specific effects, not all catalog buffs', () => {
+    // Soldier has only 'mechanic' — should NOT see 'adrenaline_shot', 'aim_boost', etc.
+    const result = resolveSoldierEffects([], ['mechanic']);
+    const all = [...result.buffs, ...result.abilities];
+    expect(all).toHaveLength(1);
+    expect(all[0].id).toBe('mechanic');
   });
 });

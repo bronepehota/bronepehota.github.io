@@ -34,6 +34,7 @@ export function convertSoldier(custom: CustomSoldier): Soldier {
     props: custom.props,
     armor: custom.armor,
     image: custom.image,
+    modifiers: custom.modifiers,
   };
 }
 

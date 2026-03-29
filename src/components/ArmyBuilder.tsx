@@ -134,6 +134,7 @@ export default function ArmyBuilder({
     // Clear army when switching sources to prevent invalid state
     setArmy({
       ...army,
+      sourceId,
       faction: undefined,
       units: [],
       totalCost: 0,
