@@ -317,4 +317,119 @@ test.describe('Modifier stat display and expiry', () => {
     const armorBonus = page.getByText('+2').first();
     await expect(armorBonus).toBeVisible({ timeout: 5000 });
   });
+
+  test('should show debuff effect on stats when activeDebuff is present', async ({ page }) => {
+    await page.addInitScript(() => {
+      const army = {
+        name: 'Debuff Stat Test Army',
+        faction: 'polaris',
+        sourceId: 'star_system',
+        units: [{
+          instanceId: 'debuff-stat-unit-1',
+          type: 'squad',
+          data: {
+            id: 'polaris_lineynaya_klon_pehota',
+            name: 'Линейная Клон-пехота',
+            shortName: 'Линейная',
+            faction: 'polaris',
+            cost: 50,
+            image: '/images/squads/polaris/lineynaya_klon_pehota/1.png',
+            soldiers: [
+              { num: 1, rank: 2, speed: 5, range: 'D6', power: '2D6', melee: 3, props: [], armor: 2 },
+            ],
+            buffs: [],
+          },
+          instanceNumber: 1,
+          deadSoldiers: [],
+          actionsUsed: [
+            { moved: false, shot: false, melee: false, done: false },
+          ],
+          soldierModifiers: [],
+          // Debuff on the unit level: -1 to armor
+          activeDebuffs: [{
+            id: 'damaged_armor_1234',
+            name: 'Повреждение брони',
+            description: '-1 к броне',
+            target: 'armor_bonus',
+            value: -1,
+            phase: 'always',
+            appliedAtTurn: 1,
+            duration: 2,
+            expiresAtTurn: 3,
+          }],
+        }],
+        totalCost: 50,
+        currentTurn: 1,
+        isInBattle: true,
+      };
+      localStorage.setItem('bronepehota_army', JSON.stringify(army));
+      localStorage.setItem('bronepehota_view', 'game');
+    });
+
+    await page.goto('/app');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000);
+
+    // The armor stat should show -1 bonus (red)
+    const armorDebuff = page.getByText('-1').first();
+    await expect(armorDebuff).toBeVisible({ timeout: 5000 });
+  });
+
+  test('should NOT show expired debuff in stats', async ({ page }) => {
+    await page.addInitScript(() => {
+      const army = {
+        name: 'Expired Debuff Test Army',
+        faction: 'polaris',
+        sourceId: 'star_system',
+        units: [{
+          instanceId: 'expired-debuff-unit-1',
+          type: 'squad',
+          data: {
+            id: 'polaris_lineynaya_klon_pehota',
+            name: 'Линейная Клон-пехота',
+            shortName: 'Линейная',
+            faction: 'polaris',
+            cost: 50,
+            image: '/images/squads/polaris/lineynaya_klon_pehota/1.png',
+            soldiers: [
+              { num: 1, rank: 2, speed: 5, range: 'D6', power: '2D6', melee: 3, props: [], armor: 2 },
+            ],
+            buffs: [],
+          },
+          instanceNumber: 1,
+          deadSoldiers: [],
+          actionsUsed: [
+            { moved: false, shot: false, melee: false, done: false },
+          ],
+          soldierModifiers: [],
+          // Debuff that expired: applied turn 1, duration 1, current turn is 5
+          activeDebuffs: [{
+            id: 'old_slow_1234',
+            name: 'Замедление',
+            description: 'Скорость x0.5',
+            target: 'speed_multiply',
+            value: 0.5,
+            phase: 'always',
+            appliedAtTurn: 1,
+            duration: 1,
+            expiresAtTurn: 2,
+          }],
+        }],
+        totalCost: 50,
+        currentTurn: 5,
+        isInBattle: true,
+      };
+      localStorage.setItem('bronepehota_army', JSON.stringify(army));
+      localStorage.setItem('bronepehota_view', 'game');
+    });
+
+    await page.goto('/app');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000);
+
+    // The speed stat should NOT show x0.5 since the debuff is expired
+    // (isModifierActive(1, 1, 5) = 5 <= 2 → false)
+    const speedDebuff = page.getByText('x0.5').first();
+    await expect(speedDebuff).not.toBeVisible({ timeout: 3000 });
+  });
 });

@@ -536,39 +536,63 @@ export default function GameSession({
             currentTurn={army.currentTurn || 1}
             abilitiesUsed={abilitiesUsed}
             onApplyModifier={(item) => {
-              const duration = 'duration' in item && item.duration ? item.duration : undefined;
-              const modifier: any = {
-                id: `${item.id}_${Date.now()}`,
-                catalogId: item.id,
-                name: item.name,
-                description: item.description,
-                target: item.target,
-                value: item.value,
-                phase: item.phase,
-                icon: item.icon,
-                appliedAtTurn: army.currentTurn || 1,
-                soldierIndex: effectsModalState.soldierIndex,
-              };
-              if (duration) {
-                modifier.duration = duration;
-                modifier.expiresAtTurn = (army.currentTurn || 1) + duration;
-              }
-              updateUnit(effectsModalState.unitId, u => {
-                const updates: Partial<ArmyUnit> = {
-                  soldierModifiers: [
-                    ...(u.soldierModifiers || []),
-                    modifier,
-                  ],
+              const isDebuff = 'applyTo' in item && !('oneTimeUse' in item) && !!item.duration;
+              const appliedAt = army.currentTurn || 1;
+
+              if (isDebuff) {
+                // Debuffs go to unit.activeDebuffs (not soldierModifiers)
+                const debuff = {
+                  id: `${item.id}_${Date.now()}`,
+                  name: item.name,
+                  description: item.description,
+                  target: item.target,
+                  value: item.value,
+                  phase: item.phase,
+                  appliedAtTurn: appliedAt,
+                  duration: item.duration!,
+                  expiresAtTurn: appliedAt + item.duration!,
+                  icon: item.icon,
                 };
-                // Track permanent abilities as consumed for the battle
-                if (!duration) {
-                  updates.soldierAbilitiesUsed = [
-                    ...(u.soldierAbilitiesUsed || []),
-                    `${item.id}_${effectsModalState.soldierIndex}`,
-                  ];
+                updateUnit(effectsModalState.unitId, u => ({
+                  ...u,
+                  activeDebuffs: [...(u.activeDebuffs || []), debuff],
+                }));
+              } else {
+                // Buffs/abilities go to soldierModifiers
+                const duration = 'duration' in item && item.duration ? item.duration : undefined;
+                const modifier: any = {
+                  id: `${item.id}_${Date.now()}`,
+                  catalogId: item.id,
+                  name: item.name,
+                  description: item.description,
+                  target: item.target,
+                  value: item.value,
+                  phase: item.phase,
+                  icon: item.icon,
+                  appliedAtTurn: appliedAt,
+                  soldierIndex: effectsModalState.soldierIndex,
+                };
+                if (duration) {
+                  modifier.duration = duration;
+                  modifier.expiresAtTurn = appliedAt + duration;
                 }
-                return { ...u, ...updates };
-              });
+                updateUnit(effectsModalState.unitId, u => {
+                  const updates: Partial<ArmyUnit> = {
+                    soldierModifiers: [
+                      ...(u.soldierModifiers || []),
+                      modifier,
+                    ],
+                  };
+                  // Track permanent abilities as consumed for the battle
+                  if (!duration) {
+                    updates.soldierAbilitiesUsed = [
+                      ...(u.soldierAbilitiesUsed || []),
+                      `${item.id}_${effectsModalState.soldierIndex}`,
+                    ];
+                  }
+                  return { ...u, ...updates };
+                });
+              }
             }}
             onRemoveModifier={(modId) => {
               updateUnit(effectsModalState.unitId, u => ({

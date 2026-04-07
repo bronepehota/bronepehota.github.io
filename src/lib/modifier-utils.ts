@@ -93,7 +93,8 @@ export function resolveSoldierEffects(
   const catalog = new Map(getAllBuffs().map(b => [b.id, b]));
   const resolved = soldierModifierIds
     .map(id => catalog.get(id))
-    .filter((b): b is BuffDefinition => !!b);
+    .filter((b): b is BuffDefinition => !!b)
+    .filter(b => b.applyTo?.includes('soldier'));
   const merged = [...squadBuffs, ...resolved];
   // Deduplicate by ID (first occurrence wins)
   const seen = new Set<string>();

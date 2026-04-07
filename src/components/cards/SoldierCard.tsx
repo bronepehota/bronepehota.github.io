@@ -8,7 +8,7 @@ import StatusStripe, { type SoldierState } from './soldier-card/StatusStripe';
 import { cn } from '@/lib/utils';
 import type { Squad, ArmyUnit, RulesVersionID } from '@/lib/types';
 import { checkPanicTrigger } from '@/lib/panic-logic';
-import { collectBuffsForUnit, getSoldierModifiers, resolveModifierSummary } from '@/lib/modifier-utils';
+import { collectBuffsForUnit, getSoldierModifiers, resolveModifierSummary, isModifierActive } from '@/lib/modifier-utils';
 import { getSourceWithCustom } from '@/lib/sources-registry';
 
 interface SoldierCardProps {
@@ -171,7 +171,6 @@ function SoldierCard({
 
       // Check panic trigger for community rules when adding a kill
       if (isAddingKill && rulesVersion === 'community_star_system') {
-        const currentTurn = 1;
         const shouldTestPanic = checkPanicTrigger(updatedUnit, 'community_star_system', currentTurn);
         if (shouldTestPanic) {
           setShowPanicModal(true);
@@ -189,8 +188,15 @@ function SoldierCard({
   const { buffCount, debuffCount, soldierModifiers, availableBuffCount, statBonuses } = useMemo(() => {
     // Build a minimal army-like structure from allUnits for buff collection
     const armyLike = { name: '', totalCost: 0, units: _allUnits, currentTurn };
-    const buffs = collectBuffsForUnit(unit, armyLike as any, 'shot');
-    const debuffs = unit.activeDebuffs || [];
+    // Count buffs across ALL phases (not just shot)
+    const shotBuffs = collectBuffsForUnit(unit, armyLike as any, 'shot');
+    const meleeBuffs = collectBuffsForUnit(unit, armyLike as any, 'melee');
+    const alwaysBuffs = collectBuffsForUnit(unit, armyLike as any, 'always');
+    const allBuffIds = new Set([...shotBuffs, ...meleeBuffs, ...alwaysBuffs].map(b => b.id));
+    // Filter debuffs by expiry
+    const debuffs = (unit.activeDebuffs || []).filter(d =>
+      isModifierActive(d.appliedAtTurn, d.duration, currentTurn)
+    );
     const soldierMods = getSoldierModifiers(unit, soldierIndex, armyLike as any);
     // Resolve buffs: only squad-level (set via editor), no catalog fallback
     const sourceData = sourceId ? getSourceWithCustom(sourceId) : null;
@@ -211,7 +217,7 @@ function SoldierCard({
       speedMultiplier: alwaysSummary.speedMultiplier !== 1 ? alwaysSummary.speedMultiplier : undefined,
     };
 
-    return { buffCount: buffs.length, debuffCount: debuffs.length, soldierModifiers: soldierMods, availableBuffCount: available, statBonuses };
+    return { buffCount: allBuffIds.size, debuffCount: debuffs.length, soldierModifiers: soldierMods, availableBuffCount: available, statBonuses };
   }, [unit, _allUnits, soldierIndex, squad.buffs, squad.id, sourceId, currentTurn]);
 
   return (
@@ -310,6 +316,7 @@ export default memo(SoldierCard, (prevProps, nextProps) => {
     prevIsDone === nextIsDone &&
     prevIsInPanic === nextIsInPanic &&
     prevProps.unit.activeDebuffs === nextProps.unit.activeDebuffs &&
+    prevProps.unit.activeBuffs === nextProps.unit.activeBuffs &&
     prevProps.unit.soldierModifiers === nextProps.unit.soldierModifiers &&
     prevProps.onNavigateToUnit === nextProps.onNavigateToUnit &&
     prevProps.onSoldierModifierClick === nextProps.onSoldierModifierClick &&

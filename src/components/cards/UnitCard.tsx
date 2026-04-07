@@ -157,14 +157,14 @@ export default function UnitCard({
   const isMachineDone = !isSquad && (unit.isMachineDone || isMachineDestroyed);
 
   const handlePanicTestComplete = (results: PanicTestResult[]) => {
-    const currentTurn = 1; // Default turn (will be updated when turn tracking is implemented)
+    const turn = army?.currentTurn || 1;
     const panicStates = results
       .filter(r => r.isPanic)
       .map(r => ({
         soldierIndex: r.soldierIndex,
         testRoll: r.roll,
         rank: r.rank,
-        triggeredAtTurn: currentTurn,
+        triggeredAtTurn: turn,
       }));
 
     if (panicStates.length > 0) {

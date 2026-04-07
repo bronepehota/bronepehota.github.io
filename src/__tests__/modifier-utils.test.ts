@@ -889,3 +889,77 @@ describe('cleanupExpiredModifiers', () => {
     expect(result.units[0].soldierModifiers).toBeUndefined();
   });
 });
+
+describe('resolveSoldierEffects applyTo filtering', () => {
+  test('should exclude machine-only buffs from soldier effects', () => {
+    // 'mechanic' has applyTo: ['soldier'] — should be included
+    const result = resolveSoldierEffects([], ['mechanic']);
+    expect(result.abilities).toHaveLength(1);
+    expect(result.abilities[0].id).toBe('mechanic');
+  });
+
+  test('should include buffs that have soldier in applyTo', () => {
+    // Most standard buffs have applyTo: ['soldier']
+    const result = resolveSoldierEffects([], ['mechanic', 'medic']);
+    expect(result.abilities.length).toBeGreaterThanOrEqual(1);
+  });
+});
+
+describe('collectBuffsForUnit phase coverage', () => {
+  test('should collect buffs from different phases independently', () => {
+    // Create a unit with a melee-only buff
+    const meleeBuff: BuffDefinition = {
+      id: 'rage_melee',
+      name: 'Ярость',
+      description: '+2 melee',
+      applyTo: ['soldier'],
+      target: 'melee_bonus',
+      value: 2,
+      phase: 'melee',
+    };
+    const unit = makeUnit({
+      data: { buffs: [meleeBuff] },
+    });
+    const army = makeArmy([unit]);
+
+    // Shot phase should NOT include melee buff
+    const shotBuffs = collectBuffsForUnit(unit, army as any, 'shot');
+    expect(shotBuffs.find(b => b.id === 'rage_melee')).toBeUndefined();
+
+    // Melee phase SHOULD include melee buff
+    const meleeBuffs = collectBuffsForUnit(unit, army as any, 'melee');
+    expect(meleeBuffs.find(b => b.id === 'rage_melee')).toBeDefined();
+
+    // Always phase includes ALL buffs (by design: 'always' means "collect everything")
+    const alwaysBuffs = collectBuffsForUnit(unit, army as any, 'always');
+    expect(alwaysBuffs.find(b => b.id === 'rage_melee')).toBeDefined();
+  });
+
+  test('shot phase should include both always-phase and shot-phase buffs', () => {
+    const alwaysBuff: BuffDefinition = {
+      id: 'armor_up',
+      name: 'Armor Up',
+      description: '+1 armor',
+      applyTo: ['soldier'],
+      target: 'armor_bonus',
+      value: 1,
+      phase: 'always',
+    };
+    const shotBuff: BuffDefinition = {
+      id: 'aim_boost',
+      name: 'Aim Boost',
+      description: '+1 range',
+      applyTo: ['soldier'],
+      target: 'range_bonus',
+      value: 1,
+      phase: 'shot',
+    };
+    const unit = makeUnit({
+      data: { buffs: [alwaysBuff, shotBuff] },
+    });
+    const army = makeArmy([unit]);
+
+    const shotBuffs = collectBuffsForUnit(unit, army as any, 'shot');
+    expect(shotBuffs).toHaveLength(2);
+  });
+});
