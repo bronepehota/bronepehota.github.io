@@ -287,6 +287,27 @@ export function cleanupExpiredModifiers(army: Army): Army {
   };
 }
 
+// Targets relevant to each combat action type
+const SHOT_RELEVANT_TARGETS: Set<string> = new Set([
+  'range_bonus', 'range_multiply', 'power_bonus', 'armor_bonus', 'distance_penalty', 'custom',
+]);
+const MELEE_RELEVANT_TARGETS: Set<string> = new Set([
+  'melee_bonus', 'custom',
+]);
+
+function isTargetRelevantForPhase(target: ModifierTarget, phase: ModifierPhase): boolean {
+  // 'always' phase = soldier card stats view: include ALL targets
+  if (phase === 'always') return true;
+  if (phase === 'shot') {
+    return SHOT_RELEVANT_TARGETS.has(target);
+  }
+  if (phase === 'melee') {
+    return MELEE_RELEVANT_TARGETS.has(target);
+  }
+  // grenade: include shot-relevant targets
+  return SHOT_RELEVANT_TARGETS.has(target);
+}
+
 // === Resolution ===
 
 /**
@@ -362,16 +383,24 @@ export function resolveModifierSummary(
   const summary: ModifierSummary = { ...EMPTY_MODIFIER_SUMMARY, descriptions: [] };
 
   for (const buff of buffs) {
-    applyModifier(summary, buff.target, buff.value, buff.name, true);
+    if (isTargetRelevantForPhase(buff.target, phase)) {
+      applyModifier(summary, buff.target, buff.value, buff.name, true);
+    }
   }
   for (const buff of activeBuffs) {
-    applyModifier(summary, buff.target, buff.value, buff.name, true);
+    if (isTargetRelevantForPhase(buff.target, phase)) {
+      applyModifier(summary, buff.target, buff.value, buff.name, true);
+    }
   }
   for (const debuff of debuffs) {
-    applyModifier(summary, debuff.target, debuff.value, debuff.name, false);
+    if (isTargetRelevantForPhase(debuff.target, phase)) {
+      applyModifier(summary, debuff.target, debuff.value, debuff.name, false);
+    }
   }
   for (const mod of soldierMods) {
-    applyModifier(summary, mod.target, mod.value, mod.name, true);
+    if (isTargetRelevantForPhase(mod.target, phase)) {
+      applyModifier(summary, mod.target, mod.value, mod.name, true);
+    }
   }
 
   return summary;

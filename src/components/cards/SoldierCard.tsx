@@ -193,11 +193,13 @@ function SoldierCard({
     const meleeBuffs = collectBuffsForUnit(unit, armyLike as any, 'melee');
     const alwaysBuffs = collectBuffsForUnit(unit, armyLike as any, 'always');
     const allBuffIds = new Set([...shotBuffs, ...meleeBuffs, ...alwaysBuffs].map(b => b.id));
-    // Filter debuffs by expiry
-    const debuffs = (unit.activeDebuffs || []).filter(d =>
+    // Filter debuffs by expiry (includes unit-level debuffs + per-soldier debuffs from modal)
+    const unitDebuffs = (unit.activeDebuffs || []).filter(d =>
       isModifierActive(d.appliedAtTurn, d.duration, currentTurn)
     );
     const soldierMods = getSoldierModifiers(unit, soldierIndex, armyLike as any);
+    const soldierDebuffs = soldierMods.filter(m => m.value < 0);
+    const debuffs = [...unitDebuffs, ...soldierDebuffs];
     // Resolve buffs: only squad-level (set via editor), no catalog fallback
     const sourceData = sourceId ? getSourceWithCustom(sourceId) : null;
     const liveSquad = sourceData?.squads.find(s => s.id === squad.id);

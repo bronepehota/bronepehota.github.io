@@ -3,6 +3,7 @@
 import { CombatParameters, CombatActionType } from '@/lib/combat-types';
 import { NumberStepper } from '@/components/ui/NumberStepper';
 import { FortificationSelector } from '@/components/controls/FortificationSelector';
+import type { ModifierSummary } from '@/lib/modifier-types';
 import { RulesVersionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { DiceNotationDisplay } from './DiceNotationDisplay';
@@ -30,6 +31,7 @@ interface ParameterInputsProps {
   isAimedShot?: boolean;
   distanceInputUnit?: 'steps' | 'cm';
   stepToCmFactor?: number;
+  modifierSummary?: ModifierSummary;
 }
 
 export function ParameterInputs({
@@ -45,6 +47,7 @@ export function ParameterInputs({
   isAimedShot,
   distanceInputUnit = 'steps',
   stepToCmFactor = 5,
+  modifierSummary,
 }: ParameterInputsProps) {
   const effectiveDistance = targetMemory?.isDirty && targetMemory?.distance !== null
     ? targetMemory.distance
@@ -60,6 +63,27 @@ export function ParameterInputs({
 
   // Get unit stats for preview
   const unitStats = unit ? getUnitStats(unit, soldierIndex, parameters.weaponIndex) : null;
+
+  // Modifier bonus pill — compact +N/-N badge inline with dice
+  const ModBadge = ({ bonus }: { bonus: number }) => {
+    if (bonus === 0) return null;
+    const pos = bonus > 0;
+    return (
+      <span className={cn(
+        'inline-flex items-center justify-center px-1.5 py-px rounded-sm text-xs font-extrabold font-mono leading-none',
+        pos
+          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+          : 'bg-red-500/20 text-red-400 border border-red-500/30',
+      )}>
+        {pos ? `+${bonus}` : `${bonus}`}
+      </span>
+    );
+  };
+
+  // Extract modifier values for display
+  const rangeBonus = modifierSummary?.rangeBonus ?? 0;
+  const powerBonus = modifierSummary?.powerBonus ?? 0;
+  const meleeBonus = modifierSummary?.meleeBonus ?? 0;
 
   // Render stats preview for shot/grenade
   const renderShotGrenadeStats = () => {
@@ -132,7 +156,10 @@ export function ParameterInputs({
           <div className="grid grid-cols-2 gap-1.5 md:gap-2">
             {/* Range Card */}
             <div className="bg-slate-950/80 p-1.5 md:p-2 rounded-md border border-blue-500/30 relative">
-              <div className="text-[8px] opacity-40 uppercase font-bold mb-1 text-center">Дальность</div>
+              <div className="flex items-center justify-center gap-1.5 mb-1">
+                <span className="text-[8px] opacity-40 uppercase font-bold">Дальность</span>
+                <ModBadge bonus={rangeBonus} />
+              </div>
               <div className="flex justify-center relative mb-1">
                 <DiceNotationDisplay rollStr={effectiveRange} color="blue" />
               </div>
@@ -150,7 +177,10 @@ export function ParameterInputs({
 
             {/* Power Card */}
             <div className="bg-slate-950/80 p-1.5 md:p-2 rounded-md border border-orange-500/30 relative">
-              <div className="text-[8px] opacity-40 uppercase font-bold mb-1 text-center">Мощность</div>
+              <div className="flex items-center justify-center gap-1.5 mb-1">
+                <span className="text-[8px] opacity-40 uppercase font-bold">Мощность</span>
+                <ModBadge bonus={powerBonus} />
+              </div>
               <div className="flex justify-center relative mb-1">
                 <DiceNotationDisplay rollStr={unitStats.power} color="orange" />
               </div>
@@ -191,8 +221,9 @@ export function ParameterInputs({
         <div className="grid grid-cols-2 gap-2">
           <div className="bg-slate-950/80 p-2 rounded-md border border-cyan-500/30 relative">
             <div className="text-[8px] opacity-40 uppercase font-bold mb-1 text-center">Вы</div>
-            <div className="flex justify-center">
+            <div className="flex items-center justify-center gap-1.5">
               <DiceNotationDisplay rollStr={`1D6+${unitStats.melee}`} color="cyan" />
+              <ModBadge bonus={meleeBonus} />
             </div>
           </div>
           <div className="bg-slate-950/80 p-2 rounded-md border border-red-500/30 relative">

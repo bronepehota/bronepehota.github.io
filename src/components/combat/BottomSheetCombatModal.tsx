@@ -254,6 +254,7 @@ export function BottomSheetCombatModal({
                 isAimedShot={state.parameters.isAimedShot}
                 distanceInputUnit={distanceInputUnit}
                 stepToCmFactor={stepToCmFactor}
+                modifierSummary={modifierSummary}
               />
 
               {/* Active Modifiers Display */}

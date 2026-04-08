@@ -119,11 +119,17 @@ interface SourceData {
 
 **Client-side persistence** (localStorage keys):
 - `bronepehota_army` - Player's army state (units, totalCost, faction, sourceId)
+- `bronepehota_view` - Current view: 'army' (builder) or 'game' (session)
+- `bronepehota_display_mode` - Display mode preference
 - `bronepehota_army_list_source` - Selected army list source ('star_system' or 'tehnolog')
 - `bronepehota_rules_version` - Selected rules version for game session
 - `bronepehota_panic_enabled` - Panic rule toggle state
 - `bronepehota_aimed_shot_enabled` - Aimed shot rule toggle state
 - `bronepehota_surprise_attack_enabled` - Surprise attack (rear attack) toggle state
+- `AUTO_COMPLETE_ENABLED` - Auto-complete actions after combat
+- `DISTANCE_INPUT_UNIT` - Distance unit: 'steps' or 'cm'
+- `STEP_TO_CM_FACTOR` - Conversion factor from steps to cm (default: 5)
+- `STRICT_PILOT_RANK_ENABLED` - Enforce pilot rank requirements
 
 The main app page (`src/app/app/page.tsx`) manages the `Army` state and passes it down to child components.
 
@@ -134,14 +140,11 @@ The main app page (`src/app/app/page.tsx`) manages the `Army` state and passes i
 ### Core Types (`src/lib/types.ts`)
 
 ```typescript
-type SourceID = string;  // Dynamic source identifier
-type FactionID = string; // Dynamic faction identifier (breaking change: was union type)
-
-Soldier      // Individual soldier stats (rank, speed, range, power, melee, armor, modifiers)
-Squad        // Collection of 1-6 soldiers
+Soldier      // Individual soldier stats (rank, speed, range, power, melee, armor, props)
+Squad        // Collection of 1-6 soldiers + buffs[]
 Machine      // Vehicle with weapons, speed_sectors, durability, ammo
-ArmyUnit     // Runtime instance of Squad or Machine with game state
-Army         // Player's army with units, totalCost, faction, sourceId
+ArmyUnit     // Runtime instance of Squad or Machine with game state (deadSoldiers, actionsUsed, soldierModifiers, activeDebuffs, etc.)
+Army         // Player's army with units, totalCost, faction, sourceId, currentTurn
 ```
 
 **Adding a new source**:
@@ -175,6 +178,7 @@ Dice notation parsing: `D6`, `D12+2`, `2D12`, `ББ` (melee)
 **Rule Implementations** (`rules/`):
 - `fan.ts` - Fan rules implementation
 - `tehnolog.ts` - Tehnolog rules implementation
+- `community_star_system.ts` - Star System community rules implementation
 
 Adding a new rules version:
 1. Create new file in `src/lib/rules/{version}.ts`
@@ -191,13 +195,18 @@ src/components/
 ├── cards/           - Unit/soldier card components (UnitCard, SoldierCard, SquadView, MachineView)
 │   └── soldier-card/ - Soldier sub-components (ModifierIndicator, SoldierActions, SoldierStats)
 │   └── unit-card/   - Unit sub-components + hooks (useUnitCardState)
-├── combat/          - Combat modals (BottomSheetCombatModal, ActionSelector, ParameterInputs, CombatResults, ActiveModifiersDisplay)
+├── combat/          - Combat modals (BottomSheetCombatModal, ActionSelector, ParameterInputs, CombatResults, ActiveModifiersDisplay, HitProbabilityIndicator)
+├── controls/        - Shared controls (FortificationSelector, DistanceConverter)
 ├── editor/          - Desktop-only unit editor (SourcesList, SquadEditor, ModifiersEditor, BuffSelector)
 ├── encyclopedia/    - Encyclopedia page components (UnitDetailPage)
 ├── game-session/    - Game session components (ActiveBuffsIndicator)
 ├── landing/         - Landing page
-├── modals/          - Shared modals (SoldierEffectsModal, PilotAssignmentModal, PanicTestModal, EncyclopediaModal, ApplyBuffModal)
+├── machine/         - Machine-specific components
+├── modals/          - Shared modals (SoldierEffectsModal, PilotAssignmentModal, PanicTestModal, EncyclopediaModal)
+├── preparation/     - Battle preparation components
 ├── rules/           - Rules/source selectors, toggles
+├── toggles/         - Settings toggles
+├── ui/              - Reusable UI primitives (NumberStepper)
 └── *.tsx           - Top-level components (ArmyBuilder, GameSession, UnitCard)
 ```
 
@@ -295,7 +304,7 @@ interface Soldier {
       "range": "D6",
       "power": "1D6",
       "melee": 0,
-      "props": ["Г"],
+      "props": ["Г"],       // Props array: "Г" = grenade, etc. Resolved to modifiers at runtime via resolveSoldierEffects()
       "armor": 2
     }
     // ... up to 6 soldiers
@@ -338,7 +347,7 @@ interface Soldier {
 **Dice Notation**:
 - Range: "D6", "D12", "D20", "D6+2"
 - Power: "1D6", "2D12", "ББ" (melee)
-- Modifiers: IDs from catalog, e.g., `["grenade", "medic"]`
+- Modifiers: Soldier `props` field in JSON (e.g., `["Г"]` for grenade). Resolved to modifier IDs at runtime via `resolveSoldierEffects()`
 
 **Speed Sectors**: Must cover full range 1 to durability_max without gaps
 
@@ -407,8 +416,9 @@ interface Soldier {
 - `collectActiveBuffsForUnit()` - Collect temporary buffs for a unit
 - `getSoldierModifiers(unit, soldierIndex, army)` - Get modifiers for specific soldier
 - `resolveModifierSummary(unit, army, phase, soldierIndex?)` - Calculate ALL active modifiers for combat (buffs + debuffs + soldier mods, filtered by phase)
-- `cleanupExpiredModifiers(army)` - Remove expired modifiers at turn start
-- `isModifierActive(appliedAtTurn, duration?, currentTurn?)` - Returns `true` for `duration === undefined` (permanent)
+- `resolveSoldierEffects(squadBuffs, soldierModIds)` - Resolve per-soldier modifier IDs against catalog; returns `{ buffs, abilities }` (temporary vs permanent)
+- `cleanupExpiredModifiers(army)` - Remove expired modifiers at turn start; sets empty arrays to `undefined`
+- `isModifierActive(appliedAtTurn, duration?, currentTurn?)` - Returns `true` for `duration === undefined` (permanent); expiry: `currentTurn > appliedAtTurn + duration`
 
 **Combat Integration:**
 - `BottomSheetCombatModal` receives `army` prop, computes `modifierSummary` via `useMemo`
@@ -416,6 +426,14 @@ interface Soldier {
 - `ActiveModifiersDisplay` shown in PARAMETERS phase (between inputs and execute button)
 - For squads: `soldierIndex` passed; for machines: `soldierIndex = undefined`
 - Phase mapping: `actionType === 'melee'` → `'melee'`, otherwise → `'shot'`
+
+**Combat Relevance Filtering:**
+- `resolveModifierSummary` filters modifiers by action-relevant targets:
+  - **Shot phase**: `range_bonus`, `range_multiply`, `power_bonus`, `armor_bonus`, `distance_penalty`, `custom`
+  - **Melee phase**: `melee_bonus`, `custom`
+  - **Always phase** (soldier card stats): ALL targets included
+- `speed_multiply` (e.g., Адреналин) is hidden in combat panel but visible on soldier card stats
+- This filtering only affects `descriptions` and bonus values in combat; soldier card stats use separate phase calls (shot/melee/always)
 
 **Soldier Effects Flow:**
 - `ModifierIndicator` on SoldierCard → click opens `SoldierEffectsModal` (3 tabs: buffs/debuffs/abilities)
@@ -532,7 +550,7 @@ async function navigateToArmyBuilder(page: Page) {
 3. **All API error messages must be in Russian** (e.g., `Ошибка чтения данных`)
 4. **Dice notation**: "D6", "D12", "D20" for range; "1D6", "2D12" for power; "ББ" for melee
 5. **Speed sectors** must cover full range from 1 to `durability_max` without gaps
-6. **Soldier modifiers**: Soldiers have `modifiers: string[]` with IDs from modifier catalog (replaced old `props` field). Applied per-soldier via `SoldierEffectsModal`.
+6. **Soldier modifiers**: Soldiers have `props: string[]` in JSON data (e.g., `["Г"]` for grenade). These are resolved to modifier catalog IDs at runtime via `resolveSoldierEffects()`. Per-soldier runtime effects are stored in `soldierModifiers[]` on ArmyUnit.
 7. **Images**: Place images in `public/images/squads/` or `public/images/machines/`
 
 ## Active Technologies
