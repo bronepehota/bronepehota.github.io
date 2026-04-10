@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle2, X, ImageIcon, Bomb, UserX } from 'lucide-react';
+import { CheckCircle2, ImageIcon, Bomb, UserX } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ArmyUnit } from '@/lib/types';
 

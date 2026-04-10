@@ -6,6 +6,7 @@
 
 import { X } from 'lucide-react';
 import { CustomSquad, CustomMachine } from '@/lib/editor/types';
+import { getSoldierModifierCatalog } from '@/components/editor/SoldiersTable';
 
 interface PreviewModalProps {
   unit: CustomSquad | CustomMachine;
@@ -59,11 +60,21 @@ export function PreviewModal({ unit, type, onClose }: PreviewModalProps) {
                       <span>Мощн: {soldier.power}</span>
                       <span>ББ: {soldier.melee}</span>
                     </div>
-                    {soldier.props.length > 0 && (
-                      <div className="mt-1 text-slate-500">
-                        Свойства: {soldier.props.join(', ')}
-                      </div>
-                    )}
+                    {soldier.modifiers && soldier.modifiers.length > 0 && (() => {
+                      const catalog = getSoldierModifierCatalog();
+                      return (
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          {soldier.modifiers!.map(modId => {
+                            const mod = catalog.find(m => m.id === modId);
+                            return mod ? (
+                              <span key={mod.id} className="text-[10px] px-1.5 py-0.5 rounded bg-amber-950/50 border border-amber-600/30 text-amber-400 font-mono">
+                                {mod.name}
+                              </span>
+                            ) : null;
+                          })}
+                        </div>
+                      );
+                    })()}
                   </div>
                 ))}
               </div>

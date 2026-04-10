@@ -11,7 +11,7 @@ import {
   CombatConfig,
   GrenadeBlastResult,
 } from '@/lib/combat-types';
-import { rollDie, multiplyRange } from '@/lib/game-logic';
+import { rollDie, multiplyRange, addBonusToRoll } from '@/lib/game-logic';
 import { rulesRegistry } from '@/lib/rules-registry';
 import { getDefaultRulesVersion } from '@/lib/rules-registry';
 
@@ -242,10 +242,33 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
       power = weapon.power;
     }
 
-    // Apply aimed shot range multiplier (only for squads)
+    // Apply active modifiers (buffs/debuffs)
+    const mods = state.parameters.activeModifiers;
+
+    // 1. Additive range bonus (e.g., D6 → D6+1)
+    if (mods && mods.rangeBonus !== 0) {
+      range = addBonusToRoll(range, mods.rangeBonus);
+    }
+
+    // 2. Multiplicative range (e.g., D6 → D12 for x2)
+    if (mods && mods.rangeMultiplier !== 1) {
+      range = multiplyRange(range, mods.rangeMultiplier);
+    }
+
+    // 3. Aimed shot (applied on top of all modifiers)
     if (state.parameters.isAimedShot && state.unitType === 'squad') {
       range = multiplyRange(range, 2);
     }
+
+    // 4. Power bonus (additive)
+    if (mods && mods.powerBonus !== 0) {
+      power = addBonusToRoll(power, mods.powerBonus);
+    }
+
+    // 5. Effective distance (distance + penalty from debuffs)
+    const effectiveDistance = mods
+      ? state.parameters.distance + mods.distancePenalty
+      : state.parameters.distance;
 
     // Animate hit roll
     await animateDiceRoll();
@@ -253,7 +276,7 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
     // Calculate hit (surprise attack doesn't affect hit roll)
     const hitResult = rules.calculateHit(
       range,
-      state.parameters.distance,
+      effectiveDistance,
       state.parameters.fortification
     );
 
@@ -499,6 +522,12 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
     let attackerMelee = 0;
     if (state.unitType === 'squad' && state.soldierIndex !== null) {
       attackerMelee = (state.unit.data as any).soldiers[state.soldierIndex].melee;
+    }
+
+    // Apply melee bonus from active modifiers
+    const mods = state.parameters.activeModifiers;
+    if (mods && mods.meleeBonus !== 0) {
+      attackerMelee += mods.meleeBonus;
     }
 
     // Animate melee rolls

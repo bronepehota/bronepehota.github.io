@@ -68,8 +68,9 @@ test.describe.serial('Editor', () => {
     await page.getByTitle('Импорт').first().click();
     await page.waitForTimeout(500);
 
-    // Should see import modal
-    await expect(page.getByText('Импорт').first()).toBeVisible();
+    // Should see import modal via testid
+    const importModal = page.getByTestId('import-source-modal');
+    await expect(importModal).toBeVisible();
 
     // Should see textarea for JSON input
     const textArea = page.locator('textarea').first();
@@ -105,8 +106,9 @@ test.describe.serial('Editor', () => {
     await page.getByTitle('Импорт').first().click();
     await page.waitForTimeout(500);
 
-    // Should see import modal
-    await expect(page.getByText('Импорт').first()).toBeVisible();
+    // Should see import modal via testid
+    const importModal = page.getByTestId('import-source-modal');
+    await expect(importModal).toBeVisible();
 
     // Paste JSON into text area
     const textArea = page.locator('textarea').first();

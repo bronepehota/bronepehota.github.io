@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, memo } from 'react';
+import { useState, useEffect, useRef, useMemo, memo } from 'react';
 import { SoldierActions } from './soldier-card/SoldierActions';
 import { SoldierStats } from './soldier-card/SoldierStats';
 import { SoldierImage } from './soldier-card/SoldierImage';
@@ -8,6 +8,8 @@ import StatusStripe, { type SoldierState } from './soldier-card/StatusStripe';
 import { cn } from '@/lib/utils';
 import type { Squad, ArmyUnit, RulesVersionID } from '@/lib/types';
 import { checkPanicTrigger } from '@/lib/panic-logic';
+import { collectBuffsForUnit, getSoldierModifiers, resolveModifierSummary, isModifierActive } from '@/lib/modifier-utils';
+import { getSourceWithCustom } from '@/lib/sources-registry';
 
 interface SoldierCardProps {
   squad: Squad;
@@ -23,6 +25,9 @@ interface SoldierCardProps {
   distanceInputUnit?: 'steps' | 'cm';
   stepToCmFactor?: number;
   onNavigateToUnit?: (instanceId: string) => void;
+  onSoldierModifierClick?: (unitId: string, soldierIndex: number, soldierName: string) => void;
+  sourceId?: string;
+  currentTurn?: number;
 }
 
 function SoldierCard({
@@ -39,6 +44,9 @@ function SoldierCard({
   distanceInputUnit = 'steps',
   stepToCmFactor = 5,
   onNavigateToUnit,
+  onSoldierModifierClick,
+  sourceId,
+  currentTurn,
 }: SoldierCardProps) {
   const [isMounted, setIsMounted] = useState(false);
   const [isLongPressing, setIsLongPressing] = useState(false);
@@ -163,7 +171,6 @@ function SoldierCard({
 
       // Check panic trigger for community rules when adding a kill
       if (isAddingKill && rulesVersion === 'community_star_system') {
-        const currentTurn = 1;
         const shouldTestPanic = checkPanicTrigger(updatedUnit, 'community_star_system', currentTurn);
         if (shouldTestPanic) {
           setShowPanicModal(true);
@@ -176,6 +183,44 @@ function SoldierCard({
 
   // Check if this soldier is a pilot
   const isPilot = soldier.isPilot || false;
+
+  // Compute modifier counts for the modifier indicator
+  const { buffCount, debuffCount, soldierModifiers, availableBuffCount, statBonuses } = useMemo(() => {
+    // Build a minimal army-like structure from allUnits for buff collection
+    const armyLike = { name: '', totalCost: 0, units: _allUnits, currentTurn };
+    // Count buffs across ALL phases (not just shot)
+    const shotBuffs = collectBuffsForUnit(unit, armyLike as any, 'shot');
+    const meleeBuffs = collectBuffsForUnit(unit, armyLike as any, 'melee');
+    const alwaysBuffs = collectBuffsForUnit(unit, armyLike as any, 'always');
+    const allBuffIds = new Set([...shotBuffs, ...meleeBuffs, ...alwaysBuffs].map(b => b.id));
+    // Filter debuffs by expiry (includes unit-level debuffs + per-soldier debuffs from modal)
+    const unitDebuffs = (unit.activeDebuffs || []).filter(d =>
+      isModifierActive(d.appliedAtTurn, d.duration, currentTurn)
+    );
+    const soldierMods = getSoldierModifiers(unit, soldierIndex, armyLike as any);
+    const soldierDebuffs = soldierMods.filter(m => m.value < 0);
+    const debuffs = [...unitDebuffs, ...soldierDebuffs];
+    // Resolve buffs: only squad-level (set via editor), no catalog fallback
+    const sourceData = sourceId ? getSourceWithCustom(sourceId) : null;
+    const liveSquad = sourceData?.squads.find(s => s.id === squad.id);
+    const available = (liveSquad?.buffs || squad.buffs || [])
+      .filter((b: any) => b.applyTo?.includes('soldier')).length;
+
+    // Compute stat bonuses for display (merge shot + melee + always phases)
+    const shotSummary = resolveModifierSummary(unit, armyLike as any, 'shot', soldierIndex);
+    const meleeSummary = resolveModifierSummary(unit, armyLike as any, 'melee', soldierIndex);
+    const alwaysSummary = resolveModifierSummary(unit, armyLike as any, 'always', soldierIndex);
+
+    const statBonuses = {
+      rangeBonus: shotSummary.rangeBonus,
+      powerBonus: shotSummary.powerBonus,
+      meleeBonus: meleeSummary.meleeBonus,
+      armorBonus: alwaysSummary.armorBonus,
+      speedMultiplier: alwaysSummary.speedMultiplier !== 1 ? alwaysSummary.speedMultiplier : undefined,
+    };
+
+    return { buffCount: allBuffIds.size, debuffCount: debuffs.length, soldierModifiers: soldierMods, availableBuffCount: available, statBonuses };
+  }, [unit, _allUnits, soldierIndex, squad.buffs, squad.id, sourceId, currentTurn]);
 
   return (
     <div
@@ -227,6 +272,12 @@ function SoldierCard({
         disabled={isDone || isDead || isInPanic}
         onClick={() => onSoldierAction(soldierIndex)}
         className="flex-1"
+        buffCount={buffCount}
+        debuffCount={debuffCount}
+        soldierModifiers={soldierModifiers}
+        availableBuffCount={availableBuffCount}
+        onModifierClick={onSoldierModifierClick ? () => onSoldierModifierClick(unit.instanceId, soldierIndex, `#${soldier.num || soldierIndex + 1}`) : undefined}
+        statBonuses={statBonuses}
       />
 
       {/* Action buttons (right - stacked vertically) */}
@@ -262,9 +313,15 @@ export default memo(SoldierCard, (prevProps, nextProps) => {
   return (
     prevProps.soldierIndex === nextProps.soldierIndex &&
     prevProps.squad === nextProps.squad &&
+    prevProps.allUnits === nextProps.allUnits &&
     prevIsDead === nextIsDead &&
     prevIsDone === nextIsDone &&
     prevIsInPanic === nextIsInPanic &&
-    prevProps.onNavigateToUnit === nextProps.onNavigateToUnit
+    prevProps.unit.activeDebuffs === nextProps.unit.activeDebuffs &&
+    prevProps.unit.activeBuffs === nextProps.unit.activeBuffs &&
+    prevProps.unit.soldierModifiers === nextProps.unit.soldierModifiers &&
+    prevProps.onNavigateToUnit === nextProps.onNavigateToUnit &&
+    prevProps.onSoldierModifierClick === nextProps.onSoldierModifierClick &&
+    prevProps.currentTurn === nextProps.currentTurn
   );
 });

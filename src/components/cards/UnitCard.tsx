@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { GitHubPagesImage as Image } from '../GitHubPagesImage';
-import { ArmyUnit, Squad, Machine, Weapon, PanicTestResult, PilotInfo } from '@/lib/types';
+import { ArmyUnit, Squad, Machine, Weapon, PanicTestResult, PilotInfo, Army } from '@/lib/types';
 import { Crosshair, X } from 'lucide-react';
 import { formatUnitNumber } from '@/lib/unit-utils';
 import { cn } from '@/lib/utils';
@@ -34,7 +34,11 @@ interface UnitCardProps {
   stepToCmFactor?: number;
   autoCompleteEnabled?: boolean;
   triggerEncyclopediaOpen?: boolean;
+  onSoldierModifierClick?: (unitId: string, soldierIndex: number, soldierName: string) => void;
+  army?: Army;
 }
+
+
 
 export default function UnitCard({
   unit,
@@ -50,6 +54,8 @@ export default function UnitCard({
   stepToCmFactor = 5,
   autoCompleteEnabled = true,
   triggerEncyclopediaOpen = false,
+  onSoldierModifierClick,
+  army,
 }: UnitCardProps) {
   // Custom hooks for state management
   const {
@@ -151,24 +157,19 @@ export default function UnitCard({
   const isMachineDone = !isSquad && (unit.isMachineDone || isMachineDestroyed);
 
   const handlePanicTestComplete = (results: PanicTestResult[]) => {
-    const currentTurn = 1; // Default turn (will be updated when turn tracking is implemented)
+    const turn = army?.currentTurn || 1;
     const panicStates = results
       .filter(r => r.isPanic)
       .map(r => ({
         soldierIndex: r.soldierIndex,
         testRoll: r.roll,
         rank: r.rank,
-        triggeredAtTurn: currentTurn,
+        triggeredAtTurn: turn,
       }));
 
     if (panicStates.length > 0) {
       updateThisUnit((u) => ({ ...u, panicState: panicStates }));
     }
-  };
-
-  const handleOpenOriginal = (e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    setShowDetailsModal(true);
   };
 
   // Load encyclopedia data when modal opens
@@ -184,7 +185,7 @@ export default function UnitCard({
     if (triggerEncyclopediaOpen) {
       setShowDetailsModal(true);
     }
-  }, [triggerEncyclopediaOpen]);
+  }, [triggerEncyclopediaOpen, setShowDetailsModal]);
 
   // Handle combat actions
   const _handleSoldierAction = useCallback((soldierIndex: number) => {
@@ -193,11 +194,6 @@ export default function UnitCard({
 
   const handleVehicleAttack = (weaponIndex: number) => {
     combatController.startCombat(unit, undefined, weaponIndex, 'shot');
-  };
-
-  // Handle ram attack (melee) for machines
-  const handleRamAttack = () => {
-    combatController.startCombat(unit, undefined, undefined, 'melee');
   };
 
   // Handle pilot assignment
@@ -423,34 +419,6 @@ export default function UnitCard({
     });
   };
 
-  const handleToggleDone = () => {
-    if (isSquad) {
-      // Toggle: mark all alive soldiers as done or undo
-      const targetState = !isSquadDone;
-      const newActions = (unit.actionsUsed || Array((data as Squad).soldiers.length).fill({ moved: false, shot: false, melee: false, done: false }))
-        .map((action, idx) => {
-          const isDead = unit.deadSoldiers?.includes(idx);
-          if (isDead) return action;
-          return { ...action, done: targetState };
-        });
-      updateThisUnit((u) => ({ ...u, actionsUsed: newActions }));
-    } else {
-      // Toggle: mark machine as done or undo
-      const newMachineDoneState = !isMachineDone;
-      updateThisUnit((u) => ({ ...u, isMachineDone: newMachineDoneState }));
-
-      // Also update pilot's done state
-      setPilotDoneState(newMachineDoneState);
-    }
-  };
-
-  // Faction border color for tech corners
-  const factionBorderColor = data.faction === 'polaris'
-    ? 'rgba(220, 38, 38, 0.6)'
-    : data.faction === 'protectorate'
-    ? 'rgba(8, 145, 178, 0.6)'
-    : 'rgba(202, 138, 4, 0.6)';
-
   return (
     <div
       className={cn(
@@ -466,6 +434,7 @@ export default function UnitCard({
         <BottomSheetCombatModal
           state={combatController.state}
           rulesVersion={rulesVersion}
+          army={army || { name: '', totalCost: 0, units: allUnits || [] }}
           onGoBack={combatController.goBack}
           onClose={combatController.cancelCombat}
           onSelectAction={combatController.selectAction}
@@ -669,6 +638,9 @@ export default function UnitCard({
             allUnits={allUnits}
             getSoldierImage={getSoldierImage}
             onNavigateToUnit={_onNavigateToUnit}
+            onSoldierModifierClick={onSoldierModifierClick}
+            sourceId={army?.sourceId}
+            currentTurn={army?.currentTurn}
           />
         ) : (
           <MachineView

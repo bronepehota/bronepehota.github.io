@@ -1,13 +1,12 @@
 /**
- * Editor layout with responsive design
- * Desktop: 3-column sidebar
- * Mobile (< 768px): Tabs + bottom sheet for editing
+ * Editor layout — desktop only
+ * Mobile shows a notice with import/export functionality
  */
 
 'use client';
 
 import { useState, useMemo } from 'react';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Zap, Monitor, Download, Upload } from 'lucide-react';
 import { CustomSource, CustomFaction, CustomSquad, CustomMachine } from '@/lib/editor/types';
 import { getCustomSourcesStorage } from '@/lib/editor/storage';
 import { generateSourceId, generateFactionId, generateUnitId } from '@/lib/editor/id-generator';
@@ -21,9 +20,9 @@ import { MachineEditor } from './MachineEditor';
 import { CreateSourceModal } from './CreateSourceModal';
 import { ExportModal } from './ExportModal';
 import { ImportModal } from './ImportModal';
+import { ModifiersEditor } from './ModifiersEditor';
 
 type EditorView = 'list' | 'edit-squad' | 'edit-machine' | 'create-squad' | 'create-machine' | 'override-squad' | 'override-machine';
-type MobileTab = 'sources' | 'factions' | 'units';
 
 export function EditorLayout() {
   // State
@@ -40,8 +39,8 @@ export function EditorLayout() {
   const [showExportModal, setShowExportModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
 
-  // Mobile tab state
-  const [mobileTab, setMobileTab] = useState<MobileTab>('sources');
+  // Desktop tab state: 'units' shows 3-column list, 'modifiers' shows ModifiersEditor
+  const [desktopTab, setDesktopTab] = useState<'units' | 'modifiers'>('units');
 
   // Override data from base source when editing base units
   const [overrideSquadData, setOverrideSquadData] = useState<CustomSquad | null>(null);
@@ -367,94 +366,7 @@ export function EditorLayout() {
   const selectedSquad = selectedSource?.squads.find(s => s.id === selectedUnitId);
   const selectedMachine = selectedSource?.machines.find(m => m.id === selectedUnitId);
 
-  // Mobile tab content
-  const renderMobileContent = () => {
-    switch (mobileTab) {
-      case 'sources':
-        return (
-          <div className="h-full flex flex-col">
-            <div className="flex-1 overflow-y-auto p-3">
-              <SourcesList
-                sources={sources}
-                selectedId={selectedSourceId}
-                onSelect={(id) => {
-                  setSelectedSourceId(id);
-                  // Auto-navigate to factions on mobile
-                  if (id) setMobileTab('factions');
-                }}
-                onCreateNew={() => setShowCreateModal(true)}
-                onDelete={handleDeleteSource}
-                onExport={() => selectedSource && setShowExportModal(true)}
-                onImport={() => setShowImportModal(true)}
-              />
-            </div>
-          </div>
-        );
-      case 'factions':
-        return (
-          <div className="h-full flex flex-col">
-            <div className="flex-1 overflow-y-auto p-3">
-              {selectedSource ? (
-                <FactionsList
-                  factions={allFactions}
-                  selectedId={selectedFactionId}
-                  onSelect={(id) => {
-                    setSelectedFactionId(id);
-                    // Auto-navigate to units on mobile
-                    if (id) setMobileTab('units');
-                  }}
-                  onCreateNew={() => {
-                    const newFaction: CustomFaction = {
-                      id: generateFactionId('Новая фракция'),
-                      name: 'Новая фракция',
-                      color: '#6b7280',
-                    };
-                    handleUpdateSource({
-                      ...selectedSource,
-                      factions: [...selectedSource.factions, newFaction],
-                    });
-                  }}
-                  myUnitsCount={selectedSource.squads.length + selectedSource.machines.length + (selectedSource.hiddenUnits?.length || 0)}
-                />
-              ) : (
-                <div className="p-6 text-center">
-                  <div className="text-slate-500 text-sm">Сначала выберите источник</div>
-                </div>
-              )}
-            </div>
-          </div>
-        );
-      case 'units':
-        return (
-          <div className="h-full flex flex-col">
-            {selectedFactionId && selectedSource ? (
-              <UnitsList
-                source={selectedSource}
-                baseSourceId={selectedSource.baseSource}
-                factionId={selectedFactionId}
-                factions={allFactions}
-                onSelectUnit={(unitId, type) => {
-                  setSelectedUnitId(unitId);
-                  setView(type === 'squad' ? 'edit-squad' : 'edit-machine');
-                }}
-                onCloneUnit={handleCloneUnit}
-                onOverrideUnit={handleOverrideUnit}
-                onHideUnit={handleHideUnit}
-                onRestoreUnit={handleRestoreUnit}
-                onCreateSquad={handleCreateSquad}
-                onCreateMachine={handleCreateMachine}
-              />
-            ) : (
-              <div className="p-6 text-center">
-                <div className="text-slate-500 text-sm">Сначала выберите фракцию</div>
-              </div>
-            )}
-          </div>
-        );
-    }
-  };
-
-  // Shared editor views (used by both desktop full-width and mobile)
+  // Shared editor views (used by desktop)
   const renderEditorView = () => {
     if (view === 'create-squad' && selectedSource && selectedFactionId) {
       return (
@@ -615,8 +527,41 @@ export function EditorLayout() {
   return (
     <div className="flex flex-col flex-1 min-h-0 bg-slate-950">
       {/* Desktop layout */}
-      <div className="hidden md:flex flex-1 min-h-0">
+      <div className="hidden md:flex flex-col flex-1 min-h-0" id="editor-desktop">
+        {/* Desktop top tab bar */}
+        {view === 'list' && (
+          <div className="flex items-center border-b border-slate-800/50 bg-slate-900/80 shrink-0 px-4">
+            <button
+              onClick={() => setDesktopTab('units')}
+              className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold transition-all border-b-2 ${
+                desktopTab === 'units'
+                  ? 'text-white border-emerald-500'
+                  : 'text-slate-500 hover:text-slate-300 border-transparent'
+              }`}
+            >
+              Юниты
+            </button>
+            <button
+              onClick={() => setDesktopTab('modifiers')}
+              className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold transition-all border-b-2 ${
+                desktopTab === 'modifiers'
+                  ? 'text-white border-violet-500'
+                  : 'text-slate-500 hover:text-slate-300 border-transparent'
+              }`}
+            >
+              <Zap className="w-4 h-4" />
+              Модификаторы
+            </button>
+          </div>
+        )}
+
+        <div className="flex flex-1 min-h-0">
         {view === 'list' ? (
+          desktopTab === 'modifiers' ? (
+            <div className="flex-1 min-h-0 overflow-hidden">
+              <ModifiersEditor onRefresh={() => {}} />
+            </div>
+          ) : (
           <div className="flex w-full h-full min-h-0">
             {/* Left column: Sources list */}
             <div className="w-72 border-r border-slate-800/50 overflow-y-auto min-h-0">
@@ -681,6 +626,7 @@ export function EditorLayout() {
               )}
             </div>
           </div>
+          )
         ) : (
           /* Full-width editor */
           <div className="flex flex-col flex-1 overflow-hidden">
@@ -708,62 +654,38 @@ export function EditorLayout() {
             </div>
           </div>
         )}
-      </div>
-
-      {/* Mobile layout */}
-      <div className="md:hidden flex flex-col flex-1 min-h-0">
-        {/* Tab content */}
-        <div className="flex-1 overflow-hidden">
-          {view === 'list' ? (
-            renderMobileContent()
-          ) : (
-            /* Editor on mobile */
-            <div className="h-full overflow-y-auto">
-              {renderEditorView()}
-            </div>
-          )}
         </div>
-
-        {/* Bottom tab bar */}
-        {view === 'list' && (
-          <div className="flex items-center justify-around border-t border-slate-700/50 bg-slate-900/95 backdrop-blur-sm px-2 py-2">
+      </div>
+      {/* Mobile notice — editor is desktop only */}
+      <div className="md:hidden flex flex-col flex-1 min-h-0">
+        <div className="flex-1 flex flex-col items-center justify-center gap-6 p-6 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-slate-800/80 border border-slate-700/50 flex items-center justify-center">
+            <Monitor className="w-8 h-8 text-slate-400" />
+          </div>
+          <div className="space-y-2 max-w-xs">
+            <h2 className="text-lg font-bold text-white">Редактор доступен на десктопе</h2>
+            <p className="text-sm text-slate-400 leading-relaxed">
+              Перейдите на компьютер для полного редактирования юнитов, фракций и модификаторов.
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
             <button
-              onClick={() => setMobileTab('sources')}
-              className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all ${
-                mobileTab === 'sources'
-                  ? 'bg-emerald-600/20 text-emerald-400'
-                  : 'text-slate-500 hover:text-slate-400'
-              }`}
+              onClick={() => setShowImportModal(true)}
+              className="flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-800 border border-slate-700/50 text-sm font-medium text-slate-300 hover:bg-slate-700 transition-all active:scale-[0.97]"
             >
-              <span className="text-lg">📁</span>
-              <span className="text-[10px]">Источники</span>
+              <Upload className="w-4 h-4" />
+              Импорт
             </button>
             <button
-              onClick={() => selectedSource && setMobileTab('factions')}
+              onClick={() => selectedSource && setShowExportModal(true)}
               disabled={!selectedSource}
-              className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all ${
-                mobileTab === 'factions'
-                  ? 'bg-cyan-600/20 text-cyan-400'
-                  : 'text-slate-500 hover:text-slate-400 disabled:opacity-50'
-              }`}
+              className="flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-800 border border-slate-700/50 text-sm font-medium text-slate-300 hover:bg-slate-700 transition-all active:scale-[0.97] disabled:opacity-40"
             >
-              <span className="text-lg">⚔️</span>
-              <span className="text-[10px]">Фракции</span>
-            </button>
-            <button
-              onClick={() => selectedFactionId && setMobileTab('units')}
-              disabled={!selectedFactionId}
-              className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all ${
-                mobileTab === 'units'
-                  ? 'bg-amber-600/20 text-amber-400'
-                  : 'text-slate-500 hover:text-slate-400 disabled:opacity-50'
-              }`}
-            >
-              <span className="text-lg">🎖️</span>
-              <span className="text-[10px]">Юниты</span>
+              <Download className="w-4 h-4" />
+              Экспорт
             </button>
           </div>
-        )}
+        </div>
       </div>
 
       {/* Create Source Modal */}

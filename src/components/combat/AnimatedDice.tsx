@@ -91,7 +91,7 @@ export function AnimatedDice({
   color = 'blue',
   size = 'md',
   delay = 0,
-  isHit = true,
+  isHit: _isHit = true,
   bonus,
   total,
   targetValue,

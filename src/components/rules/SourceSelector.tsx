@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef, KeyboardEvent } from 'react';
-import { ExternalLink, Lock, ArrowRight } from 'lucide-react';
+import { ExternalLink, Lock, ArrowRight, Pencil } from 'lucide-react';
+import Link from 'next/link';
 import { clsx } from 'clsx';
 import type { ArmyListSource, SourceID } from '@/lib/types';
 import { FloatingContinueButton } from '../controls/FloatingContinueButton';
@@ -233,12 +234,9 @@ export function SourceSelector({
         {/* Custom Sources Section */}
         {customSources.length > 0 && (
           <>
-            {/* Divider */}
             <div className="flex items-center gap-3 py-2">
               <div className="h-px flex-1 bg-green-500/30" />
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-green-400 font-mono tracking-wider">МОИ ИСТОЧНИКИ</span>
-              </div>
+              <span className="text-sm font-semibold text-green-400 font-mono tracking-wider">МОИ ИСТОЧНИКИ</span>
               <div className="h-px flex-1 bg-green-500/30" />
             </div>
 
@@ -256,6 +254,25 @@ export function SourceSelector({
             </div>
           </>
         )}
+
+        {/* Editor promo — always visible */}
+        <Link
+          href="/editor"
+          className="group flex items-center gap-3 p-3 rounded-lg border border-dashed border-violet-500/25 bg-gradient-to-r from-violet-500/[0.04] to-fuchsia-500/[0.04] hover:border-violet-400/50 hover:from-violet-500/[0.08] hover:to-fuchsia-500/[0.08] transition-all duration-300"
+        >
+          <div className="shrink-0 w-9 h-9 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center group-hover:bg-violet-500/20 transition-colors">
+            <Pencil className="w-4 h-4 text-violet-400" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-xs font-mono font-bold text-violet-300 tracking-wide">
+              Редактор армейских листов
+            </div>
+            <div className="text-[10px] text-slate-500 mt-0.5 leading-snug">
+              Создайте свои подразделения, баффы и сценарии
+            </div>
+          </div>
+          <ArrowRight className="w-4 h-4 text-violet-500/40 group-hover:text-violet-400 group-hover:translate-x-0.5 transition-all" />
+        </Link>
       </div>
 
       {/* Floating confirm button - fixed at bottom */}

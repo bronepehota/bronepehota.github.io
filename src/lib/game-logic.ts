@@ -49,6 +49,30 @@ export const multiplyRange = (rangeStr: string, multiplier: number = 2): string 
   return `${dicePart}${bonusPart}`;
 };
 
+/**
+ * Add a flat bonus to a dice roll string.
+ * e.g., addBonusToRoll('D6', 1) → 'D6+1'
+ * e.g., addBonusToRoll('D6+2', 1) → 'D6+3'
+ * e.g., addBonusToRoll('2D12', -1) → '2D12-1'
+ */
+export const addBonusToRoll = (rollStr: string, bonus: number): string => {
+  if (rollStr === 'ББ') return rollStr;
+
+  const regex = /(?:(\d+))?D(\d+)(?:\+(\d+))?/;
+  const match = rollStr.match(regex);
+  if (!match) return rollStr;
+
+  const diceCount = match[1] ? parseInt(match[1]) : 1;
+  const sides = parseInt(match[2]);
+  const existingBonus = match[3] ? parseInt(match[3]) : 0;
+  const newBonus = existingBonus + bonus;
+
+  const dicePart = diceCount === 1 ? `D${sides}` : `${diceCount}D${sides}`;
+  const bonusPart = newBonus > 0 ? `+${newBonus}` : newBonus < 0 ? `${newBonus}` : '';
+
+  return `${dicePart}${bonusPart}`;
+};
+
 export const executeRoll = (rollStr: string): { total: number, rolls: number[], bonus: number } => {
   if (rollStr === 'ББ') return { total: 0, rolls: [], bonus: 0 }; // Special case for melee range
 

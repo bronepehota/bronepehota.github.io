@@ -9,6 +9,8 @@ import { CustomMachine, CustomSource, CustomWeapon, CustomSpeedSector } from '@/
 import { generateUnitId } from '@/lib/editor/id-generator';
 import { Save, X, Plus, Trash2, Eye, Target, Zap, Shield, Gauge } from 'lucide-react';
 import { MachinePreview } from './MachinePreview';
+import { BuffSelector } from './BuffSelector';
+import type { BuffDefinition } from '@/lib/modifier-types';
 
 interface MachineEditorProps {
   machine?: CustomMachine;
@@ -68,6 +70,7 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
       { min_durability: 1, max_durability: 8, speed: 1 },
     ]
   );
+  const [buffs, setBuffs] = useState<BuffDefinition[]>(machine?.buffs || []);
   const [showPreview, setShowPreview] = useState(false);
 
   const factionStyle = getFactionStyle(factionId);
@@ -130,6 +133,7 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
       image: image.trim() || undefined,
       weapons,
       speed_sectors: speedSectors,
+      buffs: buffs.length > 0 ? buffs : undefined,
     };
 
     onSave(machineData);
@@ -311,6 +315,20 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
                   <div className="text-[10px] text-slate-600">очков</div>
                 </div>
               </div>
+            </div>
+
+            {/* Section: Buffs */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-700/50">
+                <div className="w-1 h-4 rounded-full bg-emerald-500" />
+                <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">Бафы</h3>
+                {buffs.length > 0 && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-medium">
+                    {buffs.length}
+                  </span>
+                )}
+              </div>
+              <BuffSelector selectedBuffs={buffs} onChange={setBuffs} />
             </div>
 
             {/* Preview button */}

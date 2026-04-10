@@ -1,0 +1,237 @@
+{
+  "version": "3.0",
+  "lastUpdated": "2026-03-23",
+  "buffs": [
+    {
+      "id": "banner",
+      "name": "Знамёносец",
+      "description": "Знамя воодушевляет войска: +1 к броску дальности для всех юнитов армии",
+      "applyTo": ["army"],
+      "target": "range_bonus",
+      "value": 1,
+      "phase": "shot",
+      "icon": "Flag"
+    },
+    {
+      "id": "battle_cry",
+      "name": "Боевой клич",
+      "description": "Натиск: +1 к броску ближнего боя для всех юнитов армии на 1 ход",
+      "applyTo": ["army"],
+      "target": "melee_bonus",
+      "value": 1,
+      "phase": "melee",
+      "duration": 1,
+      "icon": "Sword"
+    },
+    {
+      "id": "spotter",
+      "name": "Наводчик",
+      "description": "Корректировка огня: +1 к дальности стрельбы на 1 ход (командный)",
+      "applyTo": ["army"],
+      "target": "range_bonus",
+      "value": 1,
+      "phase": "shot",
+      "duration": 1,
+      "icon": "Crosshair"
+    },
+    {
+      "id": "medic",
+      "name": "Медик",
+      "description": "Медицинская поддержка: +1 к броне на 1 ход (адреналин)",
+      "applyTo": ["army"],
+      "target": "armor_bonus",
+      "value": 1,
+      "phase": "always",
+      "duration": 1,
+      "icon": "Heart"
+    },
+    {
+      "id": "adrenaline_shot",
+      "name": "Адреналин",
+      "description": "Адреналиновый укол: +2 к скорости на 2 хода",
+      "applyTo": ["soldier", "machine"],
+      "target": "speed_multiply",
+      "value": 1.5,
+      "phase": "always",
+      "duration": 2,
+      "icon": "Syringe"
+    },
+    {
+      "id": "aim_boost",
+      "name": "Прицельная концентрация",
+      "description": "Фокусировка на цели: +2 к дальности на 1 ход",
+      "applyTo": ["soldier", "machine"],
+      "target": "range_bonus",
+      "value": 2,
+      "phase": "shot",
+      "duration": 1,
+      "icon": "Target"
+    },
+    {
+      "id": "frenzy",
+      "name": "Ярость",
+      "description": "Боевое безумие: +2 к ближнему бою на 1 ход",
+      "applyTo": ["soldier", "machine"],
+      "target": "melee_bonus",
+      "value": 2,
+      "phase": "melee",
+      "duration": 1,
+      "icon": "Zap"
+    },
+    {
+      "id": "smoke_screen",
+      "name": "Дымовая завеса",
+      "description": "Дымовая граната: +2 к дистанции противника на 1 ход",
+      "applyTo": ["army"],
+      "target": "distance_penalty",
+      "value": 2,
+      "phase": "always",
+      "duration": 1,
+      "icon": "Wind"
+    },
+    {
+      "id": "overclock",
+      "name": "Разгон сервоприводов",
+      "description": "Форсаж машины: скорость x2 на 1 ход",
+      "applyTo": ["machine"],
+      "target": "speed_multiply",
+      "value": 2,
+      "phase": "always",
+      "duration": 1,
+      "icon": "Timer"
+    },
+    {
+      "id": "emergency_repairs",
+      "name": "Полевой ремонт",
+      "description": "Восстановление брони: +2 к броне на 2 хода",
+      "applyTo": ["soldier", "machine"],
+      "target": "armor_bonus",
+      "value": 2,
+      "phase": "always",
+      "duration": 2,
+      "icon": "ShieldCheck"
+    },
+    {
+      "id": "jump_boost_4",
+      "name": "Пр4",
+      "description": "Прыжковой ускоритель на расстояние 4е, используется один раз за бой",
+      "applyTo": ["soldier"],
+      "target": "custom",
+      "value": 4,
+      "phase": "always",
+      "icon": "ArrowUp",
+      "oneTimeUse": true
+    },
+    {
+      "id": "jump_boost_5",
+      "name": "Пр5",
+      "description": "Прыжковой ускоритель на расстояние 5е, используется один раз за бой",
+      "applyTo": ["soldier"],
+      "target": "custom",
+      "value": 5,
+      "phase": "always",
+      "icon": "ChevronsUp",
+      "oneTimeUse": true
+    },
+    {
+      "id": "mechanic",
+      "name": "Рм",
+      "description": "Возможность ремонтировать машины, постоянная способность",
+      "applyTo": ["soldier"],
+      "target": "custom",
+      "value": 0,
+      "phase": "always",
+      "icon": "Wrench"
+    }
+  ],
+  "debuffs": [
+    {
+      "id": "slow",
+      "name": "Замедление",
+      "description": "Скорость x0.5 — юнит двигается вдвое медленнее",
+      "applyTo": ["soldier", "machine"],
+      "target": "speed_multiply",
+      "value": 0.5,
+      "phase": "always",
+      "duration": 2,
+      "icon": "Snail"
+    },
+    {
+      "id": "suppression",
+      "name": "Подавление огнём",
+      "description": "Штраф +1 к дистанции — сложнее попасть по этому юниту",
+      "applyTo": ["soldier", "machine"],
+      "target": "distance_penalty",
+      "value": 1,
+      "phase": "shot",
+      "duration": 1,
+      "icon": "Crosshair"
+    },
+    {
+      "id": "stunned",
+      "name": "Оглушение",
+      "description": "Юнит не может действовать: стрелять, двигаться, атаковать",
+      "applyTo": ["soldier", "machine"],
+      "target": "custom",
+      "value": 0,
+      "phase": "always",
+      "duration": 1,
+      "icon": "Frown"
+    },
+    {
+      "id": "damaged_optics",
+      "name": "Повреждение прицела",
+      "description": "Оптика повреждена: -1 к броску дальности при стрельбе",
+      "applyTo": ["soldier", "machine"],
+      "target": "range_bonus",
+      "value": -1,
+      "phase": "shot",
+      "duration": 3,
+      "icon": "Eye"
+    },
+    {
+      "id": "breached_armor",
+      "name": "Пробитая броня",
+      "description": "Броня пробита: -1 к броне юнита",
+      "applyTo": ["soldier", "machine"],
+      "target": "armor_bonus",
+      "value": -1,
+      "phase": "always",
+      "duration": 3,
+      "icon": "ShieldOff"
+    },
+    {
+      "id": "engine_damage",
+      "name": "Повреждение двигателя",
+      "description": "Двигатель повреждён: скорость x0.5",
+      "applyTo": ["machine"],
+      "target": "speed_multiply",
+      "value": 0.5,
+      "phase": "always",
+      "duration": 2,
+      "icon": "AlertTriangle"
+    },
+    {
+      "id": "system_hack",
+      "name": "Взлом систем",
+      "description": "Электронные системы взломаны: случайные сбои",
+      "applyTo": ["machine"],
+      "target": "custom",
+      "value": 0,
+      "phase": "always",
+      "duration": 2,
+      "icon": "Bug"
+    },
+    {
+      "id": "immobilized",
+      "name": "Обездвижен",
+      "description": "Юнит не может двигаться",
+      "applyTo": ["soldier", "machine"],
+      "target": "custom",
+      "value": 0,
+      "phase": "always",
+      "duration": 1,
+      "icon": "Skull"
+    }
+  ]
+}

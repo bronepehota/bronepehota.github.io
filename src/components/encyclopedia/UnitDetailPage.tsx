@@ -6,6 +6,7 @@ import { ArrowLeft, Shield, Zap, Skull } from 'lucide-react';
 import { GitHubPagesImage } from '@/components/GitHubPagesImage';
 import { EnrichedUnit } from '@/lib/encyclopedia-utils';
 import { cn } from '@/lib/utils';
+import { ModifierIcon } from '@/components/editor/ModifierIcons';
 import { SoldierImages } from './UnitDetail/SoldierImages';
 import { MachineImages } from './UnitDetail/MachineImages';
 import PaintedExamples from './PaintedExamples';
@@ -210,6 +211,46 @@ export default function UnitDetailPage({ unit }: UnitDetailPageProps) {
 
             {/* Lore, Traditions, Battles, Locations sections */}
             <UnitLore unit={unit} />
+
+            {/* Buffs section */}
+            {unit.buffs && unit.buffs.length > 0 && (
+              <section
+                className={cn(
+                  'folded-paper military-corners p-6',
+                  'fade-in-up opacity-0',
+                  isLoaded && 'opacity-100'
+                )}
+                style={{ animationFillMode: 'forwards', animationDelay: '0.75s' }}
+              >
+                <h2 className="font-oswald text-lg text-military-sand mb-4 flex items-center gap-2">
+                  <ModifierIcon size={20} className="text-emerald-500" />
+                  Бафы
+                </h2>
+                <div className="space-y-3">
+                  {unit.buffs.map(buff => (
+                    <div key={buff.id} className="flex items-start gap-3 p-3 rounded-lg bg-military-dark/50 border border-military-steel/30">
+                      <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center bg-emerald-900/30 text-emerald-500">
+                        <ModifierIcon name={buff.icon} size={18} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-oswald text-sm text-white">{buff.name}</span>
+                          {buff.applyTo.map(t => (
+                            <span key={t} className="text-[10px] px-2 py-0.5 rounded-full font-ibm-mono bg-emerald-900/40 border border-emerald-600/30 text-emerald-400 uppercase">
+                              {t === 'army' ? 'армия' : t === 'machine' ? 'машина' : 'солдат'}
+                            </span>
+                          ))}
+                          <span className="text-[10px] px-2 py-0.5 rounded-full font-ibm-mono bg-military-steel/30 border border-military-steel/40 text-military-steel uppercase">
+                            {buff.phase === 'always' ? 'всегда' : buff.phase === 'shot' ? 'стрельба' : buff.phase === 'melee' ? 'ББ' : buff.phase}
+                          </span>
+                        </div>
+                        <p className="text-xs text-military-sand/60 mt-1">{buff.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
             {/* Soldier Images section */}
             <section

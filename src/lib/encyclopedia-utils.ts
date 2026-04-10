@@ -6,6 +6,7 @@
  */
 
 import { Squad, Machine, FactionID } from './types';
+import type { BuffDefinition } from './modifier-types';
 import {
   getEncyclopediaUnit,
   getEncyclopediaFaction,
@@ -37,6 +38,7 @@ export interface EnrichedUnit extends EncyclopediaUnit {
   durability_max?: Machine['durability_max'];
   weapons?: Machine['weapons'];
   speed_sectors?: Machine['speed_sectors'];
+  buffs?: BuffDefinition[];
 }
 
 /**

@@ -34,6 +34,7 @@ export function convertSoldier(custom: CustomSoldier): Soldier {
     props: custom.props,
     armor: custom.armor,
     image: custom.image,
+    modifiers: custom.modifiers,
   };
 }
 
@@ -49,6 +50,7 @@ export function convertSquad(custom: CustomSquad): Squad {
     cost: custom.cost,
     image: custom.image,
     soldiers: custom.soldiers.map(convertSoldier),
+    buffs: custom.buffs,
   };
 }
 
@@ -145,14 +147,16 @@ export function mergeWithBaseSource(
   for (const customSquad of custom.squads) {
     baseSquadsMap.set(customSquad.id, convertSquad(customSquad));
   }
-  const mergedSquads = Array.from(baseSquadsMap.values());
+  const mergedSquads = Array.from(baseSquadsMap.values())
+    .filter(s => !custom.hiddenUnits?.includes(s.id));
 
   // Мерж техники
   const baseMachinesMap = new Map(base.machines.map(m => [m.id, m]));
   for (const customMachine of custom.machines) {
     baseMachinesMap.set(customMachine.id, convertMachine(customMachine));
   }
-  const mergedMachines = Array.from(baseMachinesMap.values());
+  const mergedMachines = Array.from(baseMachinesMap.values())
+    .filter(m => !custom.hiddenUnits?.includes(m.id));
 
   return {
     source,

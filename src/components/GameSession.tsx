@@ -3,6 +3,9 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Army, ArmyUnit, Squad, Machine, PilotInfo, FactionID } from '@/lib/types';
 import { resolvePanic } from '@/lib/panic-logic';
+import { cleanupExpiredModifiers, getAllDebuffs, resolveSoldierEffects, collectActiveBuffsForUnit, collectDebuffsForUnit, collectBuffsForUnit } from '@/lib/modifier-utils';
+import { getSourceWithCustom } from '@/lib/sources-registry';
+import { SoldierEffectsModal } from './modals/SoldierEffectsModal';
 import { getFactionColors } from '@/lib/faction-colors';
 import UnitCard from './cards/UnitCard';
 import { History, X, Bomb, Heart } from 'lucide-react';
@@ -65,6 +68,18 @@ export default function GameSession({
   const [isDockExpanded, setIsDockExpanded] = useState(false);
   const [dockDragProgress, setDockDragProgress] = useState(0);
   const [triggerEncyclopediaOpen, setTriggerEncyclopediaOpen] = useState(false);
+  const [effectsModalState, setEffectsModalState] = useState<{
+    unitId: string;
+    soldierIndex: number;
+    soldierName: string;
+  } | null>(null);
+
+  // Soldier-applicable debuffs from catalog (buffs & abilities come from getAllBuffs)
+  const { soldierDebuffs } = useMemo(() => {
+    return {
+      soldierDebuffs: getAllDebuffs().filter(d => d.applyTo.includes('soldier')),
+    };
+  }, []);
   const { clearAllMemory } = useCombatTargetContext();
 
   // Keep ref to current army for immediate access in updateUnit
@@ -248,10 +263,18 @@ export default function GameSession({
 
     const newTurn = (army.currentTurn || 1) + 1;
 
-    setArmy({
+    // Create army with new turn value first
+    const armyWithNewTurn = {
       ...army,
       currentTurn: newTurn,
-      units: army.units.map(u => {
+    };
+
+    // Remove expired modifiers
+    const cleanedArmy = cleanupExpiredModifiers(armyWithNewTurn);
+
+    setArmy({
+      ...cleanedArmy,
+      units: cleanedArmy.units.map(u => {
         // Resolve panic at the start of new turn
         const unitWithoutPanic = resolvePanic(u, newTurn);
 
@@ -484,6 +507,107 @@ export default function GameSession({
         context="turn"
       />
 
+      {/* Soldier Effects Modal */}
+      {effectsModalState && (() => {
+        const unit = army.units.find(u => u.instanceId === effectsModalState.unitId);
+        if (!unit) return null;
+        // Resolve buffs: squad-level + soldier-level modifiers from catalog
+        const sourceData = army.sourceId ? getSourceWithCustom(army.sourceId) : null;
+        const liveSquad = sourceData?.squads.find(s => s.id === unit.data.id);
+        const squadBuffs = (liveSquad?.buffs || (unit.data as any).buffs || []);
+        const si = effectsModalState.soldierIndex;
+        // Resolve per-soldier modifier IDs against catalog
+        const soldier = (unit.data as Squad).soldiers[si];
+        const soldierModIds = soldier?.modifiers || [];
+        const { buffs: modalBuffs, abilities: modalAbilities } = resolveSoldierEffects(squadBuffs, soldierModIds);
+        const abilitiesUsed = (unit.soldierAbilitiesUsed || [])
+          .filter(k => k.endsWith(`_${si}`))
+          .map(k => k.split('_').slice(0, -1).join('_'));
+        // Collect all active effects on this unit for display
+        const unitActiveBuffs = collectActiveBuffsForUnit(unit, army);
+        const unitDebuffs = collectDebuffsForUnit(unit, army);
+        // Static buffs from army (across all phases)
+        const shotBuffs = collectBuffsForUnit(unit, army, 'shot');
+        const meleeBuffs = collectBuffsForUnit(unit, army, 'melee');
+        const alwaysBuffs = collectBuffsForUnit(unit, army, 'always');
+        const allStaticBuffs = [...shotBuffs, ...meleeBuffs, ...alwaysBuffs];
+        const seenBuffIds = new Set<string>();
+        const uniqueStaticBuffs = allStaticBuffs.filter(b => {
+          if (seenBuffIds.has(b.id)) return false;
+          seenBuffIds.add(b.id);
+          return true;
+        });
+        return (
+          <SoldierEffectsModal
+            isOpen={!!effectsModalState}
+            onClose={() => setEffectsModalState(null)}
+            soldierModifiers={(unit.soldierModifiers || []).filter(
+              m => m.soldierIndex === si
+            )}
+            activeBuffs={unitActiveBuffs}
+            activeDebuffs={unitDebuffs}
+            staticBuffs={uniqueStaticBuffs}
+            availableBuffs={modalBuffs}
+            availableDebuffs={soldierDebuffs}
+            availableAbilities={modalAbilities}
+            currentTurn={army.currentTurn || 1}
+            abilitiesUsed={abilitiesUsed}
+            onApplyModifier={(item, _tabType) => {
+              const appliedAt = army.currentTurn || 1;
+              const si = effectsModalState.soldierIndex;
+              const targetUnit = army.units.find(u => u.instanceId === effectsModalState.unitId);
+              if (!targetUnit) return;
+
+              // ALL effects from soldier modal go to soldierModifiers (per-soldier)
+              // Prevent duplicate — same catalog ID on same soldier
+              const alreadyOnSoldier = (targetUnit.soldierModifiers || []).some(
+                m => m.catalogId === item.id && m.soldierIndex === si
+              );
+              if (alreadyOnSoldier) return;
+
+              const duration = 'duration' in item && item.duration ? item.duration : undefined;
+              const modifier: any = {
+                id: `${item.id}_${Date.now()}`,
+                catalogId: item.id,
+                name: item.name,
+                description: item.description,
+                target: item.target,
+                value: item.value,
+                phase: item.phase,
+                icon: item.icon,
+                appliedAtTurn: appliedAt,
+                soldierIndex: si,
+              };
+              if (duration) {
+                modifier.duration = duration;
+                modifier.expiresAtTurn = appliedAt + duration;
+              }
+              updateUnit(effectsModalState.unitId, u => {
+                const updates: Partial<ArmyUnit> = {
+                  soldierModifiers: [
+                    ...(u.soldierModifiers || []),
+                    modifier,
+                  ],
+                  // Track ALL effects as consumed (one use per battle per soldier)
+                  soldierAbilitiesUsed: [
+                    ...(u.soldierAbilitiesUsed || []),
+                    `${item.id}_${si}`,
+                  ],
+                };
+                return { ...u, ...updates };
+              });
+            }}
+            onRemoveModifier={(modId) => {
+              updateUnit(effectsModalState.unitId, u => ({
+                ...u,
+                soldierModifiers: (u.soldierModifiers || []).filter(m => m.id !== modId),
+              }));
+            }}
+            soldierName={effectsModalState.soldierName}
+          />
+        );
+      })()}
+
       {/* Turn Confirmation Modal */}
       {showTurnConfirmation && (
         <div className="fixed inset-0 z-[100] bg-slate-950/95 flex items-center justify-center p-2 md:p-4 backdrop-blur-xl animate-in fade-in duration-300">
@@ -580,6 +704,7 @@ export default function GameSession({
               combatLog={combatLog}
               onCombatLogEntry={handleCombatLogEntry}
               allUnits={army.units}
+              army={army}
               onPilotAssign={handlePilotAssign}
               onPilotRemove={handlePilotRemove}
               onNavigateToUnit={handleNavigateToUnit}
@@ -588,6 +713,9 @@ export default function GameSession({
               stepToCmFactor={stepToCmFactor}
               autoCompleteEnabled={autoCompleteEnabled}
               triggerEncyclopediaOpen={triggerEncyclopediaOpen}
+              onSoldierModifierClick={(unitId, soldierIndex, soldierName) => {
+                setEffectsModalState({ unitId, soldierIndex, soldierName });
+              }}
             />
           </div>
         )}
