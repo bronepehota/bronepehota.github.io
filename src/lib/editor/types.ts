@@ -67,7 +67,6 @@ export interface CustomSoldier {
   range: string;
   power: string;
   melee: number;
-  props: string[];
   armor: number;
   image?: string;
   modifiers?: string[];  // Modifier IDs from catalog (see applyTo for target types)

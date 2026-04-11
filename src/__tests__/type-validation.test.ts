@@ -106,8 +106,8 @@ describe('Type Validation', () => {
           faction: 'polaris',
           cost: 50,
           soldiers: [
-            { rank: 7, speed: 4, range: 'D6', power: '1D6', melee: 0, props: [], armor: 2 },
-            { rank: 5, speed: 4, range: 'D6', power: '1D6', melee: 0, props: [], armor: 2 }
+            { rank: 7, speed: 4, range: 'D6', power: '1D6', melee: 0, armor: 2 },
+            { rank: 5, speed: 4, range: 'D6', power: '1D6', melee: 0, armor: 2 }
           ],
           image: ''
         },

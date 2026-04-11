@@ -26,8 +26,8 @@ describe('PrepArmyList', () => {
       cost: 100,
       image: '/images/squads/light-assault.jpg',
       soldiers: [
-        { num: 1, rank: 5, speed: 4, range: 'D6', power: '1D6', melee: 0, props: [], armor: 2, image: '/images/soldiers/1.jpg' },
-        { num: 2, rank: 4, speed: 4, range: 'D6', power: '1D6', melee: 0, props: [], armor: 2, image: '/images/soldiers/2.jpg' },
+        { num: 1, rank: 5, speed: 4, range: 'D6', power: '1D6', melee: 0, armor: 2, image: '/images/soldiers/1.jpg' },
+        { num: 2, rank: 4, speed: 4, range: 'D6', power: '1D6', melee: 0, armor: 2, image: '/images/soldiers/2.jpg' },
       ],
     } as Squad,
     currentDurability: undefined,
@@ -105,7 +105,7 @@ describe('PrepArmyList', () => {
         data: {
           ...mockSquadUnit.data,
           soldiers: [
-            { num: 1, rank: 5, speed: 4, range: 'D6', power: '1D6', melee: 0, props: [], armor: 2 },
+            { num: 1, rank: 5, speed: 4, range: 'D6', power: '1D6', melee: 0, armor: 2 },
           ],
         } as Squad,
       };

@@ -13,7 +13,6 @@
         "range": "",
         "power": "",
         "melee": 5,
-        "props": [],
         "armor": 2,
         "image": "/images/squads/protectorate/opolchenie_planety_gelion/1.png"
       },
@@ -24,7 +23,6 @@
         "range": "D6",
         "power": "2D6",
         "melee": 2,
-        "props": [],
         "armor": 2,
         "image": "/images/squads/protectorate/opolchenie_planety_gelion/2.png"
       },
@@ -35,7 +33,6 @@
         "range": "",
         "power": "",
         "melee": 2,
-        "props": [],
         "armor": 2,
         "image": "/images/squads/protectorate/opolchenie_planety_gelion/3.png"
       },
@@ -46,7 +43,6 @@
         "range": "",
         "power": "",
         "melee": 4,
-        "props": [],
         "armor": 2,
         "image": "/images/squads/protectorate/opolchenie_planety_gelion/4.png"
       },
@@ -57,7 +53,6 @@
         "range": "",
         "power": "",
         "melee": 5,
-        "props": [],
         "armor": 2,
         "image": "/images/squads/protectorate/opolchenie_planety_gelion/5.png"
       },
@@ -68,7 +63,6 @@
         "range": "D6",
         "power": "2D6",
         "melee": 2,
-        "props": [],
         "armor": 2,
         "image": "/images/squads/protectorate/opolchenie_planety_gelion/6.png"
       }
@@ -89,7 +83,6 @@
         "range": "",
         "power": "",
         "melee": 4,
-        "props": [],
         "armor": 2,
         "image": "/images/squads/protectorate/felitsianskaya_gvardiya/1.png"
       },
@@ -100,7 +93,6 @@
         "range": "",
         "power": "",
         "melee": 4,
-        "props": [],
         "armor": 2,
         "image": "/images/squads/protectorate/felitsianskaya_gvardiya/2.png"
       },
@@ -111,7 +103,6 @@
         "range": "D6",
         "power": "1D12",
         "melee": 2,
-        "props": [],
         "armor": 2,
         "image": "/images/squads/protectorate/felitsianskaya_gvardiya/3.png"
       },
@@ -122,7 +113,6 @@
         "range": "",
         "power": "",
         "melee": 4,
-        "props": [],
         "armor": 2,
         "image": "/images/squads/protectorate/felitsianskaya_gvardiya/4.png"
       },
@@ -133,7 +123,6 @@
         "range": "",
         "power": "",
         "melee": 4,
-        "props": [],
         "armor": 2,
         "image": "/images/squads/protectorate/felitsianskaya_gvardiya/5.png"
       },
@@ -144,7 +133,6 @@
         "range": "D6",
         "power": "1D6",
         "melee": 4,
-        "props": [],
         "armor": 2,
         "image": "/images/squads/protectorate/felitsianskaya_gvardiya/6.png"
       }
@@ -165,7 +153,6 @@
         "range": "D6",
         "power": "2D6",
         "melee": 2,
-        "props": [],
         "armor": 1,
         "image": "/images/squads/protectorate/voyska_planety_ruteniya/1.png"
       },
@@ -176,7 +163,6 @@
         "range": "D12",
         "power": "2D12",
         "melee": 0,
-        "props": [],
         "armor": 1,
         "image": "/images/squads/protectorate/voyska_planety_ruteniya/2.png"
       },
@@ -187,7 +173,6 @@
         "range": "D12",
         "power": "2D12",
         "melee": 0,
-        "props": [],
         "armor": 1,
         "image": "/images/squads/protectorate/voyska_planety_ruteniya/3.png"
       },
@@ -198,7 +183,6 @@
         "range": "",
         "power": "",
         "melee": 4,
-        "props": [],
         "armor": 1,
         "image": "/images/squads/protectorate/voyska_planety_ruteniya/4.png"
       },
@@ -209,7 +193,6 @@
         "range": "D12",
         "power": "2D12",
         "melee": 0,
-        "props": [],
         "armor": 1,
         "image": "/images/squads/protectorate/voyska_planety_ruteniya/5.png"
       },
@@ -220,7 +203,6 @@
         "range": "D6",
         "power": "1D6+3",
         "melee": 2,
-        "props": [],
         "armor": 1,
         "image": "/images/squads/protectorate/voyska_planety_ruteniya/6.png"
       }
@@ -241,7 +223,6 @@
         "range": "D6",
         "power": "2D6",
         "melee": 4,
-        "props": [],
         "armor": 3,
         "image": "/images/squads/protectorate/opolchenie_planety_velian/1.png"
       },
@@ -252,7 +233,6 @@
         "range": "D6",
         "power": "2D6",
         "melee": 2,
-        "props": [],
         "armor": 3,
         "image": "/images/squads/protectorate/opolchenie_planety_velian/2.png"
       },
@@ -263,7 +243,6 @@
         "range": "D6",
         "power": "2D6",
         "melee": 2,
-        "props": [],
         "armor": 3,
         "image": "/images/squads/protectorate/opolchenie_planety_velian/3.png"
       },
@@ -274,7 +253,6 @@
         "range": "D6",
         "power": "2D6",
         "melee": 2,
-        "props": [],
         "armor": 3,
         "image": "/images/squads/protectorate/opolchenie_planety_velian/4.png"
       },
@@ -285,7 +263,6 @@
         "range": "D6",
         "power": "2D6",
         "melee": 2,
-        "props": [],
         "armor": 3,
         "image": "/images/squads/protectorate/opolchenie_planety_velian/5.png"
       },
@@ -296,7 +273,6 @@
         "range": "D6",
         "power": "2D6",
         "melee": 2,
-        "props": [],
         "armor": 3,
         "image": "/images/squads/protectorate/opolchenie_planety_velian/6.png"
       }
@@ -317,9 +293,7 @@
         "range": "",
         "power": "",
         "melee": 5,
-        "props": [
-          "Пр5"
-        ],
+        "modifiers": ["jump_boost_5"],
         "armor": 3,
         "image": "/images/squads/protectorate/lyogkaya_kiberpehota/1.png"
       },
@@ -330,9 +304,7 @@
         "range": "",
         "power": "",
         "melee": 5,
-        "props": [
-          "Пр5"
-        ],
+        "modifiers": ["jump_boost_5"],
         "armor": 3,
         "image": "/images/squads/protectorate/lyogkaya_kiberpehota/2.png"
       },
@@ -343,9 +315,7 @@
         "range": "",
         "power": "",
         "melee": 2,
-        "props": [
-          "Пр5"
-        ],
+        "modifiers": ["jump_boost_5"],
         "armor": 3,
         "image": "/images/squads/protectorate/lyogkaya_kiberpehota/3.png"
       },
@@ -356,9 +326,7 @@
         "range": "",
         "power": "",
         "melee": 5,
-        "props": [
-          "Пр5"
-        ],
+        "modifiers": ["jump_boost_5"],
         "armor": 3,
         "image": "/images/squads/protectorate/lyogkaya_kiberpehota/4.png"
       },
@@ -369,9 +337,7 @@
         "range": "",
         "power": "",
         "melee": 2,
-        "props": [
-          "Пр5"
-        ],
+        "modifiers": ["jump_boost_5"],
         "armor": 3,
         "image": "/images/squads/protectorate/lyogkaya_kiberpehota/5.png"
       },
@@ -382,9 +348,7 @@
         "range": "",
         "power": "",
         "melee": 2,
-        "props": [
-          "Пр5"
-        ],
+        "modifiers": ["jump_boost_5"],
         "armor": 3,
         "image": "/images/squads/protectorate/lyogkaya_kiberpehota/6.png"
       }
@@ -405,7 +369,6 @@
         "range": "2D6",
         "power": "1D6+1",
         "melee": 2,
-        "props": [],
         "armor": 3,
         "image": "/images/squads/protectorate/ruteniyskaya_gvardiya/1.png"
       },
@@ -416,7 +379,6 @@
         "range": "D12",
         "power": "2D6",
         "melee": 2,
-        "props": [],
         "armor": 3,
         "image": "/images/squads/protectorate/ruteniyskaya_gvardiya/2.png"
       },
@@ -427,7 +389,6 @@
         "range": "D12+2",
         "power": "1D12",
         "melee": 2,
-        "props": [],
         "armor": 3,
         "image": "/images/squads/protectorate/ruteniyskaya_gvardiya/3.png"
       },
@@ -438,7 +399,6 @@
         "range": "D12",
         "power": "1D20",
         "melee": 0,
-        "props": [],
         "armor": 3,
         "image": "/images/squads/protectorate/ruteniyskaya_gvardiya/4.png"
       },
@@ -449,7 +409,6 @@
         "range": "D6",
         "power": "1D20",
         "melee": 0,
-        "props": [],
         "armor": 3,
         "image": "/images/squads/protectorate/ruteniyskaya_gvardiya/5.png"
       },
@@ -460,7 +419,6 @@
         "range": "D12",
         "power": "2D6",
         "melee": 2,
-        "props": [],
         "armor": 3,
         "image": "/images/squads/protectorate/ruteniyskaya_gvardiya/6.png"
       }
@@ -481,9 +439,7 @@
         "range": "",
         "power": "",
         "melee": 5,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 4,
         "image": "/images/squads/protectorate/kiberpehota/1.png"
       },
@@ -494,9 +450,7 @@
         "range": "2D6",
         "power": "1D6+1",
         "melee": 2,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 4,
         "image": "/images/squads/protectorate/kiberpehota/2.png"
       },
@@ -507,9 +461,7 @@
         "range": "2D6",
         "power": "1D6+1",
         "melee": 2,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 4,
         "image": "/images/squads/protectorate/kiberpehota/3.png"
       },
@@ -520,9 +472,7 @@
         "range": "",
         "power": "",
         "melee": 5,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 4,
         "image": "/images/squads/protectorate/kiberpehota/4.png"
       },
@@ -533,9 +483,7 @@
         "range": "2D6",
         "power": "1D6+1",
         "melee": 2,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 4,
         "image": "/images/squads/protectorate/kiberpehota/5.png"
       },
@@ -546,9 +494,7 @@
         "range": "",
         "power": "",
         "melee": 5,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 4,
         "image": "/images/squads/protectorate/kiberpehota/6.png"
       }
@@ -569,9 +515,7 @@
         "range": "D12",
         "power": "2D6",
         "melee": 2,
-        "props": [
-          "Пр5"
-        ],
+        "modifiers": ["jump_boost_5"],
         "armor": 3,
         "image": "/images/squads/protectorate/regulyary_planety_velian/1.png"
       },
@@ -582,9 +526,7 @@
         "range": "D6",
         "power": "2D6",
         "melee": 2,
-        "props": [
-          "Пр5"
-        ],
+        "modifiers": ["jump_boost_5"],
         "armor": 3,
         "image": "/images/squads/protectorate/regulyary_planety_velian/2.png"
       },
@@ -595,9 +537,7 @@
         "range": "D20",
         "power": "1D12",
         "melee": 0,
-        "props": [
-          "Пр5"
-        ],
+        "modifiers": ["jump_boost_5"],
         "armor": 3,
         "image": "/images/squads/protectorate/regulyary_planety_velian/3.png"
       },
@@ -608,9 +548,7 @@
         "range": "2D6",
         "power": "1D6+1",
         "melee": 2,
-        "props": [
-          "Пр5"
-        ],
+        "modifiers": ["jump_boost_5"],
         "armor": 3,
         "image": "/images/squads/protectorate/regulyary_planety_velian/4.png"
       },
@@ -621,9 +559,7 @@
         "range": "2D12",
         "power": "1D6+1",
         "melee": 2,
-        "props": [
-          "Пр5"
-        ],
+        "modifiers": ["jump_boost_5"],
         "armor": 3,
         "image": "/images/squads/protectorate/regulyary_planety_velian/5.png"
       },
@@ -634,9 +570,7 @@
         "range": "D6-1",
         "power": "2D6+3",
         "melee": 2,
-        "props": [
-          "Пр5"
-        ],
+        "modifiers": ["jump_boost_5"],
         "armor": 3,
         "image": "/images/squads/protectorate/regulyary_planety_velian/6.png"
       }
@@ -657,7 +591,6 @@
         "range": "D6",
         "power": "2D6",
         "melee": 3,
-        "props": [],
         "armor": 6,
         "image": "/images/squads/protectorate/tyazhyolaya_shturmovaya_pehota_veliana/1.png"
       },
@@ -668,7 +601,6 @@
         "range": "D12",
         "power": "2D6",
         "melee": 3,
-        "props": [],
         "armor": 6,
         "image": "/images/squads/protectorate/tyazhyolaya_shturmovaya_pehota_veliana/2.png"
       },
@@ -679,7 +611,6 @@
         "range": "D12",
         "power": "2D12",
         "melee": 3,
-        "props": [],
         "armor": 6,
         "image": "/images/squads/protectorate/tyazhyolaya_shturmovaya_pehota_veliana/3.png"
       },
@@ -690,7 +621,6 @@
         "range": "D12",
         "power": "2D12",
         "melee": 3,
-        "props": [],
         "armor": 6,
         "image": "/images/squads/protectorate/tyazhyolaya_shturmovaya_pehota_veliana/4.png"
       }
@@ -711,7 +641,6 @@
         "range": "D6",
         "power": "2D6",
         "melee": 3,
-        "props": [],
         "armor": 5,
         "image": "/images/squads/protectorate/shturmovoy_spetsnaz_starye/1.png"
       },
@@ -722,7 +651,6 @@
         "range": "D6",
         "power": "1D12",
         "melee": 3,
-        "props": [],
         "armor": 5,
         "image": "/images/squads/protectorate/shturmovoy_spetsnaz_starye/2.png"
       },
@@ -733,7 +661,6 @@
         "range": "D6",
         "power": "2D6",
         "melee": 4,
-        "props": [],
         "armor": 5,
         "image": "/images/squads/protectorate/shturmovoy_spetsnaz_starye/3.png"
       },
@@ -744,7 +671,6 @@
         "range": "D6-1",
         "power": "2D6+3",
         "melee": 3,
-        "props": [],
         "armor": 5,
         "image": "/images/squads/protectorate/shturmovoy_spetsnaz_starye/4.png"
       },
@@ -755,7 +681,6 @@
         "range": "",
         "power": "",
         "melee": 7,
-        "props": [],
         "armor": 5,
         "image": "/images/squads/protectorate/shturmovoy_spetsnaz_starye/5.png"
       },
@@ -766,7 +691,6 @@
         "range": "D12+2",
         "power": "1D12",
         "melee": 3,
-        "props": [],
         "armor": 5,
         "image": "/images/squads/protectorate/shturmovoy_spetsnaz_starye/6.png"
       }
@@ -787,7 +711,6 @@
         "range": "D6-1",
         "power": "2D6+3",
         "melee": 3,
-        "props": [],
         "armor": 5,
         "image": "/images/squads/protectorate/shturmovoy_spetsnaz_novye/1.png"
       },
@@ -798,7 +721,6 @@
         "range": "D6-1",
         "power": "2D6+3",
         "melee": 3,
-        "props": [],
         "armor": 5,
         "image": "/images/squads/protectorate/shturmovoy_spetsnaz_novye/2.png"
       },
@@ -809,7 +731,6 @@
         "range": "D6-1",
         "power": "2D6+3",
         "melee": 3,
-        "props": [],
         "armor": 5,
         "image": "/images/squads/protectorate/shturmovoy_spetsnaz_novye/3.png"
       },
@@ -820,7 +741,6 @@
         "range": "D12",
         "power": "1D6+3",
         "melee": 3,
-        "props": [],
         "armor": 5,
         "image": "/images/squads/protectorate/shturmovoy_spetsnaz_novye/4.png"
       },
@@ -831,7 +751,6 @@
         "range": "D12",
         "power": "1D6+3",
         "melee": 3,
-        "props": [],
         "armor": 5,
         "image": "/images/squads/protectorate/shturmovoy_spetsnaz_novye/5.png"
       },
@@ -842,7 +761,6 @@
         "range": "D12",
         "power": "2D6",
         "melee": 3,
-        "props": [],
         "armor": 5,
         "image": "/images/squads/protectorate/shturmovoy_spetsnaz_novye/6.png"
       }
@@ -863,9 +781,7 @@
         "range": "D12",
         "power": "2D6",
         "melee": 2,
-        "props": [
-          "Пр5"
-        ],
+        "modifiers": ["jump_boost_5"],
         "armor": 5,
         "image": "/images/squads/protectorate/shturmovoy_otryad_stervyatniki/1.png"
       },
@@ -876,9 +792,7 @@
         "range": "D6",
         "power": "1D6+3",
         "melee": 2,
-        "props": [
-          "Пр5"
-        ],
+        "modifiers": ["jump_boost_5"],
         "armor": 5,
         "image": "/images/squads/protectorate/shturmovoy_otryad_stervyatniki/2.png"
       },
@@ -889,9 +803,7 @@
         "range": "D6",
         "power": "2D6",
         "melee": 2,
-        "props": [
-          "Пр5"
-        ],
+        "modifiers": ["jump_boost_5"],
         "armor": 5,
         "image": "/images/squads/protectorate/shturmovoy_otryad_stervyatniki/3.png"
       },
@@ -902,9 +814,7 @@
         "range": "D12",
         "power": "2D12",
         "melee": 0,
-        "props": [
-          "Пр5"
-        ],
+        "modifiers": ["jump_boost_5"],
         "armor": 5,
         "image": "/images/squads/protectorate/shturmovoy_otryad_stervyatniki/4.png"
       },
@@ -915,9 +825,7 @@
         "range": "D6",
         "power": "2D6",
         "melee": 2,
-        "props": [
-          "Пр5"
-        ],
+        "modifiers": ["jump_boost_5"],
         "armor": 5,
         "image": "/images/squads/protectorate/shturmovoy_otryad_stervyatniki/5.png"
       },
@@ -928,9 +836,7 @@
         "range": "D6",
         "power": "2D6",
         "melee": 2,
-        "props": [
-          "Пр5"
-        ],
+        "modifiers": ["jump_boost_5"],
         "armor": 5,
         "image": "/images/squads/protectorate/shturmovoy_otryad_stervyatniki/6.png"
       }
@@ -951,9 +857,7 @@
         "range": "D6",
         "power": "2D6",
         "melee": 3,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 3,
         "image": "/images/squads/protectorate/spetsnaz_planety_felitsiya/1.png"
       },
@@ -964,9 +868,7 @@
         "range": "2D6",
         "power": "1D6+1",
         "melee": 3,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 3,
         "image": "/images/squads/protectorate/spetsnaz_planety_felitsiya/2.png"
       },
@@ -977,9 +879,7 @@
         "range": "D6",
         "power": "1D6+3",
         "melee": 3,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 3,
         "image": "/images/squads/protectorate/spetsnaz_planety_felitsiya/3.png"
       },
@@ -990,9 +890,7 @@
         "range": "D12",
         "power": "1D20+2",
         "melee": 0,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 3,
         "image": "/images/squads/protectorate/spetsnaz_planety_felitsiya/4.png"
       },
@@ -1003,9 +901,7 @@
         "range": "D6",
         "power": "3D6",
         "melee": 3,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 3,
         "image": "/images/squads/protectorate/spetsnaz_planety_felitsiya/5.png"
       },
@@ -1016,9 +912,7 @@
         "range": "D12",
         "power": "2D12",
         "melee": 0,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 3,
         "image": "/images/squads/protectorate/spetsnaz_planety_felitsiya/6.png"
       }
@@ -1039,7 +933,6 @@
         "range": "2D12",
         "power": "1D6+1",
         "melee": 3,
-        "props": [],
         "armor": 5,
         "image": "/images/squads/protectorate/kiberspetsnaz/1.png"
       },
@@ -1050,7 +943,6 @@
         "range": "2D12",
         "power": "1D6+1",
         "melee": 3,
-        "props": [],
         "armor": 5,
         "image": "/images/squads/protectorate/kiberspetsnaz/2.png"
       },
@@ -1061,7 +953,6 @@
         "range": "2D12",
         "power": "1D6+1",
         "melee": 3,
-        "props": [],
         "armor": 5,
         "image": "/images/squads/protectorate/kiberspetsnaz/3.png"
       },
@@ -1072,7 +963,6 @@
         "range": "",
         "power": "",
         "melee": 6,
-        "props": [],
         "armor": 5,
         "image": "/images/squads/protectorate/kiberspetsnaz/4.png"
       },
@@ -1083,7 +973,6 @@
         "range": "",
         "power": "",
         "melee": 6,
-        "props": [],
         "armor": 5,
         "image": "/images/squads/protectorate/kiberspetsnaz/5.png"
       },
@@ -1094,7 +983,6 @@
         "range": "",
         "power": "",
         "melee": 6,
-        "props": [],
         "armor": 5,
         "image": "/images/squads/protectorate/kiberspetsnaz/6.png"
       }

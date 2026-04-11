@@ -9,7 +9,7 @@ const mockSquad = {
   faction: 'polaris' as FactionID,
   cost: 100,
   soldiers: [
-    { rank: 5, speed: 4, range: 'D6', power: '1D6', melee: 0, props: [], armor: 2 }
+    { rank: 5, speed: 4, range: 'D6', power: '1D6', melee: 0, armor: 2 }
   ]
 };
 

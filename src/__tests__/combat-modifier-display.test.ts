@@ -13,8 +13,8 @@ import type { BuffDefinition, ActiveDebuff, SoldierModifier } from '@/lib/modifi
 function makeUnit(overrides: Record<string, any> = {}) {
   const { data: dataOverride, ...restOverrides } = overrides;
   const soldiers = [
-    { rank: 3, speed: 4, range: 'D6', power: '1D6', melee: 2, props: [], armor: 2 },
-    { rank: 2, speed: 4, range: 'D6', power: '1D6', melee: 1, props: [], armor: 2 },
+    { rank: 3, speed: 4, range: 'D6', power: '1D6', melee: 2, armor: 2 },
+    { rank: 2, speed: 4, range: 'D6', power: '1D6', melee: 1, armor: 2 },
   ];
   return {
     instanceId: 'test-unit-1',

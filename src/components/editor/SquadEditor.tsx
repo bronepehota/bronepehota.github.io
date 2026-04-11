@@ -33,7 +33,7 @@ export function SquadEditor({ squad, source: _source, factionId, isOverride = fa
   const [image, setImage] = useState(squad?.image || '');
   const [soldiers, setSoldiers] = useState<CustomSoldier[]>(
     squad?.soldiers || [
-      { rank: 7, speed: 4, range: 'D6', power: '1D6', melee: 0, props: [], armor: 2 }
+      { rank: 7, speed: 4, range: 'D6', power: '1D6', melee: 0, armor: 2 }
     ]
   );
   const [buffs, setBuffs] = useState<BuffDefinition[]>(squad?.buffs || []);
@@ -46,7 +46,7 @@ export function SquadEditor({ squad, source: _source, factionId, isOverride = fa
     if (soldiers.length < 6) {
       setSoldiers([
         ...soldiers,
-        { rank: 7, speed: 4, range: 'D6', power: '1D6', melee: 0, props: [], armor: 2 }
+        { rank: 7, speed: 4, range: 'D6', power: '1D6', melee: 0, armor: 2 }
       ]);
     }
   };

@@ -13,7 +13,6 @@
         "range": "",
         "power": "",
         "melee": 5,
-        "props": [],
         "armor": 1,
         "image": "/images/squads/mercenaries/aborigeny/1.png"
       },
@@ -24,7 +23,6 @@
         "range": "",
         "power": "",
         "melee": 5,
-        "props": [],
         "armor": 1,
         "image": "/images/squads/mercenaries/aborigeny/2.png"
       },
@@ -35,7 +33,6 @@
         "range": "",
         "power": "",
         "melee": 5,
-        "props": [],
         "armor": 1,
         "image": "/images/squads/mercenaries/aborigeny/3.png"
       },
@@ -46,7 +43,6 @@
         "range": "",
         "power": "",
         "melee": 5,
-        "props": [],
         "armor": 1,
         "image": "/images/squads/mercenaries/aborigeny/4.png"
       },
@@ -57,7 +53,6 @@
         "range": "",
         "power": "",
         "melee": 5,
-        "props": [],
         "armor": 1,
         "image": "/images/squads/mercenaries/aborigeny/5.png"
       },
@@ -68,7 +63,6 @@
         "range": "",
         "power": "",
         "melee": 5,
-        "props": [],
         "armor": 1,
         "image": "/images/squads/mercenaries/aborigeny/6.png"
       }
@@ -89,7 +83,6 @@
         "range": "D6",
         "power": "2D6",
         "melee": 2,
-        "props": [],
         "armor": 1,
         "image": "/images/squads/mercenaries/piraty_markusa_novye/1.png"
       },
@@ -100,7 +93,6 @@
         "range": "2D12",
         "power": "1D6+1",
         "melee": 2,
-        "props": [],
         "armor": 1,
         "image": "/images/squads/mercenaries/piraty_markusa_novye/2.png"
       },
@@ -111,7 +103,6 @@
         "range": "2D6-1",
         "power": "2D6+1",
         "melee": 2,
-        "props": [],
         "armor": 1,
         "image": "/images/squads/mercenaries/piraty_markusa_novye/3.png"
       },
@@ -122,7 +113,6 @@
         "range": "2D6-1",
         "power": "2D6+1",
         "melee": 2,
-        "props": [],
         "armor": 1,
         "image": "/images/squads/mercenaries/piraty_markusa_novye/4.png"
       },
@@ -133,7 +123,6 @@
         "range": "2D12",
         "power": "1D6+1",
         "melee": 2,
-        "props": [],
         "armor": 1,
         "image": "/images/squads/mercenaries/piraty_markusa_novye/5.png"
       },
@@ -144,7 +133,6 @@
         "range": "2D12",
         "power": "1D6+1",
         "melee": 3,
-        "props": [],
         "armor": 1,
         "image": "/images/squads/mercenaries/piraty_markusa_novye/6.png"
       }
@@ -165,9 +153,7 @@
         "range": "D6-1",
         "power": "3D6",
         "melee": 2,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 1,
         "image": "/images/squads/mercenaries/reydery_pylnoy_zony/1.png"
       },
@@ -178,9 +164,7 @@
         "range": "D6-1",
         "power": "3D6",
         "melee": 2,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 1,
         "image": "/images/squads/mercenaries/reydery_pylnoy_zony/2.png"
       },
@@ -191,9 +175,7 @@
         "range": "D12",
         "power": "2D6",
         "melee": 2,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 1,
         "image": "/images/squads/mercenaries/reydery_pylnoy_zony/3.png"
       },
@@ -204,9 +186,7 @@
         "range": "D12",
         "power": "2D6",
         "melee": 2,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 1,
         "image": "/images/squads/mercenaries/reydery_pylnoy_zony/4.png"
       },
@@ -217,9 +197,7 @@
         "range": "D6-1",
         "power": "3D6",
         "melee": 2,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 1,
         "image": "/images/squads/mercenaries/reydery_pylnoy_zony/5.png"
       },
@@ -230,9 +208,7 @@
         "range": "2D12",
         "power": "1D6",
         "melee": 3,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 1,
         "image": "/images/squads/mercenaries/reydery_pylnoy_zony/6.png"
       }
@@ -253,7 +229,6 @@
         "range": "D6",
         "power": "2D6",
         "melee": 4,
-        "props": [],
         "armor": 3,
         "image": "/images/squads/mercenaries/mutanty/1.png"
       },
@@ -264,7 +239,6 @@
         "range": "2D12",
         "power": "1D20",
         "melee": 0,
-        "props": [],
         "armor": 3,
         "image": "/images/squads/mercenaries/mutanty/3.png"
       },
@@ -275,7 +249,6 @@
         "range": "D12",
         "power": "1D20",
         "melee": 0,
-        "props": [],
         "armor": 3,
         "image": "/images/squads/mercenaries/mutanty/4.png"
       },
@@ -286,7 +259,6 @@
         "range": "D6",
         "power": "2D6",
         "melee": 4,
-        "props": [],
         "armor": 3,
         "image": "/images/squads/mercenaries/mutanty/2.png"
       }
@@ -307,7 +279,6 @@
         "range": "",
         "power": "",
         "melee": 4,
-        "props": [],
         "armor": 3,
         "image": "/images/squads/mercenaries/piraty_tortugi/1.png"
       },
@@ -318,7 +289,6 @@
         "range": "",
         "power": "",
         "melee": 4,
-        "props": [],
         "armor": 3,
         "image": "/images/squads/mercenaries/piraty_tortugi/2.png"
       },
@@ -329,7 +299,6 @@
         "range": "",
         "power": "",
         "melee": 4,
-        "props": [],
         "armor": 3,
         "image": "/images/squads/mercenaries/piraty_tortugi/3.png"
       },
@@ -340,7 +309,6 @@
         "range": "D6",
         "power": "2D6",
         "melee": 2,
-        "props": [],
         "armor": 3,
         "image": "/images/squads/mercenaries/piraty_tortugi/4.png"
       },
@@ -351,7 +319,6 @@
         "range": "D6",
         "power": "2D6",
         "melee": 2,
-        "props": [],
         "armor": 3,
         "image": "/images/squads/mercenaries/piraty_tortugi/5.png"
       },
@@ -362,7 +329,6 @@
         "range": "",
         "power": "",
         "melee": 4,
-        "props": [],
         "armor": 3,
         "image": "/images/squads/mercenaries/piraty_tortugi/6.png"
       }
@@ -383,7 +349,6 @@
         "range": "",
         "power": "",
         "melee": 4,
-        "props": [],
         "armor": 4,
         "image": "/images/squads/mercenaries/kosari/1.png"
       },
@@ -394,7 +359,6 @@
         "range": "",
         "power": "",
         "melee": 4,
-        "props": [],
         "armor": 4,
         "image": "/images/squads/mercenaries/kosari/2.png"
       },
@@ -405,7 +369,6 @@
         "range": "",
         "power": "",
         "melee": 4,
-        "props": [],
         "armor": 4,
         "image": "/images/squads/mercenaries/kosari/3.png"
       },
@@ -416,7 +379,6 @@
         "range": "",
         "power": "",
         "melee": 4,
-        "props": [],
         "armor": 4,
         "image": "/images/squads/mercenaries/kosari/4.png"
       },
@@ -427,7 +389,6 @@
         "range": "",
         "power": "",
         "melee": 4,
-        "props": [],
         "armor": 4,
         "image": "/images/squads/mercenaries/kosari/5.png"
       },
@@ -438,7 +399,6 @@
         "range": "",
         "power": "",
         "melee": 4,
-        "props": [],
         "armor": 4,
         "image": "/images/squads/mercenaries/kosari/6.png"
       }
@@ -459,7 +419,6 @@
         "range": "D12+2",
         "power": "1D12",
         "melee": 2,
-        "props": [],
         "armor": 3,
         "image": "/images/squads/mercenaries/piraty_markusa_starye/1.png"
       },
@@ -470,7 +429,6 @@
         "range": "",
         "power": "",
         "melee": 5,
-        "props": [],
         "armor": 3,
         "image": "/images/squads/mercenaries/piraty_markusa_starye/2.png"
       },
@@ -481,7 +439,6 @@
         "range": "",
         "power": "",
         "melee": 4,
-        "props": [],
         "armor": 3,
         "image": "/images/squads/mercenaries/piraty_markusa_starye/3.png"
       },
@@ -492,7 +449,6 @@
         "range": "D6",
         "power": "2D6",
         "melee": 2,
-        "props": [],
         "armor": 3,
         "image": "/images/squads/mercenaries/piraty_markusa_starye/4.png"
       },
@@ -503,7 +459,6 @@
         "range": "",
         "power": "",
         "melee": 4,
-        "props": [],
         "armor": 3,
         "image": "/images/squads/mercenaries/piraty_markusa_starye/5.png"
       },
@@ -514,7 +469,6 @@
         "range": "2D6",
         "power": "1D6+1",
         "melee": 4,
-        "props": [],
         "armor": 3,
         "image": "/images/squads/mercenaries/piraty_markusa_starye/6.png"
       }
@@ -535,7 +489,6 @@
         "range": "D12",
         "power": "2D6",
         "melee": 3,
-        "props": [],
         "armor": 3,
         "image": "/images/squads/mercenaries/naytstalkery/1.png"
       },
@@ -546,7 +499,6 @@
         "range": "D12",
         "power": "2D6",
         "melee": 3,
-        "props": [],
         "armor": 3,
         "image": "/images/squads/mercenaries/naytstalkery/2.png"
       },
@@ -557,7 +509,6 @@
         "range": "D6-1",
         "power": "2D6",
         "melee": 3,
-        "props": [],
         "armor": 3,
         "image": "/images/squads/mercenaries/naytstalkery/3.png"
       },
@@ -568,7 +519,6 @@
         "range": "D12+2",
         "power": "1D12",
         "melee": 3,
-        "props": [],
         "armor": 3,
         "image": "/images/squads/mercenaries/naytstalkery/4.png"
       },
@@ -579,7 +529,6 @@
         "range": "D12",
         "power": "2D6",
         "melee": 3,
-        "props": [],
         "armor": 3,
         "image": "/images/squads/mercenaries/naytstalkery/5.png"
       },
@@ -590,7 +539,6 @@
         "range": "D12",
         "power": "2D12",
         "melee": 0,
-        "props": [],
         "armor": 3,
         "image": "/images/squads/mercenaries/naytstalkery/6.png"
       }

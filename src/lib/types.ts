@@ -68,7 +68,6 @@ export interface Soldier {
   range: string;
   power: string;
   melee: number;
-  props: string[];
   modifiers?: string[];  // Modifier IDs from catalog
   armor: number;
   image?: string;

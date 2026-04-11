@@ -13,7 +13,6 @@
         "range": "D6",
         "power": "2D6",
         "melee": 3,
-        "props": [],
         "armor": 2,
         "image": "/images/squads/polaris/lineynaya_klon_pehota/1.png"
       },
@@ -24,7 +23,6 @@
         "range": "D12",
         "power": "2D6",
         "melee": 3,
-        "props": [],
         "armor": 2,
         "image": "/images/squads/polaris/lineynaya_klon_pehota/2.png"
       },
@@ -35,7 +33,6 @@
         "range": "D12",
         "power": "2D6",
         "melee": 3,
-        "props": [],
         "armor": 2,
         "image": "/images/squads/polaris/lineynaya_klon_pehota/4.png"
       },
@@ -46,7 +43,6 @@
         "range": "D12",
         "power": "2D6",
         "melee": 3,
-        "props": [],
         "armor": 2,
         "image": "/images/squads/polaris/lineynaya_klon_pehota/3.png"
       },
@@ -57,7 +53,6 @@
         "range": "D12",
         "power": "2D6",
         "melee": 3,
-        "props": [],
         "armor": 2,
         "image": "/images/squads/polaris/lineynaya_klon_pehota/5.png"
       },
@@ -68,7 +63,6 @@
         "range": "D12",
         "power": "2D6",
         "melee": 3,
-        "props": [],
         "armor": 2,
         "image": "/images/squads/polaris/lineynaya_klon_pehota/6.png"
       }
@@ -89,9 +83,7 @@
         "range": "",
         "power": "",
         "melee": 6,
-        "props": [
-          "Пр3"
-        ],
+        "modifiers": ["jump_boost_3"],
         "armor": 4,
         "image": "/images/squads/polaris/rezhimnaya_klon_pehota/1.png"
       },
@@ -102,9 +94,7 @@
         "range": "",
         "power": "",
         "melee": 6,
-        "props": [
-          "Пр3"
-        ],
+        "modifiers": ["jump_boost_3"],
         "armor": 4,
         "image": "/images/squads/polaris/rezhimnaya_klon_pehota/2.png"
       },
@@ -115,9 +105,7 @@
         "range": "",
         "power": "",
         "melee": 6,
-        "props": [
-          "Пр3"
-        ],
+        "modifiers": ["jump_boost_3"],
         "armor": 4,
         "image": "/images/squads/polaris/rezhimnaya_klon_pehota/3.png"
       },
@@ -128,9 +116,7 @@
         "range": "",
         "power": "",
         "melee": 6,
-        "props": [
-          "Пр3"
-        ],
+        "modifiers": ["jump_boost_3"],
         "armor": 4,
         "image": "/images/squads/polaris/rezhimnaya_klon_pehota/4.png"
       },
@@ -141,9 +127,7 @@
         "range": "",
         "power": "",
         "melee": 6,
-        "props": [
-          "Пр3"
-        ],
+        "modifiers": ["jump_boost_3"],
         "armor": 4,
         "image": "/images/squads/polaris/rezhimnaya_klon_pehota/5.png"
       },
@@ -154,9 +138,7 @@
         "range": "",
         "power": "",
         "melee": 6,
-        "props": [
-          "Пр3"
-        ],
+        "modifiers": ["jump_boost_3"],
         "armor": 4,
         "image": "/images/squads/polaris/rezhimnaya_klon_pehota/6.png"
       }
@@ -177,9 +159,7 @@
         "range": "D6",
         "power": "1D6+3",
         "melee": 5,
-        "props": [
-          "Пр4"
-        ],
+        "modifiers": ["jump_boost_4"],
         "armor": 2,
         "image": "/images/squads/polaris/lyogkaya_shturmovaya_klon_pehota/5.png"
       },
@@ -190,9 +170,7 @@
         "range": "D6",
         "power": "3D6",
         "melee": 6,
-        "props": [
-          "Пр4"
-        ],
+        "modifiers": ["jump_boost_4"],
         "armor": 2,
         "image": "/images/squads/polaris/lyogkaya_shturmovaya_klon_pehota/1.png"
       },
@@ -203,9 +181,7 @@
         "range": "",
         "power": "",
         "melee": 6,
-        "props": [
-          "Пр4"
-        ],
+        "modifiers": ["jump_boost_4"],
         "armor": 2,
         "image": "/images/squads/polaris/lyogkaya_shturmovaya_klon_pehota/2.png"
       },
@@ -216,9 +192,7 @@
         "range": "D6",
         "power": "2D6",
         "melee": 4,
-        "props": [
-          "Пр4"
-        ],
+        "modifiers": ["jump_boost_4"],
         "armor": 2,
         "image": "/images/squads/polaris/lyogkaya_shturmovaya_klon_pehota/3.png"
       },
@@ -229,9 +203,7 @@
         "range": "",
         "power": "",
         "melee": 6,
-        "props": [
-          "Пр4"
-        ],
+        "modifiers": ["jump_boost_4"],
         "armor": 2,
         "image": "/images/squads/polaris/lyogkaya_shturmovaya_klon_pehota/4.png"
       },
@@ -242,9 +214,7 @@
         "range": "",
         "power": "",
         "melee": 6,
-        "props": [
-          "Пр4"
-        ],
+        "modifiers": ["jump_boost_4"],
         "armor": 2,
         "image": "/images/squads/polaris/lyogkaya_shturmovaya_klon_pehota/6.png"
       }
@@ -265,9 +235,7 @@
         "range": "D6",
         "power": "1D12",
         "melee": 3,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 2,
         "image": "/images/squads/polaris/tyazhyolaya_klon_pehota/1.png"
       },
@@ -278,9 +246,7 @@
         "range": "D12+2",
         "power": "1D12",
         "melee": 3,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 2,
         "image": "/images/squads/polaris/tyazhyolaya_klon_pehota/2.png"
       },
@@ -291,9 +257,7 @@
         "range": "D12",
         "power": "2D12",
         "melee": 0,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 2,
         "image": "/images/squads/polaris/tyazhyolaya_klon_pehota/3.png"
       },
@@ -304,9 +268,7 @@
         "range": "D12",
         "power": "1D20",
         "melee": 0,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 2,
         "image": "/images/squads/polaris/tyazhyolaya_klon_pehota/4.png"
       },
@@ -317,9 +279,7 @@
         "range": "D6",
         "power": "2D6",
         "melee": 3,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 2,
         "image": "/images/squads/polaris/tyazhyolaya_klon_pehota/5.png"
       },
@@ -330,9 +290,7 @@
         "range": "D6",
         "power": "2D6",
         "melee": 7,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 2,
         "image": "/images/squads/polaris/tyazhyolaya_klon_pehota/6.png"
       }
@@ -353,7 +311,6 @@
         "range": "D6",
         "power": "2D6",
         "melee": 3,
-        "props": [],
         "armor": 5,
         "image": "/images/squads/polaris/spetsnaz_planety_shidu/1.png"
       },
@@ -364,7 +321,6 @@
         "range": "D12+2",
         "power": "1D12",
         "melee": 3,
-        "props": [],
         "armor": 5,
         "image": "/images/squads/polaris/spetsnaz_planety_shidu/2.png"
       },
@@ -375,7 +331,6 @@
         "range": "D12",
         "power": "2D12",
         "melee": 0,
-        "props": [],
         "armor": 5,
         "image": "/images/squads/polaris/spetsnaz_planety_shidu/3.png"
       },
@@ -386,7 +341,6 @@
         "range": "D20",
         "power": "1D12",
         "melee": 0,
-        "props": [],
         "armor": 5,
         "image": "/images/squads/polaris/spetsnaz_planety_shidu/4.png"
       }
@@ -407,9 +361,7 @@
         "range": "D6",
         "power": "1D6",
         "melee": 2,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 3,
         "image": "/images/squads/polaris/lyogkiy_shturmovoy_desant/1.png"
       },
@@ -420,9 +372,7 @@
         "range": "D12",
         "power": "2D6",
         "melee": 2,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 3,
         "image": "/images/squads/polaris/lyogkiy_shturmovoy_desant/2.png"
       },
@@ -433,9 +383,7 @@
         "range": "D12",
         "power": "2D12",
         "melee": 0,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 3,
         "image": "/images/squads/polaris/lyogkiy_shturmovoy_desant/3.png"
       },
@@ -446,9 +394,7 @@
         "range": "D6",
         "power": "2D6",
         "melee": 5,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 3,
         "image": "/images/squads/polaris/lyogkiy_shturmovoy_desant/4.png"
       },
@@ -459,9 +405,7 @@
         "range": "D12",
         "power": "2D6",
         "melee": 2,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 3,
         "image": "/images/squads/polaris/lyogkiy_shturmovoy_desant/5.png"
       },
@@ -472,9 +416,7 @@
         "range": "D6",
         "power": "2D6",
         "melee": 2,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 3,
         "image": "/images/squads/polaris/lyogkiy_shturmovoy_desant/6.png"
       }
@@ -495,9 +437,7 @@
         "range": "D6",
         "power": "2D6",
         "melee": 2,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 4,
         "image": "/images/squads/polaris/tyazhyolyy_shturmovoy_desant/1.png"
       },
@@ -508,9 +448,7 @@
         "range": "D12",
         "power": "2D6",
         "melee": 2,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 4,
         "image": "/images/squads/polaris/tyazhyolyy_shturmovoy_desant/2.png"
       },
@@ -521,9 +459,7 @@
         "range": "D6",
         "power": "2D6",
         "melee": 2,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 4,
         "image": "/images/squads/polaris/tyazhyolyy_shturmovoy_desant/3.png"
       },
@@ -534,9 +470,7 @@
         "range": "D12",
         "power": "2D6",
         "melee": 2,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 4,
         "image": "/images/squads/polaris/tyazhyolyy_shturmovoy_desant/4.png"
       },
@@ -547,9 +481,7 @@
         "range": "D6",
         "power": "2D6",
         "melee": 2,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 4,
         "image": "/images/squads/polaris/tyazhyolyy_shturmovoy_desant/5.png"
       },
@@ -560,9 +492,7 @@
         "range": "D12",
         "power": "2D12",
         "melee": 0,
-        "props": [
-          "Рм"
-        ],
+        "modifiers": ["mechanic"],
         "armor": 4,
         "image": "/images/squads/polaris/tyazhyolyy_shturmovoy_desant/6.png"
       }
@@ -583,7 +513,6 @@
         "range": "D12",
         "power": "1D6+3",
         "melee": 3,
-        "props": [],
         "armor": 6,
         "image": "/images/squads/polaris/tribunatory_novye/1.png"
       },
@@ -594,7 +523,6 @@
         "range": "D6",
         "power": "1D6+3",
         "melee": 3,
-        "props": [],
         "armor": 6,
         "image": "/images/squads/polaris/tribunatory_novye/2.png"
       },
@@ -605,7 +533,6 @@
         "range": "D12",
         "power": "2D6",
         "melee": 3,
-        "props": [],
         "armor": 6,
         "image": "/images/squads/polaris/tribunatory_novye/3.png"
       },
@@ -616,7 +543,6 @@
         "range": "",
         "power": "",
         "melee": 6,
-        "props": [],
         "armor": 6,
         "image": "/images/squads/polaris/tribunatory_novye/4.png"
       },
@@ -627,7 +553,6 @@
         "range": "D12",
         "power": "2D12",
         "melee": 3,
-        "props": [],
         "armor": 6,
         "image": "/images/squads/polaris/tribunatory_novye/5.png"
       },
@@ -638,7 +563,6 @@
         "range": "D20",
         "power": "1D12",
         "melee": 3,
-        "props": [],
         "armor": 6,
         "image": "/images/squads/polaris/tribunatory_novye/6.png"
       }
@@ -659,7 +583,6 @@
         "range": "",
         "power": "",
         "melee": 6,
-        "props": [],
         "armor": 6,
         "image": "/images/squads/polaris/tribunatory_starye/1.png"
       },
@@ -670,7 +593,6 @@
         "range": "D6-1",
         "power": "2D6+3",
         "melee": 3,
-        "props": [],
         "armor": 6,
         "image": "/images/squads/polaris/tribunatory_starye/2.png"
       },
@@ -681,7 +603,6 @@
         "range": "2D12",
         "power": "1D20",
         "melee": 3,
-        "props": [],
         "armor": 6,
         "image": "/images/squads/polaris/tribunatory_starye/3.png"
       },
@@ -692,7 +613,6 @@
         "range": "",
         "power": "",
         "melee": 7,
-        "props": [],
         "armor": 6,
         "image": "/images/squads/polaris/tribunatory_starye/4.png"
       },
@@ -703,7 +623,6 @@
         "range": "D12",
         "power": "2D12",
         "melee": 3,
-        "props": [],
         "armor": 6,
         "image": "/images/squads/polaris/tribunatory_starye/5.png"
       },
@@ -714,7 +633,6 @@
         "range": "D12",
         "power": "1D20",
         "melee": 3,
-        "props": [],
         "armor": 6,
         "image": "/images/squads/polaris/tribunatory_starye/6.png"
       }

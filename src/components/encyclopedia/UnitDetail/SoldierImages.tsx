@@ -6,6 +6,7 @@ import { EnrichedUnit } from '@/lib/encyclopedia-utils';
 import { Squad } from '@/lib/types';
 import { Users, ChevronDown, ChevronUp, Footprints, Target, Zap, Sword, Shield } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getAllBuffs } from '@/lib/modifier-utils';
 
 interface SoldierImagesProps {
   unit: EnrichedUnit;
@@ -152,17 +153,20 @@ export function SoldierImages({ unit }: SoldierImagesProps) {
                     </div>
                   </div>
 
-                  {/* Special props - if any */}
-                  {soldier.props && soldier.props.length > 0 && (
+                  {/* Special modifiers - if any */}
+                  {soldier.modifiers && soldier.modifiers.length > 0 && (
                     <div className="flex flex-wrap gap-1 justify-center">
-                      {soldier.props.map((prop, propIndex) => (
-                        <span
-                          key={propIndex}
-                          className="text-[9px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded font-mono border border-green-500/30"
-                        >
-                          {prop}
-                        </span>
-                      ))}
+                      {soldier.modifiers.map((modId, modIndex) => {
+                        const mod = getAllBuffs().find(b => b.id === modId);
+                        return (
+                          <span
+                            key={modIndex}
+                            className="text-[9px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded font-mono border border-green-500/30"
+                          >
+                            {mod?.name || modId}
+                          </span>
+                        );
+                      })}
                     </div>
                   )}
                 </div>

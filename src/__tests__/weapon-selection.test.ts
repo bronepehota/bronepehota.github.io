@@ -285,7 +285,7 @@ describe('Machine Weapon Selection', () => {
           faction: 'polaris',
           cost: 100,
           soldiers: [
-            { rank: 7, speed: 4, range: 'D6', power: '1D6', melee: 0, props: [], armor: 2 }
+            { rank: 7, speed: 4, range: 'D6', power: '1D6', melee: 0, armor: 2 }
           ]
         },
         instanceNumber: 1
