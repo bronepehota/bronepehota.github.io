@@ -78,7 +78,7 @@ test.describe('Source Selection', () => {
     await tehnologCard.click();
     await page.waitForTimeout(300);
 
-    await expect(page.getByText(/🔒 Скоро/i)).toBeVisible();
+    await expect(tehnologCard.getByText(/Требуется помощь сообщества/)).toBeVisible();
   });
 
   test('should show 6 steps in progress indicator', async ({ page }) => {
