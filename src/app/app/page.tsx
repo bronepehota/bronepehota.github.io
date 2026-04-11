@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Army, ArmyUnit, RulesVersionID } from '@/lib/types';
 import ArmyBuilder from '@/components/ArmyBuilder';
 import GameSession from '@/components/GameSession';
-import { Shield, CheckCircle2, MoreVertical, List, Grid, History, AlertTriangle, X, BookOpen } from 'lucide-react';
+import { CheckCircle2, MoreVertical, List, Grid, History, AlertTriangle, X, BookOpen } from 'lucide-react';
 import { isValidRulesVersion } from '@/lib/rules-registry';
 import { cn } from '@/lib/utils';
 import { LOCAL_STORAGE_KEYS } from '@/lib/constants';
@@ -298,54 +298,47 @@ export default function Home() {
         <div className={cn("absolute top-0 right-0 w-2 h-2 border-r border-t z-10", factionStyles.accent)} />
 
         <div className="flex items-center gap-2 md:gap-3">
-          {/* Left section - Faction badge with Turn trigger */}
+          {/* Left section - Turn button */}
           <div className="flex items-center gap-2 flex-shrink-0">
-            {/* Faction icon + Turn button combined */}
+            {/* Turn button — tactical HUD style */}
             <button
               onClick={view === 'game' ? handleInitiativeTrigger : undefined}
               data-testid="new-turn-button"
               className={cn(
-                "relative p-1 rounded-sm border-2 transition-all",
-                "hover:scale-[1.02] active:scale-95",
-                factionStyles.border,
-                factionStyles.bg,
-                view === 'game' && "cursor-pointer"
+                "relative flex items-center gap-1.5 pl-2.5 pr-3 py-2 rounded-lg transition-all",
+                "border-2 min-h-[40px]",
+                view === 'game'
+                  ? cn("cursor-pointer active:scale-[0.97]", factionStyles.border, factionStyles.bg, "hover:brightness-125")
+                  : "cursor-default border-slate-700/40 bg-slate-900/30"
               )}
               title={view === 'game' ? "Новый тур" : undefined}
             >
-              <Shield className={cn("w-4 h-4", factionStyles.primary)} />
-              {/* Turn counter badge - only shown in game mode */}
-              {view === 'game' && (
+              <div className="flex items-center gap-1">
+                <span className={cn(
+                  "text-[10px] font-mono font-bold uppercase tracking-wider",
+                  view === 'game' ? "text-slate-300" : "text-slate-500"
+                )}>
+                  Тур
+                </span>
                 <span
                   data-testid="turn-counter"
                   className={cn(
-                    "absolute -top-1 -right-1 w-4 h-4 rounded-full text-[9px] font-black flex items-center justify-center",
-                    factionStyles.bgSolid,
-                    "text-white",
-                    "border-2 border-slate-950"
+                    "text-base font-mono font-black leading-none",
+                    view === 'game' ? factionStyles.primary : "text-slate-600"
                   )}
                 >
                   {army.currentTurn || 1}
                 </span>
-              )}
+              </div>
             </button>
 
-            {/* App title + faction name */}
-            <div className="relative">
-              <h1 className={cn(
-                "text-sm md:text-base font-mono font-bold uppercase tracking-wider leading-none",
-                factionStyles.primary
-              )}>
-                <span className="hidden md:inline">БРОНЕПЕХОТА</span>
-                <span className="md:hidden">БП</span>
-              </h1>
-              <span className={cn(
-                "text-[8px] md:text-[9px] font-mono font-black uppercase tracking-wider",
-                factionStyles.primary
-              )}>
-                {activeFaction?.name}
-              </span>
-            </div>
+            {/* Faction name */}
+            <span className={cn(
+              "text-[9px] font-mono font-black uppercase tracking-wider",
+              factionStyles.primary
+            )}>
+              {activeFaction?.name}
+            </span>
           </div>
 
           {/* Center section - spacer for balance */}
