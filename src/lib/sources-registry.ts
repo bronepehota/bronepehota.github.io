@@ -7,6 +7,7 @@ import starSystemProtectorateMachines from '@/data/sources/star_system/protector
 import starSystemMercenariesSquads from '@/data/sources/star_system/mercenaries/squads.json';
 import starSystemMercenariesMachines from '@/data/sources/star_system/mercenaries/machines.json';
 import tehnologFactions from '@/data/sources/tehnolog/factions.json';
+import tehnolog2026Factions from '@/data/sources/tehnolog_2026/factions.json';
 import { getCustomSourcesStorage } from './editor/storage';
 import { getCustomSourceData } from './editor/converters';
 
@@ -23,6 +24,7 @@ const typedStarSystemMachines = [
   ...starSystemMercenariesMachines
 ] as Machine[];
 const typedTehnologFactions = tehnologFactions as Faction[];
+const typedTehnolog2026Factions = tehnolog2026Factions as Faction[];
 
 // Star System source metadata
 const starSystemSource: ArmyListSource = {
@@ -36,8 +38,9 @@ const starSystemSource: ArmyListSource = {
 // Tehnolog source metadata
 const tehnologSource: ArmyListSource = {
   id: 'tehnolog',
-  name: 'Технолог',
+  name: 'Технолог Классик',
   description: 'Официальные армейские листы от компании Технолог',
+  link: 'https://vk.com/album-66793422_243700984',
   version: '1.0'
 };
 
@@ -52,6 +55,18 @@ export const sourcesRegistry: Record<SourceID, SourceData> = {
   tehnolog: {
     source: tehnologSource,
     factions: typedTehnologFactions,
+    squads: [],
+    machines: []
+  },
+  tehnolog_2026: {
+    source: {
+      id: 'tehnolog_2026',
+      name: 'Технолог 2026',
+      description: 'Новые армейские листы 2026 — требуется помощь сообщества по наполнению данных',
+      link: 'https://vk.com/album-66793422_309816315',
+      version: '0.1'
+    },
+    factions: typedTehnolog2026Factions,
     squads: [],
     machines: []
   }

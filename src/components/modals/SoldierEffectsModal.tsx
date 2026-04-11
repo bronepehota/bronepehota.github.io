@@ -1,26 +1,30 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { X, Plus, Sparkles, ShieldOff, Star, Infinity, Clock } from 'lucide-react';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { X, Plus, Sparkles, Star, Infinity, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { BuffDefinition, DebuffTemplate, SoldierModifier, ActiveBuff, ActiveDebuff } from '@/lib/modifier-types';
 import { ModifierIcon } from '@/components/editor/ModifierIcons';
+import { getEffectStyles } from '@/lib/effect-colors';
 
 type CatalogItem = BuffDefinition | DebuffTemplate;
 
-// Unified display type for all active effects
+// Display type for all active effects
 interface ActiveEffectEntry {
   id: string;
   name: string;
   description: string;
   icon?: string;
-  type: 'static' | 'tempBuff' | 'soldierMod' | 'debuff';
+  type: 'static' | 'tempBuff' | 'soldierMod' | 'debuff' | 'ability';
   isPermanent: boolean;
   turnInEffect?: number;
   duration?: number;
   isLastTurn?: boolean;
   removable: boolean;
   modifierId?: string;
+  isUsed?: boolean;
+  section: 'properties' | 'combat';
+  isDebuff?: boolean;
 }
 
 interface SoldierEffectsModalProps {
@@ -35,45 +39,161 @@ interface SoldierEffectsModalProps {
   availableAbilities: BuffDefinition[];
   currentTurn: number;
   abilitiesUsed: string[];
-  onApplyModifier: (item: CatalogItem, tabType: Tab) => void;
+  onApplyModifier: (item: CatalogItem, tabType: 'buffs' | 'debuffs' | 'abilities') => void;
   onRemoveModifier: (modifierId: string) => void;
   soldierName: string;
 }
 
 type Tab = 'buffs' | 'debuffs' | 'abilities';
 
-const EFFECT_STYLES: Record<ActiveEffectEntry['type'], { border: string; bg: string; icon: string; label: string }> = {
-  static: {
-    border: 'border-l-emerald-500',
-    bg: 'bg-emerald-950/20',
-    icon: 'text-emerald-400',
-    label: 'text-emerald-500',
-  },
-  tempBuff: {
-    border: 'border-l-amber-500',
-    bg: 'bg-amber-950/20',
-    icon: 'text-amber-400',
-    label: 'text-amber-500',
-  },
-  soldierMod: {
-    border: 'border-l-cyan-500',
-    bg: 'bg-cyan-950/20',
-    icon: 'text-cyan-400',
-    label: 'text-cyan-500',
-  },
-  debuff: {
-    border: 'border-l-red-500',
-    bg: 'bg-red-950/20',
-    icon: 'text-red-400',
-    label: 'text-red-500',
-  },
-};
+// ─── Section header ───
+function SectionHeader({ label }: { label: string }) {
+  return (
+    <div className="flex items-center gap-2 mb-2 mt-3 first:mt-0">
+      <div className="h-px flex-1 bg-gradient-to-r from-slate-700/60 to-transparent" />
+      <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500 whitespace-nowrap">
+        {label}
+      </span>
+      <div className="h-px flex-1 bg-gradient-to-l from-slate-700/60 to-transparent" />
+    </div>
+  );
+}
 
-const TAB_CONFIG: { key: Tab; label: string; icon: typeof Sparkles; activeClass: string }[] = [
-  { key: 'buffs', label: 'Бафы', icon: Sparkles, activeClass: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/40' },
-  { key: 'debuffs', label: 'Дебафы', icon: ShieldOff, activeClass: 'bg-red-500/15 text-red-400 border-red-500/40' },
-  { key: 'abilities', label: 'Способности', icon: Star, activeClass: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/40' },
-];
+// ─── Effect card (unique color per effect) ───
+function EffectCard({
+  effect,
+  onRemove,
+  onApplyAbility,
+}: {
+  effect: ActiveEffectEntry;
+  onRemove: (id: string) => void;
+  onApplyAbility?: (effect: ActiveEffectEntry) => void;
+}) {
+  const styles = getEffectStyles(effect.id);
+  const isLastTurn = effect.isLastTurn;
+
+  // Used ability — dimmed
+  if (effect.isUsed) {
+    return (
+      <div className="flex items-center gap-3 pl-3 pr-1.5 py-2.5 rounded-lg border border-slate-800/30 bg-slate-900/30 opacity-40">
+        <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 bg-slate-800/70">
+          <ModifierIcon name={effect.icon} size={16} className={styles.icon} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-sm font-semibold text-slate-500 truncate leading-tight line-through">
+            {effect.name}
+          </div>
+          <div className="text-xs text-slate-600 truncate leading-tight mt-0.5">
+            {effect.description}
+          </div>
+        </div>
+        <span className="text-[10px] text-slate-600 shrink-0 mr-2">✓ исп.</span>
+      </div>
+    );
+  }
+
+  // Available unused ability — clickable
+  if (effect.type === 'ability' && !effect.isUsed && onApplyAbility) {
+    return (
+      <button
+        onClick={() => onApplyAbility(effect as any)}
+        className={cn(
+          'w-full flex items-center gap-3 pl-3 pr-3 py-2.5 rounded-lg border border-dashed transition-all min-h-[44px]',
+          styles.border + '/40',
+          styles.bg,
+          'active:bg-slate-800/60',
+        )}
+        style={{ boxShadow: styles.glow }}
+      >
+        <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 bg-slate-800/70">
+          <ModifierIcon name={effect.icon} size={16} className={styles.icon} />
+        </div>
+        <div className="flex-1 min-w-0 text-left">
+          <div className="text-sm font-semibold text-slate-200 truncate leading-tight">
+            {effect.name}
+          </div>
+          <div className="text-xs text-slate-500 truncate leading-tight mt-0.5">
+            {effect.description}
+          </div>
+        </div>
+        <Plus className={cn('w-4 h-4 shrink-0', styles.icon)} />
+      </button>
+    );
+  }
+
+  // Standard effect card (combat effects, static buffs, active buffs/debuffs)
+  return (
+    <div
+      className={cn(
+        'flex items-center gap-3 pl-3 pr-1.5 py-2.5 rounded-lg border-l-[3px]',
+        styles.border,
+        styles.bg,
+        isLastTurn && 'animate-pulse-subtle',
+      )}
+      style={{ boxShadow: isLastTurn ? styles.glow.replace('0.3)', '0.5)') : styles.glow }}
+    >
+      {/* Icon */}
+      <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 bg-slate-800/70">
+        <ModifierIcon name={effect.icon} size={16} className={styles.icon} />
+      </div>
+
+      {/* Info */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1.5">
+          {/* Buff/Debuff badge for combat effects */}
+          {effect.section === 'combat' && (
+            <span className={cn(
+              'inline-flex items-center px-1 py-px rounded text-[9px] font-bold uppercase tracking-wider leading-none shrink-0',
+              effect.isDebuff
+                ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30',
+            )}>
+              {effect.isDebuff ? '↓ ДЕБ' : '↑ БАФ'}
+            </span>
+          )}
+          <span className="text-sm font-semibold text-slate-100 truncate leading-tight">
+            {effect.name}
+          </span>
+        </div>
+        {effect.description && (
+          <div className="text-xs text-slate-500 truncate leading-tight mt-0.5">
+            {effect.description}
+          </div>
+        )}
+      </div>
+
+      {/* Duration badge */}
+      <div className="flex-shrink-0 self-start mt-0.5">
+        {effect.isPermanent ? (
+          <div className={cn('flex items-center gap-0.5 px-1.5 py-1 text-[10px] font-bold', styles.label)}>
+            <Infinity className="w-3.5 h-3.5" />
+          </div>
+        ) : (
+          <div className={cn(
+            'flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold font-mono',
+            isLastTurn
+              ? 'bg-amber-500/20 text-amber-400'
+              : cn('bg-slate-800/60', styles.label),
+          )}>
+            <Clock className="w-3 h-3" />
+            {effect.turnInEffect}/{effect.duration}
+          </div>
+        )}
+      </div>
+
+      {/* Remove button */}
+      {effect.removable && effect.modifierId && (
+        <button
+          onClick={() => onRemove(effect.modifierId!)}
+          className="p-2.5 hover:bg-red-900/40 active:bg-red-900/60 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0 -my-1.5"
+          aria-label={`Снять ${effect.name}`}
+        >
+          <X className="w-4 h-4 text-red-400/70" />
+        </button>
+      )}
+    </div>
+  );
+}
 
 export function SoldierEffectsModal({
   isOpen,
@@ -91,14 +211,13 @@ export function SoldierEffectsModal({
   onRemoveModifier,
   soldierName,
 }: SoldierEffectsModalProps) {
-  const [tab, setTab] = useState<Tab>('buffs');
-  const [catalogOpen, setCatalogOpen] = useState(false);
+  const [catalogMode, setCatalogMode] = useState<'buffs' | 'debuffs' | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
-      setCatalogOpen(false);
+      setCatalogMode(null);
     }
     else document.body.style.overflow = '';
     return () => { document.body.style.overflow = ''; };
@@ -106,20 +225,22 @@ export function SoldierEffectsModal({
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) onClose();
+      if (e.key === 'Escape' && isOpen) {
+        if (catalogMode) setCatalogMode(null);
+        else onClose();
+      }
     };
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, catalogMode]);
 
   useEffect(() => {
     if (isOpen && closeButtonRef.current) closeButtonRef.current.focus();
   }, [isOpen]);
 
-  if (!isOpen) return null;
-
-  // Merge all active effects into unified list
-  const allActive: ActiveEffectEntry[] = [
+  // ─── Properties list (ALWAYS visible) ───
+  const propertiesList = useMemo<ActiveEffectEntry[]>(() => [
+    // Static buffs — permanent properties from unit template
     ...staticBuffs.map(b => ({
       id: `static_${b.id}`,
       name: b.name,
@@ -128,7 +249,28 @@ export function SoldierEffectsModal({
       type: 'static' as const,
       isPermanent: true,
       removable: false,
+      section: 'properties' as const,
     })),
+    // Abilities — always shown, marked as used/available
+    ...availableAbilities.map(a => {
+      const isUsed = abilitiesUsed.includes(a.id) ||
+        soldierModifiers.some(m => m.catalogId === a.id);
+      return {
+        id: `ability_${a.id}`,
+        name: a.name,
+        description: a.description,
+        icon: a.icon,
+        type: 'ability' as const,
+        isPermanent: true,
+        removable: false,
+        isUsed,
+        section: 'properties' as const,
+      };
+    }),
+  ], [staticBuffs, availableAbilities, abilitiesUsed, soldierModifiers]);
+
+  // ─── Combat effects list ───
+  const combatList = useMemo<ActiveEffectEntry[]>(() => [
     ...activeBuffs.map(b => {
       const turnInEffect = currentTurn ? currentTurn - b.appliedAtTurn + 1 : 1;
       const isLastTurn = currentTurn ? currentTurn >= b.expiresAtTurn - 1 : false;
@@ -143,6 +285,8 @@ export function SoldierEffectsModal({
         duration: b.duration,
         isLastTurn,
         removable: false,
+        section: 'combat' as const,
+        isDebuff: false,
       };
     }),
     ...soldierModifiers.map(m => {
@@ -161,6 +305,8 @@ export function SoldierEffectsModal({
         isLastTurn,
         removable: true,
         modifierId: m.id,
+        section: 'combat' as const,
+        isDebuff: false,
       };
     }),
     ...activeDebuffs.map(d => {
@@ -177,43 +323,50 @@ export function SoldierEffectsModal({
         duration: d.duration,
         isLastTurn,
         removable: false,
+        section: 'combat' as const,
+        isDebuff: true,
       };
     }),
-  ];
+  ], [activeBuffs, soldierModifiers, activeDebuffs, currentTurn]);
 
-  const catalog: CatalogItem[] = tab === 'buffs'
-    ? availableBuffs
-    : tab === 'debuffs'
-      ? availableDebuffs
-      : availableAbilities;
+  // ─── Used catalog IDs for catalog display ───
+  const usedCatalogIds = useMemo(() => {
+    const activeDebuffCatalogIds = activeDebuffs.map(d => {
+      const lastUnderscore = d.id.lastIndexOf('_');
+      if (lastUnderscore !== -1 && /^\d+$/.test(d.id.slice(lastUnderscore + 1))) {
+        return d.id.slice(0, lastUnderscore);
+      }
+      return d.id;
+    });
+    return new Set([
+      ...soldierModifiers.filter(m => m.catalogId).map(m => m.catalogId!),
+      ...abilitiesUsed,
+      ...activeDebuffCatalogIds,
+    ]);
+  }, [soldierModifiers, abilitiesUsed, activeDebuffs]);
 
-  // Extract catalog IDs from activeDebuffs (format: `${catalogId}_${timestamp}`)
-  const activeDebuffCatalogIds = activeDebuffs.map(d => {
-    const lastUnderscore = d.id.lastIndexOf('_');
-    if (lastUnderscore !== -1 && /^\d+$/.test(d.id.slice(lastUnderscore + 1))) {
-      return d.id.slice(0, lastUnderscore);
-    }
-    return d.id;
-  });
+  if (!isOpen) return null;
 
-  const usedCatalogIds = new Set([
-    ...soldierModifiers.filter(m => m.catalogId).map(m => m.catalogId!),
-    ...abilitiesUsed,
-    ...activeDebuffCatalogIds,
-  ]);
+  const hasProperties = propertiesList.length > 0;
+  const hasCombat = combatList.length > 0;
+  const hasAnything = hasProperties || hasCombat;
 
-  const hasActiveEffects = allActive.length > 0;
+  const handleApplyAbility = (effect: ActiveEffectEntry) => {
+    const abilityId = effect.id.replace('ability_', '');
+    const ability = availableAbilities.find(a => a.id === abilityId);
+    if (ability) onApplyModifier(ability, 'abilities');
+  };
 
   return (
     <div
-      className="fixed inset-0 z-[60] md:flex md:items-center md:justify-center bg-black/70 backdrop-blur-sm"
+      className="fixed inset-0 z-[60] md:flex md:items-center md:justify-center bg-black/70 backdrop-blur-sm animate-fadeIn"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
       role="dialog"
       aria-modal="true"
       aria-labelledby="effects-modal-title"
     >
       <div
-        className="fixed bottom-0 left-0 right-0 md:relative md:max-w-md bg-slate-900 rounded-t-2xl md:rounded-xl max-h-[90vh] md:max-h-[90vh] shadow-2xl flex flex-col overflow-hidden border border-slate-700/40"
+        className="fixed bottom-0 left-0 right-0 md:relative md:max-w-md bg-slate-900 rounded-t-2xl md:rounded-xl max-h-[90vh] md:max-h-[90vh] shadow-2xl flex flex-col overflow-hidden border border-slate-700/40 animate-slideUp"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drag handle — mobile */}
@@ -243,180 +396,97 @@ export function SoldierEffectsModal({
         </div>
 
         {/* ─── Scrollable body ─── */}
-        <div className="flex-1 overflow-y-auto overscroll-contain">
+        <div className="flex-1 overflow-y-auto overscroll-contain px-3 pt-2 pb-2">
 
-          {/* ─── ACTIVE EFFECTS ─── */}
-          {hasActiveEffects ? (
-            <div className="px-3 pt-3 pb-2">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="h-px flex-1 bg-gradient-to-r from-slate-700/60 to-transparent" />
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 whitespace-nowrap">
-                  Активные
-                </span>
-                <div className="h-px flex-1 bg-gradient-to-l from-slate-700/60 to-transparent" />
-              </div>
-              <div className="space-y-2">
-                {allActive.map((effect) => {
-                  const style = EFFECT_STYLES[effect.type];
-                  return (
-                    <div
-                      key={effect.id}
-                      className={cn(
-                        'flex items-center gap-3 pl-3 pr-1.5 py-2.5 rounded-lg border-l-[3px]',
-                        style.border,
-                        style.bg,
-                        effect.isLastTurn && 'animate-pulse-subtle',
-                      )}
-                    >
-                      {/* Icon */}
-                      <div className={cn(
-                        'w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 bg-slate-800/70',
-                      )}>
-                        <ModifierIcon name={effect.icon} size={16} className={style.icon} />
-                      </div>
+          {hasAnything ? (
+            <>
+              {/* ─── PROPERTIES SECTION (always visible) ─── */}
+              {hasProperties && (
+                <div>
+                  <SectionHeader label="Свойства" />
+                  <div className="space-y-2">
+                    {propertiesList.map(effect => (
+                      <EffectCard
+                        key={effect.id}
+                        effect={effect}
+                        onRemove={onRemoveModifier}
+                        onApplyAbility={handleApplyAbility}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
 
-                      {/* Info */}
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-semibold text-slate-100 truncate leading-tight">
-                          {effect.name}
-                        </div>
-                        {effect.description && (
-                          <div className="text-xs text-slate-500 truncate leading-tight mt-0.5">
-                            {effect.description}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Duration badge */}
-                      <div className="flex-shrink-0 self-start mt-0.5">
-                        {effect.isPermanent ? (
-                          <div className={cn('flex items-center gap-0.5 px-1.5 py-1 text-[10px] font-bold', style.label)}>
-                            <Infinity className="w-3.5 h-3.5" />
-                          </div>
-                        ) : (
-                          <div className={cn(
-                            'flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold font-mono',
-                            effect.isLastTurn
-                              ? (effect.type === 'debuff'
-                                  ? 'bg-red-500/20 text-red-400'
-                                  : 'bg-amber-500/20 text-amber-400')
-                              : cn('bg-slate-800/60', style.label),
-                          )}>
-                            <Clock className="w-3 h-3" />
-                            {effect.turnInEffect}/{effect.duration}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Remove button — full 44px touch target */}
-                      {effect.removable && effect.modifierId && (
-                        <button
-                          onClick={() => onRemoveModifier(effect.modifierId!)}
-                          className="p-2.5 hover:bg-red-900/40 active:bg-red-900/60 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0 -my-1.5"
-                          aria-label={`Снять ${effect.name}`}
-                        >
-                          <X className="w-4 h-4 text-red-400/70" />
-                        </button>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+              {/* ─── COMBAT EFFECTS SECTION ─── */}
+              {hasCombat && (
+                <div>
+                  <SectionHeader label="Эффекты боя" />
+                  <div className="space-y-2">
+                    {combatList.map(effect => (
+                      <EffectCard
+                        key={effect.id}
+                        effect={effect}
+                        onRemove={onRemoveModifier}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
           ) : (
-            <div className="px-4 py-8 text-center">
+            <div className="py-8 text-center">
               <Sparkles className="w-10 h-10 text-slate-700 mx-auto mb-2" />
               <p className="text-slate-500 text-sm">Нет активных эффектов</p>
             </div>
           )}
+        </div>
 
-          {/* ─── CATALOG TOGGLE ─── */}
-          <div className="px-3 pb-1">
-            <button
-              onClick={() => setCatalogOpen(!catalogOpen)}
-              className={cn(
-                'w-full flex items-center justify-between px-4 py-3 rounded-lg border transition-all min-h-[44px]',
-                catalogOpen
-                  ? 'bg-slate-800/60 border-slate-600/50'
-                  : 'bg-slate-800/30 border-slate-700/30 active:bg-slate-800/50',
-              )}
-            >
-              <div className="flex items-center gap-2.5">
-                <Plus className={cn('w-4 h-4 transition-transform', catalogOpen ? 'rotate-45 text-slate-400' : 'text-slate-500')} />
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  Добавить эффект
-                </span>
-              </div>
-              <div className="flex gap-1.5">
-                {availableBuffs.length > 0 && <div className="w-2 h-2 rounded-full bg-emerald-500" />}
-                {availableDebuffs.length > 0 && <div className="w-2 h-2 rounded-full bg-red-500" />}
-                {availableAbilities.length > 0 && <div className="w-2 h-2 rounded-full bg-cyan-500" />}
-              </div>
-            </button>
-          </div>
+        {/* ─── CATALOG PANEL (slides in when active) ─── */}
+        {catalogMode && (
+          <div className="flex-shrink-0 max-h-[40vh] overflow-y-auto border-t border-slate-700/30 animate-slideUp">
+            {/* Catalog header */}
+            <div className="flex items-center justify-between px-3 py-2">
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
+                {catalogMode === 'buffs' ? 'Баффы' : 'Дебаффы'}
+              </span>
+              <button
+                onClick={() => setCatalogMode(null)}
+                className="p-2 hover:bg-slate-800 rounded-lg transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
+                aria-label="Закрыть каталог"
+              >
+                <X className="w-4 h-4 text-slate-500" />
+              </button>
+            </div>
 
-          {/* ─── CATALOG SECTION ─── */}
-          {catalogOpen && (
-            <div className="px-3 pb-4">
-              {/* Tab pills */}
-              <div className="flex gap-2 mb-3 mt-2">
-                {TAB_CONFIG.map(t => {
-                  const Icon = t.icon;
-                  const isActive = tab === t.key;
-                  const count = t.key === 'buffs' ? availableBuffs.length
-                    : t.key === 'debuffs' ? availableDebuffs.length
-                    : availableAbilities.length;
-                  return (
-                    <button
-                      key={t.key}
-                      onClick={() => setTab(t.key)}
-                      className={cn(
-                        'flex items-center gap-1.5 px-3 py-2.5 rounded-lg border text-xs font-semibold uppercase tracking-wider transition-all flex-1 justify-center min-h-[44px]',
-                        isActive
-                          ? t.activeClass
-                          : 'border-slate-700/40 text-slate-500 active:bg-slate-800/40',
-                      )}
-                    >
-                      <Icon className="w-3.5 h-3.5" />
-                      <span>{t.label}</span>
-                      {count > 0 && (
-                        <span className={cn(
-                          'text-[10px] font-mono font-bold px-1.5 py-0.5 rounded',
-                          isActive ? 'bg-slate-800/40' : 'bg-slate-800/40 text-slate-500',
-                        )}>
-                          {count}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Catalog items */}
-              {catalog.length === 0 ? (
-                <div className="px-4 py-8 text-center">
-                  <Star className="w-10 h-10 text-slate-700 mx-auto mb-2" />
-                  <p className="text-slate-500 text-sm">Нет доступных эффектов</p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {catalog.map(item => {
+            {/* Catalog items */}
+            {(() => {
+              const items = catalogMode === 'buffs' ? availableBuffs : availableDebuffs;
+              if (items.length === 0) {
+                return (
+                  <div className="px-4 py-6 text-center">
+                    <Star className="w-8 h-8 text-slate-700 mx-auto mb-2" />
+                    <p className="text-slate-500 text-xs">Нет доступных</p>
+                  </div>
+                );
+              }
+              return (
+                <div className="px-3 pb-3 space-y-2">
+                  {items.map(item => {
                     const isUsed = usedCatalogIds.has(item.id);
-                    const tabStyle = tab === 'buffs' ? 'text-emerald-400'
-                      : tab === 'debuffs' ? 'text-red-400'
-                      : 'text-cyan-400';
+                    const itemStyles = getEffectStyles(`catalog_${item.id}`);
                     return (
                       <div
                         key={item.id}
                         className={cn(
-                          'flex items-center gap-3 pl-3 pr-1.5 py-2.5 rounded-lg border transition-all',
+                          'flex items-center gap-3 pl-3 pr-1.5 py-2.5 rounded-lg border-l-[3px] transition-all',
                           isUsed
-                            ? 'border-slate-800/30 bg-slate-900/30 opacity-35'
-                            : 'border-slate-700/30 bg-slate-800/30 active:bg-slate-800/50',
+                            ? 'border-l-slate-700 border border-slate-800/30 bg-slate-900/30 opacity-35'
+                            : cn(itemStyles.border, itemStyles.bg, 'border border-transparent'),
                         )}
+                        style={!isUsed ? { boxShadow: itemStyles.glow } : undefined}
                       >
-                        <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 bg-slate-700/40">
-                          <ModifierIcon name={item.icon} size={16} className={tabStyle} />
+                        <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 bg-slate-800/70">
+                          <ModifierIcon name={item.icon} size={16} className={itemStyles.icon} />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className={cn('text-sm font-semibold truncate leading-tight', isUsed ? 'text-slate-500 line-through' : 'text-slate-200')}>
@@ -432,20 +502,60 @@ export function SoldierEffectsModal({
                           </div>
                         ) : (
                           <button
-                            onClick={() => onApplyModifier(item, tab)}
-                            className="p-2.5 hover:bg-blue-900/30 active:bg-blue-900/50 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0 -my-1.5"
+                            onClick={() => onApplyModifier(item, catalogMode as Tab)}
+                            className="p-2.5 hover:bg-slate-800/40 active:bg-slate-800/60 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0 -my-1.5"
                             aria-label={`Применить ${item.name}`}
                           >
-                            <Plus className="w-4 h-4 text-blue-400/80" />
+                            <Plus className={cn('w-4 h-4', itemStyles.icon)} />
                           </button>
                         )}
                       </div>
                     );
                   })}
                 </div>
+              );
+            })()}
+          </div>
+        )}
+
+        {/* ─── ACTION BAR (always visible) ─── */}
+        <div className="flex-shrink-0 px-3 py-3 border-t border-slate-700/40 bg-slate-900/90">
+          <div className="flex gap-3">
+            <button
+              onClick={() => setCatalogMode(catalogMode === 'buffs' ? null : 'buffs')}
+              className={cn(
+                'flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg border min-h-[44px] font-semibold text-xs uppercase tracking-wider transition-all',
+                catalogMode === 'buffs'
+                  ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400'
+                  : 'bg-slate-800/40 border-slate-700/30 text-slate-400 active:bg-slate-800/60',
               )}
-            </div>
-          )}
+            >
+              <Plus className="w-4 h-4" />
+              <span>Баф</span>
+              {availableBuffs.length > 0 && (
+                <span className="text-[10px] font-mono font-bold bg-slate-800/40 px-1.5 py-0.5 rounded">
+                  {availableBuffs.length}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => setCatalogMode(catalogMode === 'debuffs' ? null : 'debuffs')}
+              className={cn(
+                'flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg border min-h-[44px] font-semibold text-xs uppercase tracking-wider transition-all',
+                catalogMode === 'debuffs'
+                  ? 'bg-red-500/15 border-red-500/40 text-red-400'
+                  : 'bg-slate-800/40 border-slate-700/30 text-slate-400 active:bg-slate-800/60',
+              )}
+            >
+              <Plus className="w-4 h-4" />
+              <span>Дебаф</span>
+              {availableDebuffs.length > 0 && (
+                <span className="text-[10px] font-mono font-bold bg-slate-800/40 px-1.5 py-0.5 rounded">
+                  {availableDebuffs.length}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -179,9 +179,9 @@ test.describe('Modifier stat display and expiry', () => {
   });
 
   test('should remove expired modifier after advancing turns', async ({ page }) => {
-    // Set up army at turn 2 where a duration-1 modifier (applied at turn 1) has expired
+    // Set up army at turn 2 where a duration-2 modifier (applied at turn 1) is still active
     await page.addInitScript(() => {
-      // Turn 1: Apply modifier
+      // Turn 1: Apply modifier with duration 2
       const army = {
         name: 'Expiry Test Army',
         faction: 'polaris',
@@ -206,7 +206,7 @@ test.describe('Modifier stat display and expiry', () => {
           actionsUsed: [
             { moved: false, shot: false, melee: false, done: false },
           ],
-          // Duration-1 modifier applied at turn 1: active on turns 1 and 2, expires at turn 3
+          // Duration-2 modifier applied at turn 1: active on turns 1-2, expires at turn 3
           soldierModifiers: [{
             id: 'temp_buff_1234',
             catalogId: 'aim_boost',
@@ -216,8 +216,8 @@ test.describe('Modifier stat display and expiry', () => {
             value: 1,
             phase: 'shot',
             appliedAtTurn: 1,
-            duration: 1,
-            expiresAtTurn: 2,
+            duration: 2,
+            expiresAtTurn: 3,
             soldierIndex: 0,
           }],
           activeDebuffs: [],
@@ -237,7 +237,7 @@ test.describe('Modifier stat display and expiry', () => {
 
     await expect(page.getByTestId('game-session')).toBeVisible();
 
-    // The modifier is still active at turn 2 (duration=1, applied=1, active while currentTurn <= 2)
+    // The modifier is still active at turn 2 (duration=2, applied=1, active while currentTurn < 3)
     // So "+1" should be visible on the range stat
     const rangeBonus = page.getByText('+1').first();
     await expect(rangeBonus).toBeVisible({ timeout: 5000 });
