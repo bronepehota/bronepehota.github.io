@@ -269,11 +269,14 @@ export function SoldierEffectsModal({
     }),
   ], [staticBuffs, availableAbilities, abilitiesUsed, soldierModifiers]);
 
+  // ─── Debuff catalog IDs for soldier modifier classification ───
+  const debuffCatalogIds = useMemo(() => new Set(availableDebuffs.map(d => d.id)), [availableDebuffs]);
+
   // ─── Combat effects list ───
   const combatList = useMemo<ActiveEffectEntry[]>(() => [
     ...activeBuffs.map(b => {
       const turnInEffect = currentTurn ? currentTurn - b.appliedAtTurn + 1 : 1;
-      const isLastTurn = currentTurn ? currentTurn >= b.expiresAtTurn - 1 : false;
+      const isLastTurn = currentTurn && b.expiresAtTurn ? currentTurn === b.expiresAtTurn - 1 : false;
       return {
         id: `buff_${b.id}`,
         name: b.name,
@@ -292,7 +295,7 @@ export function SoldierEffectsModal({
     ...soldierModifiers.map(m => {
       const isPermanent = !m.duration;
       const turnInEffect = !isPermanent && currentTurn ? currentTurn - m.appliedAtTurn + 1 : undefined;
-      const isLastTurn = !isPermanent && currentTurn && m.expiresAtTurn ? currentTurn >= m.expiresAtTurn - 1 : false;
+      const isLastTurn = !isPermanent && currentTurn && m.expiresAtTurn ? currentTurn === m.expiresAtTurn - 1 : false;
       return {
         id: `mod_${m.id}`,
         name: m.name,
@@ -306,12 +309,12 @@ export function SoldierEffectsModal({
         removable: true,
         modifierId: m.id,
         section: 'combat' as const,
-        isDebuff: false,
+        isDebuff: !!(m.catalogId && debuffCatalogIds.has(m.catalogId)),
       };
     }),
     ...activeDebuffs.map(d => {
       const turnInEffect = currentTurn ? currentTurn - d.appliedAtTurn + 1 : 1;
-      const isLastTurn = currentTurn ? currentTurn >= d.expiresAtTurn - 1 : false;
+      const isLastTurn = currentTurn && d.expiresAtTurn ? currentTurn === d.expiresAtTurn - 1 : false;
       return {
         id: `debuff_${d.id}`,
         name: d.name,
@@ -327,7 +330,7 @@ export function SoldierEffectsModal({
         isDebuff: true,
       };
     }),
-  ], [activeBuffs, soldierModifiers, activeDebuffs, currentTurn]);
+  ], [activeBuffs, soldierModifiers, activeDebuffs, currentTurn, debuffCatalogIds]);
 
   // ─── Used catalog IDs for catalog display ───
   const usedCatalogIds = useMemo(() => {
