@@ -8,6 +8,7 @@ import starSystemMercenariesSquads from '@/data/sources/star_system/mercenaries/
 import starSystemMercenariesMachines from '@/data/sources/star_system/mercenaries/machines.json';
 import tehnologFactions from '@/data/sources/tehnolog/factions.json';
 import tehnolog2026Factions from '@/data/sources/tehnolog_2026/factions.json';
+import botwaFactions from '@/data/sources/botwa/factions.json';
 import { getCustomSourcesStorage } from './editor/storage';
 import { getCustomSourceData } from './editor/converters';
 
@@ -25,6 +26,7 @@ const typedStarSystemMachines = [
 ] as Machine[];
 const typedTehnologFactions = tehnologFactions as Faction[];
 const typedTehnolog2026Factions = tehnolog2026Factions as Faction[];
+const typedBotwaFactions = botwaFactions as Faction[];
 
 // Star System source metadata
 const starSystemSource: ArmyListSource = {
@@ -67,6 +69,18 @@ export const sourcesRegistry: Record<SourceID, SourceData> = {
       version: '0.1'
     },
     factions: typedTehnolog2026Factions,
+    squads: [],
+    machines: []
+  },
+  botwa: {
+    source: {
+      id: 'botwa',
+      name: 'Ботва',
+      description: 'Армейские листы от Ботва — требуется помощь сообщества по наполнению данных',
+      link: 'https://vk.com/album-209197708_299742845',
+      version: '0.1'
+    },
+    factions: typedBotwaFactions,
     squads: [],
     machines: []
   }
