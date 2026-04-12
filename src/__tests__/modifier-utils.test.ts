@@ -40,8 +40,8 @@ const mockedStorage = jest.requireMock('@/lib/editor/modifier-storage') as {
 function makeUnit(overrides: Record<string, any> = {}) {
   const { data: dataOverride, type: typeOverride, ...restOverrides } = overrides;
   const soldiers = dataOverride?.soldiers || [
-    { rank: 3, speed: 4, range: 'D6', power: '1D6', melee: 2, props: [], armor: 2 },
-    { rank: 2, speed: 4, range: 'D6', power: '1D6', melee: 1, props: [], armor: 2 },
+    { rank: 3, speed: 4, range: 'D6', power: '1D6', melee: 2, armor: 2 },
+    { rank: 2, speed: 4, range: 'D6', power: '1D6', melee: 1, armor: 2 },
   ];
 
   const data = {
@@ -726,23 +726,21 @@ describe('isModifierActive', () => {
   });
 
   it('should expire duration-1 modifier after appliedAtTurn + 1', () => {
-    // Duration=1 means "1 extra turn after application"
+    // Duration=1 means active for 1 turn (the turn applied)
     expect(isModifierActive(1, 1, 1)).toBe(true);  // turn applied — active
-    expect(isModifierActive(1, 1, 2)).toBe(true);  // 1 extra turn — active
-    expect(isModifierActive(1, 1, 3)).toBe(false);  // expired
+    expect(isModifierActive(1, 1, 2)).toBe(false);  // expired
   });
 
   it('should expire duration-2 modifier after appliedAtTurn + 2', () => {
     expect(isModifierActive(1, 2, 1)).toBe(true);
     expect(isModifierActive(1, 2, 2)).toBe(true);
-    expect(isModifierActive(1, 2, 3)).toBe(true);
-    expect(isModifierActive(1, 2, 4)).toBe(false);
+    expect(isModifierActive(1, 2, 3)).toBe(false);
   });
 
   it('should expire duration-3 modifier after appliedAtTurn + 3', () => {
     expect(isModifierActive(2, 3, 2)).toBe(true);
-    expect(isModifierActive(2, 3, 5)).toBe(true);
-    expect(isModifierActive(2, 3, 6)).toBe(false);
+    expect(isModifierActive(2, 3, 4)).toBe(true);
+    expect(isModifierActive(2, 3, 5)).toBe(false);
   });
 });
 
@@ -761,8 +759,8 @@ describe('cleanupExpiredModifiers', () => {
     const cleaned = result.units[0];
 
     // perm: no duration → always active
-    // exp1: appliedAtTurn=1, duration=1 → active while currentTurn<=2 → expired at turn 3
-    // active1: appliedAtTurn=2, duration=2 → active while currentTurn<=4 → still active at turn 3
+    // exp1: appliedAtTurn=1, duration=1 → active while currentTurn < 2 → expired at turn 3
+    // active1: appliedAtTurn=2, duration=2 → active while currentTurn < 4 → still active at turn 3
     expect(cleaned.soldierModifiers).toHaveLength(2);
     expect(cleaned.soldierModifiers!.map(m => m.id).sort()).toEqual(['active1', 'perm']);
   });
@@ -779,8 +777,8 @@ describe('cleanupExpiredModifiers', () => {
     const result = cleanupExpiredModifiers(army);
     const cleaned = result.units[0];
 
-    // d1: appliedAtTurn=1, duration=1 → expired at turn 3
-    // d2: appliedAtTurn=2, duration=2 → active while currentTurn<=4
+    // d1: appliedAtTurn=1, duration=1 → expired at turn 2
+    // d2: appliedAtTurn=2, duration=2 → active while currentTurn < 4
     expect(cleaned.activeDebuffs).toHaveLength(1);
     expect(cleaned.activeDebuffs![0].id).toBe('d2');
   });
@@ -797,8 +795,8 @@ describe('cleanupExpiredModifiers', () => {
     const result = cleanupExpiredModifiers(army);
     const cleaned = result.units[0];
 
-    // b1: appliedAtTurn=1, duration=1 → expired at turn 3
-    // b2: appliedAtTurn=2, duration=3 → active while currentTurn<=5
+    // b1: appliedAtTurn=1, duration=1 → expired at turn 2
+    // b2: appliedAtTurn=2, duration=3 → active while currentTurn < 5
     expect(cleaned.activeBuffs).toHaveLength(1);
     expect(cleaned.activeBuffs![0].id).toBe('b2');
   });
@@ -871,19 +869,19 @@ describe('cleanupExpiredModifiers', () => {
   });
 
   it('should simulate a full game: apply → play turns → expire', () => {
-    // Turn 1: Apply a duration-1 modifier
+    // Turn 1: Apply a duration-2 modifier
     const unit = makeUnit({
       soldierModifiers: [
-        { id: 'sm_turn1', name: 'Aim Boost', description: '+1 range', target: 'range_bonus', value: 1, phase: 'shot', appliedAtTurn: 1, duration: 1, expiresAtTurn: 2, soldierIndex: 0 },
+        { id: 'sm_turn1', name: 'Aim Boost', description: '+1 range', target: 'range_bonus', value: 1, phase: 'shot', appliedAtTurn: 1, duration: 2, expiresAtTurn: 3, soldierIndex: 0 },
       ],
     });
 
-    // Turn 2: cleanup should keep it (1+1=2, currentTurn=2 <= 2)
+    // Turn 2: cleanup should keep it (2 < 1+2=3)
     let army = { name: 'Test', totalCost: 0, units: [unit], currentTurn: 2 };
     let result = cleanupExpiredModifiers(army);
     expect(result.units[0].soldierModifiers).toHaveLength(1);
 
-    // Turn 3: cleanup should remove it (3 > 2)
+    // Turn 3: cleanup should remove it (3 < 3 is false)
     army = { ...army, units: result.units as any[], currentTurn: 3 };
     result = cleanupExpiredModifiers(army as any);
     expect(result.units[0].soldierModifiers).toBeUndefined();

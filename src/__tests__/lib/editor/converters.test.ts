@@ -209,7 +209,6 @@ describe('convertSoldier', () => {
       range: 'D12',
       power: '2D6',
       melee: 3,
-      props: ['Рм'],
       armor: 2,
       modifiers: ['mechanic', 'jump_boost_4'],
     };
@@ -225,7 +224,6 @@ describe('convertSoldier', () => {
       range: 'D12',
       power: '2D6',
       melee: 3,
-      props: [],
       armor: 2,
     };
     const result = convertSoldier(customSoldier as any);
@@ -240,7 +238,6 @@ describe('convertSoldier', () => {
       range: 'D6',
       power: '1D12',
       melee: 6,
-      props: ['Г'],
       armor: 3,
       modifiers: ['medic'],
     };
@@ -248,7 +245,6 @@ describe('convertSoldier', () => {
     expect(result.rank).toBe(5);
     expect(result.speed).toBe(4);
     expect(result.armor).toBe(3);
-    expect(result.props).toEqual(['Г']);
     expect(result.modifiers).toEqual(['medic']);
   });
 });

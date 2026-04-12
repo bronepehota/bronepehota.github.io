@@ -12,7 +12,7 @@ describe('checkPanicTrigger', () => {
         name: 'Test Squad',
         faction: 'polaris',
         cost: 100,
-        soldiers: Array(6).fill({ rank: 3, speed: 4, range: 'D6', power: '1D6', melee: 0, props: [], armor: 2 }),
+        soldiers: Array(6).fill({ rank: 3, speed: 4, range: 'D6', power: '1D6', melee: 0, armor: 2 }),
       },
       deadSoldiers: [0, 1], // 2 out of 6 dead = 33%
     };
@@ -28,7 +28,7 @@ describe('checkPanicTrigger', () => {
         name: 'Test Squad',
         faction: 'polaris',
         cost: 100,
-        soldiers: Array(6).fill({ rank: 3, speed: 4, range: 'D6', power: '1D6', melee: 0, props: [], armor: 2 }),
+        soldiers: Array(6).fill({ rank: 3, speed: 4, range: 'D6', power: '1D6', melee: 0, armor: 2 }),
       },
       deadSoldiers: [0, 1, 2], // 3 out of 6 dead = 50%
     };
@@ -44,7 +44,7 @@ describe('checkPanicTrigger', () => {
         name: 'Test Squad',
         faction: 'polaris',
         cost: 100,
-        soldiers: Array(6).fill({ rank: 3, speed: 4, range: 'D6', power: '1D6', melee: 0, props: [], armor: 2 }),
+        soldiers: Array(6).fill({ rank: 3, speed: 4, range: 'D6', power: '1D6', melee: 0, armor: 2 }),
       },
       deadSoldiers: [0, 1, 2],
     };
@@ -81,7 +81,7 @@ describe('checkPanicTrigger', () => {
         name: 'Test Squad',
         faction: 'polaris',
         cost: 100,
-        soldiers: Array(6).fill({ rank: 3, speed: 4, range: 'D6', power: '1D6', melee: 0, props: [], armor: 2 }),
+        soldiers: Array(6).fill({ rank: 3, speed: 4, range: 'D6', power: '1D6', melee: 0, armor: 2 }),
       },
       deadSoldiers: [0, 1, 2],
       panicState: [{ soldierIndex: 0, testRoll: 5, rank: 3, triggeredAtTurn: 1 }],
@@ -109,7 +109,7 @@ describe('executePanicTest', () => {
         faction: 'polaris',
         cost: 100,
         soldiers: [
-          { rank: 3, speed: 4, range: 'D6', power: '1D6', melee: 0, props: [], armor: 2 },
+          { rank: 3, speed: 4, range: 'D6', power: '1D6', melee: 0, armor: 2 },
         ],
       },
     };
@@ -130,7 +130,7 @@ describe('executePanicTest', () => {
         faction: 'polaris',
         cost: 100,
         soldiers: [
-          { rank: 3, speed: 4, range: 'D6', power: '1D6', melee: 0, props: [], armor: 2 },
+          { rank: 3, speed: 4, range: 'D6', power: '1D6', melee: 0, armor: 2 },
         ],
       },
     };
@@ -149,7 +149,7 @@ describe('executePanicTest', () => {
         faction: 'polaris',
         cost: 100,
         soldiers: [
-          { rank: 7, speed: 4, range: 'D6', power: '1D6', melee: 0, props: [], armor: 2 },
+          { rank: 7, speed: 4, range: 'D6', power: '1D6', melee: 0, armor: 2 },
         ],
       },
     };
@@ -169,7 +169,7 @@ describe('executePanicTest', () => {
         faction: 'polaris',
         cost: 100,
         soldiers: [
-          { rank: 3, speed: 4, range: 'D6', power: '1D6', melee: 0, props: [], armor: 2 },
+          { rank: 3, speed: 4, range: 'D6', power: '1D6', melee: 0, armor: 2 },
         ],
       },
     };
@@ -189,7 +189,7 @@ describe('resolvePanic', () => {
         faction: 'polaris',
         cost: 100,
         soldiers: [
-          { rank: 3, speed: 4, range: 'D6', power: '1D6', melee: 0, props: [], armor: 2 },
+          { rank: 3, speed: 4, range: 'D6', power: '1D6', melee: 0, armor: 2 },
         ],
       },
       panicState: [
@@ -210,7 +210,7 @@ describe('resolvePanic', () => {
         faction: 'polaris',
         cost: 100,
         soldiers: [
-          { rank: 3, speed: 4, range: 'D6', power: '1D6', melee: 0, props: [], armor: 2 },
+          { rank: 3, speed: 4, range: 'D6', power: '1D6', melee: 0, armor: 2 },
         ],
       },
       panicState: [
@@ -231,7 +231,7 @@ describe('resolvePanic', () => {
         faction: 'polaris',
         cost: 100,
         soldiers: [
-          { rank: 3, speed: 4, range: 'D6', power: '1D6', melee: 0, props: [], armor: 2 },
+          { rank: 3, speed: 4, range: 'D6', power: '1D6', melee: 0, armor: 2 },
         ],
       },
     };

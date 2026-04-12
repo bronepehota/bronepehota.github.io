@@ -15,8 +15,21 @@ interface SourceSelectorProps {
   onConfirm?: () => void;
 }
 
-// Sources that are disabled
-const DISABLED_SOURCES: Set<SourceID> = new Set(['tehnolog']);
+// Sources that are disabled (no data yet, need community help)
+const DISABLED_SOURCES: Set<SourceID> = new Set(['tehnolog', 'tehnolog_2026', 'botwa']);
+
+// Accent colors per source
+const SOURCE_COLORS: Record<string, string> = {
+  star_system: '#10b981',
+  tehnolog: '#f59e0b',
+  tehnolog_2026: '#f59e0b',
+  botwa: '#ef4444',
+};
+
+function getSourceColor(sourceId: string): string {
+  if (sourceId.startsWith('custom_')) return '#22c55e';
+  return SOURCE_COLORS[sourceId] || '#10b981';
+}
 
 // Component to render a single source card
 function SourceCard({
@@ -36,6 +49,7 @@ function SourceCard({
   const isExpanded = expandedSourceId === source.id;
   const isDisabled = DISABLED_SOURCES.has(source.id);
   const isCustom = source.id.startsWith('custom_');
+  const color = getSourceColor(source.id);
 
   return (
     <div
@@ -54,13 +68,9 @@ function SourceCard({
         isDisabled && 'opacity-50 cursor-not-allowed'
       )}
       style={{
-        borderColor: isSelected
-          ? (isCustom ? '#22c55e' : source.id === 'tehnolog' ? '#f59e0b' : '#10b981')
-          : (isCustom ? '#22c55e40' : '#334155'),
-        backgroundColor: isSelected
-          ? `${(isCustom ? '#22c55e' : source.id === 'tehnolog' ? '#f59e0b' : '#10b981')}10`
-          : 'rgba(30, 41, 59, 0.6)',
-        ...(isSelected && { ringColor: `${(isCustom ? '#22c55e' : source.id === 'tehnolog' ? '#f59e0b' : '#10b981')}50` })
+        borderColor: isSelected ? color : (isCustom ? `${color}40` : '#334155'),
+        backgroundColor: isSelected ? `${color}10` : 'rgba(30, 41, 59, 0.6)',
+        ...(isSelected && { ringColor: `${color}50` })
       }}
     >
       {/* Main row - always visible */}
@@ -72,10 +82,10 @@ function SourceCard({
               'w-5 h-5 rounded flex items-center justify-center border-2 transition-all',
               isSelected ? 'border-current' : 'border-slate-600'
             )}
-            style={{ borderColor: isSelected ? (isCustom ? '#22c55e' : source.id === 'tehnolog' ? '#f59e0b' : '#10b981') : undefined }}
+            style={{ borderColor: isSelected ? color : undefined }}
           >
             {isSelected && (
-              <svg className="w-3 h-3" style={{ color: isCustom ? '#22c55e' : source.id === 'tehnolog' ? '#f59e0b' : '#10b981' }} fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-3 h-3" style={{ color }} fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
               </svg>
             )}
@@ -86,7 +96,7 @@ function SourceCard({
               <h3 className={clsx(
                 'font-mono font-bold text-sm tracking-wide',
                 isSelected ? '' : 'text-slate-400'
-              )} style={isSelected ? { color: isCustom ? '#22c55e' : source.id === 'tehnolog' ? '#f59e0b' : '#10b981' } : undefined}>
+              )} style={isSelected ? { color } : undefined}>
                 {source.name}
               </h3>
               {isCustom && (
@@ -137,7 +147,7 @@ function SourceCard({
       {isDisabled && (
         <div className="px-3 pb-3 pt-0 border-t border-slate-700/30">
           <p className="text-xs text-amber-400 leading-relaxed">
-            🔒 Скоро. Требуется помощь сообщества.
+            🔒 Требуется помощь сообщества по наполнению данных
           </p>
         </div>
       )}
@@ -197,9 +207,7 @@ export function SourceSelector({
 
   // Get selected source for styling
   const selectedSourceData = sources.find(s => s.id === selectedSource);
-  const accentColor = selectedSourceData?.id.startsWith('custom_')
-    ? '#22c55e'
-    : selectedSourceData?.id === 'tehnolog' ? '#f59e0b' : '#10b981';
+  const accentColor = getSourceColor(selectedSourceData?.id || '');
 
   // Separate sources into official and custom
   const officialSources = sources.filter(s => !s.id.startsWith('custom_'));

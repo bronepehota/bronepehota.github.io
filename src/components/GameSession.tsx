@@ -588,12 +588,14 @@ export default function GameSession({
                     ...(u.soldierModifiers || []),
                     modifier,
                   ],
-                  // Track ALL effects as consumed (one use per battle per soldier)
-                  soldierAbilitiesUsed: [
+                };
+                // Only oneTimeUse abilities are permanently tracked (one per battle per soldier)
+                if ('oneTimeUse' in item && item.oneTimeUse) {
+                  updates.soldierAbilitiesUsed = [
                     ...(u.soldierAbilitiesUsed || []),
                     `${item.id}_${si}`,
-                  ],
-                };
+                  ];
+                }
                 return { ...u, ...updates };
               });
             }}

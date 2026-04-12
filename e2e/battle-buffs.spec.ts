@@ -147,7 +147,7 @@ test.describe('Battle buffs availability', () => {
     await expect(modal.locator('#effects-modal-title')).toBeVisible();
   });
 
-  test('should show three tabs in effects modal', async ({ page }) => {
+  test('should show buff and debuff action buttons in effects modal', async ({ page }) => {
     // Open modal
     const indicator = page.locator(
       '[role="button"][aria-label*="доступно"], ' +
@@ -160,21 +160,14 @@ test.describe('Battle buffs availability', () => {
     const modal = page.locator('[role="dialog"][aria-modal="true"]');
     await expect(modal).toBeVisible();
 
-    // Expand catalog section first
-    const addEffectBtn = modal.locator('button:has-text("Добавить эффект")').first();
-    await addEffectBtn.click();
-    await page.waitForTimeout(300);
-
-    // Should show three tab buttons (mixed case: Бафы, Дебафы, Способности)
-    const buffsTab = modal.locator('button').filter({ hasText: /^Бафы/ }).first();
-    const debuffsTab = modal.locator('button').filter({ hasText: 'Дебафы' }).first();
-    const abilitiesTab = modal.locator('button').filter({ hasText: 'Способности' }).first();
-    await expect(buffsTab).toBeVisible();
-    await expect(debuffsTab).toBeVisible();
-    await expect(abilitiesTab).toBeVisible();
+    // Should show two always-visible action buttons: Баф and Дебаф
+    const buffsBtn = modal.locator('button').filter({ hasText: /^Баф/ }).first();
+    const debuffsBtn = modal.locator('button').filter({ hasText: /Дебаф/ }).first();
+    await expect(buffsBtn).toBeVisible();
+    await expect(debuffsBtn).toBeVisible();
   });
 
-  test('should show only squad-assigned buffs (not full catalog)', async ({ page }) => {
+  test('should show no buffs available for squad without assigned buffs', async ({ page }) => {
     // Open modal
     const indicator = page.locator(
       '[role="button"][aria-label*="доступно"], ' +
@@ -187,17 +180,17 @@ test.describe('Battle buffs availability', () => {
     const modal = page.locator('[role="dialog"][aria-modal="true"]');
     await expect(modal).toBeVisible();
 
-    // Expand catalog section
-    const addEffectBtn = modal.locator('button:has-text("Добавить эффект")').first();
-    await addEffectBtn.click();
+    // Click Баф button to open buff catalog
+    const buffsBtn = modal.locator('button').filter({ hasText: /^Баф/ }).first();
+    await buffsBtn.click();
     await page.waitForTimeout(300);
 
     // Squad "Линейная клон-пехота" has NO buffs assigned in editor
-    // So buffs tab should show "Нет доступных эффектов"
-    await expect(modal.getByText('Нет доступных эффектов')).toBeVisible();
+    // So buff catalog should show "Нет доступных"
+    await expect(modal.getByText('Нет доступных')).toBeVisible();
   });
 
-  test('should switch to debuffs tab and show available debuffs', async ({ page }) => {
+  test('should open debuff catalog and show available debuffs', async ({ page }) => {
     // Open modal
     const indicator = page.locator(
       '[role="button"][aria-label*="доступно"], ' +
@@ -210,14 +203,9 @@ test.describe('Battle buffs availability', () => {
     const modal = page.locator('[role="dialog"][aria-modal="true"]');
     await expect(modal).toBeVisible();
 
-    // Expand catalog section
-    const addEffectBtn = modal.locator('button:has-text("Добавить эффект")').first();
-    await addEffectBtn.click();
-    await page.waitForTimeout(300);
-
-    // Click debuffs tab
-    const debuffsTab = modal.locator('button:has-text("Дебафы")').first();
-    await debuffsTab.click();
+    // Click Дебаф button to open debuff catalog
+    const debuffsBtn = modal.locator('button').filter({ hasText: /Дебаф/ }).first();
+    await debuffsBtn.click();
     await page.waitForTimeout(300);
 
     // Debuffs from catalog should be listed (at least one debuff exists)

@@ -31,7 +31,6 @@ export function convertSoldier(custom: CustomSoldier): Soldier {
     range: custom.range,
     power: custom.power,
     melee: custom.melee,
-    props: custom.props,
     armor: custom.armor,
     image: custom.image,
     modifiers: custom.modifiers,

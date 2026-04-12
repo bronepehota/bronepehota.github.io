@@ -112,6 +112,17 @@
       "icon": "ShieldCheck"
     },
     {
+      "id": "jump_boost_3",
+      "name": "Пр3",
+      "description": "Прыжковой ускоритель на расстояние 3е, используется один раз за бой",
+      "applyTo": ["soldier"],
+      "target": "custom",
+      "value": 3,
+      "phase": "always",
+      "icon": "ArrowUp",
+      "oneTimeUse": true
+    },
+    {
       "id": "jump_boost_4",
       "name": "Пр4",
       "description": "Прыжковой ускоритель на расстояние 4е, используется один раз за бой",

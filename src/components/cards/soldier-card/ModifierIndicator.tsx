@@ -4,6 +4,7 @@ import { Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { SoldierModifier } from '@/lib/modifier-types';
 import { ModifierIcon } from '@/components/editor/ModifierIcons';
+import { getEffectStyles } from '@/lib/effect-colors';
 
 interface ModifierIndicatorProps {
   buffCount: number;
@@ -24,7 +25,7 @@ export function ModifierIndicator({
 }: ModifierIndicatorProps) {
   const totalCount = buffCount + debuffCount;
 
-  // If there are soldier-specific modifiers, show them as icons
+  // If there are soldier-specific modifiers, show them as color-coded icons
   if (soldierModifiers.length > 0) {
     return (
       <div
@@ -43,25 +44,28 @@ export function ModifierIndicator({
               }
         }
         className={cn(
-          'flex flex-row items-center justify-center gap-0.5 rounded-lg bg-slate-800/60 border border-amber-700/50 min-h-[40px] min-w-[44px] flex-1 px-0.5 transition-all select-none',
+          'flex flex-row items-center justify-center gap-0.5 rounded-lg bg-slate-800/60 border border-slate-700/50 min-h-[40px] min-w-[44px] flex-1 px-0.5 transition-all select-none',
           !disabled && 'cursor-pointer hover:bg-slate-700/30 active:scale-[0.97]',
           disabled && 'opacity-30'
         )}
         aria-label={`${soldierModifiers.length} модификаторов на солдата`}
       >
-        {soldierModifiers.map(mod => (
-          <div
-            key={mod.id}
-            title={`${mod.name}: ${mod.description}${mod.duration ? ` (Ход ${mod.expiresAtTurn! - mod.appliedAtTurn}/${mod.duration})` : ' (постоянная)'}`}
-            className="shrink-0"
-          >
-            <ModifierIcon
-              name={mod.icon}
-              size={14}
-              className="text-amber-400"
-            />
-          </div>
-        ))}
+        {soldierModifiers.map(mod => {
+          const colorStyles = getEffectStyles(mod.id);
+          return (
+            <div
+              key={mod.id}
+              title={`${mod.name}: ${mod.description}${mod.duration ? ` (Ход ${mod.expiresAtTurn! - mod.appliedAtTurn}/${mod.duration})` : ' (постоянная)'}`}
+              className="shrink-0"
+            >
+              <ModifierIcon
+                name={mod.icon}
+                size={14}
+                className={colorStyles.icon}
+              />
+            </div>
+          );
+        })}
       </div>
     );
   }
@@ -158,7 +162,7 @@ export function ModifierIndicator({
                 onClick?.();
               }
             }
-        }
+      }
       className={cn(
         'flex flex-row items-center justify-center gap-1 rounded-lg bg-slate-800/60 border min-h-[40px] min-w-[44px] flex-1 px-1 transition-all select-none',
         colorClasses,

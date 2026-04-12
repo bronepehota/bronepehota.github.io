@@ -11,7 +11,7 @@ describe('ArmyUnit panic integration', () => {
         name: 'Test Squad',
         faction: 'polaris',
         cost: 100,
-        soldiers: [{ rank: 3, speed: 4, range: 'D6', power: '1D6', melee: 0, props: [], armor: 2 }],
+        soldiers: [{ rank: 3, speed: 4, range: 'D6', power: '1D6', melee: 0, armor: 2 }],
       },
       panicState: [
         { soldierIndex: 0, testRoll: 5, rank: 3, triggeredAtTurn: 1 },

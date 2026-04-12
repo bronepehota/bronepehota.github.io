@@ -153,7 +153,7 @@ export function isModifierActive(
 ): boolean {
   if (duration === undefined) return true; // Permanent modifier
   if (!currentTurn) return true; // Game hasn't started yet
-  return currentTurn <= appliedAtTurn + duration;
+  return currentTurn < appliedAtTurn + duration;
 }
 
 /**

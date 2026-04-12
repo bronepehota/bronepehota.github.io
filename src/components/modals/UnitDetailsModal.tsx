@@ -8,6 +8,7 @@ import type { Squad, Machine, Faction, Soldier, Weapon, SpeedSector } from '@/li
 import { useBottomSheet } from '@/hooks/useBottomSheet';
 import { formatRange } from '@/lib/distance-utils';
 import { getEncyclopediaUnit } from '@/lib/encyclopedia-registry';
+import { getAllBuffs } from '@/lib/modifier-utils';
 
 interface UnitDetailsModalProps {
   unit: Squad | Machine;
@@ -31,12 +32,7 @@ interface SoldierStatsProps {
 
 function SoldierStats({ soldier, index, factionColor, onImageClick, distanceInputUnit = 'steps', stepToCmFactor = 5 }: SoldierStatsProps) {
   // T017: Tooltip/popover for special property explanation
-  const propDescriptions: Record<string, string> = {
-    'Г': 'Граната',
-    'Сн': 'Снайпер',
-    'Мед': 'Медик',
-    'Инж': 'Инженер',
-  };
+  const modifierCatalog = getAllBuffs();
 
   // T053: Add visual error indication for negative stat values (red color)
   const getStatColor = (value: number) => {
@@ -145,19 +141,22 @@ function SoldierStats({ soldier, index, factionColor, onImageClick, distanceInpu
         </div>
       </div>
 
-      {/* T016: Implement special properties (props) display as badges with visual highlighting */}
-      {soldier.props && soldier.props.length > 0 && (
+      {/* T016: Implement special properties (modifiers) display as badges with visual highlighting */}
+      {soldier.modifiers && soldier.modifiers.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-2">
-          {soldier.props.map((prop, propIndex) => (
-            <div
-              key={propIndex}
-              className="group relative inline-flex items-center gap-1 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/40 rounded-lg px-2 py-1 transition-colors"
-              title={propDescriptions[prop] || prop}
-            >
-              <span className="text-xs font-bold text-blue-400 font-mono">{prop}</span>
-              <Info className="w-3 h-3 text-blue-400 opacity-50" />
-            </div>
-          ))}
+          {soldier.modifiers.map((modId, modIndex) => {
+            const mod = modifierCatalog.find(b => b.id === modId);
+            return (
+              <div
+                key={modIndex}
+                className="group relative inline-flex items-center gap-1 bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/40 rounded-lg px-2 py-1 transition-colors"
+                title={mod?.description || modId}
+              >
+                <span className="text-xs font-bold text-blue-400 font-mono">{mod?.name || modId}</span>
+                <Info className="w-3 h-3 text-blue-400 opacity-50" />
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
@@ -447,6 +446,7 @@ interface KeyStatsCardProps {
 }
 
 function KeyStatsCard({ unit, unitType, factionColor }: KeyStatsCardProps) {
+  const modifierCatalog = getAllBuffs();
   if (unitType === 'squad') {
     const squad = unit as Squad;
     const soldierCount = squad.soldiers.length;
@@ -454,8 +454,10 @@ function KeyStatsCard({ unit, unitType, factionColor }: KeyStatsCardProps) {
     const avgArmor = armorValues.length > 0
       ? Math.round(armorValues.reduce((a, b) => a + b, 0) / armorValues.length)
       : 0;
-    const allProps = squad.soldiers.flatMap(s => s.props || []);
-    const uniqueProps = Array.from(new Set(allProps));
+    const allMods = squad.soldiers.flatMap(s => s.modifiers || []);
+    const uniqueModIds = Array.from(new Set(allMods));
+    const uniqueModNames = uniqueModIds
+      .map(id => modifierCatalog.find(b => b.id === id)?.name || id);
 
     return (
       <div className="flex items-center gap-4 mt-3">
@@ -467,10 +469,10 @@ function KeyStatsCard({ unit, unitType, factionColor }: KeyStatsCardProps) {
           <ShieldCheck className="w-4 h-4 text-purple-400" />
           <span className="text-sm font-semibold text-white">Защита {avgArmor}</span>
         </div>
-        {uniqueProps.length > 0 && (
+        {uniqueModNames.length > 0 && (
           <div className="flex items-center gap-2 bg-slate-800/60 rounded-full px-3 py-1.5">
             <Sparkles className="w-4 h-4 text-yellow-400" />
-            <span className="text-sm font-semibold text-white">{uniqueProps.join(', ')}</span>
+            <span className="text-sm font-semibold text-white">{uniqueModNames.join(', ')}</span>
           </div>
         )}
       </div>

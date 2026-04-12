@@ -72,7 +72,6 @@ const mockSoldier = {
   range: 'D6',
   power: '1D6',
   melee: 0,
-  props: [],
   armor: 2
 };
 
