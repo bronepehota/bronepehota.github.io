@@ -58,6 +58,18 @@ export default function Footer({ className }: FooterProps) {
             ПОМОЩЬ
           </span>
         </a>
+
+        {/* VK community link */}
+        <a
+          href="https://vk.com/lastbpcoder"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1 md:gap-2 px-2 md:px-4 py-1.5 rounded-sm border border-slate-700/50 hover:border-blue-400/50 transition-all duration-300 group touch-manipulation whitespace-nowrap"
+        >
+          <span className="font-russo text-[10px] md:text-xs text-slate-400 group-hover:text-blue-400 transition-colors">
+            СООБЩЕСТВО VK
+          </span>
+        </a>
         </div>
 
         {/* Scroll indicator */}

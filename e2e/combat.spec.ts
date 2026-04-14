@@ -163,11 +163,22 @@ test.describe('Combat Mechanics', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(500);
 
-    // Find and click initiative button by test-id (new-turn-button)
+    // Open dock menu and click new turn button
+    const menuButton = page.locator('.ml-auto button:has(svg.lucide-more-vertical)').last();
+    await menuButton.click({ force: true });
+    await page.waitForTimeout(300);
+
     const initiativeButton = page.getByTestId('new-turn-button');
     await expect(initiativeButton).toBeVisible({ timeout: 5000 });
     await initiativeButton.click({ force: true });
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(500);
+
+    // Should see turn confirmation (has incomplete units), confirm it
+    const turnConfirm = page.locator('text=ЗАВЕРШИТЬ ТУР').first();
+    if (await turnConfirm.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await page.locator('button:has-text("ЗАВЕРШИТЬ")').last().click({ force: true });
+      await page.waitForTimeout(500);
+    }
 
     // Should see initiative modal
     const initiativeModal = page.getByTestId('initiative-modal');

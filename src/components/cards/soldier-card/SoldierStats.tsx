@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import type { Soldier } from '@/lib/types';
 import type { SoldierModifier } from '@/lib/modifier-types';
 import { ModifierIndicator } from './ModifierIndicator';
+import { ExpandedEffectsPanel } from './ExpandedEffectsPanel';
 
 interface StatBonuses {
   rangeBonus?: number;
@@ -27,6 +28,8 @@ interface SoldierStatsProps {
   availableBuffCount?: number;
   onModifierClick?: () => void;
   statBonuses?: StatBonuses;
+  hideArmor?: boolean;
+  hideSpeed?: boolean;
 }
 
 function StatBadge({ icon: Icon, value, color, bonus, disabled }: {
@@ -76,6 +79,8 @@ export function SoldierStats({
   availableBuffCount,
   onModifierClick,
   statBonuses,
+  hideArmor = false,
+  hideSpeed = false,
 }: SoldierStatsProps) {
   const noRange = !soldier.range || soldier.range === '0';
   const noPower = !soldier.power || soldier.power === '0';
@@ -104,29 +109,33 @@ export function SoldierStats({
       )}
       aria-label={disabled ? 'Действие недоступно' : 'Выберите действие бойца'}
     >
-      {/* Row 1: Armor, Speed, ModifierIndicator */}
-      <StatBadge
-        icon={Shield}
-        value={soldier.armor.toString()}
-        color="text-yellow-400"
-        bonus={formatBonus(statBonuses?.armorBonus)}
-      />
-      <StatBadge
-        icon={Footprints}
-        value={distanceInputUnit === 'cm' ? `${soldier.speed * stepToCmFactor}см` : soldier.speed.toString()}
-        color="text-cyan-400"
-        bonus={formatMultiplier(statBonuses?.speedMultiplier)}
-      />
-      <ModifierIndicator
-        buffCount={buffCount ?? 0}
-        debuffCount={debuffCount ?? 0}
-        soldierModifiers={soldierModifiers}
-        availableCount={availableBuffCount}
-        onClick={onModifierClick}
-        disabled={disabled}
-      />
+      {/* Combat stats: always first row, shifted up when armor/speed hidden */}
+      {!hideArmor || !hideSpeed ? (
+        <>
+          <StatBadge
+            icon={Shield}
+            value={soldier.armor.toString()}
+            color="text-yellow-400"
+            bonus={formatBonus(statBonuses?.armorBonus)}
+          />
+          <StatBadge
+            icon={Footprints}
+            value={distanceInputUnit === 'cm' ? `${soldier.speed * stepToCmFactor}см` : soldier.speed.toString()}
+            color="text-cyan-400"
+            bonus={formatMultiplier(statBonuses?.speedMultiplier)}
+          />
+          <ModifierIndicator
+            buffCount={buffCount ?? 0}
+            debuffCount={debuffCount ?? 0}
+            soldierModifiers={soldierModifiers}
+            availableCount={availableBuffCount}
+            onClick={onModifierClick}
+            disabled={disabled}
+          />
+        </>
+      ) : null}
 
-      {/* Row 2: Range, Power, Melee */}
+      {/* Combat stats row */}
       <StatBadge
         icon={Target}
         value={noRange ? '—' : soldier.range}
@@ -147,6 +156,18 @@ export function SoldierStats({
         color="text-red-400"
         bonus={formatBonus(statBonuses?.meleeBonus)}
       />
+
+      {/* Effects panel below stats — only when armor/speed are hidden */}
+      {hideArmor && hideSpeed && (
+        <ExpandedEffectsPanel
+          buffCount={buffCount ?? 0}
+          debuffCount={debuffCount ?? 0}
+          soldierModifiers={soldierModifiers}
+          availableCount={availableBuffCount}
+          onClick={onModifierClick}
+          disabled={disabled}
+        />
+      )}
     </div>
   );
 }
