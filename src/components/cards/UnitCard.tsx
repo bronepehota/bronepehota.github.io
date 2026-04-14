@@ -36,6 +36,8 @@ interface UnitCardProps {
   triggerEncyclopediaOpen?: boolean;
   onSoldierModifierClick?: (unitId: string, soldierIndex: number, soldierName: string) => void;
   army?: Army;
+  hideArmor?: boolean;
+  hideSpeed?: boolean;
 }
 
 
@@ -56,6 +58,8 @@ export default function UnitCard({
   triggerEncyclopediaOpen = false,
   onSoldierModifierClick,
   army,
+  hideArmor = false,
+  hideSpeed = false,
 }: UnitCardProps) {
   // Custom hooks for state management
   const {
@@ -641,6 +645,8 @@ export default function UnitCard({
             onSoldierModifierClick={onSoldierModifierClick}
             sourceId={army?.sourceId}
             currentTurn={army?.currentTurn}
+            hideArmor={hideArmor}
+            hideSpeed={hideSpeed}
           />
         ) : (
           <MachineView

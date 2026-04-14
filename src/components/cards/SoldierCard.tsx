@@ -28,6 +28,8 @@ interface SoldierCardProps {
   onSoldierModifierClick?: (unitId: string, soldierIndex: number, soldierName: string) => void;
   sourceId?: string;
   currentTurn?: number;
+  hideArmor?: boolean;
+  hideSpeed?: boolean;
 }
 
 function SoldierCard({
@@ -47,6 +49,8 @@ function SoldierCard({
   onSoldierModifierClick,
   sourceId,
   currentTurn,
+  hideArmor = false,
+  hideSpeed = false,
 }: SoldierCardProps) {
   const [isMounted, setIsMounted] = useState(false);
   const [isLongPressing, setIsLongPressing] = useState(false);
@@ -278,6 +282,8 @@ function SoldierCard({
         availableBuffCount={availableBuffCount}
         onModifierClick={onSoldierModifierClick ? () => onSoldierModifierClick(unit.instanceId, soldierIndex, `#${soldier.num || soldierIndex + 1}`) : undefined}
         statBonuses={statBonuses}
+        hideArmor={hideArmor}
+        hideSpeed={hideSpeed}
       />
 
       {/* Action buttons (right - stacked vertically) */}
@@ -322,6 +328,8 @@ export default memo(SoldierCard, (prevProps, nextProps) => {
     prevProps.unit.soldierModifiers === nextProps.unit.soldierModifiers &&
     prevProps.onNavigateToUnit === nextProps.onNavigateToUnit &&
     prevProps.onSoldierModifierClick === nextProps.onSoldierModifierClick &&
-    prevProps.currentTurn === nextProps.currentTurn
+    prevProps.currentTurn === nextProps.currentTurn &&
+    prevProps.hideArmor === nextProps.hideArmor &&
+    prevProps.hideSpeed === nextProps.hideSpeed
   );
 });

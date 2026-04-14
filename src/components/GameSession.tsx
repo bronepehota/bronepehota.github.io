@@ -8,12 +8,14 @@ import { getSourceWithCustom } from '@/lib/sources-registry';
 import { SoldierEffectsModal } from './modals/SoldierEffectsModal';
 import { getFactionColors } from '@/lib/faction-colors';
 import UnitCard from './cards/UnitCard';
-import { History, X, Bomb, Heart } from 'lucide-react';
+import { History, X, Bomb, Heart, Shield, Footprints, CheckCircle2, MoreVertical, BookOpen, RotateCcw, MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CombatLogEntry } from '@/lib/combat-types';
 import { useCombatTargetContext } from '@/contexts/CombatTargetContext';
 import InitiativeModal from './modals/InitiativeModal';
 import { UnitNavigationCard } from './GameSession/index';
+import { checkSquadUniformStats } from '@/lib/unit-utils';
+import { resolveModifierSummary } from '@/lib/modifier-utils';
 
 // Faction styles for unit dock navigation
 const getUnitDockStyles = (factionId: string) => {
@@ -51,6 +53,8 @@ interface GameSessionProps {
 export default function GameSession({
   army,
   setArmy,
+  isInBattle: _isInBattle,
+  onEndBattle,
   onInitiativeTriggerRef,
   showCombatLog,
   setShowCombatLog,
@@ -73,6 +77,15 @@ export default function GameSession({
     soldierIndex: number;
     soldierName: string;
   } | null>(null);
+  const [showDockMenu, setShowDockMenu] = useState(false);
+
+  // Close dock menu on outside click
+  useEffect(() => {
+    if (!showDockMenu) return;
+    const handler = () => setShowDockMenu(false);
+    document.addEventListener('click', handler);
+    return () => document.removeEventListener('click', handler);
+  }, [showDockMenu]);
 
   // Soldier-applicable debuffs from catalog (buffs & abilities come from getAllBuffs)
   const { soldierDebuffs } = useMemo(() => {
@@ -81,6 +94,20 @@ export default function GameSession({
     };
   }, []);
   const { clearAllMemory } = useCombatTargetContext();
+
+  // Ref for dock element to compute dynamic positions
+  const dockRef = useRef<HTMLDivElement>(null);
+  const [dockHeight, setDockHeight] = useState(80);
+  useEffect(() => {
+    if (!dockRef.current) return;
+    const observer = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        setDockHeight(entry.contentRect.height);
+      }
+    });
+    observer.observe(dockRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   // Keep ref to current army for immediate access in updateUnit
   const armyRef = useRef(army);
@@ -253,8 +280,13 @@ export default function GameSession({
     if (incompleteUnits.length > 0) {
       setShowTurnConfirmation(true);
     } else {
-      confirmStartNewTurn();
+      setShowInitiativeModal(true);
     }
+  };
+
+  const onTurnConfirmed = () => {
+    setShowTurnConfirmation(false);
+    setShowInitiativeModal(true);
   };
 
   const confirmStartNewTurn = () => {
@@ -333,14 +365,18 @@ export default function GameSession({
     return { isDead, isDone };
   }, []);
 
+  // Keep ref to onCurrentUnitChange to avoid useEffect dependency on unstable callback
+  const onCurrentUnitChangeRef = useRef(onCurrentUnitChange);
+  onCurrentUnitChangeRef.current = onCurrentUnitChange;
+
   // Notify parent about current unit changes
   useEffect(() => {
-    if (onCurrentUnitChange && army.units.length > 0 && focusedUnitIdx < army.units.length) {
+    if (onCurrentUnitChangeRef.current && army.units.length > 0 && focusedUnitIdx < army.units.length) {
       const currentUnit = army.units[focusedUnitIdx];
       const { isDead, isDone } = getUnitStatus(currentUnit);
-      onCurrentUnitChange(currentUnit, isDone ?? false, isDead);
+      onCurrentUnitChangeRef.current(currentUnit, isDone ?? false, isDead);
     }
-  }, [focusedUnitIdx, army.units, onCurrentUnitChange, getUnitStatus]);
+  }, [focusedUnitIdx, army.units, getUnitStatus]);
 
   // Handle encyclopedia trigger from parent
   useEffect(() => {
@@ -495,13 +531,38 @@ export default function GameSession({
 
   const factionColors = getFactionColors(army.faction || 'polaris');
 
+  // Compute uniform stats for focused squad unit
+  const focusedUnit = army.units[focusedUnitIdx];
+  const squadUniformStats = useMemo(() => {
+    const unit = army.units[focusedUnitIdx];
+    if (!unit || unit.type !== 'squad') {
+      return { isUniformArmor: false, isUniformSpeed: false };
+    }
+    return checkSquadUniformStats(unit);
+  }, [army.units, focusedUnitIdx]);
+
+  const hideArmorForUnit = squadUniformStats.isUniformArmor && squadUniformStats.isUniformSpeed;
+  const hideSpeedForUnit = hideArmorForUnit;
+
+  // Compute squad-level modifier bonuses for dock bar display
+  const squadDockBonuses = useMemo(() => {
+    if (!focusedUnit || focusedUnit.type !== 'squad' || !hideArmorForUnit) {
+      return { armorBonus: undefined, speedMultiplier: undefined };
+    }
+    const summary = resolveModifierSummary(focusedUnit, army, 'always');
+    return {
+      armorBonus: summary.armorBonus || undefined,
+      speedMultiplier: summary.speedMultiplier !== 1 ? summary.speedMultiplier : undefined,
+    };
+  }, [focusedUnit, hideArmorForUnit, army]);
+
   return (
     <div className="flex flex-col h-full bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden" data-testid="game-session">
       {/* Initiative Modal */}
       <InitiativeModal
         isOpen={showInitiativeModal}
         onClose={() => setShowInitiativeModal(false)}
-        onConfirm={startNewTurn}
+        onConfirm={confirmStartNewTurn}
         factionId={army.faction || 'polaris'}
         activeUnitsCount={activeUnitsCount}
         context="turn"
@@ -629,7 +690,7 @@ export default function GameSession({
             <div className="flex items-center gap-3">
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent"></div>
               <h3 className={cn("text-lg md:text-xl font-mono font-bold tracking-wider", factionColors.primary)}>
-                ЗАВЕРШИТЬ ТУР?
+                ЗАВЕРШИТЬ ТУР {army.currentTurn || 1}?
               </h3>
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent"></div>
             </div>
@@ -677,7 +738,7 @@ export default function GameSession({
                 ОТМЕНИТЬ
               </button>
               <button
-                onClick={confirmStartNewTurn}
+                onClick={onTurnConfirmed}
                 className={cn(
                   "flex-[2] py-3 md:py-4 font-mono text-sm md:text-lg font-bold uppercase tracking-wider border transition-all min-h-[52px] md:min-h-[56px]",
                   factionColors.border,
@@ -686,7 +747,7 @@ export default function GameSession({
                   "hover:scale-102 active:scale-95"
                 )}
               >
-                ЗАВЕРШИТЬ
+                ЗАВЕРШИТЬ ТУР
               </button>
             </div>
           </div>
@@ -718,6 +779,8 @@ export default function GameSession({
               onSoldierModifierClick={(unitId, soldierIndex, soldierName) => {
                 setEffectsModalState({ unitId, soldierIndex, soldierName });
               }}
+              hideArmor={hideArmorForUnit}
+              hideSpeed={hideSpeedForUnit}
             />
           </div>
         )}
@@ -726,6 +789,7 @@ export default function GameSession({
       {/* Compact Unit Dock - Technical HUD styling */}
       {army.units.length > 0 && (
         <div
+          ref={dockRef}
           className={cn(
             "fixed left-0 right-0 z-50 bg-slate-950 border-t transition-all duration-200 ease-out",
             isDockExpanded ? "top-16 bottom-0" : "bottom-0",
@@ -744,82 +808,6 @@ export default function GameSession({
               isDockExpanded ? "bg-slate-600 w-12" : factionColors.bgSolid
             )} />
           </div>
-
-          {/* Current unit info bar - ultra compact */}
-          {!isDockExpanded && army.units[focusedUnitIdx] && (
-            <div className="px-2 py-1 border-b border-slate-800/50 flex items-center gap-2">
-              {army.units[focusedUnitIdx].instanceNumber && (
-                <span className={cn(
-                  "shrink-0 px-1 py-0.5 text-[9px] font-mono font-bold",
-                  factionColors.bg,
-                  factionColors.text
-                )}>
-                  {army.units[focusedUnitIdx].instanceNumber}
-                </span>
-              )}
-              <span className={cn(
-                "text-xs font-mono font-bold uppercase tracking-wider truncate",
-                factionColors.text
-              )}>
-                {army.units[focusedUnitIdx].data.name}
-              </span>
-              {/* Grenade indicator - only for squads */}
-              {army.units[focusedUnitIdx].type === 'squad' && (() => {
-                const grenadesUsed = army.units[focusedUnitIdx].grenadesUsed;
-                return (
-                  <span className={cn(
-                    "flex items-center justify-center w-5 h-5 rounded-sm",
-                    grenadesUsed ? "bg-slate-800" : "bg-amber-950/50"
-                  )}>
-                    <Bomb className={cn(
-                      "w-3 h-3",
-                      grenadesUsed ? "text-slate-500" : "text-amber-400"
-                    )} />
-                  </span>
-                );
-              })()}
-              {/* Durability indicator - only for machines */}
-              {army.units[focusedUnitIdx].type === 'machine' && (() => {
-                const machine = army.units[focusedUnitIdx].data as Machine;
-                const currentDurability = army.units[focusedUnitIdx].currentDurability || 0;
-                const maxDurability = machine.durability_max;
-                const durabilityPercent = currentDurability / maxDurability;
-
-                let durabilityColor = "text-emerald-500";
-                let durabilityBg = "bg-emerald-950/50";
-
-                if (currentDurability === 0) {
-                  durabilityColor = "text-slate-600";
-                  durabilityBg = "bg-slate-800";
-                } else if (durabilityPercent < 0.3) {
-                  durabilityColor = "text-red-500";
-                  durabilityBg = "bg-red-950/50";
-                } else if (durabilityPercent < 0.6) {
-                  durabilityColor = "text-amber-500";
-                  durabilityBg = "bg-amber-950/50";
-                }
-
-                return (
-                  <span className={cn(
-                    "flex items-center justify-center gap-1 w-5 h-5 rounded-sm",
-                    durabilityBg
-                  )}>
-                    <Heart className={cn("w-3 h-3", durabilityColor)} />
-                    <span className={cn("text-[9px] font-mono font-bold", durabilityColor)}>
-                      {currentDurability}/{maxDurability}
-                    </span>
-                  </span>
-                );
-              })()}
-              {(() => {
-                const currentUnit = army.units[focusedUnitIdx];
-                const { isDead, isDone } = getUnitStatus(currentUnit);
-                if (isDead) return <span className="text-[9px] text-red-500 font-mono font-bold ml-auto">†</span>;
-                if (isDone) return <span className="text-[9px] text-emerald-500 font-mono font-bold ml-auto">✓</span>;
-                return null;
-              })()}
-            </div>
-          )}
 
           {/* Content based on expanded state */}
           {isDockExpanded ? (
@@ -966,9 +954,248 @@ export default function GameSession({
 
             return elements;
           })()}
+          {/* Menu button at far right of navigation row */}
+          <div className="relative shrink-0 ml-auto">
+            <button
+              onClick={(e) => { e.stopPropagation(); setShowDockMenu(!showDockMenu); }}
+              className="p-1.5 hover:bg-slate-800 rounded-sm transition-colors text-slate-400 hover:text-slate-200 min-w-[44px] min-h-[44px] flex items-center justify-center"
+            >
+              <MoreVertical className="w-4 h-4" />
+            </button>
+
           </div>
+          </div>
+          {/* Current unit info bar - with turn button, armor/speed, menu, done toggle */}
+          {!isDockExpanded && focusedUnit && (
+            <div className="px-2 py-1 border-t border-slate-800/50 flex items-center gap-1.5">
+
+
+              {/* Unit number */}
+              {(() => {
+                const sameTypeCount = army.units.filter(u => u.data.id === focusedUnit.data.id).length;
+                return focusedUnit.instanceNumber && sameTypeCount > 1 && (
+                  <span className={cn(
+                    "shrink-0 px-1 py-0.5 text-[9px] font-mono font-bold",
+                    factionColors.bg,
+                    factionColors.text
+                  )}>
+                    {focusedUnit.instanceNumber}
+                  </span>
+                );
+              })()}
+
+              {/* Unit name */}
+              <span className={cn(
+                "text-xs font-mono font-bold uppercase tracking-wider truncate",
+                factionColors.text
+              )}>
+                {focusedUnit.data.name}
+              </span>
+
+              {/* Armor badge - squads with uniform armor */}
+              {focusedUnit.type === 'squad' && squadUniformStats.isUniformArmor && squadUniformStats.commonArmor !== undefined && (() => {
+                const bonus = squadDockBonuses.armorBonus ? `+${squadDockBonuses.armorBonus}` : undefined;
+                const isActive = !!bonus;
+                return (
+                  <div className={cn(
+                    'flex items-center justify-center gap-0.5 rounded-lg min-h-[32px] min-w-[44px] flex-1 max-w-[60px] px-1 transition-colors shrink-0',
+                    isActive ? 'border border-emerald-500/40 shadow-[inset_0_0_8px_rgba(16,185,129,0.06)]' : 'border border-slate-700/40 bg-slate-800/60'
+                  )}>
+                    <Shield className="w-3.5 h-3.5 shrink-0 text-yellow-400" />
+                    <span className="text-sm font-mono font-black text-yellow-300 leading-none">
+                      {squadUniformStats.commonArmor}
+                    </span>
+                    {bonus && (
+                      <span className="text-[9px] font-mono font-extrabold text-emerald-400/90 leading-none translate-y-[-1px]">
+                        {bonus}
+                      </span>
+                    )}
+                  </div>
+                );
+              })()}
+
+              {/* Speed badge - squads with uniform speed */}
+              {focusedUnit.type === 'squad' && squadUniformStats.isUniformSpeed && squadUniformStats.commonSpeed !== undefined && (() => {
+                const bonus = squadDockBonuses.speedMultiplier ? `x${squadDockBonuses.speedMultiplier}` : undefined;
+                const isActive = !!bonus;
+                return (
+                  <div className={cn(
+                    'flex items-center justify-center gap-0.5 rounded-lg min-h-[32px] min-w-[44px] flex-1 max-w-[60px] px-1 transition-colors shrink-0',
+                    isActive ? 'border border-emerald-500/40 shadow-[inset_0_0_8px_rgba(16,185,129,0.06)]' : 'border border-slate-700/40 bg-slate-800/60'
+                  )}>
+                    <Footprints className="w-3.5 h-3.5 shrink-0 text-cyan-400" />
+                    <span className="text-sm font-mono font-black text-cyan-300 leading-none">
+                      {distanceInputUnit === 'cm' ? `${squadUniformStats.commonSpeed * stepToCmFactor}` : squadUniformStats.commonSpeed}
+                    </span>
+                    {bonus && (
+                      <span className="text-[9px] font-mono font-extrabold text-emerald-400/90 leading-none translate-y-[-1px]">
+                        {bonus}
+                      </span>
+                    )}
+                  </div>
+                );
+              })()}
+
+              {/* Grenade indicator - only for squads */}
+              {focusedUnit.type === 'squad' && (() => {
+                const grenadesUsed = focusedUnit.grenadesUsed;
+                return (
+                  <span className={cn(
+                    "flex items-center justify-center w-5 h-5 rounded-sm shrink-0",
+                    grenadesUsed ? "bg-slate-800" : "bg-amber-950/50"
+                  )}>
+                    <Bomb className={cn(
+                      "w-3 h-3",
+                      grenadesUsed ? "text-slate-500" : "text-amber-400"
+                    )} />
+                  </span>
+                );
+              })()}
+
+              {/* Durability indicator - only for machines */}
+              {focusedUnit.type === 'machine' && (() => {
+                const machine = focusedUnit.data as Machine;
+                const currentDurability = focusedUnit.currentDurability || 0;
+                const maxDurability = machine.durability_max;
+                const durabilityPercent = currentDurability / maxDurability;
+
+                let durabilityColor = "text-emerald-500";
+                let durabilityBg = "bg-emerald-950/50";
+
+                if (currentDurability === 0) {
+                  durabilityColor = "text-slate-600";
+                  durabilityBg = "bg-slate-800";
+                } else if (durabilityPercent < 0.3) {
+                  durabilityColor = "text-red-500";
+                  durabilityBg = "bg-red-950/50";
+                } else if (durabilityPercent < 0.6) {
+                  durabilityColor = "text-amber-500";
+                  durabilityBg = "bg-amber-950/50";
+                }
+
+                return (
+                  <span className={cn(
+                    "flex items-center justify-center gap-1 rounded-sm shrink-0 px-1",
+                    durabilityBg
+                  )}>
+                    <Heart className={cn("w-3 h-3", durabilityColor)} />
+                    <span className={cn("text-[9px] font-mono font-bold", durabilityColor)}>
+                      {currentDurability}/{maxDurability}
+                    </span>
+                  </span>
+                );
+              })()}
+
+              {/* Spacer */}
+              <div className="flex-1 min-w-0" />
+
+              {/* Unit done toggle */}
+              {(() => {
+                const { isDead, isDone } = getUnitStatus(focusedUnit);
+                return (
+                  <button
+                    onClick={isDead ? undefined : handleToggleUnitDone}
+                    disabled={isDead}
+                    className={cn(
+                      "shrink-0 w-11 h-11 min-h-[44px] flex items-center justify-center rounded-sm border transition-all",
+                      "hover:scale-[1.02] active:scale-95",
+                      isDead
+                        ? "bg-slate-900/50 border-slate-800/50 opacity-40 cursor-not-allowed"
+                        : isDone
+                          ? "bg-emerald-950/50 border-emerald-700/60 hover:bg-emerald-950/70"
+                          : "bg-slate-900/50 border-slate-700/60 hover:bg-slate-800/70"
+                    )}
+                    title={isDone ? "Отменить завершение" : "Завершить ход"}
+                  >
+                    {isDone ? (
+                      <X className="w-4 h-4 text-emerald-400" />
+                    ) : (
+                      <CheckCircle2 className={cn(
+                        "w-4 h-4",
+                        isDead ? "text-slate-700" : "text-slate-400"
+                      )} />
+                    )}
+                  </button>
+                );
+              })()}
+            </div>
+          )}
+
         </div>
           )}
+        </div>
+      )}
+
+
+      {/* Dock Menu Dropdown - fixed position to escape dock overflow */}
+      {showDockMenu && (
+        <div className="fixed right-2 z-[60] animate-in fade-in duration-150" style={{ bottom: `${dockHeight + 40}px` }}>
+          <div className="bg-slate-800 border border-slate-700 rounded-sm shadow-xl py-1 min-w-[150px]">
+            <div className="px-3 py-1.5 border-b border-slate-700/50 flex items-center justify-between">
+              <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-500">Тур</span>
+              <span className={cn("text-sm font-mono font-black", factionColors.primary)}>{army.currentTurn || 1}</span>
+            </div>
+            <button
+              data-testid="new-turn-button"
+              onClick={() => { startNewTurn(); setShowDockMenu(false); }}
+              className="w-full px-3 py-2 text-left text-xs text-slate-300 hover:bg-slate-700 flex items-center gap-2"
+            >
+              <RotateCcw className="w-3.5 h-3.5 text-emerald-400" />
+              Новый тур
+            </button>
+            <button
+              onClick={() => { setTriggerEncyclopediaOpen(true); setShowDockMenu(false); setTimeout(() => setTriggerEncyclopediaOpen(false), 100); }}
+              className="w-full px-3 py-2 text-left text-xs text-slate-300 hover:bg-slate-700 flex items-center gap-2 border-t border-slate-700/50"
+            >
+              <BookOpen className="w-3.5 h-3.5 text-blue-400" />
+              Энциклопедия
+            </button>
+            <button
+              onClick={() => { setCombatLogVisible(true); setShowDockMenu(false); }}
+              className="w-full px-3 py-2 text-left text-xs text-slate-300 hover:bg-slate-700 flex items-center gap-2 border-t border-slate-700/50"
+            >
+              <History className="w-3.5 h-3.5 text-blue-400" />
+              История боя
+            </button>
+            {army.isInBattle && (
+              <button
+                onClick={() => { onEndBattle?.(); setShowDockMenu(false); }}
+                className="w-full px-3 py-2 text-left text-xs text-red-400 hover:bg-red-950/30 flex items-center gap-2 border-t border-slate-700/50"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                Завершить бой
+              </button>
+            )}
+            <a
+              href="https://vk.com/lastbpcoder"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setShowDockMenu(false)}
+              className="w-full px-3 py-2 text-left text-xs text-slate-400 hover:bg-slate-700 flex items-center gap-2 border-t border-slate-700/50"
+            >
+              <MessageCircle className="w-3.5 h-3.5 text-amber-400" />
+              Сообщить о проблеме
+            </a>
+          </div>
+        </div>
+      )}
+
+      {/* Floating "End Turn" button - appears when all units are done */}
+      {army.units.length > 0 && getIncompleteUnits().length === 0 && !isDockExpanded && (
+        <div className="fixed left-2 right-2 z-[55] animate-in slide-in-from-bottom-4 duration-300" style={{ bottom: `${dockHeight + 12}px` }}>
+          <button
+            data-testid="new-turn-button"
+            onClick={startNewTurn}
+            className={cn(
+              "w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 font-mono font-bold text-sm uppercase tracking-wider transition-all min-h-[48px]",
+              "cursor-pointer active:scale-[0.97] hover:scale-[1.01]",
+              factionColors.border, factionColors.bg, factionColors.primary,
+              "shadow-lg backdrop-blur-sm"
+            )}
+          >
+            <RotateCcw className="w-4 h-4" />
+            Завершить тур {army.currentTurn || 1}
+          </button>
         </div>
       )}
 

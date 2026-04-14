@@ -7,7 +7,7 @@
  * @module unit-utils
  */
 
-import type { Army, ArmyUnit } from './types';
+import type { Army, ArmyUnit, Squad } from './types';
 
 /**
  * Counts units by their template ID (Squad/Machine ID)
@@ -145,6 +145,53 @@ export function formatCountBadge(count: number): string | null {
  * // Returns: "6-ств. скор. ПУ"
  * shortenWeaponName("автоматическая бронебойная");
  * // Returns: "авт. бронеб."
+ */
+export interface SquadUniformStats {
+  isUniformArmor: boolean;
+  isUniformSpeed: boolean;
+  commonArmor?: number;
+  commonSpeed?: number;
+}
+
+/**
+ * Checks if all alive soldiers in a squad share the same armor and/or speed values.
+ * Dead soldiers are excluded from comparison.
+ *
+ * @param unit - Army unit (must be a squad)
+ * @returns Uniform stats result with flags and common values
+ *
+ * @example
+ * // Squad where all soldiers have armor=2 and speed=5
+ * checkSquadUniformStats(unit);
+ * // Returns: { isUniformArmor: true, isUniformSpeed: true, commonArmor: 2, commonSpeed: 5 }
+ */
+export function checkSquadUniformStats(unit: ArmyUnit): SquadUniformStats {
+  if (unit.type !== 'squad') {
+    return { isUniformArmor: false, isUniformSpeed: false };
+  }
+
+  const squad = unit.data as Squad;
+  const deadIndices = new Set(unit.deadSoldiers || []);
+  const aliveSoldiers = squad.soldiers.filter((_, idx) => !deadIndices.has(idx));
+
+  if (aliveSoldiers.length <= 1) {
+    return { isUniformArmor: false, isUniformSpeed: false };
+  }
+
+  const first = aliveSoldiers[0];
+  const isUniformArmor = aliveSoldiers.every(s => s.armor === first.armor);
+  const isUniformSpeed = aliveSoldiers.every(s => s.speed === first.speed);
+
+  return {
+    isUniformArmor,
+    isUniformSpeed,
+    commonArmor: isUniformArmor ? first.armor : undefined,
+    commonSpeed: isUniformSpeed ? first.speed : undefined,
+  };
+}
+
+/**
+ * Shortens weapon names for mobile display by replacing long Russian words with abbreviations
  */
 export function shortenWeaponName(name: string): string {
   return name

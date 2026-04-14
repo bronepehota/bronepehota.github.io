@@ -287,8 +287,8 @@ export default function Home() {
       <main className="h-screen flex flex-col bg-slate-900 text-slate-100 overflow-hidden">
         {/* Scrollable wrapper containing both header and content */}
         <div className="flex-1 overflow-auto min-h-0">
-          {/* Header - Clean Tech Style — hidden during setup steps */}
-          {(view === 'game' || army.currentStep === 'unit-select' || army.currentStep === 'preparation') && (
+          {/* Header - Clean Tech Style — hidden during setup steps and game mode (controls moved to dock bar) */}
+          {(army.currentStep === 'unit-select' || army.currentStep === 'preparation') && (
           <header className={cn(
             "bg-slate-950/95 border-b border-slate-800/80",
             "px-2 md:px-3 py-2 sticky top-0 z-50",

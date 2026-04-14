@@ -16,6 +16,8 @@ interface SquadViewProps {
   onSoldierModifierClick?: (unitId: string, soldierIndex: number, soldierName: string) => void;
   sourceId?: string;
   currentTurn?: number;
+  hideArmor?: boolean;
+  hideSpeed?: boolean;
 }
 
 export function SquadView({
@@ -33,6 +35,8 @@ export function SquadView({
   onSoldierModifierClick,
   sourceId,
   currentTurn,
+  hideArmor = false,
+  hideSpeed = false,
 }: SquadViewProps) {
   const data = unit.data as Squad;
 
@@ -58,6 +62,8 @@ export function SquadView({
             onSoldierModifierClick={onSoldierModifierClick}
             sourceId={sourceId}
             currentTurn={currentTurn}
+            hideArmor={hideArmor}
+            hideSpeed={hideSpeed}
           />
         </div>
       ))}

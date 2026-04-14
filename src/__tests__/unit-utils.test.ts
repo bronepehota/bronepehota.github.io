@@ -6,7 +6,8 @@ import {
   canAddUnit,
   validateAddUnit,
   formatUnitNumber,
-  formatCountBadge
+  formatCountBadge,
+  checkSquadUniformStats
 } from '../lib/unit-utils';
 
 const mockSquad: Squad = {
@@ -254,6 +255,81 @@ describe('Unit Utilities', () => {
     it('should return string for positive count', () => {
       expect(formatCountBadge(1)).toBe('1');
       expect(formatCountBadge(99)).toBe('99');
+    });
+  });
+
+  describe('checkSquadUniformStats', () => {
+    const makeUnit = (soldiers: Partial<{ armor: number; speed: number }>[], deadSoldiers?: number[]): ArmyUnit => ({
+      instanceId: 'test-unit',
+      type: 'squad',
+      data: {
+        id: 'test-squad',
+        name: 'Test Squad',
+        faction: 'polaris',
+        cost: 50,
+        soldiers: soldiers.map(s => ({
+          rank: 2, range: 'D6', power: '1D6', melee: 0,
+          armor: s.armor ?? 2,
+          speed: s.speed ?? 5,
+        })),
+      },
+      deadSoldiers: deadSoldiers,
+      instanceNumber: 1,
+    });
+
+    it('should return false for non-squad unit', () => {
+      const machine = { instanceId: 'm1', type: 'machine', data: { id: 'm1' } } as ArmyUnit;
+      expect(checkSquadUniformStats(machine)).toEqual({ isUniformArmor: false, isUniformSpeed: false });
+    });
+
+    it('should return false for single alive soldier', () => {
+      const unit = makeUnit([{ armor: 2, speed: 5 }]);
+      expect(checkSquadUniformStats(unit)).toEqual({ isUniformArmor: false, isUniformSpeed: false });
+    });
+
+    it('should return true when all soldiers share same armor and speed', () => {
+      const unit = makeUnit([{ armor: 2, speed: 5 }, { armor: 2, speed: 5 }, { armor: 2, speed: 5 }]);
+      expect(checkSquadUniformStats(unit)).toEqual({
+        isUniformArmor: true, isUniformSpeed: true, commonArmor: 2, commonSpeed: 5
+      });
+    });
+
+    it('should return false for armor when soldiers have different armor', () => {
+      const unit = makeUnit([{ armor: 2, speed: 5 }, { armor: 3, speed: 5 }]);
+      const result = checkSquadUniformStats(unit);
+      expect(result.isUniformArmor).toBe(false);
+      expect(result.isUniformSpeed).toBe(true);
+      expect(result.commonSpeed).toBe(5);
+      expect(result.commonArmor).toBeUndefined();
+    });
+
+    it('should return false for speed when soldiers have different speed', () => {
+      const unit = makeUnit([{ armor: 2, speed: 5 }, { armor: 2, speed: 4 }]);
+      const result = checkSquadUniformStats(unit);
+      expect(result.isUniformArmor).toBe(true);
+      expect(result.isUniformSpeed).toBe(false);
+      expect(result.commonArmor).toBe(2);
+      expect(result.commonSpeed).toBeUndefined();
+    });
+
+    it('should exclude dead soldiers from comparison', () => {
+      const unit = makeUnit(
+        [{ armor: 2, speed: 5 }, { armor: 3, speed: 4 }, { armor: 2, speed: 5 }],
+        [1] // soldier 1 is dead
+      );
+      expect(checkSquadUniformStats(unit)).toEqual({
+        isUniformArmor: true, isUniformSpeed: true, commonArmor: 2, commonSpeed: 5
+      });
+    });
+
+    it('should return false when all soldiers are dead', () => {
+      const unit = makeUnit([{ armor: 2, speed: 5 }, { armor: 2, speed: 5 }], [0, 1]);
+      expect(checkSquadUniformStats(unit)).toEqual({ isUniformArmor: false, isUniformSpeed: false });
+    });
+
+    it('should return false when only one soldier alive (others dead)', () => {
+      const unit = makeUnit([{ armor: 2, speed: 5 }, { armor: 2, speed: 5 }], [1]);
+      expect(checkSquadUniformStats(unit)).toEqual({ isUniformArmor: false, isUniformSpeed: false });
     });
   });
 });

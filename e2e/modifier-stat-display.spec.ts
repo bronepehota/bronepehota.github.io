@@ -27,7 +27,7 @@ test.describe('Modifier stat display and expiry', () => {
             image: '/images/squads/polaris/lineynaya_klon_pehota/1.png',
             soldiers: [
               { num: 1, rank: 2, speed: 5, range: 'D6', power: '2D6', melee: 3, props: [], armor: 2 },
-              { num: 2, rank: 2, speed: 5, range: 'D12', power: '2D6', melee: 3, props: [], armor: 2 },
+              { num: 2, rank: 2, speed: 4, range: 'D12', power: '2D6', melee: 3, props: [], armor: 2 },
             ],
             buffs: [],
           },
