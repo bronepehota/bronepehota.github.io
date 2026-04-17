@@ -116,7 +116,7 @@ export default function HeroSection({ className }: HeroSectionProps) {
           )}
         >
           <Link
-            href="https://github.com/Luxor/bronepehota"
+            href="https://vk.com/lastbpcoder"
             target="_blank"
             rel="noopener noreferrer"
             className="font-ibm-mono text-[9px] md:text-xs text-military-rust/50 hover:text-military-amber transition-colors duration-200 tracking-widest uppercase"
