@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { LOCAL_STORAGE_KEYS } from '@/lib/constants';
 import { CombatTargetProvider } from '@/contexts/CombatTargetContext';
 import { getEncyclopediaFaction } from '@/lib/encyclopedia-registry';
+import { trackScreenView } from '@/lib/analytics';
 
 export default function Home() {
   // View state - use URL hash for persistence instead of localStorage to avoid race conditions
@@ -210,6 +211,7 @@ export default function Home() {
   useEffect(() => {
     if (typeof window === 'undefined' || !isMounted) return;
     localStorage.setItem('bronepehota_view', view);
+    trackScreenView(view === 'game' ? 'battle' : 'army_builder');
   }, [view, isMounted]);
 
   // Load army from localStorage on mount (client-side only)

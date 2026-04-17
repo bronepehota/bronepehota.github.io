@@ -5,6 +5,7 @@ import './globals.css'
 import { SerwistRegister } from '@/components/SerwistRegister'
 import NavigationProgress from '@/components/NavigationProgress'
 import { BASE_PATH } from '@/lib/constants'
+import GoogleAnalytics from '@/components/GoogleAnalytics'
 
 const inter = Inter({ subsets: ['latin'] })
 const orbitron = Orbitron({
@@ -71,6 +72,7 @@ export default function RootLayout({
   return (
     <html lang="ru" className={`${orbitron.variable} ${russoOne.variable} ${ibmPlexMono.variable} ${oswald.variable}`}>
       <body className={inter.className}>
+        <GoogleAnalytics />
         <SerwistRegister />
         <NavigationProgress />
         {children}
