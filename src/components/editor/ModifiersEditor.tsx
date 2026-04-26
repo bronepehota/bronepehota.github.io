@@ -33,7 +33,7 @@ import type {
   ModifierDuration,
 } from '@/lib/modifier-types';
 import { DURATION_OPTIONS, APPLY_TARGET_OPTIONS } from '@/lib/modifier-types';
-import { ModifierExportImport } from './ModifierExportImport';
+
 import { ModifierIcon, MODIFIER_ICON_OPTIONS } from './ModifierIcons';
 
 // ---------------------------------------------------------------------------
@@ -301,7 +301,6 @@ export function ModifiersEditor({ onRefresh }: ModifiersEditorProps) {
           Модификаторы
         </h2>
         <div className="flex items-center gap-2">
-          <ModifierExportImport onImportComplete={refreshData} />
           <button
             onClick={handleStartCreate}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium

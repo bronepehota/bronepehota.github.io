@@ -38,8 +38,10 @@ describe('config-export', () => {
 
     it('should reject wrong type', () => {
       const envelope = createConfigEnvelope([], { buffs: [], debuffs: [] });
-      envelope.type = 'wrong';
-      const result = validateConfigEnvelope(JSON.stringify(envelope));
+      // Create a modified envelope with wrong type for testing
+      const modifiedEnvelope = JSON.parse(JSON.stringify(envelope));
+      modifiedEnvelope.type = 'wrong';
+      const result = validateConfigEnvelope(JSON.stringify(modifiedEnvelope));
       expect(result.valid).toBe(false);
       expect(result.error).toBe('Это не файл настроек Бронепехоты');
     });

@@ -34,7 +34,8 @@ import { ImportExportHelp } from '@/components/modals/ImportExportHelp';
 interface UnifiedSaveAreaProps {
   mode: 'full' | 'import-only';
   onImportComplete?: () => void;
-  compact?: boolean;
+  /** Rendering variant: default (full panel), compact (icon buttons with borders), toolbar (flat icon buttons) */
+  variant?: 'default' | 'compact' | 'toolbar';
 }
 
 function formatDate(isoDate: string): string {
@@ -45,10 +46,24 @@ function formatDate(isoDate: string): string {
   }
 }
 
+// Style presets for icon button variants
+const buttonStyles = {
+  toolbar: {
+    default: 'p-2 rounded-lg hover:bg-slate-700/60 text-slate-400 hover:text-slate-200 transition-colors disabled:opacity-50',
+    drive: 'p-2 rounded-lg hover:bg-blue-900/30 text-slate-400 hover:text-blue-300 transition-colors disabled:opacity-50',
+    help: 'p-1.5 rounded-lg hover:bg-slate-700/50 text-slate-500 hover:text-slate-300 transition-colors',
+  },
+  compact: {
+    default: 'p-2 rounded-lg bg-slate-600/20 hover:bg-slate-600/40 border border-slate-500/30 text-slate-300 transition-colors disabled:opacity-50',
+    drive: 'p-2 rounded-lg bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/30 text-blue-300 transition-colors disabled:opacity-50',
+    help: 'p-1.5 rounded-lg hover:bg-slate-700/50 text-slate-500 hover:text-slate-300 transition-colors',
+  },
+} as const;
+
 export function UnifiedSaveArea({
   mode,
   onImportComplete,
-  compact = false,
+  variant = 'default',
 }: UnifiedSaveAreaProps) {
   const [token, setToken] = useState<string | null>(null);
   const [gisAvailable, setGisAvailable] = useState<boolean | null>(null);
@@ -89,7 +104,6 @@ export function UnifiedSaveArea({
     return () => { cancelled = true; };
   }, []);
 
-  // Cleanup success timer
   useEffect(() => {
     return () => { if (successTimerRef.current) clearTimeout(successTimerRef.current); };
   }, []);
@@ -112,7 +126,6 @@ export function UnifiedSaveArea({
     return newToken;
   }, [token]);
 
-  // ---- Save to file ----
   const handleFileExport = useCallback(() => {
     setLoading(true); setError(null); clearSuccess();
     try {
@@ -132,7 +145,6 @@ export function UnifiedSaveArea({
     } finally { setLoading(false); }
   }, [showSuccess, clearSuccess]);
 
-  // ---- Save to Drive ----
   const handleDriveExport = useCallback(async () => {
     setLoading(true); setError(null); clearSuccess();
     try {
@@ -147,7 +159,6 @@ export function UnifiedSaveArea({
     } finally { setLoading(false); }
   }, [ensureToken, showSuccess, clearSuccess]);
 
-  // ---- Load from file ----
   const handleFileImport = useCallback(() => { fileInputRef.current?.click(); }, []);
 
   const handleFileInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -165,7 +176,6 @@ export function UnifiedSaveArea({
     e.target.value = '';
   }, [clearSuccess]);
 
-  // ---- Load from Drive ----
   const handleDriveImportList = useCallback(async () => {
     setLoading(true); setError(null); clearSuccess(); setFiles([]);
     try {
@@ -194,7 +204,6 @@ export function UnifiedSaveArea({
     } finally { setLoading(false); }
   }, [token, ensureToken]);
 
-  // ---- Confirm import ----
   const handleConfirmImport = useCallback(() => {
     if (!pendingImportData) return;
     try {
@@ -212,43 +221,47 @@ export function UnifiedSaveArea({
   const driveReady = gisAvailable === true;
   const isChecking = gisAvailable === null;
 
-  // ---- Compact mode (header, mobile) ----
-  if (compact) {
+  // ---- Icon mode (compact / toolbar) ----
+  if (variant === 'compact' || variant === 'toolbar') {
+    const styles = buttonStyles[variant];
+
     return (
       <>
         <div className="flex items-center gap-1">
           {mode === 'full' && (
             <>
               <button onClick={handleFileExport} disabled={loading} title="Сохранить в файл"
-                className="p-2 rounded-lg bg-slate-600/20 hover:bg-slate-600/40 border border-slate-500/30 text-slate-300 transition-colors disabled:opacity-50">
+                aria-label="Сохранить в файл" className={styles.default}>
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
               </button>
               {driveReady && (
-                <button onClick={handleDriveExport} disabled={loading} title="Сохранить на Drive"
-                  className="p-2 rounded-lg bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/30 text-blue-300 transition-colors disabled:opacity-50">
+                <button onClick={handleDriveExport} disabled={loading} title="Сохранить на Google Drive"
+                  aria-label="Сохранить на Google Drive" className={styles.drive}>
                   <UploadCloud className="w-4 h-4" />
                 </button>
               )}
+              {variant === 'toolbar' && <div className="w-px h-5 bg-slate-700/50 mx-1" />}
             </>
           )}
           <button onClick={handleFileImport} disabled={loading} title="Загрузить из файла"
-            className="p-2 rounded-lg bg-slate-600/20 hover:bg-slate-600/40 border border-slate-500/30 text-slate-300 transition-colors disabled:opacity-50">
+            aria-label="Загрузить из файла" className={styles.default}>
             <FolderOpen className="w-4 h-4" />
           </button>
           {driveReady && (
-            <button onClick={handleDriveImportList} disabled={loading} title="Загрузить из Drive"
-              className="p-2 rounded-lg bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/30 text-blue-300 transition-colors disabled:opacity-50">
+            <button onClick={handleDriveImportList} disabled={loading} title="Загрузить из Google Drive"
+              aria-label="Загрузить из Google Drive" className={styles.drive}>
               <DownloadCloud className="w-4 h-4" />
             </button>
           )}
+          {isChecking && variant === 'toolbar' && <Loader2 className="w-4 h-4 animate-spin text-slate-600 mx-1" />}
           <button onClick={() => setShowHelp(true)} title="Как перенести настройки"
-            className="p-1.5 rounded-lg hover:bg-slate-700/50 text-slate-500 hover:text-slate-300 transition-colors">
+            aria-label="Справка по переносу настроек" className={styles.help}>
             <HelpCircle className="w-3.5 h-3.5" />
           </button>
         </div>
         <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleFileInputChange} />
 
-        {/* Modals */}
+        {/* Floating toasts */}
         {successMessage && !showFileList && !showConfirm && (
           <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-xl bg-emerald-900/80 border border-emerald-600/40 text-emerald-200 text-sm backdrop-blur-sm shadow-lg">
             {successMessage}
@@ -257,7 +270,7 @@ export function UnifiedSaveArea({
         {error && !showFileList && !showConfirm && (
           <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 max-w-sm px-4 py-2 rounded-xl bg-amber-900/80 border border-amber-600/40 text-amber-200 text-sm backdrop-blur-sm shadow-lg flex items-center gap-2">
             <span className="flex-1">{error}</span>
-            <button onClick={() => setError(null)} className="p-0.5"><X className="w-3.5 h-3.5" /></button>
+            <button onClick={() => setError(null)} className="p-0.5" aria-label="Закрыть"><X className="w-3.5 h-3.5" /></button>
           </div>
         )}
         {showFileList && (
@@ -271,7 +284,7 @@ export function UnifiedSaveArea({
     );
   }
 
-  // ---- Full mode (desktop editor) ----
+  // ---- Default mode (full panel) ----
   return (
     <div className="border-b border-slate-700/50">
       {/* Metadata row */}
@@ -289,6 +302,7 @@ export function UnifiedSaveArea({
           </div>
         </div>
         <button onClick={() => setShowHelp(true)} title="Как перенести настройки"
+          aria-label="Справка по переносу настроек"
           className="p-1.5 rounded-lg hover:bg-slate-700/50 text-slate-500 hover:text-slate-300 transition-colors">
           <HelpCircle className="w-3.5 h-3.5" />
         </button>
@@ -349,17 +363,17 @@ export function UnifiedSaveArea({
 
       <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleFileInputChange} />
 
-      {/* Messages */}
+      {/* Inline messages */}
       {successMessage && (
         <div className="mx-4 mb-2 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-900/30 border border-emerald-600/30 text-emerald-300 text-xs">
           <span className="flex-1">{successMessage}</span>
-          <button onClick={clearSuccess} className="p-0.5 rounded hover:bg-emerald-800/30"><X className="w-3 h-3" /></button>
+          <button onClick={clearSuccess} className="p-0.5 rounded hover:bg-emerald-800/30" aria-label="Закрыть"><X className="w-3 h-3" /></button>
         </div>
       )}
       {error && (
         <div className="mx-4 mb-2 flex items-start gap-2 px-3 py-1.5 rounded-lg bg-amber-900/30 border border-amber-600/30 text-amber-300 text-xs">
           <span className="flex-1">{error}</span>
-          <button onClick={() => setError(null)} className="p-0.5 rounded hover:bg-amber-800/30 shrink-0"><X className="w-3 h-3" /></button>
+          <button onClick={() => setError(null)} className="p-0.5 rounded hover:bg-amber-800/30 shrink-0" aria-label="Закрыть"><X className="w-3 h-3" /></button>
         </div>
       )}
 
@@ -388,7 +402,7 @@ function FileListModal({ files, loading, onSelect, onClose }: {
       <div className="bg-slate-900 border border-slate-700/50 rounded-2xl w-full max-w-md max-h-[70vh] flex flex-col">
         <div className="flex items-center justify-between p-4 border-b border-slate-700/50">
           <h3 className="text-lg font-semibold text-slate-100">Файлы на Google Drive</h3>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-slate-800 text-slate-400"><X className="w-5 h-5" /></button>
+          <button onClick={onClose} className="p-1 rounded-lg hover:bg-slate-800 text-slate-400" aria-label="Закрыть"><X className="w-5 h-5" /></button>
         </div>
         <div className="overflow-y-auto flex-1 p-2">
           {files.map((file) => (

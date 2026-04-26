@@ -439,7 +439,7 @@ export default function Home() {
             {/* Config import button */}
             <UnifiedSaveArea
               mode="import-only"
-              compact
+              variant="compact"
               onImportComplete={() => window.location.reload()}
             />
 

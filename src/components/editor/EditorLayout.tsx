@@ -6,7 +6,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { ChevronLeft, Zap, Monitor, Download, Upload } from 'lucide-react';
+import { ChevronLeft, Zap, Monitor } from 'lucide-react';
 import { CustomSource, CustomFaction, CustomSquad, CustomMachine } from '@/lib/editor/types';
 import { getCustomSourcesStorage } from '@/lib/editor/storage';
 import { generateSourceId, generateFactionId, generateUnitId } from '@/lib/editor/id-generator';
@@ -18,8 +18,6 @@ import { UnitsList } from './UnitsList';
 import { SquadEditor } from './SquadEditor';
 import { MachineEditor } from './MachineEditor';
 import { CreateSourceModal } from './CreateSourceModal';
-import { ExportModal } from './ExportModal';
-import { ImportModal } from './ImportModal';
 import { ModifiersEditor } from './ModifiersEditor';
 import { UnifiedSaveArea } from '@/components/editor/UnifiedSaveArea';
 
@@ -37,8 +35,6 @@ export function EditorLayout() {
   const [selectedUnitId, setSelectedUnitId] = useState<string | null>(null);
   const [view, setView] = useState<EditorView>('list');
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showExportModal, setShowExportModal] = useState(false);
-  const [showImportModal, setShowImportModal] = useState(false);
 
   // Desktop tab state: 'units' shows 3-column list, 'modifiers' shows ModifiersEditor
   const [desktopTab, setDesktopTab] = useState<'units' | 'modifiers'>('units');
@@ -213,30 +209,6 @@ export function EditorLayout() {
       setSelectedFactionId(null);
       setSelectedUnitId(null);
     }
-  };
-
-  const handleImportSource = (importedSource: CustomSource) => {
-    const storage = getCustomSourcesStorage();
-
-    // Check if source with same ID already exists
-    const existing = storage.getById(importedSource.id);
-
-    if (existing) {
-      // Generate new ID for duplicate
-      const newSource = {
-        ...importedSource,
-        id: generateSourceId(),
-        name: `${importedSource.name} (импорт)`,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      storage.save(newSource);
-    } else {
-      storage.save(importedSource);
-    }
-
-    setSources(storage.getAll());
-    setShowImportModal(false);
   };
 
   const handleCreateSquad = () => {
@@ -553,6 +525,10 @@ export function EditorLayout() {
               <Zap className="w-4 h-4" />
               Модификаторы
             </button>
+            {/* Save/load controls in toolbar */}
+            <div className="ml-auto">
+              <UnifiedSaveArea mode="full" variant="toolbar" onImportComplete={() => { const s = getCustomSourcesStorage(); setSources(s.getAll()); }} />
+            </div>
           </div>
         )}
 
@@ -566,7 +542,6 @@ export function EditorLayout() {
           <div className="flex w-full h-full min-h-0">
             {/* Left column: Sources list */}
             <div className="w-72 border-r border-slate-800/50 overflow-y-auto min-h-0">
-              <UnifiedSaveArea mode="full" onImportComplete={() => { const s = getCustomSourcesStorage(); setSources(s.getAll()); }} />
               <SourcesList
                 sources={sources}
                 selectedId={selectedSourceId}
@@ -668,24 +643,7 @@ export function EditorLayout() {
               Перейдите на компьютер для полного редактирования юнитов, фракций и модификаторов.
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <UnifiedSaveArea mode="full" onImportComplete={() => { const s = getCustomSourcesStorage(); setSources(s.getAll()); }} />
-            <button
-              onClick={() => setShowImportModal(true)}
-              className="flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-800 border border-slate-700/50 text-sm font-medium text-slate-300 hover:bg-slate-700 transition-all active:scale-[0.97]"
-            >
-              <Upload className="w-4 h-4" />
-              Импорт
-            </button>
-            <button
-              onClick={() => selectedSource && setShowExportModal(true)}
-              disabled={!selectedSource}
-              className="flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-800 border border-slate-700/50 text-sm font-medium text-slate-300 hover:bg-slate-700 transition-all active:scale-[0.97] disabled:opacity-40"
-            >
-              <Download className="w-4 h-4" />
-              Экспорт
-            </button>
-          </div>
+          <UnifiedSaveArea mode="full" variant="compact" onImportComplete={() => { const s = getCustomSourcesStorage(); setSources(s.getAll()); }} />
         </div>
       </div>
 
@@ -694,22 +652,6 @@ export function EditorLayout() {
         <CreateSourceModal
           onClose={() => setShowCreateModal(false)}
           onCreate={handleCreateSource}
-        />
-      )}
-
-      {/* Export Modal */}
-      {showExportModal && selectedSource && (
-        <ExportModal
-          source={selectedSource}
-          onClose={() => setShowExportModal(false)}
-        />
-      )}
-
-      {/* Import Modal */}
-      {showImportModal && (
-        <ImportModal
-          onClose={() => setShowImportModal(false)}
-          onImport={handleImportSource}
         />
       )}
     </div>
