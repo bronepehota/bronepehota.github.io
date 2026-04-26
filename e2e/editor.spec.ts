@@ -60,32 +60,30 @@ test.describe.serial('Editor', () => {
     await expect(page.getByRole('button', { name: 'Создать', exact: true }).first()).toBeVisible();
   });
 
-  test('should open import source modal', async ({ page }) => {
+  test('should have unified save/load toolbar', async ({ page }) => {
     await page.goto('/editor');
     await page.waitForLoadState('networkidle');
 
-    // Click import button
-    await page.getByTitle('Импорт').first().click();
-    await page.waitForTimeout(500);
+    // Toolbar should have save/load icon buttons
+    const saveButton = page.getByTitle('Сохранить в файл').first();
+    await expect(saveButton).toBeVisible();
 
-    // Should see import modal via testid
-    const importModal = page.getByTestId('import-source-modal');
-    await expect(importModal).toBeVisible();
+    const loadButton = page.getByTitle('Загрузить из файла').first();
+    await expect(loadButton).toBeVisible();
 
-    // Should see textarea for JSON input
-    const textArea = page.locator('textarea').first();
-    await expect(textArea).toBeVisible();
-
-    // Should see import and cancel buttons
-    await expect(page.getByText('Импортировать')).toBeVisible();
-    await expect(page.getByText('Отмена')).toBeVisible();
+    // Help button should be present
+    const helpButton = page.getByTitle('Как перенести настройки').first();
+    await expect(helpButton).toBeVisible();
   });
 
-  test('should import source from JSON', async ({ page }) => {
+  test('should import config from JSON file', async ({ page }) => {
+    const fs = require('fs');
+    const path = require('path');
+
     await page.goto('/editor');
     await page.waitForLoadState('networkidle');
 
-    // Create a test JSON content
+    // Create a config envelope with a test source
     const testSource = {
       id: 'custom_test_import',
       name: 'Импортированный источник',
@@ -101,28 +99,32 @@ test.describe.serial('Editor', () => {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
+    const configEnvelope = {
+      version: 1,
+      type: 'bronepehota_config',
+      exportedAt: new Date().toISOString(),
+      data: { sources: [testSource], modifiers: { buffs: [], debuffs: [] } }
+    };
 
-    // Click import button
-    await page.getByTitle('Импорт').first().click();
-    await page.waitForTimeout(500);
+    const tmpFile = path.join('/tmp', 'test-config.json');
+    fs.writeFileSync(tmpFile, JSON.stringify(configEnvelope, null, 2));
 
-    // Should see import modal via testid
-    const importModal = page.getByTestId('import-source-modal');
-    await expect(importModal).toBeVisible();
-
-    // Paste JSON into text area
-    const textArea = page.locator('textarea').first();
-    await textArea.fill(JSON.stringify(testSource, null, 2));
-
-    // Click import
-    await page.click('button:has-text("Импортировать")');
+    // Upload via file input
+    const fileInput = page.locator('input[type="file"][accept=".json"]').first();
+    await fileInput.setInputFiles(tmpFile);
     await page.waitForTimeout(1000);
 
-    // Modal should close after successful import
-    await expect(page.getByTestId('import-source-modal')).not.toBeVisible();
+    // Confirm dialog should appear
+    const confirmButton = page.getByRole('button', { name: 'Загрузить', exact: true });
+    await expect(confirmButton).toBeVisible();
+    await confirmButton.click();
+    await page.waitForTimeout(1000);
 
     // Should see imported source in the list
     await expect(page.getByText('Импортированный источник').first()).toBeVisible();
+
+    // Cleanup
+    fs.unlinkSync(tmpFile);
   });
 
   test('should interact with create source form fields', async ({ page }) => {

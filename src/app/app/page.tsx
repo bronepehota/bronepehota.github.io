@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Army, ArmyUnit, RulesVersionID } from '@/lib/types';
 import ArmyBuilder from '@/components/ArmyBuilder';
 import GameSession from '@/components/GameSession';
+import { UnifiedSaveArea } from '@/components/editor/UnifiedSaveArea';
 import { CheckCircle2, MoreVertical, List, Grid, History, AlertTriangle, X, BookOpen } from 'lucide-react';
 import { isValidRulesVersion } from '@/lib/rules-registry';
 import { cn } from '@/lib/utils';
@@ -434,6 +435,13 @@ export default function Home() {
                 </button>
               </div>
             )}
+
+            {/* Config import button */}
+            <UnifiedSaveArea
+              mode="import-only"
+              variant="compact"
+              onImportComplete={() => window.location.reload()}
+            />
 
             {/* End Battle button - dropdown menu */}
             {view === 'game' && army.isInBattle && (

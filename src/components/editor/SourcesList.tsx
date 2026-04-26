@@ -6,7 +6,7 @@
 'use client';
 
 import { CustomSource } from '@/lib/editor/types';
-import { Plus, Trash2, FileText, GitBranch, Database, Download, Upload } from 'lucide-react';
+import { Plus, Trash2, FileText, GitBranch, Database } from 'lucide-react';
 
 interface SourcesListProps {
   sources: CustomSource[];
@@ -14,8 +14,6 @@ interface SourcesListProps {
   onSelect: (id: string) => void;
   onCreateNew: () => void;
   onDelete?: (id: string) => void;
-  onExport?: () => void;
-  onImport?: () => void;
 }
 
 export function SourcesList({
@@ -24,8 +22,6 @@ export function SourcesList({
   onSelect,
   onCreateNew,
   onDelete,
-  onExport,
-  onImport,
 }: SourcesListProps) {
   return (
     <div className="flex flex-col h-full bg-slate-900/50">
@@ -33,24 +29,6 @@ export function SourcesList({
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700/50 bg-slate-900/80 backdrop-blur-sm">
         <h2 className="text-sm font-semibold text-slate-200 tracking-wide uppercase">Армлисты</h2>
         <div className="flex gap-1">
-          {onImport && (
-            <button
-              onClick={onImport}
-              className="p-2 rounded-lg bg-blue-600/20 hover:bg-blue-600/40 border border-blue-600/30 transition-all group"
-              title="Импорт"
-            >
-              <Upload className="w-4 h-4 text-blue-400 group-hover:scale-110 transition-transform" />
-            </button>
-          )}
-          {onExport && (
-            <button
-              onClick={onExport}
-              className="p-2 rounded-lg bg-violet-600/20 hover:bg-violet-600/40 border border-violet-600/30 transition-all group"
-              title="Экспорт"
-            >
-              <Download className="w-4 h-4 text-violet-400 group-hover:scale-110 transition-transform" />
-            </button>
-          )}
           <button
             onClick={onCreateNew}
             className="p-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/40 border border-emerald-600/30 transition-all group"
