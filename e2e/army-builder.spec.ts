@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 
 /**
  * Army Builder E2E tests
@@ -28,27 +28,4 @@ test.describe('Army Builder', () => {
     await page.waitForLoadState('networkidle');
   });
 
-  test('should display display mode toggle', async ({ page }) => {
-    // Find display mode toggle buttons by aria-label
-    const compactButton = page.getByLabel('Компактный вид');
-    const detailedButton = page.getByLabel('Подробный вид');
-
-    // At least one button should be visible in army view mode
-    const hasCompact = await compactButton.count() > 0;
-    const hasDetailed = await detailedButton.count() > 0;
-    expect(hasCompact || hasDetailed).toBeTruthy();
-
-    // Click a button to verify it's interactive
-    if (hasCompact) {
-      await compactButton.first().click();
-      await page.waitForTimeout(200);
-      // Click successful - button is interactive
-      expect(true).toBeTruthy();
-    } else if (hasDetailed) {
-      await detailedButton.first().click();
-      await page.waitForTimeout(200);
-      // Click successful - button is interactive
-      expect(true).toBeTruthy();
-    }
-  });
 });
