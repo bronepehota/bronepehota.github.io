@@ -63,7 +63,7 @@ function SourceCard({
       data-testid={`source-card-${source.id}`}
       className={clsx(
         'relative group transition-all duration-200',
-        'rounded-lg border overflow-hidden',
+        'rounded-lg border',
         isSelected ? 'ring-1' : 'hover:border-slate-600',
         isDisabled && 'opacity-50 cursor-not-allowed'
       )}
@@ -107,9 +107,6 @@ function SourceCard({
             </div>
           </div>
 
-          {isDisabled && (
-            <Lock className="w-4 h-4 text-amber-400 ml-2" />
-          )}
         </div>
 
         {!isDisabled && (
@@ -143,12 +140,25 @@ function SourceCard({
         </div>
       )}
 
-      {/* Disabled message */}
+      {/* Disabled: tooltip on lock icon */}
       {isDisabled && (
-        <div className="px-3 pb-3 pt-0 border-t border-slate-700/30">
-          <p className="text-xs text-amber-400 leading-relaxed">
-            🔒 Требуется помощь сообщества по наполнению данных
-          </p>
+        <div className="absolute top-3 right-3 group/lock cursor-help">
+          <Lock className="w-4 h-4 text-amber-400" />
+          <div className="absolute right-0 top-full mt-2 w-56 p-2.5 rounded-lg bg-slate-800 border border-amber-500/30 shadow-xl opacity-0 group-hover/lock:opacity-100 transition-opacity duration-200 z-50">
+            <p className="text-xs text-amber-300 leading-relaxed mb-1.5">
+              Требуется помощь сообщества по наполнению данных
+            </p>
+            <a
+              href="https://vk.com/bp_bnp"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="text-xs text-blue-400 hover:text-blue-300 underline flex items-center gap-1"
+            >
+              <ExternalLink className="w-3 h-3" />
+              Отправить JSON в группу VK
+            </a>
+          </div>
         </div>
       )}
     </div>
