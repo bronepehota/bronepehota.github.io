@@ -13,8 +13,9 @@ import { cn } from '@/lib/utils';
 import { CombatLogEntry } from '@/lib/combat-types';
 import { useCombatTargetContext } from '@/contexts/CombatTargetContext';
 import InitiativeModal from './modals/InitiativeModal';
-import { UnitNavigationCard } from './GameSession/index';
+import { UnitNavigationCard, ExpandedNavigator } from './GameSession/index';
 import { checkSquadUniformStats } from '@/lib/unit-utils';
+import { deriveUnitStatus } from '@/lib/unit-status';
 import { resolveModifierSummary } from '@/lib/modifier-utils';
 
 // Faction styles for unit dock navigation
@@ -811,75 +812,22 @@ export default function GameSession({
 
           {/* Content based on expanded state */}
           {isDockExpanded ? (
-            /* Expanded view - grid of all units */
-            <div className="flex-1 overflow-y-auto p-3 custom-scrollbar">
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-                {army.units.map((unit, idx) => {
-                  const dockStyles = getUnitDockStyles(army.faction || 'polaris');
-                  const isActive = focusedUnitIdx === idx;
-                  const isMachine = unit.type === 'machine';
-
-                  // Calculate status
-                  const isDone = (() => {
-                    if (unit.type === 'squad') {
-                      const data = unit.data as Squad;
-                      return data.soldiers.every((_, soldierIdx) => {
-                        const isDead = unit.deadSoldiers?.includes(soldierIdx);
-                        const isActionDone = unit.actionsUsed?.[soldierIdx]?.done;
-                        return isDead || isActionDone;
-                      });
-                    } else {
-                      return unit.isMachineDone || unit.currentDurability === 0;
-                    }
-                  })();
-
-                  const isDead = (() => {
-                    if (unit.type === 'squad') {
-                      return (unit.deadSoldiers?.length || 0) === (unit.data as Squad).soldiers.length;
-                    } else {
-                      return (unit.currentDurability || 0) === 0;
-                    }
-                  })();
-
-                  return (
-                    <UnitNavigationCard
-                      key={unit.instanceId}
-                      unit={unit}
-                      isActive={isActive}
-                      isDone={isDone}
-                      isDead={isDead}
-                      isMachine={isMachine}
-                      onClick={() => { setFocusedUnitIdx(idx); setIsDockExpanded(false); }}
-                      dockStyles={dockStyles}
-                    />
-                  );
-                })}
-              </div>
-            </div>
+            <ExpandedNavigator
+              army={army}
+              focusedUnitIdx={focusedUnitIdx}
+              onSelectUnit={(idx) => { setFocusedUnitIdx(idx); setIsDockExpanded(false); }}
+            />
           ) : (
             /* Compact view - horizontal scroll */
             <div className="relative">
               <div className="flex overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-hide items-center px-1 py-1.5 gap-1">
             {(() => {
+              const statusOrder: Record<string, number> = { active: 0, done: 1, dead: 2 };
               // Sort and group units: active first, then done/dead
               const sortedUnits = army.units
               .map((unit, idx) => ({ unit, idx, originalIndex: idx }))
               .sort((a, b) => {
-                const getStatus = (u: ArmyUnit) => {
-                  if (u.type === 'squad') {
-                    const isDead = (u.deadSoldiers?.length || 0) === (u.data as Squad).soldiers.length;
-                    const isDone = (u.data as Squad).soldiers.every((_, idx) => {
-                      return u.deadSoldiers?.includes(idx) || u.actionsUsed?.[idx]?.done;
-                    });
-                    if (isDead) return 2; // Dead - last
-                    if (isDone) return 1;  // Done - middle
-                    return 0;              // Active - first
-                  } else {
-                    if (u.currentDurability === 0) return 2; // Dead - last
-                    if (u.isMachineDone) return 1;           // Done - middle
-                    return 0;                                // Active - first
-                  }
-                };
+                const getStatus = (u: ArmyUnit) => statusOrder[deriveUnitStatus(u)];
                 return getStatus(a.unit) - getStatus(b.unit) || a.originalIndex - b.originalIndex;
               });
 
@@ -892,21 +840,8 @@ export default function GameSession({
               const isMachine = unit.type === 'machine';
 
               // Calculate current unit status
-              const currentStatus = (() => {
-                if (unit.type === 'squad') {
-                  const isDead = (unit.deadSoldiers?.length || 0) === (unit.data as Squad).soldiers.length;
-                  const isDone = (unit.data as Squad).soldiers.every((_, idx) => {
-                    return unit.deadSoldiers?.includes(idx) || unit.actionsUsed?.[idx]?.done;
-                  });
-                  if (isDead) return 2;
-                  if (isDone) return 1;
-                  return 0;
-                } else {
-                  if (unit.currentDurability === 0) return 2;
-                  if (unit.isMachineDone) return 1;
-                  return 0;
-                }
-              })();
+              const unitStatus = deriveUnitStatus(unit);
+              const currentStatus = statusOrder[unitStatus];
 
               // Add spacer between active (0) and non-active (1, 2) units
               if (lastStatus === 0 && currentStatus > 0) {
@@ -916,27 +851,8 @@ export default function GameSession({
               }
               lastStatus = currentStatus;
 
-              // Calculate if unit is done
-              const isDone = (() => {
-                if (unit.type === 'squad') {
-                  const data = unit.data as Squad;
-                  return data.soldiers.every((_, soldierIdx) => {
-                    const isDead = unit.deadSoldiers?.includes(soldierIdx);
-                    const isActionDone = unit.actionsUsed?.[soldierIdx]?.done;
-                    return isDead || isActionDone;
-                  });
-                } else {
-                  return unit.isMachineDone || unit.currentDurability === 0;
-                }
-              })();
-
-              const isDead = (() => {
-                if (unit.type === 'squad') {
-                  return (unit.deadSoldiers?.length || 0) === (unit.data as Squad).soldiers.length;
-                } else {
-                  return (unit.currentDurability || 0) === 0;
-                }
-              })();
+              const isDone = unitStatus === 'done' || unitStatus === 'dead';
+              const isDead = unitStatus === 'dead';
 
               elements.push(
                 <UnitNavigationCard
