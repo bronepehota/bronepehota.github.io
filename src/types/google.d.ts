@@ -18,4 +18,5 @@ interface Google {
   accounts: GoogleAccounts;
 }
 
+// eslint-disable-next-line no-var
 declare var google: Google;
