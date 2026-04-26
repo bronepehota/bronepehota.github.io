@@ -55,8 +55,7 @@ File name on Drive: `bronepehota_config_YYYY-MM-DD.json` (UTC date).
 1. Click «Сохранить на Drive»
 2. If not authenticated → Google popup → user allows
 3. Serialize all settings (custom sources + modifiers) into JSON envelope
-4. Ensure `Бронепехота/` folder exists in Drive root (create if missing via `files.list?q=name='Бронепехота' and mimeType='application/vnd.google-apps.folder'`)
-5. Upload file via `files.create` with `parents: ['<folderId>']`
+4. Upload file via `files.create` to Drive root (no folder — flat naming avoids `drive.file` scope limitations with folder-based queries)
 6. Toast: «Настройки сохранены на Google Drive»
 
 **Mechanism**: Drive API v3 multipart upload — metadata + JSON body in single POST to `https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart`.
@@ -68,7 +67,7 @@ File name on Drive: `bronepehota_config_YYYY-MM-DD.json` (UTC date).
 **UI flow**:
 1. Click «Загрузить из Drive»
 2. If not authenticated → Google popup → user allows
-3. List files in `Бронепехота/` folder: `files.list?q="'<folderId>' in parents and name contains 'bronepehota_config'"&orderBy=modifiedTime desc`
+3. List config files: `files.list?q="name contains 'bronepehota_config'"&orderBy=modifiedTime desc&spaces=drive` (flat query — no folder needed. `drive.file` scope reliably lists files the app created.)
 4. Show file list (name + modified date): `bronepehota_config_2026-04-26.json — 26 апр`
 5. User taps file → download content via `files.get?alt=media&id=<fileId>`
 6. Validate envelope (`type`, `version`, `data` structure)
@@ -82,7 +81,7 @@ File name on Drive: `bronepehota_config_YYYY-MM-DD.json` (UTC date).
 **Validation**:
 - Check `type === "bronepehota_config"` and `version` is recognized (currently only `1`)
 - Verify `data.sources` is an array and `data.modifiers` has `buffs`/`debuffs` arrays
-- Reject unknown future versions: «Обновите приложение для поддержки этого формата»
+- Version check: accept `version <= CURRENT_VERSION`. Only breaking changes increment version. Unknown future versions are rejected with: «Обновите приложение для поддержки этого формата»
 
 **Conflict resolution**: Uses existing merge logic — `CustomSourcesStorage.save()` upserts by ID, `importCustomModifiers()` merges by ID.
 
@@ -129,7 +128,7 @@ These use the same envelope format and validation logic.
 | File | Action |
 |------|--------|
 | `src/lib/config-export.ts` | **new** — serialize config, validate envelope, file name generation |
-| `src/lib/google-drive.ts` | **new** — GIS auth, Drive API wrapper (auth, create folder, upload, list files, download) |
+| `src/lib/google-drive.ts` | **new** — GIS auth, Drive API wrapper (auth, upload, list files, download) |
 | `src/components/GoogleDriveSync.tsx` | **new** — unified component with auth state, save/load UI, fallback to file picker |
 | `src/components/modals/ImportExportHelp.tsx` | **new** — help modal with step-by-step guide |
 | `src/components/editor/EditorLayout.tsx` | modify — add GoogleDriveSync (export mode) + help button |
@@ -170,7 +169,7 @@ The existing service worker (`src/app/sw.ts`) uses `NetworkFirst` for HTTPS URLs
 
 **Manual verification**:
 1. Click «Сохранить на Drive» → verify OAuth popup with `drive.file` scope
-2. Save settings → verify file created in `Бронепехота/` folder in Drive
+2. Save settings → verify file created in Drive root
 3. Click «Загрузить из Drive» on mobile → verify file list appears
 4. Select file → verify sources and modifiers imported correctly
 5. Expired token → verify re-auth prompt
