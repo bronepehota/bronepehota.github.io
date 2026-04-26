@@ -21,6 +21,7 @@ import { CreateSourceModal } from './CreateSourceModal';
 import { ExportModal } from './ExportModal';
 import { ImportModal } from './ImportModal';
 import { ModifiersEditor } from './ModifiersEditor';
+import { GoogleDriveSync } from '@/components/GoogleDriveSync';
 
 type EditorView = 'list' | 'edit-squad' | 'edit-machine' | 'create-squad' | 'create-machine' | 'override-squad' | 'override-machine';
 
@@ -565,6 +566,7 @@ export function EditorLayout() {
           <div className="flex w-full h-full min-h-0">
             {/* Left column: Sources list */}
             <div className="w-72 border-r border-slate-800/50 overflow-y-auto min-h-0">
+              <GoogleDriveSync mode="export" />
               <SourcesList
                 sources={sources}
                 selectedId={selectedSourceId}
@@ -669,6 +671,7 @@ export function EditorLayout() {
             </p>
           </div>
           <div className="flex items-center gap-3">
+            <GoogleDriveSync mode="export" />
             <button
               onClick={() => setShowImportModal(true)}
               className="flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-800 border border-slate-700/50 text-sm font-medium text-slate-300 hover:bg-slate-700 transition-all active:scale-[0.97]"
