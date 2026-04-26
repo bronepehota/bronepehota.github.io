@@ -2,25 +2,37 @@
 
 ## Context
 
-Supersedes the 2026-04-17 Google Drive backup spec. The original spec proposed full OAuth integration with Google Drive API and Picker API. This revision uses a file-based approach: no OAuth, no API keys, no third-party dependencies, no CORS issues.
+Supersedes the 2026-04-17 Google Drive backup spec. That spec proposed OAuth with Picker API and required both a Client ID and an API Key. This revision uses only Google Identity Services (GIS) with a single Client ID — no API Key, no Picker API, no third-party dependencies.
 
-**User workflow**: Desktop users export all settings as a JSON file, upload it to Google Drive (or any cloud). Mobile users download the file from Drive and import it via file picker.
+**User workflow**: Desktop users save settings to Google Drive with one click (via familiar Google auth popup). Mobile users load settings from Drive with one click — the app lists saved files and the user picks one.
 
 **Scope**: Export custom army list sources + custom modifiers as a single bundle. Does NOT export assembled armies.
 
-**Why not link-paste**: Google Drive's direct download endpoint (`drive.google.com/uc?export=download`) does not serve CORS headers. Client-side `fetch()` is blocked by browsers. Since the app is a static site on GitHub Pages (no server), a proxy route is not available. File picker import is the only technically viable approach.
+## Approach: GIS OAuth + Drive API v3
 
-## Approach: File Download + File Upload via Google Drive
+### Prerequisites (developer, one-time setup)
 
-### Desktop — Export
+1. Create project in [Google Cloud Console](https://console.cloud.google.com)
+2. Enable Google Drive API
+3. Create OAuth Client ID (Web application)
+4. Set `NEXT_PUBLIC_GOOGLE_CLIENT_ID` env var (public, safe for JS bundle)
+5. Scope: `drive.file` — app accesses only files it creates and files user selects
 
-**Trigger**: Button in the editor (`/editor`) labeled «Экспорт настроек».
+### Authentication
 
-**What gets exported**: All user configuration in one file:
-- Custom army list sources (from `bronepehota_custom_sources` localStorage)
-- Custom modifiers (from `bronepehota_custom_modifiers` localStorage)
+**Library**: Google Identity Services (GIS) loaded via `<Script>` from `accounts.google.com/gsi/client`. Lazy-loaded when `GoogleDriveSync` component mounts — not in root layout.
 
-**Format**:
+**Flow**:
+1. User clicks «Сохранить на Drive» or «Загрузить из Drive»
+2. GIS popup requests `drive.file` scope
+3. Access token + expiry stored in React state (memory only, never persisted)
+4. Before each Drive API call, check `Date.now() > tokenExpiry - 60000` (1-minute buffer). If expired, clear token and re-auth
+5. Handle 401 responses as fallback — clear token, prompt re-auth
+
+**Graceful degradation**: If GIS script fails to load (offline, ad blocker), show "Подключение к Google Drive недоступно" and fall back to file-based import/export (file picker).
+
+### Data Format
+
 ```typescript
 interface ConfigExportEnvelope {
   version: 1;
@@ -33,94 +45,121 @@ interface ConfigExportEnvelope {
 }
 ```
 
-**File name**: `bronepehota_config_YYYY-MM-DD.json` using UTC date from `new Date().toISOString()`.
+File name on Drive: `bronepehota_config_YYYY-MM-DD.json` (UTC date).
 
-**Mechanism**: `Blob` + `URL.createObjectURL` + programmatic `<a>` click (standard browser download).
+### Desktop — Save to Drive
 
-**After download**: User uploads the file to Google Drive (or any cloud storage). A help modal explains the steps.
-
-### Mobile — Import from File
-
-**Trigger**: Button in the app (`/app`) labeled «Импорт настроек», visible in the header when `army.currentStep !== 'battle'`. Small icon button using the Upload icon from Lucide, matching existing header button style.
+**Trigger**: Button in editor (`/editor`) labeled «Сохранить на Drive».
 
 **UI flow**:
-1. User taps «Импорт настроек»
-2. System file picker opens (`<input type="file" accept=".json">`)
-3. User selects the downloaded `bronepehota_config_*.json` file
-4. App reads file via `FileReader`, parses JSON
-5. Validates envelope (`type === "bronepehota_config"`, `version` recognized, `data` has `sources` and `modifiers`)
-6. Confirmation dialog: «Будут заменены существующие армлисты и способности. Продолжить?»
-7. Saves each source via `CustomSourcesStorage.save()` (existing upsert logic)
-8. Saves modifiers via `importCustomModifiers()` (existing merge logic)
-9. Shows toast: «Загружено: X армлистов, Y способностей»
+1. Click «Сохранить на Drive»
+2. If not authenticated → Google popup → user allows
+3. Serialize all settings (custom sources + modifiers) into JSON envelope
+4. Ensure `Бронепехота/` folder exists in Drive root (create if missing via `files.list?q=name='Бронепехота' and mimeType='application/vnd.google-apps.folder'`)
+5. Upload file via `files.create` with `parents: ['<folderId>']`
+6. Toast: «Настройки сохранены на Google Drive»
+
+**Mechanism**: Drive API v3 multipart upload — metadata + JSON body in single POST to `https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart`.
+
+### Mobile — Load from Drive
+
+**Trigger**: Button in app (`/app`) labeled «Загрузить из Drive», visible in header when `army.currentStep !== 'battle'`. Small icon button using CloudDownload icon from Lucide, matching existing header style.
+
+**UI flow**:
+1. Click «Загрузить из Drive»
+2. If not authenticated → Google popup → user allows
+3. List files in `Бронепехота/` folder: `files.list?q="'<folderId>' in parents and name contains 'bronepehota_config'"&orderBy=modifiedTime desc`
+4. Show file list (name + modified date): `bronepehota_config_2026-04-26.json — 26 апр`
+5. User taps file → download content via `files.get?alt=media&id=<fileId>`
+6. Validate envelope (`type`, `version`, `data` structure)
+7. Confirmation dialog: «Будут заменены существующие армлисты и способности. Продолжить?»
+8. Save each source via `CustomSourcesStorage.save()` (existing upsert logic)
+9. Save modifiers via `importCustomModifiers()` (existing merge logic)
+10. Toast: «Загружено: X армлистов, Y способностей»
+
+**Empty state**: «На Google Drive нет сохранённых настроек. Сначала экспортируйте настройки с компьютера.»
 
 **Validation**:
 - Check `type === "bronepehota_config"` and `version` is recognized (currently only `1`)
-- Verify `data.sources` is an array and `data.modifiers` is an object with `buffs`/`debuffs` arrays
-- Reject unknown future versions with message: «Обновите приложение для поддержки этого формата»
+- Verify `data.sources` is an array and `data.modifiers` has `buffs`/`debuffs` arrays
+- Reject unknown future versions: «Обновите приложение для поддержки этого формата»
 
-**Conflict resolution**: Uses existing merge logic — `CustomSourcesStorage.save()` upserts by ID (overwrites matching, preserves others). `importCustomModifiers()` merges buffs/debuffs by ID. The confirmation dialog warns about potential overwrites before starting.
+**Conflict resolution**: Uses existing merge logic — `CustomSourcesStorage.save()` upserts by ID, `importCustomModifiers()` merges by ID.
 
 **Error handling**:
+- Drive API error → «Нет доступа к Google Drive. Проверьте подключение.»
+- Expired token → automatic re-auth prompt
+- GIS unavailable → fallback to file picker import
 - Invalid JSON → «Файл повреждён или имеет неверный формат»
-- Wrong `type` field → «Это не файл настроек Бронепехоты»
+- Wrong `type` → «Это не файл настроек Бронепехоты»
 - Unsupported version → «Обновите приложение для поддержки этого формата»
-- File read error → «Не удалось прочитать файл»
+
+### Fallback: File-Based Import/Export
+
+When GIS is unavailable (ad blocker, restricted network), both desktop and mobile show file-based alternatives:
+- Desktop: «Скачать настройки» → downloads JSON file
+- Mobile: «Импорт из файла» → system file picker (`<input type="file" accept=".json">`)
+
+These use the same envelope format and validation logic.
 
 ### User Instructions
 
-**Location**: Help modal (`ImportExportHelp.tsx`) opened by «?» button next to export/import buttons. Also accessible from the mobile import screen.
+**Location**: Modal opened by «?» button next to Drive buttons.
 
 **Content** (in Russian):
 
 ---
 **Как перенести настройки с компьютера на телефон**
 
-**Шаг 1 — На компьютере (редактор)**
+**На компьютере (редактор)**
 1. Откройте редактор
-2. Нажмите кнопку «Экспорт настроек»
-3. Скачается файл `bronepehota_config_<date>.json`
+2. Нажмите «Сохранить на Drive»
+3. Войдите в Google, если потребуется
+4. Готово — настройки сохранены на Google Drive
 
-**Шаг 2 — Загрузите файл на Google Drive**
-1. Откройте [Google Drive](https://drive.google.com)
-2. Нажмите «+» → «Загрузить файлы»
-3. Выберите скачанный файл
-
-**Шаг 3 — На телефоне**
-1. Откройте Google Drive и скачайте файл на устройство
-2. Откройте Бронепехоту
-3. Нажмите «Импорт настроек»
-4. Выберите скачанный файл
-5. Готово!
+**На телефоне**
+1. Нажмите «Загрузить из Drive»
+2. Войдите в Google, если потребуется
+3. Выберите файл из списка
+4. Готово!
 ---
 
 ## Components
 
 | File | Action |
 |------|--------|
-| `src/lib/config-export.ts` | **new** — serialize config to JSON, validate envelope, parse uploaded file |
-| `src/components/editor/ConfigExportButton.tsx` | **new** — export button for editor |
-| `src/components/ConfigImportButton.tsx` | **new** — file picker + import for mobile |
+| `src/lib/config-export.ts` | **new** — serialize config, validate envelope, file name generation |
+| `src/lib/google-drive.ts` | **new** — GIS auth, Drive API wrapper (auth, create folder, upload, list files, download) |
+| `src/components/GoogleDriveSync.tsx` | **new** — unified component with auth state, save/load UI, fallback to file picker |
 | `src/components/modals/ImportExportHelp.tsx` | **new** — help modal with step-by-step guide |
-| `src/components/editor/EditorLayout.tsx` | modify — add export button + help button |
-| `src/app/app/page.tsx` | modify — add import button in header (visible when not in battle) |
+| `src/components/editor/EditorLayout.tsx` | modify — add GoogleDriveSync (export mode) + help button |
+| `src/app/app/page.tsx` | modify — add GoogleDriveSync (import mode) in header |
+| `src/app/sw.ts` | modify — exclude `accounts.google.com`, `www.googleapis.com`, `content.googleapis.com` from caching |
 
-**No changes to**: existing source import/export in editor, service worker, no new npm dependencies.
+**No new npm dependencies.** GIS and Drive API accessed via standard `<Script>` and `fetch()`.
+
+## Service Worker Consideration
+
+The existing service worker (`src/app/sw.ts`) uses `NetworkFirst` for HTTPS URLs. Google API domains must be excluded from caching:
+- `accounts.google.com`
+- `www.googleapis.com`
+- `content.googleapis.com`
 
 ## Security
 
-- No OAuth tokens, no API keys — nothing to leak
-- All processing client-side, no data sent to any server
-- File never leaves the user's device during import
+- `drive.file` scope — app accesses only files it created
+- Tokens in memory only, never persisted to localStorage
+- `NEXT_PUBLIC_GOOGLE_CLIENT_ID` is public (restrict to Drive API in Google Console)
+- All processing client-side, no server-side code
 
 ## Out of Scope
 
 - Export of assembled armies (army builder state)
-- Direct Google Drive API integration (OAuth)
-- Link-paste import (blocked by CORS on static site)
 - Real-time sync between devices
+- Collaborative editing
 - Auto-save
 - Battle session state backup
+- Google Picker API (not needed — we list files via API)
 
 ## Testing
 
@@ -130,10 +169,10 @@ interface ConfigExportEnvelope {
 - File name generation (UTC date format)
 
 **Manual verification**:
-1. Export from editor → verify JSON downloads with correct structure and all custom data
-2. Import valid config file → verify sources and modifiers restored via existing storage methods
-3. Import invalid JSON → verify error message
-4. Import file with wrong `type` → verify «не файл настроек» message
-5. Import with version mismatch → verify rejection message
-6. Conflict (existing source with same ID) → verify confirmation dialog and upsert behavior
-7. Help modal → verify instructions are clear and complete
+1. Click «Сохранить на Drive» → verify OAuth popup with `drive.file` scope
+2. Save settings → verify file created in `Бронепехота/` folder in Drive
+3. Click «Загрузить из Drive» on mobile → verify file list appears
+4. Select file → verify sources and modifiers imported correctly
+5. Expired token → verify re-auth prompt
+6. GIS blocked → verify fallback to file picker
+7. Help modal → verify instructions clear and complete
