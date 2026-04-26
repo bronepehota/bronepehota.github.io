@@ -27,8 +27,8 @@ The existing `UnitNavigationCard` component stays for compact dock mode. The exp
 - **Number badge**: Top-left, monospace font, dark background with border
 - **Name**: Bold, 10px, below image
 - **Stats row**: 2-3 compact stat indicators:
-  - Squad: attack (⚔), armor (🛡), alive soldiers (♥)
-  - Machine: attack (⚔), HP
+  - Squad: power (⚔), armor (🛡), alive soldiers (♥)
+  - Machine: primary weapon power (⚔), durability (HP)
 - **Border radius**: 4px (angular, military feel)
 - **Faction-colored border**: Active cards use faction accent color (red/cyan/yellow)
 
@@ -70,7 +70,7 @@ When a section has 0 units (e.g., no dead units yet), the section header still r
 ## Files to Modify
 
 1. **`src/components/GameSession/UnitNavigationCard.tsx`** — Add expanded variant or accept a `variant` prop
-2. **`src/components/GameSession.tsx`** — Replace expanded grid with sectioned layout (lines ~813-858)
+2. **`src/components/GameSession.tsx`** — Replace expanded grid with sectioned layout (the `isDockExpanded` ternary and surrounding dock container, roughly lines 790-860)
 3. **Potentially new**: `src/components/GameSession/ExpandedNavigator.tsx` — Extract expanded view into its own component to keep GameSession manageable
 
 ## Testing Requirements
@@ -83,8 +83,55 @@ When a section has 0 units (e.g., no dead units yet), the section header still r
 
 - **Click unit**: `setFocusedUnitIdx(idx)` + `setIsDockExpanded(false)` — same as current
 - **Swipe down**: Collapse to compact dock — same as current
-- **Keyboard**: Arrow keys still work for navigation within expanded view
+- **Keyboard**: Not in scope for this redesign — no existing keyboard navigation to preserve
+
+## Stats Derivation
+
+Card stats map to actual data fields as follows:
+
+| Display | Squad source | Machine source |
+|---------|-------------|----------------|
+| ⚔ Power | First soldier's `power` field (e.g. "1D6") | First weapon's `power` field |
+| 🛡 Armor | First soldier's `armor` field (number) | — (not shown) |
+| ♥ Alive | `soldiers.length - (deadSoldiers?.length \|\| 0)` | — (not shown) |
+| HP | — | `currentDurability / durability_max` |
+
+For squads, use first soldier (index 0) stats. For machines, use first weapon (index 0).
+
+## Responsive Grid
+
+Cards use `flex-wrap` within each section with `gap: 10px`. Card width is fixed at ~100px on mobile, filling naturally. Column counts are not hardcoded — `flex-wrap` handles responsive behavior automatically. On wider screens more cards fit per row.
+
+## Props Interface (Expanded Variant)
+
+New component `ExpandedUnitCard` receives:
+
+```typescript
+interface ExpandedUnitCardProps {
+  unit: ArmyUnit;
+  originalIndex: number;
+  isActive: boolean;
+  section: 'active' | 'done' | 'dead';
+  isMachine: boolean;
+  onClick: () => void;
+  faction: FactionID;
+}
+```
+
+Status derivation (isDone, isDead) moves to the parent `ExpandedNavigator` component, which groups units into sections and passes `section` prop down. This avoids duplicate status calculations.
+
+## Accessibility
+
+- Cards remain `<button>` elements with `aria-label` including unit name and status
+- Section headers use `role="region"` with `aria-label` (e.g., "Активные юниты")
+- Dead unit text with `line-through` has sufficient contrast (#fca5a5 on dark background)
+- Section count badges include `aria-label` for screen readers
+
+## Edge Cases
+
+- **All units dead**: Active and Done sections render with count "0", Dead section contains all cards. No special handling needed — the vertical scroll accommodates this naturally.
+- **No units**: Should not happen (army always has at least one unit), but all three sections render with count "0".
 
 ## Faction Color Integration
 
-Active section cards use `getFactionColors(faction)` from `@/lib/faction-colors` for border and indicator colors. Done and Dead sections use fixed green/red regardless of faction.
+Active section cards use `getFactionColors(faction)` from `@/lib/faction-colors` directly (not the `getUnitDockStyles` wrapper). Use `border`, `text`, and `glow` keys from the returned object. Done and Dead sections use fixed green/red regardless of faction.
