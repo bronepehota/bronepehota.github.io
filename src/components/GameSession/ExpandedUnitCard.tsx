@@ -52,18 +52,11 @@ function getUnitStats(unit: ArmyUnit, isMachine: boolean): string[] {
   if (isMachine) {
     const machine = unit.data as Machine;
     const hp = `${unit.currentDurability ?? 0}/${machine.durability_max}`;
-    const power = machine.weapons[0]?.power || '—';
-    return [`⚔ ${power}`, `HP ${hp}`];
+    return [`HP ${hp}`];
   }
   const squad = unit.data as Squad;
-  const firstSoldier = squad.soldiers[0];
-  if (!firstSoldier) return [];
   const alive = squad.soldiers.length - (unit.deadSoldiers?.length || 0);
-  return [
-    `⚔ ${firstSoldier.power}`,
-    `🛡 ${firstSoldier.armor}`,
-    `♥ ${alive}`,
-  ];
+  return [`♥ ${alive}`];
 }
 
 export const ExpandedUnitCard = memo(function ExpandedUnitCard({
@@ -107,7 +100,7 @@ export const ExpandedUnitCard = memo(function ExpandedUnitCard({
             src={finalSrc}
             alt={unit.data.name}
             className="w-full h-full object-cover"
-            style={{ objectPosition: '50% 85%' }}
+            style={{ objectPosition: '50% 20%' }}
           />
         ) : (
           <span className="text-slate-500 text-xs">IMG</span>
