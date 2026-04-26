@@ -197,12 +197,12 @@ src/components/
 │   └── unit-card/   - Unit sub-components + hooks (useUnitCardState)
 ├── combat/          - Combat modals (BottomSheetCombatModal, ActionSelector, ParameterInputs, CombatResults, ActiveModifiersDisplay, HitProbabilityIndicator)
 ├── controls/        - Shared controls (FortificationSelector, DistanceConverter)
-├── editor/          - Desktop-only unit editor (SourcesList, SquadEditor, ModifiersEditor, BuffSelector)
+├── editor/          - Desktop-only unit editor (SourcesList, SquadEditor, MachineEditor, ModifiersEditor, UnifiedSaveArea, BuffSelector, ModifierIcons, UnitsList, FactionsList, CreateSourceModal)
 ├── encyclopedia/    - Encyclopedia page components (UnitDetailPage)
 ├── game-session/    - Game session components (ActiveBuffsIndicator)
 ├── landing/         - Landing page
 ├── machine/         - Machine-specific components
-├── modals/          - Shared modals (SoldierEffectsModal, PilotAssignmentModal, PanicTestModal, EncyclopediaModal)
+├── modals/          - Shared modals (SoldierEffectsModal, PilotAssignmentModal, PanicTestModal, EncyclopediaModal, ImportExportHelp)
 ├── preparation/     - Battle preparation components
 ├── rules/           - Rules/source selectors, toggles
 ├── toggles/         - Settings toggles
@@ -211,6 +211,8 @@ src/components/
 ```
 
 **Main Page** (`src/app/app/page.tsx`): ArmyBuilder (construction) OR GameSession (gameplay).
+
+**Orphaned editor files** (not imported anywhere, safe to delete): `ExportModal.tsx`, `ImportModal.tsx`, `ModifierExportImport.tsx` — functionality replaced by `UnifiedSaveArea.tsx`.
 
 ### Grenade Combat Mechanics
 
@@ -440,6 +442,23 @@ interface Soldier {
 - Buffs/abilities filtered from `squad.buffs` (not global catalog); debuffs from catalog
 - GameSession manages `effectsModalState` and `onSoldierModifierClick` prop chain
 
+### Import/Export System
+
+**Purpose**: Save/load all editor configuration (custom sources + custom modifiers) via file or Google Drive.
+
+**Key Files**:
+- `src/lib/config-export.ts` — Envelope creation/validation. `createConfigEnvelope(sources, modifiers)` bundles all config into versioned envelope. `validateConfigEnvelope(jsonString)` validates on import.
+- `src/lib/google-drive.ts` — Google Identity Services (GIS) OAuth + Drive API v3 wrapper. Uses `drive.file` scope (only files created by app). Functions: `loadGisScript()`, `requestAccessToken()`, `listConfigFiles()`, `downloadFile()`, `uploadConfigFile()`.
+- `src/components/editor/UnifiedSaveArea.tsx` — Unified save/load component. Props: `mode: 'full' | 'import-only'`, `variant: 'default' | 'compact' | 'toolbar'`. Used in editor tab bar (`toolbar`), app header (`compact`), and editor sidebar (`default`).
+- `src/components/modals/ImportExportHelp.tsx` — Step-by-step help modal
+
+**Config Envelope Format**:
+```typescript
+{ version: 1, type: 'bronepehota_config', exportedAt: string, data: { sources: CustomSource[], modifiers: { buffs: Modifier[], debuffs: Modifier[] } } }
+```
+
+**Environment**: Requires `NEXT_PUBLIC_GOOGLE_CLIENT_ID` for Drive features. Without it, only file save/load is available (Drive buttons hidden).
+
 ### Styling
 
 - **MOBILE FIRST**: Design for mobile screens first (320px+), then enhance for tablets and desktop using Tailwind's `md:` and `lg:` breakpoints
@@ -542,16 +561,6 @@ async function navigateToArmyBuilder(page: Page) {
 ```
 
 **CI/CD**: Unit tests on every commit (~30s). E2E tests in CI after deployment (~2-5min). See `.github/workflows/test.yml`.
-
-## Important Notes
-
-1. **MOBILE FIRST DESIGN**: Primary target device is mobile phone. Exception: the editor is desktop-only.
-2. **Frontend Design Skill**: Use `frontend-design` skill when building new UI components to ensure production-grade, visually polished interfaces.
-3. **All API error messages must be in Russian** (e.g., `Ошибка чтения данных`)
-4. **Dice notation**: "D6", "D12", "D20" for range; "1D6", "2D12" for power; "ББ" for melee
-5. **Speed sectors** must cover full range from 1 to `durability_max` without gaps
-6. **Soldier modifiers**: Soldiers have `props: string[]` in JSON data (e.g., `["Г"]` for grenade). These are resolved to modifier catalog IDs at runtime via `resolveSoldierEffects()`. Per-soldier runtime effects are stored in `soldierModifiers[]` on ArmyUnit.
-7. **Images**: Place images in `public/images/squads/` or `public/images/machines/`
 
 ## Active Technologies
 
