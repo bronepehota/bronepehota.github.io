@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 import { CombatLogEntry } from '@/lib/combat-types';
 import { useCombatTargetContext } from '@/contexts/CombatTargetContext';
 import InitiativeModal from './modals/InitiativeModal';
-import { UnitNavigationCard } from './GameSession/index';
+import { UnitNavigationCard, ExpandedNavigator } from './GameSession/index';
 import { checkSquadUniformStats } from '@/lib/unit-utils';
 import { resolveModifierSummary } from '@/lib/modifier-utils';
 
@@ -811,51 +811,11 @@ export default function GameSession({
 
           {/* Content based on expanded state */}
           {isDockExpanded ? (
-            /* Expanded view - grid of all units */
-            <div className="flex-1 overflow-y-auto p-3 custom-scrollbar">
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-                {army.units.map((unit, idx) => {
-                  const dockStyles = getUnitDockStyles(army.faction || 'polaris');
-                  const isActive = focusedUnitIdx === idx;
-                  const isMachine = unit.type === 'machine';
-
-                  // Calculate status
-                  const isDone = (() => {
-                    if (unit.type === 'squad') {
-                      const data = unit.data as Squad;
-                      return data.soldiers.every((_, soldierIdx) => {
-                        const isDead = unit.deadSoldiers?.includes(soldierIdx);
-                        const isActionDone = unit.actionsUsed?.[soldierIdx]?.done;
-                        return isDead || isActionDone;
-                      });
-                    } else {
-                      return unit.isMachineDone || unit.currentDurability === 0;
-                    }
-                  })();
-
-                  const isDead = (() => {
-                    if (unit.type === 'squad') {
-                      return (unit.deadSoldiers?.length || 0) === (unit.data as Squad).soldiers.length;
-                    } else {
-                      return (unit.currentDurability || 0) === 0;
-                    }
-                  })();
-
-                  return (
-                    <UnitNavigationCard
-                      key={unit.instanceId}
-                      unit={unit}
-                      isActive={isActive}
-                      isDone={isDone}
-                      isDead={isDead}
-                      isMachine={isMachine}
-                      onClick={() => { setFocusedUnitIdx(idx); setIsDockExpanded(false); }}
-                      dockStyles={dockStyles}
-                    />
-                  );
-                })}
-              </div>
-            </div>
+            <ExpandedNavigator
+              army={army}
+              focusedUnitIdx={focusedUnitIdx}
+              onSelectUnit={(idx) => { setFocusedUnitIdx(idx); setIsDockExpanded(false); }}
+            />
           ) : (
             /* Compact view - horizontal scroll */
             <div className="relative">
