@@ -5,12 +5,12 @@ import { CacheableResponsePlugin } from "serwist";
 import { Serwist } from "serwist";
 
 declare global {
-  interface WorkerGlobalScope extends SerwistGlobalConfig {
+  interface ServiceWorkerGlobalScope extends SerwistGlobalConfig {
     __SW_MANIFEST: (PrecacheEntry | string)[] | undefined;
   }
 }
 
-declare const self: ServiceWorkerGlobalScope;
+declare const self: ServiceWorkerGlobalScope & typeof globalThis;
 
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
@@ -70,7 +70,11 @@ const serwist = new Serwist({
       }),
     },
     {
-      matcher: /^https?.*/i,
+      matcher: ({ url }: { url: URL }) => {
+        const excludedHosts = ['accounts.google.com', 'www.googleapis.com', 'content.googleapis.com'];
+        if (excludedHosts.includes(url.hostname)) return false;
+        return /^https?/i.test(url.href);
+      },
       handler: new NetworkFirst({
         cacheName: "offline-cache",
         networkTimeoutSeconds: 10,
