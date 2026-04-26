@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Army, ArmyUnit, RulesVersionID } from '@/lib/types';
 import ArmyBuilder from '@/components/ArmyBuilder';
 import GameSession from '@/components/GameSession';
+import { GoogleDriveSync } from '@/components/GoogleDriveSync';
 import { CheckCircle2, MoreVertical, List, Grid, History, AlertTriangle, X, BookOpen } from 'lucide-react';
 import { isValidRulesVersion } from '@/lib/rules-registry';
 import { cn } from '@/lib/utils';
@@ -434,6 +435,13 @@ export default function Home() {
                 </button>
               </div>
             )}
+
+            {/* Google Drive Import button */}
+            <GoogleDriveSync
+              mode="import"
+              onImportComplete={() => window.location.reload()}
+              compact
+            />
 
             {/* End Battle button - dropdown menu */}
             {view === 'game' && army.isInBattle && (
