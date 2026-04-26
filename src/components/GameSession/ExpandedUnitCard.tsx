@@ -166,6 +166,8 @@ export const ExpandedUnitCard = memo(function ExpandedUnitCard({
     prev.unit.instanceId === next.unit.instanceId &&
     prev.isActive === next.isActive &&
     prev.section === next.section &&
+    prev.faction === next.faction &&
+    prev.isMachine === next.isMachine &&
     prev.unit.currentDurability === next.unit.currentDurability &&
     prev.unit.deadSoldiers?.length === next.unit.deadSoldiers?.length
   );
