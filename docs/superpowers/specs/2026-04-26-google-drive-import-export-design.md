@@ -2,13 +2,15 @@
 
 ## Context
 
-Supersedes the 2026-04-17 Google Drive backup spec. The original spec proposed full OAuth integration with Google Drive API and Picker API. This revision simplifies to a link-paste approach: no OAuth, no API keys, no third-party dependencies.
+Supersedes the 2026-04-17 Google Drive backup spec. The original spec proposed full OAuth integration with Google Drive API and Picker API. This revision uses a file-based approach: no OAuth, no API keys, no third-party dependencies, no CORS issues.
 
-**User workflow**: Desktop users export all settings as a JSON file, upload it to Google Drive manually, and share a public link. Mobile users paste that link in the app to import everything.
+**User workflow**: Desktop users export all settings as a JSON file, upload it to Google Drive (or any cloud). Mobile users download the file from Drive and import it via file picker.
 
 **Scope**: Export custom army list sources + custom modifiers as a single bundle. Does NOT export assembled armies.
 
-## Approach: Google Drive Link Paste
+**Why not link-paste**: Google Drive's direct download endpoint (`drive.google.com/uc?export=download`) does not serve CORS headers. Client-side `fetch()` is blocked by browsers. Since the app is a static site on GitHub Pages (no server), a proxy route is not available. File picker import is the only technically viable approach.
+
+## Approach: File Download + File Upload via Google Drive
 
 ### Desktop — Export
 
@@ -16,62 +18,58 @@ Supersedes the 2026-04-17 Google Drive backup spec. The original spec proposed f
 
 **What gets exported**: All user configuration in one file:
 - Custom army list sources (from `bronepehota_custom_sources` localStorage)
-- Custom modifiers (from modifier storage)
+- Custom modifiers (from `bronepehota_custom_modifiers` localStorage)
 
 **Format**:
-```json
-{
-  "version": 1,
-  "type": "bronepehota_config",
-  "exportedAt": "2026-04-26T12:00:00Z",
-  "data": {
-    "sources": [],
-    "modifiers": []
-  }
+```typescript
+interface ConfigExportEnvelope {
+  version: 1;
+  type: 'bronepehota_config';
+  exportedAt: string; // ISO timestamp
+  data: {
+    sources: CustomSource[];       // Full CustomSource objects from editor/types.ts
+    modifiers: CustomModifiersData; // { buffs: BuffDefinition[], debuffs: DebuffTemplate[] }
+  };
 }
 ```
 
-**File name**: `bronepehota_config_<date>.json` (e.g. `bronepehota_config_2026-04-26.json`)
+**File name**: `bronepehota_config_YYYY-MM-DD.json` using UTC date from `new Date().toISOString()`.
 
-**Mechanism**: `Blob` + `URL.createObjectURL` + programmatic `<a>` click (standard browser download). No server involved.
+**Mechanism**: `Blob` + `URL.createObjectURL` + programmatic `<a>` click (standard browser download).
 
-**After download**: User uploads the file to Google Drive and creates a public share link. A help modal explains the steps.
+**After download**: User uploads the file to Google Drive (or any cloud storage). A help modal explains the steps.
 
-### Mobile — Import via Google Drive Link
+### Mobile — Import from File
 
-**Trigger**: Button in the app (`/app`) labeled «Импорт из Drive», visible at any step before battle starts.
+**Trigger**: Button in the app (`/app`) labeled «Импорт настроек», visible in the header when `army.currentStep !== 'battle'`. Small icon button using the Upload icon from Lucide, matching existing header button style.
 
 **UI flow**:
-1. User taps «Импорт из Drive»
-2. Input field appears: «Вставьте ссылку Google Drive» + «Загрузить» button
-3. App parses URL, extracts FILE_ID
-4. Fetches file via `https://drive.google.com/uc?export=download&id=FILE_ID`
-5. Validates JSON envelope (`type`, `version`, `data` structure)
-6. Imports sources + modifiers into localStorage
-7. Shows toast: «Загружено: X армлистов, Y способностей»
-
-**Supported Google Drive URL formats**:
-- `https://drive.google.com/file/d/FILE_ID/view?usp=sharing`
-- `https://drive.google.com/file/d/FILE_ID/view`
-- `https://drive.google.com/open?id=FILE_ID`
-- `https://drive.google.com/uc?export=download&id=FILE_ID`
+1. User taps «Импорт настроек»
+2. System file picker opens (`<input type="file" accept=".json">`)
+3. User selects the downloaded `bronepehota_config_*.json` file
+4. App reads file via `FileReader`, parses JSON
+5. Validates envelope (`type === "bronepehota_config"`, `version` recognized, `data` has `sources` and `modifiers`)
+6. Confirmation dialog: «Будут заменены существующие армлисты и способности. Продолжить?»
+7. Saves each source via `CustomSourcesStorage.save()` (existing upsert logic)
+8. Saves modifiers via `importCustomModifiers()` (existing merge logic)
+9. Shows toast: «Загружено: X армлистов, Y способностей»
 
 **Validation**:
 - Check `type === "bronepehota_config"` and `version` is recognized (currently only `1`)
-- Verify `data` has `sources` and `modifiers` arrays
-- Reject unknown future versions with message to update the app
+- Verify `data.sources` is an array and `data.modifiers` is an object with `buffs`/`debuffs` arrays
+- Reject unknown future versions with message: «Обновите приложение для поддержки этого формата»
 
-**Conflict resolution**: Import replaces existing data. If a custom source with the same ID exists locally, it gets overwritten. Confirmation dialog: «Будут заменены существующие армлисты и способности. Продолжить?»
+**Conflict resolution**: Uses existing merge logic — `CustomSourcesStorage.save()` upserts by ID (overwrites matching, preserves others). `importCustomModifiers()` merges buffs/debuffs by ID. The confirmation dialog warns about potential overwrites before starting.
 
 **Error handling**:
-- Unrecognized URL → «Неверная ссылка. Скопируйте ссылку общего доступа из Google Drive»
-- Download failed → «Не удалось загрузить файл. Убедитесь, что доступ к файлу — „Все, у кого есть ссылка"»
 - Invalid JSON → «Файл повреждён или имеет неверный формат»
+- Wrong `type` field → «Это не файл настроек Бронепехоты»
 - Unsupported version → «Обновите приложение для поддержки этого формата»
+- File read error → «Не удалось прочитать файл»
 
 ### User Instructions
 
-**Location**: Help modal opened by «?» button next to export/import buttons. Also accessible via inline hint text.
+**Location**: Help modal (`ImportExportHelp.tsx`) opened by «?» button next to export/import buttons. Also accessible from the mobile import screen.
 
 **Content** (in Russian):
 
@@ -84,53 +82,58 @@ Supersedes the 2026-04-17 Google Drive backup spec. The original spec proposed f
 3. Скачается файл `bronepehota_config_<date>.json`
 
 **Шаг 2 — Загрузите файл на Google Drive**
-1. Откройте Google Drive
-2. Нажмите «+ Создать» → «Загрузить файлы»
+1. Откройте [Google Drive](https://drive.google.com)
+2. Нажмите «+» → «Загрузить файлы»
 3. Выберите скачанный файл
-4. Нажмите правой кнопкой на файл → «Доступ» → «Все, у кого есть ссылка»
-5. Скопируйте ссылку
 
 **Шаг 3 — На телефоне**
-1. Нажмите «Импорт из Drive»
-2. Вставьте скопированную ссылку
-3. Нажмите «Загрузить»
-4. Готово!
+1. Откройте Google Drive и скачайте файл на устройство
+2. Откройте Бронепехоту
+3. Нажмите «Импорт настроек»
+4. Выберите скачанный файл
+5. Готово!
 ---
 
 ## Components
 
 | File | Action |
 |------|--------|
-| `src/lib/config-export.ts` | **new** — serialize config, parse Google Drive URLs, validate envelope |
-| `src/components/ConfigExportButton.tsx` | **new** — export button for editor |
-| `src/components/ConfigImportFromDrive.tsx` | **new** — link input + fetch + import for mobile |
-| `src/components/ImportExportHelp.tsx` | **new** — help modal with step-by-step guide |
+| `src/lib/config-export.ts` | **new** — serialize config to JSON, validate envelope, parse uploaded file |
+| `src/components/editor/ConfigExportButton.tsx` | **new** — export button for editor |
+| `src/components/ConfigImportButton.tsx` | **new** — file picker + import for mobile |
+| `src/components/modals/ImportExportHelp.tsx` | **new** — help modal with step-by-step guide |
 | `src/components/editor/EditorLayout.tsx` | modify — add export button + help button |
-| `src/app/app/page.tsx` | modify — add import button + help button |
+| `src/app/app/page.tsx` | modify — add import button in header (visible when not in battle) |
 
 **No changes to**: existing source import/export in editor, service worker, no new npm dependencies.
 
 ## Security
 
 - No OAuth tokens, no API keys — nothing to leak
-- Google Drive direct download works for publicly shared files only
 - All processing client-side, no data sent to any server
-- User explicitly shares their file via Google Drive's own sharing mechanism
+- File never leaves the user's device during import
 
 ## Out of Scope
 
 - Export of assembled armies (army builder state)
 - Direct Google Drive API integration (OAuth)
+- Link-paste import (blocked by CORS on static site)
 - Real-time sync between devices
 - Auto-save
 - Battle session state backup
 
-## Verification
+## Testing
 
+**Unit tests**: `src/__tests__/lib/config-export.test.ts` covering:
+- Envelope creation (correct structure, version, type)
+- Envelope validation (valid, missing fields, wrong type, wrong version)
+- File name generation (UTC date format)
+
+**Manual verification**:
 1. Export from editor → verify JSON downloads with correct structure and all custom data
-2. Import via valid Google Drive link → verify sources and modifiers restored
-3. Import via invalid URL → verify error message
-4. Import with wrong file format → verify error message
+2. Import valid config file → verify sources and modifiers restored via existing storage methods
+3. Import invalid JSON → verify error message
+4. Import file with wrong `type` → verify «не файл настроек» message
 5. Import with version mismatch → verify rejection message
-6. Conflict (existing source with same ID) → verify confirmation dialog and overwrite
+6. Conflict (existing source with same ID) → verify confirmation dialog and upsert behavior
 7. Help modal → verify instructions are clear and complete
