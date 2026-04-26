@@ -287,7 +287,6 @@ export function GoogleDriveSync({
   const dismissFileList = useCallback(() => setShowFileList(false), []);
 
   // ---- Determine which mode to render ----
-  const isGisReady = gisAvailable === true;
   const isFallback = gisAvailable === false;
   const isChecking = gisAvailable === null;
 
