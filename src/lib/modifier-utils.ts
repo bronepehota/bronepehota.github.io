@@ -454,3 +454,34 @@ export function getSpeedModifierText(summary: ModifierSummary): string {
   }
   return '';
 }
+
+/**
+ * Build a ModifierSummary from selected catalog modifiers for the calculator.
+ * Used by standalone calculator to aggregate toggled buffs/debuffs.
+ * Filters modifiers by phase relevance (same logic as resolveModifierSummary).
+ */
+export function buildCalculatorModifierSummary(
+  selectedBuffs: BuffDefinition[],
+  selectedDebuffs: DebuffTemplate[],
+  phase: ModifierPhase,
+): ModifierSummary {
+  if (selectedBuffs.length === 0 && selectedDebuffs.length === 0) {
+    return EMPTY_MODIFIER_SUMMARY;
+  }
+
+  const summary: ModifierSummary = { ...EMPTY_MODIFIER_SUMMARY, descriptions: [] };
+
+  for (const buff of selectedBuffs) {
+    if (isTargetRelevantForPhase(buff.target, phase)) {
+      applyModifier(summary, buff.target, buff.value, buff.name, true);
+    }
+  }
+
+  for (const debuff of selectedDebuffs) {
+    if (isTargetRelevantForPhase(debuff.target, phase)) {
+      applyModifier(summary, debuff.target, debuff.value, debuff.name, false);
+    }
+  }
+
+  return summary;
+}
