@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { Dice1 } from 'lucide-react';
 import HUDOverlay from './HUDOverlay';
 import CTAButton from './CTAButton';
 import { cn } from '@/lib/utils';
@@ -106,6 +107,35 @@ export default function HeroSection({ className }: HeroSectionProps) {
           )}
         >
           <CTAButton />
+        </div>
+
+        <div
+          className={cn(
+            'transition-all duration-700 delay-150',
+            showCTA ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          )}
+        >
+          <Link
+            href="/calculator"
+            data-testid="landing-calculator-button"
+            className="group relative inline-flex mx-auto mt-3
+              px-4 py-2 sm:px-6 sm:py-3
+              bg-transparent
+              border border-slate-600/40
+              font-russo text-xs sm:text-sm
+              uppercase tracking-wider
+              text-slate-400
+              hover:border-slate-500 hover:text-slate-300 transition-all duration-300
+              rounded
+              overflow-hidden touch-manipulation
+              min-h-[44px]
+              no-underline"
+          >
+            <span className="relative flex items-center gap-2">
+              <Dice1 className="w-4 h-4" />
+              <span>Калькулятор боя</span>
+            </span>
+          </Link>
         </div>
 
         {/* GitHub help link */}
