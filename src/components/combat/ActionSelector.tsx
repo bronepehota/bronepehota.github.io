@@ -2,6 +2,7 @@
 
 import { CombatActionType } from '@/lib/combat-types';
 import { ArmyUnit, Squad } from '@/lib/types';
+import type { CombatantData } from '@/lib/combatant-data';
 import { Target, Sword, Bomb } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -11,6 +12,7 @@ interface ActionSelectorProps {
   className?: string;
   unit?: ArmyUnit;
   soldierIndex?: number | null;
+  combatantData?: CombatantData;
 }
 
 // Color scheme for action types
@@ -77,8 +79,13 @@ export function ActionSelector({
   className,
   unit,
   soldierIndex,
+  combatantData,
 }: ActionSelectorProps) {
-  const canShoot = canSoldierShoot(unit, soldierIndex);
+  const canShoot = unit
+  ? canSoldierShoot(unit, soldierIndex)
+  : combatantData
+    ? Boolean(combatantData.range && combatantData.range !== '0' && combatantData.range !== 'ББ')
+    : true;
   const canMelee = canSoldierMelee(unit, soldierIndex);
 
   const actions: Array<{

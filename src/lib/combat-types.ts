@@ -106,6 +106,7 @@ export interface CombatFlowState {
   diceDisplay: DiceDisplay;
   result: CombatResult | null;
   isRolling: boolean;
+  combatantData?: any;       // CombatantData for standalone calculator
   // Grenade-specific state
   grenadeData?: {
     distanceRoll: number;      // Final D6 roll selected (or single roll for tehnolog)
@@ -121,7 +122,7 @@ export interface CombatFlowState {
  * Actions that can be dispatched to combat flow
  */
 export type CombatFlowAction =
-  | { type: 'START_COMBAT'; unit: any; soldierIndex?: number; weaponIndex?: number; actionType?: CombatActionType }
+  | { type: 'START_COMBAT'; unit: any; soldierIndex?: number; weaponIndex?: number; actionType?: CombatActionType; combatantData?: import('@/lib/combatant-data').CombatantData }
   | { type: 'SELECT_ACTION'; actionType: CombatActionType }
   | { type: 'SET_PARAMETERS'; parameters: Partial<CombatParameters> }
   | { type: 'EXECUTE_ROLL' }

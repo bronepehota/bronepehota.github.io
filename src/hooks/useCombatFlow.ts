@@ -12,6 +12,7 @@ import {
   GrenadeBlastResult,
 } from '@/lib/combat-types';
 import { rollDie, multiplyRange, addBonusToRoll } from '@/lib/game-logic';
+import type { CombatantData } from '@/lib/combatant-data';
 import { rulesRegistry } from '@/lib/rules-registry';
 import { getDefaultRulesVersion } from '@/lib/rules-registry';
 
@@ -35,6 +36,7 @@ const initialCombatFlowState: CombatFlowState = {
   diceDisplay: {},
   result: null,
   isRolling: false,
+  combatantData: undefined,
 };
 
 /**
@@ -53,6 +55,7 @@ function combatFlowReducer(
         unit: action.unit,
         unitType: action.unit.type,
         soldierIndex: action.soldierIndex ?? null,
+        combatantData: action.combatantData,
         parameters: {
           ...initialCombatFlowState.parameters,
           weaponIndex: action.weaponIndex,
@@ -189,8 +192,8 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
   /**
    * Start combat for a unit
    */
-  const startCombat = useCallback((unit: any, soldierIndex?: number, weaponIndex?: number, actionType?: CombatActionType) => {
-    dispatch({ type: 'START_COMBAT', unit, soldierIndex, weaponIndex, actionType });
+  const startCombat = useCallback((unit: any, soldierIndex?: number, weaponIndex?: number, actionType?: CombatActionType, combatantData?: CombatantData) => {
+    dispatch({ type: 'START_COMBAT', unit, soldierIndex, weaponIndex, actionType, combatantData });
   }, []);
 
   /**
@@ -232,7 +235,10 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
     let range = '';
     let power = '';
 
-    if (state.unitType === 'squad' && soldierIndex !== null) {
+    if (state.combatantData) {
+      range = state.combatantData.range || '';
+      power = state.combatantData.power || '';
+    } else if (state.unitType === 'squad' && soldierIndex !== null) {
       const soldier = (unit.data as any).soldiers[soldierIndex];
       range = soldier.range;
       power = soldier.power;
@@ -364,8 +370,8 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
       hitResult,
       damageResult,
       timestamp: Date.now(),
-      unitName: unit.data.name,
-      unitId: unit.instanceId,
+      unitName: state.combatantData ? 'Калькулятор' : unit.data.name,
+      unitId: state.combatantData ? 'calculator' : unit.instanceId,
       soldierIndex: soldierIndex ?? undefined,
       pilotDied: damageResult.pilotDied,
       armorTestRoll: damageResult.armorTestRoll,
@@ -392,7 +398,9 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
 
     // Get soldier rank for grenade throw
     let soldierRank = 0;
-    if (state.unitType === 'squad' && state.soldierIndex !== null) {
+    if (state.combatantData) {
+      soldierRank = state.combatantData.rank;
+    } else if (state.unitType === 'squad' && state.soldierIndex !== null) {
       const soldiers = (state.unit.data as any).soldiers;
       if (soldiers && soldiers[state.soldierIndex]) {
         soldierRank = soldiers[state.soldierIndex].rank || 0;
@@ -456,8 +464,8 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
         isGrenade: true
       },
       timestamp: Date.now(),
-      unitName: state.unit.data.name,
-      unitId: state.unit.instanceId,
+      unitName: state.combatantData ? 'Калькулятор' : state.unit.data.name,
+      unitId: state.combatantData ? 'calculator' : state.unit.instanceId,
       soldierIndex: state.soldierIndex ?? undefined,
       grenadeDistance: totalDistance,
       grenadeBlastZone: blastZone,
@@ -520,7 +528,9 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
 
     // Get attacker melee stat
     let attackerMelee = 0;
-    if (state.unitType === 'squad' && state.soldierIndex !== null) {
+    if (state.combatantData) {
+      attackerMelee = state.combatantData.melee;
+    } else if (state.unitType === 'squad' && state.soldierIndex !== null) {
       attackerMelee = (state.unit.data as any).soldiers[state.soldierIndex].melee;
     }
 
@@ -567,8 +577,8 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
       parameters: { ...state.parameters },
       meleeResult,
       timestamp: Date.now(),
-      unitName: state.unit.data.name,
-      unitId: state.unit.instanceId,
+      unitName: state.combatantData ? 'Калькулятор' : state.unit.data.name,
+      unitId: state.combatantData ? 'calculator' : state.unit.instanceId,
       soldierIndex: state.soldierIndex ?? undefined,
     };
 
