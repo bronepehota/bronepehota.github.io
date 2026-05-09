@@ -83,8 +83,10 @@ src/data/sources/
 │   └── mercenaries/  - Mercenaries faction units
 │       ├── squads.json
 │       └── machines.json
-└── tehnolog/         - Official Tehnolog source (placeholder for future data)
-    └── factions.json
+├── tehnolog/         - Official Tehnolog source
+│   └── factions.json
+├── tehnolog_2026/    - Tehnolog 2026 edition source
+└── botwa/            - Botwa community source
 ```
 
 **Source Registry** (`src/lib/sources-registry.ts`): Manages multiple army list sources.
@@ -94,26 +96,7 @@ src/data/sources/
 - `getDefaultSource()` - Returns 'star_system' as default
 - `isValidSource(id)` - Validate source ID
 
-**Source Types**:
-```typescript
-type SourceID = string;  // Dynamic source identifiers
-type FactionID = string; // Dynamic faction identifiers (changed from union type)
-
-interface ArmyListSource {
-  id: SourceID;
-  name: string;
-  description: string;
-  link?: string;
-  version: string;
-}
-
-interface SourceData {
-  source: ArmyListSource;
-  factions: Faction[];
-  squads: Squad[];
-  machines: Machine[];
-}
-```
+**Source Types**: See `src/lib/types.ts` — `SourceID` and `FactionID` are dynamic strings; `ArmyListSource` and `SourceData` define source metadata.
 
 ### State Management
 
@@ -176,9 +159,8 @@ Dice notation parsing: `D6`, `D12+2`, `2D12`, `ББ` (melee)
 - `getRulesByVersion(version)` - Get specific rules implementation
 
 **Rule Implementations** (`rules/`):
-- `fan.ts` - Fan rules implementation
-- `tehnolog.ts` - Tehnolog rules implementation
 - `community_star_system.ts` - Star System community rules implementation
+- `tehnolog.ts` - Tehnolog rules implementation
 
 Adding a new rules version:
 1. Create new file in `src/lib/rules/{version}.ts`
@@ -199,7 +181,8 @@ src/components/
 ├── controls/        - Shared controls (FortificationSelector, DistanceConverter)
 ├── editor/          - Desktop-only unit editor (SourcesList, SquadEditor, MachineEditor, ModifiersEditor, UnifiedSaveArea, BuffSelector, ModifierIcons, UnitsList, FactionsList, CreateSourceModal)
 ├── encyclopedia/    - Encyclopedia page components (UnitDetailPage)
-├── game-session/    - Game session components (ActiveBuffsIndicator)
+├── GameSession/     - Game session navigation (ExpandedNavigator, ExpandedUnitCard, UnitNavigationCard) — PascalCase dir
+├── game-session/    - Game session sub-components (ActiveBuffsIndicator)
 ├── landing/         - Landing page
 ├── machine/         - Machine-specific components
 ├── modals/          - Shared modals (SoldierEffectsModal, PilotAssignmentModal, PanicTestModal, EncyclopediaModal, ImportExportHelp)
@@ -212,71 +195,24 @@ src/components/
 
 **Main Page** (`src/app/app/page.tsx`): ArmyBuilder (construction) OR GameSession (gameplay).
 
-**Orphaned editor files** (not imported anywhere, safe to delete): `ExportModal.tsx`, `ImportModal.tsx`, `ModifierExportImport.tsx` — functionality replaced by `UnifiedSaveArea.tsx`.
+**Orphaned editor files** (not imported anywhere): `ExportModal.tsx`, `ImportModal.tsx`, `ModifierExportImport.tsx` in `src/components/editor/` — functionality replaced by `UnifiedSaveArea.tsx`. Can be safely deleted.
 
 ### Grenade Combat Mechanics
 
-**Two-phase grenade flow (per Fan rules lines 1161-1213)**:
+Two-phase flow: (1) Roll D6 + soldier rank = blast distance, (2) Roll D20 vs target armor for each target in blast zone. D6=1 triggers self-danger warning.
 
-**Phase 1: Determine Explosion Location**
-- Roll D6 + soldier's army rank (A) = explosion distance
-- Display: "Взрыв на расстоянии X шагов [Y-Z см]" (X ± 1 step)
-- Warning if D6 roll = 1: "⚠️ Опасно! Вы в зоне взрыва!"
-- Example: D6=4, rank=2 → distance=6 → blast zone [5-7 steps, 20-28 cm]
-
-**Phase 2: Check Targets in Blast Zone**
-- Input: "Броня цели" (with memory for last value)
-- Button: **ВЗРЫВ** → rolls 1D20 vs target armor
-- Result: D20 > armor = ПРОБИТО, D20 ≤ armor = НЕ ПРОБИТО
-- Can repeat for multiple targets in blast zone
-
-**Implementation**:
-- `useCombatFlow.ts`: `executeGrenade()` (Phase 1) and `checkGrenadeTarget()` (Phase 2)
-- `combat-types.ts`: `GrenadeBlastResult`, `grenadeDistance`, `grenadeBlastZone`, `grenadeBlastChecks`
-- `CombatResults.tsx`: Special grenade display with blast zone and target check UI
-
-**Grenade Usage**:
-- Only squads can throw grenades (not machines)
-- Grenades can be used once per battle (`grenadesUsed: true` after first use)
-- Soldier's army rank (0-7) is added to D6 roll for distance
+- Implementation: `useCombatFlow.ts` (`executeGrenade()`, `checkGrenadeTarget()`), `combat-types.ts` (`GrenadeBlastResult`), `CombatResults.tsx`
+- Only squads can throw grenades; once per battle (`grenadesUsed: true`)
 
 ### Pilot Assignment System
 
-**Purpose**: Soldiers can be assigned as pilots to machines. When assigned, the pilot is blocked from independent actions and must navigate to the machine to operate it.
+Soldiers can be assigned as pilots to machines. Assigned pilots show "ПИЛОТ" badge and "К МАШИНЕ →" button that navigates to their machine.
 
-**Pilot Navigation Flow**:
-1. Open machine view in game session
-2. Click pilot button (shield icon or pilot portrait)
-3. Select squad from modal
-4. Select soldier from squad
-5. Confirm assignment
-6. Pilot soldier now shows:
-   - "ПИЛОТ" badge on soldier card
-   - "К МАШИНЕ →" button instead of "ДЕЙСТВИЕ"
-   - Clicking navigates directly to the machine card
-7. Machine shows pilot portrait in TacticalDashboard
-
-**Implementation**:
-- `PilotAssignmentModal.tsx`: Two-step modal (squad → soldier selection)
-- `SoldierActions.tsx`: Shows "К МАШИНЕ →" button when `isPilot=true`
-- `TacticalDashboard.tsx`: Displays pilot status and portrait
-- Navigation: `onNavigateToUnit(instanceId)` prop chain from UnitCard → SquadView → SoldierCard
-
-**Type Definitions**:
-```typescript
-interface PilotInfo {
-  squadInstanceId: string;
-  soldierIndex: number;
-  pilotArmor: number;
-  alive: boolean;
-}
-
-// Soldier has pilot flags
-interface Soldier {
-  isPilot: boolean;
-  pilotOfInstanceId: string | null;  // Which machine this soldier pilots
-}
-```
+- `PilotAssignmentModal.tsx`: Two-step modal (squad → soldier)
+- `SoldierActions.tsx`: Shows pilot navigation when `isPilot=true`
+- `TacticalDashboard.tsx`: Displays pilot status/portrait
+- Navigation via `onNavigateToUnit(instanceId)` prop chain
+- Types: `PilotInfo { squadInstanceId, soldierIndex, pilotArmor, alive }`; Soldier has `isPilot` and `pilotOfInstanceId` flags
 
 ### Adding New Units via JSON
 
@@ -346,10 +282,7 @@ interface Soldier {
 
 **Images**: Place in `public/images/squads/` or `public/images/machines/`
 
-**Dice Notation**:
-- Range: "D6", "D12", "D20", "D6+2"
-- Power: "1D6", "2D12", "ББ" (melee)
-- Modifiers: Soldier `props` field in JSON (e.g., `["Г"]` for grenade). Resolved to modifier IDs at runtime via `resolveSoldierEffects()`
+**Dice Notation**: See Game Logic section for format details.
 
 **Speed Sectors**: Must cover full range 1 to durability_max without gaps
 
@@ -429,18 +362,9 @@ interface Soldier {
 - For squads: `soldierIndex` passed; for machines: `soldierIndex = undefined`
 - Phase mapping: `actionType === 'melee'` → `'melee'`, otherwise → `'shot'`
 
-**Combat Relevance Filtering:**
-- `resolveModifierSummary` filters modifiers by action-relevant targets:
-  - **Shot phase**: `range_bonus`, `range_multiply`, `power_bonus`, `armor_bonus`, `distance_penalty`, `custom`
-  - **Melee phase**: `melee_bonus`, `custom`
-  - **Always phase** (soldier card stats): ALL targets included
-- `speed_multiply` (e.g., Адреналин) is hidden in combat panel but visible on soldier card stats
-- This filtering only affects `descriptions` and bonus values in combat; soldier card stats use separate phase calls (shot/melee/always)
+**Combat Relevance Filtering:** `resolveModifierSummary` filters by phase — shot (`range_bonus`, `range_multiply`, `power_bonus`, `armor_bonus`, `distance_penalty`, `custom`), melee (`melee_bonus`, `custom`), or all. `speed_multiply` hidden in combat but shown on soldier card.
 
-**Soldier Effects Flow:**
-- `ModifierIndicator` on SoldierCard → click opens `SoldierEffectsModal` (3 tabs: buffs/debuffs/abilities)
-- Buffs/abilities filtered from `squad.buffs` (not global catalog); debuffs from catalog
-- GameSession manages `effectsModalState` and `onSoldierModifierClick` prop chain
+**Soldier Effects Flow:** `ModifierIndicator` click → `SoldierEffectsModal` (3 tabs: buffs/debuffs/abilities). Buffs from `squad.buffs`, debuffs from catalog.
 
 ### Import/Export System
 
