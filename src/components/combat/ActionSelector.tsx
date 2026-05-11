@@ -78,7 +78,10 @@ export function ActionSelector({
   unit,
   soldierIndex,
 }: ActionSelectorProps) {
-  const canShoot = canSoldierShoot(unit, soldierIndex);
+  // Calculator mode (combatantData, no unit): always show all actions
+  const canShoot = unit
+    ? canSoldierShoot(unit, soldierIndex)
+    : true;
   const canMelee = canSoldierMelee(unit, soldierIndex);
 
   const actions: Array<{

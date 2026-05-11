@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Sword, RotateCcw, Clock } from 'lucide-react';
+import { ArrowRight, Sword, RotateCcw, Clock, Calculator } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface CTAButtonProps {
@@ -193,52 +193,90 @@ export default function CTAButton({ className }: CTAButtonProps) {
               <span className="sm:hidden">В бой</span>
             </span>
           </Link>
+
+          {/* Calculator */}
+          <Link
+            href="/calculator"
+            className="group flex items-center justify-center gap-1 px-2 sm:px-3 py-2
+              bg-slate-800/30 hover:bg-slate-700/50
+              transition-all duration-200 touch-manipulation no-underline"
+          >
+            <Calculator className="w-3.5 h-3.5 text-slate-500 group-hover:text-slate-400 transition-colors" />
+            <span className="font-russo text-[10px] sm:text-xs text-slate-400 group-hover:text-slate-300 transition-colors uppercase">
+              <span className="hidden sm:inline">Калькулятор</span>
+              <span className="sm:hidden">Кальк</span>
+            </span>
+          </Link>
         </div>
       </div>
     );
   }
 
-  // Normal state - single CTA button
+  // Normal state - CTA button + calculator link
   return (
-    <Link
-      href="/app"
-      data-testid="landing-cta-button"
-      className={cn(
-        'group relative inline-flex',
-        'px-4 py-2 sm:px-6 sm:py-3 md:px-8 md:py-4',
-        'bg-transparent',
-        'border-2 border-military-rust/60',
-        'font-russo font-bold text-sm sm:text-base md:text-lg',
-        'uppercase tracking-wider md:tracking-widest',
-        'text-military-rust',
-        'hover:border-military-amber hover:text-military-amber transition-all duration-300',
-        'overflow-hidden touch-manipulation',
-        'min-h-[44px] md:min-h-[56px]',
-        'hover:shadow-[0_0_20px_rgba(234,88,12,0.3)]',
-        'no-underline',
-        className
-      )}
-    >
-      {/* Button background overlay */}
-      <span className="absolute inset-0 bg-military-rust/10 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300" />
+    <div className={cn('flex flex-col sm:flex-row items-center justify-center gap-3', className)}>
+      <Link
+        href="/app"
+        data-testid="landing-cta-button"
+        className={cn(
+          'group relative inline-flex',
+          'px-4 py-2 sm:px-6 sm:py-3 md:px-8 md:py-4',
+          'bg-transparent',
+          'border-2 border-military-rust/60',
+          'font-russo font-bold text-sm sm:text-base md:text-lg',
+          'uppercase tracking-wider md:tracking-widest',
+          'text-military-rust',
+          'hover:border-military-amber hover:text-military-amber transition-all duration-300',
+          'overflow-hidden touch-manipulation',
+          'min-h-[44px] md:min-h-[56px]',
+          'hover:shadow-[0_0_20px_rgba(234,88,12,0.3)]',
+          'no-underline'
+        )}
+      >
+        {/* Button background overlay */}
+        <span className="absolute inset-0 bg-military-rust/10 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300" />
 
-      {/* Corner accents - responsive size */}
-      <span className="absolute top-0 left-0 w-2 h-2 sm:w-3 sm:h-3 border-t-2 border-l-2 border-military-rust" />
-      <span className="absolute top-0 right-0 w-2 h-2 sm:w-3 sm:h-3 border-t-2 border-r-2 border-military-rust" />
-      <span className="absolute bottom-0 left-0 w-2 h-2 sm:w-3 sm:h-3 border-b-2 border-l-2 border-military-rust" />
-      <span className="absolute bottom-0 right-0 w-2 h-2 sm:w-3 sm:h-3 border-b-2 border-r-2 border-military-rust" />
+        {/* Corner accents - responsive size */}
+        <span className="absolute top-0 left-0 w-2 h-2 sm:w-3 sm:h-3 border-t-2 border-l-2 border-military-rust" />
+        <span className="absolute top-0 right-0 w-2 h-2 sm:w-3 sm:h-3 border-t-2 border-r-2 border-military-rust" />
+        <span className="absolute bottom-0 left-0 w-2 h-2 sm:w-3 sm:h-3 border-b-2 border-l-2 border-military-rust" />
+        <span className="absolute bottom-0 right-0 w-2 h-2 sm:w-3 sm:h-3 border-b-2 border-r-2 border-military-rust" />
 
-      {/* Button content - responsive icon and gap */}
-      <span className="relative flex items-center gap-2 md:gap-3">
-        <span className="hidden sm:inline">ПЕРЕЙТИ В ШТАБ</span>
-        <span className="sm:hidden">В ШТАБ</span>
-        <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 transform group-hover:translate-x-1 transition-transform duration-300" />
-      </span>
+        {/* Button content - responsive icon and gap */}
+        <span className="relative flex items-center gap-2 md:gap-3">
+          <span className="hidden sm:inline">ПЕРЕЙТИ В ШТАБ</span>
+          <span className="sm:hidden">В ШТАБ</span>
+          <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 transform group-hover:translate-x-1 transition-transform duration-300" />
+        </span>
 
-      {/* Scanline effect on hover */}
-      <span className="absolute inset-0 overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-        <span className="absolute inset-0 bg-gradient-to-r from-transparent via-military-rust/20 to-transparent transform -translate-x-full group-hover:animate-shine" />
-      </span>
-    </Link>
+        {/* Scanline effect on hover */}
+        <span className="absolute inset-0 overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <span className="absolute inset-0 bg-gradient-to-r from-transparent via-military-rust/20 to-transparent transform -translate-x-full group-hover:animate-shine" />
+        </span>
+      </Link>
+
+      <Link
+        href="/calculator"
+        className={cn(
+          'group relative inline-flex',
+          'px-4 py-2 sm:px-5 sm:py-3',
+          'bg-transparent',
+          'border-2 border-military-steel/30',
+          'font-russo font-bold text-xs sm:text-sm',
+          'uppercase tracking-wider',
+          'text-military-steel/70',
+          'hover:border-military-steel/60 hover:text-military-steel transition-all duration-300',
+          'overflow-hidden touch-manipulation',
+          'min-h-[44px] md:min-h-[56px]',
+          'no-underline'
+        )}
+      >
+        <span className="relative flex items-center gap-1.5 sm:gap-2">
+          <Calculator className="w-4 h-4" />
+          <span className="hidden sm:inline">КАЛЬКУЛЯТОР БОЯ</span>
+          <span className="sm:hidden">КАЛЬКУЛЯТОР</span>
+        </span>
+      </Link>
+    </div>
   );
 }

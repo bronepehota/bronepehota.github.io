@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import HeroSection from '@/components/landing/HeroSection';
 import LoreSection from '@/components/landing/LoreSection';
 import FactionsSection from '@/components/landing/FactionsSection';
@@ -47,6 +48,12 @@ export default function Home() {
             >
               Сообщество VK
             </a>
+            <Link
+              href="/calculator"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-sm border border-amber-400/40 hover:border-amber-400 text-amber-400 font-russo text-xs uppercase tracking-wider transition-all hover:bg-amber-400/10"
+            >
+              Калькулятор боя
+            </Link>
           </div>
         </div>
       </section>

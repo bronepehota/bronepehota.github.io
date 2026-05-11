@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { DiceNotationDisplay } from './DiceNotationDisplay';
 import { getUnitStats, multiplyRange } from '@/lib/game-logic';
 import { Target, Shield } from 'lucide-react';
+import type { CombatantData } from '@/lib/combatant-data';
 import { Machine } from '@/lib/types';
 import { TargetMemory } from '@/contexts/CombatTargetContext';
 import { DistanceConverter } from './DistanceConverter';
@@ -32,6 +33,8 @@ interface ParameterInputsProps {
   distanceInputUnit?: 'steps' | 'cm';
   stepToCmFactor?: number;
   modifierSummary?: ModifierSummary;
+  onDataNeeded?: (field: 'range' | 'power' | 'melee' | 'rank') => void;
+  combatantData?: CombatantData;
 }
 
 export function ParameterInputs({
@@ -48,6 +51,8 @@ export function ParameterInputs({
   distanceInputUnit = 'steps',
   stepToCmFactor = 5,
   modifierSummary,
+  onDataNeeded,
+  combatantData,
 }: ParameterInputsProps) {
   const effectiveDistance = targetMemory?.isDirty && targetMemory?.distance !== null
     ? targetMemory.distance
@@ -61,8 +66,12 @@ export function ParameterInputs({
     ? targetMemory.targetMelee
     : parameters.targetMelee;
 
-  // Get unit stats for preview
-  const unitStats = unit ? getUnitStats(unit, soldierIndex, parameters.weaponIndex) : null;
+  // Get unit stats for preview — combatantData takes priority (calculator mode)
+  const unitStats = combatantData
+    ? { range: combatantData.range || '', power: combatantData.power || '', melee: combatantData.melee, displayName: 'Боец' }
+    : unit
+      ? getUnitStats(unit, soldierIndex, parameters.weaponIndex)
+      : null;
 
   // Modifier bonus pill — compact +N/-N badge inline with dice
   const ModBadge = ({ bonus }: { bonus: number }) => {
@@ -116,6 +125,25 @@ export function ParameterInputs({
                 <DiceNotationDisplay rollStr="1D20" color="orange" />
               </div>
             </div>
+            {/* Rank for grenade blast distance (D6 + rank) */}
+            {combatantData && onDataNeeded && (
+              <div className="mt-2 bg-slate-950/80 p-2 rounded-md border border-emerald-500/30">
+                <div className="text-[8px] opacity-40 uppercase font-bold mb-1 text-center">Ранг (дистанция D6+ранг)</div>
+                <div className="flex justify-center">
+                  <button
+                    onClick={() => onDataNeeded('rank')}
+                    className={cn(
+                      "px-3 py-1 rounded border-2 font-mono transition-all min-h-[44px] flex items-center justify-center",
+                      combatantData.rank === 0
+                        ? "border-dashed border-emerald-500/40 text-emerald-400/60 text-xs hover:border-emerald-500/70 hover:text-emerald-400"
+                        : "border-emerald-500/30 text-emerald-400 hover:border-emerald-500/60 text-sm font-bold"
+                    )}
+                  >
+                    {combatantData.rank === 0 ? 'Нажмите для ввода' : combatantData.rank}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       );
@@ -161,7 +189,21 @@ export function ParameterInputs({
                 <ModBadge bonus={rangeBonus} />
               </div>
               <div className="flex justify-center relative mb-1">
-                <DiceNotationDisplay rollStr={effectiveRange} color="blue" />
+                {onDataNeeded && combatantData ? (
+                  <button
+                    onClick={() => onDataNeeded('range')}
+                    className={cn(
+                      "rounded transition-all min-h-[44px] flex items-center justify-center",
+                      !effectiveRange
+                        ? "px-3 py-1 border-2 border-dashed border-blue-500/40 text-blue-400/60 text-xs font-mono hover:border-blue-500/70 hover:text-blue-400"
+                        : "hover:bg-blue-950/20 px-1 py-0.5"
+                    )}
+                  >
+                    {!effectiveRange ? 'Нажмите для ввода' : <DiceNotationDisplay rollStr={effectiveRange} color="blue" />}
+                  </button>
+                ) : (
+                  <DiceNotationDisplay rollStr={effectiveRange} color="blue" />
+                )}
               </div>
               {/* Hit probability indicator */}
               {hitProb && (
@@ -182,7 +224,21 @@ export function ParameterInputs({
                 <ModBadge bonus={powerBonus} />
               </div>
               <div className="flex justify-center relative mb-1">
-                <DiceNotationDisplay rollStr={unitStats.power} color="orange" />
+                {onDataNeeded && combatantData ? (
+                  <button
+                    onClick={() => onDataNeeded('power')}
+                    className={cn(
+                      "rounded transition-all min-h-[44px] flex items-center justify-center",
+                      !unitStats.power
+                        ? "px-3 py-1 border-2 border-dashed border-orange-500/40 text-orange-400/60 text-xs font-mono hover:border-orange-500/70 hover:text-orange-400"
+                        : "hover:bg-orange-950/20 px-1 py-0.5"
+                    )}
+                  >
+                    {!unitStats.power ? 'Нажмите для ввода' : <DiceNotationDisplay rollStr={unitStats.power} color="orange" />}
+                  </button>
+                ) : (
+                  <DiceNotationDisplay rollStr={unitStats.power} color="orange" />
+                )}
               </div>
               {/* Penetration probability indicator */}
               {penProb && (
@@ -205,7 +261,9 @@ export function ParameterInputs({
 
   // Render stats preview for melee
   const renderMeleeStats = () => {
-    if (!unitStats) return null;
+    if (!unitStats && !combatantData) return null;
+
+    const meleeValue = unitStats?.melee ?? combatantData?.melee ?? 0;
 
     return (
       <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/60 p-2 md:p-3 rounded-lg border border-slate-700/50 mb-2 md:mb-3 relative overflow-hidden">
@@ -222,7 +280,21 @@ export function ParameterInputs({
           <div className="bg-slate-950/80 p-2 rounded-md border border-cyan-500/30 relative">
             <div className="text-[8px] opacity-40 uppercase font-bold mb-1 text-center">Вы</div>
             <div className="flex items-center justify-center gap-1.5">
-              <DiceNotationDisplay rollStr={`1D6+${unitStats.melee}`} color="cyan" />
+              {combatantData && onDataNeeded ? (
+                <button
+                  onClick={() => onDataNeeded('melee')}
+                  className={cn(
+                    "px-3 py-1 rounded border-2 font-mono transition-all min-h-[44px] flex items-center justify-center",
+                    meleeValue === 0
+                      ? "border-dashed border-cyan-500/40 text-cyan-400/60 text-xs hover:border-cyan-500/70 hover:text-cyan-400"
+                      : "border-cyan-500/30 text-cyan-400 hover:border-cyan-500/60 text-sm font-bold"
+                  )}
+                >
+                  {meleeValue === 0 ? 'Нажмите для ввода' : `1D6+${meleeValue}`}
+                </button>
+              ) : (
+                <DiceNotationDisplay rollStr={`1D6+${meleeValue}`} color="cyan" />
+              )}
               <ModBadge bonus={meleeBonus} />
             </div>
           </div>
