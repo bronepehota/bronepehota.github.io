@@ -39,6 +39,63 @@ npm run test:e2e:headed  # Run E2E tests with visible browser
 npm run test:e2e:debug   # Run E2E tests in debug mode with inspector
 ```
 
+## Testing Workflow
+
+**ALWAYS write tests for new features.** The project has 1036+ unit tests and 85+ E2E tests across 20 spec files. Both are required.
+
+### When to write what
+
+| Scenario | Test type | Location |
+|----------|-----------|----------|
+| Pure logic (dice parsing, damage calc, state transforms) | **Unit** (`src/__tests__/`) | `*.test.ts` |
+| New utility/lib function | **Unit** (`src/__tests__/`) | `*.test.ts` |
+| New page or UI flow | **E2E** (`e2e/`) | `*.spec.ts` |
+| Changed UI interaction pattern | **E2E** (`e2e/`) | Update existing spec |
+| New combat mechanic | **Both** — unit for logic, E2E for UI flow | Both dirs |
+
+### Required checks before finishing work
+
+```bash
+npm run type-check          # Must pass
+npm run test                # All unit tests pass
+npm run test:e2e            # All E2E tests pass
+```
+
+`npm run validate` runs type-check + lint + unit tests but does NOT run E2E — run E2E separately.
+
+### E2E test conventions
+
+- **Selector priority**: `getByTestId()` > `getByRole()` > `getByText()` > CSS selectors
+- **Always clear localStorage** in `beforeEach`
+- **Always `await page.waitForTimeout(200)`** after clicks
+- **Dev server auto-starts** on `http://localhost:3001` before tests
+- **Headed mode**: `npm run test:e2e:headed` (visible browser)
+- **Debug mode**: `npm run test:e2e:debug` (Playwright Inspector)
+
+### Existing E2E coverage
+
+| Area | Spec file | Tests |
+|------|-----------|-------|
+| Calculator | `calculator.spec.ts` | 7 |
+| Combat flow | `combat.spec.ts` | 2 |
+| Aimed shot | `aimed-shot.spec.ts` | 7 |
+| Battle buffs | `battle-buffs.spec.ts` | 11 |
+| Source selection | `source-selection.spec.ts` | 9 |
+| Editor | `editor.spec.ts` | 7 |
+| Encyclopedia | `encyclopedia.spec.ts` | 7 |
+| Landing | `landing.spec.ts` | 2 |
+| Army creation | `army-creation.spec.ts` | 3 |
+| Game session | `game-session.spec.ts` | 2 |
+| Soldier state | `soldier-state-management.spec.ts` | 6 |
+| Pilot | `pilot-functionality.spec.ts` | 1 |
+| Preparation | `preparation-phase.spec.ts` | 5 |
+| Unit cards | `unit-card-complex-scenarios.spec.ts` | 4 |
+| Fire rate | `unit-card-fire-rate.spec.ts` | 1 |
+| Navigator | `expanded-navigator.spec.ts` | 1 |
+| Modifier display | `modifier-stat-display.spec.ts` | 7 |
+
+**CI/CD**: Unit tests on every commit (~6s). E2E tests in CI after deployment (~2-5min). See `.github/workflows/test.yml`.
+
 ## Architecture
 
 ### Data Layer
@@ -105,6 +162,8 @@ src/data/sources/
 - `bronepehota_view` - Current view: 'army' (builder) or 'game' (session)
 - `bronepehota_display_mode` - Display mode preference
 - `bronepehota_army_list_source` - Selected army list source ('star_system' or 'tehnolog')
+- `bronepehota_calculator_rules` - Calculator rules version ('tehnolog' or 'community_star_system')
+- `bronepehota_dice_history` - Calculator dice input history (JSON array of {value, field, timestamp})
 - `bronepehota_rules_version` - Selected rules version for game session
 - `bronepehota_panic_enabled` - Panic rule toggle state
 - `bronepehota_aimed_shot_enabled` - Aimed shot rule toggle state
@@ -177,6 +236,7 @@ src/components/
 ├── cards/           - Unit/soldier card components (UnitCard, SoldierCard, SquadView, MachineView)
 │   └── soldier-card/ - Soldier sub-components (ModifierIndicator, SoldierActions, SoldierStats)
 │   └── unit-card/   - Unit sub-components + hooks (useUnitCardState)
+├── calculator/      - Standalone combat calculator (CalculatorPage, DiceInputPopup, ModifiersSelector, RulesSelector)
 ├── combat/          - Combat modals (BottomSheetCombatModal, ActionSelector, ParameterInputs, CombatResults, ActiveModifiersDisplay, HitProbabilityIndicator)
 ├── controls/        - Shared controls (FortificationSelector, DistanceConverter)
 ├── editor/          - Desktop-only unit editor (SourcesList, SquadEditor, MachineEditor, ModifiersEditor, UnifiedSaveArea, BuffSelector, ModifierIcons, UnitsList, FactionsList, CreateSourceModal)
@@ -194,6 +254,8 @@ src/components/
 ```
 
 **Main Page** (`src/app/app/page.tsx`): ArmyBuilder (construction) OR GameSession (gameplay).
+
+**Calculator Page** (`src/app/calculator/page.tsx`): Standalone combat calculator — fully decoupled from Army/ArmyUnit. Users manually input all combat parameters (range, power, melee, armor, rank) via `DiceInputPopup`. Reuses combat components (`ActionSelector`, `ParameterInputs`, `CombatResults`) via the `CombatantData` adapter pattern. Accessible from landing page and direct URL.
 
 **Orphaned editor files** (not imported anywhere): `ExportModal.tsx`, `ImportModal.tsx`, `ModifierExportImport.tsx` in `src/components/editor/` — functionality replaced by `UnifiedSaveArea.tsx`. Can be safely deleted.
 
@@ -216,81 +278,13 @@ Soldiers can be assigned as pilots to machines. Assigned pilots show "ПИЛОТ
 
 ### Adding New Units via JSON
 
-**To add a new squad or machine:**
+Edit `squads.json` or `machines.json` in `src/data/sources/{source_id}/{faction}/`. Use existing entries as templates.
 
-1. Navigate to the source and faction directory: `src/data/sources/{source_id}/{faction}/`
-   - Default source: `star_system`
-   - Available factions: `polaris`, `protectorate`, `mercenaries`
+**Squad**: `id`, `name`, `shortName`, `faction`, `cost`, `image`, `soldiers[]` (up to 6, each with `rank`, `speed`, `range`, `power`, `melee`, `armor`, `props[]`). ID format: `{source}_{faction}_{slugified_name}`.
 
-2. Edit `squads.json` for infantry or `machines.json` for vehicles
+**Machine**: `id`, `name`, `shortName`, `faction`, `cost`, `rank`, `fire_rate`, `ammo_max`, `durability_max`, `image`, `speed_sectors[]` (must cover 1 to durability_max), `weapons[]`.
 
-3. Add a new unit object with required fields:
-
-**Squad Structure:**
-```json
-{
-  "id": "{source}_{faction}_{slugified_name}",
-  "name": "Название на русском",
-  "shortName": "Краткое название",
-  "faction": "polaris|protectorate|mercenaries",
-  "cost": 100,
-  "image": "/images/squads/filename.jpg",
-  "soldiers": [
-    {
-      "rank": 7,
-      "speed": 4,
-      "range": "D6",
-      "power": "1D6",
-      "melee": 0,
-      "props": ["Г"],       // Props array: "Г" = grenade, etc. Resolved to modifiers at runtime via resolveSoldierEffects()
-      "armor": 2
-    }
-    // ... up to 6 soldiers
-  ]
-}
-```
-
-**Machine Structure:**
-```json
-{
-  "id": "{faction}_{slugified_name}",
-  "name": "Название на русском",
-  "shortName": "Краткое название",
-  "faction": "polaris|protectorate|mercenaries",
-  "cost": 150,
-  "rank": 2,
-  "fire_rate": 2,
-  "ammo_max": 20,
-  "durability_max": 16,
-  "image": "/images/machines/filename.jpg",
-  "speed_sectors": [
-    {"min_durability": 9, "max_durability": 16, "speed": 2},
-    {"min_durability": 1, "max_durability": 8, "speed": 1}
-  ],
-  "weapons": [
-    {
-      "name": "Weapon Name",
-      "range": "D12",
-      "power": "2D20",
-      "special": "Optional special effect"
-    }
-  ]
-}
-```
-
-**ID Generation**: `{faction}_{slugified_name}` (e.g., `polaris_light_assault_clone`)
-
-**Images**: Place in `public/images/squads/` or `public/images/machines/`
-
-**Dice Notation**: See Game Logic section for format details.
-
-**Speed Sectors**: Must cover full range 1 to durability_max without gaps
-
-**Image Standards:**
-- Target size: 300x400 px (PNG format)
-- White background (#FFFFFF)
-- Figure centered with ~5% margins
-- Use `tools/standardize_images.py` to process new images
+**Image Standards**: 300x400 px PNG, white background, centered with ~5% margins. Process with `tools/standardize_images.py`. Place in `public/images/squads/` or `public/images/machines/`.
 
 ### Custom Hooks (`src/hooks/`)
 
@@ -299,6 +293,11 @@ Soldiers can be assigned as pilots to machines. Assigned pilots show "ПИЛОТ
   - Touch handlers for drag-to-close
 - `useCombatFlow.ts` - Combat state machine for shots, melee, grenades
   - `executeShot()`, `executeMelee()`, `executeGrenade()`, `checkGrenadeTarget()`
+  - Accepts optional `combatantData` (5th param of `startCombat`) for standalone calculator mode
+- `useStandaloneCombatFlow.ts` - Standalone calculator state (no ArmyUnit dependency)
+  - Uses `combatantData` adapter pattern via `combatantToUnitLike()` to create fake ArmyUnit
+  - Manages rules version, modifier summary, combatant data
+  - Provides `switchAction()`, `newCalculation()`, `updateCombatantField()`
 - `useLongPress.ts` - Long-press gesture detection for undo actions
 - `usePilotTestFlow.ts` - Pilot survival test state machine (D12 + D6 rolls)
 - `usePanicTestFlow.ts` - Panic test state for squads
@@ -315,6 +314,8 @@ Soldiers can be assigned as pilots to machines. Assigned pilots show "ПИЛОТ
 
 - `unit-utils.ts` - Helper functions for unit operations (numbering, validation, etc.)
 - `combat-types.ts` - TypeScript types for combat system (CombatParameters, ShotResult, MeleeResult, GrenadeBlastResult, etc.)
+- `combatant-data.ts` - Calculator adapter: `CombatantData` interface, `combatantToUnitLike()`, `isCombatReady()`, `missingFields()`
+- `dice-history.ts` - Dice input history persistence: `loadHistory()`, `saveEntry()`, `getRecentForField()`, `fieldFromTitle()`
 - `faction-colors.ts` - Centralized faction color mappings (getFactionColors function)
   - Polaris: red tones, Protectorate: cyan tones, Mercenaries: yellow tones
   - Returns object with all color variants (text, bg, border, glow, etc.)
@@ -322,49 +323,15 @@ Soldiers can be assigned as pilots to machines. Assigned pilots show "ПИЛОТ
 
 ### Modifier System (`src/lib/modifier-types.ts`, `src/lib/modifier-utils.ts`)
 
-**Modifier Types:**
-- **Buffs** (positive): Static bonuses from unit data OR temporary effects applied during battle
-- **Debuffs** (negative): Applied during combat, always time-limited (1-3 turns)
-- **Soldier Modifiers**: Applied to individual soldiers via `SoldierEffectsModal`, tracked with `catalogId` for one-time-use enforcement
-
-**Duration System:**
-- `ModifierDuration = 1 | 2 | 3` (turns)
-- No `duration` field = permanent (abilities). `SoldierModifier.duration` and `expiresAtTurn` are optional
-- One-time-use abilities tracked via `soldierAbilitiesUsed: string[]` on ArmyUnit (format: `"catalogId_soldierIndex"`)
-- Cleanup happens at start of each turn via `cleanupExpiredModifiers()`
-
-**Apply Target**: `ModifierApplyTarget = 'machine' | 'soldier' | 'army'` (no 'squad' — removed)
-
-**Storage:**
-- Unit-level: `activeBuffs`, `activeDebuffs` on `ArmyUnit`
-- Soldier-level: `soldierModifiers[]` with `soldierIndex` for squads, `catalogId` for tracking
-- One-time tracking: `soldierAbilitiesUsed[]` — persists independently from active modifiers
-- Custom modifiers stored in localStorage via `modifier-storage.ts`
-
-**Catalog:**
-- `src/data/modifiers/standard-modifiers.json` - Built-in buffs/debuffs
-- Access via `getStandardBuffs()`, `getStandardDebuffs()`
-- Custom modifiers created via editor (UI at `/editor`)
-
-**Key Functions (`src/lib/modifier-utils.ts`):**
-- `collectBuffsForUnit()` - Collect static buffs from army
-- `collectActiveBuffsForUnit()` - Collect temporary buffs for a unit
-- `getSoldierModifiers(unit, soldierIndex, army)` - Get modifiers for specific soldier
-- `resolveModifierSummary(unit, army, phase, soldierIndex?)` - Calculate ALL active modifiers for combat (buffs + debuffs + soldier mods, filtered by phase)
-- `resolveSoldierEffects(squadBuffs, soldierModIds)` - Resolve per-soldier modifier IDs against catalog; returns `{ buffs, abilities }` (temporary vs permanent)
-- `cleanupExpiredModifiers(army)` - Remove expired modifiers at turn start; sets empty arrays to `undefined`
-- `isModifierActive(appliedAtTurn, duration?, currentTurn?)` - Returns `true` for `duration === undefined` (permanent); expiry: `currentTurn > appliedAtTurn + duration`
-
-**Combat Integration:**
-- `BottomSheetCombatModal` receives `army` prop, computes `modifierSummary` via `useMemo`
-- Syncs to `state.parameters.activeModifiers` via `useEffect`
-- `ActiveModifiersDisplay` shown in PARAMETERS phase (between inputs and execute button)
-- For squads: `soldierIndex` passed; for machines: `soldierIndex = undefined`
-- Phase mapping: `actionType === 'melee'` → `'melee'`, otherwise → `'shot'`
-
-**Combat Relevance Filtering:** `resolveModifierSummary` filters by phase — shot (`range_bonus`, `range_multiply`, `power_bonus`, `armor_bonus`, `distance_penalty`, `custom`), melee (`melee_bonus`, `custom`), or all. `speed_multiply` hidden in combat but shown on soldier card.
-
-**Soldier Effects Flow:** `ModifierIndicator` click → `SoldierEffectsModal` (3 tabs: buffs/debuffs/abilities). Buffs from `squad.buffs`, debuffs from catalog.
+- **Buffs** (positive): Static from unit data or temporary (1-3 turns). **Debuffs** (negative): Combat-applied, always time-limited.
+- **Soldier Modifiers**: Per-soldier via `SoldierEffectsModal`, tracked with `catalogId` for one-time-use.
+- **Duration**: No `duration` field = permanent. Cleanup via `cleanupExpiredModifiers()` at turn start.
+- **Apply Target**: `'machine' | 'soldier' | 'army'` (no 'squad').
+- **Storage**: Unit-level (`activeBuffs`, `activeDebuffs`), soldier-level (`soldierModifiers[]`), one-time tracking (`soldierAbilitiesUsed[]`).
+- **Catalog**: `src/data/modifiers/standard-modifiers.json`. Access via `getStandardBuffs()`, `getStandardDebuffs()`.
+- **Key function**: `resolveModifierSummary(unit, army, phase, soldierIndex?)` — computes all active modifiers filtered by phase ('shot', 'melee', or all).
+- **Combat integration**: `BottomSheetCombatModal` computes `modifierSummary` → `ActiveModifiersDisplay` in PARAMETERS phase.
+- **Soldier Effects Flow**: `ModifierIndicator` click → `SoldierEffectsModal` (3 tabs: buffs/debuffs/abilities).
 
 ### Import/Export System
 
@@ -433,58 +400,21 @@ GITHUB_PAGES=true npm run build
 
 ### Testing
 
-**Unit Tests (Jest)**:
-- Focus on game logic utilities (`game-logic.ts`, `unit-utils.ts`)
-- Test files location: `src/__tests__/`
-- Run with: `npm run test`
+See **Testing Workflow** section above for full testing conventions. Key commands:
 
-**E2E Tests (Playwright)**:
-- TypeScript-based E2E tests using Playwright
-- Test files location: `e2e/*.spec.ts`
-- Configuration: `playwright.config.ts`
-- **Automatically starts dev server** on `http://localhost:3001` before tests
-- Run with: `npm run test:e2e`
-- Debug mode: `npm run test:e2e:debug` (opens Playwright Inspector)
-
-**E2E Testing Best Practices**:
-- **Selector Priority**: `getByTestId()` > `getByRole()` > `getByText()` > CSS selectors
-- **Local Cleanup**: Always clear localStorage in `beforeEach`
-- **Async state**: Always use `await page.waitForTimeout(200)` after clicks
-
-**App Navigation Flow** (critical — tests must follow this sequence):
-```
-1. Rules → click [data-testid="rules-confirm-button"]
-2. Source → select source → click [data-testid="source-confirm-button"]
-3. Faction → select faction → click [data-testid="faction-continue-button"]
-4. Budget → select points → click [data-testid="budget-next-button"]
-5. Army Builder → add units → click [data-testid="to-battle-button"]
-6. Battle Preparation → click [data-testid="start-battle-button"]
+```bash
+npm run test              # Unit tests (Jest, ~6s)
+npm run test:e2e          # E2E tests (Playwright, ~2-5min)
+npm run validate          # type-check + lint + unit tests (no E2E)
 ```
 
-**Common Pitfalls**:
-1. **Cannot skip steps** — must follow the full 6-step sequence
-2. **Toggle selectors**: `data-testid` on wrapper, `aria-pressed` on inner button — use `container.locator('button[aria-pressed]')`
-3. **Missing Source step**: After Rules, always click source-confirm before Faction
-
-**Helper — navigate to Army Builder**:
-```typescript
-async function navigateToArmyBuilder(page: Page) {
-  await page.click('[data-testid="rules-confirm-button"]');
-  await page.waitForTimeout(500);
-  await page.click('[data-testid="source-confirm-button"]');
-  await page.waitForTimeout(500);
-  await page.click('[data-testid="faction-card-polaris"]');
-  await page.waitForTimeout(300);
-  await page.click('[data-testid="faction-continue-button"]');
-  await page.waitForTimeout(500);
-  await page.click('button:has-text("350")');
-  await page.waitForTimeout(300);
-  await page.click('[data-testid="budget-next-button"]');
-  await page.waitForTimeout(500);
-}
+**App Navigation Flow** for E2E tests (must follow this sequence, cannot skip steps):
 ```
+Rules → Source → Faction → Budget → Army Builder → Battle Preparation
+```
+Use `data-testid` selectors: `rules-confirm-button`, `source-confirm-button`, `faction-continue-button`, `budget-next-button`, `to-battle-button`, `start-battle-button`.
 
-**CI/CD**: Unit tests on every commit (~30s). E2E tests in CI after deployment (~2-5min). See `.github/workflows/test.yml`.
+**Toggle selectors**: `data-testid` on wrapper, `aria-pressed` on inner button — use `container.locator('button[aria-pressed]')`.
 
 ## Active Technologies
 
