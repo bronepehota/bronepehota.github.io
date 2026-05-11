@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
-import { ChevronLeft, Target, Sword, Bomb, SlidersHorizontal, X } from 'lucide-react';
+import { ChevronLeft, Target, Sword, Bomb, SlidersHorizontal, X, EyeOff, Crosshair } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useStandaloneCombatFlow } from '@/hooks/useStandaloneCombatFlow';
 import { ActionSelector } from '@/components/combat/ActionSelector';
@@ -19,11 +19,45 @@ const ACTION_TABS: Array<{ type: CombatActionType; label: string; icon: typeof T
   { type: 'grenade', label: 'ГРАНАТА', icon: Bomb },
 ];
 
-const actionColors = {
-  shot: 'text-amber-400 border-amber-500/50 bg-amber-950/30',
-  melee: 'text-red-400 border-red-500/50 bg-red-950/30',
-  grenade: 'text-emerald-400 border-emerald-500/50 bg-emerald-950/30',
+// Action type colors — matches BottomSheetCombatModal
+const getActionColors = (actionType: CombatActionType | null, isSurpriseAttack?: boolean) => {
+  const surpriseBase = isSurpriseAttack
+    ? 'border-purple-600 bg-purple-950/40 text-purple-300 hover:bg-purple-950/60 shadow-lg shadow-purple-900/20'
+    : '';
+
+  const colorMap = {
+    shot: {
+      primary: 'text-amber-400',
+      border: 'border-amber-600/40',
+      bg: 'bg-amber-950/20',
+      accent: 'border-amber-500',
+      button: surpriseBase || 'border-amber-600 bg-amber-950/30 text-amber-400 hover:bg-amber-950/50'
+    },
+    melee: {
+      primary: 'text-red-400',
+      border: 'border-red-600/40',
+      bg: 'bg-red-950/20',
+      accent: 'border-red-500',
+      button: surpriseBase || 'border-red-600 bg-red-950/30 text-red-400 hover:bg-red-950/50'
+    },
+    grenade: {
+      primary: 'text-emerald-400',
+      border: 'border-emerald-600/40',
+      bg: 'bg-emerald-950/20',
+      accent: 'border-emerald-500',
+      button: 'border-emerald-600 bg-emerald-950/30 text-emerald-400 hover:bg-emerald-950/50'
+    }
+  };
+  return colorMap[actionType as keyof typeof colorMap] || {
+    primary: 'text-slate-400',
+    border: 'border-slate-700',
+    bg: 'bg-slate-800',
+    accent: 'border-slate-600',
+    button: 'border-slate-600 text-slate-400'
+  };
 };
+
+type DicePopupField = 'range' | 'power' | 'melee' | 'rank' | null;
 
 export function CalculatorPage() {
   const {
@@ -44,10 +78,10 @@ export function CalculatorPage() {
     newCalculation,
   } = useStandaloneCombatFlow();
 
-  const [dicePopupField, setDicePopupField] = useState<'range' | 'power' | null>(null);
+  const [dicePopupField, setDicePopupField] = useState<DicePopupField>(null);
   const [showModifiers, setShowModifiers] = useState(false);
 
-  const handleDataNeeded = useCallback((field: 'range' | 'power') => {
+  const handleDataNeeded = useCallback((field: 'range' | 'power' | 'melee' | 'rank') => {
     setDicePopupField(field);
   }, []);
 
@@ -56,12 +90,17 @@ export function CalculatorPage() {
       updateCombatantField('range', value);
     } else if (dicePopupField === 'power') {
       updateCombatantField('power', value);
+    } else if (dicePopupField === 'melee') {
+      updateCombatantField('melee', parseInt(value, 10) || 0);
+    } else if (dicePopupField === 'rank') {
+      updateCombatantField('rank', parseInt(value, 10) || 0);
     }
     setDicePopupField(null);
   }, [dicePopupField, updateCombatantField]);
 
   const currentAction = combatState.actionType;
   const phase = currentAction === 'melee' ? 'melee' as const : currentAction === 'grenade' ? 'grenade' as const : 'shot' as const;
+  const actionColors = getActionColors(currentAction, combatState.parameters.isSurpriseAttack);
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
@@ -73,8 +112,25 @@ export function CalculatorPage() {
         >
           <ChevronLeft className="w-5 h-5 text-slate-400" />
         </Link>
-        <h1 className="font-mono font-black text-lg uppercase tracking-wider text-slate-300">
-          Калькулятор боя
+        {/* Action type icon in header — matches BottomSheetCombatModal */}
+        {currentAction && (
+          <div className={cn(
+            "p-1.5 rounded border-2 relative",
+            actionColors.bg,
+            actionColors.border,
+          )}>
+            {currentAction === 'shot' && <Target className={cn("w-4 h-4", actionColors.primary)} />}
+            {currentAction === 'melee' && <Sword className={cn("w-4 h-4", actionColors.primary)} />}
+            {currentAction === 'grenade' && <Bomb className={cn("w-4 h-4", actionColors.primary)} />}
+          </div>
+        )}
+        <h1 className={cn(
+          "font-mono font-bold text-sm uppercase tracking-wider",
+          currentAction ? actionColors.primary : "text-slate-300"
+        )}>
+          {currentAction === 'shot' ? 'ВЫСТРЕЛ' :
+           currentAction === 'melee' ? 'БЛИЖНИЙ БОЙ' :
+           currentAction === 'grenade' ? 'ГРАНАТА' : 'Калькулятор боя'}
         </h1>
         <div className="ml-auto">
           <RulesSelector value={rulesVersion} onChange={updateRulesVersion} />
@@ -83,27 +139,30 @@ export function CalculatorPage() {
 
       {/* Action Type Tabs — always visible */}
       <div className="flex border-b border-slate-800">
-        {ACTION_TABS.map(({ type, label, icon: Icon }) => (
-          <button
-            key={type}
-            onClick={() => {
-              if (combatState.phase === 'ACTION_SELECT') {
-                selectAction(type);
-              } else if (combatState.phase !== 'ROLLING') {
-                switchAction(type);
-              }
-            }}
-            className={cn(
-              "flex-1 flex items-center justify-center gap-1.5 py-3 border-b-2 transition-all font-mono text-xs uppercase tracking-wider min-h-[48px]",
-              currentAction === type
-                ? actionColors[type]
-                : "text-slate-500 border-transparent hover:text-slate-300 hover:border-slate-600"
-            )}
-          >
-            <Icon className="w-4 h-4" />
-            <span className="hidden md:inline">{label}</span>
-          </button>
-        ))}
+        {ACTION_TABS.map(({ type, label, icon: Icon }) => {
+          const tabColors = getActionColors(type);
+          return (
+            <button
+              key={type}
+              onClick={() => {
+                if (combatState.phase === 'ACTION_SELECT') {
+                  selectAction(type);
+                } else if (combatState.phase !== 'ROLLING') {
+                  switchAction(type);
+                }
+              }}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-1.5 py-3 border-b-2 transition-all font-mono text-xs uppercase tracking-wider min-h-[48px]",
+                currentAction === type
+                  ? `${tabColors.primary} ${tabColors.border} ${tabColors.bg}`
+                  : "text-slate-500 border-transparent hover:text-slate-300 hover:border-slate-600"
+              )}
+            >
+              <Icon className="w-4 h-4" />
+              <span className="hidden md:inline">{label}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Main content */}
@@ -172,50 +231,88 @@ export function CalculatorPage() {
               modifierSummary={modifierSummary}
             />
 
-            {/* Toggles + Execute */}
-            <div className="flex gap-2">
-              {/* Surprise Attack */}
+            {/* Execute button panel — matches BottomSheetCombatModal */}
+            <div className="flex gap-2 md:gap-3">
+              {/* Surprise Attack toggle — shot and melee only */}
               {(combatState.actionType === 'shot' || combatState.actionType === 'melee') && (
                 <button
+                  type="button"
                   onClick={() => setParameters({ isSurpriseAttack: !combatState.parameters.isSurpriseAttack })}
                   className={cn(
-                    "h-10 w-10 min-h-[40px] min-w-[40px] rounded-lg border-2 flex items-center justify-center shrink-0 transition-all active:scale-95",
+                    'relative h-10 w-10 min-h-[40px] min-w-[40px] md:h-12 md:w-12 md:min-h-[48px] md:min-w-[48px] rounded-lg border-2 flex items-center justify-center shrink-0',
+                    'touch-manipulation active:scale-95 transition-all duration-200',
                     combatState.parameters.isSurpriseAttack
-                      ? "bg-purple-600/20 border-purple-500 shadow-lg shadow-purple-500/20"
-                      : "bg-slate-700/50 border-slate-600 hover:bg-slate-700"
+                      ? 'bg-purple-600/20 border-purple-500 shadow-lg shadow-purple-500/20'
+                      : 'bg-slate-700/50 border-slate-600 hover:bg-slate-700'
                   )}
-                  aria-label="Внезапная атака"
+                  aria-label={combatState.parameters.isSurpriseAttack ? 'Внезапная атака включена' : 'Внезапная атака выключена'}
                 >
-                  <span className={cn("text-sm", combatState.parameters.isSurpriseAttack ? "text-purple-400" : "text-slate-400")}>&#9889;</span>
+                  <EyeOff
+                    className={cn('transition-colors duration-200', combatState.parameters.isSurpriseAttack ? 'text-purple-400' : 'text-slate-400')}
+                    size={16}
+                  />
+                  {combatState.parameters.isSurpriseAttack && (
+                    <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-purple-400 rounded-full animate-pulse" />
+                  )}
                 </button>
               )}
 
-              {/* Aimed Shot */}
+              {/* Aimed Shot toggle — shot only, squads only */}
               {combatState.actionType === 'shot' && combatantData.type === 'squad' && (
                 <button
+                  type="button"
                   onClick={() => setParameters({ isAimedShot: !combatState.parameters.isAimedShot })}
                   className={cn(
-                    "h-10 w-10 min-h-[40px] min-w-[40px] rounded-lg border-2 flex items-center justify-center shrink-0 transition-all active:scale-95",
+                    'relative h-10 w-10 min-h-[40px] min-w-[40px] md:h-12 md:w-12 md:min-h-[48px] md:min-w-[48px] rounded-lg border-2 flex items-center justify-center shrink-0',
+                    'touch-manipulation active:scale-95 transition-all duration-200',
                     combatState.parameters.isAimedShot
-                      ? "bg-cyan-600/20 border-cyan-500 shadow-lg shadow-cyan-500/20"
-                      : "bg-slate-700/50 border-slate-600 hover:bg-slate-700"
+                      ? 'bg-cyan-600/20 border-cyan-500 shadow-lg shadow-cyan-500/20'
+                      : 'bg-slate-700/50 border-slate-600 hover:bg-slate-700'
                   )}
-                  aria-label="Прицельный выстрел"
+                  aria-label={combatState.parameters.isAimedShot ? 'Прицельный выстрел включён' : 'Прицельный выстрел выключен'}
                 >
-                  <span className={cn("text-sm", combatState.parameters.isAimedShot ? "text-cyan-400" : "text-slate-400")}>&#9678;</span>
+                  <Crosshair
+                    className={cn('transition-colors duration-200', combatState.parameters.isAimedShot ? 'text-cyan-400' : 'text-slate-400')}
+                    size={16}
+                  />
+                  {combatState.parameters.isAimedShot && (
+                    <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-cyan-400 rounded-full animate-pulse" />
+                  )}
                 </button>
               )}
 
-              {/* Execute */}
+              {/* Execute button — matches BottomSheetCombatModal styling */}
               <button
                 onClick={() => executeAction()}
                 className={cn(
-                  "flex-1 py-3 rounded-lg font-mono font-bold uppercase tracking-wider border-2 transition-all min-h-[48px] active:scale-95",
-                  currentAction && actionColors[currentAction]
+                  "relative flex-1 font-mono text-xs md:text-sm font-bold uppercase tracking-wider border-2 transition-all min-h-[44px] md:min-h-[48px]",
+                  "hover:scale-[1.02] active:scale-95 overflow-hidden",
+                  "shadow-lg",
+                  actionColors.button
                 )}
+                style={{
+                  textShadow: '0 0 10px rgba(255,255,255,0.3)'
+                }}
               >
-                {combatState.actionType === 'shot' ? 'ВЫСТРЕЛИТЬ' :
-                 combatState.actionType === 'melee' ? 'АТАКОВАТЬ' : 'БРОСИТЬ'}
+                {/* Tech decoration corners */}
+                <div className={cn("absolute top-0 left-0 w-2 h-2 border-l-2 border-t-2 opacity-40", actionColors.accent)} />
+                <div className={cn("absolute top-0 right-0 w-2 h-2 border-r-2 border-t-2 opacity-40", actionColors.accent)} />
+                <div className={cn("absolute bottom-0 left-0 w-2 h-2 border-l-2 border-b-2 opacity-40", actionColors.accent)} />
+                <div className={cn("absolute bottom-0 right-0 w-2 h-2 border-r-2 border-b-2 opacity-40", actionColors.accent)} />
+
+                <div className="relative flex items-center justify-center gap-2 px-2 md:px-6 py-2 md:py-3">
+                  <span>
+                    {combatState.actionType === 'shot' ? 'ВЫСТРЕЛИТЬ' :
+                     combatState.actionType === 'melee' ? 'АТАКОВАТЬ' : 'БРОСИТЬ'}
+                  </span>
+                  {(combatState.parameters.isSurpriseAttack || combatState.parameters.isAimedShot) && (
+                    <span className="text-purple-300 text-[10px] opacity-80 hidden md:inline">
+                      {combatState.parameters.isSurpriseAttack && 'с тыла'}
+                      {combatState.parameters.isSurpriseAttack && combatState.parameters.isAimedShot && ' + '}
+                      {combatState.parameters.isAimedShot && 'прицельный'}
+                    </span>
+                  )}
+                </div>
               </button>
             </div>
           </div>
@@ -251,9 +348,21 @@ export function CalculatorPage() {
       {/* Dice Input Popup */}
       {dicePopupField && (
         <DiceInputPopup
-          title={dicePopupField === 'range' ? 'ДАЛЬНОСТЬ' : 'МОЩНОСТЬ'}
-          value={dicePopupField === 'range' ? combatantData.range : combatantData.power}
-          color={dicePopupField === 'range' ? 'blue' : 'orange'}
+          title={
+            dicePopupField === 'range' ? 'ДАЛЬНОСТЬ' :
+            dicePopupField === 'power' ? 'МОЩНОСТЬ' :
+            dicePopupField === 'melee' ? 'БЛИЖНИЙ БОЙ' : 'РАНГ'
+          }
+          value={dicePopupField === 'range' ? combatantData.range : dicePopupField === 'power' ? combatantData.power : undefined}
+          mode={dicePopupField === 'melee' || dicePopupField === 'rank' ? 'number' : 'dice'}
+          numericValue={dicePopupField === 'melee' ? combatantData.melee : dicePopupField === 'rank' ? combatantData.rank : 0}
+          min={0}
+          max={dicePopupField === 'rank' ? 5 : 10}
+          color={
+            dicePopupField === 'range' ? 'blue' :
+            dicePopupField === 'power' ? 'orange' :
+            dicePopupField === 'melee' ? 'cyan' : 'emerald'
+          }
           onSubmit={handleDiceSubmit}
           onClose={() => setDicePopupField(null)}
         />
