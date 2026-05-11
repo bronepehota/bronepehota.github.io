@@ -25,6 +25,7 @@ export function useStandaloneCombatFlow() {
     ...EMPTY_MODIFIER_SUMMARY,
   });
 
+  // Load rules version from localStorage
   useEffect(() => {
     const saved = localStorage.getItem('bronepehota_calculator_rules');
     if (saved === 'community_star_system' || saved === 'tehnolog') {
@@ -32,14 +33,34 @@ export function useStandaloneCombatFlow() {
     }
   }, []);
 
+  // Auto-start combat on mount — go directly to ACTION_SELECT
+  useEffect(() => {
+    const unitLike = combatantToUnitLike(combatantData);
+    combatFlow.startCombat(unitLike, 0, undefined, undefined, combatantData);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const updateRulesVersion = useCallback((version: RulesVersionID) => {
     setRulesVersion(version);
     localStorage.setItem('bronepehota_calculator_rules', version);
   }, []);
 
-  const startStandaloneCombat = useCallback((actionType?: CombatActionType) => {
+  // Restart combat with updated combatantData (keeps current phase or resets to ACTION_SELECT)
+  const restartCombat = useCallback((actionType?: CombatActionType) => {
     const unitLike = combatantToUnitLike(combatantData);
     combatFlow.startCombat(unitLike, 0, undefined, actionType, combatantData);
+  }, [combatantData, combatFlow]);
+
+  // Switch action type — goes back to PARAMETERS with new action
+  const switchAction = useCallback((actionType: CombatActionType) => {
+    const unitLike = combatantToUnitLike(combatantData);
+    combatFlow.startCombat(unitLike, 0, undefined, actionType, combatantData);
+  }, [combatantData, combatFlow]);
+
+  // Start a fresh calculation (back to ACTION_SELECT)
+  const newCalculation = useCallback(() => {
+    const unitLike = combatantToUnitLike(combatantData);
+    combatFlow.startCombat(unitLike, 0, undefined, undefined, combatantData);
   }, [combatantData, combatFlow]);
 
   const setParameters = useCallback((params: Partial<CombatParameters>) => {
@@ -71,6 +92,8 @@ export function useStandaloneCombatFlow() {
     updateRulesVersion,
     modifierSummary,
     setModifierSummary,
-    startStandaloneCombat,
+    switchAction,
+    newCalculation,
+    restartCombat,
   };
 }

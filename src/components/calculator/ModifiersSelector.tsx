@@ -11,6 +11,7 @@ interface ModifiersSelectorProps {
   value: ModifierSummary;
   onChange: (summary: ModifierSummary) => void;
   className?: string;
+  phase?: 'shot' | 'melee' | 'grenade';
 }
 
 const NUMERIC_FIELDS: Array<{ target: ModifierTarget; label: string; key: keyof ModifierSummary }> = [
@@ -33,15 +34,35 @@ function targetToField(target: ModifierTarget): keyof ModifierSummary {
   }
 }
 
-export function ModifiersSelector({ value, onChange, className }: ModifiersSelectorProps) {
+export function ModifiersSelector({ value, onChange, className, phase }: ModifiersSelectorProps) {
   const [showCatalog, setShowCatalog] = useState(false);
   const [selectedCatalogIds, setSelectedCatalogIds] = useState<Set<string>>(new Set());
+
+  const filteredNumericFields = useMemo(() => {
+    if (!phase) return NUMERIC_FIELDS;
+    if (phase === 'melee') return NUMERIC_FIELDS.filter(f => f.target === 'melee_bonus');
+    return NUMERIC_FIELDS;
+  }, [phase]);
 
   const allModifiers = useMemo(() => {
     const buffs = getStandardBuffs().filter(b => b.target !== 'speed_multiply' && b.target !== 'custom');
     const debuffs = getStandardDebuffs().filter(d => d.target !== 'speed_multiply' && d.target !== 'custom');
-    return [...buffs.map(b => ({ ...b, isBuff: true as const })), ...debuffs.map(d => ({ ...d, isBuff: false as const }))];
-  }, []);
+
+    let modifiers = [...buffs.map(b => ({ ...b, isBuff: true as const })), ...debuffs.map(d => ({ ...d, isBuff: false as const }))];
+
+    // Filter modifiers based on phase
+    if (phase) {
+      if (phase === 'melee') {
+        modifiers = modifiers.filter(m => m.phase === 'melee' || m.phase === 'always');
+      } else if (phase === 'shot') {
+        modifiers = modifiers.filter(m => m.phase === 'shot' || m.phase === 'always');
+      } else if (phase === 'grenade') {
+        modifiers = modifiers.filter(m => m.phase === 'grenade' || m.phase === 'shot' || m.phase === 'always');
+      }
+    }
+
+    return modifiers;
+  }, [phase]);
 
   const handleNumericChange = (key: keyof ModifierSummary, val: number) => {
     onChange({ ...value, [key]: val });
@@ -140,7 +161,7 @@ export function ModifiersSelector({ value, onChange, className }: ModifiersSelec
       )}
 
       <div className="grid grid-cols-2 gap-2">
-        {NUMERIC_FIELDS.map(({ target, label, key }) => (
+        {filteredNumericFields.map(({ target, label, key }) => (
           <div key={target} className="flex items-center gap-1">
             <span className="text-[9px] font-mono text-slate-500 whitespace-nowrap min-w-[60px]">{label}</span>
             <NumberStepper

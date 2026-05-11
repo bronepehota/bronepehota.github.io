@@ -66,11 +66,11 @@ export function ParameterInputs({
     ? targetMemory.targetMelee
     : parameters.targetMelee;
 
-  // Get unit stats for preview
-  const unitStats = unit
-    ? getUnitStats(unit, soldierIndex, parameters.weaponIndex)
-    : combatantData
-      ? { range: combatantData.range || '', power: combatantData.power || '', melee: combatantData.melee, displayName: 'Боец' }
+  // Get unit stats for preview — combatantData takes priority (calculator mode)
+  const unitStats = combatantData
+    ? { range: combatantData.range || '', power: combatantData.power || '', melee: combatantData.melee, displayName: 'Боец' }
+    : unit
+      ? getUnitStats(unit, soldierIndex, parameters.weaponIndex)
       : null;
 
   // Modifier bonus pill — compact +N/-N badge inline with dice
