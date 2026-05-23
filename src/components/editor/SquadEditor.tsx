@@ -321,10 +321,11 @@ export function SquadEditor({ squad, source: _source, factionId, isOverride = fa
                     <button
                       onClick={handleAddSoldier}
                       disabled={soldiers.length >= 6}
-                      className="p-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/40 border border-emerald-600/30 transition-all disabled:opacity-50 group"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600/10 hover:bg-emerald-600/20 border border-emerald-600/20 text-xs text-emerald-400 transition-all disabled:opacity-40"
                       title="Добавить солдата"
                     >
-                      <Plus className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+                      <Plus className="w-3.5 h-3.5" />
+                      Добавить солдата
                     </button>
                   )}
                 </div>
