@@ -4,6 +4,7 @@
 
 import type { SourceID } from '@/lib/types';
 import type { BuffDefinition } from '@/lib/modifier-types';
+import type { CalculatorSoldierParams } from '@/lib/calculator-engine';
 
 /**
  * Упрощённый интерфей фракции для пользовательских источников
@@ -55,6 +56,7 @@ export interface CustomSquad {
   image?: string;
   soldiers: CustomSoldier[];
   buffs?: BuffDefinition[];
+  calculatorParams?: CalculatorSoldierParams[];
 }
 
 /**

@@ -11,11 +11,23 @@ import { generateUnitId } from '@/lib/editor/id-generator';
 import { getFactionColors } from '@/lib/faction-colors';
 import { Save, X, Plus, Eye, Users, Star, ImageIcon } from 'lucide-react';
 import { SoldiersTable } from './SoldiersTable';
+import { SoldiersCalculator } from './SoldiersCalculator';
 import { SquadPreview } from './SquadPreview';
 import { BuffSelector } from './BuffSelector';
 import { GitHubPagesImage } from '@/components/GitHubPagesImage';
 import { cn } from '@/lib/utils';
 import type { BuffDefinition } from '@/lib/modifier-types';
+import type { CalculatorSoldierParams, CalculatedSoldier } from '@/lib/calculator-engine';
+
+const DEFAULT_CALC_PARAMS: CalculatorSoldierParams = {
+  race: 'human',
+  squadType: 'shock',
+  armor: 'clothing',
+  weapon: 'pistol',
+  twoWeapons: false,
+  meleeWeapon: 'unarmed',
+  property: null,
+};
 
 interface SquadEditorProps {
   squad?: CustomSquad;
@@ -39,6 +51,28 @@ export function SquadEditor({ squad, source: _source, factionId, isOverride = fa
   const [buffs, setBuffs] = useState<BuffDefinition[]>(squad?.buffs || []);
   const [showPreview, setShowPreview] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [appliedCalcParams, setAppliedCalcParams] = useState<CalculatorSoldierParams[] | null>(
+    squad?.calculatorParams?.length ? squad.calculatorParams : null
+  );
+  const [mode, setMode] = useState<'manual' | 'calculator'>('manual');
+  const [calcParams, setCalcParams] = useState<CalculatorSoldierParams[]>(
+    () => squad?.calculatorParams?.length
+      ? squad.calculatorParams
+      : squad?.soldiers?.length
+        ? squad.soldiers.map(s => ({
+            race: 'human',
+            squadType: 'shock',
+            armor: 'clothing',
+            weapon: 'pistol',
+            twoWeapons: false,
+            meleeWeapon: 'unarmed',
+            property: (s.modifiers || []).find(m =>
+              m === 'mechanic' || m === 'jump_boost_3' || m === 'jump_boost_4' || m === 'jump_boost_5'
+            ) ?? null,
+            image: s.image,
+          }))
+        : [DEFAULT_CALC_PARAMS]
+  );
 
   const colors = getFactionColors(factionId);
 
@@ -91,6 +125,7 @@ export function SquadEditor({ squad, source: _source, factionId, isOverride = fa
       image: image.trim() || undefined,
       soldiers,
       buffs: buffs.length > 0 ? buffs : undefined,
+      calculatorParams: appliedCalcParams ?? squad?.calculatorParams,
     };
 
     onSave(squadData);
@@ -275,14 +310,46 @@ export function SquadEditor({ squad, source: _source, factionId, isOverride = fa
                     Солдаты <span className="text-slate-500">({soldiers.length}/6)</span>
                   </h3>
                 </div>
-                <button
-                  onClick={handleAddSoldier}
-                  disabled={soldiers.length >= 6}
-                  className="p-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/40 border border-emerald-600/30 transition-all disabled:opacity-50 group"
-                  title="Добавить солдата"
-                >
-                  <Plus className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
-                </button>
+                <div className="flex items-center gap-2">
+                  {/* Tab switcher */}
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => setMode('manual')}
+                      className={cn(
+                        "px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
+                        mode === 'manual'
+                          ? "bg-emerald-600/20 text-emerald-400 border border-emerald-600/30"
+                          : "text-slate-500 hover:text-slate-400 border border-transparent"
+                      )}
+                      data-testid="manual-tab"
+                    >
+                      Ручной ввод
+                    </button>
+                    <button
+                      onClick={() => setMode('calculator')}
+                      className={cn(
+                        "px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
+                        mode === 'calculator'
+                          ? "bg-emerald-600/20 text-emerald-400 border border-emerald-600/30"
+                          : "text-slate-500 hover:text-slate-400 border border-transparent"
+                      )}
+                      data-testid="calculator-tab"
+                    >
+                      Калькулятор
+                    </button>
+                  </div>
+                  {mode === 'manual' && (
+                    <button
+                      onClick={handleAddSoldier}
+                      disabled={soldiers.length >= 6}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600/10 hover:bg-emerald-600/20 border border-emerald-600/20 text-xs text-emerald-400 transition-all disabled:opacity-40"
+                      title="Добавить солдата"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      Добавить солдата
+                    </button>
+                  )}
+                </div>
               </div>
 
               {errors.soldiers && (
@@ -291,14 +358,55 @@ export function SquadEditor({ squad, source: _source, factionId, isOverride = fa
                 </div>
               )}
 
-              <SoldiersTable
-                soldiers={soldiers}
-                squadName={name || 'Новый отряд'}
-                squadCost={cost}
-                faction={factionId}
-                onUpdate={handleUpdateSoldier}
-                onRemove={handleRemoveSoldier}
-              />
+              {mode === 'manual' ? (
+                <SoldiersTable
+                  soldiers={soldiers}
+                  squadName={name || 'Новый отряд'}
+                  squadCost={cost}
+                  faction={factionId}
+                  onUpdate={handleUpdateSoldier}
+                  onRemove={handleRemoveSoldier}
+                />
+              ) : (
+                <SoldiersCalculator
+                  params={calcParams}
+                  onParamsChange={setCalcParams}
+                  onApply={(calculatedSoldiers: CalculatedSoldier[], squadCost: number) => {
+                    const newSoldiers = calcParams.map((cp, idx) => {
+                      const cs = calculatedSoldiers[idx];
+                      const modifiers: string[] = [];
+                      if (cp.property) {
+                        modifiers.push(cp.property);
+                      }
+                      return {
+                        rank: cs.rank,
+                        speed: cs.speed,
+                        range: cs.range,
+                        power: cs.power,
+                        melee: cs.melee,
+                        armor: cs.armor,
+                        image: cp.image || undefined,
+                        modifiers,
+                      };
+                    });
+                    setSoldiers(newSoldiers);
+                    setCost(squadCost);
+                    setAppliedCalcParams(calcParams);
+                    setMode('manual');
+                  }}
+                  onAddSoldier={() => {
+                    if (calcParams.length < 6) {
+                      setCalcParams([...calcParams, DEFAULT_CALC_PARAMS]);
+                    }
+                  }}
+                  onRemoveSoldier={(idx: number) => {
+                    if (calcParams.length > 1) {
+                      setCalcParams(calcParams.filter((_, i) => i !== idx));
+                    }
+                  }}
+                  soldierCount={calcParams.length}
+                />
+              )}
             </div>
           </div>
         </div>
