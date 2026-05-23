@@ -363,6 +363,7 @@ export function SquadEditor({ squad, source: _source, factionId, isOverride = fa
                         power: cs.power,
                         melee: cs.melee,
                         armor: cs.armor,
+                        image: cp.image || undefined,
                         modifiers,
                       };
                     });

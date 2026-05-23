@@ -12,6 +12,7 @@ export interface CalculatorSoldierParams {
   twoWeapons: boolean;
   meleeWeapon: string;
   property: string | null;
+  image?: string;
 }
 
 export interface CostBreakdown {

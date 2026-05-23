@@ -1,8 +1,9 @@
 'use client';
 
 import { useMemo } from 'react';
-import { Trash2, Plus, Calculator, ExternalLink } from 'lucide-react';
+import { Trash2, Plus, Calculator, ExternalLink, ImageIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { GitHubPagesImage } from '@/components/GitHubPagesImage';
 import {
   RACES, SQUAD_TYPES, ARMOR_TYPES, WEAPONS, MELEE_WEAPONS, PROPERTIES,
 } from '@/data/calculator/calculator-catalogs';
@@ -60,6 +61,7 @@ export function SoldiersCalculator({
             </tr>
             <tr className="border-b border-slate-800/80">
               <th className="w-7 px-0.5 pb-2" />
+              <th className="px-1 pb-2"><span className={labelClass}>Фото</span></th>
               <th className="px-1 pb-2"><span className={labelClass}>Раса</span></th>
               <th className="px-1 pb-2"><span className={labelClass}>Тип отряда</span></th>
               <th className="px-1 pb-2"><span className={labelClass}>Броня</span></th>
@@ -87,6 +89,38 @@ export function SoldiersCalculator({
                   {/* Number */}
                   <td className="px-0.5 py-1.5 text-center">
                     <span className="text-[10px] text-slate-600 font-mono">{i + 1}</span>
+                  </td>
+
+                  {/* Image */}
+                  <td className="px-1 py-1.5">
+                    <div className="relative group/img">
+                      {p.image ? (
+                        <div className="w-9 h-12 rounded border border-slate-700 overflow-hidden bg-slate-900 shrink-0">
+                          <GitHubPagesImage
+                            src={p.image}
+                            alt=""
+                            width={36}
+                            height={48}
+                            className="w-full h-full object-cover object-center"
+                            unoptimized
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = 'none';
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-9 h-12 rounded border border-slate-700/50 border-dashed bg-slate-900/50 flex items-center justify-center shrink-0">
+                          <ImageIcon className="w-3.5 h-3.5 text-slate-600" />
+                        </div>
+                      )}
+                      <input
+                        type="text"
+                        value={p.image || ''}
+                        onChange={(e) => updateParam(i, { image: e.target.value || undefined })}
+                        className="absolute inset-0 w-full h-full opacity-0 group-hover/img:opacity-100 bg-slate-900/90 border border-slate-600 rounded text-[9px] text-center px-0.5 focus:opacity-100 focus:ring-1 focus:ring-emerald-500/20 focus:border-emerald-500 transition-opacity"
+                        placeholder="/images/..."
+                      />
+                    </div>
                   </td>
 
                   {/* Race */}
