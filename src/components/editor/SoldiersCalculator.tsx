@@ -315,7 +315,7 @@ export function SoldiersCalculator({
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-emerald-400 transition-colors"
         >
-          Калькулятор от Star System
+          Спасибо Star System за формулы расчёта
           <ExternalLink className="w-3 h-3" />
         </a>
       </div>
