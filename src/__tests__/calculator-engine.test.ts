@@ -137,3 +137,60 @@ describe('calculateSquadSoldiers', () => {
     });
   });
 });
+
+describe('CalculatorSoldierParams serialization', () => {
+  test('calculatorParams round-trip through JSON', () => {
+    const params: CalculatorSoldierParams[] = [
+      { race: 'human', squadType: 'shock', armor: 'heavy_infantry', weapon: 'sniper', twoWeapons: false, meleeWeapon: 'unarmed', property: 'jump_boost_5', image: '/images/test.png' },
+      { race: 'clone', squadType: 'main', armor: 'clothing', weapon: 'pistol', twoWeapons: true, meleeWeapon: 'knife', property: null },
+    ];
+
+    const json = JSON.stringify(params);
+    const parsed = JSON.parse(json) as CalculatorSoldierParams[];
+
+    expect(parsed).toHaveLength(2);
+    expect(parsed[0].race).toBe('human');
+    expect(parsed[0].property).toBe('jump_boost_5');
+    expect(parsed[0].image).toBe('/images/test.png');
+    expect(parsed[1].race).toBe('clone');
+    expect(parsed[1].twoWeapons).toBe(true);
+    expect(parsed[1].property).toBeNull();
+  });
+
+  test('calculatorParams survives CustomSquad serialization', () => {
+    const squad = {
+      id: 'test_squad',
+      name: 'Test',
+      faction: 'test',
+      cost: 100,
+      soldiers: [
+        { rank: 3, speed: 4, range: 'Д12', power: 'Д6', melee: 2, armor: 4 },
+      ],
+      calculatorParams: [
+        { race: 'mutant', squadType: 'elite_heavy', armor: 'exoskeleton', weapon: 'lmg', twoWeapons: false, meleeWeapon: 'heavy_ranged', property: 'mechanic' },
+      ],
+    };
+
+    const json = JSON.stringify(squad);
+    const parsed = JSON.parse(json);
+
+    expect(parsed.calculatorParams).toHaveLength(1);
+    expect(parsed.calculatorParams[0].race).toBe('mutant');
+    expect(parsed.calculatorParams[0].weapon).toBe('lmg');
+  });
+
+  test('calculatorParams is optional and omitted by default', () => {
+    const squad = {
+      id: 'test',
+      name: 'NoCalc',
+      faction: 'test',
+      cost: 50,
+      soldiers: [{ rank: 1, speed: 5, range: 'Д6', power: 'Д6', melee: 0, armor: 1 }],
+    };
+
+    const json = JSON.stringify(squad);
+    const parsed = JSON.parse(json);
+
+    expect(parsed.calculatorParams).toBeUndefined();
+  });
+});
