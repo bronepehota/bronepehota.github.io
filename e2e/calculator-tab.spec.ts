@@ -62,7 +62,7 @@ test.describe.serial('Calculator Tab', () => {
     await expect(page.getByTestId('calculator-apply')).toBeVisible();
 
     // Should see attribution
-    await expect(page.getByText('БНП')).toBeVisible();
+    await expect(page.getByText('Star System')).toBeVisible();
   });
 
   test('should calculate stats and apply to squad', async ({ page }) => {
@@ -134,5 +134,67 @@ test.describe.serial('Calculator Tab', () => {
     // range=Д12+2, power=Д12
     // Cost: 20 + 80 + 0 + 0 + 80 + 20 = 200
     await expect(row0).toContainText('Д12+2');
+  });
+
+  test('should initialize calculator with correct soldier count on existing squad', async ({ page }) => {
+    // Create source + faction
+    await page.getByTitle('Создать источник').first().click();
+    await page.waitForTimeout(300);
+    await page.getByTestId('source-name-input').fill('TestCalc');
+    await page.getByRole('button', { name: 'Создать', exact: true }).first().click();
+    await page.waitForTimeout(500);
+    await page.getByTitle('Создать фракцию').first().click();
+    await page.waitForTimeout(300);
+    await page.getByText('Новая фракция').first().click();
+    await page.waitForTimeout(300);
+    await page.getByTitle('Создать отряд').first().click();
+    await page.waitForTimeout(500);
+
+    // Add 3 soldiers via manual mode
+    for (let i = 0; i < 3; i++) {
+      await page.getByTitle('Добавить солдата').first().click();
+      await page.waitForTimeout(100);
+    }
+
+    // Save the squad
+    await page.getByRole('textbox', { name: 'Введите название' }).fill('Test Squad');
+    await page.getByRole('button', { name: 'Сохранить', exact: true }).click();
+    await page.waitForTimeout(500);
+
+    // Click the saved squad to edit it
+    await page.getByText('Test Squad').first().click();
+    await page.waitForTimeout(500);
+
+    // Switch to calculator — should have 4 rows (1 original + 3 added)
+    await page.getByTestId('calculator-tab').click();
+    await page.waitForTimeout(200);
+
+    await expect(page.getByTestId('calculator-row-0')).toBeVisible();
+    await expect(page.getByTestId('calculator-row-1')).toBeVisible();
+    await expect(page.getByTestId('calculator-row-2')).toBeVisible();
+    await expect(page.getByTestId('calculator-row-3')).toBeVisible();
+    // Should NOT have row 4
+    await expect(page.getByTestId('calculator-row-4')).not.toBeVisible();
+  });
+
+  test('should apply property as modifier on soldier', async ({ page }) => {
+    await setupSquadEditor(page);
+
+    // Switch to calculator
+    await page.getByTestId('calculator-tab').click();
+    await page.waitForTimeout(200);
+
+    // Set property to Пр5
+    const row0 = page.getByTestId('calculator-row-0');
+    const propertySelect = row0.locator('select').nth(5);
+    await propertySelect.selectOption('jump_boost_5');
+    await page.waitForTimeout(200);
+
+    // Apply — switches back to manual tab
+    await page.getByTestId('calculator-apply').click();
+    await page.waitForTimeout(200);
+
+    // On manual tab, should see Пр5 modifier badge
+    await expect(page.getByText('Пр5')).toBeVisible();
   });
 });
