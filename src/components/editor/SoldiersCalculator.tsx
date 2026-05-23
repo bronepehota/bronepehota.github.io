@@ -308,16 +308,15 @@ export function SoldiersCalculator({
       </div>
 
       {/* Attribution */}
-      <div className="flex items-center justify-end gap-1.5 pt-1">
-        <span className="text-[10px] text-slate-600">Калькулятор:</span>
+      <div className="flex items-center justify-between pt-1">
         <a
           href="https://vk.com/bp_bnp"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-0.5 text-[10px] text-slate-500 hover:text-emerald-400 transition-colors"
+          className="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-emerald-400 transition-colors"
         >
-          БНП
-          <ExternalLink className="w-2.5 h-2.5" />
+          Калькулятор от БНП
+          <ExternalLink className="w-3 h-3" />
         </a>
       </div>
     </div>
