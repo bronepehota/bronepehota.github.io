@@ -248,8 +248,8 @@ export function SoldiersCalculator({
         </table>
       </div>
 
-      {/* Add soldier button */}
-      <div className="flex items-center gap-2">
+      {/* Add soldier button + legend */}
+      <div className="flex items-center gap-4">
         <button
           onClick={onAddSoldier}
           disabled={soldierCount >= 6}
@@ -259,6 +259,9 @@ export function SoldiersCalculator({
           <Plus className="w-3.5 h-3.5" />
           Добавить солдата
         </button>
+        <span className="text-[10px] text-slate-600">
+          ★ — тяжёлое оружие (ББ = 0, при 3+ в отряде снижает скорость)
+        </span>
       </div>
 
       {/* Cost summary */}
