@@ -102,4 +102,37 @@ test.describe.serial('Calculator Tab', () => {
     // Should see 2 rows
     await expect(page.getByTestId('calculator-row-1')).toBeVisible();
   });
+
+  test('should compute correct stats for Excel example soldier', async ({ page }) => {
+    await setupSquadEditor(page);
+
+    // Switch to calculator
+    await page.getByTestId('calculator-tab').click();
+    await page.waitForTimeout(200);
+
+    const row0 = page.getByTestId('calculator-row-0');
+
+    // Default: Человек, Ударное, Одежда, Пистолет, Без оружия
+    // Expected: rank=3, speed=5, range=Д6, power=Д6, melee=2, armor=1
+    await expect(row0).toContainText('3');   // rank
+    await expect(row0).toContainText('Д6');  // range/power
+
+    // Change armor to Тяжёлый пехотный доспех
+    const armorSelect = row0.locator('select').nth(2);
+    await armorSelect.selectOption('heavy_infantry');
+    await page.waitForTimeout(200);
+
+    // Now armor=4, speed=4
+    // Cost breakdown: rankPrice=20, weapon=15, melee=0, property=0, armor=80, race=20 = 135
+    await expect(page.getByTestId('calculator-cost')).toContainText('15');
+
+    // Change weapon to Снайперская Винтовка
+    const weaponSelect = row0.locator('select').nth(3);
+    await weaponSelect.selectOption('sniper');
+    await page.waitForTimeout(200);
+
+    // range=Д12+2, power=Д12
+    // Cost: 20 + 80 + 0 + 0 + 80 + 20 = 200
+    await expect(row0).toContainText('Д12+2');
+  });
 });

@@ -79,7 +79,7 @@ export const ARMOR_TYPES: ArmorDef[] = [
 
 export const WEAPONS: WeaponDef[] = [
   { id: 'pistol',          name: 'Пистолет',               range: 'Д6',   power: 'Д6',   price: 15,  isHeavy: false, macedonianRange: 'Д6-1',  macedonianPower: '2Д6'   },
-  { id: 'smg',             name: 'Пистолет-пулемёт',       range: 'Д6',   power: '2Д6',  price: 25,  isHeavy: false, macedonianRange: 'Д6-1',  macedonianPower: '3Д6'   },
+  { id: 'smg',             name: 'Пистолет-пулемёт',       range: 'Д6',   power: '2Д6',  price: 25,  isHeavy: false, macedonianRange: '2Д6-1', macedonianPower: '3Д6'   },
   { id: 'shotgun',         name: 'Дробовик',               range: 'Д6',   power: '3Д6',  price: 35,  isHeavy: false },
   { id: 'assault_rifle',   name: 'Автомат',                range: 'Д12',  power: '2Д6',  price: 40,  isHeavy: false },
   { id: 'carbine',         name: 'Штурмовой карабин',      range: 'Д6',   power: 'Д12',  price: 45,  isHeavy: false },

@@ -85,6 +85,12 @@ describe('calculateSoldier', () => {
     expect(result.power).toBe('2Д6');
   });
 
+  test('SMG with macedonian mode changes range/power', () => {
+    const result = calculateSoldier({ ...baseParams, weapon: 'smg', twoWeapons: true });
+    expect(result.range).toBe('2Д6-1');
+    expect(result.power).toBe('3Д6');
+  });
+
   test('no property gives 0 property price', () => {
     const result = calculateSoldier({ ...baseParams, weapon: 'assault_rifle', property: null });
     expect(result.costBreakdown.propertyPrice).toBe(0);
