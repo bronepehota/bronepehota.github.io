@@ -52,7 +52,22 @@ export function SquadEditor({ squad, source: _source, factionId, isOverride = fa
   const [showPreview, setShowPreview] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [mode, setMode] = useState<'manual' | 'calculator'>('manual');
-  const [calcParams, setCalcParams] = useState<CalculatorSoldierParams[]>([DEFAULT_CALC_PARAMS]);
+  const [calcParams, setCalcParams] = useState<CalculatorSoldierParams[]>(
+    () => squad?.soldiers?.length
+      ? squad.soldiers.map(s => ({
+          race: 'human',
+          squadType: 'shock',
+          armor: 'clothing',
+          weapon: 'pistol',
+          twoWeapons: false,
+          meleeWeapon: 'unarmed',
+          property: (s.modifiers || []).find(m =>
+            m === 'mechanic' || m === 'jump_boost_3' || m === 'jump_boost_4' || m === 'jump_boost_5'
+          ) ?? null,
+          image: s.image,
+        }))
+      : [DEFAULT_CALC_PARAMS]
+  );
 
   const colors = getFactionColors(factionId);
 
