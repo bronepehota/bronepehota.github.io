@@ -1,5 +1,3 @@
-'use client';
-
 import { useMemo } from 'react';
 import { Trash2, Plus, Calculator, ExternalLink, ImageIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';

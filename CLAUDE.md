@@ -41,7 +41,7 @@ npm run test:e2e:debug   # Run E2E tests in debug mode with inspector
 
 ## Testing Workflow
 
-**ALWAYS write tests for new features.** The project has 1036+ unit tests and 85+ E2E tests across 20 spec files. Both are required.
+**ALWAYS write tests for new features.** The project has 1100+ unit tests (79 test files) and 94 E2E tests across 19 spec files. Both are required.
 
 ### When to write what
 
@@ -71,13 +71,14 @@ npm run test:e2e            # All E2E tests pass
 - **Dev server auto-starts** on `http://localhost:3001` before tests
 - **Headed mode**: `npm run test:e2e:headed` (visible browser)
 - **Debug mode**: `npm run test:e2e:debug` (Playwright Inspector)
+- **Shared setup helpers**: `e2e/helpers/setup.ts` — use `setupToArmyBuilder`, `setupGameSessionWithSquad`, `setupToPreparation` etc. to reduce setup duplication
 
 ### Existing E2E coverage
 
 | Area | Spec file | Tests |
 |------|-----------|-------|
 | Calculator | `calculator.spec.ts` | 7 |
-| Combat flow | `combat.spec.ts` | 2 |
+| Combat flow | `combat.spec.ts` | 4 |
 | Aimed shot | `aimed-shot.spec.ts` | 7 |
 | Battle buffs | `battle-buffs.spec.ts` | 11 |
 | Source selection | `source-selection.spec.ts` | 9 |
@@ -93,6 +94,8 @@ npm run test:e2e            # All E2E tests pass
 | Fire rate | `unit-card-fire-rate.spec.ts` | 1 |
 | Navigator | `expanded-navigator.spec.ts` | 1 |
 | Modifier display | `modifier-stat-display.spec.ts` | 7 |
+| Calculator tab | `calculator-tab.spec.ts` | 7 |
+| Example/smoke | `example.spec.ts` | 3 |
 
 **CI/CD**: Unit tests on every commit (~6s). E2E tests in CI after deployment (~2-5min). See `.github/workflows/test.yml`.
 
@@ -157,21 +160,26 @@ src/data/sources/
 
 ### State Management
 
-**Client-side persistence** (localStorage keys):
+**Client-side persistence** (localStorage keys — canonical list in `src/lib/constants.ts`):
 - `bronepehota_army` - Player's army state (units, totalCost, faction, sourceId)
 - `bronepehota_view` - Current view: 'army' (builder) or 'game' (session)
 - `bronepehota_display_mode` - Display mode preference
 - `bronepehota_army_list_source` - Selected army list source ('star_system' or 'tehnolog')
+- `bronepehota_rules_version` - Selected rules version for game session
 - `bronepehota_calculator_rules` - Calculator rules version ('tehnolog' or 'community_star_system')
 - `bronepehota_dice_history` - Calculator dice input history (JSON array of {value, field, timestamp})
-- `bronepehota_rules_version` - Selected rules version for game session
 - `bronepehota_panic_enabled` - Panic rule toggle state
 - `bronepehota_aimed_shot_enabled` - Aimed shot rule toggle state
 - `bronepehota_surprise_attack_enabled` - Surprise attack (rear attack) toggle state
-- `AUTO_COMPLETE_ENABLED` - Auto-complete actions after combat
-- `DISTANCE_INPUT_UNIT` - Distance unit: 'steps' or 'cm'
-- `STEP_TO_CM_FACTOR` - Conversion factor from steps to cm (default: 5)
-- `STRICT_PILOT_RANK_ENABLED` - Enforce pilot rank requirements
+- `bronepehota_auto_complete_enabled` - Auto-complete actions after combat
+- `bronepehota_distance_input_unit` - Distance unit: 'steps' or 'cm'
+- `bronepehota_step_to_cm_factor` - Conversion factor from steps to cm (default: 5)
+- `bronepehota_strict_pilot_rank_enabled` - Enforce pilot rank requirements
+- `bronepehota_custom_sources` - Editor custom source JSON
+- `bronepehota_custom_modifiers` - Editor custom modifiers JSON
+- `bronepehota_setup_step` - Current setup wizard step
+- `bronepehota_editor_show_base_units` - Editor base unit visibility toggle
+- `bronepehota_weapon_selections` - Weapon selector modal selections
 
 The main app page (`src/app/app/page.tsx`) manages the `Army` state and passes it down to child components.
 
