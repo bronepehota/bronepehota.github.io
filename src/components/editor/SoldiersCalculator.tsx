@@ -308,16 +308,19 @@ export function SoldiersCalculator({
       </div>
 
       {/* Attribution */}
-      <div className="flex items-center justify-between pt-1">
-        <a
-          href="https://vk.com/bp_bnp"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-emerald-400 transition-colors"
-        >
-          Спасибо Star System за формулы расчёта
-          <ExternalLink className="w-3 h-3" />
-        </a>
+      <div className="flex items-center justify-between pt-2">
+        <div className="flex items-center gap-2">
+          <a
+            href="https://vk.com/bp_bnp"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-950/40 border border-emerald-800/60 text-sm text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/60 hover:border-emerald-700 transition-all font-medium"
+          >
+            На базе формул расчёта от Star System
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
+          <span className="text-[11px] text-slate-500">только для правил Star System</span>
+        </div>
       </div>
     </div>
   );

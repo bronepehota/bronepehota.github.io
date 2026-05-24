@@ -62,7 +62,7 @@ test.describe.serial('Calculator Tab', () => {
     await expect(page.getByTestId('calculator-apply')).toBeVisible();
 
     // Should see attribution
-    await expect(page.getByText('Star System')).toBeVisible();
+    await expect(page.getByText('На базе формул расчёта от Star System')).toBeVisible();
   });
 
   test('should calculate stats and apply to squad', async ({ page }) => {
