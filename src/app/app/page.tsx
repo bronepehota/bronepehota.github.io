@@ -53,15 +53,13 @@ export default function Home() {
   });
 
   // Rules version state with localStorage persistence
-  const [rulesVersion, setRulesVersion] = useState<RulesVersionID>('tehnolog');
-
-  // Load rules version from localStorage on mount (client-side only)
-  useEffect(() => {
-    const saved = localStorage.getItem('bronepehota_rules_version');
-    if (saved && isValidRulesVersion(saved)) {
-      setRulesVersion(saved as RulesVersionID);
+  const [rulesVersion, setRulesVersion] = useState<RulesVersionID>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('bronepehota_rules_version');
+      if (saved && isValidRulesVersion(saved)) return saved as RulesVersionID;
     }
-  }, []);
+    return 'tehnolog';
+  });
 
   // Strict pilot rank enabled state - persisted in localStorage
   const [strictPilotRankEnabled, setStrictPilotRankEnabled] = useState<boolean>(() => {

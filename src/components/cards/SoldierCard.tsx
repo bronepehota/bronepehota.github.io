@@ -175,7 +175,7 @@ function SoldierCard({
 
       // Check panic trigger for community rules when adding a kill
       if (isAddingKill && rulesVersion === 'community_star_system') {
-        const shouldTestPanic = checkPanicTrigger(updatedUnit, 'community_star_system', currentTurn);
+        const shouldTestPanic = checkPanicTrigger(updatedUnit, 'community_star_system');
         if (shouldTestPanic) {
           setShowPanicModal(true);
         }

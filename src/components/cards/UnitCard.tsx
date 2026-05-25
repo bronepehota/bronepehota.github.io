@@ -171,9 +171,11 @@ export default function UnitCard({
         triggeredAtTurn: turn,
       }));
 
-    if (panicStates.length > 0) {
-      updateThisUnit((u) => ({ ...u, panicState: panicStates }));
-    }
+    updateThisUnit((u) => ({
+      ...u,
+      panicState: panicStates.length > 0 ? panicStates : u.panicState,
+      panicTestUsed: true,
+    }));
   };
 
   // Load encyclopedia data when modal opens

@@ -4,13 +4,11 @@ import { ArmyUnit, PanicTestResult, RulesVersionID } from './types';
  * Check if panic test should be triggered for a unit
  * @param unit - The army unit to check
  * @param rulesVersion - Current rules version
- * @param currentTurn - Current turn number (optional)
  * @returns true if panic test should be triggered
  */
 export function checkPanicTrigger(
   unit: ArmyUnit,
-  rulesVersion: RulesVersionID,
-  currentTurn?: number
+  rulesVersion: RulesVersionID
 ): boolean {
   // Check if panic is enabled in settings
   if (typeof window !== 'undefined') {
@@ -34,21 +32,16 @@ export function checkPanicTrigger(
     return false;
   }
 
-  // Community rules: automatic panic trigger at 50% losses
+  // Community rules: automatic panic trigger at 50% losses, once per game
   if (rulesVersion === 'community_star_system') {
-    const halfThreshold = Math.floor(totalSoldiers / 2);
-    if (deadCount < halfThreshold) {
+    // Panic test is once per game per squad
+    if (unit.panicTestUsed) {
       return false;
     }
 
-    // Check if panic already triggered this turn
-    if (currentTurn !== undefined && unit.panicState) {
-      const triggeredThisTurn = unit.panicState.some(
-        p => p.triggeredAtTurn === currentTurn
-      );
-      if (triggeredThisTurn) {
-        return false;
-      }
+    const halfThreshold = Math.floor(totalSoldiers / 2);
+    if (deadCount < halfThreshold) {
+      return false;
     }
 
     return true;
