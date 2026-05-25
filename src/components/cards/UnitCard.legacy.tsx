@@ -93,7 +93,7 @@ export default function UnitCard({
   const isMachineDone = !isSquad && (unit.isMachineDone || isMachineDestroyed);
 
   const handlePanicTestComplete = (results: PanicTestResult[]) => {
-    const currentTurn = 1; // Default turn (will be updated when turn tracking is implemented)
+    const currentTurn = 1;
     const panicStates = results
       .filter(r => r.isPanic)
       .map(r => ({
@@ -103,9 +103,11 @@ export default function UnitCard({
         triggeredAtTurn: currentTurn,
       }));
 
-    if (panicStates.length > 0) {
-      updateThisUnit((u) => ({ ...u, panicState: panicStates }));
-    }
+    updateThisUnit((u) => ({
+      ...u,
+      panicState: panicStates.length > 0 ? panicStates : u.panicState,
+      panicTestUsed: true,
+    }));
   };
 
   const updateMachineStat = (stat: 'durability' | 'ammo', delta: number) => {

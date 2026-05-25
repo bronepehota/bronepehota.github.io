@@ -72,7 +72,7 @@ describe('checkPanicTrigger', () => {
     expect(checkPanicTrigger(unit, 'community_star_system')).toBe(false);
   });
 
-  test('returns false if panic already triggered this turn', () => {
+  test('returns false if panic test already used this game', () => {
     const unit: ArmyUnit = {
       instanceId: 'test-1',
       type: 'squad',
@@ -84,9 +84,9 @@ describe('checkPanicTrigger', () => {
         soldiers: Array(6).fill({ rank: 3, speed: 4, range: 'D6', power: '1D6', melee: 0, armor: 2 }),
       },
       deadSoldiers: [0, 1, 2],
-      panicState: [{ soldierIndex: 0, testRoll: 5, rank: 3, triggeredAtTurn: 1 }],
+      panicTestUsed: true,
     };
-    expect(checkPanicTrigger(unit, 'community_star_system', 1)).toBe(false);
+    expect(checkPanicTrigger(unit, 'community_star_system')).toBe(false);
   });
 });
 

@@ -12,6 +12,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Frontend Design**: When building new UI components or pages, use the `frontend-design` skill to ensure production-grade, visually polished interfaces that avoid generic AI aesthetics.
 
+**Prefer LSP tools** (`workspaceSymbol`, `goToDefinition`, `findReferences`) for code exploration over spawning Explore agents. Use `grep` for text search, LSP for symbol navigation.
+
 ## Development Commands
 
 ```bash
@@ -267,6 +269,8 @@ src/components/
 
 **Orphaned editor files** (not imported anywhere): `ExportModal.tsx`, `ImportModal.tsx`, `ModifierExportImport.tsx` in `src/components/editor/` — functionality replaced by `UnifiedSaveArea.tsx`. Can be safely deleted.
 
+**Legacy files**: `UnitCard.legacy.tsx` mirrors `UnitCard.tsx` logic — always update both when changing shared behavior (panic, combat, state updates).
+
 ### Grenade Combat Mechanics
 
 Two-phase flow: (1) Roll D6 + soldier rank = blast distance, (2) Roll D20 vs target armor for each target in blast zone. D6=1 triggers self-danger warning.
@@ -309,6 +313,7 @@ Edit `squads.json` or `machines.json` in `src/data/sources/{source_id}/{faction}
 - `useLongPress.ts` - Long-press gesture detection for undo actions
 - `usePilotTestFlow.ts` - Pilot survival test state machine (D12 + D6 rolls)
 - `usePanicTestFlow.ts` - Panic test state for squads
+  - **Star System rules**: panic test is once per game per squad (tracked via `panicTestUsed` on `ArmyUnit`), not per-turn
 - `useEditorState.ts` - Editor form state management (desktop-only)
 
 ### Long-Press Pattern

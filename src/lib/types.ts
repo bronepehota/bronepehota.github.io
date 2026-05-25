@@ -219,6 +219,7 @@ export interface ArmyUnit {
   // [0, 2, 4] = only weapons at indices 0, 2, 4 are equipped
   selectedWeaponIndices?: number[]; // Indices into machine.weapons array
   panicState?: PanicState[]; // Список паникующих солдат
+  panicTestUsed?: boolean;   // Паника проведена (единожды за игру для Star System)
   // Modifier system
   activeDebuffs?: import('./modifier-types').ActiveDebuff[];
   activeBuffs?: import('./modifier-types').ActiveBuff[];  // Temporary buffs applied during battle
