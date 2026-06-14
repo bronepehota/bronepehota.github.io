@@ -16,14 +16,14 @@ interface SourceSelectorProps {
 }
 
 // Sources that are disabled (no data yet, need community help)
-const DISABLED_SOURCES: Set<SourceID> = new Set(['tehnolog', 'tehnolog_2026', 'botwa']);
+// Note: 'tehnolog' is enabled — imported with 33 verified squads across 3 factions.
+const DISABLED_SOURCES: Set<SourceID> = new Set(['tehnolog_2026']);
 
 // Accent colors per source
 const SOURCE_COLORS: Record<string, string> = {
   star_system: '#10b981',
   tehnolog: '#f59e0b',
   tehnolog_2026: '#f59e0b',
-  botwa: '#ef4444',
 };
 
 function getSourceColor(sourceId: string): string {
