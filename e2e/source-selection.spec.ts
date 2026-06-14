@@ -81,6 +81,11 @@ test.describe('Source Selection', () => {
     // No longer shows the "needs community help" disabled marker
     await expect(tehnologCard.getByText(/Требуется помощь сообщества/)).toHaveCount(0);
 
+    // The source album link is shown in the expanded card
+    await expect(
+      tehnologCard.locator('a[href*="album-122813310_260326962"]')
+    ).toBeVisible();
+
     // Confirming with tehnolog proceeds to faction selection
     await page.click('[data-testid="source-confirm-button"]');
     await page.waitForTimeout(500);

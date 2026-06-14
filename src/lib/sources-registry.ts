@@ -56,7 +56,7 @@ const tehnologSource: ArmyListSource = {
   id: 'tehnolog',
   name: 'Технолог Классик',
   description: 'Официальные армейские листы от компании Технолог',
-  link: 'https://vk.com/album-66793422_243700984',
+  link: 'https://vk.com/album-122813310_260326962',
   version: '1.0'
 };
 
