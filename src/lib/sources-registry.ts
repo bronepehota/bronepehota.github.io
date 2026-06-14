@@ -7,6 +7,12 @@ import starSystemProtectorateMachines from '@/data/sources/star_system/protector
 import starSystemMercenariesSquads from '@/data/sources/star_system/mercenaries/squads.json';
 import starSystemMercenariesMachines from '@/data/sources/star_system/mercenaries/machines.json';
 import tehnologFactions from '@/data/sources/tehnolog/factions.json';
+import tehnologPolarisSquads from '@/data/sources/tehnolog/polaris/squads.json';
+import tehnologPolarisMachines from '@/data/sources/tehnolog/polaris/machines.json';
+import tehnologProtectorateSquads from '@/data/sources/tehnolog/protectorate/squads.json';
+import tehnologProtectorateMachines from '@/data/sources/tehnolog/protectorate/machines.json';
+import tehnologMercenariesSquads from '@/data/sources/tehnolog/mercenaries/squads.json';
+import tehnologMercenariesMachines from '@/data/sources/tehnolog/mercenaries/machines.json';
 import tehnolog2026Factions from '@/data/sources/tehnolog_2026/factions.json';
 import botwaFactions from '@/data/sources/botwa/factions.json';
 import { getCustomSourcesStorage } from './editor/storage';
@@ -25,6 +31,16 @@ const typedStarSystemMachines = [
   ...starSystemMercenariesMachines
 ] as Machine[];
 const typedTehnologFactions = tehnologFactions as Faction[];
+const typedTehnologSquads = [
+  ...tehnologPolarisSquads,
+  ...tehnologProtectorateSquads,
+  ...tehnologMercenariesSquads
+] as Squad[];
+const typedTehnologMachines = [
+  ...tehnologPolarisMachines,
+  ...tehnologProtectorateMachines,
+  ...tehnologMercenariesMachines
+] as Machine[];
 const typedTehnolog2026Factions = tehnolog2026Factions as Faction[];
 const typedBotwaFactions = botwaFactions as Faction[];
 
@@ -57,8 +73,8 @@ export const sourcesRegistry: Record<SourceID, SourceData> = {
   tehnolog: {
     source: tehnologSource,
     factions: typedTehnologFactions,
-    squads: [],
-    machines: []
+    squads: typedTehnologSquads,
+    machines: typedTehnologMachines
   },
   tehnolog_2026: {
     source: {
