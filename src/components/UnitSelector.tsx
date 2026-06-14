@@ -62,7 +62,7 @@ export function UnitSelector({
   isLoading = false,
   loadError = null,
   displayMode,
-  onDisplayModeChange: _onDisplayModeChange,
+  onDisplayModeChange,
 }: UnitSelectorProps) {
   const [filterType, setFilterType] = useState<FilterType>('all');
 
@@ -221,6 +221,8 @@ export function UnitSelector({
         currentCost={totalCost}
         pointBudget={pointBudget}
         armyCount={army.length}
+        displayMode={displayMode}
+        onDisplayModeChange={onDisplayModeChange}
       />
 
       {/* Warning toast */}
