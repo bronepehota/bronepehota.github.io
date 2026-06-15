@@ -125,4 +125,28 @@ test.describe('Army Creation', () => {
     await expect(detailedBtn).toHaveAttribute('aria-pressed', 'true');
     await expect(compactCards).toHaveCount(0);
   });
+
+  test('opens a stats-first detail sheet on squad tap and reflects the source', async ({ page }) => {
+    // Desktop viewport defaults to 'detailed' → unit cards have data-testid `unit-card-<id>`
+    await setupToArmyBuilder(page, { faction: 'polaris', budget: 350 });
+
+    // Tap the first squad card (corner click avoids the add/remove buttons)
+    const firstCard = page.locator('[data-testid^="unit-card-"]').first();
+    await firstCard.click({ position: { x: 10, y: 10 } });
+    await page.waitForTimeout(250);
+
+    const sheet = page.getByTestId('unit-detail-sheet');
+    await expect(sheet).toBeVisible();
+
+    // Stat table is present at the top (no auto-scroll to images anymore)
+    await expect(sheet.getByTestId('unit-stat-table')).toBeVisible();
+
+    // Source stamp reflects the selected source (default star_system)
+    await expect(sheet.getByText(/Star System/)).toBeVisible();
+
+    // Add-to-army from the sheet, then the sheet closes
+    await sheet.getByRole('button', { name: /добавить/i }).click();
+    await page.waitForTimeout(250);
+    await expect(page.getByTestId('unit-detail-sheet')).toHaveCount(0);
+  });
 });
