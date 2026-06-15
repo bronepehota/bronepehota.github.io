@@ -92,7 +92,39 @@ function SquadStats({ squad }: { squad: Squad }) {
   );
 }
 
-// Placeholder — implemented in Task 2.
-function MachineStats({ machine: _machine }: { machine: Machine }) {
-  return null;
+function MachineStats({ machine }: { machine: Machine }) {
+  const speeds = Array.from(new Set(machine.speed_sectors.map((s) => s.speed))).join(' / ');
+  const tiles = [
+    { label: 'Ранг', value: String(machine.rank), cls: STAT_TEXT.rank },
+    { label: 'Прочн.', value: String(machine.durability_max), cls: 'text-military-sand' },
+    { label: 'Б/с', value: String(machine.fire_rate), cls: 'text-amber-400' },
+    { label: 'Боезапас', value: String(machine.ammo_max), cls: 'text-military-sand' },
+    { label: 'Скорость', value: speeds, cls: STAT_TEXT.speed },
+  ];
+  return (
+    <section className="folded-paper military-corners p-3" data-testid="unit-stat-table" aria-label="Боевой расчёт">
+      <div className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider mb-2">
+        // БОЕВОЙ РАСЧЁТ
+      </div>
+      <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-3">
+        {tiles.map((t) => (
+          <div key={t.label} className="text-center p-2 bg-military-charcoal/50 rounded">
+            <div className={`font-russo text-base font-bold ${t.cls}`}>{t.value}</div>
+            <div className="font-ibm-mono text-[10px] text-military-steel uppercase">{t.label}</div>
+          </div>
+        ))}
+      </div>
+      <ul className="space-y-1">
+        {machine.weapons.map((w, i) => (
+          <li key={i} className="flex items-center justify-between gap-2 font-ibm-mono text-xs">
+            <span className="text-military-sand truncate">{w.name}</span>
+            <span className="flex items-center gap-2 shrink-0">
+              <span className={STAT_TEXT.range}>{w.range}</span>
+              <span className={STAT_TEXT.power}>{w.power}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
 }
