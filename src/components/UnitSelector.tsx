@@ -2,16 +2,16 @@
 
 import React, { useState, useMemo } from 'react';
 import { GitHubPagesImage as Image } from './GitHubPagesImage';
-import type { Faction, Squad, Machine, ArmyUnit, FactionID, FilterType } from '@/lib/types';
+import type { Faction, Squad, Machine, ArmyUnit, FactionID, FilterType, SourceID } from '@/lib/types';
 import { Plus, Users, Shield, BookOpen, X, Sword } from 'lucide-react';
-import { EncyclopediaModal } from './modals/EncyclopediaModal';
+import { UnitDetailSheet } from './encyclopedia/UnitDetailSheet';
 import MachineCard from './machine/MachineCard';
 import { ArmyControlPanel } from './ArmyControlPanel';
 import { CompactUnitCard } from './CompactUnitCard';
 import { FloatingContinueButton } from './controls/FloatingContinueButton';
 import { clsx } from 'clsx';
 import { getFactionColors } from '@/lib/faction-colors';
-import { EnrichedUnit } from '@/lib/encyclopedia-utils';
+
 
 interface UnitSelectorProps {
   factions: Faction[];
@@ -28,6 +28,7 @@ interface UnitSelectorProps {
   loadError?: string | null;
   displayMode: 'detailed' | 'compact';
   onDisplayModeChange: (mode: 'detailed' | 'compact') => void;
+  sourceId: SourceID;
 }
 
 type UnitDisplay = {
@@ -63,6 +64,7 @@ export function UnitSelector({
   loadError = null,
   displayMode,
   onDisplayModeChange,
+  sourceId,
 }: UnitSelectorProps) {
   const [filterType, setFilterType] = useState<FilterType>('all');
 
@@ -524,18 +526,18 @@ export function UnitSelector({
         )}
       </div>
 
-      {/* Unit details modal */}
+      {/* Unit details sheet (lean, stats-first) */}
       {selectedUnit && (
-        <EncyclopediaModal
-          unit={{
-            ...selectedUnit.data,
-            type: selectedUnit.type,
-            sources: [{ id: 'star_system', cost: selectedUnit.data.cost }],
-            cost: selectedUnit.data.cost,
-          } as EnrichedUnit}
+        <UnitDetailSheet
+          unit={selectedUnit.data}
+          type={selectedUnit.type}
+          sourceId={sourceId}
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          scrollTarget={selectedUnit.type === 'squad' ? 'soldier-images' : 'machine-images'}
+          onAdd={() => {
+            handleAddUnit(selectedUnit);
+            setIsModalOpen(false);
+          }}
         />
       )}
 

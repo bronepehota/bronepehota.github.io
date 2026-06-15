@@ -392,6 +392,7 @@ export default function ArmyBuilder({
             }}
             displayMode={displayMode}
             onDisplayModeChange={onDisplayModeChange}
+            sourceId={selectedSource}
           />
           </>
         )}
