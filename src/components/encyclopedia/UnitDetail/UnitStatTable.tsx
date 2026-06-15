@@ -40,7 +40,7 @@ function SquadStats({ squad }: { squad: Squad }) {
   return (
     <section className="folded-paper military-corners p-3" data-testid="unit-stat-table" aria-label="Боевой расчёт">
       <div className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider mb-2">
-        // БОЕВОЙ РАСЧЁТ
+        {'// БОЕВОЙ РАСЧЁТ'}
       </div>
       <div className="overflow-x-auto custom-scrollbar">
         <table className="w-full text-sm font-ibm-mono">
@@ -104,7 +104,7 @@ function MachineStats({ machine }: { machine: Machine }) {
   return (
     <section className="folded-paper military-corners p-3" data-testid="unit-stat-table" aria-label="Боевой расчёт">
       <div className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider mb-2">
-        // БОЕВОЙ РАСЧЁТ
+        {'// БОЕВОЙ РАСЧЁТ'}
       </div>
       <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-3">
         {tiles.map((t) => (
