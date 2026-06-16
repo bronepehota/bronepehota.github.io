@@ -41,6 +41,8 @@ No other files change. `src/lib/types.ts` and `src/lib/encyclopedia-registry.ts`
 
 ### Canon sources (consult per task; fetch fresh — these are the ground truth)
 
+> **See `docs/superpowers/plans/vk-canon-catalog.md`** for the full 52-article VK blog index, grouped by faction, with exact URLs and a per-squad→article map. Use it to jump straight to the right article per squad.
+
 - **VK blog «ЭПОХА РОБОГИР» — `https://vk.com/@age_of_robogear`** (художественные статьи + лор; index page confirmed readable). Most directly relevant, per faction — open the index and read:
   - «Прославленные части ВКС Империи Полярис» → **Task 1 (Polaris)** — distinguished Imperial units.
   - «Прославленные части ВКС Договора Торгового Протектората» (Космический Флот, Роботехнические войска, Силы Специальных операций) → **Task 2 (Protectorate)**.
