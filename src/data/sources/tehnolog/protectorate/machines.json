@@ -1,1 +1,535 @@
-[]
+[
+  {
+    "id": "spider",
+    "name": "SPIDER",
+    "shortName": "SPIDER",
+    "faction": "protectorate",
+    "cost": 80,
+    "image": "/images/machines/spider.jpg",
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 16,
+    "durability_max": 11,
+    "speed_sectors": [
+      {
+        "min_durability": 8,
+        "max_durability": 11,
+        "speed": 5
+      },
+      {
+        "min_durability": 4,
+        "max_durability": 7,
+        "speed": 4
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 3,
+        "speed": 3
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Автоматическая пушка",
+        "range": "D12",
+        "power": "2D20"
+      },
+      {
+        "name": "Спаренный пулемет",
+        "range": "D6+1",
+        "power": "1D12"
+      }
+    ]
+  },
+  {
+    "id": "salamander",
+    "name": "SALAMANDER",
+    "shortName": "SALAMANDER",
+    "faction": "protectorate",
+    "cost": 40,
+    "image": "/images/machines/salamander.jpg",
+    "rank": 1,
+    "fire_rate": 1,
+    "ammo_max": 12,
+    "durability_max": 7,
+    "speed_sectors": [
+      {
+        "min_durability": 3,
+        "max_durability": 7,
+        "speed": 4
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 2,
+        "speed": 3
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Ракетная установка",
+        "range": "D6+3",
+        "power": "2D20"
+      }
+    ]
+  },
+  {
+    "id": "viper",
+    "name": "VIPER",
+    "shortName": "VIPER",
+    "faction": "protectorate",
+    "cost": 50,
+    "image": "/images/machines/viper.jpg",
+    "rank": 1,
+    "fire_rate": 1,
+    "ammo_max": 10,
+    "durability_max": 8,
+    "speed_sectors": [
+      {
+        "min_durability": 7,
+        "max_durability": 8,
+        "speed": 7
+      },
+      {
+        "min_durability": 4,
+        "max_durability": 6,
+        "speed": 5
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 3,
+        "speed": 3
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Ракетная установка",
+        "range": "D6+3",
+        "power": "2D20"
+      }
+    ]
+  },
+  {
+    "id": "bronekhod",
+    "name": "BRONEKHOD",
+    "shortName": "BRONEKHOD",
+    "faction": "protectorate",
+    "cost": 60,
+    "image": "/images/machines/bronekhod.jpg",
+    "rank": 1,
+    "fire_rate": 1,
+    "ammo_max": 12,
+    "durability_max": 10,
+    "speed_sectors": [
+      {
+        "min_durability": 7,
+        "max_durability": 10,
+        "speed": 4
+      },
+      {
+        "min_durability": 4,
+        "max_durability": 6,
+        "speed": 3
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 3,
+        "speed": 2
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Ракетная установка",
+        "range": "D6+3",
+        "power": "2D20"
+      }
+    ]
+  },
+  {
+    "id": "puma",
+    "name": "PUMA",
+    "shortName": "PUMA",
+    "faction": "protectorate",
+    "cost": 60,
+    "image": "/images/machines/puma.jpg",
+    "rank": 1,
+    "fire_rate": 2,
+    "ammo_max": 12,
+    "durability_max": 10,
+    "speed_sectors": [
+      {
+        "min_durability": 8,
+        "max_durability": 10,
+        "speed": 5
+      },
+      {
+        "min_durability": 4,
+        "max_durability": 7,
+        "speed": 4
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 3,
+        "speed": 3
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Ракетная установка",
+        "range": "D6+3",
+        "power": "2D20"
+      }
+    ]
+  },
+  {
+    "id": "griffin",
+    "name": "GRYPHON",
+    "shortName": "GRYPHON",
+    "faction": "protectorate",
+    "cost": 70,
+    "image": "/images/machines/griffin.jpg",
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 14,
+    "durability_max": 11,
+    "speed_sectors": [
+      {
+        "min_durability": 8,
+        "max_durability": 11,
+        "speed": 6
+      },
+      {
+        "min_durability": 4,
+        "max_durability": 7,
+        "speed": 5
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 3,
+        "speed": 4
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Ракетная установка",
+        "range": "D6+3",
+        "power": "2D20"
+      },
+      {
+        "name": "Строенный пулемёт",
+        "range": "D6",
+        "power": "1D6"
+      },
+      {
+        "name": "Лазерная пушка",
+        "range": "D20",
+        "power": "1D12"
+      },
+      {
+        "name": "Плазменный излучатель",
+        "range": "D12",
+        "power": "2D12"
+      }
+    ]
+  },
+  {
+    "id": "octopus",
+    "name": "SPRUT",
+    "shortName": "SPRUT",
+    "faction": "protectorate",
+    "cost": 80,
+    "image": "/images/machines/octopus.jpg",
+    "rank": 3,
+    "fire_rate": 2,
+    "ammo_max": 14,
+    "durability_max": 10,
+    "speed_sectors": [
+      {
+        "min_durability": 7,
+        "max_durability": 10,
+        "speed": 6
+      },
+      {
+        "min_durability": 4,
+        "max_durability": 6,
+        "speed": 5
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 3,
+        "speed": 4
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Двуствольный пулемет",
+        "range": "D12",
+        "power": "2D12"
+      },
+      {
+        "name": "Импульсное оружие",
+        "range": "D12",
+        "power": "1D20"
+      },
+      {
+        "name": "Авиационные ракеты",
+        "range": "D12",
+        "power": "4D12"
+      }
+    ]
+  },
+  {
+    "id": "varan",
+    "name": "VARAN",
+    "shortName": "VARAN",
+    "faction": "protectorate",
+    "cost": 90,
+    "image": "/images/machines/varan.jpg",
+    "rank": 3,
+    "fire_rate": 2,
+    "ammo_max": 20,
+    "durability_max": 12,
+    "speed_sectors": [
+      {
+        "min_durability": 6,
+        "max_durability": 12,
+        "speed": 2
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 5,
+        "speed": 1
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Ракеты дальнего действия",
+        "range": "D20",
+        "power": "4D12"
+      }
+    ]
+  },
+  {
+    "id": "trex",
+    "name": "T-REX",
+    "shortName": "T-REX",
+    "faction": "protectorate",
+    "cost": 100,
+    "image": "/images/machines/trex.jpg",
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 16,
+    "durability_max": 14,
+    "speed_sectors": [
+      {
+        "min_durability": 9,
+        "max_durability": 14,
+        "speed": 4
+      },
+      {
+        "min_durability": 5,
+        "max_durability": 8,
+        "speed": 3
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 4,
+        "speed": 2
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Крупнокалиберный пулемет",
+        "range": "D12",
+        "power": "1D20"
+      },
+      {
+        "name": "Ракетная установка",
+        "range": "D6+3",
+        "power": "2D20"
+      }
+    ]
+  },
+  {
+    "id": "condor",
+    "name": "CONDOR",
+    "shortName": "CONDOR",
+    "faction": "protectorate",
+    "cost": 100,
+    "image": "/images/machines/condor.jpg",
+    "rank": 3,
+    "fire_rate": 2,
+    "ammo_max": 14,
+    "durability_max": 14,
+    "speed_sectors": [
+      {
+        "min_durability": 9,
+        "max_durability": 14,
+        "speed": 6
+      },
+      {
+        "min_durability": 5,
+        "max_durability": 8,
+        "speed": 5
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 4,
+        "speed": 4
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Ракетная установка",
+        "range": "D6+3",
+        "power": "2D20"
+      },
+      {
+        "name": "Авиационные ракеты",
+        "range": "D12",
+        "power": "4D12"
+      }
+    ]
+  },
+  {
+    "id": "hurricane",
+    "name": "HURRICANE",
+    "shortName": "HURRICANE",
+    "faction": "protectorate",
+    "cost": 130,
+    "image": "/images/machines/hurricane.jpg",
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 18,
+    "durability_max": 15,
+    "speed_sectors": [
+      {
+        "min_durability": 10,
+        "max_durability": 15,
+        "speed": 3
+      },
+      {
+        "min_durability": 5,
+        "max_durability": 9,
+        "speed": 2
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 4,
+        "speed": 1
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Лазерная пушка",
+        "range": "D20",
+        "power": "1D12"
+      },
+      {
+        "name": "Выброплая",
+        "range": "ББ",
+        "power": "2"
+      },
+      {
+        "name": "Спаренная ракетная установка",
+        "range": "D20",
+        "power": "2D12"
+      },
+      {
+        "name": "Пушка Гатлинга",
+        "range": "D12",
+        "power": "3D20"
+      },
+      {
+        "name": "Пулемет Вулкан",
+        "range": "D12",
+        "power": "3D12"
+      }
+    ]
+  },
+  {
+    "id": "werewolf",
+    "name": "WEREWOLF",
+    "shortName": "WEREWOLF",
+    "faction": "protectorate",
+    "cost": 150,
+    "image": "/images/machines/werewolf.jpg",
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 18,
+    "durability_max": 14,
+    "speed_sectors": [
+      {
+        "min_durability": 10,
+        "max_durability": 14,
+        "speed": 5
+      },
+      {
+        "min_durability": 5,
+        "max_durability": 9,
+        "speed": 4
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 4,
+        "speed": 3
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Лазерная пушка",
+        "range": "D20",
+        "power": "1D12"
+      },
+      {
+        "name": "Тяжелая ракета",
+        "range": "D12",
+        "power": "4D20"
+      },
+      {
+        "name": "Плазменный излучатель",
+        "range": "D12",
+        "power": "2D12"
+      },
+      {
+        "name": "Манипулятор кулак",
+        "range": "ББ",
+        "power": "2"
+      },
+      {
+        "name": "Пушка Гатлинга",
+        "range": "D12",
+        "power": "3D20"
+      },
+      {
+        "name": "Легкая бронебойная пушка",
+        "range": "D20",
+        "power": "1D20"
+      }
+    ]
+  },
+  {
+    "id": "sparennaya_pushka",
+    "name": "СПАРЕННАЯ ПУШКА",
+    "shortName": "СПАРЕННАЯ ПУШКА",
+    "faction": "protectorate",
+    "cost": 45,
+    "image": "/images/machines/sparennaya_pushka.jpg",
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 16,
+    "durability_max": 8,
+    "speed_sectors": [
+      {
+        "min_durability": 1,
+        "max_durability": 8,
+        "speed": 0
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Спаренная пушка",
+        "range": "D12",
+        "power": "3D20"
+      }
+    ]
+  }
+]

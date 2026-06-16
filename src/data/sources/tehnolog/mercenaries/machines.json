@@ -1,1 +1,219 @@
-[]
+[
+  {
+    "id": "minomet",
+    "name": "МИНОМЕТ",
+    "shortName": "МИНОМЕТ",
+    "faction": "mercenaries",
+    "cost": 20,
+    "image": "/images/machines/minomet.jpg",
+    "rank": 1,
+    "fire_rate": 1,
+    "ammo_max": 12,
+    "durability_max": 4,
+    "speed_sectors": [
+      {
+        "min_durability": 1,
+        "max_durability": 4,
+        "speed": 0
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Миномет",
+        "range": "D6+2",
+        "power": "3D20"
+      }
+    ]
+  },
+  {
+    "id": "buldog",
+    "name": "BULDOG",
+    "shortName": "BULDOG",
+    "faction": "mercenaries",
+    "cost": 30,
+    "image": "/images/machines/buldog.jpg",
+    "rank": 1,
+    "fire_rate": 1,
+    "ammo_max": 14,
+    "durability_max": 5,
+    "speed_sectors": [
+      {
+        "min_durability": 1,
+        "max_durability": 5,
+        "speed": 0
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Пушка",
+        "range": "D12",
+        "power": "2D20"
+      }
+    ]
+  },
+  {
+    "id": "grinder",
+    "name": "GRINDER",
+    "shortName": "GRINDER",
+    "faction": "mercenaries",
+    "cost": 30,
+    "image": "/images/machines/grinder.jpg",
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 16,
+    "durability_max": 8,
+    "speed_sectors": [
+      {
+        "min_durability": 1,
+        "max_durability": 8,
+        "speed": 0
+      }
+    ],
+    "weapons": [
+      {
+        "name": "GRINDER",
+        "range": "D12",
+        "power": "D12+2"
+      }
+    ]
+  },
+  {
+    "id": "stilet",
+    "name": "STILET",
+    "shortName": "STILET",
+    "faction": "mercenaries",
+    "cost": 30,
+    "image": "/images/machines/stilet.jpg",
+    "rank": 1,
+    "fire_rate": 2,
+    "ammo_max": 16,
+    "durability_max": 16,
+    "speed_sectors": [
+      {
+        "min_durability": 1,
+        "max_durability": 16,
+        "speed": 0
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Пушка",
+        "range": "D12",
+        "power": "3D12"
+      }
+    ]
+  },
+  {
+    "id": "executor",
+    "name": "EXECUTOR",
+    "shortName": "EXECUTOR",
+    "faction": "mercenaries",
+    "cost": 30,
+    "image": "/images/machines/executor.jpg",
+    "rank": 1,
+    "fire_rate": 2,
+    "ammo_max": 16,
+    "durability_max": 6,
+    "speed_sectors": [
+      {
+        "min_durability": 1,
+        "max_durability": 6,
+        "speed": 0
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Пушка",
+        "range": "D12",
+        "power": "3D12"
+      }
+    ]
+  },
+  {
+    "id": "kibertank",
+    "name": "КИБЕРТАНК",
+    "shortName": "КИБЕРТАНК",
+    "faction": "mercenaries",
+    "cost": 100,
+    "image": "/images/machines/kibertank.jpg",
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 16,
+    "durability_max": 12,
+    "speed_sectors": [
+      {
+        "min_durability": 9,
+        "max_durability": 12,
+        "speed": 4
+      },
+      {
+        "min_durability": 5,
+        "max_durability": 8,
+        "speed": 3
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 4,
+        "speed": 2
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Автоматическая пушка",
+        "range": "D12",
+        "power": "2D20"
+      }
+    ]
+  },
+  {
+    "id": "mz_st",
+    "name": "MZ-ST",
+    "shortName": "MZ-ST",
+    "faction": "mercenaries",
+    "cost": 100,
+    "image": "/images/machines/mz_st.jpg",
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 18,
+    "durability_max": 12,
+    "speed_sectors": [
+      {
+        "min_durability": 1,
+        "max_durability": 12,
+        "speed": 0
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Двуствольная бронебойная пушка",
+        "range": "D20",
+        "power": "2D20"
+      },
+      {
+        "name": "Легкая бронебойная пушка",
+        "range": "D20",
+        "power": "1D20"
+      },
+      {
+        "name": "Спаренный пулемет",
+        "range": "D6+1",
+        "power": "1D12"
+      },
+      {
+        "name": "Спаренная ракетная установка",
+        "range": "D20",
+        "power": "2D12"
+      },
+      {
+        "name": "Ракеты",
+        "range": "D12",
+        "power": "4D12"
+      },
+      {
+        "name": "Ракетная установка",
+        "range": "D6+3",
+        "power": "2D20"
+      }
+    ]
+  }
+]
