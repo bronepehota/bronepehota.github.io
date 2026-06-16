@@ -7,8 +7,13 @@ import starSystemProtectorateMachines from '@/data/sources/star_system/protector
 import starSystemMercenariesSquads from '@/data/sources/star_system/mercenaries/squads.json';
 import starSystemMercenariesMachines from '@/data/sources/star_system/mercenaries/machines.json';
 import tehnologFactions from '@/data/sources/tehnolog/factions.json';
+import tehnologPolarisSquads from '@/data/sources/tehnolog/polaris/squads.json';
+import tehnologPolarisMachines from '@/data/sources/tehnolog/polaris/machines.json';
+import tehnologProtectorateSquads from '@/data/sources/tehnolog/protectorate/squads.json';
+import tehnologProtectorateMachines from '@/data/sources/tehnolog/protectorate/machines.json';
+import tehnologMercenariesSquads from '@/data/sources/tehnolog/mercenaries/squads.json';
+import tehnologMercenariesMachines from '@/data/sources/tehnolog/mercenaries/machines.json';
 import tehnolog2026Factions from '@/data/sources/tehnolog_2026/factions.json';
-import botwaFactions from '@/data/sources/botwa/factions.json';
 import { getCustomSourcesStorage } from './editor/storage';
 import { getCustomSourceData } from './editor/converters';
 
@@ -25,8 +30,17 @@ const typedStarSystemMachines = [
   ...starSystemMercenariesMachines
 ] as Machine[];
 const typedTehnologFactions = tehnologFactions as Faction[];
+const typedTehnologSquads = [
+  ...tehnologPolarisSquads,
+  ...tehnologProtectorateSquads,
+  ...tehnologMercenariesSquads
+] as Squad[];
+const typedTehnologMachines = [
+  ...tehnologPolarisMachines,
+  ...tehnologProtectorateMachines,
+  ...tehnologMercenariesMachines
+] as Machine[];
 const typedTehnolog2026Factions = tehnolog2026Factions as Faction[];
-const typedBotwaFactions = botwaFactions as Faction[];
 
 // Star System source metadata
 const starSystemSource: ArmyListSource = {
@@ -42,7 +56,7 @@ const tehnologSource: ArmyListSource = {
   id: 'tehnolog',
   name: 'Технолог Классик',
   description: 'Официальные армейские листы от компании Технолог',
-  link: 'https://vk.com/album-66793422_243700984',
+  link: 'https://vk.com/album-122813310_260326962',
   version: '1.0'
 };
 
@@ -57,8 +71,8 @@ export const sourcesRegistry: Record<SourceID, SourceData> = {
   tehnolog: {
     source: tehnologSource,
     factions: typedTehnologFactions,
-    squads: [],
-    machines: []
+    squads: typedTehnologSquads,
+    machines: typedTehnologMachines
   },
   tehnolog_2026: {
     source: {
@@ -69,18 +83,6 @@ export const sourcesRegistry: Record<SourceID, SourceData> = {
       version: '0.1'
     },
     factions: typedTehnolog2026Factions,
-    squads: [],
-    machines: []
-  },
-  botwa: {
-    source: {
-      id: 'botwa',
-      name: 'Ботва',
-      description: 'Армейские листы от Ботва — требуется помощь сообщества по наполнению данных',
-      link: 'https://vk.com/album-209197708_299742845',
-      version: '0.1'
-    },
-    factions: typedBotwaFactions,
     squads: [],
     machines: []
   }

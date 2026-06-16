@@ -33,6 +33,14 @@ describe('multiplyRange', () => {
   it('should handle D20 with bonus', () => {
     expect(multiplyRange('D20+1', 2)).toBe('D40+2');
   });
+
+  it('should double a negative bonus', () => {
+    expect(multiplyRange('D6-1', 2)).toBe('D12-2');
+  });
+
+  it('should handle negative bonus with dice count', () => {
+    expect(multiplyRange('2D6-1', 2)).toBe('2D12-2');
+  });
 });
 
 describe('Game Logic - Dice Rolls', () => {
@@ -41,6 +49,8 @@ describe('Game Logic - Dice Rolls', () => {
     expect(parseRoll('D12+2')).toEqual({ dice: 1, sides: 12, bonus: 2 });
     expect(parseRoll('2D20')).toEqual({ dice: 2, sides: 20, bonus: 0 });
     expect(parseRoll('3D6+1')).toEqual({ dice: 3, sides: 6, bonus: 1 });
+    expect(parseRoll('D6-1')).toEqual({ dice: 1, sides: 6, bonus: -1 });
+    expect(parseRoll('2D6-1')).toEqual({ dice: 2, sides: 6, bonus: -1 });
   });
 
   test('executeRoll should return a total within expected range', () => {

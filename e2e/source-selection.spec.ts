@@ -65,20 +65,31 @@ test.describe('Source Selection', () => {
     expect(savedSource).toBe('star_system');
   });
 
-  test('should show tehnolog source as disabled with lock icon', async ({ page }) => {
+  test('should have tehnolog source enabled and selectable', async ({ page }) => {
     // Navigate to source selection
     await page.click('[data-testid="rules-confirm-button"]');
     await page.waitForTimeout(500);
 
-    // Tehnolog source should be visible
+    // Tehnolog source card is visible
     const tehnologCard = page.getByTestId('source-card-tehnolog');
     await expect(tehnologCard).toBeVisible();
 
-    // Should show "Скоро" message when expanded
+    // Tehnolog is now enabled (imported with 33 verified squads) — select it
     await tehnologCard.click();
     await page.waitForTimeout(300);
 
-    await expect(tehnologCard.getByText(/Требуется помощь сообщества/)).toBeVisible();
+    // No longer shows the "needs community help" disabled marker
+    await expect(tehnologCard.getByText(/Требуется помощь сообщества/)).toHaveCount(0);
+
+    // The source album link is shown in the expanded card
+    await expect(
+      tehnologCard.locator('a[href*="album-122813310_260326962"]')
+    ).toBeVisible();
+
+    // Confirming with tehnolog proceeds to faction selection
+    await page.click('[data-testid="source-confirm-button"]');
+    await page.waitForTimeout(500);
+    await expect(page.getByTestId('faction-card-polaris')).toBeVisible();
   });
 
   test('should show 6 steps in progress indicator', async ({ page }) => {

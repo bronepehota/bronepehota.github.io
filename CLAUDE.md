@@ -147,8 +147,7 @@ src/data/sources/
 │       └── machines.json
 ├── tehnolog/         - Official Tehnolog source
 │   └── factions.json
-├── tehnolog_2026/    - Tehnolog 2026 edition source
-└── botwa/            - Botwa community source
+└── tehnolog_2026/    - Tehnolog 2026 edition source
 ```
 
 **Source Registry** (`src/lib/sources-registry.ts`): Manages multiple army list sources.
@@ -220,6 +219,7 @@ Dice notation parsing: `D6`, `D12+2`, `2D12`, `ББ` (melee)
 - `calculateDamage(powerStr, targetArmor)` → damage count
 - `calculateMelee(attackerMelee, defenderMelee)` → combat resolution
 - `multiplyRange(rangeStr, multiplier)` → multiply dice range (e.g., D6 → D12, D6+2 → D12+4)
+- **Negative bonuses supported**: `parseRoll`/`multiplyRange`/`addBonusToRoll` (all in `src/lib/game-logic.ts`) match an optional `+N`/`-N` (e.g. `D6-1`, `2D6-1`). `2D6-1` parses to bonus -1; such values are valid in unit `range`/`power`.
 
 ### Rules System (`src/lib/`)
 
@@ -379,9 +379,9 @@ Edit `squads.json` or `machines.json` in `src/data/sources/{source_id}/{faction}
 
 **Important Notes**:
 - The app uses `basePath: '/bronepehota'` in production (configured in `next.config.mjs`)
-- The basePath is controlled by `GITHUB_PAGES` environment variable:
-  - **Local development**: `GITHUB_PAGES` unset → basePath is empty (`""`)
-  - **GitHub Pages**: `GITHUB_PAGES=true` → basePath is `/bronepehota`
+- The basePath is controlled by `NEXT_PUBLIC_GITHUB_PAGES` environment variable:
+  - **Local development**: `NEXT_PUBLIC_GITHUB_PAGES` unset → basePath is empty (`""`)
+  - **GitHub Pages**: `NEXT_PUBLIC_GITHUB_PAGES=true` → basePath is `/bronepehota`
 - Always use Next.js `<Link>` component for internal navigation (respects basePath automatically)
 - For `<Image>` components, use `unoptimized` prop when images don't display on GitHub Pages
 - Example: `<Link href="/encyclopedia">` not `<a href="/encyclopedia">`
@@ -392,7 +392,7 @@ Edit `squads.json` or `machines.json` in `src/data/sources/{source_id}/{faction}
 - Uses regular `<img>` tag instead of Next.js `<Image>` for reliable static export
 - For dynamic image components (like navigation cards), use:
   ```tsx
-  const BASE_PATH = process.env.GITHUB_PAGES === 'true' ? '/bronepehota' : '';
+  const BASE_PATH = process.env.NEXT_PUBLIC_GITHUB_PAGES === 'true' ? '/bronepehota' : '';
   const finalSrc = imageUrl.startsWith('/images/') ? `${BASE_PATH}${imageUrl}` : imageUrl;
   <img src={finalSrc} ... />
   ```
@@ -406,7 +406,7 @@ npx serve out -l 3000
 
 **Building for GitHub Pages**:
 ```bash
-GITHUB_PAGES=true npm run build
+NEXT_PUBLIC_GITHUB_PAGES=true npm run build
 # Manifest will have paths with /bronepehota prefix
 # This is automatically set in .github/workflows/deploy.yml
 ```

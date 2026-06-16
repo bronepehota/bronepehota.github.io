@@ -1,0 +1,426 @@
+[
+  {
+    "id": "raptor",
+    "name": "RAPTOR",
+    "shortName": "RAPTOR",
+    "faction": "polaris",
+    "cost": 60,
+    "image": "/images/machines/raptor.jpg",
+    "rank": 1,
+    "fire_rate": 1,
+    "ammo_max": 12,
+    "durability_max": 9,
+    "speed_sectors": [
+      {
+        "min_durability": 7,
+        "max_durability": 9,
+        "speed": 5
+      },
+      {
+        "min_durability": 4,
+        "max_durability": 6,
+        "speed": 4
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 3,
+        "speed": 3
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Ракетная установка",
+        "range": "D6+3",
+        "power": "2D20"
+      },
+      {
+        "name": "Ракетная установка",
+        "range": "D6+3",
+        "power": "2D20"
+      }
+    ]
+  },
+  {
+    "id": "hunter",
+    "name": "HUNTER",
+    "shortName": "HUNTER",
+    "faction": "polaris",
+    "cost": 60,
+    "image": "/images/machines/hunter.jpg",
+    "rank": 2,
+    "fire_rate": 1,
+    "ammo_max": 12,
+    "durability_max": 9,
+    "speed_sectors": [
+      {
+        "min_durability": 7,
+        "max_durability": 9,
+        "speed": 6
+      },
+      {
+        "min_durability": 4,
+        "max_durability": 6,
+        "speed": 5
+      },
+      {
+        "min_durability": 0,
+        "max_durability": 3,
+        "speed": 4
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Автоматическая дальнобойная пушка",
+        "range": "D12+1",
+        "power": "2D20"
+      }
+    ]
+  },
+  {
+    "id": "thunder",
+    "name": "THUNDER",
+    "shortName": "THUNDER",
+    "faction": "polaris",
+    "cost": 80,
+    "image": "/images/machines/thunder.jpg",
+    "rank": 3,
+    "fire_rate": 2,
+    "ammo_max": 14,
+    "durability_max": 11,
+    "speed_sectors": [
+      {
+        "min_durability": 8,
+        "max_durability": 11,
+        "speed": 5
+      },
+      {
+        "min_durability": 4,
+        "max_durability": 7,
+        "speed": 4
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 3,
+        "speed": 3
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Двуствольный пулемет",
+        "range": "D12",
+        "power": "2D12"
+      },
+      {
+        "name": "Импульсное орудие",
+        "range": "D12",
+        "power": "1D20"
+      },
+      {
+        "name": "Авиационные ракеты",
+        "range": "D12",
+        "power": "4D12"
+      }
+    ]
+  },
+  {
+    "id": "helix",
+    "name": "HELIX",
+    "shortName": "HELIX",
+    "faction": "polaris",
+    "cost": 90,
+    "image": "/images/machines/helix.jpg",
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 16,
+    "durability_max": 12,
+    "speed_sectors": [
+      {
+        "min_durability": 9,
+        "max_durability": 12,
+        "speed": 4
+      },
+      {
+        "min_durability": 5,
+        "max_durability": 8,
+        "speed": 3
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 4,
+        "speed": 2
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Ракетная установка",
+        "range": "D6+3",
+        "power": "2D20"
+      },
+      {
+        "name": "Ракетная установка",
+        "range": "D6+3",
+        "power": "2D20"
+      }
+    ]
+  },
+  {
+    "id": "locust",
+    "name": "LOCUST",
+    "shortName": "LOCUST",
+    "faction": "polaris",
+    "cost": 90,
+    "image": "/images/machines/locust.jpg",
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 16,
+    "durability_max": 12,
+    "speed_sectors": [
+      {
+        "min_durability": 9,
+        "max_durability": 12,
+        "speed": 5
+      },
+      {
+        "min_durability": 5,
+        "max_durability": 8,
+        "speed": 4
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 4,
+        "speed": 3
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Автоматическая пушка x 2",
+        "range": "D12",
+        "power": "2D20"
+      },
+      {
+        "name": "Скорострельная пушка x 2",
+        "range": "D20",
+        "power": "2D12"
+      }
+    ]
+  },
+  {
+    "id": "hornet",
+    "name": "HORNET",
+    "shortName": "HORNET",
+    "faction": "polaris",
+    "cost": 140,
+    "image": "/images/machines/hornet.jpg",
+    "rank": 3,
+    "fire_rate": 2,
+    "ammo_max": 12,
+    "durability_max": 14,
+    "speed_sectors": [
+      {
+        "min_durability": 9,
+        "max_durability": 14,
+        "speed": 6
+      },
+      {
+        "min_durability": 5,
+        "max_durability": 8,
+        "speed": 5
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 4,
+        "speed": 4
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Автоматическая дальнобойная пушка",
+        "range": "D12+1",
+        "power": "2D20"
+      },
+      {
+        "name": "Спаренный пулемет",
+        "range": "D6+1",
+        "power": "1D12"
+      },
+      {
+        "name": "Ракеты дальнего действия",
+        "range": "D20",
+        "power": "4D12"
+      }
+    ]
+  },
+  {
+    "id": "madbull",
+    "name": "MAD BULL",
+    "shortName": "MAD BULL",
+    "faction": "polaris",
+    "cost": 150,
+    "image": "/images/machines/madbull.jpg",
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 20,
+    "durability_max": 15,
+    "speed_sectors": [
+      {
+        "min_durability": 10,
+        "max_durability": 15,
+        "speed": 3
+      },
+      {
+        "min_durability": 5,
+        "max_durability": 9,
+        "speed": 2
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 4,
+        "speed": 1
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Тяжелая ракета",
+        "range": "D12",
+        "power": "4D20"
+      },
+      {
+        "name": "Импульсное оружие",
+        "range": "D12",
+        "power": "1D20"
+      },
+      {
+        "name": "Четырехствольный пулемет",
+        "range": "D20",
+        "power": "2D12"
+      },
+      {
+        "name": "Пушка Гатлинга",
+        "range": "D12",
+        "power": "3D20"
+      },
+      {
+        "name": "Энергетический гарпун",
+        "range": "D6+2",
+        "power": "6D20"
+      },
+      {
+        "name": "Механическая пила",
+        "range": "ББ",
+        "power": "2"
+      }
+    ]
+  },
+  {
+    "id": "demolisher",
+    "name": "DEMOLISHER",
+    "shortName": "DEMOLISHER",
+    "faction": "polaris",
+    "cost": 160,
+    "image": "/images/machines/demolisher.jpg",
+    "rank": 2,
+    "fire_rate": 2,
+    "ammo_max": 20,
+    "durability_max": 16,
+    "speed_sectors": [
+      {
+        "min_durability": 7,
+        "max_durability": 16,
+        "speed": 2
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 6,
+        "speed": 1
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Энергетический гарпун",
+        "range": "D6+2",
+        "power": "6D20"
+      },
+      {
+        "name": "Тяжелая ракета",
+        "range": "D12",
+        "power": "4D20"
+      },
+      {
+        "name": "Двусторонний пулемет",
+        "range": "D12",
+        "power": "2D12"
+      },
+      {
+        "name": "Манипулятор куяк",
+        "range": "ББ",
+        "power": "2"
+      },
+      {
+        "name": "Бронеотвал",
+        "range": "ББ",
+        "power": "2"
+      },
+      {
+        "name": "Пушка Гатлинга",
+        "range": "D12",
+        "power": "3D20"
+      },
+      {
+        "name": "Двусторонняя бронебойная пушка",
+        "range": "D20",
+        "power": "2D20"
+      }
+    ]
+  },
+  {
+    "id": "t_600",
+    "name": "T-600",
+    "shortName": "T-600",
+    "faction": "polaris",
+    "cost": 160,
+    "image": "/images/machines/t_600.jpg",
+    "rank": 3,
+    "fire_rate": 2,
+    "ammo_max": 14,
+    "durability_max": 15,
+    "speed_sectors": [
+      {
+        "min_durability": 10,
+        "max_durability": 15,
+        "speed": 4
+      },
+      {
+        "min_durability": 5,
+        "max_durability": 9,
+        "speed": 3
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 4,
+        "speed": 2
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Пулемет Вулакан",
+        "range": "D12",
+        "power": "3D12"
+      },
+      {
+        "name": "Крупнокалиберный пулемет",
+        "range": "D12",
+        "power": "1D20"
+      },
+      {
+        "name": "Пулемет",
+        "range": "D6+2",
+        "power": "3D6"
+      },
+      {
+        "name": "Бронеотвал",
+        "range": "ББ",
+        "power": "3"
+      }
+    ]
+  }
+]

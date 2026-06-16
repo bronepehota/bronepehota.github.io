@@ -18,33 +18,35 @@ export const rollWithAdvantage = (sides: number): { roll1: number; roll2: number
 };
 
 export const parseRoll = (rollStr: string): { dice: number, sides: number, bonus: number } => {
-  // Matches formats like "D6", "D6+2", "2D12", "D12+1", etc.
-  const regex = /(?:(\d+))?D(\d+)(?:\+(\d+))?/;
+  // Matches formats like "D6", "D6+2", "2D12", "D12+1", "2D6-1", etc. (negative bonuses supported)
+  const regex = /(?:(\d+))?D(\d+)(?:([+-])(\d+))?/;
   const match = rollStr.match(regex);
   if (!match) return { dice: 1, sides: 6, bonus: 0 };
 
+  const sign = match[3] === '-' ? -1 : 1;
   return {
     dice: parseInt(match[1] || '1'),
     sides: parseInt(match[2]),
-    bonus: parseInt(match[3] || '0')
+    bonus: match[4] ? sign * parseInt(match[4]) : 0
   };
 };
 
 /**
  * Multiply range string by a factor (e.g., D6 -> D12 for aimed shot)
- * Handles formats: D6, D12, D6+2, 2D6
+ * Handles formats: D6, D12, D6+2, 2D6, 2D6-1 (negative bonuses supported)
  */
 export const multiplyRange = (rangeStr: string, multiplier: number = 2): string => {
-  const regex = /(?:(\d+))?D(\d+)(?:\+(\d+))?/;
+  const regex = /(?:(\d+))?D(\d+)(?:([+-])(\d+))?/;
   const match = rangeStr.match(regex);
   if (!match) return rangeStr; // Return as-is for ББ or invalid
 
   const diceCount = match[1] ? parseInt(match[1]) : 1;
   const sides = parseInt(match[2]) * multiplier;
-  const bonus = match[3] ? parseInt(match[3]) * multiplier : 0;
+  const sign = match[3] === '-' ? -1 : 1;
+  const bonus = match[4] ? sign * parseInt(match[4]) * multiplier : 0;
 
   const dicePart = diceCount === 1 ? `D${sides}` : `${diceCount}D${sides}`;
-  const bonusPart = bonus > 0 ? `+${bonus}` : '';
+  const bonusPart = bonus > 0 ? `+${bonus}` : bonus < 0 ? `${bonus}` : '';
 
   return `${dicePart}${bonusPart}`;
 };
@@ -58,13 +60,14 @@ export const multiplyRange = (rangeStr: string, multiplier: number = 2): string 
 export const addBonusToRoll = (rollStr: string, bonus: number): string => {
   if (rollStr === 'ББ') return rollStr;
 
-  const regex = /(?:(\d+))?D(\d+)(?:\+(\d+))?/;
+  const regex = /(?:(\d+))?D(\d+)(?:([+-])(\d+))?/;
   const match = rollStr.match(regex);
   if (!match) return rollStr;
 
   const diceCount = match[1] ? parseInt(match[1]) : 1;
   const sides = parseInt(match[2]);
-  const existingBonus = match[3] ? parseInt(match[3]) : 0;
+  const sign = match[3] === '-' ? -1 : 1;
+  const existingBonus = match[4] ? sign * parseInt(match[4]) : 0;
   const newBonus = existingBonus + bonus;
 
   const dicePart = diceCount === 1 ? `D${sides}` : `${diceCount}D${sides}`;

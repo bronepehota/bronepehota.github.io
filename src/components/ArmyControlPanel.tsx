@@ -4,6 +4,7 @@ import React from 'react';
 import { ViewMode, FilterType, FactionID } from '@/lib/types';
 import { Users, Zap, Shield, Eye } from 'lucide-react';
 import { getFactionColors } from '@/lib/faction-colors';
+import { DisplayModeToggle } from './controls/DisplayModeToggle';
 
 interface ArmyControlPanelProps {
   viewMode: ViewMode;
@@ -16,6 +17,8 @@ interface ArmyControlPanelProps {
   currentCost: number;
   pointBudget: number;
   armyCount: number;
+  displayMode: 'detailed' | 'compact';
+  onDisplayModeChange: (mode: 'detailed' | 'compact') => void;
 }
 
 export function ArmyControlPanel({
@@ -28,7 +31,9 @@ export function ArmyControlPanel({
   mercenaryCount,
   currentCost,
   pointBudget,
-  armyCount
+  armyCount,
+  displayMode,
+  onDisplayModeChange
 }: ArmyControlPanelProps) {
   const colors = getFactionColors(factionId);
 
@@ -165,6 +170,14 @@ export function ArmyControlPanel({
           </span>
         </button>
 
+      </div>
+
+      {/* Display mode toggle — switch between detailed cards and compact list */}
+      <div className="flex items-center justify-between gap-3 pt-1">
+        <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+          Вид списка
+        </span>
+        <DisplayModeToggle mode={displayMode} onChange={onDisplayModeChange} />
       </div>
     </div>
   );

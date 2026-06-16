@@ -231,6 +231,7 @@ describe('UnitSelector', () => {
         onToBattle={mockToBattle}
         displayMode="detailed"
         onDisplayModeChange={mockDisplayModeChange}
+        sourceId="star_system"
       />
     );
 
@@ -259,6 +260,7 @@ describe('UnitSelector', () => {
         onToBattle={mockToBattle}
         displayMode="detailed"
         onDisplayModeChange={mockDisplayModeChange}
+        sourceId="star_system"
       />
     );
 
@@ -280,6 +282,7 @@ describe('UnitSelector', () => {
         onToBattle={mockToBattle}
         displayMode="detailed"
         onDisplayModeChange={mockDisplayModeChange}
+        sourceId="star_system"
       />
     );
 
@@ -317,6 +320,7 @@ describe('UnitSelector', () => {
         onToBattle={mockToBattle}
         displayMode="detailed"
         onDisplayModeChange={mockDisplayModeChange}
+        sourceId="star_system"
       />
     );
 
@@ -340,6 +344,7 @@ describe('UnitSelector', () => {
         onToBattle={mockToBattle}
         displayMode="detailed"
         onDisplayModeChange={mockDisplayModeChange}
+        sourceId="star_system"
       />
     );
 
@@ -364,6 +369,7 @@ describe('UnitSelector', () => {
         onToBattle={mockToBattle}
         displayMode="detailed"
         onDisplayModeChange={mockDisplayModeChange}
+        sourceId="star_system"
       />
     );
 
@@ -392,6 +398,7 @@ describe('UnitSelector', () => {
         onToBattle={mockToBattle}
         displayMode="detailed"
         onDisplayModeChange={mockDisplayModeChange}
+        sourceId="star_system"
       />
     );
 
@@ -431,6 +438,7 @@ describe('UnitSelector', () => {
         onToBattle={mockToBattle}
         displayMode="detailed"
         onDisplayModeChange={mockDisplayModeChange}
+        sourceId="star_system"
       />
     );
 
