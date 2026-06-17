@@ -157,7 +157,7 @@ test.describe('Source Selection', () => {
     // Should see external link
     const externalLink = page.getByRole('link', { name: /Подробнее →/i });
     await expect(externalLink).toBeVisible();
-    await expect(externalLink).toHaveAttribute('href', 'https://vk.com/star_system');
+    await expect(externalLink).toHaveAttribute('href', 'https://vk.com/bp_bnp');
   });
 
   test('should complete full flow: rules → source → faction → budget', async ({ page }) => {

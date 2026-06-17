@@ -14,14 +14,12 @@ import { UnitLore } from './UnitDetail/UnitLore';
 import { SourceAvailability } from './SourceAvailability';
 import { getFactionColors } from '@/lib/faction-colors';
 import { UnitStatTable } from './UnitDetail/UnitStatTable';
-import { SourceSwitcher } from './SourceSwitcher';
 import type { Squad, Machine } from '@/lib/types';
 
 interface UnitDetailPageProps {
   unit: EnrichedUnit;
   bySource: Record<string, EnrichedUnit>;
   sourceOrder: string[];
-  sourceLabels: Record<string, string>;
 }
 
 const factionIcons: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -42,7 +40,7 @@ const factionNames: Record<string, string> = {
   mercenaries: 'Наёмники',
 };
 
-export default function UnitDetailPage({ unit, bySource, sourceOrder, sourceLabels }: UnitDetailPageProps) {
+export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDetailPageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [activeSource, setActiveSource] = useState<string>(sourceOrder[0] ?? unit.sources[0]?.id ?? '');
   const activeUnit = bySource[activeSource] ?? unit;
@@ -214,17 +212,13 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, sourceLabe
               )}
               style={{ animationFillMode: 'forwards', animationDelay: '0.4s' }}
             >
-              <SourceAvailability unit={unit} variant="detail" />
-            </section>
-
-            {/* Source switcher — only for units available in more than one source */}
-            {sourceOrder.length > 1 && (
-              <SourceSwitcher
-                options={sourceOrder.map(id => ({ id, label: sourceLabels[id] ?? id }))}
-                active={activeSource}
-                onChange={setActiveSource}
+              <SourceAvailability
+                unit={unit}
+                variant="detail"
+                activeSource={activeSource}
+                onSourceChange={sourceOrder.length > 1 ? setActiveSource : undefined}
               />
-            )}
+            </section>
 
             {/* Stats table — soldiers or machine loadout, follows the active source */}
             <UnitStatTable unit={activeUnit as unknown as Squad | Machine} type={unit.type} />

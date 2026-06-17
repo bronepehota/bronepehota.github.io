@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getEnrichedUnit, getAllUnits, EnrichedUnit } from '@/lib/encyclopedia-utils';
-import { getSource } from '@/lib/sources-registry';
 import UnitDetailPage from '@/components/encyclopedia/UnitDetailPage';
 
 interface PageProps {
@@ -48,18 +47,9 @@ export default async function Page({ params }: PageProps) {
     if (enriched) bySource[sid] = enriched;
   }));
   const sourceOrder = sourceIds.filter(sid => bySource[sid]);
-  const sourceLabels: Record<string, string> = {};
-  for (const sid of sourceOrder) {
-    sourceLabels[sid] = getSource(sid)?.source.name ?? sid;
-  }
 
   return (
-    <UnitDetailPage
-      unit={unit}
-      bySource={bySource}
-      sourceOrder={sourceOrder}
-      sourceLabels={sourceLabels}
-    />
+    <UnitDetailPage unit={unit} bySource={bySource} sourceOrder={sourceOrder} />
   );
 }
 
