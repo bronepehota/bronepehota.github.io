@@ -1,6 +1,6 @@
 [
   {
-    "id": "mercenaries_aborigeny",
+    "id": "mercenaries_aborigeny_kreposti_molodyh_rostkov",
     "name": "Аборигены крепости Молодых Ростков",
     "shortName": "Аборигены крепости Молодых Ростков",
     "faction": "mercenaries",
@@ -436,5 +436,75 @@
       }
     ],
     "image": "/images/squads/mercenaries/naytstalkery/1.png"
+  },
+  {
+    "id": "mercenaries_kosari",
+    "name": "Косари",
+    "shortName": "Косари",
+    "faction": "mercenaries",
+    "cost": 60,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 1,
+        "speed": 4,
+        "range": "",
+        "power": "",
+        "melee": 4,
+        "armor": 4,
+        "image": "/images/squads/mercenaries/kosari/1.png"
+      },
+      {
+        "num": 2,
+        "rank": 1,
+        "speed": 4,
+        "range": "",
+        "power": "",
+        "melee": 4,
+        "armor": 4,
+        "image": "/images/squads/mercenaries/kosari/2.png"
+      },
+      {
+        "num": 3,
+        "rank": 1,
+        "speed": 4,
+        "range": "",
+        "power": "",
+        "melee": 4,
+        "armor": 3,
+        "image": "/images/squads/mercenaries/kosari/3.png"
+      },
+      {
+        "num": 4,
+        "rank": 1,
+        "speed": 4,
+        "range": "",
+        "power": "",
+        "melee": 4,
+        "armor": 3,
+        "image": "/images/squads/mercenaries/kosari/4.png"
+      },
+      {
+        "num": 5,
+        "rank": 1,
+        "speed": 4,
+        "range": "",
+        "power": "",
+        "melee": 4,
+        "armor": 4,
+        "image": "/images/squads/mercenaries/kosari/5.png"
+      },
+      {
+        "num": 6,
+        "rank": 1,
+        "speed": 4,
+        "range": "",
+        "power": "",
+        "melee": 4,
+        "armor": 4,
+        "image": "/images/squads/mercenaries/kosari/6.png"
+      }
+    ],
+    "image": "/images/squads/mercenaries/kosari/1.png"
   }
 ]

@@ -9,6 +9,10 @@
       {
         "id": "star_system",
         "cost": 20
+      },
+      {
+        "id": "tehnolog",
+        "cost": 40
       }
     ],
     "encyclopedia": {
@@ -30,6 +34,10 @@
       {
         "id": "star_system",
         "cost": 75
+      },
+      {
+        "id": "tehnolog",
+        "cost": 60
       }
     ],
     "encyclopedia": {
