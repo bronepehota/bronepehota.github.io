@@ -11,6 +11,7 @@ import PaintedExamples from '@/components/encyclopedia/PaintedExamples';
 import Image from 'next/image';
 import { Shield, Zap, Skull } from 'lucide-react';
 import { getFactionColors } from '@/lib/faction-colors';
+import { FactionLogo } from '@/components/FactionLogo';
 
 interface EncyclopediaModalProps {
   unit: EnrichedUnit;
@@ -94,7 +95,7 @@ export function EncyclopediaModal({
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <div className="p-2 rounded-lg" style={{ backgroundColor: `${colors.bg}` }}>
               <div className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: colors.text }}>
-                <FactionIcon className="w-full h-full" />
+                <FactionLogo faction={unit.faction} className="w-full h-full" fallback={FactionIcon} />
               </div>
             </div>
             <div className="min-w-0 flex-1">
@@ -166,7 +167,7 @@ export function EncyclopediaModal({
               <div className="text-center p-3 bg-military-charcoal/50 rounded">
                 <div className="mb-1">
                   <div className="w-5 h-5 mx-auto" style={{ color: colors.text }}>
-                    <FactionIcon className="w-full h-full" />
+                    <FactionLogo faction={unit.faction} className="w-full h-full" fallback={FactionIcon} />
                   </div>
                 </div>
                 <div className="font-oswald text-sm text-military-sand">{faction.badge}</div>

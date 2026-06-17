@@ -12,6 +12,7 @@ import { MachineImages } from './UnitDetail/MachineImages';
 import PaintedExamples from './PaintedExamples';
 import { UnitLore } from './UnitDetail/UnitLore';
 import { SourceAvailability } from './SourceAvailability';
+import { FactionLogo } from '@/components/FactionLogo';
 import { getFactionColors, factionLogos } from '@/lib/faction-colors';
 import { UnitStatTable } from './UnitDetail/UnitStatTable';
 import type { Squad, Machine } from '@/lib/types';
@@ -184,7 +185,7 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
                       style={{ backgroundColor: `${faction.color}20` }}
                     >
                       <div className="w-5 h-5" style={{ color: faction.color }}>
-                        <FactionIcon className="w-full h-full" />
+                        <FactionLogo faction={unit.faction} className="w-full h-full" fallback={FactionIcon} />
                       </div>
                     </div>
                     <span

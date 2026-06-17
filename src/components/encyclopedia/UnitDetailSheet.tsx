@@ -8,6 +8,7 @@ import type { Squad, Machine, SourceID, FactionID } from '@/lib/types';
 import { getSource } from '@/lib/sources-registry';
 import { getFactionColors } from '@/lib/faction-colors';
 import { useBottomSheet } from '@/hooks/useBottomSheet';
+import { FactionLogo } from '@/components/FactionLogo';
 import { UnitStatTable } from './UnitDetail/UnitStatTable';
 
 interface UnitDetailSheetProps {
@@ -58,7 +59,7 @@ export function UnitDetailSheet({ unit, type, sourceId, isOpen, onClose, onAdd }
         <div className="flex items-center justify-between px-3 py-2 border-b border-military-rust/30">
           <div className="flex items-center gap-2 min-w-0">
             <div className={cn('p-2 rounded-lg', colors.bgSolid)}>
-              <FactionIcon className={cn('w-4 h-4', colors.text)} />
+              <FactionLogo faction={unit.faction} className="w-4 h-4" fallback={FactionIcon} fallbackClassName={cn('w-4 h-4', colors.text)} />
             </div>
             <div className="min-w-0">
               <h2 className={cn('font-russo font-bold text-sm uppercase tracking-wider truncate', colors.text)}>
