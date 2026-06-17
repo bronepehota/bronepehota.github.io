@@ -6,53 +6,11 @@ interface PaintedExamplesProps {
 }
 
 export default function PaintedExamples({ unit }: PaintedExamplesProps) {
-  // Map unit IDs to their painted example images
-  const paintedExamples: Record<string, string[]> = {
-    // Polaris squads
-    'polaris_lineynaya_klon_pehota': [
-      '/images/squads/painted-examples/polaris/painted_linear_infantry.jpg',
-    ],
-    'polaris_lyogkaya_shturmovaya_klon_pehota': [
-      '/images/squads/painted-examples/polaris/painted_linear_infantry.jpg', // Reuse for now
-    ],
-    'polaris_tyazhyolaya_shturmovaya_pehota_veliana': [
-      '/images/squads/painted-examples/polaris/painted_linear_infantry.jpg', // Reuse for now
-    ],
-    'polaris_rezhimnaya_klon_pehota': [
-      '/images/squads/painted-examples/polaris/painted_linear_infantry.jpg', // Reuse for now
-    ],
-    'polaris_tribunatory_starye': [
-      '/images/squads/painted-examples/polaris/painted_linear_infantry.jpg', // Reuse for now
-    ],
-    'polaris_tribunatory_novye': [
-      '/images/squads/painted-examples/polaris/painted_linear_infantry.jpg', // Reuse for now
-    ],
-    'polaris_tyazhyolyy_shturmovoy_desant': [
-      '/images/squads/painted-examples/polaris/painted_linear_infantry.jpg', // Reuse for now
-    ],
-    'polaris_spetsnaz_planety_shidu': [
-      '/images/squads/painted-examples/polaris/painted_linear_infantry.jpg', // Reuse for now
-    ],
-
-    // Protectorate squads
-    'protectorate_lyogkaya_kiberpehota': [
-      '/images/squads/painted-examples/protectorate/painted_light_infantry.jpg',
-    ],
-    'protectorate_shturmovoy_otryad_stervyatniki': [
-      '/images/squads/painted-examples/protectorate/painted_assault_infantry_01.jpg',
-      '/images/squads/painted-examples/protectorate/painted_assault_infantry_02.jpg',
-      '/images/squads/painted-examples/protectorate/painted_assault_infantry_final.jpg',
-    ],
-    'protectorate_shturmovoy_spetsnaz_novye': [
-      '/images/squads/painted-examples/protectorate/painted_assault_infantry_final.jpg',
-    ],
-    'protectorate_kiberpehota': [
-      '/images/squads/painted-examples/protectorate/painted_light_infantry.jpg',
-    ],
-    'protectorate_kiberspetsnaz': [
-      '/images/squads/painted-examples/protectorate/painted_assault_infantry_final.jpg',
-    ],
-  };
+  // Map unit IDs to their painted-example photos. NOTE: none of these assets
+  // exist yet — the map is intentionally empty so the section renders nothing
+  // (rather than broken images) until real painted-example photos are added
+  // under public/images/squads/painted-examples/.
+  const paintedExamples: Record<string, string[]> = {};
 
   const images = paintedExamples[unit.id] || [];
 
