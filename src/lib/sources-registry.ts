@@ -47,7 +47,7 @@ const starSystemSource: ArmyListSource = {
   id: 'star_system',
   name: 'Star System',
   description: 'Армейские листы от сообщества Star System',
-  link: 'https://vk.com/star_system',
+  link: 'https://vk.com/bp_bnp',
   version: '1.0'
 };
 
