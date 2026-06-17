@@ -1,8 +1,7 @@
 import Link from 'next/link';
 import { GitHubPagesImage } from '@/components/GitHubPagesImage';
 import { EncyclopediaUnit } from '@/lib/encyclopedia-registry';
-import { getFactionColors } from '@/lib/faction-colors';
-import { SourceAvailability } from './SourceAvailability';
+import { getFactionColors, factionLogos } from '@/lib/faction-colors';
 
 interface UnitCardProps {
   unit: EncyclopediaUnit;
@@ -32,6 +31,9 @@ export function UnitCard({ unit }: UnitCardProps) {
   // Get display image: unit image, or placeholder
   const displayImage = unit.image || '/images/placeholder.png';
 
+  // Faction logo (if available); mercenaries falls back to a text badge
+  const logo = factionLogos[unit.faction];
+
   return (
     <Link
       href={`/encyclopedia/unit/${unit.id}`}
@@ -57,18 +59,24 @@ export function UnitCard({ unit }: UnitCardProps) {
             <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(234,88,12,0.05)_50%)] bg-[length:100%_4px]" />
           </div>
 
-          {/* Faction badge - top left */}
+          {/* Faction badge - logo (or text fallback for mercenaries) */}
           <div className="absolute top-2 left-2">
             <div
-              className="px-2 py-1 backdrop-blur-sm rounded-sm"
+              className="relative w-9 h-9 flex items-center justify-center backdrop-blur-md rounded-sm overflow-hidden"
               style={{
                 backgroundColor: `${factionStyle.glow}`,
                 border: `1px solid ${factionStyle.border}`,
               }}
             >
-              <span className="font-ibm-mono text-[9px] font-bold text-white tracking-wider">
-                {factionBadges[unit.faction]}
-              </span>
+              {logo ? (
+                <div className="absolute inset-1">
+                  <GitHubPagesImage src={logo} alt={unit.faction} fill className="object-contain" />
+                </div>
+              ) : (
+                <span className="font-ibm-mono text-[9px] font-bold text-white tracking-wider">
+                  {factionBadges[unit.faction]}
+                </span>
+              )}
             </div>
           </div>
 
@@ -112,9 +120,6 @@ export function UnitCard({ unit }: UnitCardProps) {
           <p className="font-oswald text-[11px] leading-snug text-military-taupe/80 mb-1.5 line-clamp-2">
             {unit.encyclopedia?.shortDescription || unit.encyclopedia?.class || (unit.type === 'squad' ? 'Отряд' : 'Машина')}
           </p>
-
-          {/* Source availability pills */}
-          <SourceAvailability unit={unit} variant="card" size="compact" />
 
           {/* Tactical decoration line */}
           <div className="h-px bg-gradient-to-r from-military-rust/50 via-military-amber/30 to-transparent" />

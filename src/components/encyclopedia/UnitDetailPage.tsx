@@ -12,7 +12,7 @@ import { MachineImages } from './UnitDetail/MachineImages';
 import PaintedExamples from './PaintedExamples';
 import { UnitLore } from './UnitDetail/UnitLore';
 import { SourceAvailability } from './SourceAvailability';
-import { getFactionColors } from '@/lib/faction-colors';
+import { getFactionColors, factionLogos } from '@/lib/faction-colors';
 import { UnitStatTable } from './UnitDetail/UnitStatTable';
 import type { Squad, Machine } from '@/lib/types';
 
@@ -45,6 +45,7 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
   const [activeSource, setActiveSource] = useState<string>(sourceOrder[0] ?? unit.sources[0]?.id ?? '');
   const activeUnit = bySource[activeSource] ?? unit;
   const factionColors = getFactionColors(unit.faction);
+  const detailLogo = factionLogos[unit.faction];
   // Rank shown next to class — follows the active source (machine.rank / squad soldier ranks).
   const rankLabel = (() => {
     if (activeUnit.type === 'machine') return activeUnit.rank != null ? String(activeUnit.rank) : undefined;
@@ -121,18 +122,24 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
                     <div className="absolute inset-0 bg-gradient-to-t from-military-dark/60 to-transparent" />
                   </div>
 
-                  {/* Faction badge */}
+                  {/* Faction badge - logo (or text fallback for mercenaries) */}
                   <div className="absolute top-3 left-3">
                     <div
-                      className="px-3 py-1 backdrop-blur-sm rounded-sm"
+                      className="relative w-11 h-11 flex items-center justify-center backdrop-blur-md rounded-sm overflow-hidden"
                       style={{
                         backgroundColor: `${factionColors.primary}33`,
                         border: `1px solid ${factionColors.primary}`,
                       }}
                     >
-                      <span className="font-ibm-mono text-xs font-bold text-white tracking-wider">
-                        {faction.badge}
-                      </span>
+                      {detailLogo ? (
+                        <div className="absolute inset-1">
+                          <GitHubPagesImage src={detailLogo} alt={unit.faction} fill className="object-contain" />
+                        </div>
+                      ) : (
+                        <span className="font-ibm-mono text-xs font-bold text-white tracking-wider">
+                          {faction.badge}
+                        </span>
+                      )}
                     </div>
                   </div>
 

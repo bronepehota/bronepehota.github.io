@@ -35,3 +35,9 @@ export const factionDisplayNames: Record<FactionID, string> = {
   protectorate: 'Протекторат',
   mercenaries: 'Наёмники',
 };
+
+/** Faction logo images (PNG with transparency). Mercenaries has no logo (text fallback). */
+export const factionLogos: Partial<Record<FactionID, string>> = {
+  polaris: '/images/factions/polaris.png',
+  protectorate: '/images/factions/protectorate.png',
+};
