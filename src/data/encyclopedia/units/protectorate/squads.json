@@ -9,6 +9,10 @@
       {
         "id": "star_system",
         "cost": 50
+      },
+      {
+        "id": "tehnolog",
+        "cost": 60
       }
     ],
     "encyclopedia": {
@@ -30,6 +34,10 @@
       {
         "id": "star_system",
         "cost": 105
+      },
+      {
+        "id": "tehnolog",
+        "cost": 70
       }
     ],
     "encyclopedia": {
@@ -51,6 +59,10 @@
       {
         "id": "star_system",
         "cost": 135
+      },
+      {
+        "id": "tehnolog",
+        "cost": 90
       }
     ],
     "encyclopedia": {
@@ -72,6 +84,10 @@
       {
         "id": "star_system",
         "cost": 95
+      },
+      {
+        "id": "tehnolog",
+        "cost": 60
       }
     ],
     "encyclopedia": {
@@ -92,6 +108,10 @@
     "sources": [
       {
         "id": "star_system",
+        "cost": 40
+      },
+      {
+        "id": "tehnolog",
         "cost": 40
       }
     ],
@@ -114,6 +134,10 @@
       {
         "id": "star_system",
         "cost": 75
+      },
+      {
+        "id": "tehnolog",
+        "cost": 60
       }
     ],
     "encyclopedia": {
@@ -135,6 +159,10 @@
       {
         "id": "star_system",
         "cost": 115
+      },
+      {
+        "id": "tehnolog",
+        "cost": 70
       }
     ],
     "encyclopedia": {
@@ -156,6 +184,10 @@
       {
         "id": "star_system",
         "cost": 100
+      },
+      {
+        "id": "tehnolog",
+        "cost": 70
       }
     ],
     "encyclopedia": {
@@ -177,6 +209,10 @@
       {
         "id": "star_system",
         "cost": 125
+      },
+      {
+        "id": "tehnolog",
+        "cost": 120
       }
     ],
     "encyclopedia": {
@@ -197,6 +233,10 @@
     "sources": [
       {
         "id": "star_system",
+        "cost": 120
+      },
+      {
+        "id": "tehnolog",
         "cost": 120
       }
     ],
@@ -219,6 +259,10 @@
       {
         "id": "star_system",
         "cost": 120
+      },
+      {
+        "id": "tehnolog",
+        "cost": 130
       }
     ],
     "encyclopedia": {
@@ -240,6 +284,10 @@
       {
         "id": "star_system",
         "cost": 135
+      },
+      {
+        "id": "tehnolog",
+        "cost": 70
       }
     ],
     "encyclopedia": {
@@ -261,6 +309,10 @@
       {
         "id": "star_system",
         "cost": 115
+      },
+      {
+        "id": "tehnolog",
+        "cost": 140
       }
     ],
     "encyclopedia": {
@@ -281,6 +333,10 @@
     "sources": [
       {
         "id": "star_system",
+        "cost": 60
+      },
+      {
+        "id": "tehnolog",
         "cost": 60
       }
     ],
