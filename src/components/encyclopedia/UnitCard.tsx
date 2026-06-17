@@ -102,19 +102,19 @@ export function UnitCard({ unit }: UnitCardProps) {
         </div>
 
         {/* Info section */}
-        <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-military-dark via-military-dark/95 to-transparent">
+        <div className="absolute bottom-0 left-0 right-0 p-3 pt-10 bg-gradient-to-t from-military-dark via-military-dark/95 to-transparent">
           {/* Unit name */}
           <h3 className="font-russo font-bold text-white text-sm mb-1 line-clamp-2 group-hover:text-military-amber transition-colors">
             {unit.name}
           </h3>
 
-          {/* Unit class/type */}
-          <div className="flex flex-col gap-1.5">
-            <span className="font-oswald text-xs text-military-taupe truncate">
-              {unit.encyclopedia?.class || (unit.type === 'squad' ? 'Отряд' : 'Машина')}
-            </span>
-            <SourceAvailability unit={unit} variant="card" size="compact" />
-          </div>
+          {/* Short description (one-liner role summary), clamped to 2 lines for mobile safety */}
+          <p className="font-oswald text-[11px] leading-snug text-military-taupe/80 mb-1.5 line-clamp-2">
+            {unit.encyclopedia?.shortDescription || unit.encyclopedia?.class || (unit.type === 'squad' ? 'Отряд' : 'Машина')}
+          </p>
+
+          {/* Source availability pills */}
+          <SourceAvailability unit={unit} variant="card" size="compact" />
 
           {/* Tactical decoration line */}
           <div className="h-px bg-gradient-to-r from-military-rust/50 via-military-amber/30 to-transparent" />

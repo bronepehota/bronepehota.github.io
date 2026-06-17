@@ -45,6 +45,14 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
   const [activeSource, setActiveSource] = useState<string>(sourceOrder[0] ?? unit.sources[0]?.id ?? '');
   const activeUnit = bySource[activeSource] ?? unit;
   const factionColors = getFactionColors(unit.faction);
+  // Rank shown next to class — follows the active source (machine.rank / squad soldier ranks).
+  const rankLabel = (() => {
+    if (activeUnit.type === 'machine') return activeUnit.rank != null ? String(activeUnit.rank) : undefined;
+    const rs = (activeUnit.soldiers ?? []).map(s => s.rank).filter(r => r != null);
+    if (!rs.length) return undefined;
+    const lo = Math.min(...rs), hi = Math.max(...rs);
+    return lo === hi ? String(lo) : `${lo}–${hi}`;
+  })();
   const faction = {
     name: factionNames[unit.faction] || unit.faction,
     color: factionColors.primary,
@@ -180,15 +188,29 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
                     </span>
                   </div>
 
-                  {/* Class */}
-                  {unit.encyclopedia?.class && (
-                    <div className="mb-6">
-                      <span className="font-ibm-mono text-xs text-military-steel/60 uppercase tracking-wider mr-2">
-                        CLASS
-                      </span>
-                      <span className="font-oswald text-military-sand">
-                        {unit.encyclopedia.class}
-                      </span>
+                  {/* Class + Rank */}
+                  {(unit.encyclopedia?.class || rankLabel) && (
+                    <div className="mb-6 flex flex-wrap items-center gap-x-5 gap-y-1">
+                      {unit.encyclopedia?.class && (
+                        <span>
+                          <span className="font-ibm-mono text-xs text-military-steel/60 uppercase tracking-wider mr-2">
+                            CLASS
+                          </span>
+                          <span className="font-oswald text-military-sand">
+                            {unit.encyclopedia.class}
+                          </span>
+                        </span>
+                      )}
+                      {rankLabel && (
+                        <span>
+                          <span className="font-ibm-mono text-xs text-military-steel/60 uppercase tracking-wider mr-2">
+                            РАНГ
+                          </span>
+                          <span className="font-oswald text-military-amber">
+                            {rankLabel}
+                          </span>
+                        </span>
+                      )}
                     </div>
                   )}
 

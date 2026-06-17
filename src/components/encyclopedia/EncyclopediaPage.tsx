@@ -65,7 +65,7 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
 
       <div className="relative z-10">
         {/* Hero Header */}
-        <header className="relative py-16 md:py-24 px-4 overflow-hidden">
+        <header className="relative py-6 md:py-20 px-4 overflow-hidden">
           {/* Animated scanline */}
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-military-rust/60 to-transparent animate-pulse" />
 
@@ -76,7 +76,7 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
               className={cn(
                 'inline-flex items-center gap-2 font-ibm-mono text-xs md:text-sm',
                 'text-military-rust/60 hover:text-military-amber transition-colors',
-                'tracking-widest uppercase mb-8',
+                'tracking-widest uppercase mb-4 md:mb-8',
                 'fade-in-up opacity-0',
                 isLoaded && 'opacity-100'
               )}
@@ -87,11 +87,11 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
             </Link>
 
             {/* Main title */}
-            <div className="text-center mb-12">
+            <div className="text-center mb-4 md:mb-10">
               <h1
                 className={cn(
                   'font-russo font-black military-text-gradient',
-                  'text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl',
+                  'text-2xl sm:text-4xl md:text-6xl lg:text-7xl',
                   'mb-4 tracking-wide',
                   'fade-in-up opacity-0',
                   isLoaded && 'opacity-100'
@@ -128,7 +128,7 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
               style={{ animationFillMode: 'forwards', animationDelay: '0.4s' }}
             >
               {/* Search Input */}
-              <div className="relative mb-6 folded-paper military-corners">
+              <div className="relative mb-4 md:mb-6 folded-paper military-corners">
                 <div className="absolute inset-0 bg-military-charcoal/80 backdrop-blur-sm pointer-events-none" />
                 <div className="relative flex items-center">
                   <Search className="absolute left-4 text-military-rust/60 w-5 h-5 pointer-events-none" />
@@ -137,7 +137,7 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="ПОИСК ПО НАЗВАНИЮ..."
-                    className="w-full pl-12 pr-4 py-4 bg-transparent text-white placeholder:text-military-steel/60 font-ibm-mono text-sm tracking-wider focus:outline-none relative z-10"
+                    className="w-full pl-12 pr-4 py-3 md:py-4 bg-transparent text-white placeholder:text-military-steel/60 font-ibm-mono text-sm tracking-wider focus:outline-none relative z-10"
                   />
                   <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none">
                     <span className="font-ibm-mono text-xs text-military-rust/40">
@@ -150,7 +150,7 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
               {/* Filter Panels */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Faction Filter */}
-                <div className="folded-paper military-corners p-4">
+                <div className="folded-paper military-corners p-3 md:p-4">
                   <div className="flex items-center gap-2 mb-3">
                     <span className="font-ibm-mono text-[10px] text-military-rust/60 uppercase tracking-wider">
                       FILTER_FACTION
@@ -162,7 +162,7 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
                         key={faction.value}
                         onClick={() => setSelectedFaction(faction.value)}
                         className={cn(
-                          'font-ibm-mono text-xs px-3 py-2 rounded transition-all duration-300',
+                          'font-ibm-mono text-xs px-2.5 py-1.5 md:px-3 md:py-2 rounded transition-all duration-300',
                           'border border-transparent',
                           'hover:scale-105 active:scale-95',
                           selectedFaction === faction.value
@@ -181,7 +181,7 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
                 </div>
 
                 {/* Type Filter */}
-                <div className="folded-paper military-corners p-4">
+                <div className="folded-paper military-corners p-3 md:p-4">
                   <div className="flex items-center gap-2 mb-3">
                     <span className="font-ibm-mono text-[10px] text-military-rust/60 uppercase tracking-wider">
                       FILTER_TYPE
@@ -193,7 +193,7 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
                         key={type.value}
                         onClick={() => setSelectedType(type.value)}
                         className={cn(
-                          'font-ibm-mono text-xs px-3 py-2 rounded transition-all duration-300',
+                          'font-ibm-mono text-xs px-2.5 py-1.5 md:px-3 md:py-2 rounded transition-all duration-300',
                           'flex items-center gap-2',
                           'border border-transparent',
                           'hover:scale-105 active:scale-95',
