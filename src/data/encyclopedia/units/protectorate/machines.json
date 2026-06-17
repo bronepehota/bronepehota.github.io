@@ -9,6 +9,10 @@
       {
         "id": "star_system",
         "cost": 190
+      },
+      {
+        "id": "tehnolog",
+        "cost": 60
       }
     ],
     "image": "/images/machines/bronekhod.jpg",
@@ -63,6 +67,10 @@
       {
         "id": "star_system",
         "cost": 800
+      },
+      {
+        "id": "tehnolog",
+        "cost": 100
       }
     ],
     "image": "/images/machines/condor.jpg",
@@ -90,6 +98,10 @@
       {
         "id": "star_system",
         "cost": 1000
+      },
+      {
+        "id": "tehnolog",
+        "cost": 70
       }
     ],
     "image": "/images/machines/griffin.jpg",
@@ -117,6 +129,10 @@
       {
         "id": "star_system",
         "cost": 390
+      },
+      {
+        "id": "tehnolog",
+        "cost": 130
       }
     ],
     "image": "/images/machines/hurricane.jpg",
@@ -144,6 +160,10 @@
       {
         "id": "star_system",
         "cost": 1000
+      },
+      {
+        "id": "tehnolog",
+        "cost": 80
       }
     ],
     "image": "/images/machines/octopus.jpg",
@@ -198,6 +218,10 @@
       {
         "id": "star_system",
         "cost": 200
+      },
+      {
+        "id": "tehnolog",
+        "cost": 60
       }
     ],
     "image": "/images/machines/puma.jpg",
@@ -225,6 +249,10 @@
       {
         "id": "star_system",
         "cost": 160
+      },
+      {
+        "id": "tehnolog",
+        "cost": 40
       }
     ],
     "image": "/images/machines/salamander.jpg",
@@ -279,6 +307,10 @@
       {
         "id": "star_system",
         "cost": 320
+      },
+      {
+        "id": "tehnolog",
+        "cost": 100
       }
     ],
     "image": "/images/machines/trex.jpg",
@@ -306,6 +338,10 @@
       {
         "id": "star_system",
         "cost": 250
+      },
+      {
+        "id": "tehnolog",
+        "cost": 90
       }
     ],
     "image": "/images/machines/varan.jpg",
@@ -333,6 +369,10 @@
       {
         "id": "star_system",
         "cost": 200
+      },
+      {
+        "id": "tehnolog",
+        "cost": 50
       }
     ],
     "image": "/images/machines/viper.jpg",
@@ -360,6 +400,10 @@
       {
         "id": "star_system",
         "cost": 250
+      },
+      {
+        "id": "tehnolog",
+        "cost": 150
       }
     ],
     "image": "/images/machines/werewolf.jpg",
@@ -375,6 +419,27 @@
       "mass": "4,7 тонн",
       "crew": "1 человек",
       "shortDescription": "Ветеран Протектората, первый серийно выпускающийся шагающий танк общего назначения. Незаменим в штурмовых подразделениях."
+    }
+  },
+  {
+    "id": "sparennaya_pushka",
+    "name": "Спаренная пушка",
+    "shortName": "Спаренная пушка",
+    "faction": "protectorate",
+    "type": "machine",
+    "sources": [
+      {
+        "id": "tehnolog",
+        "cost": 45
+      }
+    ],
+    "image": "/images/machines/sparennaya_pushka.jpg",
+    "encyclopedia": {
+      "class": "Лёгкая бронетехника",
+      "lore": "«Спаренная пушка» — лёгкая бронемашина Протектората с двуствольной пушкой: простое и надёжное средство огневой поддержки пехоты и борьбы с лёгкой техникой противника.",
+      "history": "Серийная лёгкая самоходка Протектората — дешёвая платформа спаренной пушки для усиления пехотных частей.",
+      "tactics": "Лёгкая самоходка (ранг 2): Спаренная пушка, прочность 8. Огневая поддержка пехоты и борьба с лёгкой техникой; против тяжёлой брони слаба.",
+      "shortDescription": "Лёгкая бронемашина Протектората со спаренной пушкой для поддержки пехоты."
     }
   }
 ]

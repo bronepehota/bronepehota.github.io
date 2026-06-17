@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getEnrichedUnit, getAllUnits } from '@/lib/encyclopedia-utils';
+import { getEnrichedUnit, getAllUnits, EnrichedUnit } from '@/lib/encyclopedia-utils';
 import UnitDetailPage from '@/components/encyclopedia/UnitDetailPage';
 
 interface PageProps {
@@ -37,5 +37,19 @@ export default async function Page({ params }: PageProps) {
     notFound();
   }
 
-  return <UnitDetailPage unit={unit} />;
+  // Pre-compute enriched game data for EVERY source the unit appears in, so the
+  // client can switch sources (stats/cost/weapons) without a network round-trip.
+  // Lore is source-independent and lives on the encyclopedia entry.
+  const sourceIds = unit.sources.map(s => s.id);
+  const bySource: Record<string, EnrichedUnit> = {};
+  await Promise.all(sourceIds.map(async sid => {
+    const enriched = await getEnrichedUnit(params.id, sid);
+    if (enriched) bySource[sid] = enriched;
+  }));
+  const sourceOrder = sourceIds.filter(sid => bySource[sid]);
+
+  return (
+    <UnitDetailPage unit={unit} bySource={bySource} sourceOrder={sourceOrder} />
+  );
 }
+

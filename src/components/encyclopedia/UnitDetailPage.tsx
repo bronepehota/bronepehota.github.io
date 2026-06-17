@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Shield, Zap, Skull } from 'lucide-react';
+import { ArrowLeft, Shield, Zap, Skull, Target } from 'lucide-react';
 import { GitHubPagesImage } from '@/components/GitHubPagesImage';
 import { EnrichedUnit } from '@/lib/encyclopedia-utils';
 import { cn } from '@/lib/utils';
@@ -13,9 +13,13 @@ import PaintedExamples from './PaintedExamples';
 import { UnitLore } from './UnitDetail/UnitLore';
 import { SourceAvailability } from './SourceAvailability';
 import { getFactionColors } from '@/lib/faction-colors';
+import { UnitStatTable } from './UnitDetail/UnitStatTable';
+import type { Squad, Machine } from '@/lib/types';
 
 interface UnitDetailPageProps {
   unit: EnrichedUnit;
+  bySource: Record<string, EnrichedUnit>;
+  sourceOrder: string[];
 }
 
 const factionIcons: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -36,8 +40,10 @@ const factionNames: Record<string, string> = {
   mercenaries: 'Наёмники',
 };
 
-export default function UnitDetailPage({ unit }: UnitDetailPageProps) {
+export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDetailPageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [activeSource, setActiveSource] = useState<string>(sourceOrder[0] ?? unit.sources[0]?.id ?? '');
+  const activeUnit = bySource[activeSource] ?? unit;
   const factionColors = getFactionColors(unit.faction);
   const faction = {
     name: factionNames[unit.faction] || unit.faction,
@@ -112,8 +118,8 @@ export default function UnitDetailPage({ unit }: UnitDetailPageProps) {
                     <div
                       className="px-3 py-1 backdrop-blur-sm rounded-sm"
                       style={{
-                        backgroundColor: `${unit.faction === 'polaris' ? 'rgba(220, 38, 38, 0.3)' : unit.faction === 'protectorate' ? 'rgba(59, 130, 246, 0.3)' : 'rgba(234, 179, 8, 0.3)'}`,
-                        border: `1px solid ${faction.color}`,
+                        backgroundColor: `${factionColors.primary}33`,
+                        border: `1px solid ${factionColors.primary}`,
                       }}
                     >
                       <span className="font-ibm-mono text-xs font-bold text-white tracking-wider">
@@ -206,8 +212,28 @@ export default function UnitDetailPage({ unit }: UnitDetailPageProps) {
               )}
               style={{ animationFillMode: 'forwards', animationDelay: '0.4s' }}
             >
-              <SourceAvailability unit={unit} variant="detail" />
+              <SourceAvailability
+                unit={unit}
+                variant="detail"
+                activeSource={activeSource}
+                onSourceChange={sourceOrder.length > 1 ? setActiveSource : undefined}
+              />
             </section>
+
+            {/* Stats table — soldiers or machine loadout, follows the active source */}
+            <UnitStatTable unit={activeUnit as unknown as Squad | Machine} type={unit.type} />
+
+            {/* Tactics */}
+            {activeUnit.encyclopedia?.tactics && (
+              <section className="folded-paper military-corners p-6">
+                <h2 className="font-oswald text-lg text-military-sand mb-3 flex items-center gap-2">
+                  <Target className="w-5 h-5 text-military-rust" /> Тактика применения
+                </h2>
+                <p className="text-military-sand/80 leading-relaxed text-sm">
+                  {activeUnit.encyclopedia.tactics}
+                </p>
+              </section>
+            )}
 
             {/* Lore, Traditions, Battles, Locations sections */}
             <UnitLore unit={unit} />

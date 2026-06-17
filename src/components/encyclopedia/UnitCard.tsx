@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import SafeImage from '@/components/SafeImage';
+import { GitHubPagesImage } from '@/components/GitHubPagesImage';
 import { EncyclopediaUnit } from '@/lib/encyclopedia-registry';
 import { getFactionColors } from '@/lib/faction-colors';
 import { SourceAvailability } from './SourceAvailability';
@@ -42,7 +42,7 @@ export function UnitCard({ unit }: UnitCardProps) {
         {/* Image container with tactical overlay */}
         <div className="relative aspect-[3/4] w-full overflow-hidden">
           {/* Unit image */}
-          <SafeImage
+          <GitHubPagesImage
             src={displayImage}
             alt={unit.name}
             fill
