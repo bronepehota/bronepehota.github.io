@@ -52,14 +52,6 @@ export default function PaintedExamples({ unit }: PaintedExamplesProps) {
     'protectorate_kiberspetsnaz': [
       '/images/squads/painted-examples/protectorate/painted_assault_infantry_final.jpg',
     ],
-
-    // Mercenaries squads
-    'mercenaries_ohotniki': [
-      // TODO: Add painted examples
-    ],
-    'mercenaries_inoplanety': [
-      // TODO: Add painted examples
-    ],
   };
 
   const images = paintedExamples[unit.id] || [];
@@ -69,10 +61,10 @@ export default function PaintedExamples({ unit }: PaintedExamplesProps) {
   }
 
   return (
-    <section className="mt-8 border-t border-slate-700 pt-6">
-      <h3 className="text-lg font-russo text-military-amber mb-4 flex items-center gap-2">
+    <section className="folded-paper military-corners p-4">
+      <h3 className="font-oswald text-lg text-military-sand mb-4 flex items-center gap-2">
         <svg className="w-5 h-5 text-military-rust" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0 4.172 4.172a4 4 0 00-.586 4.172 2 2 0 012.828 0 4.172-4.172 4.4 4.4 0 00-.586 4.172 4.172 4.172 4 4 0 00-.586 4.172-4.172 4.172M9 12H6m6 0H9" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
         </svg>
         Примеры покраски
       </h3>
@@ -81,9 +73,9 @@ export default function PaintedExamples({ unit }: PaintedExamplesProps) {
         {images.map((image, index) => (
           <div
             key={index}
-            className="relative group overflow-hidden rounded-lg border border-slate-700 bg-slate-800 hover:border-military-amber/50 transition-all duration-300"
+            className="relative group overflow-hidden rounded-sm border border-military-steel/30 bg-military-charcoal/50 hover:border-military-amber/50 transition-all duration-300"
           >
-            <div className="aspect-[4/3] relative bg-slate-900">
+            <div className="aspect-[4/3] relative bg-military-dark">
               <Image
                 src={image}
                 alt={`Покрашенный пример: ${unit.name}`}
@@ -92,19 +84,19 @@ export default function PaintedExamples({ unit }: PaintedExamplesProps) {
                 sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 unoptimized
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-military-dark/80 to-transparent" />
             </div>
             <div className="p-3">
-              <p className="text-xs text-slate-400 text-center">
-                {unit.name} — пример покраски #{index + 1}
+              <p className="font-ibm-mono text-xs text-military-steel text-center">
+                {unit.name} — пример #{index + 1}
               </p>
             </div>
           </div>
         ))}
       </div>
 
-      <p className="text-xs text-slate-500 mt-3 italic">
-        Изображения предоставлены сообществом. Хотите добавить свои примеры покраски?
+      <p className="font-ibm-mono text-[10px] text-military-steel/60 mt-3 italic uppercase tracking-wider">
+        Изображения предоставлены сообществом Robogear
       </p>
     </section>
   );

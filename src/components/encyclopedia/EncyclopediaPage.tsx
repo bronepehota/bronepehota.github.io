@@ -15,7 +15,7 @@ interface EncyclopediaPageProps {
 const factions: { value: FactionID | 'all'; label: string; color: string }[] = [
   { value: 'all', label: 'ВСЕ ФРАКЦИИ', color: '#A8A29E' },
   { value: 'polaris', label: 'ПОЛЯРИС', color: '#DC2626' },
-  { value: 'protectorate', label: 'ПРОТЕКТОРАТ', color: '#3B82F6' },
+  { value: 'protectorate', label: 'ПРОТЕКТОРАТ', color: '#06b6d4' },
   { value: 'mercenaries', label: 'НАЁМНИКИ', color: '#EAB308' },
 ];
 
