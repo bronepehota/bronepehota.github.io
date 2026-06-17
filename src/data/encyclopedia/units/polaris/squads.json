@@ -47,7 +47,7 @@
       "tactics": "Универсальный штурмовой отряд смешанного состава: одна часть ведёт огонь, другая идёт в рукопашную. Высокая мобильность позволяет маневрировать и бить во фланг; адаптируйтесь к ситуации.",
       "shortDescription": "Штурмовые клоны смешанного состава: огонь и ближний бой в одном отряде для гибкого прорыва."
     },
-    "image": "/images/squads/polaris/lyogkaya_shturmovaya_klon_pehota/5.png"
+    "image": "/images/squads/polaris/lyogkaya_shturmovaya_klon_pehota/group.jpg"
   },
   {
     "id": "polaris_lyogkiy_shturmovoy_desant",
@@ -122,7 +122,7 @@
       "tactics": "Элитный малочисленный отряд в тяжёлой броне со снайпером и смешанным вооружением: точность на дистанции и гибкость в бою. Для критических миссий и ликвидации важных целей.",
       "shortDescription": "Шидуанские «самураи»: элитный бронепехотный спецназ штурма городов и планет-океанов."
     },
-    "image": "/images/squads/polaris/spetsnaz_planety_shidu/group.jpg"
+    "image": "/images/squads/polaris/spetsnaz_planety_shidu/1.png"
   },
   {
     "id": "polaris_tribunatory_novye",
