@@ -89,6 +89,9 @@ export async function getEnrichedUnit(id: string, sourceId?: string): Promise<En
     ...encyclopediaUnit,
     cost,
     ...gameDataWithoutCost,
+    // Encyclopedia is the canonical display layer — its image wins over the
+    // source's (e.g. a group/hero photo) while game stats still come from source.
+    image: encyclopediaUnit.image ?? gameDataWithoutCost.image,
   } as EnrichedUnit;
 }
 
