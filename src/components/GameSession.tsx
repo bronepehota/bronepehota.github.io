@@ -96,18 +96,27 @@ export default function GameSession({
   }, []);
   const { clearAllMemory } = useCombatTargetContext();
 
-  // Ref for dock element to compute dynamic positions
-  const dockRef = useRef<HTMLDivElement>(null);
+  // Ref for dock element to compute dynamic positions.
+  // The army loads asynchronously, so the dock is NOT present on first mount.
+  // A `useEffect([])` would run before the dock exists and never observe it,
+  // leaving dockHeight stuck at the initial value. A callback ref attaches the
+  // observer exactly when the dock element mounts (and re-attaches if it
+  // remounts), measuring its height reliably.
+  const dockObserverRef = useRef<ResizeObserver | null>(null);
   const [dockHeight, setDockHeight] = useState(80);
-  useEffect(() => {
-    if (!dockRef.current) return;
+  const setDockRef = useCallback((node: HTMLDivElement | null) => {
+    dockObserverRef.current?.disconnect();
+    dockObserverRef.current = null;
+    if (!node) return;
+    // Measure immediately so the reserve is correct before the first callback.
+    setDockHeight(node.clientHeight);
     const observer = new ResizeObserver(entries => {
       for (const entry of entries) {
         setDockHeight(entry.contentRect.height);
       }
     });
-    observer.observe(dockRef.current);
-    return () => observer.disconnect();
+    observer.observe(node);
+    dockObserverRef.current = observer;
   }, []);
 
   // Keep ref to current army for immediate access in updateUnit
@@ -782,6 +791,7 @@ export default function GameSession({
               }}
               hideArmor={hideArmorForUnit}
               hideSpeed={hideSpeedForUnit}
+              bottomInset={dockHeight}
             />
           </div>
         )}
@@ -790,7 +800,8 @@ export default function GameSession({
       {/* Compact Unit Dock - Technical HUD styling */}
       {army.units.length > 0 && (
         <div
-          ref={dockRef}
+          ref={setDockRef}
+          data-testid="unit-dock"
           className={cn(
             "fixed left-0 right-0 z-50 bg-slate-950 border-t transition-all duration-200 ease-out",
             isDockExpanded ? "top-16 bottom-0" : "bottom-0",

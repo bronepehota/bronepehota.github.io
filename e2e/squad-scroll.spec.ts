@@ -33,25 +33,46 @@ test.describe('Squad scroll in battle view', () => {
     });
   });
 
-  test('squad area scrolls so the full 6-soldier squad is reachable', async ({ page }) => {
+  test('squad area scrolls and the last soldier clears the bottom dock', async ({ page }) => {
     const scrollArea = page.getByTestId('squad-scroll');
     await expect(scrollArea).toBeVisible();
 
-    // A properly bounded scroll container is shorter than its content when the
-    // squad overflows the viewport. Before the fix this container was unbounded
-    // (clientHeight === scrollHeight) and the last soldier stayed clipped.
+    // 1) A properly bounded scroll container is shorter than its content when
+    //    the squad overflows the viewport. Before the height-chain fix this
+    //    container was unbounded (clientHeight === scrollHeight) and the last
+    //    soldier stayed clipped.
     const isScrollable = await scrollArea.evaluate(
       (el) => el.scrollHeight > el.clientHeight,
     );
     expect(isScrollable).toBe(true);
 
-    // Scrolling to the bottom must actually move the content — proving the last
-    // soldier can be brought into view rather than being permanently hidden.
+    // 2) Scrolling to the bottom must actually move the content.
     const scrolled = await scrollArea.evaluate((el) => {
       const before = el.scrollTop;
       el.scrollTop = el.scrollHeight;
       return el.scrollTop > before;
     });
     expect(scrolled).toBe(true);
+
+    // 3) After scrolling all the way down, the last soldier must sit fully
+    //    ABOVE the bottom dock — not half-hidden behind it. Regression for the
+    //    case where scroll worked but the last soldier was still clipped
+    //    because the bottom reserve didn't match the dock height (the dock
+    //    loads after the army, so its height must be measured when it mounts).
+    await page.waitForTimeout(150);
+    const clearance = await page.evaluate(() => {
+      const killButtons = Array.from(
+        document.querySelectorAll('[data-testid="soldier-kill-button"]'),
+      );
+      const lastSoldier = killButtons[killButtons.length - 1];
+      const dock = document.querySelector('[data-testid="unit-dock"]');
+      if (!lastSoldier || !dock) return null;
+      return {
+        soldierBottom: Math.round(lastSoldier.getBoundingClientRect().bottom),
+        dockTop: Math.round(dock.getBoundingClientRect().top),
+      };
+    });
+    expect(clearance, 'last soldier kill button and dock should both be present').not.toBeNull();
+    expect(clearance!.soldierBottom).toBeLessThanOrEqual(clearance!.dockTop + 1);
   });
 });

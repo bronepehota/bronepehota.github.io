@@ -38,6 +38,8 @@ interface UnitCardProps {
   army?: Army;
   hideArmor?: boolean;
   hideSpeed?: boolean;
+  /** Bottom space to reserve so content clears the fixed bottom dock (battle view). */
+  bottomInset?: number;
 }
 
 
@@ -60,6 +62,7 @@ export default function UnitCard({
   army,
   hideArmor = false,
   hideSpeed = false,
+  bottomInset = 0,
 }: UnitCardProps) {
   // Custom hooks for state management
   const {
@@ -631,8 +634,9 @@ export default function UnitCard({
         data-testid={isSquad ? 'squad-scroll' : undefined}
         className={cn(
           "px-1 md:px-2 py-1 md:py-2 relative z-10 min-h-0",
-          isSquad ? "pb-20 md:pb-2 overflow-y-auto flex-1" : "pb-2 overflow-hidden"
+          isSquad ? "overflow-y-auto flex-1" : "pb-2 overflow-hidden"
         )}
+        style={isSquad ? { paddingBottom: bottomInset } : undefined}
       >
         {isSquad ? (
           <SquadView
