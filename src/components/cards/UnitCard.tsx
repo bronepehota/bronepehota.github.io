@@ -429,7 +429,7 @@ export default function UnitCard({
     <div
       className={cn(
         "bg-transparent transition-all relative cursor-default select-none",
-        "flex flex-col min-h-0",
+        "flex flex-col min-h-0 h-full",
         (isSquadDone || (isMachineDone && !isMachineDestroyed)) ? "opacity-70 grayscale-[0.3]" : "",
         isAllDead || isMachineDestroyed ? "opacity-40 grayscale" : ""
       )}
@@ -627,10 +627,13 @@ export default function UnitCard({
       )}
 
       {/* Unit Content - Full height utilization */}
-      <div className={cn(
-        "px-1 md:px-2 py-1 md:py-2 relative z-10 min-h-0",
-        isSquad ? "pb-20 md:pb-2 overflow-y-auto" : "pb-2 overflow-hidden"
-      )}>
+      <div
+        data-testid={isSquad ? 'squad-scroll' : undefined}
+        className={cn(
+          "px-1 md:px-2 py-1 md:py-2 relative z-10 min-h-0",
+          isSquad ? "pb-20 md:pb-2 overflow-y-auto flex-1" : "pb-2 overflow-hidden"
+        )}
+      >
         {isSquad ? (
           <SquadView
             unit={unit}

@@ -759,7 +759,7 @@ export default function GameSession({
       <div className="flex-1 min-h-0 overflow-hidden">
         {army.units.length > 0 && (
           <div className={cn(
-            "w-full",
+            "w-full h-full flex flex-col min-h-0",
             army.units[focusedUnitIdx]?.type === 'machine' ? "max-w-6xl mx-auto" : "max-w-3xl mx-auto"
           )}>
             <UnitCard
