@@ -68,12 +68,32 @@ export async function selectBudget(page: Page, budget = 350) {
   await page.waitForTimeout(TIMEOUTS.long);
 }
 
+/**
+ * Advance through the optional Mission step. Defaults to free play
+ * (Свободная игра, pre-selected). Pass a mission id to select a specific mission.
+ */
+export async function selectMission(page: Page, missionId?: string) {
+  const confirmButton = page.getByTestId('mission-confirm-button');
+  await expect(confirmButton).toBeVisible({ timeout: TIMEOUTS.load });
+
+  if (missionId) {
+    const card = page.getByTestId(`mission-card-${missionId}`);
+    await expect(card).toBeVisible();
+    await card.click();
+    await page.waitForTimeout(TIMEOUTS.medium);
+  }
+
+  await confirmButton.click();
+  await page.waitForTimeout(TIMEOUTS.long);
+}
+
 /** Full setup to army builder (unit selection step) */
 export async function setupToArmyBuilder(page: Page, opts?: { faction?: string; budget?: number }) {
   await clearStorage(page);
   await confirmRulesAndSource(page);
   await selectFaction(page, opts?.faction);
-  await selectBudget(page, opts?.budget);
+  await selectMission(page); // free play (default) → budget step
+  await selectBudget(page, opts?.budget); // → unit selection
 }
 
 /** Add the first available unit to the army */

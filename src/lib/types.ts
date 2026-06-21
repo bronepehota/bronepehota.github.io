@@ -244,6 +244,7 @@ export interface Army {
   loadError?: string;
   currentTurn?: number; // Starts at 1, increments with each new turn
   lastBattleDate?: string; // ISO timestamp when battle was started
+  missionId?: string | null; // Selected mission id, FREE_PLAY_MISSION_ID, or null
 }
 
 // Rules version selection

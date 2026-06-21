@@ -1,1 +1,28 @@
-[]
+[
+  {
+    "id": "minomet",
+    "name": "МИНОМЕТ",
+    "shortName": "МИНОМЕТ",
+    "faction": "mercenaries",
+    "cost": 20,
+    "image": "/images/machines/minomet.jpg",
+    "rank": 1,
+    "fire_rate": 1,
+    "ammo_max": 12,
+    "durability_max": 4,
+    "speed_sectors": [
+      {
+        "min_durability": 1,
+        "max_durability": 4,
+        "speed": 0
+      }
+    ],
+    "weapons": [
+      {
+        "name": "Миномет",
+        "range": "D6+2",
+        "power": "3D20"
+      }
+    ]
+  }
+]

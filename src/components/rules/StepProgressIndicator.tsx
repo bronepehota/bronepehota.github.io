@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Shield, Coins, Book, Users, Sword, Check, LucideIcon } from 'lucide-react';
+import { Shield, Coins, Book, Users, Sword, Check, Target, LucideIcon } from 'lucide-react';
 import type { FactionID, RulesVersionID } from '@/lib/types';
 import { getFactionColors } from '@/lib/faction-colors';
 
@@ -16,17 +16,18 @@ const steps: Step[] = [
   { id: 1, label: 'Правила', description: 'Выберите версию правил', icon: Book },
   { id: 2, label: 'Арм.Тех Листы', description: 'Выберите армейские листы', icon: Shield },
   { id: 3, label: 'Фракция', description: 'Выберите сторону конфликта', icon: Shield },
-  { id: 4, label: 'Бюджет', description: 'Установите лимит очков армии', icon: Coins },
-  { id: 5, label: 'Армия', description: 'Соберите свою армию', icon: Users },
-  { id: 6, label: 'Расстановка', description: 'Подготовьте войска к бою', icon: Sword },
+  { id: 4, label: 'Миссия', description: 'Выберите сценарий (необязательно)', icon: Target },
+  { id: 5, label: 'Бюджет', description: 'Установите лимит очков армии', icon: Coins },
+  { id: 6, label: 'Армия', description: 'Соберите свою армию', icon: Users },
+  { id: 7, label: 'Расстановка', description: 'Подготовьте войска к бою', icon: Sword },
 ];
 
 interface StepProgressIndicatorProps {
-  currentStep: 'faction' | 'budget' | 'rules' | 'source' | 'units' | 'preparation' | 'complete';
+  currentStep: 'faction' | 'budget' | 'rules' | 'source' | 'mission' | 'units' | 'preparation' | 'complete';
   selectedFaction?: FactionID;
   selectedBudget?: number;
   selectedRules?: RulesVersionID;
-  onStepClick?: (step: 'rules' | 'source' | 'faction' | 'budget' | 'units' | 'preparation') => void;
+  onStepClick?: (step: 'rules' | 'source' | 'faction' | 'budget' | 'mission' | 'units' | 'preparation') => void;
 }
 
 /**
@@ -53,10 +54,11 @@ export function StepProgressIndicator({
       case 'rules': return 0;
       case 'source': return 1;
       case 'faction': return 2;
-      case 'budget': return 3;
-      case 'units': return 4;
+      case 'mission': return 3;
+      case 'budget': return 4;
+      case 'units': return 5;
       case 'preparation':
-      case 'complete': return 5;
+      case 'complete': return 6;
       default: return 0;
     }
   };
@@ -71,7 +73,7 @@ export function StepProgressIndicator({
   return (
     <div className="w-full mb-8">
       {/* Progress bar container */}
-      <div className="flex items-center justify-center gap-1.5 md:gap-4">
+      <div className="flex items-center justify-center gap-1 md:gap-3">
         {steps.map((step, index) => {
           const isActive = index === activeIndex;
           const isCompleted = index < activeIndex;
@@ -85,13 +87,14 @@ export function StepProgressIndicator({
                   onClick={() => {
                     // Allow clicking on completed steps or current step (to navigate back)
                     if (isCompleted || isActive) {
-                      const stepMap: Record<number, 'rules' | 'source' | 'faction' | 'budget' | 'units' | 'preparation'> = {
+                      const stepMap: Record<number, 'rules' | 'source' | 'faction' | 'budget' | 'mission' | 'units' | 'preparation'> = {
                         0: 'rules',
                         1: 'source',
                         2: 'faction',
-                        3: 'budget',
-                        4: 'units',
-                        5: 'preparation',
+                        3: 'mission',
+                        4: 'budget',
+                        5: 'units',
+                        6: 'preparation',
                       };
                       onStepClick?.(stepMap[index]);
                     }
@@ -102,10 +105,10 @@ export function StepProgressIndicator({
                     relative flex items-center justify-center
                     rounded-full font-semibold transition-all duration-300
                     ${isActive
-                      ? 'w-11 h-11 md:w-14 md:h-14 text-white scale-110 cursor-pointer'
+                      ? 'w-9 h-9 md:w-14 md:h-14 text-white scale-110 cursor-pointer'
                       : isCompleted
-                        ? 'w-9 h-9 md:w-12 md:h-12 text-green-400 bg-green-500/20 border-2 border-green-500 cursor-pointer hover:scale-105'
-                        : 'w-9 h-9 md:w-12 md:h-12 text-slate-500 bg-slate-800/50 border-2 border-slate-700 opacity-60 cursor-not-allowed'
+                        ? 'w-7 h-7 md:w-12 md:h-12 text-green-400 bg-green-500/20 border-2 border-green-500 cursor-pointer hover:scale-105'
+                        : 'w-7 h-7 md:w-12 md:h-12 text-slate-500 bg-slate-800/50 border-2 border-slate-700 opacity-60 cursor-not-allowed'
                     }
                   `}
                   style={isActive ? {
@@ -114,9 +117,9 @@ export function StepProgressIndicator({
                   } : undefined}
                 >
                   {isCompleted ? (
-                    <Check className="w-5 h-5 md:w-6 md:h-6" />
+                    <Check className="w-4 h-4 md:w-6 md:h-6" />
                   ) : (
-                    <StepIcon className="w-5 h-5 md:w-6 md:h-6" />
+                    <StepIcon className="w-4 h-4 md:w-6 md:h-6" />
                   )}
 
                   {/* Pulse animation for active step */}
@@ -143,7 +146,7 @@ export function StepProgressIndicator({
               {index < steps.length - 1 && (
                 <div
                   className={`
-                    h-0.5 w-6 md:w-16 rounded-full transition-all duration-300
+                    h-0.5 w-2.5 md:w-12 rounded-full transition-all duration-300
                     ${index < activeIndex ? 'bg-green-500' : 'bg-slate-700'}
                   `}
                 />

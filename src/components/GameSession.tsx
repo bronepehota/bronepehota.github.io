@@ -1,14 +1,16 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import Link from 'next/link';
 import { Army, ArmyUnit, Squad, Machine, PilotInfo, FactionID } from '@/lib/types';
 import { resolvePanic } from '@/lib/panic-logic';
 import { cleanupExpiredModifiers, getAllDebuffs, resolveSoldierEffects, collectActiveBuffsForUnit, collectDebuffsForUnit, collectBuffsForUnit } from '@/lib/modifier-utils';
 import { getSourceWithCustom } from '@/lib/sources-registry';
+import { getMission, isFreePlay } from '@/lib/missions-registry';
 import { SoldierEffectsModal } from './modals/SoldierEffectsModal';
 import { getFactionColors } from '@/lib/faction-colors';
 import UnitCard from './cards/UnitCard';
-import { History, X, Bomb, Heart, Shield, Footprints, CheckCircle2, MoreVertical, BookOpen, RotateCcw, MessageCircle } from 'lucide-react';
+import { History, X, Bomb, Heart, Shield, Footprints, CheckCircle2, MoreVertical, BookOpen, RotateCcw, MessageCircle, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CombatLogEntry } from '@/lib/combat-types';
 import { useCombatTargetContext } from '@/contexts/CombatTargetContext';
@@ -540,6 +542,7 @@ export default function GameSession({
   }, [handleToggleUnitDone, onToggleUnitDoneRef]);
 
   const factionColors = getFactionColors(army.faction || 'polaris');
+  const selectedMission = isFreePlay(army.missionId) ? null : getMission(army.missionId!) ?? null;
 
   // Compute uniform stats for focused squad unit
   const focusedUnit = army.units[focusedUnitIdx];
@@ -1062,6 +1065,23 @@ export default function GameSession({
               <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-500">Тур</span>
               <span className={cn("text-sm font-mono font-black", factionColors.primary)}>{army.currentTurn || 1}</span>
             </div>
+            {selectedMission && (
+              <Link
+                href={`/encyclopedia/mission/${selectedMission.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-testid="game-session-mission-link"
+                onClick={() => setShowDockMenu(false)}
+                className="px-3 py-1.5 border-b border-slate-700/50 flex items-center justify-between hover:bg-slate-700"
+              >
+                <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1">
+                  <Target className="w-3 h-3" /> Миссия
+                </span>
+                <span className={cn("text-xs font-mono font-bold truncate ml-2 max-w-[90px]", factionColors.primary)}>
+                  {selectedMission.name}
+                </span>
+              </Link>
+            )}
             <button
               data-testid="new-turn-button"
               onClick={() => { startNewTurn(); setShowDockMenu(false); }}

@@ -92,14 +92,14 @@ test.describe('Source Selection', () => {
     await expect(page.getByTestId('faction-card-polaris')).toBeVisible();
   });
 
-  test('should show 6 steps in progress indicator', async ({ page }) => {
+  test('should show 7 steps in progress indicator', async ({ page }) => {
     // Navigate to source selection
     await page.click('[data-testid="rules-confirm-button"]');
     await page.waitForTimeout(500);
 
-    // Should have 6 step buttons: rules, source, faction, budget, army, preparation
+    // Should have 7 step buttons: rules, source, faction, budget, mission, army, preparation
     const stepButtons = await page.locator('button[aria-label*="Шаг"]').count();
-    expect(stepButtons).toBe(6);
+    expect(stepButtons).toBe(7);
 
     // Step 2 (Source) should be active
     const activeStep = page.locator('button[aria-current="step"]');
@@ -174,6 +174,8 @@ test.describe('Source Selection', () => {
     await page.click('[data-testid="faction-card-polaris"]');
     await page.waitForTimeout(300);
     await page.click('[data-testid="faction-continue-button"]');
+    await page.waitForTimeout(500);
+    await page.click('[data-testid="mission-confirm-button"]');
     await page.waitForTimeout(500);
 
     // Step 4: Budget selection

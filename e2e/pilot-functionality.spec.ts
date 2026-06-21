@@ -39,6 +39,8 @@ test.describe('Pilot Functionality', () => {
     await page.waitForTimeout(300);
     await page.click('[data-testid="faction-continue-button"]');
     await page.waitForTimeout(500);
+    await page.click('[data-testid="mission-confirm-button"]');
+    await page.waitForTimeout(500);
 
     // Fourth: Select budget
     await page.click('button:has-text("350")');
