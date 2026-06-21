@@ -17,6 +17,8 @@ test.describe('UnitCard Complex Scenarios', () => {
     await page.waitForTimeout(300);
     await page.click('[data-testid="faction-continue-button"]');
     await page.waitForTimeout(500);
+    await page.click('[data-testid="mission-confirm-button"]');
+    await page.waitForTimeout(500);
     await page.click('button:has-text("350")');
     await page.waitForTimeout(300);
     await page.click('[data-testid="budget-next-button"]');
@@ -43,6 +45,8 @@ test.describe('UnitCard Complex Scenarios', () => {
     await page.click('[data-testid="faction-card-polaris"]');
     await page.waitForTimeout(300);
     await page.click('[data-testid="faction-continue-button"]');
+    await page.waitForTimeout(500);
+    await page.click('[data-testid="mission-confirm-button"]');
     await page.waitForTimeout(500);
     await page.click('button:has-text("350")');
     await page.waitForTimeout(300);
@@ -73,6 +77,8 @@ test.describe('UnitCard Complex Scenarios', () => {
     await page.click('[data-testid="faction-card-polaris"]');
     await page.waitForTimeout(300);
     await page.click('[data-testid="faction-continue-button"]');
+    await page.waitForTimeout(500);
+    await page.click('[data-testid="mission-confirm-button"]');
     await page.waitForTimeout(500);
     await page.click('button:has-text("350")');
     await page.waitForTimeout(300);

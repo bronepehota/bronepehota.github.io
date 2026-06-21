@@ -99,4 +99,48 @@ test.describe('Энциклопедия', () => {
     const response = await page.goto('/encyclopedia/unit/non_existent_id');
     expect(response?.status()).toBe(500);
   });
+
+  test('переключатель разделов виден и содержит 3 вкладки', async ({ page }) => {
+    await page.goto('/encyclopedia');
+    await page.waitForLoadState('networkidle');
+
+    const tabs = page.getByTestId('encyclopedia-tabs');
+    await expect(tabs).toBeVisible();
+    await expect(page.getByTestId('encyclopedia-tab-units')).toBeVisible();
+    await expect(page.getByTestId('encyclopedia-tab-missions')).toBeVisible();
+    await expect(page.getByTestId('encyclopedia-tab-factions')).toBeVisible();
+    // Юниты активны на главной странице
+    await expect(page.getByTestId('encyclopedia-tab-units')).toHaveAttribute('aria-current', 'page');
+  });
+
+  test('вкладка ведёт на миссии', async ({ page }) => {
+    await page.goto('/encyclopedia');
+    await page.waitForLoadState('networkidle');
+    await page.getByTestId('encyclopedia-tab-missions').click();
+    // Client-side navigation — auto-wait for the URL to update.
+    await expect(page).toHaveURL(/\/encyclopedia\/missions$/);
+    await expect(page.getByTestId('encyclopedia-tab-missions')).toHaveAttribute('aria-current', 'page');
+  });
+
+  test('страница фракций показывает карточки фракций', async ({ page }) => {
+    await page.goto('/encyclopedia/factions');
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.getByTestId('faction-grid')).toBeVisible();
+    await expect(page.getByTestId('encyclopedia-faction-card-polaris')).toBeVisible();
+    await expect(page.getByTestId('encyclopedia-faction-card-protectorate')).toBeVisible();
+    await expect(page.getByTestId('encyclopedia-faction-card-mercenaries')).toBeVisible();
+    // Фракции активны
+    await expect(page.getByTestId('encyclopedia-tab-factions')).toHaveAttribute('aria-current', 'page');
+  });
+
+  test('deep-link ?faction=polaris предфильтрует юнитов', async ({ page }) => {
+    await page.goto('/encyclopedia?faction=polaris');
+    await page.waitForLoadState('networkidle');
+    await page.waitForSelector('[data-testid^="unit-card-"]');
+
+    // The polaris filter button lights up once the deep-link is applied (auto-waits).
+    const polarisBtn = page.getByRole('button', { name: 'ПОЛЯРИС' });
+    await expect(polarisBtn).toHaveCSS('background-color', 'rgb(220, 38, 38)');
+  });
 });

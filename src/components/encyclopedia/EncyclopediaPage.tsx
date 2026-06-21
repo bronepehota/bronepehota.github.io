@@ -6,6 +6,7 @@ import { EncyclopediaUnit } from '@/lib/encyclopedia-registry';
 import { FactionID } from '@/lib/types';
 import { Search } from 'lucide-react';
 import { UnitCard } from './UnitCard';
+import { EncyclopediaTabs } from './EncyclopediaTabs';
 import { cn } from '@/lib/utils';
 
 interface EncyclopediaPageProps {
@@ -35,6 +36,16 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
 
   useEffect(() => {
     setIsLoaded(true);
+  }, []);
+
+  // Optional deep-link: /encyclopedia?faction=polaris pre-selects that faction filter.
+  // Read on the client (not via useSearchParams) so the page stays statically renderable.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const f = new URLSearchParams(window.location.search).get('faction');
+    if (f === 'polaris' || f === 'protectorate' || f === 'mercenaries') {
+      setSelectedFaction(f);
+    }
   }, []);
 
   useEffect(() => {
@@ -116,6 +127,18 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
                 </p>
                 <div className="h-px w-16 md:w-24 bg-gradient-to-l from-transparent to-military-rust/50" />
               </div>
+            </div>
+
+            {/* Mode selector — Units / Missions / Factions */}
+            <div
+              className={cn(
+                'max-w-4xl mx-auto mb-8 md:mb-10',
+                'fade-in-up opacity-0',
+                isLoaded && 'opacity-100'
+              )}
+              style={{ animationFillMode: 'forwards', animationDelay: '0.35s' }}
+            >
+              <EncyclopediaTabs />
             </div>
 
             {/* Tactical Command Panel - Search & Filters */}

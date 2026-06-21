@@ -10,6 +10,9 @@ import { StepProgressIndicator } from './rules/StepProgressIndicator';
 import { getAllRulesVersions } from '@/lib/rules-registry';
 import { getAllSourcesWithCustom, getSourceWithCustom, isValidSourceWithCustom, getDefaultSource } from '@/lib/sources-registry';
 import { SourceSelector } from './rules/SourceSelector';
+import { MissionSelector } from './missions/MissionSelector';
+import { getMission, isFreePlay } from '@/lib/missions-registry';
+import { buildMissionArmy } from '@/lib/mission-army';
 import { getEncyclopediaFaction } from '@/lib/encyclopedia-registry';
 import { BattlePreparationScreen } from './preparation';
 import { LOCAL_STORAGE_KEYS } from '@/lib/constants';
@@ -88,10 +91,10 @@ export default function ArmyBuilder({
   });
 
   // Setup step state for guided flow - sync with army.currentStep
-  const [setupStep, setSetupStep] = useState<'rules' | 'source' | 'faction' | 'budget' | 'units' | 'preparation'>(() => {
+  const [setupStep, setSetupStep] = useState<'rules' | 'source' | 'faction' | 'budget' | 'mission' | 'units' | 'preparation'>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.SETUP_STEP);
-      if (saved && ['rules', 'source', 'faction', 'budget', 'units', 'preparation'].includes(saved)) {
+      if (saved && ['rules', 'source', 'faction', 'budget', 'mission', 'units', 'preparation'].includes(saved)) {
         return saved as any;
       }
     }
@@ -155,8 +158,8 @@ export default function ArmyBuilder({
   }, [army.currentStep]);
 
   // Handle step navigation from StepProgressIndicator
-  const handleStepClick = useCallback((step: 'rules' | 'source' | 'faction' | 'budget' | 'units' | 'preparation') => {
-    const stepOrder = ['rules', 'source', 'faction', 'budget', 'units', 'preparation'];
+  const handleStepClick = useCallback((step: 'rules' | 'source' | 'faction' | 'budget' | 'mission' | 'units' | 'preparation') => {
+    const stepOrder = ['rules', 'source', 'faction', 'mission', 'budget', 'units', 'preparation'];
     const currentIndex = stepOrder.indexOf(setupStep);
     const targetIndex = stepOrder.indexOf(step);
 
@@ -196,8 +199,8 @@ export default function ArmyBuilder({
   const confirmBackNavigation = useCallback(() => {
     if (!pendingBackStep) return;
 
-    const step = pendingBackStep as 'rules' | 'source' | 'faction' | 'budget' | 'units' | 'preparation';
-    const stepOrder = ['rules', 'source', 'faction', 'budget', 'units', 'preparation'];
+    const step = pendingBackStep as 'rules' | 'source' | 'faction' | 'budget' | 'mission' | 'units' | 'preparation';
+    const stepOrder = ['rules', 'source', 'faction', 'mission', 'budget', 'units', 'preparation'];
     const targetIndex = stepOrder.indexOf(step);
 
     // Reset army completely
@@ -279,12 +282,41 @@ export default function ArmyBuilder({
                 factions={availableFactions}
                 selectedFaction={army.faction}
                 onFactionSelect={(factionId) => setArmy({ ...army, faction: factionId })}
-                onNext={() => setSetupStep('budget')}
+                onNext={() => setSetupStep('mission')}
                 _nextDisabled={!army.faction}
               />
             )}
 
-            {/* Step 3: Budget Selection */}
+            {/* Step 3: Mission Selection — choosing a real mission auto-fills the army and skips budget */}
+            {setupStep === 'mission' && army.faction && (
+              <MissionSelector
+                selectedMissionId={army.missionId ?? null}
+                onSelect={(missionId) => setArmy({ ...army, missionId })}
+                onConfirm={() => {
+                  const missionId = army.missionId;
+                  const faction = army.faction;
+                  if (!isFreePlay(missionId) && missionId && faction) {
+                    const mission = getMission(missionId);
+                    if (mission) {
+                      const built = buildMissionArmy(mission, faction, typedSquads, typedMachines);
+                      setArmy({
+                        ...army,
+                        units: built.units,
+                        totalCost: built.totalCost,
+                        pointBudget: built.totalCost,
+                        currentStep: 'unit-select',
+                      });
+                      setSetupStep('units');
+                      return;
+                    }
+                  }
+                  // Free play → go to budget, then build the army manually
+                  setSetupStep('budget');
+                }}
+              />
+            )}
+
+            {/* Step 4: Budget Selection (free play only — a chosen mission skips this) */}
             {setupStep === 'budget' && army.faction && (
               <PointBudgetInput
                 presets={[250, 350, 500, 1000]}

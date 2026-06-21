@@ -259,6 +259,8 @@ test.describe('Full flow regression with editor link', () => {
     await page.waitForTimeout(300);
     await page.getByTestId('faction-continue-button').click();
     await page.waitForTimeout(500);
+    await page.getByTestId('mission-confirm-button').click();
+    await page.waitForTimeout(500);
 
     // Step 4: Budget
     await page.getByRole('button', { name: '350' }).click();

@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Sword, ChevronUp, Shield, Users, Zap, Target, Timer } from 'lucide-react';
+import Link from 'next/link';
+import { Sword, ChevronUp, Shield, Users, Zap, Target, Timer, Flag, Clock, Crosshair, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Army } from '@/lib/types';
 import { PrepArmyList } from './PrepArmyList';
 import InitiativeModal from '../modals/InitiativeModal';
-import { getFactionColors } from '@/lib/faction-colors';
+import { getFactionColors, factionDisplayNames } from '@/lib/faction-colors';
+import { getMission, getCampaign, getObjectiveForFaction, isFreePlay } from '@/lib/missions-registry';
 
 interface BattlePreparationScreenProps {
   army: Army;
@@ -58,6 +60,13 @@ export function BattlePreparationScreen({
     return acc;
   }, 0);
   const hasUnits = army.units.length > 0;
+
+  // Selected mission (reference only — informational, never enforced)
+  const mission = isFreePlay(army.missionId) ? null : getMission(army.missionId!);
+  const missionCampaign = mission ? getCampaign(mission.campaign) : undefined;
+  const playerObjective = mission && army.faction
+    ? getObjectiveForFaction(mission.id, army.faction)
+    : undefined;
 
   return (
     <div className="relative min-h-screen pb-36 overflow-hidden bg-slate-950">
@@ -168,6 +177,69 @@ export function BattlePreparationScreen({
             </div>
           </div>
 
+          {/* Selected mission reference (informational only) */}
+          {mission && (
+            <div
+              data-testid="mission-reference-banner"
+              className="mt-2 rounded-xl border p-4"
+              style={{
+                borderColor: `${colors.primary}40`,
+                backgroundColor: `${colors.primary}0d`,
+                animation: isLoaded ? 'fadeSlideUp 0.6s ease-out 0.35s both' : 'none',
+              }}
+            >
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <div className="flex items-center gap-2">
+                  <Target className="w-4 h-4" style={{ color: colors.primary }} />
+                  <span className="font-mono text-xs text-slate-400 uppercase tracking-wider">Миссия</span>
+                </div>
+                {missionCampaign && (
+                  <span className="font-mono text-[10px] text-slate-500 uppercase tracking-wider">
+                    Кампания «{missionCampaign.name}»
+                  </span>
+                )}
+              </div>
+
+              <h3 className="font-mono font-bold text-base text-white mb-2.5">
+                {mission.name}
+              </h3>
+
+              <div className="flex flex-wrap gap-2 mb-3">
+                <MissionStat icon={<Clock className="w-3 h-3" />} text={mission.parameters.turnCount ? `${mission.parameters.turnCount} ходов` : 'без лимита'} />
+                {mission.parameters.firstMove && (
+                  <MissionStat icon={<Flag className="w-3 h-3" />} text={`1-й ход: ${factionDisplayNames[mission.parameters.firstMove] ?? mission.parameters.firstMove}`} />
+                )}
+                {mission.parameters.rulesVariant && (
+                  <MissionStat icon={<Crosshair className="w-3 h-3" />} text={mission.parameters.rulesVariant} />
+                )}
+              </div>
+
+              {playerObjective ? (
+                <div className="rounded-lg bg-slate-900/50 border border-slate-700/40 p-2.5 mb-2">
+                  <span className="font-mono text-[10px] uppercase tracking-wider" style={{ color: colors.primary }}>
+                    Ваша задача
+                  </span>
+                  <p className="text-sm text-slate-300 leading-snug mt-0.5">{playerObjective.text}</p>
+                </div>
+              ) : (
+                <div className="rounded-lg bg-slate-900/50 border border-slate-700/40 p-2.5 mb-2">
+                  <p className="text-xs text-slate-400">См. обе задачи сторон в описании миссии.</p>
+                </div>
+              )}
+
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[10px] text-slate-500 font-mono">Справочно. Отслеживание — вручную.</span>
+                <Link
+                  href={`/encyclopedia/mission/${mission.id}`}
+                  className="inline-flex items-center gap-1 text-xs font-mono uppercase tracking-wider hover:opacity-80 transition-opacity"
+                  style={{ color: colors.primary }}
+                >
+                  Подробнее <ArrowRight className="w-3 h-3" />
+                </Link>
+              </div>
+            </div>
+          )}
+
           {/* Army list */}
           <div style={{
             animation: isLoaded ? 'fadeSlideUp 0.6s ease-out 0.2s both' : 'none',
@@ -276,5 +348,14 @@ function StatChip({ icon, value, label }: { icon: React.ReactNode; value: number
       <span className="text-sm font-mono font-bold text-white">{value}</span>
       <span className="text-[10px] font-mono uppercase tracking-wide hidden sm:inline">{label}{suffix}</span>
     </div>
+  );
+}
+
+function MissionStat({ icon, text }: { icon: React.ReactNode; text: string }) {
+  return (
+    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-slate-900/60 border border-slate-800/60 text-[11px] font-mono text-slate-300">
+      <span className="opacity-60">{icon}</span>
+      {text}
+    </span>
   );
 }
