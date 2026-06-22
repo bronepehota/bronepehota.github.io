@@ -7,6 +7,7 @@ import {
   selectMission,
   addFirstUnit,
   goToPreparation,
+  setupGameSessionWithSquad,
 } from './helpers/setup';
 
 test.describe('Миссии', () => {
@@ -133,5 +134,23 @@ test.describe('Миссии', () => {
     await expect(page.getByText('Кампания «Классические сценарии»')).toHaveCount(0);
     // Цербер campaign header still present (grouping intact)
     await expect(page.getByText('Кампания «Цербер»')).toBeVisible();
+  });
+
+  test('бой: баннер лимита ходов появляется и закрывается', async ({ page }) => {
+    await setupGameSessionWithSquad(page, { missionId: 'zahvat_tochek', currentTurn: 6 });
+
+    const banner = page.getByTestId('turn-limit-banner');
+    await expect(banner).toBeVisible({ timeout: 5000 });
+    await expect(banner).toContainText('лимит ходов');
+    await expect(banner).toContainText('6');
+
+    // Dismiss
+    await page.getByTestId('turn-limit-dismiss').click();
+    await expect(banner).toHaveCount(0);
+  });
+
+  test('бой: баннер не появляется до достижения лимита', async ({ page }) => {
+    await setupGameSessionWithSquad(page, { missionId: 'zahvat_tochek', currentTurn: 3 });
+    await expect(page.getByTestId('turn-limit-banner')).toHaveCount(0);
   });
 });

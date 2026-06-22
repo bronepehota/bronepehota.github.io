@@ -6,11 +6,11 @@ import { Army, ArmyUnit, Squad, Machine, PilotInfo, FactionID } from '@/lib/type
 import { resolvePanic } from '@/lib/panic-logic';
 import { cleanupExpiredModifiers, getAllDebuffs, resolveSoldierEffects, collectActiveBuffsForUnit, collectDebuffsForUnit, collectBuffsForUnit } from '@/lib/modifier-utils';
 import { getSourceWithCustom } from '@/lib/sources-registry';
-import { getMission, isFreePlay } from '@/lib/missions-registry';
+import { getMission, isFreePlay, isTurnLimitReached } from '@/lib/missions-registry';
 import { SoldierEffectsModal } from './modals/SoldierEffectsModal';
 import { getFactionColors } from '@/lib/faction-colors';
 import UnitCard from './cards/UnitCard';
-import { History, X, Bomb, Heart, Shield, Footprints, CheckCircle2, MoreVertical, BookOpen, RotateCcw, MessageCircle, Target } from 'lucide-react';
+import { History, X, Bomb, Heart, Shield, Footprints, CheckCircle2, MoreVertical, BookOpen, RotateCcw, MessageCircle, Target, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CombatLogEntry } from '@/lib/combat-types';
 import { useCombatTargetContext } from '@/contexts/CombatTargetContext';
@@ -81,6 +81,7 @@ export default function GameSession({
     soldierName: string;
   } | null>(null);
   const [showDockMenu, setShowDockMenu] = useState(false);
+  const [turnLimitDismissed, setTurnLimitDismissed] = useState(false);
 
   // Close dock menu on outside click
   useEffect(() => {
@@ -543,6 +544,7 @@ export default function GameSession({
 
   const factionColors = getFactionColors(army.faction || 'polaris');
   const selectedMission = isFreePlay(army.missionId) ? null : getMission(army.missionId!) ?? null;
+  const turnLimitHit = isTurnLimitReached(selectedMission, army.currentTurn || 1);
 
   // Compute uniform stats for focused squad unit
   const focusedUnit = army.units[focusedUnitIdx];
@@ -569,8 +571,33 @@ export default function GameSession({
     };
   }, [focusedUnit, hideArmorForUnit, army]);
 
+  // Reset the turn-limit banner dismissal when the selected mission changes
+  useEffect(() => {
+    setTurnLimitDismissed(false);
+  }, [army.missionId]);
+
   return (
     <div className="flex flex-col h-full bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden" data-testid="game-session">
+      {/* Turn-limit banner — passive, dismissible; informational only */}
+      {turnLimitHit && !turnLimitDismissed && selectedMission && (
+        <div
+          data-testid="turn-limit-banner"
+          className="shrink-0 z-[45] flex items-center gap-2 px-3 py-2 bg-amber-500/15 border-b border-amber-500/40 text-amber-200"
+        >
+          <Clock className="w-4 h-4 shrink-0" />
+          <span className="flex-1 text-xs font-mono leading-snug">
+            Достигнут лимит ходов миссии ({selectedMission.parameters.turnCount}). Подсчитайте очки контроля и определите победителя.
+          </span>
+          <button
+            data-testid="turn-limit-dismiss"
+            onClick={() => setTurnLimitDismissed(true)}
+            aria-label="Закрыть предупреждение о лимите ходов"
+            className="shrink-0 p-2 hover:bg-amber-500/20 rounded min-w-[44px] min-h-[44px] flex items-center justify-center"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
       {/* Initiative Modal */}
       <InitiativeModal
         isOpen={showInitiativeModal}
