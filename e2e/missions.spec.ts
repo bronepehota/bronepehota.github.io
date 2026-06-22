@@ -19,7 +19,7 @@ test.describe('Миссии', () => {
     await page.goto('/encyclopedia/missions');
     await page.waitForLoadState('networkidle');
 
-    const grid = page.getByTestId('mission-grid');
+    const grid = page.getByTestId('mission-grid').first();
     await expect(grid).toBeVisible();
 
     const cards = page.locator('[data-testid^="mission-card-"]');
@@ -152,5 +152,25 @@ test.describe('Миссии', () => {
   test('бой: баннер не появляется до достижения лимита', async ({ page }) => {
     await setupGameSessionWithSquad(page, { missionId: 'zahvat_tochek', currentTurn: 3 });
     await expect(page.getByTestId('turn-limit-banner')).toHaveCount(0);
+  });
+
+  test('энциклопедия: список миссий включает захват точек под «Классические сценарии»', async ({ page }) => {
+    await page.goto('/encyclopedia/missions');
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.getByText('Кампания «Классические сценарии»')).toBeVisible();
+    await expect(page.getByTestId('mission-group-classic')).toBeVisible();
+    await expect(page.getByTestId('mission-card-zahvat_tochek')).toBeVisible();
+  });
+
+  test('энциклопедия: страница захвата точек показывает цели, правила и диаграмму', async ({ page }) => {
+    await page.goto('/encyclopedia/mission/zahvat_tochek');
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.locator('h1')).toContainText('Захват и удержание точек');
+    await expect(page.getByRole('heading', { name: 'Условия победы' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Особые правила' })).toBeVisible();
+    const diagram = page.locator('img[src*="/images/missions/zahvat_tochek/diagram"]');
+    await expect(diagram.first()).toBeVisible();
   });
 });
