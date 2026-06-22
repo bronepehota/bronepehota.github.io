@@ -9,6 +9,9 @@ import {
   isFreePlay,
   isValidMission,
   FREE_PLAY_MISSION_ID,
+  missionHasParticipantsForFaction,
+  missionHasAnyParticipants,
+  isTurnLimitReached,
 } from '@/lib/missions-registry';
 
 describe('missions-registry', () => {
@@ -146,6 +149,65 @@ describe('missions-registry', () => {
       expect(isValidMission(FREE_PLAY_MISSION_ID)).toBe(false);
       expect(isValidMission(undefined)).toBe(false);
       expect(isValidMission('nonexistent')).toBe(false);
+    });
+  });
+
+  describe('missionHasParticipantsForFaction', () => {
+    it('returns true for a faction that has participants', () => {
+      const m = getMission('osvobozhdenie')!;
+      expect(missionHasParticipantsForFaction(m, 'polaris')).toBe(true);
+    });
+
+    it('returns false when participants is undefined', () => {
+      const m = getMission('osvobozhdenie')!;
+      const noForces = { ...m, participants: undefined };
+      expect(missionHasParticipantsForFaction(noForces, 'polaris')).toBe(false);
+    });
+
+    it('returns false for an empty participants array', () => {
+      const m = getMission('osvobozhdenie')!;
+      const emptyForces = { ...m, participants: { polaris: [], protectorate: [] } };
+      expect(missionHasParticipantsForFaction(emptyForces, 'polaris')).toBe(false);
+    });
+  });
+
+  describe('missionHasAnyParticipants', () => {
+    it('returns true when at least one faction has participants', () => {
+      const m = getMission('osvobozhdenie')!;
+      expect(missionHasAnyParticipants(m)).toBe(true);
+    });
+
+    it('returns false when participants is undefined', () => {
+      const m = getMission('osvobozhdenie')!;
+      expect(missionHasAnyParticipants({ ...m, participants: undefined })).toBe(false);
+    });
+
+    it('returns false when all participant arrays are empty', () => {
+      const m = getMission('osvobozhdenie')!;
+      expect(missionHasAnyParticipants({ ...m, participants: { polaris: [], protectorate: [] } })).toBe(false);
+    });
+  });
+
+  describe('isTurnLimitReached', () => {
+    it('returns true at and beyond the turn limit', () => {
+      const m = getMission('osvobozhdenie')!; // turnCount 8
+      expect(isTurnLimitReached(m, 8)).toBe(true);
+      expect(isTurnLimitReached(m, 10)).toBe(true);
+    });
+
+    it('returns false before the turn limit', () => {
+      const m = getMission('osvobozhdenie')!;
+      expect(isTurnLimitReached(m, 7)).toBe(false);
+    });
+
+    it('returns false when there is no turn limit (objective-based mission)', () => {
+      const kapkan = getMission('kapkan')!; // no turnCount
+      expect(isTurnLimitReached(kapkan, 100)).toBe(false);
+    });
+
+    it('returns false for null/undefined mission', () => {
+      expect(isTurnLimitReached(null, 5)).toBe(false);
+      expect(isTurnLimitReached(undefined, 5)).toBe(false);
     });
   });
 });
