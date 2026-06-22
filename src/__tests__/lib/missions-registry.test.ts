@@ -210,4 +210,28 @@ describe('missions-registry', () => {
       expect(isTurnLimitReached(undefined, 5)).toBe(false);
     });
   });
+
+  describe('classic campaign / zahvat_tochek', () => {
+    it('exposes the classic campaign', () => {
+      const c = getCampaign('classic');
+      expect(c).toBeDefined();
+      expect(c!.name).toBe('Классические сценарии');
+    });
+
+    it('zahvat_tochek exists in the classic campaign with symmetric objectives', () => {
+      const m = getMission('zahvat_tochek');
+      expect(m).toBeDefined();
+      expect(m!.campaign).toBe('classic');
+      expect(m!.parameters.turnCount).toBe(6);
+      expect(missionHasAnyParticipants(m!)).toBe(false);
+      // symmetric: both sides share the same objective text
+      expect(getObjectiveForFaction('zahvat_tochek', 'polaris')!.text)
+        .toBe(getObjectiveForFaction('zahvat_tochek', 'protectorate')!.text);
+    });
+
+    it('getMissionsForCampaign returns zahvat_tochek for classic', () => {
+      const ids = getMissionsForCampaign('classic').map((m) => m.id);
+      expect(ids).toContain('zahvat_tochek');
+    });
+  });
 });
