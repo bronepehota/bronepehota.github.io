@@ -121,4 +121,17 @@ test.describe('Миссии', () => {
     expect(army.missionId).toBe('zahvat_tochek');
     expect(army.units.length).toBe(0);
   });
+
+  test('мастер: миссия без участников — в кластере свободной игры (без делителя)', async ({ page }) => {
+    await confirmRulesAndSource(page);
+    await selectFaction(page, 'polaris');
+
+    await expect(page.getByTestId('mission-confirm-button')).toBeVisible();
+    // The capture-hold card is visible next to free play
+    await expect(page.getByTestId('mission-card-zahvat_tochek')).toBeVisible();
+    // No campaign header for classic (it is not grouped in the wizard)
+    await expect(page.getByText('Кампания «Классические сценарии»')).toHaveCount(0);
+    // Цербер campaign header still present (grouping intact)
+    await expect(page.getByText('Кампания «Цербер»')).toBeVisible();
+  });
 });
