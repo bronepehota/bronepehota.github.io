@@ -106,4 +106,19 @@ test.describe('Миссии', () => {
 
     await expect(page.getByTestId('mission-reference-banner')).toHaveCount(0);
   });
+
+  test('мастер: миссия без участников ведёт к бюджету (своя армия)', async ({ page }) => {
+    await confirmRulesAndSource(page);
+    await selectFaction(page, 'polaris');
+    await selectMission(page, 'zahvat_tochek');
+
+    // Lands on the budget step (not auto-filled unit-select)
+    await expect(page.getByTestId('budget-next-button')).toBeVisible({ timeout: 5000 });
+
+    // missionId stored, army NOT auto-filled
+    const armyRaw = await page.evaluate(() => localStorage.getItem('bronepehota_army'));
+    const army = JSON.parse(armyRaw!);
+    expect(army.missionId).toBe('zahvat_tochek');
+    expect(army.units.length).toBe(0);
+  });
 });
