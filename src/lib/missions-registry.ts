@@ -94,16 +94,3 @@ export function missionHasAnyParticipants(mission: Mission): boolean {
     Object.values(mission.participants).some((arr) => Array.isArray(arr) && arr.length > 0)
   );
 }
-
-/**
- * True when the current turn has reached or exceeded the mission's turn limit.
- * Returns false for missions without a turn limit and for null/undefined missions.
- */
-export function isTurnLimitReached(
-  mission: Mission | null | undefined,
-  currentTurn: number,
-): boolean {
-  const limit = mission?.parameters.turnCount;
-  if (!limit || limit <= 0) return false;
-  return currentTurn >= limit;
-}

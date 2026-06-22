@@ -136,22 +136,21 @@ test.describe('Миссии', () => {
     await expect(page.getByText('Кампания «Цербер»')).toBeVisible();
   });
 
-  test('бой: баннер лимита ходов появляется и закрывается', async ({ page }) => {
-    await setupGameSessionWithSquad(page, { missionId: 'zahvat_tochek', currentTurn: 6 });
+  test('бой: попап завершения тура показывает лимит ходов миссии', async ({ page }) => {
+    await setupGameSessionWithSquad(page, { missionId: 'zahvat_tochek', currentTurn: 1 });
 
-    const banner = page.getByTestId('turn-limit-banner');
-    await expect(banner).toBeVisible({ timeout: 5000 });
-    await expect(banner).toContainText('лимит ходов');
-    await expect(banner).toContainText('6');
+    await expect(page.getByTestId('game-session')).toBeVisible({ timeout: 5000 });
 
-    // Dismiss
-    await page.getByTestId('turn-limit-dismiss').click();
-    await expect(banner).toHaveCount(0);
-  });
+    // Open dock menu, then click "Новый тур" to trigger the confirmation popup
+    await page.getByTestId('dock-menu-toggle').click();
+    await page.waitForTimeout(200);
+    await page.getByTestId('new-turn-button').click();
+    await page.waitForTimeout(200);
 
-  test('бой: баннер не появляется до достижения лимита', async ({ page }) => {
-    await setupGameSessionWithSquad(page, { missionId: 'zahvat_tochek', currentTurn: 3 });
-    await expect(page.getByTestId('turn-limit-banner')).toHaveCount(0);
+    // Popup should show "ИЗ 6" (zahvat_tochek has turnCount=6)
+    const popup = page.locator('.fixed.inset-0.z-\\[100\\]');
+    await expect(popup).toBeVisible();
+    await expect(popup).toContainText('ИЗ 6');
   });
 
   test('энциклопедия: список миссий включает захват точек под «Классические сценарии»', async ({ page }) => {
