@@ -703,7 +703,7 @@ export default function GameSession({
             <div className="flex items-center gap-3">
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent"></div>
               <h3 className={cn("text-lg md:text-xl font-mono font-bold tracking-wider", factionColors.primary)}>
-                ЗАВЕРШИТЬ ТУР {army.currentTurn || 1}?
+                ЗАВЕРШИТЬ ТУР {army.currentTurn || 1}{selectedMission?.parameters.turnCount ? ` ИЗ ${selectedMission.parameters.turnCount}` : ''}?
               </h3>
               <div className="flex-1 h-px bg-gradient-to-r from-transparent via-slate-600 to-transparent"></div>
             </div>
@@ -887,6 +887,7 @@ export default function GameSession({
           {/* Menu button at far right of navigation row */}
           <div className="relative shrink-0 ml-auto">
             <button
+              data-testid="dock-menu-toggle"
               onClick={(e) => { e.stopPropagation(); setShowDockMenu(!showDockMenu); }}
               className="p-1.5 hover:bg-slate-800 rounded-sm transition-colors text-slate-400 hover:text-slate-200 min-w-[44px] min-h-[44px] flex items-center justify-center"
             >

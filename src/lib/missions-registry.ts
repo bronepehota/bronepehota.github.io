@@ -74,3 +74,23 @@ export function isFreePlay(missionId?: string | null): boolean {
 export function isValidMission(id?: string | null): boolean {
   return !!id && id !== FREE_PLAY_MISSION_ID && !!getMission(id);
 }
+
+/**
+ * True if the mission prescribes combat forces for the given faction.
+ * Drives the wizard routing: missions with prescribed forces auto-fill the army;
+ * missions without them go to the budget/manual-build path.
+ */
+export function missionHasParticipantsForFaction(mission: Mission, faction: FactionID): boolean {
+  return (mission.participants?.[faction]?.length ?? 0) > 0;
+}
+
+/**
+ * True if the mission prescribes combat forces for any faction.
+ * Drives wizard clustering: participant-less missions render in the free-play cluster.
+ */
+export function missionHasAnyParticipants(mission: Mission): boolean {
+  return (
+    !!mission.participants &&
+    Object.values(mission.participants).some((arr) => Array.isArray(arr) && arr.length > 0)
+  );
+}

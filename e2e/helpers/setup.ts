@@ -126,13 +126,15 @@ export async function setupToPreparation(page: Page, opts?: { faction?: string; 
  */
 export async function setupGameSessionWithSquad(
   page: Page,
-  opts?: { unitOverrides?: Record<string, unknown>; extraUnits?: Record<string, unknown>[] }
+  opts?: { unitOverrides?: Record<string, unknown>; extraUnits?: Record<string, unknown>[]; missionId?: string; currentTurn?: number }
 ) {
   const config = {
     unitOverrides: opts?.unitOverrides || {},
     extraUnits: opts?.extraUnits || [],
+    missionId: opts?.missionId,
+    currentTurn: opts?.currentTurn ?? 1,
   };
-  await page.addInitScript((cfg: { unitOverrides: Record<string, unknown>; extraUnits: Record<string, unknown>[] }) => {
+  await page.addInitScript((cfg: { unitOverrides: Record<string, unknown>; extraUnits: Record<string, unknown>[]; missionId?: string; currentTurn?: number }) => {
     const soldiers = [
       { num: 1, rank: 2, speed: 5, range: 'D6', power: '2D6', melee: 3, props: [], armor: 2, image: '' },
       { num: 2, rank: 2, speed: 5, range: 'D12', power: '2D6', melee: 3, props: [], armor: 2, image: '' },
@@ -167,7 +169,8 @@ export async function setupGameSessionWithSquad(
       totalCost: 50,
       currentStep: 'battle',
       isInBattle: true,
-      currentTurn: 1,
+      currentTurn: cfg.currentTurn,
+      ...(cfg.missionId ? { missionId: cfg.missionId } : {}),
     };
     localStorage.clear();
     localStorage.setItem('bronepehota_army', JSON.stringify(army));

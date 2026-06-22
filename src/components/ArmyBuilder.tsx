@@ -11,7 +11,7 @@ import { getAllRulesVersions } from '@/lib/rules-registry';
 import { getAllSourcesWithCustom, getSourceWithCustom, isValidSourceWithCustom, getDefaultSource } from '@/lib/sources-registry';
 import { SourceSelector } from './rules/SourceSelector';
 import { MissionSelector } from './missions/MissionSelector';
-import { getMission, isFreePlay } from '@/lib/missions-registry';
+import { getMission, isFreePlay, missionHasParticipantsForFaction } from '@/lib/missions-registry';
 import { buildMissionArmy } from '@/lib/mission-army';
 import { getEncyclopediaFaction } from '@/lib/encyclopedia-registry';
 import { BattlePreparationScreen } from './preparation';
@@ -298,19 +298,22 @@ export default function ArmyBuilder({
                   if (!isFreePlay(missionId) && missionId && faction) {
                     const mission = getMission(missionId);
                     if (mission) {
-                      const built = buildMissionArmy(mission, faction, typedSquads, typedMachines);
-                      setArmy({
-                        ...army,
-                        units: built.units,
-                        totalCost: built.totalCost,
-                        pointBudget: built.totalCost,
-                        currentStep: 'unit-select',
-                      });
-                      setSetupStep('units');
-                      return;
+                      if (missionHasParticipantsForFaction(mission, faction)) {
+                        const built = buildMissionArmy(mission, faction, typedSquads, typedMachines);
+                        setArmy({
+                          ...army,
+                          units: built.units,
+                          totalCost: built.totalCost,
+                          pointBudget: built.totalCost,
+                          currentStep: 'unit-select',
+                        });
+                        setSetupStep('units');
+                        return;
+                      }
+                      // Real mission without prescribed forces → bring your own army (budget path)
                     }
                   }
-                  // Free play → go to budget, then build the army manually
+                  // Free play or participant-less mission → budget, then build manually
                   setSetupStep('budget');
                 }}
               />

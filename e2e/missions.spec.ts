@@ -7,6 +7,7 @@ import {
   selectMission,
   addFirstUnit,
   goToPreparation,
+  setupGameSessionWithSquad,
 } from './helpers/setup';
 
 test.describe('Миссии', () => {
@@ -18,7 +19,7 @@ test.describe('Миссии', () => {
     await page.goto('/encyclopedia/missions');
     await page.waitForLoadState('networkidle');
 
-    const grid = page.getByTestId('mission-grid');
+    const grid = page.getByTestId('mission-grid').first();
     await expect(grid).toBeVisible();
 
     const cards = page.locator('[data-testid^="mission-card-"]');
@@ -105,5 +106,70 @@ test.describe('Миссии', () => {
     await goToPreparation(page);
 
     await expect(page.getByTestId('mission-reference-banner')).toHaveCount(0);
+  });
+
+  test('мастер: миссия без участников ведёт к бюджету (своя армия)', async ({ page }) => {
+    await confirmRulesAndSource(page);
+    await selectFaction(page, 'polaris');
+    await selectMission(page, 'zahvat_tochek');
+
+    // Lands on the budget step (not auto-filled unit-select)
+    await expect(page.getByTestId('budget-next-button')).toBeVisible({ timeout: 5000 });
+
+    // missionId stored, army NOT auto-filled
+    const armyRaw = await page.evaluate(() => localStorage.getItem('bronepehota_army'));
+    const army = JSON.parse(armyRaw!);
+    expect(army.missionId).toBe('zahvat_tochek');
+    expect(army.units.length).toBe(0);
+  });
+
+  test('мастер: миссия без участников — в кластере свободной игры (без делителя)', async ({ page }) => {
+    await confirmRulesAndSource(page);
+    await selectFaction(page, 'polaris');
+
+    await expect(page.getByTestId('mission-confirm-button')).toBeVisible();
+    // The capture-hold card is visible next to free play
+    await expect(page.getByTestId('mission-card-zahvat_tochek')).toBeVisible();
+    // No campaign header for classic (it is not grouped in the wizard)
+    await expect(page.getByText('Кампания «Классические сценарии»')).toHaveCount(0);
+    // Цербер campaign header still present (grouping intact)
+    await expect(page.getByText('Кампания «Цербер»')).toBeVisible();
+  });
+
+  test('бой: попап завершения тура показывает лимит ходов миссии', async ({ page }) => {
+    await setupGameSessionWithSquad(page, { missionId: 'zahvat_tochek', currentTurn: 1 });
+
+    await expect(page.getByTestId('game-session')).toBeVisible({ timeout: 5000 });
+
+    // Open dock menu, then click "Новый тур" to trigger the confirmation popup
+    await page.getByTestId('dock-menu-toggle').click();
+    await page.waitForTimeout(200);
+    await page.getByTestId('new-turn-button').click();
+    await page.waitForTimeout(200);
+
+    // Popup should show "ИЗ 6" (zahvat_tochek has turnCount=6)
+    const popup = page.locator('.fixed.inset-0.z-\\[100\\]');
+    await expect(popup).toBeVisible();
+    await expect(popup).toContainText('ИЗ 6');
+  });
+
+  test('энциклопедия: список миссий включает захват точек под «Классические сценарии»', async ({ page }) => {
+    await page.goto('/encyclopedia/missions');
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.getByText('Кампания «Классические сценарии»')).toBeVisible();
+    await expect(page.getByTestId('mission-group-classic')).toBeVisible();
+    await expect(page.getByTestId('mission-card-zahvat_tochek')).toBeVisible();
+  });
+
+  test('энциклопедия: страница захвата точек показывает цели, правила и диаграмму', async ({ page }) => {
+    await page.goto('/encyclopedia/mission/zahvat_tochek');
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.locator('h1')).toContainText('Захват и удержание точек');
+    await expect(page.getByRole('heading', { name: 'Условия победы' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Особые правила' })).toBeVisible();
+    const diagram = page.locator('img[src*="/images/missions/zahvat_tochek/diagram"]');
+    await expect(diagram.first()).toBeVisible();
   });
 });

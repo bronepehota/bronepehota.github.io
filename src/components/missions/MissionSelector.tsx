@@ -10,6 +10,7 @@ import {
   getAllMissions,
   getAllCampaigns,
   FREE_PLAY_MISSION_ID,
+  missionHasAnyParticipants,
 } from '@/lib/missions-registry';
 import { FloatingContinueButton } from '../controls/FloatingContinueButton';
 
@@ -186,11 +187,21 @@ export function MissionSelector({ selectedMissionId, onSelect, onConfirm }: Miss
     detail: 'Сражение без специальной миссии: цели и ходы определяете сами.',
   };
 
-  // Group real missions by campaign (preserving campaign order; unknown → "Прочие")
+  // Participant-less missions cluster with free play (both = "bring your own army");
+  // the rest are grouped by campaign.
+  const freeBuildOptions = options.filter((o) => {
+    const m = missions.find((mm) => mm.id === o.id);
+    return m ? !missionHasAnyParticipants(m) : false;
+  });
+  const campaignOptions = options.filter(
+    (o) => !freeBuildOptions.some((f) => f.id === o.id),
+  );
+
+  // Group campaign missions by campaign (preserving campaign order; unknown → "Прочие")
   const groups = campaigns
-    .map((c) => ({ campaign: c, options: options.filter((o) => missions.find((m) => m.id === o.id)?.campaign === c.id) }))
+    .map((c) => ({ campaign: c, options: campaignOptions.filter((o) => missions.find((m) => m.id === o.id)?.campaign === c.id) }))
     .filter((g) => g.options.length > 0);
-  const uncategorized = options.filter(
+  const uncategorized = campaignOptions.filter(
     (o) => !campaigns.some((c) => missions.find((m) => m.id === o.id)?.campaign === c.id),
   );
 
@@ -204,7 +215,7 @@ export function MissionSelector({ selectedMissionId, onSelect, onConfirm }: Miss
           <div className="h-px flex-1 bg-slate-700/50" />
         </div>
 
-        {/* Free play — default, always first */}
+        {/* Free play + build-your-own-army scenarios — clustered, no divider between them */}
         <div className="space-y-2">
           <OptionCard
             option={freePlayOption}
@@ -214,6 +225,17 @@ export function MissionSelector({ selectedMissionId, onSelect, onConfirm }: Miss
             onClick={() => handleClick(FREE_PLAY_MISSION_ID)}
             onKeyDown={(e) => handleKeyDown(e, FREE_PLAY_MISSION_ID)}
           />
+          {freeBuildOptions.map((option) => (
+            <OptionCard
+              key={option.id}
+              option={option}
+              icon="target"
+              isSelected={effectiveSelected === option.id}
+              isExpanded={expandedId === option.id}
+              onClick={() => handleClick(option.id)}
+              onKeyDown={(e) => handleKeyDown(e, option.id)}
+            />
+          ))}
         </div>
 
         {/* Grouped missions */}
