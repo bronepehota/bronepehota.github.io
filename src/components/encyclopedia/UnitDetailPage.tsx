@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 import { ModifierIcon } from '@/components/editor/ModifierIcons';
 import { SoldierImages } from './UnitDetail/SoldierImages';
 import { MachineImages } from './UnitDetail/MachineImages';
-import PaintedExamples from './PaintedExamples';
+import { SQUAD_GROUP_IMAGE, getPhotoCredit } from '@/lib/painted-images';
 import { UnitLore } from './UnitDetail/UnitLore';
 import { SourceAvailability } from './SourceAvailability';
 import { FactionLogo } from '@/components/FactionLogo';
@@ -62,6 +62,8 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
     badge: factionBadges[unit.faction] || '',
   };
   const FactionIcon = faction.icon;
+  // Wide group photo shown as a hero banner at the top (only some squads have one)
+  const groupPhoto = SQUAD_GROUP_IMAGE[unit.id];
 
   useEffect(() => {
     setIsLoaded(true);
@@ -99,9 +101,59 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
             </Link>
 
             {/* Title section */}
-            <div className="flex flex-col md:flex-row gap-6 items-start">
-              {/* Unit image */}
-              {unit.image && (
+            <div className={cn('flex gap-6 items-start', groupPhoto ? 'flex-col' : 'flex-col md:flex-row')}>
+              {/* Image: wide group-photo hero for some squads, else 3:4 portrait */}
+              {groupPhoto ? (
+                <figure
+                  className={cn(
+                    'relative aspect-[3/2] w-full',
+                    'folded-paper military-corners overflow-hidden',
+                    'fade-in-up opacity-0',
+                    isLoaded && 'opacity-100'
+                  )}
+                  style={{ animationFillMode: 'forwards', animationDelay: '0.2s' }}
+                >
+                  <GitHubPagesImage
+                    src={groupPhoto}
+                    alt={`${unit.name} — отряд в сборе`}
+                    fill
+                    className="object-cover object-center"
+                  />
+                  {/* Faction badge - logo (or text fallback for mercenaries) */}
+                  <div className="absolute top-3 left-3">
+                    <div
+                      className="relative w-11 h-11 flex items-center justify-center backdrop-blur-md rounded-sm overflow-hidden"
+                      style={{
+                        backgroundColor: `${factionColors.primary}33`,
+                        border: `1px solid ${factionColors.primary}`,
+                      }}
+                    >
+                      {detailLogo ? (
+                        <div className="absolute inset-1">
+                          <GitHubPagesImage src={detailLogo} alt={unit.faction} fill className="object-contain" />
+                        </div>
+                      ) : (
+                        <span className="font-ibm-mono text-xs font-bold text-white tracking-wider">
+                          {faction.badge}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  {/* Type indicator */}
+                  <div className="absolute top-3 right-3">
+                    <div className="px-3 py-1 backdrop-blur-sm bg-military-amber/20 border border-military-amber/40 rounded-sm">
+                      <span className="text-sm">
+                        {unit.type === 'squad' ? '◆' : '▲'}
+                      </span>
+                    </div>
+                  </div>
+                  <figcaption className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-military-dark/90 to-transparent">
+                    <span className="font-ibm-mono text-[10px] text-military-amber/90 uppercase tracking-wider">
+                      ◆ Отряд в сборе
+                    </span>
+                  </figcaption>
+                </figure>
+              ) : unit.image && (
                 <div
                   className={cn(
                     'relative aspect-[3/4] w-full md:w-64 lg:w-80',
@@ -156,7 +208,7 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
               )}
 
               {/* Info section */}
-              <div className="flex-1">
+              <div className={cn('flex-1', groupPhoto && 'w-full')}>
                 <div
                   className={cn(
                     'fade-in-up opacity-0',
@@ -221,6 +273,29 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
                       )}
                     </div>
                   )}
+
+                  {/* Photo credit — per-squad source, only for units with a group photo */}
+                  {groupPhoto && (() => {
+                    const c = getPhotoCredit(unit.id);
+                    return (
+                      <div className="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2">
+                        <span className="font-ibm-mono text-[10px] text-military-steel/60 uppercase tracking-wider">
+                          Источник фото:
+                        </span>
+                        <a
+                          href={c.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 rounded-sm border border-military-steel/20 bg-military-charcoal/40 px-2 py-1 hover:border-military-amber/50 transition-colors"
+                        >
+                          <GitHubPagesImage src={c.logo} alt={c.name} width={28} height={28} className="rounded-sm" />
+                          <span className="font-ibm-mono text-[10px] text-military-sand uppercase tracking-wide">
+                            {c.name}
+                          </span>
+                        </a>
+                      </div>
+                    );
+                  })()}
 
                   {/* Divider */}
                   <div className="military-divider max-w-xs mb-6" />
@@ -328,17 +403,6 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
               style={{ animationFillMode: 'forwards', animationDelay: '0.85s' }}
             >
               <MachineImages unit={unit} />
-            </section>
-
-            {/* Painted Examples section */}
-            <section
-              className={cn(
-                'fade-in-up opacity-0',
-                isLoaded && 'opacity-100'
-              )}
-              style={{ animationFillMode: 'forwards', animationDelay: '0.95s' }}
-            >
-              <PaintedExamples unit={unit} />
             </section>
           </div>
         </main>
