@@ -32,17 +32,43 @@ export default function HeroSection({ className }: HeroSectionProps) {
         className
       )}
       style={{
-        backgroundImage: `url('${BASE_PATH}/images/hero-art.jpg')`,
+        backgroundImage: `url('${BASE_PATH}/images/landing-hero.jpg')`,
         backgroundSize: 'cover',
-        backgroundPosition: 'center top',
+        backgroundPosition: 'center 30%',
         backgroundRepeat: 'no-repeat',
       }}
     >
-      {/* Dark overlay for readability */}
-      <div className="absolute inset-0 bg-gradient-to-b from-military-dark/95 via-military-charcoal/90 to-military-dark/95" />
+      {/* Mild global darkening — the battlefield stays visible (was 90-95%, drowned the image) */}
+      <div className="absolute inset-0 bg-military-dark/55" />
+
+      {/* Warm fire glow from lower-left (matches the promo's fire) + faint cool top-right */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            'radial-gradient(62% 55% at 12% 82%, rgba(234,88,12,0.32), transparent 62%), radial-gradient(45% 40% at 88% 16%, rgba(202,166,74,0.12), transparent 60%)',
+        }}
+      />
+
+      {/* Legibility scrim behind the centered text block */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div
+          className="w-full max-w-3xl h-[72%]"
+          style={{
+            background:
+              'radial-gradient(ellipse at center, rgba(12,10,9,0.80) 0%, rgba(12,10,9,0.38) 46%, transparent 72%)',
+          }}
+        />
+      </div>
+
+      {/* Vignette — pull focus to the center, darken edges */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{ background: 'radial-gradient(ellipse at center, transparent 36%, rgba(12,10,9,0.62) 100%)' }}
+      />
 
       {/* Film grain overlay */}
-      <div className="absolute inset-0 film-grain opacity-20 pointer-events-none" />
+      <div className="absolute inset-0 film-grain opacity-15 pointer-events-none" />
 
       {/* HUD Overlay */}
       <HUDOverlay />
@@ -56,6 +82,7 @@ export default function HeroSection({ className }: HeroSectionProps) {
             // Tighter responsive sizes: 2xl -> 4xl -> 6xl
             'text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl',
             'military-text-gradient',
+            'drop-shadow-[0_2px_14px_rgba(0,0,0,0.9)]',
             'mb-1 md:mb-2 lg:mb-3',
             'tracking-wide transition-all duration-700',
             showText ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
