@@ -7,7 +7,6 @@ import { cn } from '@/lib/utils';
 import { useBottomSheet } from '@/hooks/useBottomSheet';
 import { SoldierImages } from '@/components/encyclopedia/UnitDetail/SoldierImages';
 import { MachineImages } from '@/components/encyclopedia/UnitDetail/MachineImages';
-import PaintedExamples from '@/components/encyclopedia/PaintedExamples';
 import Image from 'next/image';
 import { Shield, Zap, Skull } from 'lucide-react';
 import { getFactionColors } from '@/lib/faction-colors';
@@ -253,9 +252,6 @@ export function EncyclopediaModal({
 
           {/* Machine Images section */}
           <MachineImages unit={unit} />
-
-          {/* Painted Examples section */}
-          <PaintedExamples unit={unit} />
         </div>
       </div>
     </div>

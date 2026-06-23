@@ -28,7 +28,8 @@ export function UnitCard({ unit }: UnitCardProps) {
   // Get cost from first source (or default to 0)
   const cost = unit.sources[0]?.cost || 0;
 
-  // Get display image: unit image, or placeholder
+  // Get display image: per-soldier card art (the wide group photo is too wide for
+  // the 3:4 card — it crops the side figures; it's shown as the hero on the detail page).
   const displayImage = unit.image || '/images/placeholder.png';
 
   // Faction logo (if available); mercenaries falls back to a text badge
