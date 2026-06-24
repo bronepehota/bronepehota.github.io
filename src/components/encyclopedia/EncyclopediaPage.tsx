@@ -76,7 +76,7 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
 
       <div className="relative z-10">
         {/* Hero Header */}
-        <header className="relative py-6 md:py-20 px-4 overflow-hidden">
+        <header className="relative py-6 md:py-12 px-4 overflow-hidden">
           {/* Animated scanline */}
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-military-rust/60 to-transparent animate-pulse" />
 
@@ -112,7 +112,7 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
               <h1
                 className={cn(
                   'font-russo font-black military-text-gradient',
-                  'text-2xl sm:text-4xl md:text-6xl lg:text-7xl',
+                  'text-2xl sm:text-3xl md:text-4xl lg:text-5xl',
                   'mb-4 tracking-wide',
                   'fade-in-up opacity-0',
                   isLoaded && 'opacity-100'
