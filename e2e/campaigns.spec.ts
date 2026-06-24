@@ -18,7 +18,7 @@ test.describe('Хроники войн', () => {
     await page.waitForLoadState('networkidle');
 
     // detail page renders the title and rendered body
-    await expect(page.getByRole('heading', { name: 'Хало и Вахо 2' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Корпоративные войны' })).toBeVisible();
     // cross-link to an encyclopedia unit is present
     await expect(page.locator('[href*="/encyclopedia/unit/"]').first()).toBeVisible();
     // missions block rendered
