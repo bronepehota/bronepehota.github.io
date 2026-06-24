@@ -2,6 +2,18 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getAllCampaigns, getCampaign } from '@/lib/campaigns';
 
+const FACTION_COLORS: Record<string, string> = {
+  polaris: '#DC2626',
+  protectorate: '#06b6d4',
+  mercenaries: '#EAB308',
+};
+const FACTION_LABELS: Record<string, string> = {
+  polaris: 'ИМП',
+  protectorate: 'ПРОТ',
+  mercenaries: 'НАЁМ',
+};
+const factionOf = (id: string) => id.split('_')[0];
+
 export function generateStaticParams() {
   return getAllCampaigns().map((c) => ({ slug: c.slug }));
 }
@@ -15,65 +27,140 @@ export default async function CampaignDetailPage({
   if (!campaign) notFound();
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100 px-4 py-8">
-      <article className="max-w-3xl mx-auto">
-        <Link
-          href="/campaigns"
-          className="text-sm text-hud-green mb-4 inline-block"
-        >
-          ← Хроники войн
-        </Link>
+    <main className="min-h-screen bg-military-dark relative overflow-hidden">
+      {/* Background layers — shared with the encyclopedia */}
+      <div className="fixed inset-0 diagonal-stripes opacity-30 pointer-events-none" />
+      <div className="fixed inset-0 film-grain-overlay pointer-events-none" />
+      <div
+        className="fixed inset-0 pointer-events-none"
+        style={{
+          background:
+            'radial-gradient(ellipse at center, transparent 0%, rgba(12, 10, 9, 0.8) 100%)',
+        }}
+      />
 
-        <h1 className="font-russo text-2xl md:text-3xl text-military-amber">
-          {campaign.title}
-        </h1>
-        {campaign.subtitle && (
-          <p className="text-slate-400 mt-1">{campaign.subtitle}</p>
-        )}
-        {campaign.era && (
-          <p className="text-xs text-hud-green font-ibm-mono mt-2">
-            Эпоха: {campaign.era}
-          </p>
-        )}
+      <article className="relative z-10">
+        {/* Header */}
+        <header className="relative py-8 md:py-14 px-4 overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-military-rust/60 to-transparent animate-pulse" />
+          <div className="max-w-3xl mx-auto">
+            <Link
+              href="/campaigns"
+              className="fade-in-up inline-flex items-center gap-2 font-ibm-mono text-xs md:text-sm text-military-rust/60 hover:text-military-amber transition-colors tracking-widest uppercase mb-6"
+              style={{ animationDelay: '0.1s', animationFillMode: 'both' }}
+            >
+              <span className="text-lg">←</span>
+              <span>Хроники войн</span>
+            </Link>
+
+            <div
+              className="fade-in-up"
+              style={{ animationDelay: '0.2s', animationFillMode: 'both' }}
+            >
+              <div className="flex flex-wrap items-center gap-3 mb-2">
+                {campaign.era && (
+                  <span className="font-ibm-mono text-xs text-hud-green tracking-[0.3em]">
+                    ЭПОХА {campaign.era}
+                  </span>
+                )}
+                {campaign.factions?.map((f) => (
+                  <span
+                    key={f}
+                    className="inline-flex items-center gap-1 font-ibm-mono text-[10px] tracking-widest text-military-taupe"
+                  >
+                    <span
+                      className="w-2 h-2 rounded-full"
+                      style={{ background: FACTION_COLORS[f] }}
+                    />
+                    {FACTION_LABELS[f] ?? f}
+                  </span>
+                ))}
+              </div>
+              <h1 className="font-russo font-black military-text-gradient text-3xl md:text-4xl tracking-wide">
+                {campaign.title}
+              </h1>
+              {campaign.subtitle && (
+                <p className="text-military-taupe mt-2">{campaign.subtitle}</p>
+              )}
+            </div>
+          </div>
+        </header>
 
         {/* Rendered Markdown body. Content is first-party/trusted (authored .md). */}
-        <div
-          className="prose prose-invert prose-headings:text-military-amber prose-a:text-hud-green max-w-none mt-6"
-          dangerouslySetInnerHTML={{ __html: campaign.bodyHtml }}
-        />
+        <section className="px-4 pb-10">
+          <div
+            className="fade-in-up max-w-3xl mx-auto prose prose-invert max-w-none prose-headings:font-russo prose-headings:text-military-amber prose-h2:mt-8 prose-h2:tracking-wide prose-p:text-military-sand/90 prose-strong:text-military-sand prose-a:text-hud-green"
+            style={{ animationDelay: '0.3s', animationFillMode: 'both' }}
+            dangerouslySetInnerHTML={{ __html: campaign.bodyHtml }}
+          />
+        </section>
 
+        {/* Participants — link out to encyclopedia unit pages */}
         {campaign.units && campaign.units.length > 0 && (
-          <section className="mt-10">
-            <h2 className="font-russo text-lg text-slate-200 mb-3">Участники</h2>
-            <ul className="flex flex-wrap gap-2">
-              {campaign.units.map((u) => (
-                <li key={u.id}>
-                  <Link
-                    href={`/encyclopedia/unit/${u.id}`}
-                    className="inline-block text-sm px-3 py-1.5 rounded-sm border border-slate-700/50 hover:border-military-amber/50 transition-colors"
-                  >
-                    {u.role}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+          <section className="px-4 pb-6">
+            <div className="max-w-3xl mx-auto">
+              <h2
+                className="fade-in-up font-russo text-sm tracking-[0.3em] text-military-rust uppercase mb-4"
+                style={{ animationDelay: '0.4s', animationFillMode: 'both' }}
+              >
+                Участники
+              </h2>
+              <ul
+                className="fade-in-up flex flex-wrap gap-2"
+                style={{ animationDelay: '0.45s', animationFillMode: 'both' }}
+              >
+                {campaign.units.map((u) => {
+                  const f = factionOf(u.id);
+                  return (
+                    <li key={u.id}>
+                      <Link
+                        href={`/encyclopedia/unit/${u.id}`}
+                        className="folded-paper group inline-flex items-center gap-2 px-3 py-2 text-sm text-military-sand hover:text-military-amber transition-colors"
+                      >
+                        <span
+                          className="w-2 h-2 rounded-full"
+                          style={{ background: FACTION_COLORS[f] ?? '#A8A29E' }}
+                        />
+                        {u.role}
+                        <span className="font-ibm-mono text-[10px] text-military-taupe group-hover:text-military-amber">
+                          ↗
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
           </section>
         )}
 
+        {/* Missions */}
         {campaign.missions && campaign.missions.length > 0 && (
-          <section className="mt-8">
-            <h2 className="font-russo text-lg text-slate-200 mb-3">Миссии</h2>
-            <ul className="grid sm:grid-cols-2 gap-2">
-              {campaign.missions.map((m, i) => (
-                <li
-                  key={i}
-                  className="border border-slate-800 rounded-sm p-3"
-                >
-                  <div className="font-russo text-military-amber">{m.name}</div>
-                  <div className="text-xs text-slate-400">Коробка: {m.box}</div>
-                </li>
-              ))}
-            </ul>
+          <section className="px-4 pb-16">
+            <div className="max-w-3xl mx-auto">
+              <h2
+                className="fade-in-up font-russo text-sm tracking-[0.3em] text-military-rust uppercase mb-4 mt-10"
+                style={{ animationDelay: '0.5s', animationFillMode: 'both' }}
+              >
+                Миссии
+              </h2>
+              <ul
+                className="fade-in-up grid sm:grid-cols-2 gap-3"
+                style={{ animationDelay: '0.55s', animationFillMode: 'both' }}
+              >
+                {campaign.missions.map((m, i) => (
+                  <li key={i} className="folded-paper military-corners p-4">
+                    <div className="font-ibm-mono text-[10px] text-hud-green tracking-widest mb-1">
+                      МИССИЯ {i + 1}
+                    </div>
+                    <div className="font-russo text-military-amber">{m.name}</div>
+                    <div className="text-xs text-military-taupe mt-1">
+                      Коробка: {m.box}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </section>
         )}
       </article>

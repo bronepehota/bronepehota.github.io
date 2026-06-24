@@ -81,21 +81,31 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-military-rust/60 to-transparent animate-pulse" />
 
           <div className="max-w-7xl mx-auto">
-            {/* Back link */}
-            <Link
-              href="/app"
+            {/* Top nav row: back to app + link to Chronicles */}
+            <div
               className={cn(
-                'inline-flex items-center gap-2 font-ibm-mono text-xs md:text-sm',
-                'text-military-rust/60 hover:text-military-amber transition-colors',
-                'tracking-widest uppercase mb-4 md:mb-8',
+                'flex items-center justify-between mb-4 md:mb-8',
                 'fade-in-up opacity-0',
                 isLoaded && 'opacity-100'
               )}
               style={{ animationFillMode: 'forwards', animationDelay: '0.1s' }}
             >
-              <span className="text-lg">←</span>
-              <span>В приложение</span>
-            </Link>
+              <Link
+                href="/app"
+                className="inline-flex items-center gap-2 font-ibm-mono text-xs md:text-sm text-military-rust/60 hover:text-military-amber transition-colors tracking-widest uppercase"
+              >
+                <span className="text-lg">←</span>
+                <span>В приложение</span>
+              </Link>
+              <Link
+                href="/campaigns"
+                data-testid="encyclopedia-campaigns-link"
+                className="inline-flex items-center gap-2 font-ibm-mono text-xs md:text-sm text-military-amber/70 hover:text-military-amber transition-colors tracking-widest uppercase"
+              >
+                <span>Хроники войн</span>
+                <span className="text-lg">→</span>
+              </Link>
+            </div>
 
             {/* Main title */}
             <div className="text-center mb-4 md:mb-10">
