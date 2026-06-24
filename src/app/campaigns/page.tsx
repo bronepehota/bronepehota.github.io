@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { getAllCampaigns } from '@/lib/campaigns';
 
 export default async function CampaignsPage() {
-  const campaigns = await getAllCampaigns();
+  const campaigns = getAllCampaigns();
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100 px-4 py-8">
