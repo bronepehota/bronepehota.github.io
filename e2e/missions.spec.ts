@@ -172,4 +172,15 @@ test.describe('Миссии', () => {
     const diagram = page.locator('img[src*="/images/missions/zahvat_tochek/diagram"]');
     await expect(diagram.first()).toBeVisible();
   });
+
+  test('энциклопедия: миссия «Скрытый враг» (наёмники vs протекторат) открывается', async ({ page }) => {
+    await page.goto('/encyclopedia/mission/skrytyj_vrag');
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.locator('h1')).toContainText('Скрытый враг');
+    await expect(page.getByText('Условия победы')).toBeVisible();
+    await expect(page.getByText('Особые правила')).toBeVisible();
+    // participant roster present (protectorate side links rendered)
+    await expect(page.getByRole('link', { name: 'Войска Рутении' })).toBeVisible();
+  });
 });

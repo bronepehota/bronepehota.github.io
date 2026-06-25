@@ -32,4 +32,16 @@ test.describe('Хроники войн', () => {
     await page.waitForLoadState('networkidle');
     await expect(page).toHaveURL(/\/campaigns$/);
   });
+
+  test('в Хрониках видна операция «Скрытый враг»', async ({ page }) => {
+    await page.goto('/campaigns');
+    await page.waitForLoadState('networkidle');
+
+    const card = page.locator('[data-testid="campaign-card"]', { hasText: 'Скрытый враг' }).first();
+    await expect(card).toBeVisible();
+    await card.click();
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.getByRole('heading', { name: 'Операция «Скрытый враг»' })).toBeVisible();
+  });
 });
