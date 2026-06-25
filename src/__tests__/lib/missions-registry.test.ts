@@ -222,11 +222,17 @@ describe('missions-registry', () => {
       expect(m!.objectives.protectorate).toBeTruthy();
     });
 
-    it('maps the canon machines to participants', () => {
+    it('has the correct participant roster', () => {
       const m = getMission('skrytyj_vrag');
+      // mercenaries: Банда Маркуса + Рейдеры + имперские багги (Хантер)
       expect(m!.participants?.mercenaries?.some((u) => u.unitId === 'hunter')).toBe(true);
-      expect(m!.participants?.protectorate?.some((u) => u.unitId === 'salamander')).toBe(true);
-      expect(m!.participants?.protectorate?.some((u) => u.unitId === 'puma')).toBe(true);
+      // protectorate: only Рутенийская гвардия + рота «Валькирия» (Felicia spetsnaz)
+      const prot = m!.participants?.protectorate ?? [];
+      expect(prot.length).toBe(2);
+      expect(prot.some((u) => u.unitId === 'protectorate_ruteniyskaya_gvardiya')).toBe(true);
+      expect(prot.some((u) => u.unitId === 'protectorate_spetsnaz_planety_felitsiya')).toBe(true);
+      expect(prot.some((u) => u.unitId === 'salamander')).toBe(false);
+      expect(prot.some((u) => u.unitId === 'puma')).toBe(false);
     });
 
     it('exposes the ruthenium campaign', () => {

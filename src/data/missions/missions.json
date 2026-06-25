@@ -343,11 +343,8 @@
         { "name": "Имперские багги (Хантер)", "type": "machine", "unitId": "hunter" }
       ],
       "protectorate": [
-        { "name": "Войска Рутении", "type": "squad", "unitId": "protectorate_voyska_planety_ruteniya" },
         { "name": "Рутенийская гвардия", "type": "squad", "unitId": "protectorate_ruteniyskaya_gvardiya" },
-        { "name": "Рота «Валькирия» (спецназ Фелиции)", "type": "squad", "unitId": "protectorate_spetsnaz_planety_felitsiya" },
-        { "name": "Фелицианские шагающие танки (Саламандра)", "type": "machine", "unitId": "salamander" },
-        { "name": "Шагающие танкетки (Пума)", "type": "machine", "unitId": "puma" }
+        { "name": "Рота «Валькирия» (спецназ Фелиции)", "type": "squad", "unitId": "protectorate_spetsnaz_planety_felitsiya" }
       ]
     }
   }
