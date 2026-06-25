@@ -335,7 +335,7 @@
     "specialRules": [
       "Профессор Филипп Реббит должен остаться жив — он ценнее любых данных. Игрок, чей солдат «уничтожит» профессора, сразу считается проигравшим (каноничная ирония операции: в «Скрытом враге» профессора убила именно защитница — полковник Марта Керри)."
     ],
-    "diagramImage": "/images/missions/skrytyj_vrag/diagram.png",
+    "diagramImage": "/images/missions/skrytyj_vrag/diagram.jpg",
     "participants": {
       "mercenaries": [
         { "name": "Банда пиратов Маркуса", "type": "squad", "unitId": "mercenaries_piraty_markusa_novye" },

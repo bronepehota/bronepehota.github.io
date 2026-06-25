@@ -31,12 +31,7 @@ export default async function CampaignDetailPage({
 
   return (
     <main className="min-h-screen bg-military-dark relative overflow-hidden">
-      {/* Atmospheric chronicle background (abstract military image, faint) */}
-      <div
-        className="fixed inset-0 bg-cover bg-center opacity-[0.08] pointer-events-none"
-        style={{ backgroundImage: `url(${CHRONICLE_BG})` }}
-      />
-      {/* Background layers — shared with the encyclopedia */}
+      {/* Background layers (content area) — shared with the encyclopedia */}
       <div className="fixed inset-0 diagonal-stripes opacity-30 pointer-events-none" />
       <div className="fixed inset-0 film-grain-overlay pointer-events-none" />
       <div
@@ -50,8 +45,12 @@ export default async function CampaignDetailPage({
       <article className="relative z-10">
         {/* Header */}
         <header className="relative py-8 md:py-14 px-4 overflow-hidden">
+          {/* Battle hero backdrop (visible), fading into the dark content area */}
+          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${CHRONICLE_BG})` }} />
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(12,10,9,0.5) 0%, rgba(12,10,9,0.4) 60%, rgba(12,10,9,0.95) 100%)' }} />
+          <div className="absolute inset-0 diagonal-stripes opacity-20" />
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-military-rust/60 to-transparent animate-pulse" />
-          <div className="max-w-3xl mx-auto">
+          <div className="relative z-10 max-w-3xl mx-auto">
             <Link
               href="/campaigns"
               className="fade-in-up inline-flex items-center gap-2 font-ibm-mono text-xs md:text-sm text-military-rust/60 hover:text-military-amber transition-colors tracking-widest uppercase mb-6"
