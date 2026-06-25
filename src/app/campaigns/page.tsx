@@ -1,6 +1,9 @@
 import Link from 'next/link';
 import { getAllCampaigns } from '@/lib/campaigns';
 
+const BASE_PATH = process.env.NEXT_PUBLIC_GITHUB_PAGES === 'true' ? '/bronepehota' : '';
+const CHRONICLE_BG = `${BASE_PATH}/images/campaigns/chronicle-bg.jpg`;
+
 const FACTION_COLORS: Record<string, string> = {
   polaris: '#DC2626',
   protectorate: '#06b6d4',
@@ -17,6 +20,11 @@ export default async function CampaignsPage() {
 
   return (
     <main className="min-h-screen bg-military-dark relative overflow-hidden">
+      {/* Atmospheric chronicle background (abstract military image, faint) */}
+      <div
+        className="fixed inset-0 bg-cover bg-center opacity-[0.08] pointer-events-none"
+        style={{ backgroundImage: `url(${CHRONICLE_BG})` }}
+      />
       {/* Background layers — shared with the encyclopedia */}
       <div className="fixed inset-0 diagonal-stripes opacity-30 pointer-events-none" />
       <div className="fixed inset-0 film-grain-overlay pointer-events-none" />
