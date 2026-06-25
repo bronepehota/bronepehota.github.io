@@ -210,4 +210,27 @@ describe('missions-registry', () => {
       expect(ids).toContain('zahvat_tochek');
     });
   });
+
+  describe('skrytyj_vrag mission', () => {
+    it('exists in the ruthenium campaign as mercenaries vs protectorate', () => {
+      const m = getMission('skrytyj_vrag');
+      expect(m).toBeDefined();
+      expect(m!.campaign).toBe('ruthenium');
+      expect(m!.factions).toContain('mercenaries');
+      expect(m!.factions).toContain('protectorate');
+      expect(m!.objectives.mercenaries).toBeTruthy();
+      expect(m!.objectives.protectorate).toBeTruthy();
+    });
+
+    it('maps the canon machines to participants', () => {
+      const m = getMission('skrytyj_vrag');
+      expect(m!.participants?.mercenaries?.some((u) => u.unitId === 'hunter')).toBe(true);
+      expect(m!.participants?.protectorate?.some((u) => u.unitId === 'salamander')).toBe(true);
+      expect(m!.participants?.protectorate?.some((u) => u.unitId === 'puma')).toBe(true);
+    });
+
+    it('exposes the ruthenium campaign', () => {
+      expect(getAllCampaigns().some((c) => c.id === 'ruthenium')).toBe(true);
+    });
+  });
 });
