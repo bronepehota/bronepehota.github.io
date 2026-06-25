@@ -182,5 +182,7 @@ test.describe('Миссии', () => {
     await expect(page.getByText('Особые правила')).toBeVisible();
     // participant roster present (protectorate side links rendered)
     await expect(page.getByRole('link', { name: 'Войска Рутении' })).toBeVisible();
+    // mercenaries-side roster renders (guard against the hardcoded-faction-loop regression)
+    await expect(page.getByRole('link', { name: 'Рейдеры Пыльной Зоны' })).toBeVisible();
   });
 });

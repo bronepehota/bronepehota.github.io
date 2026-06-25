@@ -244,7 +244,7 @@ export default function MissionDetailPage({ mission, campaign }: MissionDetailPa
             {mission.participants && Object.keys(mission.participants).length > 0 && (
               <Section title="Состав сторон" icon={Users} delay="0.6s" isLoaded={isLoaded}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {(['polaris', 'protectorate'] as FactionID[])
+                  {(Object.keys(mission.participants) as FactionID[])
                     .filter((f) => (mission.participants?.[f]?.length ?? 0) > 0)
                     .map((faction) => {
                       const color = getFactionColors(faction);
