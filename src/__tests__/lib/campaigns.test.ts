@@ -22,4 +22,19 @@ describe('campaigns loader', () => {
     const all = getAllCampaigns();
     expect(all[0].slug).toBe('korporativnye-voyny');
   });
+
+  it('discovers the Скрытый враг chronicle', () => {
+    const sv = getAllCampaigns().find((c) => c.slug === 'skrytyj-vrag');
+    expect(sv).toBeDefined();
+    expect(sv!.title).toBe('Операция «Скрытый враг»');
+  });
+
+  it('Скрытый враг has a units roster and a mission', () => {
+    const sv = getAllCampaigns().find((c) => c.slug === 'skrytyj-vrag')!;
+    expect(sv.units?.length).toBeGreaterThan(0);
+    expect(
+      sv.units?.some((u) => u.id === 'mercenaries_piraty_markusa_novye')
+    ).toBe(true);
+    expect(sv.missions?.length).toBe(1);
+  });
 });
