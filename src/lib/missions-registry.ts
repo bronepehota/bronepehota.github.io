@@ -16,7 +16,7 @@ import type { FactionID } from './types';
 export const FREE_PLAY_MISSION_ID = '__free_play__';
 
 // Type assertions for JSON imports
-const missions: Mission[] = missionsJson as Mission[];
+const missions: Mission[] = missionsJson as unknown as Mission[];
 const campaigns: Campaign[] = campaignsJson as Campaign[];
 
 /** All missions, sorted ascending by `order`. */

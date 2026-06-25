@@ -210,4 +210,33 @@ describe('missions-registry', () => {
       expect(ids).toContain('zahvat_tochek');
     });
   });
+
+  describe('skrytyj_vrag mission', () => {
+    it('exists in the ruthenium campaign as mercenaries vs protectorate', () => {
+      const m = getMission('skrytyj_vrag');
+      expect(m).toBeDefined();
+      expect(m!.campaign).toBe('ruthenium');
+      expect(m!.factions).toContain('mercenaries');
+      expect(m!.factions).toContain('protectorate');
+      expect(m!.objectives.mercenaries).toBeTruthy();
+      expect(m!.objectives.protectorate).toBeTruthy();
+    });
+
+    it('has the correct participant roster', () => {
+      const m = getMission('skrytyj_vrag');
+      // mercenaries: Банда Маркуса + Рейдеры + имперские багги (Хантер)
+      expect(m!.participants?.mercenaries?.some((u) => u.unitId === 'hunter')).toBe(true);
+      // protectorate: only Рутенийская гвардия + рота «Валькирия» (Felicia spetsnaz)
+      const prot = m!.participants?.protectorate ?? [];
+      expect(prot.length).toBe(2);
+      expect(prot.some((u) => u.unitId === 'protectorate_ruteniyskaya_gvardiya')).toBe(true);
+      expect(prot.some((u) => u.unitId === 'protectorate_spetsnaz_planety_felitsiya')).toBe(true);
+      expect(prot.some((u) => u.unitId === 'salamander')).toBe(false);
+      expect(prot.some((u) => u.unitId === 'puma')).toBe(false);
+    });
+
+    it('exposes the ruthenium campaign', () => {
+      expect(getAllCampaigns().some((c) => c.id === 'ruthenium')).toBe(true);
+    });
+  });
 });

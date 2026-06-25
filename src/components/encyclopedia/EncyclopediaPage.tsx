@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { EncyclopediaUnit } from '@/lib/encyclopedia-registry';
 import { FactionID } from '@/lib/types';
-import { Search } from 'lucide-react';
+import { Search, SlidersHorizontal } from 'lucide-react';
 import { UnitCard } from './UnitCard';
 import { EncyclopediaTabs } from './EncyclopediaTabs';
 import { cn } from '@/lib/utils';
@@ -33,6 +33,9 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
   const [selectedType, setSelectedType] = useState<'all' | 'squad' | 'machine'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoaded, setIsLoaded] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const activeFilterCount =
+    (selectedFaction !== 'all' ? 1 : 0) + (selectedType !== 'all' ? 1 : 0);
 
   useEffect(() => {
     setIsLoaded(true);
@@ -76,33 +79,43 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
 
       <div className="relative z-10">
         {/* Hero Header */}
-        <header className="relative py-6 md:py-20 px-4 overflow-hidden">
+        <header className="relative py-6 md:py-12 px-4 overflow-hidden">
           {/* Animated scanline */}
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-military-rust/60 to-transparent animate-pulse" />
 
           <div className="max-w-7xl mx-auto">
-            {/* Back link */}
-            <Link
-              href="/app"
+            {/* Top nav row: back to app + link to Chronicles */}
+            <div
               className={cn(
-                'inline-flex items-center gap-2 font-ibm-mono text-xs md:text-sm',
-                'text-military-rust/60 hover:text-military-amber transition-colors',
-                'tracking-widest uppercase mb-4 md:mb-8',
+                'flex items-center justify-between mb-4 md:mb-8',
                 'fade-in-up opacity-0',
                 isLoaded && 'opacity-100'
               )}
               style={{ animationFillMode: 'forwards', animationDelay: '0.1s' }}
             >
-              <span className="text-lg">←</span>
-              <span>В приложение</span>
-            </Link>
+              <Link
+                href="/app"
+                className="inline-flex items-center gap-2 font-ibm-mono text-xs md:text-sm text-military-rust/60 hover:text-military-amber transition-colors tracking-widest uppercase"
+              >
+                <span className="text-lg">←</span>
+                <span>В приложение</span>
+              </Link>
+              <Link
+                href="/campaigns"
+                data-testid="encyclopedia-campaigns-link"
+                className="inline-flex items-center gap-2 font-ibm-mono text-xs md:text-sm text-military-amber/70 hover:text-military-amber transition-colors tracking-widest uppercase"
+              >
+                <span>Хроники войн</span>
+                <span className="text-lg">→</span>
+              </Link>
+            </div>
 
             {/* Main title */}
             <div className="text-center mb-4 md:mb-10">
               <h1
                 className={cn(
                   'font-russo font-black military-text-gradient',
-                  'text-2xl sm:text-4xl md:text-6xl lg:text-7xl',
+                  'text-2xl sm:text-3xl md:text-4xl lg:text-5xl',
                   'mb-4 tracking-wide',
                   'fade-in-up opacity-0',
                   isLoaded && 'opacity-100'
@@ -170,8 +183,32 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
                 </div>
               </div>
 
+              {/* Mobile filters toggle (hidden on md+, where panels stay open) */}
+              <button
+                type="button"
+                onClick={() => setShowFilters((v) => !v)}
+                aria-expanded={showFilters}
+                className="md:hidden mb-4 w-full min-h-[44px] folded-paper inline-flex items-center gap-2 px-4 font-ibm-mono text-xs uppercase tracking-widest text-military-amber"
+              >
+                <SlidersHorizontal className="w-4 h-4" />
+                <span>Фильтры</span>
+                {activeFilterCount > 0 && (
+                  <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full bg-military-amber text-military-dark text-[10px] font-bold">
+                    {activeFilterCount}
+                  </span>
+                )}
+                <span className="ml-auto text-military-rust/60 text-[10px]">
+                  {showFilters ? '▲ СВЕРНУТЬ' : '▼ РАЗВЕРНУТЬ'}
+                </span>
+              </button>
+
               {/* Filter Panels */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div
+                className={cn(
+                  'grid grid-cols-1 md:grid-cols-2 gap-4',
+                  !showFilters && 'hidden md:grid'
+                )}
+              >
                 {/* Faction Filter */}
                 <div className="folded-paper military-corners p-3 md:p-4">
                   <div className="flex items-center gap-2 mb-3">
@@ -185,7 +222,7 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
                         key={faction.value}
                         onClick={() => setSelectedFaction(faction.value)}
                         className={cn(
-                          'font-ibm-mono text-xs px-2.5 py-1.5 md:px-3 md:py-2 rounded transition-all duration-300',
+                          'font-ibm-mono text-xs px-3 min-h-[44px] md:min-h-0 md:px-3 md:py-2 inline-flex items-center justify-center rounded transition-all duration-300',
                           'border border-transparent',
                           'hover:scale-105 active:scale-95',
                           selectedFaction === faction.value
@@ -216,8 +253,7 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
                         key={type.value}
                         onClick={() => setSelectedType(type.value)}
                         className={cn(
-                          'font-ibm-mono text-xs px-2.5 py-1.5 md:px-3 md:py-2 rounded transition-all duration-300',
-                          'flex items-center gap-2',
+                          'font-ibm-mono text-xs px-3 min-h-[44px] md:min-h-0 md:px-3 md:py-2 inline-flex items-center justify-center gap-2 rounded transition-all duration-300',
                           'border border-transparent',
                           'hover:scale-105 active:scale-95',
                           selectedType === type.value

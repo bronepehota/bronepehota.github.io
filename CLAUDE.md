@@ -159,6 +159,10 @@ src/data/sources/
 
 **Source Types**: See `src/lib/types.ts` — `SourceID` and `FactionID` are dynamic strings; `ArmyListSource` and `SourceData` define source metadata.
 
+**Missions** (`src/data/missions/missions.json` + `campaigns.json`; registry `src/lib/missions-registry.ts`): battle scenarios — **informational reference only; the app does NOT enforce objectives/turns/winners**. Registry exports `getAllMissions`, `getMission`, `getMissionsForCampaign`, `getAllCampaigns`. Routes: list `/encyclopedia/missions`, detail `/encyclopedia/mission/[id]` (**singular**). Participant machine `unitId` is a **bare slug** (`hunter`, `salamander`, `raptor`), linked as `/encyclopedia/unit/${unitId}`. The registry casts the JSON `as unknown as Mission[]` (TS infers a union of objective/participant shapes across missions) — don't simplify back to `as Mission[]`.
+
+**Campaigns (Хроники войн)** — in-app lore from build-time Markdown: content `src/content/campaigns/*.md` (frontmatter + body), loader `src/lib/campaigns.ts`. `getAllCampaigns()` is sync (frontmatter only, via `gray-matter`); `getCampaign(slug)` is async and renders the body→HTML via **dynamically-imported** `remark`/`remark-gfm`/`remark-html` (dynamic import keeps the module Jest-importable — unit-test only `getAllCampaigns`, never `getCampaign`). Routes `/campaigns` + `/campaigns/[slug]`. **Markdown under `docs/` is NOT published** (not in the static export) — in-app content must live under `src/` and be build-imported.
+
 ### State Management
 
 **Client-side persistence** (localStorage keys — canonical list in `src/lib/constants.ts`):
