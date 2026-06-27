@@ -83,7 +83,9 @@
         "range": "",
         "power": "",
         "melee": 6,
-        "modifiers": ["jump_boost_3"],
+        "modifiers": [
+          "jump_boost_3"
+        ],
         "armor": 4,
         "image": "/images/squads/polaris/rezhimnaya_klon_pehota/1.png"
       },
@@ -94,7 +96,9 @@
         "range": "",
         "power": "",
         "melee": 6,
-        "modifiers": ["jump_boost_3"],
+        "modifiers": [
+          "jump_boost_3"
+        ],
         "armor": 4,
         "image": "/images/squads/polaris/rezhimnaya_klon_pehota/2.png"
       },
@@ -105,7 +109,9 @@
         "range": "",
         "power": "",
         "melee": 6,
-        "modifiers": ["jump_boost_3"],
+        "modifiers": [
+          "jump_boost_3"
+        ],
         "armor": 4,
         "image": "/images/squads/polaris/rezhimnaya_klon_pehota/3.png"
       },
@@ -116,7 +122,9 @@
         "range": "",
         "power": "",
         "melee": 6,
-        "modifiers": ["jump_boost_3"],
+        "modifiers": [
+          "jump_boost_3"
+        ],
         "armor": 4,
         "image": "/images/squads/polaris/rezhimnaya_klon_pehota/4.png"
       },
@@ -127,7 +135,9 @@
         "range": "",
         "power": "",
         "melee": 6,
-        "modifiers": ["jump_boost_3"],
+        "modifiers": [
+          "jump_boost_3"
+        ],
         "armor": 4,
         "image": "/images/squads/polaris/rezhimnaya_klon_pehota/5.png"
       },
@@ -138,7 +148,9 @@
         "range": "",
         "power": "",
         "melee": 6,
-        "modifiers": ["jump_boost_3"],
+        "modifiers": [
+          "jump_boost_3"
+        ],
         "armor": 4,
         "image": "/images/squads/polaris/rezhimnaya_klon_pehota/6.png"
       }
@@ -159,7 +171,9 @@
         "range": "D6",
         "power": "1D6+3",
         "melee": 5,
-        "modifiers": ["jump_boost_4"],
+        "modifiers": [
+          "jump_boost_4"
+        ],
         "armor": 2,
         "image": "/images/squads/polaris/lyogkaya_shturmovaya_klon_pehota/5.png"
       },
@@ -170,7 +184,9 @@
         "range": "D6",
         "power": "3D6",
         "melee": 6,
-        "modifiers": ["jump_boost_4"],
+        "modifiers": [
+          "jump_boost_4"
+        ],
         "armor": 2,
         "image": "/images/squads/polaris/lyogkaya_shturmovaya_klon_pehota/1.png"
       },
@@ -181,7 +197,9 @@
         "range": "",
         "power": "",
         "melee": 6,
-        "modifiers": ["jump_boost_4"],
+        "modifiers": [
+          "jump_boost_4"
+        ],
         "armor": 2,
         "image": "/images/squads/polaris/lyogkaya_shturmovaya_klon_pehota/2.png"
       },
@@ -192,7 +210,9 @@
         "range": "D6",
         "power": "2D6",
         "melee": 4,
-        "modifiers": ["jump_boost_4"],
+        "modifiers": [
+          "jump_boost_4"
+        ],
         "armor": 2,
         "image": "/images/squads/polaris/lyogkaya_shturmovaya_klon_pehota/3.png"
       },
@@ -203,7 +223,9 @@
         "range": "",
         "power": "",
         "melee": 6,
-        "modifiers": ["jump_boost_4"],
+        "modifiers": [
+          "jump_boost_4"
+        ],
         "armor": 2,
         "image": "/images/squads/polaris/lyogkaya_shturmovaya_klon_pehota/4.png"
       },
@@ -214,7 +236,9 @@
         "range": "",
         "power": "",
         "melee": 6,
-        "modifiers": ["jump_boost_4"],
+        "modifiers": [
+          "jump_boost_4"
+        ],
         "armor": 2,
         "image": "/images/squads/polaris/lyogkaya_shturmovaya_klon_pehota/6.png"
       }
@@ -235,7 +259,9 @@
         "range": "D6",
         "power": "1D12",
         "melee": 3,
-        "modifiers": ["mechanic"],
+        "modifiers": [
+          "mechanic"
+        ],
         "armor": 2,
         "image": "/images/squads/polaris/tyazhyolaya_klon_pehota/1.png"
       },
@@ -246,7 +272,9 @@
         "range": "D12+2",
         "power": "1D12",
         "melee": 3,
-        "modifiers": ["mechanic"],
+        "modifiers": [
+          "mechanic"
+        ],
         "armor": 2,
         "image": "/images/squads/polaris/tyazhyolaya_klon_pehota/2.png"
       },
@@ -257,7 +285,9 @@
         "range": "D12",
         "power": "2D12",
         "melee": 0,
-        "modifiers": ["mechanic"],
+        "modifiers": [
+          "mechanic"
+        ],
         "armor": 2,
         "image": "/images/squads/polaris/tyazhyolaya_klon_pehota/3.png"
       },
@@ -268,7 +298,9 @@
         "range": "D12",
         "power": "1D20",
         "melee": 0,
-        "modifiers": ["mechanic"],
+        "modifiers": [
+          "mechanic"
+        ],
         "armor": 2,
         "image": "/images/squads/polaris/tyazhyolaya_klon_pehota/4.png"
       },
@@ -279,7 +311,9 @@
         "range": "D6",
         "power": "2D6",
         "melee": 3,
-        "modifiers": ["mechanic"],
+        "modifiers": [
+          "mechanic"
+        ],
         "armor": 2,
         "image": "/images/squads/polaris/tyazhyolaya_klon_pehota/5.png"
       },
@@ -290,7 +324,9 @@
         "range": "D6",
         "power": "2D6",
         "melee": 7,
-        "modifiers": ["mechanic"],
+        "modifiers": [
+          "mechanic"
+        ],
         "armor": 2,
         "image": "/images/squads/polaris/tyazhyolaya_klon_pehota/6.png"
       }
@@ -361,7 +397,9 @@
         "range": "D6",
         "power": "1D6",
         "melee": 2,
-        "modifiers": ["mechanic"],
+        "modifiers": [
+          "mechanic"
+        ],
         "armor": 3,
         "image": "/images/squads/polaris/lyogkiy_shturmovoy_desant/1.png"
       },
@@ -372,7 +410,9 @@
         "range": "D12",
         "power": "2D6",
         "melee": 2,
-        "modifiers": ["mechanic"],
+        "modifiers": [
+          "mechanic"
+        ],
         "armor": 3,
         "image": "/images/squads/polaris/lyogkiy_shturmovoy_desant/2.png"
       },
@@ -383,7 +423,9 @@
         "range": "D12",
         "power": "2D12",
         "melee": 0,
-        "modifiers": ["mechanic"],
+        "modifiers": [
+          "mechanic"
+        ],
         "armor": 3,
         "image": "/images/squads/polaris/lyogkiy_shturmovoy_desant/3.png"
       },
@@ -394,7 +436,9 @@
         "range": "D6",
         "power": "2D6",
         "melee": 5,
-        "modifiers": ["mechanic"],
+        "modifiers": [
+          "mechanic"
+        ],
         "armor": 3,
         "image": "/images/squads/polaris/lyogkiy_shturmovoy_desant/4.png"
       },
@@ -405,7 +449,9 @@
         "range": "D12",
         "power": "2D6",
         "melee": 2,
-        "modifiers": ["mechanic"],
+        "modifiers": [
+          "mechanic"
+        ],
         "armor": 3,
         "image": "/images/squads/polaris/lyogkiy_shturmovoy_desant/5.png"
       },
@@ -416,7 +462,9 @@
         "range": "D6",
         "power": "2D6",
         "melee": 2,
-        "modifiers": ["mechanic"],
+        "modifiers": [
+          "mechanic"
+        ],
         "armor": 3,
         "image": "/images/squads/polaris/lyogkiy_shturmovoy_desant/6.png"
       }
@@ -437,7 +485,9 @@
         "range": "D6",
         "power": "2D6",
         "melee": 2,
-        "modifiers": ["mechanic"],
+        "modifiers": [
+          "mechanic"
+        ],
         "armor": 4,
         "image": "/images/squads/polaris/tyazhyolyy_shturmovoy_desant/1.png"
       },
@@ -448,7 +498,9 @@
         "range": "D12",
         "power": "2D6",
         "melee": 2,
-        "modifiers": ["mechanic"],
+        "modifiers": [
+          "mechanic"
+        ],
         "armor": 4,
         "image": "/images/squads/polaris/tyazhyolyy_shturmovoy_desant/2.png"
       },
@@ -459,7 +511,9 @@
         "range": "D6",
         "power": "2D6",
         "melee": 2,
-        "modifiers": ["mechanic"],
+        "modifiers": [
+          "mechanic"
+        ],
         "armor": 4,
         "image": "/images/squads/polaris/tyazhyolyy_shturmovoy_desant/3.png"
       },
@@ -470,7 +524,9 @@
         "range": "D12",
         "power": "2D6",
         "melee": 2,
-        "modifiers": ["mechanic"],
+        "modifiers": [
+          "mechanic"
+        ],
         "armor": 4,
         "image": "/images/squads/polaris/tyazhyolyy_shturmovoy_desant/4.png"
       },
@@ -481,7 +537,9 @@
         "range": "D6",
         "power": "2D6",
         "melee": 2,
-        "modifiers": ["mechanic"],
+        "modifiers": [
+          "mechanic"
+        ],
         "armor": 4,
         "image": "/images/squads/polaris/tyazhyolyy_shturmovoy_desant/5.png"
       },
@@ -492,7 +550,9 @@
         "range": "D12",
         "power": "2D12",
         "melee": 0,
-        "modifiers": ["mechanic"],
+        "modifiers": [
+          "mechanic"
+        ],
         "armor": 4,
         "image": "/images/squads/polaris/tyazhyolyy_shturmovoy_desant/6.png"
       }
@@ -638,5 +698,125 @@
       }
     ],
     "image": "/images/squads/polaris/tribunatory_starye/1.png"
+  },
+  {
+    "id": "polaris_markus_trehglazyy",
+    "name": "Маркус Трехглазый",
+    "shortName": "Маркус Трехглазый",
+    "faction": "polaris",
+    "cost": 109,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 5,
+        "speed": 4,
+        "range": "D12",
+        "power": "3D6",
+        "melee": 6,
+        "armor": 8,
+        "image": "/images/squads/polaris/markus_trehglazyy/1.png"
+      }
+    ],
+    "image": "/images/squads/polaris/markus_trehglazyy/1.png"
+  },
+  {
+    "id": "polaris_erkkhard",
+    "name": "Лорд Эркхард",
+    "shortName": "Эркхард",
+    "faction": "polaris",
+    "cost": 110,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 4,
+        "speed": 5,
+        "range": "D6",
+        "power": "3D6",
+        "melee": 7,
+        "armor": 8,
+        "image": "/images/squads/polaris/erkkhard/1.png"
+      }
+    ],
+    "image": "/images/squads/polaris/erkkhard/1.png"
+  },
+  {
+    "id": "polaris_kross",
+    "name": "Лорд Кросс",
+    "shortName": "Кросс",
+    "faction": "polaris",
+    "cost": 107,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 5,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 6,
+        "armor": 8,
+        "image": "/images/squads/polaris/kross/1.png"
+      }
+    ],
+    "image": "/images/squads/polaris/kross/1.png"
+  },
+  {
+    "id": "polaris_shindzhi",
+    "name": "Лорд Шинджи",
+    "shortName": "Шинджи",
+    "faction": "polaris",
+    "cost": 112,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 4,
+        "speed": 6,
+        "range": "",
+        "power": "",
+        "melee": 7,
+        "armor": 8,
+        "image": "/images/squads/polaris/shindzhi/1.png"
+      }
+    ],
+    "image": "/images/squads/polaris/shindzhi/1.png"
+  },
+  {
+    "id": "polaris_ledi_agata",
+    "name": "Леди Агата",
+    "shortName": "Леди Агата",
+    "faction": "polaris",
+    "cost": 68,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 4,
+        "speed": 6,
+        "range": "",
+        "power": "",
+        "melee": 6,
+        "armor": 3,
+        "image": "/images/squads/polaris/ledi_agata/1.png"
+      }
+    ],
+    "image": "/images/squads/polaris/ledi_agata/1.png"
+  },
+  {
+    "id": "polaris_dolgorukiy",
+    "name": "Алексей Долгорукий",
+    "shortName": "Долгорукий",
+    "faction": "polaris",
+    "cost": 82,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 5,
+        "speed": 4,
+        "range": "",
+        "power": "",
+        "melee": 5,
+        "armor": 6,
+        "image": "/images/squads/polaris/dolgorukiy/1.png"
+      }
+    ],
+    "image": "/images/squads/polaris/dolgorukiy/1.png"
   }
 ]

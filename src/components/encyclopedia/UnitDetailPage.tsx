@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Shield, Zap, Skull, Target } from 'lucide-react';
+import { ArrowLeft, Shield, Zap, Skull, Target, AlertTriangle } from 'lucide-react';
 import { GitHubPagesImage } from '@/components/GitHubPagesImage';
 import { EnrichedUnit } from '@/lib/encyclopedia-utils';
 import { cn } from '@/lib/utils';
@@ -139,14 +139,6 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
                       )}
                     </div>
                   </div>
-                  {/* Type indicator */}
-                  <div className="absolute top-3 right-3">
-                    <div className="px-3 py-1 backdrop-blur-sm bg-military-amber/20 border border-military-amber/40 rounded-sm">
-                      <span className="text-sm">
-                        {unit.type === 'squad' ? '◆' : '▲'}
-                      </span>
-                    </div>
-                  </div>
                   <figcaption className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-military-dark/90 to-transparent">
                     <span className="font-ibm-mono text-[10px] text-military-amber/90 uppercase tracking-wider">
                       ◆ Отряд в сборе
@@ -196,14 +188,6 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
                     </div>
                   </div>
 
-                  {/* Type indicator */}
-                  <div className="absolute top-3 right-3">
-                    <div className="px-3 py-1 backdrop-blur-sm bg-military-amber/20 border border-military-amber/40 rounded-sm">
-                      <span className="text-sm">
-                        {unit.type === 'squad' ? '◆' : '▲'}
-                      </span>
-                    </div>
-                  </div>
                 </div>
               )}
 
@@ -324,6 +308,28 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
                 onSourceChange={sourceOrder.length > 1 ? setActiveSource : undefined}
               />
             </section>
+
+            {/* Provisional-stats disclaimer (heroes): stats are approximate, not canon */}
+            {unit.statsNote && (
+              <section
+                className={cn(
+                  'folded-paper military-corners p-4 border-amber-500/40',
+                  'fade-in-up opacity-0',
+                  isLoaded && 'opacity-100'
+                )}
+                style={{ animationFillMode: 'forwards', animationDelay: '0.45s' }}
+              >
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+                  <div>
+                    <div className="font-oswald text-amber-400 text-sm uppercase tracking-wider mb-1">
+                      Предварительные данные
+                    </div>
+                    <p className="text-military-sand/70 text-sm leading-relaxed">{unit.statsNote}</p>
+                  </div>
+                </div>
+              </section>
+            )}
 
             {/* Stats table — soldiers or machine loadout, follows the active source */}
             <UnitStatTable unit={activeUnit as unknown as Squad | Machine} type={unit.type} />

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { GitHubPagesImage } from '@/components/GitHubPagesImage';
 import { EncyclopediaUnit } from '@/lib/encyclopedia-registry';
 import { getFactionColors, factionLogos } from '@/lib/faction-colors';
+import { SQUAD_GROUP_IMAGE } from '@/lib/painted-images';
 
 interface UnitCardProps {
   unit: EncyclopediaUnit;
@@ -28,9 +29,10 @@ export function UnitCard({ unit }: UnitCardProps) {
   // Get cost from first source (or default to 0)
   const cost = unit.sources[0]?.cost || 0;
 
-  // Get display image: per-soldier card art (the wide group photo is too wide for
-  // the 3:4 card — it crops the side figures; it's shown as the hero on the detail page).
-  const displayImage = unit.image || '/images/placeholder.png';
+  // Get display image: prefer the wide "squad assembled" group photo when available,
+  // else fall back to the per-soldier card art (first soldier).
+  const hasGroup = !!SQUAD_GROUP_IMAGE[unit.id];
+  const displayImage = hasGroup ? SQUAD_GROUP_IMAGE[unit.id] : (unit.image || '/images/placeholder.png');
 
   // Faction logo (if available); mercenaries falls back to a text badge
   const logo = factionLogos[unit.faction];
@@ -38,12 +40,13 @@ export function UnitCard({ unit }: UnitCardProps) {
   return (
     <Link
       href={`/encyclopedia/unit/${unit.id}`}
-      className="block group"
+      className="block group h-full"
       data-testid={`unit-card-${unit.id}`}
     >
       <div className="relative folded-paper military-corners overflow-hidden transition-all duration-300 hover:scale-[1.02]">
-        {/* Image container with tactical overlay */}
-        <div className="relative aspect-[3/4] w-full overflow-hidden">
+        {/* Image container with tactical overlay. Group-photo units use a wide
+            3:2 frame (whole squad visible); others stay portrait 3:4. */}
+        <div className={`relative w-full overflow-hidden ${hasGroup ? 'aspect-[3/2]' : 'aspect-[3/4]'}`}>
           {/* Unit image */}
           <GitHubPagesImage
             src={displayImage}
@@ -81,15 +84,6 @@ export function UnitCard({ unit }: UnitCardProps) {
             </div>
           </div>
 
-          {/* Unit type indicator - top right */}
-          <div className="absolute top-2 right-2">
-            <div className="px-2 py-1 backdrop-blur-sm bg-military-amber/20 border border-military-amber/40 rounded-sm">
-              <span className="text-xs">
-                {unit.type === 'squad' ? '◆' : '▲'}
-              </span>
-            </div>
-          </div>
-
           {/* Cost badge - bottom left */}
           <div className="absolute bottom-2 left-2">
             <div className="flex items-center gap-1 backdrop-blur-sm bg-military-dark/80 px-2 py-1 rounded border border-military-rust/30">
@@ -119,7 +113,7 @@ export function UnitCard({ unit }: UnitCardProps) {
 
           {/* Short description (one-liner role summary), clamped to 2 lines for mobile safety */}
           <p className="font-oswald text-[11px] leading-snug text-military-taupe/80 mb-1.5 line-clamp-2">
-            {unit.encyclopedia?.shortDescription || unit.encyclopedia?.class || (unit.type === 'squad' ? 'Отряд' : 'Машина')}
+            {unit.encyclopedia?.shortDescription || unit.encyclopedia?.class || (unit.type === 'squad' ? 'Отряд' : unit.type === 'орудие' ? 'Орудие' : 'Машина')}
           </p>
 
           {/* Tactical decoration line */}
