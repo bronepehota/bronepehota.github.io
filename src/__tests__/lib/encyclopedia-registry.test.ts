@@ -44,7 +44,7 @@ describe('encyclopedia-registry', () => {
       for (const u of units) {
         expect(u.id).toBeTruthy();
         expect(u.name).toBeTruthy();
-        expect(['squad', 'machine']).toContain(u.type);
+        expect(['squad', 'machine', 'орудие']).toContain(u.type);
       }
     });
   });

@@ -22,11 +22,12 @@ function modifierMeta(id: string): { name: string; icon?: string } | undefined {
 
 interface UnitStatTableProps {
   unit: Squad | Machine;
-  type: 'squad' | 'machine';
+  type: 'squad' | 'machine' | 'орудие';
 }
 
 export function UnitStatTable({ unit, type }: UnitStatTableProps) {
-  if (type === 'machine') {
+  // Орудия имеют ту же структуру данных, что и машины (прочность, вооружение)
+  if (type === 'machine' || type === 'орудие') {
     return <MachineStats machine={unit as Machine} />;
   }
   return <SquadStats squad={unit as Squad} />;

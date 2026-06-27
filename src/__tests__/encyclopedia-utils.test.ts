@@ -6,7 +6,7 @@ describe('encyclopedia-utils', () => {
       const units = await getAllUnits();
 
       expect(units.length).toBeGreaterThan(0);
-      expect(units.every(u => u.type === 'squad' || u.type === 'machine')).toBe(true);
+      expect(units.every(u => u.type === 'squad' || u.type === 'machine' || u.type === 'орудие')).toBe(true);
     });
 
     it('includes units from all factions', async () => {

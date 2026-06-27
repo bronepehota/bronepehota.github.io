@@ -45,10 +45,12 @@ export interface EncyclopediaUnit {
   name: string;
   shortName: string;
   faction: string;
-  type: 'squad' | 'machine';
+  type: 'squad' | 'machine' | 'орудие';
   sources: UnitSource[];
   image?: string;
   encyclopedia?: EncyclopediaLore;
+  /** Optional disclaimer shown on the detail page (e.g. provisional stats). */
+  statsNote?: string;
 }
 
 export interface EncyclopediaFaction {
@@ -103,7 +105,7 @@ export function getUnitsForFaction(factionId: string): EncyclopediaUnit[] {
 /**
  * Get all units of a specific type (squad or machine)
  */
-export function getUnitsByType(type: 'squad' | 'machine'): EncyclopediaUnit[] {
+export function getUnitsByType(type: 'squad' | 'machine' | 'орудие'): EncyclopediaUnit[] {
   return encyclopediaUnits.filter((unit) => unit.type === type);
 }
 
