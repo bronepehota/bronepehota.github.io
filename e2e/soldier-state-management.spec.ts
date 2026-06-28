@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { setupGameSessionWithSquad, expandFirstUnit } from './helpers/setup';
+import { setupGameSessionWithSquad, expandFirstUnit, clearStorage } from './helpers/setup';
 
 /**
  * Soldier State Management E2E tests
@@ -14,6 +14,7 @@ import { setupGameSessionWithSquad, expandFirstUnit } from './helpers/setup';
  */
 test.describe('Soldier State Management', () => {
   test.beforeEach(async ({ page }) => {
+    await clearStorage(page);
     await setupGameSessionWithSquad(page, {
       unitOverrides: { instanceId: 'soldier-state-unit-1' },
     });

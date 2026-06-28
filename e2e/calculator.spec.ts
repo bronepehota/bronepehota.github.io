@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { clearStorage } from './helpers/setup';
 
 test.describe('Standalone Calculator', () => {
   test.beforeEach(async ({ page }) => {
+    await clearStorage(page);
     await page.goto('/calculator');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(500);

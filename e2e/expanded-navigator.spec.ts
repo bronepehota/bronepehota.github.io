@@ -1,6 +1,11 @@
 import { test, expect } from '@playwright/test';
+import { clearStorage } from './helpers/setup';
 
 test.describe('Expanded Navigator', () => {
+  test.beforeEach(async ({ page }) => {
+    await clearStorage(page);
+  });
+
   test('expanded navigator shows sections and handles clicks', async ({ page }) => {
     // Set up game session state BEFORE page loads
     await page.addInitScript(() => {

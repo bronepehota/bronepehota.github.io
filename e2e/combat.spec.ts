@@ -1,11 +1,15 @@
 import { test, expect } from '@playwright/test';
-import { setupGameSessionWithSquad } from './helpers/setup';
+import { setupGameSessionWithSquad, clearStorage } from './helpers/setup';
 
 /**
  * Combat E2E tests
  * Tests critical combat gameplay mechanics
  */
 test.describe('Combat Mechanics', () => {
+  test.beforeEach(async ({ page }) => {
+    await clearStorage(page);
+  });
+
   test('should open combat modal', async ({ page }) => {
     await setupGameSessionWithSquad(page, {
       unitOverrides: { instanceId: 'combat-unit-1' },
