@@ -1,5 +1,6 @@
-import { Army, ArmyUnit, isSquad } from './types';
+import { Army, ArmyUnit, isSquad, isMachine } from './types';
 import { LOCAL_STORAGE_KEYS } from './constants';
+import { getSourceWithCustom } from './sources-registry';
 
 /**
  * Persisted-army schema version. Bump when the Army shape changes and add a
@@ -36,10 +37,44 @@ export function loadArmy(now: number = Date.now()): Army | null {
     const army: Army | undefined =
       'schemaVersion' in parsed ? (parsed as PersistedArmy).army : (parsed as Army);
     if (!army) return null;
-    return migrateArmy(army as Army, now);
+    return rehydrateFromSource(migrateArmy(army as Army, now));
   } catch {
     return null;
   }
+}
+
+/**
+ * Refresh each unit's template `data` from its source so a saved army reflects the
+ * current army-list data (stats/cost/weapons). Runtime state (durability, ammo, dead
+ * soldiers, actions, modifiers, pilot…) is preserved. Falls back to the stored data
+ * when the source is unavailable or the unit's structure changed (e.g. soldier count)
+ * so runtime indices stay valid.
+ */
+export function rehydrateFromSource(army: Army): Army {
+  if (!army.sourceId) return army;
+  const source = getSourceWithCustom(army.sourceId);
+  if (!source) return army;
+
+  return {
+    ...army,
+    units: army.units.map((unit) => {
+      if (isSquad(unit)) {
+        const fresh = source.squads.find((s) => s.id === unit.data.id);
+        if (fresh && fresh.soldiers.length === unit.data.soldiers.length) {
+          return { ...unit, data: fresh };
+        }
+        return unit;
+      }
+      if (isMachine(unit)) {
+        const fresh = source.machines.find((m) => m.id === unit.data.id);
+        if (fresh && fresh.durability_max === unit.data.durability_max) {
+          return { ...unit, data: fresh };
+        }
+        return unit;
+      }
+      return unit;
+    }),
+  };
 }
 
 /**

@@ -1,5 +1,6 @@
-import { saveArmy, loadArmy, migrateArmy, ARMY_SCHEMA_VERSION } from '@/lib/army-storage';
+import { saveArmy, loadArmy, migrateArmy, rehydrateFromSource, ARMY_SCHEMA_VERSION } from '@/lib/army-storage';
 import { Army, ArmyUnit } from '@/lib/types';
+import { getSourceWithCustom } from '@/lib/sources-registry';
 
 const baseArmy: Army = {
   name: 'Test',
@@ -75,5 +76,44 @@ describe('army-storage', () => {
     const migrated = migrateArmy(army, new Date('2020-01-01T12:30:00Z').getTime());
     expect(migrated.units[0].machineShotsUsed).toBe(2);
     expect(migrated.units[0].isMachineShot).toBe(true);
+  });
+});
+
+describe('army-storage — rehydrate from source', () => {
+  const realSquad = getSourceWithCustom('star_system')!.squads.find(
+    (s) => s.id === 'polaris_lineynaya_klon_pehota'
+  )!;
+
+  it('refreshes a stale squad when structurally compatible (same soldier count)', () => {
+    const army: Army = {
+      ...baseArmy,
+      sourceId: 'star_system',
+      units: [{ instanceId: 'u1', type: 'squad', data: { ...realSquad, name: 'STALE' } } as ArmyUnit],
+    };
+    expect(rehydrateFromSource(army).units[0].data.name).toBe(realSquad.name);
+  });
+
+  it('keeps stored data when the source no longer has the unit', () => {
+    const army: Army = {
+      ...baseArmy,
+      sourceId: 'star_system',
+      units: [{
+        instanceId: 'u1', type: 'squad',
+        data: { id: 'ghost', name: 'STALE', faction: 'polaris', cost: 999, soldiers: [] },
+      } as ArmyUnit],
+    };
+    expect(rehydrateFromSource(army).units[0].data.name).toBe('STALE');
+  });
+
+  it('keeps stored data when the soldier count changed (incompatible)', () => {
+    const army: Army = {
+      ...baseArmy,
+      sourceId: 'star_system',
+      units: [{
+        instanceId: 'u1', type: 'squad',
+        data: { ...realSquad, name: 'STALE', soldiers: [...realSquad.soldiers, ...realSquad.soldiers] },
+      } as ArmyUnit],
+    };
+    expect(rehydrateFromSource(army).units[0].data.name).toBe('STALE');
   });
 });
