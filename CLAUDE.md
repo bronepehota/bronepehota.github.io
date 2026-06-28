@@ -68,8 +68,13 @@ npm run test:e2e            # All E2E tests pass
 ### E2E test conventions
 
 - **Selector priority**: `getByTestId()` > `getByRole()` > `getByText()` > CSS selectors
-- **Always clear localStorage** in `beforeEach`
-- **Always `await page.waitForTimeout(200)`** after clicks
+- **Always clear localStorage** in `beforeEach` (use the `clearStorage(page)` helper)
+- **Prefer waiting for state over fixed sleeps**: `expect(locator).toBeVisible()` and
+  actionability auto-wait already poll up to 5s, so a `waitForTimeout` immediately
+  before them is redundant — drop it. Reserve `waitForTimeout(ms)` for animations /
+  transitions that produce no assertable state. Don't sprinkle sleeps "just in case".
+- Legacy tests still use `await page.waitForTimeout(200)` after clicks; convert to the
+  above when refactoring a spec.
 - **Dev server auto-starts** on `http://localhost:3001` before tests
 - **Headed mode**: `npm run test:e2e:headed` (visible browser)
 - **Debug mode**: `npm run test:e2e:debug` (Playwright Inspector)

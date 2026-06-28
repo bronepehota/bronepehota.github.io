@@ -50,7 +50,6 @@ test.describe.serial('Calculator Tab', () => {
 
     // Switch to calculator tab
     await page.getByTestId('calculator-tab').click();
-    await page.waitForTimeout(200);
 
     // Should see the calculator table
     await expect(page.getByTestId('calculator-table')).toBeVisible();
@@ -70,14 +69,12 @@ test.describe.serial('Calculator Tab', () => {
 
     // Switch to calculator
     await page.getByTestId('calculator-tab').click();
-    await page.waitForTimeout(200);
 
     // Should show calculated cost
     await expect(page.getByTestId('calculator-cost')).toBeVisible();
 
     // Click apply
     await page.getByTestId('calculator-apply').click();
-    await page.waitForTimeout(200);
 
     // Should switch back to manual tab with populated soldiers
     // After apply, mode is 'manual', so manual tab should be active
@@ -90,14 +87,12 @@ test.describe.serial('Calculator Tab', () => {
 
     // Switch to calculator
     await page.getByTestId('calculator-tab').click();
-    await page.waitForTimeout(200);
 
     // Should see 1 soldier row
     await expect(page.getByTestId('calculator-row-0')).toBeVisible();
 
     // Add soldier
     await page.getByTestId('calculator-add-soldier').click();
-    await page.waitForTimeout(200);
 
     // Should see 2 rows
     await expect(page.getByTestId('calculator-row-1')).toBeVisible();
@@ -108,7 +103,6 @@ test.describe.serial('Calculator Tab', () => {
 
     // Switch to calculator
     await page.getByTestId('calculator-tab').click();
-    await page.waitForTimeout(200);
 
     const row0 = page.getByTestId('calculator-row-0');
 
@@ -120,7 +114,6 @@ test.describe.serial('Calculator Tab', () => {
     // Change armor to Тяжёлый пехотный доспех
     const armorSelect = row0.locator('select').nth(2);
     await armorSelect.selectOption('heavy_infantry');
-    await page.waitForTimeout(200);
 
     // Now armor=4, speed=4
     // Cost breakdown: rankPrice=20, weapon=15, melee=0, property=0, armor=80, race=20 = 135
@@ -129,7 +122,6 @@ test.describe.serial('Calculator Tab', () => {
     // Change weapon to Снайперская Винтовка
     const weaponSelect = row0.locator('select').nth(3);
     await weaponSelect.selectOption('sniper');
-    await page.waitForTimeout(200);
 
     // range=Д12+2, power=Д12
     // Cost: 20 + 80 + 0 + 0 + 80 + 20 = 200
@@ -192,7 +184,6 @@ test.describe.serial('Calculator Tab', () => {
 
     // Apply — switches back to manual tab
     await page.getByTestId('calculator-apply').click();
-    await page.waitForTimeout(200);
 
     // On manual tab, should see Пр5 modifier badge
     await expect(page.getByText('Пр5')).toBeVisible();
