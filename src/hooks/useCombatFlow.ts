@@ -147,9 +147,6 @@ function combatFlowReducer(
         grenadeBlastChecks: [...(state.result.grenadeBlastChecks || []), newCheck],
       } : state.result;
 
-      console.log('[GRENADE_CHECK_TARGET] New check:', newCheck);
-      console.log('[GRENADE_CHECK_TARGET] Updated result grenadeBlastChecks:', updatedResult?.grenadeBlastChecks);
-
       return {
         ...state,
         result: updatedResult,

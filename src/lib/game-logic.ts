@@ -10,7 +10,7 @@ export const rollDie = (sides: number): number => {
  * Previously 'D0' dealt constant damage (rollDie(0)===1) and '2D'/'' silently
  * became a D6 roll — both wrong with no error surfaced.
  */
-const INVALID_ROLL = { dice: 0, sides: 0, bonus: 0 };
+const INVALID_ROLL = Object.freeze({ dice: 0, sides: 0, bonus: 0 });
 
 /**
  * Roll twice and return the better result (Surprise Attack - Fan rules)
@@ -284,49 +284,6 @@ export function calculateMeleeWithSurpriseAttack(attackerMelee: number, defender
     defenderRoll: dRoll,
     defenderTotal: dTotal,
     winner
-  };
-}
-
-/**
- * Combat flow validation utilities
- */
-
-export interface CombatValidation {
-  isValid: boolean;
-  errors: string[];
-}
-
-export function validateCombatParameters(
-  actionType: 'shot' | 'melee' | 'grenade',
-  distance: number,
-  targetArmor: number,
-  targetMelee: number,
-  ammo?: number,
-  grenadesAvailable?: boolean
-): CombatValidation {
-  const errors: string[] = [];
-
-  if (actionType === 'shot' || actionType === 'grenade') {
-    if (distance < 1 || distance > 20) {
-      errors.push('Дистанция должна быть от 1 до 20');
-    }
-    if (targetArmor < 0 || targetArmor > 10) {
-      errors.push('Броня должна быть от 0 до 10');
-    }
-    if (actionType === 'grenade' && !grenadesAvailable) {
-      errors.push('Гранаты уже израсходованы');
-    }
-  }
-
-  if (actionType === 'melee') {
-    if (targetMelee < 0 || targetMelee > 10) {
-      errors.push('Ближний бой цели должен быть от 0 до 10');
-    }
-  }
-
-  return {
-    isValid: errors.length === 0,
-    errors,
   };
 }
 
