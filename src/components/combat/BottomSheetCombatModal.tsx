@@ -147,6 +147,7 @@ export function BottomSheetCombatModal({
   return (
     <div
       ref={focusRef}
+      data-testid="bottom-sheet-combat-modal"
       className="fixed inset-0 z-[100] bg-slate-950/95 backdrop-blur-sm flex items-center justify-center p-2 md:p-4"
     >
       <div
