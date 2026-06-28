@@ -105,7 +105,6 @@ test.describe('Expanded Navigator', () => {
       const handle = document.querySelector('.fixed.left-0.right-0.z-50 > .flex.justify-center');
       if (handle) handle.dispatchEvent(new Event('click', { bubbles: true }));
     });
-    await page.waitForTimeout(500);
     await expect(expandedNav).toBeVisible();
 
     // Verify all three sections render
@@ -125,7 +124,6 @@ test.describe('Expanded Navigator', () => {
 
     // Click a unit card to close navigator
     await page.getByTestId('expanded-unit-nav-active-unit').click();
-    await page.waitForTimeout(300);
     await expect(expandedNav).not.toBeVisible();
   });
 });
