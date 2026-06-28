@@ -32,7 +32,6 @@ test.describe('UnitCard Complex Scenarios', () => {
     const unitCard = lightAssaultUnit.locator('..').locator('..').locator('..');
     const addButton = unitCard.locator('button:has-text("В АРМИЮ")');
     await addButton.click();
-    await page.waitForTimeout(500);
 
     expect(await page.locator('text=ЛЁГКАЯ ШТУРМОВАЯ КЛОН-ПЕХОТА').isVisible()).toBe(true);
   });
@@ -64,7 +63,6 @@ test.describe('UnitCard Complex Scenarios', () => {
     const helixCard = helixUnit.locator('..').locator('..').locator('..');
     const addButton = helixCard.locator('button:has-text("В АРМИЮ")');
     await addButton.click();
-    await page.waitForTimeout(500);
 
     expect(await page.locator('text=×1').isVisible()).toBe(true);
   });
@@ -84,28 +82,22 @@ test.describe('UnitCard Complex Scenarios', () => {
     await page.waitForTimeout(300);
     await page.click('[data-testid="budget-next-button"]');
     await page.waitForTimeout(500);
-    await page.waitForTimeout(500);
 
     expect(await page.locator('button:has-text("Отряды")').isVisible()).toBe(true);
 
     await page.click('button:has-text("Машины")');
-    await page.waitForTimeout(300);
     expect(await page.locator('h3:has-text("Хеликс")').isVisible()).toBe(true);
 
     await page.click('button:has-text("Наёмники")');
-    await page.waitForTimeout(300);
     expect(await page.locator('text=АБОРИГЕНЫ КРЕПОСТИ МОЛОДЫХ РОСТКОВ').isVisible()).toBe(true);
   });
 
   test('switching between rules versions', async ({ page }) => {
-    await page.waitForTimeout(500);
-
     expect(await page.locator('text=Выберите версию правил').isVisible()).toBe(true);
     expect(await page.locator('h3:has-text("Технолог")').isVisible()).toBe(true);
     expect(await page.locator('h3:has-text("Правила от Сообщества Star System")').isVisible()).toBe(true);
 
     await page.click('h3:has-text("Правила от Сообщества Star System")');
-    await page.waitForTimeout(500);
 
     expect(await page.locator('[data-testid="rules-confirm-button"]').isVisible()).toBe(true);
   });

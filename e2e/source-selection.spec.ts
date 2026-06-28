@@ -42,7 +42,6 @@ test.describe('Source Selection', () => {
 
     // Click confirm button
     await page.click('[data-testid="source-confirm-button"]');
-    await page.waitForTimeout(500);
 
     // Should be on faction selection screen
     await expect(page.getByTestId('faction-card-polaris')).toBeVisible();
@@ -76,7 +75,6 @@ test.describe('Source Selection', () => {
 
     // Tehnolog is now enabled (imported with 33 verified squads) — select it
     await tehnologCard.click();
-    await page.waitForTimeout(300);
 
     // No longer shows the "needs community help" disabled marker
     await expect(tehnologCard.getByText(/Требуется помощь сообщества/)).toHaveCount(0);
@@ -88,7 +86,6 @@ test.describe('Source Selection', () => {
 
     // Confirming with tehnolog proceeds to faction selection
     await page.click('[data-testid="source-confirm-button"]');
-    await page.waitForTimeout(500);
     await expect(page.getByTestId('faction-card-polaris')).toBeVisible();
   });
 
@@ -114,7 +111,6 @@ test.describe('Source Selection', () => {
 
     // Click on Step 1 (Правила) in the progress indicator to go back
     await page.click('button[aria-label*="Шаг 1"]');
-    await page.waitForTimeout(300);
 
     // Should be back on rules screen
     await expect(page.getByTestId('rules-confirm-button')).toBeVisible();
@@ -149,7 +145,6 @@ test.describe('Source Selection', () => {
 
     // Click on star_system card
     await page.click('[data-testid="source-card-star_system"]');
-    await page.waitForTimeout(300);
 
     // Should see description
     await expect(page.getByText(/Армейские листы от сообщества Star System/i)).toBeVisible();
@@ -163,7 +158,6 @@ test.describe('Source Selection', () => {
   test('should complete full flow: rules → source → faction → budget', async ({ page }) => {
     // Step 1: Rules confirmation
     await page.click('[data-testid="rules-confirm-button"]');
-    await page.waitForTimeout(500);
 
     // Step 2: Source selection (star_system should be pre-selected)
     await expect(page.getByTestId('source-card-star_system')).toBeVisible();
@@ -176,14 +170,12 @@ test.describe('Source Selection', () => {
     await page.click('[data-testid="faction-continue-button"]');
     await page.waitForTimeout(500);
     await page.click('[data-testid="mission-confirm-button"]');
-    await page.waitForTimeout(500);
 
     // Step 4: Budget selection
     await expect(page.getByText('350')).toBeVisible();
     await page.click('button:has-text("350")');
     await page.waitForTimeout(300);
     await page.click('[data-testid="budget-next-button"]');
-    await page.waitForTimeout(500);
 
     // Should be on unit selection screen
     await expect(page.getByTestId('unit-selector')).toBeVisible();

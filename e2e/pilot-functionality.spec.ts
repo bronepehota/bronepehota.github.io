@@ -46,7 +46,6 @@ test.describe('Pilot Functionality', () => {
     await page.click('button:has-text("350")');
     await page.waitForTimeout(300);
     await page.click('[data-testid="budget-next-button"]');
-    await page.waitForTimeout(500);
 
     // Verify we're on unit selector screen (Army Builder)
     await page.waitForSelector('text=Соберите свою армию', { timeout: 5000 });
@@ -93,7 +92,6 @@ test.describe('Pilot Functionality', () => {
 
     // Click machine navigation card
     await page.locator('button[data-testid^="unit-nav-"]').nth(1).click();
-    await page.waitForTimeout(1500);
 
     // Verify machine view is visible (Урон button)
     await expect(page.locator('button:has-text("Урон")')).toBeVisible({ timeout: 3000 });
