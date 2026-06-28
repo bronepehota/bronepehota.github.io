@@ -48,16 +48,39 @@ export function getAllCampaigns(): CampaignMeta[] {
   return metas;
 }
 
+/**
+ * Markdown → sanitized HTML.
+ *
+ * `remark-html` does NOT sanitize (raw `<script>`/`onerror=` pass through), so we
+ * bridge mdast→hast via `remark-rehype` and run `rehype-sanitize` before stringifying.
+ * The default schema keeps the basic Markdown the campaigns use today (headings,
+ * paragraphs, bold/emphasis, lists, blockquotes) and strips scripts, event handlers,
+ * and `javascript:` URLs. Defense-in-depth: the source is first-party/build-time, but
+ * any future Markdown field sourced from user input must not inherit an XSS hole.
+ *
+ * NB: if campaigns start using GFM tables/code/images, extend the schema passed to
+ * `rehypeSanitize` (default schema drops `table`/`thead`/`td`/…).
+ */
+async function renderMarkdownToSanitizedHtml(content: string): Promise<string> {
+  const { remark } = await import('remark');
+  const { default: remarkGfm } = await import('remark-gfm');
+  const { default: remarkRehype } = await import('remark-rehype');
+  const { default: rehypeSanitize } = await import('rehype-sanitize');
+  const { default: rehypeStringify } = await import('rehype-stringify');
+  const file = await remark()
+    .use(remarkGfm)
+    .use(remarkRehype)        // mdast → hast (raw HTML in the .md is dropped by default)
+    .use(rehypeSanitize)      // strip <script>, on* handlers, javascript: URLs
+    .use(rehypeStringify)     // hast → HTML string
+    .process(content);
+  return String(file);
+}
+
 // Async: dynamically imports remark (ESM-only) so the module stays Jest-importable.
 export async function getCampaign(slug: string): Promise<Campaign | null> {
   const fullPath = path.join(CAMPAIGNS_DIR, `${slug}.md`);
   if (!fs.existsSync(fullPath)) return null;
   const { data, content } = readFrontmatter(slug);
-  const { remark } = await import('remark');
-  const { default: remarkGfm } = await import('remark-gfm');
-  const { default: remarkHtml } = await import('remark-html');
-  const bodyHtml = String(
-    await remark().use(remarkGfm).use(remarkHtml).process(content)
-  );
+  const bodyHtml = await renderMarkdownToSanitizedHtml(content);
   return { slug, ...(data as Omit<CampaignMeta, 'slug'>), bodyHtml };
 }
