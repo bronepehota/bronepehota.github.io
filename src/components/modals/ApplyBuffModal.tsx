@@ -6,6 +6,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useEscapeToClose } from '@/hooks/useEscapeToClose';
 import { X, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { isSquad } from '@/lib/types';
@@ -32,6 +33,8 @@ export function ApplyBuffModal({
 }: ApplyBuffModalProps) {
   const [selectedUnitId, setSelectedUnitId] = useState<string | null>(null);
   const [selectedBuffId, setSelectedBuffId] = useState<string | null>(null);
+
+  useEscapeToClose(isOpen, onClose);
 
   if (!isOpen) return null;
 

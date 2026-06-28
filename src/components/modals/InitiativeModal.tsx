@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
+import { useEscapeToClose } from '@/hooks/useEscapeToClose';
 import { FactionID } from '@/lib/types';
 import { X } from 'lucide-react';
 import { rollDie } from '@/lib/game-logic';
@@ -24,6 +25,7 @@ export default function InitiativeModal({
   activeUnitsCount = 0,
   context
 }: InitiativeModalProps) {
+  useEscapeToClose(isOpen, onClose);
   const [initRoll, setInitRoll] = useState(0);
   const [isRolling, setIsRolling] = useState(false);
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { X } from 'lucide-react';
+import { useEscapeToClose } from '@/hooks/useEscapeToClose';
 
 interface ImportExportHelpProps {
   isOpen: boolean;
@@ -8,6 +9,8 @@ interface ImportExportHelpProps {
 }
 
 export function ImportExportHelp({ isOpen, onClose }: ImportExportHelpProps) {
+  useEscapeToClose(isOpen, onClose);
+
   if (!isOpen) return null;
 
   return (

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useEscapeToClose } from '@/hooks/useEscapeToClose';
 import { GitHubPagesImage as Image } from '../GitHubPagesImage';
 import { ArmyUnit, Machine, PilotInfo, Squad, Soldier } from '@/lib/types';
 import { Shield, UserX, X, ArrowLeft, Users } from 'lucide-react';
@@ -42,6 +43,7 @@ export function PilotAssignmentModal({
   onRemovePilot,
   strictPilotRankEnabled = true,
 }: PilotAssignmentModalProps) {
+  useEscapeToClose(isOpen, onClose);
   const [selectedPilot, setSelectedPilot] = useState<PilotCandidate | null>(null);
   const [step, setStep] = useState<StepState>('squads');
   const [selectedSquad, setSelectedSquad] = useState<ArmyUnit | null>(null);

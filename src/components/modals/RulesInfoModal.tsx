@@ -3,6 +3,7 @@
 import { RulesVersionID } from '@/lib/types';
 import { X, Info } from 'lucide-react';
 import { clsx } from 'clsx';
+import { useEscapeToClose } from '@/hooks/useEscapeToClose';
 
 interface RulesInfoModalProps {
   isOpen: boolean;
@@ -69,6 +70,8 @@ const COMMUNITY_CONTENT = (
 );
 
 export function RulesInfoModal({ isOpen, onClose, rulesVersion }: RulesInfoModalProps) {
+  useEscapeToClose(isOpen, onClose);
+
   if (!isOpen) return null;
 
   const content = rulesVersion === 'tehnolog' ? TEHNOLOG_CONTENT : COMMUNITY_CONTENT;

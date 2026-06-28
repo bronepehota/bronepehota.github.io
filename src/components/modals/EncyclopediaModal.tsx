@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 import { EnrichedUnit } from '@/lib/encyclopedia-utils';
 import { cn } from '@/lib/utils';
 import { useBottomSheet } from '@/hooks/useBottomSheet';
+import { useEscapeToClose } from '@/hooks/useEscapeToClose';
 import { SoldierImages } from '@/components/encyclopedia/UnitDetail/SoldierImages';
 import { MachineImages } from '@/components/encyclopedia/UnitDetail/MachineImages';
 import Image from 'next/image';
@@ -43,6 +44,7 @@ export function EncyclopediaModal({
   onClose,
   scrollTarget,
 }: EncyclopediaModalProps) {
+  useEscapeToClose(isOpen, onClose);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const { sheetRef, touchHandlers } = useBottomSheet({
