@@ -3,6 +3,16 @@ export const rollDie = (sides: number): number => {
 };
 
 /**
+ * Sentinel for unparseable dice notation ('ББ', '', 'xyz', '2D', 'D0', '0D6').
+ * Returning dice:0 (instead of a silent D6 fallback) means:
+ *  - combat yields NO effect (no damage / miss), and
+ *  - DiceNotationDisplay renders the raw string via its `dice === 0` branch.
+ * Previously 'D0' dealt constant damage (rollDie(0)===1) and '2D'/'' silently
+ * became a D6 roll — both wrong with no error surfaced.
+ */
+const INVALID_ROLL = { dice: 0, sides: 0, bonus: 0 };
+
+/**
  * Roll twice and return the better result (Surprise Attack - Fan rules)
  * @param sides - Number of sides on the die (6, 12, 20)
  * @returns Object with both rolls and the better roll
@@ -21,14 +31,15 @@ export const parseRoll = (rollStr: string): { dice: number, sides: number, bonus
   // Matches formats like "D6", "D6+2", "2D12", "D12+1", "2D6-1", etc. (negative bonuses supported)
   const regex = /(?:(\d+))?D(\d+)(?:([+-])(\d+))?/;
   const match = rollStr.match(regex);
-  if (!match) return { dice: 1, sides: 6, bonus: 0 };
+  if (!match) return INVALID_ROLL; // 'ББ', '', 'xyz', '2D' (missing sides) — no silent D6 fallback
+
+  const dice = parseInt(match[1] || '1');
+  const sides = parseInt(match[2]);
+  // Reject nonsensical dice: 'D0' (zero sides → rollDie(0)===1) and '0D6' (zero dice → -Infinity).
+  if (dice < 1 || sides < 1) return INVALID_ROLL;
 
   const sign = match[3] === '-' ? -1 : 1;
-  return {
-    dice: parseInt(match[1] || '1'),
-    sides: parseInt(match[2]),
-    bonus: match[4] ? sign * parseInt(match[4]) : 0
-  };
+  return { dice, sides, bonus: match[4] ? sign * parseInt(match[4]) : 0 };
 };
 
 /**
@@ -85,8 +96,9 @@ export const executeRoll = (rollStr: string): { total: number, rolls: number[], 
     const r = rollDie(sides);
     rolls.push(r);
   }
-  // Take maximum roll, not sum
-  const maxRoll = Math.max(...rolls);
+  // Take maximum roll, not sum. Guard empty rolls (dice:0 / invalid notation)
+  // — Math.max() with no args returns -Infinity, which would leak into total.
+  const maxRoll = rolls.length ? Math.max(...rolls) : 0;
   return { total: maxRoll + bonus, rolls, bonus };
 };
 

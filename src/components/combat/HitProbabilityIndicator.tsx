@@ -41,6 +41,9 @@ export function calculateHitProbability(
   isSurpriseAttack: boolean = false
 ): { probability: number; favorableRolls: number; totalRolls: number } {
   const { sides, bonus } = parseRoll(rangeStr);
+  // Invalid/unusable notation (e.g. 'ББ', malformed editor input) → sides:0.
+  // Bail out before the surprise-attack branch divides by totalRolls (=sides).
+  if (sides < 1) return { probability: 0, favorableRolls: 0, totalRolls: 0 };
 
   // Community Star System: fortification adds to distance
   const effectiveDistance = rulesVersion === 'community_star_system'
@@ -100,6 +103,8 @@ export function calculatePenetrationProbability(
   rulesVersion: RulesVersionID = 'tehnolog'
 ): { probability: number; penetratingDice: number; totalDice: number } {
   const { dice, sides, bonus } = parseRoll(powerStr);
+  // Invalid notation → sides:0 would divide by zero below; report 0% instead.
+  if (sides < 1) return { probability: 0, penetratingDice: 0, totalDice: 0 };
 
   // Tehnolog rules: fortification adds to armor
   const effectiveArmor = rulesVersion === 'tehnolog'
