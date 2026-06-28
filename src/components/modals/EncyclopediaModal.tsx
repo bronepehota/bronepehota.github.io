@@ -6,6 +6,7 @@ import { EnrichedUnit } from '@/lib/encyclopedia-utils';
 import { cn } from '@/lib/utils';
 import { useBottomSheet } from '@/hooks/useBottomSheet';
 import { useEscapeToClose } from '@/hooks/useEscapeToClose';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { SoldierImages } from '@/components/encyclopedia/UnitDetail/SoldierImages';
 import { MachineImages } from '@/components/encyclopedia/UnitDetail/MachineImages';
 import Image from 'next/image';
@@ -45,6 +46,8 @@ export function EncyclopediaModal({
   scrollTarget,
 }: EncyclopediaModalProps) {
   useEscapeToClose(isOpen, onClose);
+  const focusRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(focusRef, isOpen);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const { sheetRef, touchHandlers } = useBottomSheet({
@@ -78,6 +81,7 @@ export function EncyclopediaModal({
 
   return (
     <div
+      ref={focusRef}
       className="fixed inset-0 z-[60] bg-military-dark/95 backdrop-blur-sm flex items-end sm:items-center justify-center"
       onClick={onClose}
     >

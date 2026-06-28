@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useEscapeToClose } from '@/hooks/useEscapeToClose';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { FactionID } from '@/lib/types';
 import { X } from 'lucide-react';
 import { rollDie } from '@/lib/game-logic';
@@ -26,6 +27,8 @@ export default function InitiativeModal({
   context
 }: InitiativeModalProps) {
   useEscapeToClose(isOpen, onClose);
+  const focusRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(focusRef, isOpen);
   const [initRoll, setInitRoll] = useState(0);
   const [isRolling, setIsRolling] = useState(false);
 
@@ -64,7 +67,7 @@ export default function InitiativeModal({
 
   return (
     <div className="fixed inset-0 z-[100] bg-slate-950/95 flex items-center justify-center p-2 md:p-4 backdrop-blur-xl animate-in fade-in duration-300" data-testid="initiative-modal">
-      <div className={cn(
+      <div ref={focusRef} className={cn(
         "relative border-2 backdrop-blur-sm rounded-2xl md:rounded-3xl p-4 md:p-6 lg:p-8 max-w-sm w-full shadow-2xl text-center space-y-4 md:space-y-6 animate-in zoom-in duration-300 mx-auto max-h-[90vh] overflow-hidden",
         factionColors.border,
         factionColors.bg,

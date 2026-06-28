@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { X, Check, Footprints } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useBottomSheet } from '@/hooks/useBottomSheet';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { ArmyUnit, RulesVersionID, PanicTestResult, Squad } from '@/lib/types';
 import { executePanicTest } from '@/lib/panic-logic';
 
@@ -27,6 +28,9 @@ export function PanicTestModal({
     closeThreshold: 100,
     isEnabled: true,
   });
+
+  const focusRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(focusRef, isOpen);
 
   const [isRolling, setIsRolling] = useState(false);
   const [results, setResults] = useState<PanicTestResult[]>([]);
@@ -88,7 +92,7 @@ export function PanicTestModal({
   const deadIndices = unit.deadSoldiers || [];
 
   return (
-    <div className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-4">
+    <div ref={focusRef} className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-4">
       <div
         ref={sheetRef}
         {...touchHandlers}

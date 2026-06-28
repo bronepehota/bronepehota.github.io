@@ -1,9 +1,11 @@
 'use client';
 
+import { useRef } from 'react';
 import { RulesVersionID } from '@/lib/types';
 import { X, Info } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useEscapeToClose } from '@/hooks/useEscapeToClose';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 
 interface RulesInfoModalProps {
   isOpen: boolean;
@@ -71,6 +73,8 @@ const COMMUNITY_CONTENT = (
 
 export function RulesInfoModal({ isOpen, onClose, rulesVersion }: RulesInfoModalProps) {
   useEscapeToClose(isOpen, onClose);
+  const focusRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(focusRef, isOpen);
 
   if (!isOpen) return null;
 
@@ -81,7 +85,7 @@ export function RulesInfoModal({ isOpen, onClose, rulesVersion }: RulesInfoModal
       role="dialog"
       aria-modal="true"
       className={clsx(
-        'fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-4',
+        'fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-0 sm:p-4',
         'transition-opacity duration-200',
         isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
       )}
@@ -96,7 +100,8 @@ export function RulesInfoModal({ isOpen, onClose, rulesVersion }: RulesInfoModal
 
       {/* Modal */}
       <div
-        className="relative glass-strong rounded-2xl p-6 max-w-lg w-full shadow-2xl max-h-[85vh] overflow-y-auto"
+        ref={focusRef}
+        className="relative glass-strong rounded-t-2xl sm:rounded-2xl p-6 max-w-lg w-full shadow-2xl max-h-[85vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

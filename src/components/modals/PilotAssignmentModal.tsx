@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useEscapeToClose } from '@/hooks/useEscapeToClose';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { GitHubPagesImage as Image } from '../GitHubPagesImage';
 import { ArmyUnit, Machine, PilotInfo, Squad, Soldier } from '@/lib/types';
 import { Shield, UserX, X, ArrowLeft, Users } from 'lucide-react';
@@ -44,6 +45,8 @@ export function PilotAssignmentModal({
   strictPilotRankEnabled = true,
 }: PilotAssignmentModalProps) {
   useEscapeToClose(isOpen, onClose);
+  const focusRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(focusRef, isOpen);
   const [selectedPilot, setSelectedPilot] = useState<PilotCandidate | null>(null);
   const [step, setStep] = useState<StepState>('squads');
   const [selectedSquad, setSelectedSquad] = useState<ArmyUnit | null>(null);
@@ -308,7 +311,7 @@ export function PilotAssignmentModal({
         )}
 
         {/* Content */}
-        <div className="flex-1 overflow-auto p-4">
+        <div ref={focusRef} className="flex-1 overflow-auto p-4">
           {/* Rank Requirement */}
           <div className="mb-4 p-3 bg-amber-900/20 border border-amber-700/30 rounded-lg">
             <div className="flex items-center gap-2 text-amber-400">

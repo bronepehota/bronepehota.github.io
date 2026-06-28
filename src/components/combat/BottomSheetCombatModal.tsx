@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { X, ChevronLeft, Target, Sword, Bomb, EyeOff, Crosshair } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useBottomSheet } from '@/hooks/useBottomSheet';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { CombatFlowState, CombatActionType, CombatParameters } from '@/lib/combat-types';
 import { ActionSelector } from './ActionSelector';
 import { ParameterInputs } from './ParameterInputs';
@@ -97,6 +98,11 @@ export function BottomSheetCombatModal({
   // Access combat target context for memory
   const { getTargetMemory, updateTargetMemory } = useCombatTargetContext();
 
+  // Focus trap — keep keyboard focus inside the modal while it's open.
+  const isOpen = state.phase !== 'IDLE';
+  const focusRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(focusRef, isOpen);
+
   // Compute active modifiers for the current combat phase
   const modifierPhase = state.actionType === 'melee' ? 'melee' as const : 'shot';
   const soldierIdx = state.unitType === 'squad' ? (state.soldierIndex ?? undefined) : undefined;
@@ -139,7 +145,10 @@ export function BottomSheetCombatModal({
   const actionColors = getActionColors(state.actionType, state.parameters.isSurpriseAttack);
 
   return (
-    <div className="fixed inset-0 z-[100] bg-slate-950/95 backdrop-blur-sm flex items-center justify-center p-2 md:p-4">
+    <div
+      ref={focusRef}
+      className="fixed inset-0 z-[100] bg-slate-950/95 backdrop-blur-sm flex items-center justify-center p-2 md:p-4"
+    >
       <div
         ref={sheetRef}
         {...touchHandlers}

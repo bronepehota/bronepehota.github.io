@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { BuffDefinition, ActiveDebuff, DebuffTemplate } from '@/lib/modifier-types';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 
 interface DebuffModalProps {
   isOpen: boolean;
@@ -64,6 +65,8 @@ export function DebuffModal({
   currentTurn,
 }: DebuffModalProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const focusRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(focusRef, isOpen);
 
   // Body scroll lock
   useEffect(() => {
@@ -116,6 +119,7 @@ export function DebuffModal({
       aria-labelledby="debuff-modal-title"
     >
       <div
+        ref={focusRef}
         className="fixed bottom-0 left-0 right-0 md:relative md:max-w-lg bg-slate-900 rounded-t-3xl md:rounded-xl max-h-[85vh] md:max-h-[90vh] shadow-2xl flex flex-col animate-slideUp overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >

@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import type { BuffDefinition, DebuffTemplate, SoldierModifier, ActiveBuff, ActiveDebuff } from '@/lib/modifier-types';
 import { ModifierIcon } from '@/components/editor/ModifierIcons';
 import { getEffectStyles } from '@/lib/effect-colors';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 
 type CatalogItem = BuffDefinition | DebuffTemplate;
 
@@ -161,6 +162,8 @@ export function SoldierEffectsModal({
 }: SoldierEffectsModalProps) {
   const [catalogMode, setCatalogMode] = useState<'buffs' | 'debuffs' | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const focusRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(focusRef, isOpen);
 
   useEffect(() => {
     if (isOpen) {
@@ -306,6 +309,7 @@ export function SoldierEffectsModal({
       aria-labelledby="effects-modal-title"
     >
       <div
+        ref={focusRef}
         className="fixed bottom-0 left-0 right-0 md:relative md:max-w-md bg-slate-900 rounded-t-2xl md:rounded-xl max-h-[90vh] md:max-h-[90vh] shadow-2xl flex flex-col overflow-hidden border border-slate-700/40 animate-slideUp"
         onClick={(e) => e.stopPropagation()}
       >

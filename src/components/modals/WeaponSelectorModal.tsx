@@ -5,6 +5,7 @@ import { GitHubPagesImage as Image } from '../GitHubPagesImage';
 import { X, Target, Zap, Check } from 'lucide-react';
 import type { Machine, Faction, Weapon } from '@/lib/types';
 import { useBottomSheet } from '@/hooks/useBottomSheet';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 
 interface WeaponSelectorModalProps {
   machine: Machine;
@@ -34,6 +35,8 @@ export function WeaponSelectorModal({
 }: WeaponSelectorModalProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const backdropRef = useRef<HTMLDivElement>(null);
+  const focusRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(focusRef, isOpen);
 
   // Load saved weapon selection for this machine type from localStorage
   // Format: { "machine_id": [0, 2, 4] }
@@ -217,7 +220,7 @@ export function WeaponSelectorModal({
         </div>
 
         {/* Scrollable content area */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-6">
+        <div ref={focusRef} className="flex-1 overflow-y-auto p-4 md:p-6">
           <h3 className="text-lg font-bold text-white mb-3">
             Выберите вооружение:
           </h3>

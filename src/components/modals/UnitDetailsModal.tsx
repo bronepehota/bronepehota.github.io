@@ -6,6 +6,7 @@ import { ImageModal } from './ImageModal';
 import { X, Shield, Sword, Zap, Target, Gauge, ShieldCheck, Info, Cpu, Crosshair, Activity, Users, Sparkles, BookOpen, ChevronDown, ChevronUp, MapPin, Trophy, ScrollText } from 'lucide-react';
 import type { Squad, Machine, Faction, Soldier, Weapon, SpeedSector } from '@/lib/types';
 import { useBottomSheet } from '@/hooks/useBottomSheet';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { formatRange } from '@/lib/distance-utils';
 import { getEncyclopediaUnit } from '@/lib/encyclopedia-registry';
 import { getAllBuffs } from '@/lib/modifier-utils';
@@ -510,6 +511,8 @@ export function UnitDetailsModal({
 }: UnitDetailsModalProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const backdropRef = useRef<HTMLDivElement>(null);
+  const focusRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(focusRef, isOpen);
 
   // Image modal state
   const [imageModalOpen, setImageModalOpen] = useState(false);
@@ -606,7 +609,7 @@ export function UnitDetailsModal({
         </button>
 
         {/* Hero section with image, name, cost */}
-        <div className="relative px-4 pt-2 pb-4 md:p-6 md:pb-4 border-b border-slate-700">
+        <div ref={focusRef} className="relative px-4 pt-2 pb-4 md:p-6 md:pb-4 border-b border-slate-700">
           {unit.image ? (
             /* Squad has image - show single large image */
             <div className="flex justify-center mb-4 md:absolute md:right-16 md:top-1/2 md:-translate-y-1/2 md:mb-0 md:opacity-20">
