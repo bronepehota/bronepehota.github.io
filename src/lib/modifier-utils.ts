@@ -362,11 +362,12 @@ function applyModifier(
  * and soldier-level modifiers (if soldierIndex provided).
  */
 export function resolveModifierSummary(
-  unit: ArmyUnit,
+  unit: ArmyUnit | null | undefined,
   army: Army,
   phase: ModifierPhase,
   soldierIndex?: number
 ): ModifierSummary {
+  if (!unit) return EMPTY_MODIFIER_SUMMARY;
   const buffs = collectBuffsForUnit(unit, army, phase);
   const activeBuffs = collectActiveBuffsForUnit(unit, army, phase);
   const debuffs = collectDebuffsForUnit(unit, army, phase);

@@ -1,4 +1,5 @@
-import { FortificationType, HitResult, DamageResult, MeleeResult } from './types';
+import { FortificationType, HitResult, DamageResult, MeleeResult, ArmyUnit } from './types';
+import type { CombatantData } from './combatant-data';
 import type { ModifierSummary } from './modifier-types';
 
 /**
@@ -99,14 +100,14 @@ export interface CombatLogEntry {
 export interface CombatFlowState {
   phase: CombatPhase;
   actionType: CombatActionType | null;
-  unit: any;                  // ArmyUnit
+  unit: ArmyUnit | null;
   unitType: CombatUnitType;
   soldierIndex: number | null; // For squads
   parameters: CombatParameters;
   diceDisplay: DiceDisplay;
   result: CombatResult | null;
   isRolling: boolean;
-  combatantData?: any;       // CombatantData for standalone calculator
+  combatantData?: CombatantData;
   // Grenade-specific state
   grenadeData?: {
     distanceRoll: number;      // Final D6 roll selected (or single roll for tehnolog)
@@ -122,7 +123,7 @@ export interface CombatFlowState {
  * Actions that can be dispatched to combat flow
  */
 export type CombatFlowAction =
-  | { type: 'START_COMBAT'; unit: any; soldierIndex?: number; weaponIndex?: number; actionType?: CombatActionType; combatantData?: import('@/lib/combatant-data').CombatantData }
+  | { type: 'START_COMBAT'; unit: ArmyUnit; soldierIndex?: number; weaponIndex?: number; actionType?: CombatActionType; combatantData?: CombatantData }
   | { type: 'SELECT_ACTION'; actionType: CombatActionType }
   | { type: 'SET_PARAMETERS'; parameters: Partial<CombatParameters> }
   | { type: 'EXECUTE_ROLL' }

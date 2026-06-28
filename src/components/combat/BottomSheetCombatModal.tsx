@@ -235,7 +235,7 @@ export function BottomSheetCombatModal({
             <ActionSelector
               onSelect={(action) => onSelectAction(action)}
               grenadesAvailable={grenadesAvailable}
-              unit={state.unit}
+              unit={state.unit ?? undefined}
               soldierIndex={state.soldierIndex}
             />
           )}
