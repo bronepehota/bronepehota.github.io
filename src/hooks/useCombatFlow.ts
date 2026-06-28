@@ -13,8 +13,8 @@ import {
 } from '@/lib/combat-types';
 import { rollDie, multiplyRange, addBonusToRoll, rollGrenadeDistance } from '@/lib/game-logic';
 import type { CombatantData } from '@/lib/combatant-data';
-import { rulesRegistry } from '@/lib/rules-registry';
-import { getDefaultRulesVersion } from '@/lib/rules-registry';
+import { isSquad, isMachine } from '@/lib/types';
+import { rulesRegistry, getDefaultRulesVersion, isValidRulesVersion } from '@/lib/rules-registry';
 
 /**
  * Initial combat flow state
@@ -181,11 +181,12 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
   const [state, dispatch] = useReducer(combatFlowReducer, initialCombatFlowState);
   const [rulesVersion, setRulesVersion] = useState(getDefaultRulesVersion());
 
-  // Load rules version from localStorage
+  // Load rules version from localStorage (validate — a stale/garbage value would
+  // make rulesRegistry[version] undefined and crash the next rules call).
   useEffect(() => {
     const saved = localStorage.getItem('bronepehota_rules_version');
-    if (saved) {
-      setRulesVersion(saved as any);
+    if (saved && isValidRulesVersion(saved)) {
+      setRulesVersion(saved);
     }
   }, []);
 
@@ -238,12 +239,12 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
     if (state.combatantData) {
       range = state.combatantData.range || '';
       power = state.combatantData.power || '';
-    } else if (state.unitType === 'squad' && soldierIndex !== null) {
-      const soldier = (unit.data as any).soldiers[soldierIndex];
+    } else if (isSquad(unit) && soldierIndex !== null) {
+      const soldier = unit.data.soldiers[soldierIndex];
       range = soldier.range;
       power = soldier.power;
-    } else if (state.unitType === 'machine' && state.parameters.weaponIndex !== undefined) {
-      const weapon = (unit.data as any).weapons[state.parameters.weaponIndex];
+    } else if (isMachine(unit) && state.parameters.weaponIndex !== undefined) {
+      const weapon = unit.data.weapons[state.parameters.weaponIndex];
       range = weapon.range;
       power = weapon.power;
     }
@@ -329,11 +330,11 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
       finalDisplay.power = damageResult.rolls;
 
       // Armor Test and Pilot Survival Test for machines with pilots
-      if (state.unitType === 'machine' && damageResult.damage > 0) {
+      if (isMachine(state.unit) && damageResult.damage > 0) {
         const machine = state.unit;
         if (machine.pilotInfo && machine.pilotInfo.alive) {
           // Machine armor = current durability (where marker is on damage scale)
-          const currentDurability = machine.currentDurability || (machine.data as any).durability_max;
+          const currentDurability = machine.currentDurability || machine.data.durability_max;
           const machineArmor = currentDurability;
 
           // ARMOR TEST (Тест брони)
@@ -400,8 +401,8 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
     let soldierRank = 0;
     if (state.combatantData) {
       soldierRank = state.combatantData.rank;
-    } else if (state.unitType === 'squad' && state.soldierIndex !== null) {
-      const soldiers = (state.unit.data as any).soldiers;
+    } else if (isSquad(state.unit) && state.soldierIndex !== null) {
+      const soldiers = state.unit.data.soldiers;
       if (soldiers && soldiers[state.soldierIndex]) {
         soldierRank = soldiers[state.soldierIndex].rank || 0;
       }
@@ -422,7 +423,7 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
         hitRolls: allRolls.length > 0 ? allRolls : [distanceRoll],
         hitTotal: totalDistance
       }
-    } as any);
+    });
 
     // Create result for phase 1 (distance roll)
     const result: CombatResult = {
@@ -448,7 +449,7 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
     };
 
     // Store grenade-specific data for target checks
-    (dispatch as any)({
+    dispatch({
       type: 'ROLL_COMPLETE',
       result,
       diceDisplay: {
@@ -485,7 +486,7 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
     const d20Roll = rollDie(20);
 
     // Dispatch action with the dice roll result
-    dispatch({ type: 'GRENADE_CHECK_TARGET', armor, d20Roll } as any);
+    dispatch({ type: 'GRENADE_CHECK_TARGET', armor, d20Roll });
   }, [state.grenadeData, animateDiceRoll]);
 
   /**
@@ -504,8 +505,8 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
     let attackerMelee = 0;
     if (state.combatantData) {
       attackerMelee = state.combatantData.melee;
-    } else if (state.unitType === 'squad' && state.soldierIndex !== null) {
-      attackerMelee = (state.unit.data as any).soldiers[state.soldierIndex].melee;
+    } else if (isSquad(state.unit) && state.soldierIndex !== null) {
+      attackerMelee = state.unit.data.soldiers[state.soldierIndex].melee;
     }
 
     // Apply melee bonus from active modifiers
