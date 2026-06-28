@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { X, Check, Footprints } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useBottomSheet } from '@/hooks/useBottomSheet';
-import { ArmyUnit, RulesVersionID, PanicTestResult } from '@/lib/types';
+import { ArmyUnit, RulesVersionID, PanicTestResult, Squad } from '@/lib/types';
 import { executePanicTest } from '@/lib/panic-logic';
 
 interface PanicTestModalProps {
@@ -54,7 +54,7 @@ export function PanicTestModal({
 
   const handleConductTest = () => {
     setIsRolling(true);
-    const squad = unit.data as any;
+    const squad = unit.data as Squad;
     const soldiers = squad.soldiers || [];
     const deadIndices = unit.deadSoldiers || [];
 
@@ -83,7 +83,7 @@ export function PanicTestModal({
 
   if (!isOpen) return null;
 
-  const squad = unit.data as any;
+  const squad = unit.data as Squad;
   const soldiers = squad.soldiers || [];
   const deadIndices = unit.deadSoldiers || [];
 

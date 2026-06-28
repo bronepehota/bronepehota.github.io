@@ -51,7 +51,7 @@ export function MachineView({
   const machine = unit.data as Machine;
 
   // Get pilot info from unit
-  const pilotInfo: PilotInfo | null = (unit as any).pilotInfo || null;
+  const pilotInfo: PilotInfo | null = unit.pilotInfo || null;
 
   // Get weapon shots tracking from unit state
   const weaponShots: Record<number, number> = unit.machineWeaponShots || {};

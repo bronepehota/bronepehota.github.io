@@ -8,6 +8,7 @@
 import { useState } from 'react';
 import { X, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { isSquad } from '@/lib/types';
 import type { BuffDefinition, ActiveBuff } from '@/lib/modifier-types';
 import type { Army } from '@/lib/types';
 import { ModifierIcon } from '@/components/editor/ModifierIcons';
@@ -36,8 +37,8 @@ export function ApplyBuffModal({
 
   // Filter alive units
   const aliveUnits = army.units.filter(unit => {
-    if (unit.type === 'squad') {
-      const soldierCount = (unit.data as any).soldiers?.length || 0;
+    if (isSquad(unit)) {
+      const soldierCount = unit.data.soldiers.length;
       const deadCount = unit.deadSoldiers?.length || 0;
       return deadCount < soldierCount;
     }

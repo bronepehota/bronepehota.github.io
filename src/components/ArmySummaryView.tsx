@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ArmyUnit, FactionID } from '@/lib/types';
+import { ArmyUnit, FactionID, Machine, Squad } from '@/lib/types';
 import { Shield, Sword, Plus } from 'lucide-react';
 import { CompactArmyCard } from './CompactArmyCard';
 import SquadCard from './SquadCard';
@@ -120,13 +120,13 @@ export function ArmySummaryView({
                   <div onClick={() => onUnitClick?.(unit)} className="cursor-pointer">
                     {unit.type === 'machine' ? (
                       <MachineCard
-                        machine={unit.data as any}
+                        machine={unit.data as Machine}
                         onAdd={() => {}}
                         onViewDetails={() => onUnitClick?.(unit)}
                       />
                     ) : (
                       <SquadCard
-                        squad={unit.data as any}
+                        squad={unit.data as Squad}
                         onAdd={() => {}}
                         onViewDetails={() => onUnitClick?.(unit)}
                       />

@@ -176,12 +176,13 @@ export function CombatResults({
                 Урон vs Броня [{getEffectiveArmor()}]
               </div>
 
-              {parameters.isSurpriseAttack && result.damageResult.isSurpriseAttack && (result.damageResult as any).bothRolls ? (
+              {parameters.isSurpriseAttack && result.damageResult.isSurpriseAttack && result.damageResult.bothRolls ? (
                 <div className="space-y-2">
-                  {(result.damageResult as any).bothRolls.map((rollSet: number[], setIndex: number) => {
+                  {result.damageResult.bothRolls.map((rollSet: number[], setIndex: number) => {
                     const isFirstSet = setIndex === 0;
-                    const firstSetDamage = (result.damageResult as any).bothRolls[0].filter((r: number) => r > getEffectiveArmor()).length;
-                    const secondSetDamage = (result.damageResult as any).bothRolls[1].filter((r: number) => r > getEffectiveArmor()).length;
+                    const rolls = result.damageResult!.bothRolls!;
+                    const firstSetDamage = rolls[0].filter((r: number) => r > getEffectiveArmor()).length;
+                    const secondSetDamage = rolls[1].filter((r: number) => r > getEffectiveArmor()).length;
                     const thisSetDamage = isFirstSet ? firstSetDamage : secondSetDamage;
                     const isWinner = thisSetDamage > (isFirstSet ? secondSetDamage : firstSetDamage);
 
@@ -540,10 +541,10 @@ export function CombatResults({
         const meleeResult = result.meleeResult!;
         return (
           <div className="space-y-3">
-            {parameters.isSurpriseAttack && (meleeResult as any).attackerRolls ? (
+            {parameters.isSurpriseAttack && meleeResult.attackerRolls ? (
               <div className="bg-purple-900/20 p-3 rounded-lg border border-purple-700">
                 <div className="flex items-center justify-center gap-3">
-                  {(meleeResult as any).attackerRolls.map((roll: number, index: number) => {
+                  {meleeResult.attackerRolls.map((roll: number, index: number) => {
                     const isBest = roll === meleeResult.attackerRoll;
                   return (
                     <AnimatedDice

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Army, ArmyUnit, RulesVersionID } from '@/lib/types';
+import { Army, ArmyUnit, RulesVersionID, isSquad } from '@/lib/types';
 import ArmyBuilder from '@/components/ArmyBuilder';
 import GameSession from '@/components/GameSession';
 import { AlertTriangle, X } from 'lucide-react';
@@ -207,10 +207,10 @@ export default function Home() {
               };
             }
             // Also reset squad action states for stale battles
-            if (unit.type === 'squad' && unit.actionsUsed) {
+            if (isSquad(unit) && unit.actionsUsed) {
               return {
                 ...unit,
-                actionsUsed: (unit.data as any).soldiers.map(() => ({
+                actionsUsed: unit.data.soldiers.map(() => ({
                   moved: false,
                   shot: false,
                   melee: false,
