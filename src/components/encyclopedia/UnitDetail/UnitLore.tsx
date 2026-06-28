@@ -78,7 +78,7 @@ export function UnitLore({ unit }: UnitLoreProps) {
           <div className="space-y-2">
             {unit.encyclopedia.locations.map((location, index) => (
               <div key={index} className="flex items-start gap-2">
-                <span className="text-lg">{getLocationIcon((location as any).type || 'default')}</span>
+                <span className="text-lg">{getLocationIcon(location.type)}</span>
                 <div>
                   <h4 className="font-oswald text-military-sand">{location.name}</h4>
                   <p className="text-sm text-military-sand/70">{location.description}</p>
