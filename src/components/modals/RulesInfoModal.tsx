@@ -81,7 +81,7 @@ export function RulesInfoModal({ isOpen, onClose, rulesVersion }: RulesInfoModal
       role="dialog"
       aria-modal="true"
       className={clsx(
-        'fixed inset-0 z-[200] flex items-center justify-center p-4',
+        'fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-4',
         'transition-opacity duration-200',
         isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
       )}
@@ -96,7 +96,7 @@ export function RulesInfoModal({ isOpen, onClose, rulesVersion }: RulesInfoModal
 
       {/* Modal */}
       <div
-        className="relative glass-strong rounded-2xl p-6 max-w-lg w-full shadow-2xl"
+        className="relative glass-strong rounded-2xl p-6 max-w-lg w-full shadow-2xl max-h-[85vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
