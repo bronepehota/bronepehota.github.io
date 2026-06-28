@@ -111,6 +111,27 @@ describe('config-export', () => {
     });
   });
 
+  describe('round-trip: create → serialize → validate → restore', () => {
+    it('preserves sources and modifiers across export/import', () => {
+      const source = {
+        id: 'rt-src', name: 'Round Trip', description: '', version: '1',
+        baseSource: null, factions: [], squads: [], machines: [],
+        createdAt: '2026-01-01', updatedAt: '2026-01-01',
+      } as unknown as CustomSource;
+      const modifiers = {
+        buffs: [{ id: 'b1', name: 'Buff', target: 'soldier' } as never],
+        debuffs: [{ id: 'd1', name: 'Debuff', target: 'soldier' } as never],
+      };
+      const envelope = createConfigEnvelope([source], modifiers);
+      const result = validateConfigEnvelope(JSON.stringify(envelope));
+      expect(result.valid).toBe(true);
+      expect(result.data!.sources[0].id).toBe('rt-src');
+      expect(result.data!.sources[0].name).toBe('Round Trip');
+      expect(result.data!.modifiers.buffs.length).toBe(1);
+      expect(result.data!.modifiers.debuffs[0].id).toBe('d1');
+    });
+  });
+
   describe('generateConfigFileName', () => {
     it('should generate filename with UTC date', () => {
       const name = generateConfigFileName();
