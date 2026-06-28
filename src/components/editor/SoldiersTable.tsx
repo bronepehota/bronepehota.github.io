@@ -68,7 +68,7 @@ function SoldierModifierModal({ catalog, selected, onToggle, onClose }: SoldierM
       <div className="relative w-full max-w-md bg-slate-900 rounded-2xl border border-slate-700/50 shadow-2xl max-h-[70vh] flex flex-col">
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700/50 shrink-0">
           <h3 className="text-sm font-semibold text-slate-200">Модификатор</h3>
-          <button onClick={onClose} className="p-1 rounded-md hover:bg-slate-800 transition-colors">
+          <button onClick={onClose} aria-label="Закрыть" className="p-1 rounded-md hover:bg-slate-800 transition-colors">
             <X className="w-4 h-4 text-slate-400" />
           </button>
         </div>

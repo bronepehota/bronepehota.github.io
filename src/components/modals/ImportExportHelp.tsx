@@ -17,7 +17,7 @@ export function ImportExportHelp({ isOpen, onClose }: ImportExportHelpProps) {
           <h3 className="text-lg font-semibold text-slate-100">
             Как перенести настройки
           </h3>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-slate-800 text-slate-400">
+          <button onClick={onClose} aria-label="Закрыть" className="p-1 rounded-lg hover:bg-slate-800 text-slate-400">
             <X className="w-5 h-5" />
           </button>
         </div>

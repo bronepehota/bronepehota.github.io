@@ -82,6 +82,7 @@ export default function InitiativeModal({
           </h3>
           <button
             onClick={onClose}
+            aria-label="Закрыть"
             className="p-1 hover:bg-slate-800/50 rounded-sm transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
             title="Закрыть"
           >

@@ -107,7 +107,7 @@ export function PanicTestModal({
           <button
             onClick={onClose}
             disabled={isRolling}
-            aria-label="Close"
+            aria-label="Закрыть"
             className="p-2 hover:bg-slate-800 rounded-lg transition-colors text-slate-400 hover:text-white min-w-[44px] min-h-[44px] flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <X className="w-5 h-5" />

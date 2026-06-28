@@ -113,6 +113,7 @@ export function EncyclopediaModal({
           </div>
           <button
             onClick={onClose}
+            aria-label="Закрыть"
             className="p-2 hover:bg-military-steel/20 rounded-sm transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center border border-military-rust/30"
           >
             <X className="w-4 h-4 sm:w-5 sm:h-5 text-military-steel" />
