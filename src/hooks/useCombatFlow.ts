@@ -11,7 +11,7 @@ import {
   CombatConfig,
   GrenadeBlastResult,
 } from '@/lib/combat-types';
-import { rollDie, multiplyRange, addBonusToRoll } from '@/lib/game-logic';
+import { rollDie, multiplyRange, addBonusToRoll, rollGrenadeDistance } from '@/lib/game-logic';
 import type { CombatantData } from '@/lib/combatant-data';
 import { rulesRegistry } from '@/lib/rules-registry';
 import { getDefaultRulesVersion } from '@/lib/rules-registry';
@@ -386,8 +386,8 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
    * Execute grenade attack - roll distance
    * Phase 1: Determine explosion location
    *
-   * Tehnolog rules: D6 + rank (bonus)
-   * Community Star System rules: Roll D6 (rank times), pick best result
+   * Tehnolog rules (official §7.8): single D6 — the roll is the distance, no rank bonus.
+   * Community Star System rules: roll D6 (rank times), keep best result.
    */
   const executeGrenade = useCallback(async (): Promise<CombatResult> => {
     if (!state.unit || state.actionType !== 'grenade') {
@@ -410,35 +410,9 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
     // Animate distance roll (D6)
     await animateDiceRoll();
 
-    // Different mechanics for different rules versions
-    let distanceRoll: number;
-    const allRolls: number[] = [];
-    let totalDistance: number;
-
-    if (rulesVersion === 'community_star_system' && soldierRank > 0) {
-      // Community Star System: Roll D6 multiple times (equal to rank), pick best result
-      // "Указав цель, игрок бросает кубик Д6 столько раз, сколько указано в его
-      // характеристике «Армейского ранга», чтобы определить дальность. Из всех
-      // бросков выбирается результат наиболее подходящий, по мнению игрока."
-      for (let i = 0; i < soldierRank; i++) {
-        allRolls.push(rollDie(6));
-      }
-      // Pick the best result (highest for distance)
-      distanceRoll = Math.max(...allRolls);
-      totalDistance = distanceRoll;  // No bonus - distance is just the best roll
-    } else {
-      // Tehnolog rules (original): D6 only, no bonus
-      distanceRoll = rollDie(6);
-      totalDistance = distanceRoll;
-    }
-
-    // Calculate blast zone (±1 step)
-    const minSteps = Math.max(1, totalDistance - 1);
-    const maxSteps = totalDistance + 1;
-    const minCm = minSteps * 4;
-    const maxCm = maxSteps * 4;
-
-    const blastZone = { minSteps, maxSteps, minCm, maxCm };
+    // Determine blast location (rules-dependent) — see rollGrenadeDistance in game-logic.
+    const { distanceRoll, allRolls, totalDistance, blastZone } =
+      rollGrenadeDistance(rulesVersion, soldierRank);
 
     // Store grenade data in state for phase 2
     dispatch({
@@ -460,7 +434,7 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
         roll: distanceRoll,
         rolls: allRolls.length > 0 ? allRolls : [distanceRoll],
         total: totalDistance,
-        bonus: rulesVersion === 'community_star_system' ? 0 : soldierRank,
+        bonus: 0, // distance is the raw roll (best-of-N for community); rank never adds
         isGrenade: true
       },
       timestamp: Date.now(),

@@ -1,4 +1,4 @@
-import { parseRoll, executeRoll, multiplyRange, calculateDamage } from '../lib/game-logic';
+import { parseRoll, executeRoll, multiplyRange, calculateDamage, rollGrenadeDistance } from '../lib/game-logic';
 import { rulesRegistry } from '@/lib/rules-registry';
 
 describe('multiplyRange', () => {
@@ -110,6 +110,39 @@ describe('executeRoll - invalid input yields no roll (not -Infinity, not silent 
 describe('calculateDamage - invalid power deals no damage', () => {
   test('D0 vs armor 0 → 0 damage (was 1: rollDie(0)===1 > 0)', () => {
     expect(calculateDamage('D0', 0).damage).toBe(0);
+  });
+});
+
+describe('rollGrenadeDistance - grenade blast-location (phase 1)', () => {
+  // Deterministic via an injected D6 roller.
+  test('Tehnolog: single D6, NO rank bonus (official rules §7.8)', () => {
+    const r = rollGrenadeDistance('tehnolog', 3, () => 4);
+    expect(r.distanceRoll).toBe(4);
+    expect(r.allRolls).toEqual([4]);
+    expect(r.totalDistance).toBe(4); // NOT 4 + rank(3)
+    expect(r.bonus).toBe(0);         // previously wrongly reported soldierRank
+    expect(r.blastZone).toEqual({ minSteps: 3, maxSteps: 5, minCm: 12, maxCm: 20 });
+  });
+
+  test('Community Star System: roll D6 per rank, keep best', () => {
+    const rolls = [2, 5, 3];
+    let i = 0;
+    const r = rollGrenadeDistance('community_star_system', 3, () => rolls[i++]);
+    expect(r.distanceRoll).toBe(5);
+    expect(r.allRolls).toEqual([2, 5, 3]);
+    expect(r.totalDistance).toBe(5);
+    expect(r.bonus).toBe(0);
+  });
+
+  test('Community rank 0 falls back to a single D6', () => {
+    const r = rollGrenadeDistance('community_star_system', 0, () => 6);
+    expect(r.totalDistance).toBe(6);
+    expect(r.allRolls).toEqual([6]);
+  });
+
+  test('D6=1 impact → blast zone reaches the thrower (minSteps clamped to 1)', () => {
+    const r = rollGrenadeDistance('tehnolog', 2, () => 1);
+    expect(r.blastZone).toEqual({ minSteps: 1, maxSteps: 2, minCm: 4, maxCm: 8 });
   });
 });
 

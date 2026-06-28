@@ -126,6 +126,66 @@ export const calculateDamage = (powerStr: string, targetArmor: number): { damage
   return { damage, rolls };
 };
 
+export interface GrenadeBlastZone {
+  minSteps: number;
+  maxSteps: number;
+  minCm: number;
+  maxCm: number;
+}
+
+export interface GrenadeDistanceResult {
+  distanceRoll: number;
+  allRolls: number[];
+  totalDistance: number;
+  bonus: number;
+  blastZone: GrenadeBlastZone;
+}
+
+/**
+ * Grenade attack — phase 1: determine the blast location.
+ *
+ * Official Tehnolog rules (docs/original/official_rules.txt §7.8):
+ *   "игрок бросает кубик Д6, чтобы определить дальность" — a single D6, and the
+ *   roll IS the distance in steps. No rank bonus.
+ *
+ * Community Star System rules (docs/panov/fan_rules.txt):
+ *   roll D6 a number of times equal to the thrower's Army Rank, keep the best.
+ *
+ * Blast zone is ±1 step around the impact point (1 step = 4 cm). A roll of 1
+ * means the blast reaches the thrower (self-danger warning, handled by the UI).
+ *
+ * @param rulesVersion 'tehnolog' | 'community_star_system'
+ * @param soldierRank  thrower's Army Rank (number of D6 rolled under community rules)
+ * @param rollD6       injectable D6 roller (defaults to rollDie(6)) — for deterministic tests
+ */
+export function rollGrenadeDistance(
+  rulesVersion: string,
+  soldierRank: number,
+  rollD6: () => number = () => rollDie(6),
+): GrenadeDistanceResult {
+  const allRolls: number[] = [];
+
+  if (rulesVersion === 'community_star_system' && soldierRank > 0) {
+    for (let i = 0; i < soldierRank; i++) allRolls.push(rollD6());
+  } else {
+    // Tehnolog (official §7.8): a single D6, no rank bonus.
+    allRolls.push(rollD6());
+  }
+
+  const distanceRoll = Math.max(...allRolls);
+  const totalDistance = distanceRoll; // rank never adds to distance in either ruleset
+  const minSteps = Math.max(1, totalDistance - 1);
+  const maxSteps = totalDistance + 1;
+
+  return {
+    distanceRoll,
+    allRolls,
+    totalDistance,
+    bonus: 0,
+    blastZone: { minSteps, maxSteps, minCm: minSteps * 4, maxCm: maxSteps * 4 },
+  };
+}
+
 export const calculateMelee = (attackerMelee: number, defenderMelee: number): {
   attackerRoll: number,
   attackerTotal: number,
