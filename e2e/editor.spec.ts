@@ -42,7 +42,6 @@ test.describe.serial('Editor', () => {
 
     // Click create button
     await page.getByTitle('Создать источник').first().click();
-    await page.waitForTimeout(500);
 
     // Should see modal
     await expect(page.getByText('Новый источник').first()).toBeVisible();
@@ -112,13 +111,11 @@ test.describe.serial('Editor', () => {
     // Upload via file input
     const fileInput = page.locator('input[type="file"][accept=".json"]').first();
     await fileInput.setInputFiles(tmpFile);
-    await page.waitForTimeout(1000);
 
     // Confirm dialog should appear
     const confirmButton = page.getByRole('button', { name: 'Загрузить', exact: true });
     await expect(confirmButton).toBeVisible();
     await confirmButton.click();
-    await page.waitForTimeout(1000);
 
     // Should see imported source in the list
     await expect(page.getByText('Импортированный источник').first()).toBeVisible();
@@ -133,7 +130,6 @@ test.describe.serial('Editor', () => {
 
     // Click create button
     await page.getByTitle('Создать источник').first().click();
-    await page.waitForTimeout(500);
 
     // Verify form fields are present and interactive
     const nameInput = page.getByTestId('source-name-input');
@@ -143,7 +139,6 @@ test.describe.serial('Editor', () => {
     // Type in the name field
     await nameInput.click();
     await nameInput.pressSequentially('Test Source', { delay: 30 });
-    await page.waitForTimeout(200);
 
     // Verify the input has content (DOM value is set)
     await expect(nameInput).toHaveValue('Test Source');
@@ -153,7 +148,6 @@ test.describe.serial('Editor', () => {
     await expect(descInput).toBeVisible();
     await descInput.click();
     await descInput.pressSequentially('Test description', { delay: 30 });
-    await page.waitForTimeout(200);
 
     // Verify type buttons are present
     await expect(page.getByText('Новый источник').nth(1)).toBeVisible();
@@ -173,14 +167,12 @@ test.describe.serial('Editor', () => {
 
     // Click create button
     await page.getByTitle('Создать источник').first().click();
-    await page.waitForTimeout(500);
 
     // Should see modal
     await expect(page.getByText('Новый источник').first()).toBeVisible();
 
     // Click cancel
     await page.click('button:has-text("Отмена")');
-    await page.waitForTimeout(300);
 
     // Modal should be closed - check that the modal container is gone
     await expect(page.getByTestId('create-source-modal')).not.toBeVisible();
@@ -192,7 +184,6 @@ test.describe.serial('Editor', () => {
 
     // Click create button
     await page.getByTitle('Создать источник').first().click();
-    await page.waitForTimeout(500);
 
     // Find the "Новый источник" type button (second occurrence - first is the modal title)
     const newTypeButton = page.getByRole('button').filter({ hasText: 'Новый источник' }).first();
@@ -202,7 +193,6 @@ test.describe.serial('Editor', () => {
     // Click "Расширение существующего"
     const extButton = page.getByRole('button').filter({ hasText: 'Расширение существующего' });
     await extButton.click();
-    await page.waitForTimeout(200);
 
     // Should see base source selector appear
     await expect(page.getByText('Базовый источник').first()).toBeVisible();

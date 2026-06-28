@@ -57,13 +57,11 @@ test.describe('Aimed Shot - Combat Modal', () => {
     const actionButton = page.getByRole('button', { name: 'Выберите действие' }).first();
     await expect(actionButton).toBeVisible({ timeout: 5000 });
     await actionButton.click({ force: true });
-    await page.waitForTimeout(500);
 
     // Select shot action (ВЫСТРЕЛ)
     const shotButton = page.getByRole('button', { name: /выстрел/i });
     await expect(shotButton).toBeVisible({ timeout: 3000 });
     await shotButton.click();
-    await page.waitForTimeout(300);
 
     // Check aimed shot button is visible (uses aria-label)
     const aimedShotButton = page.locator('button[aria-label*="Прицельный"]');
@@ -74,7 +72,6 @@ test.describe('Aimed Shot - Combat Modal', () => {
 
     // Toggle aimed shot on
     await aimedShotButton.click();
-    await page.waitForTimeout(200);
 
     // Verify it's now enabled
     await expect(aimedShotButton).toHaveAttribute('aria-label', 'Прицельный выстрел включён');
@@ -145,7 +142,6 @@ test.describe('Aimed Shot - Combat Modal', () => {
     const weaponCard = newPage.getByRole('button', { name: /Выстрел:/i }).first();
     await expect(weaponCard).toBeVisible({ timeout: 5000 });
     await weaponCard.click({ force: true });
-    await newPage.waitForTimeout(500);
 
     // Check aimed shot button is NOT visible for machines
     const aimedShotButton = newPage.locator('button[aria-label*="Прицельный"]');
@@ -204,13 +200,11 @@ test.describe('Aimed Shot - Combat Modal', () => {
     const actionButton = page.getByRole('button', { name: 'Выберите действие' }).first();
     await expect(actionButton).toBeVisible({ timeout: 5000 });
     await actionButton.click({ force: true });
-    await page.waitForTimeout(500);
 
     // Select shot action
     const shotButton = page.getByRole('button', { name: /выстрел/i });
     await expect(shotButton).toBeVisible({ timeout: 3000 });
     await shotButton.click();
-    await page.waitForTimeout(300);
 
     // Get aimed shot button and verify it exists
     const aimedShotButton = page.locator('button[aria-label*="Прицельный"]');
@@ -218,12 +212,10 @@ test.describe('Aimed Shot - Combat Modal', () => {
 
     // Toggle aimed shot on
     await aimedShotButton.click();
-    await page.waitForTimeout(200);
     await expect(aimedShotButton).toHaveAttribute('aria-label', 'Прицельный выстрел включён');
 
     // Toggle aimed shot off again
     await aimedShotButton.click();
-    await page.waitForTimeout(200);
     await expect(aimedShotButton).toHaveAttribute('aria-label', 'Прицельный выстрел выключен');
   });
 });
@@ -293,12 +285,10 @@ test.describe('Optional Rules Toggles', () => {
 
     // Toggle on - click the button inside
     await aimedShotButton.click();
-    await page.waitForTimeout(200);
     await expect(aimedShotButton).toHaveAttribute('aria-pressed', 'true');
 
     // Toggle off
     await aimedShotButton.click();
-    await page.waitForTimeout(200);
     await expect(aimedShotButton).toHaveAttribute('aria-pressed', 'false');
   });
 
@@ -321,7 +311,6 @@ test.describe('Optional Rules Toggles', () => {
 
     // Toggle on - click the button inside
     await surpriseAttackButton.click();
-    await page.waitForTimeout(200);
     await expect(surpriseAttackButton).toHaveAttribute('aria-pressed', 'true');
   });
 
