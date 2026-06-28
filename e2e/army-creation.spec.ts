@@ -57,9 +57,11 @@ test.describe('Army Creation', () => {
     });
 
     expect(armyData).toBeTruthy();
-    const parsedArmy = JSON.parse(armyData!);
-    expect(parsedArmy.name).toBe('Test Army');
-    expect(parsedArmy.units).toEqual(expect.anything());
+    const parsed = JSON.parse(armyData!);
+    // Persistence uses a versioned envelope { schemaVersion, army }; legacy data is a bare army.
+    const army = parsed.army ?? parsed;
+    expect(army.name).toBe('Test Army');
+    expect(army.units).toEqual(expect.anything());
   });
 
   test('should calculate total cost correctly', async ({ page }) => {
