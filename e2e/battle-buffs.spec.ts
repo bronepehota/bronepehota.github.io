@@ -40,7 +40,6 @@ test.describe('Editor promo link on source selection', () => {
   test('should show editor promo even after selecting a source', async ({ page }) => {
     // Click star_system source
     await page.getByTestId('source-card-star_system').click();
-    await page.waitForTimeout(300);
 
     // Editor link should still be visible
     const editorLink = page.locator('a[href="/editor"]').first();
@@ -111,7 +110,6 @@ test.describe('Battle buffs availability', () => {
       const unitNav = page.locator('[data-testid^="unit-nav-"]').first();
       if (await unitNav.isVisible()) {
         await unitNav.click();
-        await page.waitForTimeout(500);
       }
       await expect(page.getByTestId('game-session')).toBeVisible({ timeout: 5000 });
     }
@@ -183,7 +181,6 @@ test.describe('Battle buffs availability', () => {
     // Click Баф button to open buff catalog
     const buffsBtn = modal.locator('button').filter({ hasText: /^Баф/ }).first();
     await buffsBtn.click();
-    await page.waitForTimeout(300);
 
     // Squad "Линейная клон-пехота" has NO buffs assigned in editor
     // So buff catalog should show "Нет доступных"
@@ -228,7 +225,6 @@ test.describe('Battle buffs availability', () => {
 
     // Click close
     await modal.locator('[aria-label="Закрыть"]').click();
-    await page.waitForTimeout(300);
 
     // Modal should close
     await expect(modal).not.toBeVisible();
@@ -247,7 +243,6 @@ test.describe('Full flow regression with editor link', () => {
 
     // Step 1: Rules
     await page.getByTestId('rules-confirm-button').click();
-    await page.waitForTimeout(500);
 
     // Step 2: Source — editor link visible
     await expect(page.locator('a[href="/editor"]').first()).toBeVisible();
@@ -266,7 +261,6 @@ test.describe('Full flow regression with editor link', () => {
     await page.getByRole('button', { name: '350' }).click();
     await page.waitForTimeout(300);
     await page.getByTestId('budget-next-button').click();
-    await page.waitForTimeout(500);
 
     // Should be on unit selection screen
     await expect(page.getByTestId('unit-selector')).toBeVisible();

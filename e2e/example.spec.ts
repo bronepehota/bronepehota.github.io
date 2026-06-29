@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { clearStorage } from './helpers/setup';
 
 /**
  * Example Playwright E2E test
@@ -6,6 +7,7 @@ import { test, expect } from '@playwright/test';
  */
 test.describe('Main Page', () => {
   test.beforeEach(async ({ page }) => {
+    await clearStorage(page);
     await page.goto('/');
   });
 

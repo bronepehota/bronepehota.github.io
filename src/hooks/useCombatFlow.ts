@@ -11,10 +11,10 @@ import {
   CombatConfig,
   GrenadeBlastResult,
 } from '@/lib/combat-types';
-import { rollDie, multiplyRange, addBonusToRoll } from '@/lib/game-logic';
+import { rollDie, multiplyRange, addBonusToRoll, rollGrenadeDistance } from '@/lib/game-logic';
 import type { CombatantData } from '@/lib/combatant-data';
-import { rulesRegistry } from '@/lib/rules-registry';
-import { getDefaultRulesVersion } from '@/lib/rules-registry';
+import { isSquad, isMachine } from '@/lib/types';
+import { rulesRegistry, getDefaultRulesVersion, isValidRulesVersion } from '@/lib/rules-registry';
 
 /**
  * Initial combat flow state
@@ -147,9 +147,6 @@ function combatFlowReducer(
         grenadeBlastChecks: [...(state.result.grenadeBlastChecks || []), newCheck],
       } : state.result;
 
-      console.log('[GRENADE_CHECK_TARGET] New check:', newCheck);
-      console.log('[GRENADE_CHECK_TARGET] Updated result grenadeBlastChecks:', updatedResult?.grenadeBlastChecks);
-
       return {
         ...state,
         result: updatedResult,
@@ -181,11 +178,12 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
   const [state, dispatch] = useReducer(combatFlowReducer, initialCombatFlowState);
   const [rulesVersion, setRulesVersion] = useState(getDefaultRulesVersion());
 
-  // Load rules version from localStorage
+  // Load rules version from localStorage (validate — a stale/garbage value would
+  // make rulesRegistry[version] undefined and crash the next rules call).
   useEffect(() => {
     const saved = localStorage.getItem('bronepehota_rules_version');
-    if (saved) {
-      setRulesVersion(saved as any);
+    if (saved && isValidRulesVersion(saved)) {
+      setRulesVersion(saved);
     }
   }, []);
 
@@ -238,12 +236,12 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
     if (state.combatantData) {
       range = state.combatantData.range || '';
       power = state.combatantData.power || '';
-    } else if (state.unitType === 'squad' && soldierIndex !== null) {
-      const soldier = (unit.data as any).soldiers[soldierIndex];
+    } else if (isSquad(unit) && soldierIndex !== null) {
+      const soldier = unit.data.soldiers[soldierIndex];
       range = soldier.range;
       power = soldier.power;
-    } else if (state.unitType === 'machine' && state.parameters.weaponIndex !== undefined) {
-      const weapon = (unit.data as any).weapons[state.parameters.weaponIndex];
+    } else if (isMachine(unit) && state.parameters.weaponIndex !== undefined) {
+      const weapon = unit.data.weapons[state.parameters.weaponIndex];
       range = weapon.range;
       power = weapon.power;
     }
@@ -329,11 +327,11 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
       finalDisplay.power = damageResult.rolls;
 
       // Armor Test and Pilot Survival Test for machines with pilots
-      if (state.unitType === 'machine' && damageResult.damage > 0) {
+      if (isMachine(state.unit) && damageResult.damage > 0) {
         const machine = state.unit;
         if (machine.pilotInfo && machine.pilotInfo.alive) {
           // Machine armor = current durability (where marker is on damage scale)
-          const currentDurability = machine.currentDurability || (machine.data as any).durability_max;
+          const currentDurability = machine.currentDurability || machine.data.durability_max;
           const machineArmor = currentDurability;
 
           // ARMOR TEST (Тест брони)
@@ -386,8 +384,8 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
    * Execute grenade attack - roll distance
    * Phase 1: Determine explosion location
    *
-   * Tehnolog rules: D6 + rank (bonus)
-   * Community Star System rules: Roll D6 (rank times), pick best result
+   * Tehnolog rules (official §7.8): single D6 — the roll is the distance, no rank bonus.
+   * Community Star System rules: roll D6 (rank times), keep best result.
    */
   const executeGrenade = useCallback(async (): Promise<CombatResult> => {
     if (!state.unit || state.actionType !== 'grenade') {
@@ -400,8 +398,8 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
     let soldierRank = 0;
     if (state.combatantData) {
       soldierRank = state.combatantData.rank;
-    } else if (state.unitType === 'squad' && state.soldierIndex !== null) {
-      const soldiers = (state.unit.data as any).soldiers;
+    } else if (isSquad(state.unit) && state.soldierIndex !== null) {
+      const soldiers = state.unit.data.soldiers;
       if (soldiers && soldiers[state.soldierIndex]) {
         soldierRank = soldiers[state.soldierIndex].rank || 0;
       }
@@ -410,35 +408,9 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
     // Animate distance roll (D6)
     await animateDiceRoll();
 
-    // Different mechanics for different rules versions
-    let distanceRoll: number;
-    const allRolls: number[] = [];
-    let totalDistance: number;
-
-    if (rulesVersion === 'community_star_system' && soldierRank > 0) {
-      // Community Star System: Roll D6 multiple times (equal to rank), pick best result
-      // "Указав цель, игрок бросает кубик Д6 столько раз, сколько указано в его
-      // характеристике «Армейского ранга», чтобы определить дальность. Из всех
-      // бросков выбирается результат наиболее подходящий, по мнению игрока."
-      for (let i = 0; i < soldierRank; i++) {
-        allRolls.push(rollDie(6));
-      }
-      // Pick the best result (highest for distance)
-      distanceRoll = Math.max(...allRolls);
-      totalDistance = distanceRoll;  // No bonus - distance is just the best roll
-    } else {
-      // Tehnolog rules (original): D6 only, no bonus
-      distanceRoll = rollDie(6);
-      totalDistance = distanceRoll;
-    }
-
-    // Calculate blast zone (±1 step)
-    const minSteps = Math.max(1, totalDistance - 1);
-    const maxSteps = totalDistance + 1;
-    const minCm = minSteps * 4;
-    const maxCm = maxSteps * 4;
-
-    const blastZone = { minSteps, maxSteps, minCm, maxCm };
+    // Determine blast location (rules-dependent) — see rollGrenadeDistance in game-logic.
+    const { distanceRoll, allRolls, totalDistance, blastZone } =
+      rollGrenadeDistance(rulesVersion, soldierRank);
 
     // Store grenade data in state for phase 2
     dispatch({
@@ -448,7 +420,7 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
         hitRolls: allRolls.length > 0 ? allRolls : [distanceRoll],
         hitTotal: totalDistance
       }
-    } as any);
+    });
 
     // Create result for phase 1 (distance roll)
     const result: CombatResult = {
@@ -460,7 +432,7 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
         roll: distanceRoll,
         rolls: allRolls.length > 0 ? allRolls : [distanceRoll],
         total: totalDistance,
-        bonus: rulesVersion === 'community_star_system' ? 0 : soldierRank,
+        bonus: 0, // distance is the raw roll (best-of-N for community); rank never adds
         isGrenade: true
       },
       timestamp: Date.now(),
@@ -474,7 +446,7 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
     };
 
     // Store grenade-specific data for target checks
-    (dispatch as any)({
+    dispatch({
       type: 'ROLL_COMPLETE',
       result,
       diceDisplay: {
@@ -511,7 +483,7 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
     const d20Roll = rollDie(20);
 
     // Dispatch action with the dice roll result
-    dispatch({ type: 'GRENADE_CHECK_TARGET', armor, d20Roll } as any);
+    dispatch({ type: 'GRENADE_CHECK_TARGET', armor, d20Roll });
   }, [state.grenadeData, animateDiceRoll]);
 
   /**
@@ -530,8 +502,8 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
     let attackerMelee = 0;
     if (state.combatantData) {
       attackerMelee = state.combatantData.melee;
-    } else if (state.unitType === 'squad' && state.soldierIndex !== null) {
-      attackerMelee = (state.unit.data as any).soldiers[state.soldierIndex].melee;
+    } else if (isSquad(state.unit) && state.soldierIndex !== null) {
+      attackerMelee = state.unit.data.soldiers[state.soldierIndex].melee;
     }
 
     // Apply melee bonus from active modifiers

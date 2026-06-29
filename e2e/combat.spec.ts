@@ -1,11 +1,15 @@
 import { test, expect } from '@playwright/test';
-import { setupGameSessionWithSquad } from './helpers/setup';
+import { setupGameSessionWithSquad, clearStorage } from './helpers/setup';
 
 /**
  * Combat E2E tests
  * Tests critical combat gameplay mechanics
  */
 test.describe('Combat Mechanics', () => {
+  test.beforeEach(async ({ page }) => {
+    await clearStorage(page);
+  });
+
   test('should open combat modal', async ({ page }) => {
     await setupGameSessionWithSquad(page, {
       unitOverrides: { instanceId: 'combat-unit-1' },
@@ -68,7 +72,6 @@ test.describe('Combat Mechanics', () => {
     const shotButton = page.getByRole('button', { name: /выстрел/i });
     await expect(shotButton).toBeVisible({ timeout: 3000 });
     await shotButton.click();
-    await page.waitForTimeout(300);
 
     // Verify combat modal is showing (title "БОЕВАЯ СИСТЕМА" visible)
     await expect(page.getByText('БОЕВАЯ СИСТЕМА')).toBeVisible({ timeout: 3000 });
@@ -103,7 +106,6 @@ test.describe('Combat Mechanics', () => {
     const meleeButton = page.getByRole('button', { name: /ближний бой|бб/i });
     await expect(meleeButton).toBeVisible({ timeout: 3000 });
     await meleeButton.click();
-    await page.waitForTimeout(300);
 
     // Verify combat modal is showing
     await expect(page.getByText('БОЕВАЯ СИСТЕМА')).toBeVisible({ timeout: 3000 });

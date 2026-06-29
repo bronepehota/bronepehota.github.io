@@ -228,6 +228,16 @@ export interface ArmyUnit {
   soldierAbilitiesUsed?: string[];  // "catalogId_soldierIndex" — abilities consumed this battle
 }
 
+/** Type guard: narrows an ArmyUnit's `data` to `Squad`. */
+export function isSquad(unit: ArmyUnit): unit is ArmyUnit & { data: Squad } {
+  return unit.type === 'squad';
+}
+
+/** Type guard: narrows an ArmyUnit's `data` to `Machine`. */
+export function isMachine(unit: ArmyUnit): unit is ArmyUnit & { data: Machine } {
+  return unit.type === 'machine';
+}
+
 export type ArmyCurrentStep = 'faction-select' | 'unit-select' | 'preparation' | 'battle';
 
 export interface Army {

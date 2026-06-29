@@ -57,9 +57,11 @@ test.describe('Army Creation', () => {
     });
 
     expect(armyData).toBeTruthy();
-    const parsedArmy = JSON.parse(armyData!);
-    expect(parsedArmy.name).toBe('Test Army');
-    expect(parsedArmy.units).toEqual(expect.anything());
+    const parsed = JSON.parse(armyData!);
+    // Persistence uses a versioned envelope { schemaVersion, army }; legacy data is a bare army.
+    const army = parsed.army ?? parsed;
+    expect(army.name).toBe('Test Army');
+    expect(army.units).toEqual(expect.anything());
   });
 
   test('should calculate total cost correctly', async ({ page }) => {
@@ -114,14 +116,12 @@ test.describe('Army Creation', () => {
 
     // Switch to compact
     await compactBtn.click();
-    await page.waitForTimeout(200);
     await expect(compactBtn).toHaveAttribute('aria-pressed', 'true');
     await expect(detailedBtn).toHaveAttribute('aria-pressed', 'false');
     await expect(compactCards.first()).toBeVisible();
 
     // Switch back to detailed — compact cards disappear again
     await detailedBtn.click();
-    await page.waitForTimeout(200);
     await expect(detailedBtn).toHaveAttribute('aria-pressed', 'true');
     await expect(compactCards).toHaveCount(0);
   });
@@ -146,7 +146,6 @@ test.describe('Army Creation', () => {
 
     // Add-to-army from the sheet, then the sheet closes
     await sheet.getByRole('button', { name: /добавить/i }).click();
-    await page.waitForTimeout(250);
     await expect(page.getByTestId('unit-detail-sheet')).toHaveCount(0);
   });
 });

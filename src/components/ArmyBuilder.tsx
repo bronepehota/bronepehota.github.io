@@ -95,7 +95,7 @@ export default function ArmyBuilder({
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.SETUP_STEP);
       if (saved && ['rules', 'source', 'faction', 'budget', 'mission', 'units', 'preparation'].includes(saved)) {
-        return saved as any;
+        return saved as 'rules' | 'source' | 'faction' | 'budget' | 'mission' | 'units' | 'preparation';
       }
     }
     return 'rules';

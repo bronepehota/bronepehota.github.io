@@ -9,6 +9,7 @@
 
 import factionsJson from '@/data/encyclopedia/factions.json';
 // Import units from faction/type structure
+import type { Location } from '@/lib/types';
 import polarisSquads from '@/data/encyclopedia/units/polaris/squads.json';
 import polarisMachines from '@/data/encyclopedia/units/polaris/machines.json';
 import protectorateSquads from '@/data/encyclopedia/units/protectorate/squads.json';
@@ -31,7 +32,7 @@ export interface EncyclopediaLore {
   manufacturer?: string;
   traditions?: string;
   keyBattles?: Array<{ name: string; year: string; description: string; outcome: string }>;
-  locations?: Array<{ name: string; description: string }>;
+  locations?: Array<{ name: string; description: string; type?: Location['type'] }>;
   sourceUrl?: string;
   monoblock?: string;
   mass?: string;

@@ -65,7 +65,8 @@ test.describe('Миссии', () => {
 
     const armyRaw = await page.evaluate(() => localStorage.getItem('bronepehota_army'));
     expect(armyRaw).toBeTruthy();
-    const army = JSON.parse(armyRaw!);
+    const parsed = JSON.parse(armyRaw!);
+    const army = parsed.army ?? parsed; // versioned envelope, or legacy bare
     expect(army.missionId).toBe('osvobozhdenie');
   });
 
@@ -75,7 +76,8 @@ test.describe('Миссии', () => {
     await selectMission(page, 'osvobozhdenie');
 
     const armyRaw = await page.evaluate(() => localStorage.getItem('bronepehota_army'));
-    const army = JSON.parse(armyRaw!);
+    const parsed = JSON.parse(armyRaw!);
+    const army = parsed.army ?? parsed; // versioned envelope, or legacy bare
     // Polaris side of Освобождение: Тяжёлый штурмовой десант + Раптор + 2× миномёт
     expect(army.units.length).toBeGreaterThanOrEqual(3);
     expect(army.totalCost).toBeGreaterThan(0);
@@ -118,7 +120,8 @@ test.describe('Миссии', () => {
 
     // missionId stored, army NOT auto-filled
     const armyRaw = await page.evaluate(() => localStorage.getItem('bronepehota_army'));
-    const army = JSON.parse(armyRaw!);
+    const parsed = JSON.parse(armyRaw!);
+    const army = parsed.army ?? parsed; // versioned envelope, or legacy bare
     expect(army.missionId).toBe('zahvat_tochek');
     expect(army.units.length).toBe(0);
   });

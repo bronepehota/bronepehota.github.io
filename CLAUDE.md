@@ -68,8 +68,13 @@ npm run test:e2e            # All E2E tests pass
 ### E2E test conventions
 
 - **Selector priority**: `getByTestId()` > `getByRole()` > `getByText()` > CSS selectors
-- **Always clear localStorage** in `beforeEach`
-- **Always `await page.waitForTimeout(200)`** after clicks
+- **Always clear localStorage** in `beforeEach` (use the `clearStorage(page)` helper)
+- **Prefer waiting for state over fixed sleeps**: `expect(locator).toBeVisible()` and
+  actionability auto-wait already poll up to 5s, so a `waitForTimeout` immediately
+  before them is redundant — drop it. Reserve `waitForTimeout(ms)` for animations /
+  transitions that produce no assertable state. Don't sprinkle sleeps "just in case".
+- Legacy tests still use `await page.waitForTimeout(200)` after clicks; convert to the
+  above when refactoring a spec.
 - **Dev server auto-starts** on `http://localhost:3001` before tests
 - **Headed mode**: `npm run test:e2e:headed` (visible browser)
 - **Debug mode**: `npm run test:e2e:debug` (Playwright Inspector)
@@ -271,10 +276,6 @@ src/components/
 
 **Calculator Page** (`src/app/calculator/page.tsx`): Standalone combat calculator — fully decoupled from Army/ArmyUnit. Users manually input all combat parameters (range, power, melee, armor, rank) via `DiceInputPopup`. Reuses combat components (`ActionSelector`, `ParameterInputs`, `CombatResults`) via the `CombatantData` adapter pattern. Accessible from landing page and direct URL.
 
-**Orphaned editor files** (not imported anywhere): `ExportModal.tsx`, `ImportModal.tsx`, `ModifierExportImport.tsx` in `src/components/editor/` — functionality replaced by `UnifiedSaveArea.tsx`. Can be safely deleted.
-
-**Legacy files**: `UnitCard.legacy.tsx` mirrors `UnitCard.tsx` logic — always update both when changing shared behavior (panic, combat, state updates).
-
 ### Grenade Combat Mechanics
 
 Two-phase flow: (1) Roll D6 + soldier rank = blast distance, (2) Roll D20 vs target armor for each target in blast zone. D6=1 triggers self-danger warning.
@@ -316,9 +317,9 @@ Edit `squads.json` or `machines.json` in `src/data/sources/{source_id}/{faction}
   - Provides `switchAction()`, `newCalculation()`, `updateCombatantField()`
 - `useLongPress.ts` - Long-press gesture detection for undo actions
 - `usePilotTestFlow.ts` - Pilot survival test state machine (D12 + D6 rolls)
-- `usePanicTestFlow.ts` - Panic test state for squads
-  - **Star System rules**: panic test is once per game per squad (tracked via `panicTestUsed` on `ArmyUnit`), not per-turn
 - `useEditorState.ts` - Editor form state management (desktop-only)
+
+> **Panic (Star System rules)**: the panic test is once per game per squad (tracked via `panicTestUsed` on `ArmyUnit`), not per-turn. Logic lives in `src/lib/panic-logic.ts` + `PanicTestModal.tsx`.
 
 ### Long-Press Pattern
 

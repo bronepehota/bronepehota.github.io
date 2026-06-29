@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { setupGameSessionWithSquad } from './helpers/setup';
+import { setupGameSessionWithSquad, clearStorage } from './helpers/setup';
 
 /**
  * Squad Scroll E2E tests
@@ -28,6 +28,7 @@ test.describe('Squad scroll in battle view', () => {
   test.beforeEach(async ({ page }) => {
     // setupGameSessionWithSquad creates a single 6-soldier squad by default,
     // which becomes the focused unit shown by <UnitCard> in the battle view.
+    await clearStorage(page);
     await setupGameSessionWithSquad(page, {
       unitOverrides: { instanceId: 'squad-scroll-unit-1' },
     });

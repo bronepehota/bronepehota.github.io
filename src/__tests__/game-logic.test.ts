@@ -1,4 +1,4 @@
-import { parseRoll, executeRoll, multiplyRange } from '../lib/game-logic';
+import { parseRoll, executeRoll, multiplyRange, calculateDamage, rollGrenadeDistance } from '../lib/game-logic';
 import { rulesRegistry } from '@/lib/rules-registry';
 
 describe('multiplyRange', () => {
@@ -66,6 +66,83 @@ describe('Game Logic - Dice Rolls', () => {
     const result = executeRoll('ББ');
     expect(result.total).toBe(0);
     expect(result.rolls).toEqual([]);
+  });
+});
+
+describe('parseRoll - invalid notation must not silently fall back', () => {
+  // B1: malformed dice notation previously produced silent wrong results:
+  //  - 'D0'  → sides:0 → rollDie(0)===1 always (constant damage)
+  //  - '2D'  → no match → silent fallback to a D6 roll
+  // Invalid input now returns { dice:0, sides:0, bonus:0 }, which:
+  //  - makes combat yield NO effect (no damage / miss), and
+  //  - activates DiceNotationDisplay's dice===0 branch (render the raw string).
+  test('D0 (zero sides) → zeros', () => {
+    expect(parseRoll('D0')).toEqual({ dice: 0, sides: 0, bonus: 0 });
+  });
+  test('2D (missing sides) → zeros', () => {
+    expect(parseRoll('2D')).toEqual({ dice: 0, sides: 0, bonus: 0 });
+  });
+  test('0D6 (zero dice) → zeros', () => {
+    expect(parseRoll('0D6')).toEqual({ dice: 0, sides: 0, bonus: 0 });
+  });
+  test('empty string → zeros', () => {
+    expect(parseRoll('')).toEqual({ dice: 0, sides: 0, bonus: 0 });
+  });
+  test('garbage → zeros', () => {
+    expect(parseRoll('xyz')).toEqual({ dice: 0, sides: 0, bonus: 0 });
+  });
+});
+
+describe('executeRoll - invalid input yields no roll (not -Infinity, not silent D6)', () => {
+  test('D0 → total 0, no rolls (was silently always 1)', () => {
+    const r = executeRoll('D0');
+    expect(r.total).toBe(0);
+    expect(r.rolls).toEqual([]);
+  });
+  test('2D → total 0 (was silently a 1D6 roll)', () => {
+    expect(executeRoll('2D').total).toBe(0);
+  });
+  test('0D6 → total 0 (was -Infinity from Math.max of empty rolls)', () => {
+    expect(executeRoll('0D6').total).toBe(0);
+  });
+});
+
+describe('calculateDamage - invalid power deals no damage', () => {
+  test('D0 vs armor 0 → 0 damage (was 1: rollDie(0)===1 > 0)', () => {
+    expect(calculateDamage('D0', 0).damage).toBe(0);
+  });
+});
+
+describe('rollGrenadeDistance - grenade blast-location (phase 1)', () => {
+  // Deterministic via an injected D6 roller.
+  test('Tehnolog: single D6, NO rank bonus (official rules §7.8)', () => {
+    const r = rollGrenadeDistance('tehnolog', 3, () => 4);
+    expect(r.distanceRoll).toBe(4);
+    expect(r.allRolls).toEqual([4]);
+    expect(r.totalDistance).toBe(4); // NOT 4 + rank(3)
+    expect(r.bonus).toBe(0);         // previously wrongly reported soldierRank
+    expect(r.blastZone).toEqual({ minSteps: 3, maxSteps: 5, minCm: 12, maxCm: 20 });
+  });
+
+  test('Community Star System: roll D6 per rank, keep best', () => {
+    const rolls = [2, 5, 3];
+    let i = 0;
+    const r = rollGrenadeDistance('community_star_system', 3, () => rolls[i++]);
+    expect(r.distanceRoll).toBe(5);
+    expect(r.allRolls).toEqual([2, 5, 3]);
+    expect(r.totalDistance).toBe(5);
+    expect(r.bonus).toBe(0);
+  });
+
+  test('Community rank 0 falls back to a single D6', () => {
+    const r = rollGrenadeDistance('community_star_system', 0, () => 6);
+    expect(r.totalDistance).toBe(6);
+    expect(r.allRolls).toEqual([6]);
+  });
+
+  test('D6=1 impact → blast zone reaches the thrower (minSteps clamped to 1)', () => {
+    const r = rollGrenadeDistance('tehnolog', 2, () => 1);
+    expect(r.blastZone).toEqual({ minSteps: 1, maxSteps: 2, minCm: 4, maxCm: 8 });
   });
 });
 

@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { X, Check, Footprints } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useBottomSheet } from '@/hooks/useBottomSheet';
-import { ArmyUnit, RulesVersionID, PanicTestResult } from '@/lib/types';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
+import { ArmyUnit, RulesVersionID, PanicTestResult, Squad } from '@/lib/types';
 import { executePanicTest } from '@/lib/panic-logic';
 
 interface PanicTestModalProps {
@@ -27,6 +28,9 @@ export function PanicTestModal({
     closeThreshold: 100,
     isEnabled: true,
   });
+
+  const focusRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(focusRef, isOpen);
 
   const [isRolling, setIsRolling] = useState(false);
   const [results, setResults] = useState<PanicTestResult[]>([]);
@@ -54,7 +58,7 @@ export function PanicTestModal({
 
   const handleConductTest = () => {
     setIsRolling(true);
-    const squad = unit.data as any;
+    const squad = unit.data as Squad;
     const soldiers = squad.soldiers || [];
     const deadIndices = unit.deadSoldiers || [];
 
@@ -83,12 +87,12 @@ export function PanicTestModal({
 
   if (!isOpen) return null;
 
-  const squad = unit.data as any;
+  const squad = unit.data as Squad;
   const soldiers = squad.soldiers || [];
   const deadIndices = unit.deadSoldiers || [];
 
   return (
-    <div className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-4">
+    <div ref={focusRef} className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-4">
       <div
         ref={sheetRef}
         {...touchHandlers}
@@ -107,7 +111,7 @@ export function PanicTestModal({
           <button
             onClick={onClose}
             disabled={isRolling}
-            aria-label="Close"
+            aria-label="Закрыть"
             className="p-2 hover:bg-slate-800 rounded-lg transition-colors text-slate-400 hover:text-white min-w-[44px] min-h-[44px] flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <X className="w-5 h-5" />

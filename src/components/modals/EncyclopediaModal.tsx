@@ -5,6 +5,8 @@ import { X } from 'lucide-react';
 import { EnrichedUnit } from '@/lib/encyclopedia-utils';
 import { cn } from '@/lib/utils';
 import { useBottomSheet } from '@/hooks/useBottomSheet';
+import { useEscapeToClose } from '@/hooks/useEscapeToClose';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { SoldierImages } from '@/components/encyclopedia/UnitDetail/SoldierImages';
 import { MachineImages } from '@/components/encyclopedia/UnitDetail/MachineImages';
 import Image from 'next/image';
@@ -43,6 +45,9 @@ export function EncyclopediaModal({
   onClose,
   scrollTarget,
 }: EncyclopediaModalProps) {
+  useEscapeToClose(isOpen, onClose);
+  const focusRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(focusRef, isOpen);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const { sheetRef, touchHandlers } = useBottomSheet({
@@ -76,6 +81,7 @@ export function EncyclopediaModal({
 
   return (
     <div
+      ref={focusRef}
       className="fixed inset-0 z-[60] bg-military-dark/95 backdrop-blur-sm flex items-end sm:items-center justify-center"
       onClick={onClose}
     >
@@ -113,6 +119,7 @@ export function EncyclopediaModal({
           </div>
           <button
             onClick={onClose}
+            aria-label="Закрыть"
             className="p-2 hover:bg-military-steel/20 rounded-sm transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center border border-military-rust/30"
           >
             <X className="w-4 h-4 sm:w-5 sm:h-5 text-military-steel" />

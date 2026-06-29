@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Sword, ChevronUp, Shield, Users, Zap, Target, Timer, Flag, Clock, Crosshair, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Army } from '@/lib/types';
+import { Army, isSquad } from '@/lib/types';
 import { PrepArmyList } from './PrepArmyList';
 import InitiativeModal from '../modals/InitiativeModal';
 import { getFactionColors, factionDisplayNames } from '@/lib/faction-colors';
@@ -44,8 +44,8 @@ export function BattlePreparationScreen({
   };
 
   const activeUnitsCount = army.units.filter(unit => {
-    if (unit.type === 'squad') {
-      return (unit.deadSoldiers?.length || 0) < (unit.data as any).soldiers.length;
+    if (isSquad(unit)) {
+      return (unit.deadSoldiers?.length || 0) < unit.data.soldiers.length;
     }
     return (unit.currentDurability || 0) > 0;
   }).length;
@@ -53,9 +53,8 @@ export function BattlePreparationScreen({
   const squadCount = army.units.filter(u => u.type === 'squad').length;
   const machineCount = army.units.filter(u => u.type === 'machine').length;
   const totalSoldiers = army.units.reduce((acc, u) => {
-    if (u.type === 'squad') {
-      const squad = u.data as any;
-      return acc + (squad.soldiers?.length || 0) - (u.deadSoldiers?.length || 0);
+    if (isSquad(u)) {
+      return acc + u.data.soldiers.length - (u.deadSoldiers?.length || 0);
     }
     return acc;
   }, 0);

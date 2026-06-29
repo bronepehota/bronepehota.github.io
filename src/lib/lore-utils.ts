@@ -20,12 +20,12 @@ export function formatBattleYear(year: string): string {
   return year;
 }
 
-export function getLocationIcon(type: Location['type']): string {
+export function getLocationIcon(type: Location['type'] | undefined): string {
   const icons = {
     base: '🏠',
     academy: '🎓',
     battlefield: '⚔️',
     homeworld: '🌍'
   };
-  return icons[type] || '📍';
+  return type ? (icons[type] || '📍') : '📍';
 }

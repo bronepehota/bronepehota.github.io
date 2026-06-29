@@ -3,6 +3,16 @@ export const rollDie = (sides: number): number => {
 };
 
 /**
+ * Sentinel for unparseable dice notation ('ББ', '', 'xyz', '2D', 'D0', '0D6').
+ * Returning dice:0 (instead of a silent D6 fallback) means:
+ *  - combat yields NO effect (no damage / miss), and
+ *  - DiceNotationDisplay renders the raw string via its `dice === 0` branch.
+ * Previously 'D0' dealt constant damage (rollDie(0)===1) and '2D'/'' silently
+ * became a D6 roll — both wrong with no error surfaced.
+ */
+const INVALID_ROLL = Object.freeze({ dice: 0, sides: 0, bonus: 0 });
+
+/**
  * Roll twice and return the better result (Surprise Attack - Fan rules)
  * @param sides - Number of sides on the die (6, 12, 20)
  * @returns Object with both rolls and the better roll
@@ -21,14 +31,15 @@ export const parseRoll = (rollStr: string): { dice: number, sides: number, bonus
   // Matches formats like "D6", "D6+2", "2D12", "D12+1", "2D6-1", etc. (negative bonuses supported)
   const regex = /(?:(\d+))?D(\d+)(?:([+-])(\d+))?/;
   const match = rollStr.match(regex);
-  if (!match) return { dice: 1, sides: 6, bonus: 0 };
+  if (!match) return INVALID_ROLL; // 'ББ', '', 'xyz', '2D' (missing sides) — no silent D6 fallback
+
+  const dice = parseInt(match[1] || '1');
+  const sides = parseInt(match[2]);
+  // Reject nonsensical dice: 'D0' (zero sides → rollDie(0)===1) and '0D6' (zero dice → -Infinity).
+  if (dice < 1 || sides < 1) return INVALID_ROLL;
 
   const sign = match[3] === '-' ? -1 : 1;
-  return {
-    dice: parseInt(match[1] || '1'),
-    sides: parseInt(match[2]),
-    bonus: match[4] ? sign * parseInt(match[4]) : 0
-  };
+  return { dice, sides, bonus: match[4] ? sign * parseInt(match[4]) : 0 };
 };
 
 /**
@@ -85,8 +96,9 @@ export const executeRoll = (rollStr: string): { total: number, rolls: number[], 
     const r = rollDie(sides);
     rolls.push(r);
   }
-  // Take maximum roll, not sum
-  const maxRoll = Math.max(...rolls);
+  // Take maximum roll, not sum. Guard empty rolls (dice:0 / invalid notation)
+  // — Math.max() with no args returns -Infinity, which would leak into total.
+  const maxRoll = rolls.length ? Math.max(...rolls) : 0;
   return { total: maxRoll + bonus, rolls, bonus };
 };
 
@@ -113,6 +125,66 @@ export const calculateDamage = (powerStr: string, targetArmor: number): { damage
   }
   return { damage, rolls };
 };
+
+export interface GrenadeBlastZone {
+  minSteps: number;
+  maxSteps: number;
+  minCm: number;
+  maxCm: number;
+}
+
+export interface GrenadeDistanceResult {
+  distanceRoll: number;
+  allRolls: number[];
+  totalDistance: number;
+  bonus: number;
+  blastZone: GrenadeBlastZone;
+}
+
+/**
+ * Grenade attack — phase 1: determine the blast location.
+ *
+ * Official Tehnolog rules (docs/original/official_rules.txt §7.8):
+ *   "игрок бросает кубик Д6, чтобы определить дальность" — a single D6, and the
+ *   roll IS the distance in steps. No rank bonus.
+ *
+ * Community Star System rules (docs/panov/fan_rules.txt):
+ *   roll D6 a number of times equal to the thrower's Army Rank, keep the best.
+ *
+ * Blast zone is ±1 step around the impact point (1 step = 4 cm). A roll of 1
+ * means the blast reaches the thrower (self-danger warning, handled by the UI).
+ *
+ * @param rulesVersion 'tehnolog' | 'community_star_system'
+ * @param soldierRank  thrower's Army Rank (number of D6 rolled under community rules)
+ * @param rollD6       injectable D6 roller (defaults to rollDie(6)) — for deterministic tests
+ */
+export function rollGrenadeDistance(
+  rulesVersion: string,
+  soldierRank: number,
+  rollD6: () => number = () => rollDie(6),
+): GrenadeDistanceResult {
+  const allRolls: number[] = [];
+
+  if (rulesVersion === 'community_star_system' && soldierRank > 0) {
+    for (let i = 0; i < soldierRank; i++) allRolls.push(rollD6());
+  } else {
+    // Tehnolog (official §7.8): a single D6, no rank bonus.
+    allRolls.push(rollD6());
+  }
+
+  const distanceRoll = Math.max(...allRolls);
+  const totalDistance = distanceRoll; // rank never adds to distance in either ruleset
+  const minSteps = Math.max(1, totalDistance - 1);
+  const maxSteps = totalDistance + 1;
+
+  return {
+    distanceRoll,
+    allRolls,
+    totalDistance,
+    bonus: 0,
+    blastZone: { minSteps, maxSteps, minCm: minSteps * 4, maxCm: maxSteps * 4 },
+  };
+}
 
 export const calculateMelee = (attackerMelee: number, defenderMelee: number): {
   attackerRoll: number,
@@ -212,49 +284,6 @@ export function calculateMeleeWithSurpriseAttack(attackerMelee: number, defender
     defenderRoll: dRoll,
     defenderTotal: dTotal,
     winner
-  };
-}
-
-/**
- * Combat flow validation utilities
- */
-
-export interface CombatValidation {
-  isValid: boolean;
-  errors: string[];
-}
-
-export function validateCombatParameters(
-  actionType: 'shot' | 'melee' | 'grenade',
-  distance: number,
-  targetArmor: number,
-  targetMelee: number,
-  ammo?: number,
-  grenadesAvailable?: boolean
-): CombatValidation {
-  const errors: string[] = [];
-
-  if (actionType === 'shot' || actionType === 'grenade') {
-    if (distance < 1 || distance > 20) {
-      errors.push('Дистанция должна быть от 1 до 20');
-    }
-    if (targetArmor < 0 || targetArmor > 10) {
-      errors.push('Броня должна быть от 0 до 10');
-    }
-    if (actionType === 'grenade' && !grenadesAvailable) {
-      errors.push('Гранаты уже израсходованы');
-    }
-  }
-
-  if (actionType === 'melee') {
-    if (targetMelee < 0 || targetMelee > 10) {
-      errors.push('Ближний бой цели должен быть от 0 до 10');
-    }
-  }
-
-  return {
-    isValid: errors.length === 0,
-    errors,
   };
 }
 

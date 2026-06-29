@@ -6,7 +6,7 @@ import { SoldierStats } from './soldier-card/SoldierStats';
 import { SoldierImage } from './soldier-card/SoldierImage';
 import StatusStripe, { type SoldierState } from './soldier-card/StatusStripe';
 import { cn } from '@/lib/utils';
-import type { Squad, ArmyUnit, RulesVersionID } from '@/lib/types';
+import type { Squad, ArmyUnit, Army, RulesVersionID } from '@/lib/types';
 import { checkPanicTrigger } from '@/lib/panic-logic';
 import { collectBuffsForUnit, getSoldierModifiers, resolveModifierSummary, isModifierActive } from '@/lib/modifier-utils';
 import { getSourceWithCustom } from '@/lib/sources-registry';
@@ -57,6 +57,7 @@ function SoldierCard({
   const [longPressProgress, setLongPressProgress] = useState(0);
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
   const longPressProgressRef = useRef<NodeJS.Timeout | null>(null);
+  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -107,7 +108,7 @@ function SoldierCard({
       }, 30);
 
       // Store interval ID for cleanup
-      (longPressProgressRef as any).interval = progressInterval;
+      progressIntervalRef.current = progressInterval;
     }, progressDelay);
   };
 
@@ -118,8 +119,9 @@ function SoldierCard({
     }
     if (longPressProgressRef.current) {
       clearTimeout(longPressProgressRef.current);
-      if ((longPressProgressRef as any).interval) {
-        clearInterval((longPressProgressRef as any).interval);
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
       }
       longPressProgressRef.current = null;
     }
@@ -191,17 +193,17 @@ function SoldierCard({
   // Compute modifier counts for the modifier indicator
   const { buffCount, debuffCount, soldierModifiers, availableBuffCount, statBonuses } = useMemo(() => {
     // Build a minimal army-like structure from allUnits for buff collection
-    const armyLike = { name: '', totalCost: 0, units: _allUnits, currentTurn };
+    const armyLike: Army = { name: '', totalCost: 0, units: _allUnits, currentTurn };
     // Count buffs across ALL phases (not just shot)
-    const shotBuffs = collectBuffsForUnit(unit, armyLike as any, 'shot');
-    const meleeBuffs = collectBuffsForUnit(unit, armyLike as any, 'melee');
-    const alwaysBuffs = collectBuffsForUnit(unit, armyLike as any, 'always');
+    const shotBuffs = collectBuffsForUnit(unit, armyLike, 'shot');
+    const meleeBuffs = collectBuffsForUnit(unit, armyLike, 'melee');
+    const alwaysBuffs = collectBuffsForUnit(unit, armyLike, 'always');
     const allBuffIds = new Set([...shotBuffs, ...meleeBuffs, ...alwaysBuffs].map(b => b.id));
     // Filter debuffs by expiry (includes unit-level debuffs + per-soldier debuffs from modal)
     const unitDebuffs = (unit.activeDebuffs || []).filter(d =>
       isModifierActive(d.appliedAtTurn, d.duration, currentTurn)
     );
-    const soldierMods = getSoldierModifiers(unit, soldierIndex, armyLike as any);
+    const soldierMods = getSoldierModifiers(unit, soldierIndex, armyLike);
     const soldierDebuffs = soldierMods.filter(m => m.value < 0);
     const debuffs = [...unitDebuffs, ...soldierDebuffs];
     // Resolve buffs: only squad-level (set via editor), no catalog fallback
@@ -211,9 +213,9 @@ function SoldierCard({
       .filter((b: any) => b.applyTo?.includes('soldier')).length;
 
     // Compute stat bonuses for display (merge shot + melee + always phases)
-    const shotSummary = resolveModifierSummary(unit, armyLike as any, 'shot', soldierIndex);
-    const meleeSummary = resolveModifierSummary(unit, armyLike as any, 'melee', soldierIndex);
-    const alwaysSummary = resolveModifierSummary(unit, armyLike as any, 'always', soldierIndex);
+    const shotSummary = resolveModifierSummary(unit, armyLike, 'shot', soldierIndex);
+    const meleeSummary = resolveModifierSummary(unit, armyLike, 'melee', soldierIndex);
+    const alwaysSummary = resolveModifierSummary(unit, armyLike, 'always', soldierIndex);
 
     const statBonuses = {
       rangeBonus: shotSummary.rangeBonus,

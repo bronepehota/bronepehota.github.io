@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ArmyUnit, RulesVersionID } from '@/lib/types';
-import { getDefaultRulesVersion } from '@/lib/rules-registry';
+import { getDefaultRulesVersion, isValidRulesVersion } from '@/lib/rules-registry';
 
 /**
  * Pilot survival test result
@@ -40,11 +40,11 @@ export function useUnitCardState(_unit: ArmyUnit): UnitCardState {
   const [rulesVersion, setRulesVersion] = useState<RulesVersionID>(getDefaultRulesVersion());
   const [pilotSurvivalTest, setPilotSurvivalTest] = useState<PilotSurvivalTest | null>(null);
 
-  // Load rules version from localStorage
+  // Load rules version from localStorage (validate — a stale value would break rules lookups)
   useEffect(() => {
     const saved = localStorage.getItem('bronepehota_rules_version');
-    if (saved) {
-      setRulesVersion(saved as any);
+    if (saved && isValidRulesVersion(saved)) {
+      setRulesVersion(saved);
     }
   }, []);
 

@@ -5,9 +5,12 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { useEscapeToClose } from '@/hooks/useEscapeToClose';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { X, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { isSquad } from '@/lib/types';
 import type { BuffDefinition, ActiveBuff } from '@/lib/modifier-types';
 import type { Army } from '@/lib/types';
 import { ModifierIcon } from '@/components/editor/ModifierIcons';
@@ -32,12 +35,16 @@ export function ApplyBuffModal({
   const [selectedUnitId, setSelectedUnitId] = useState<string | null>(null);
   const [selectedBuffId, setSelectedBuffId] = useState<string | null>(null);
 
+  useEscapeToClose(isOpen, onClose);
+  const focusRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(focusRef, isOpen);
+
   if (!isOpen) return null;
 
   // Filter alive units
   const aliveUnits = army.units.filter(unit => {
-    if (unit.type === 'squad') {
-      const soldierCount = (unit.data as any).soldiers?.length || 0;
+    if (isSquad(unit)) {
+      const soldierCount = unit.data.soldiers.length;
       const deadCount = unit.deadSoldiers?.length || 0;
       return deadCount < soldierCount;
     }
@@ -73,7 +80,7 @@ export function ApplyBuffModal({
   const canApply = selectedUnitId && selectedBuff;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
@@ -81,7 +88,7 @@ export function ApplyBuffModal({
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-lg bg-slate-900 rounded-xl border border-slate-700 shadow-2xl max-h-[80vh] overflow-hidden flex flex-col">
+      <div ref={focusRef} className="relative w-full max-w-lg bg-slate-900 rounded-t-xl sm:rounded-xl border border-slate-700 shadow-2xl max-h-[80vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700">
           <div className="flex items-center gap-2">

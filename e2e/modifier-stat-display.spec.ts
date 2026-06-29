@@ -61,7 +61,6 @@ test.describe('Modifier stat display and expiry', () => {
 
     await page.goto('/app');
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
 
     // The game session should be visible
     await expect(page.getByTestId('game-session')).toBeVisible();
@@ -112,7 +111,6 @@ test.describe('Modifier stat display and expiry', () => {
 
     await page.goto('/app');
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
 
     // No +2 or -1 bonus text should appear
     await expect(page.getByTestId('game-session')).toBeVisible();
@@ -171,7 +169,6 @@ test.describe('Modifier stat display and expiry', () => {
 
     await page.goto('/app');
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
 
     // Speed stat should show "x0.5" modifier
     const speedBonusText = page.getByText('x0.5').first();
@@ -233,7 +230,6 @@ test.describe('Modifier stat display and expiry', () => {
 
     await page.goto('/app');
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
 
     await expect(page.getByTestId('game-session')).toBeVisible();
 
@@ -311,7 +307,6 @@ test.describe('Modifier stat display and expiry', () => {
 
     await page.goto('/app');
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
 
     // Permanent modifier should still show at turn 5
     const armorBonus = page.getByText('+2').first();
@@ -368,7 +363,6 @@ test.describe('Modifier stat display and expiry', () => {
 
     await page.goto('/app');
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
 
     // The armor stat should show -1 bonus (red)
     const armorDebuff = page.getByText('-1').first();
@@ -425,7 +419,6 @@ test.describe('Modifier stat display and expiry', () => {
 
     await page.goto('/app');
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
 
     // The speed stat should NOT show x0.5 since the debuff is expired
     // (isModifierActive(1, 1, 5) = 5 <= 2 → false)

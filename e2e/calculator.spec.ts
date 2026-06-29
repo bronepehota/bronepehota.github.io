@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { clearStorage } from './helpers/setup';
 
 test.describe('Standalone Calculator', () => {
   test.beforeEach(async ({ page }) => {
+    await clearStorage(page);
     await page.goto('/calculator');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(500);
@@ -24,7 +26,6 @@ test.describe('Standalone Calculator', () => {
         break;
       }
     }
-    await page.waitForTimeout(500);
 
     // Verify shot parameters visible
     await expect(page.getByRole('heading', { name: 'ВЫСТРЕЛ' })).toBeVisible();
@@ -46,13 +47,11 @@ test.describe('Standalone Calculator', () => {
 
     // Switch to melee — use nth button with this text (tab comes before card)
     await page.getByRole('button', { name: 'БЛИЖНИЙ БОЙ' }).first().click();
-    await page.waitForTimeout(500);
     await expect(page.getByRole('heading', { name: 'БЛИЖНИЙ БОЙ' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'АТАКОВАТЬ' })).toBeVisible();
 
     // Switch to grenade
     await page.getByRole('button', { name: 'ГРАНАТА' }).first().click();
-    await page.waitForTimeout(500);
     await expect(page.getByRole('heading', { name: 'ГРАНАТА' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'БРОСИТЬ' })).toBeVisible();
   });
@@ -71,7 +70,6 @@ test.describe('Standalone Calculator', () => {
 
     // Open modifiers
     await page.locator('button[aria-label="Модификаторы"]').click();
-    await page.waitForTimeout(300);
 
     // Verify panel with tabs
     await expect(page.getByRole('heading', { name: 'Модификаторы' })).toBeVisible();
@@ -89,7 +87,6 @@ test.describe('Standalone Calculator', () => {
 
     // Close panel by clicking backdrop
     await page.locator('.fixed.inset-0.z-40 > .bg-transparent').click();
-    await page.waitForTimeout(300);
 
     // Panel should be gone
     await expect(page.getByRole('heading', { name: 'Модификаторы' })).not.toBeVisible();
@@ -110,7 +107,6 @@ test.describe('Standalone Calculator', () => {
         break;
       }
     }
-    await page.waitForTimeout(500);
 
     // Verify melee placeholder
     await expect(page.getByRole('heading', { name: 'БЛИЖНИЙ БОЙ' })).toBeVisible();
@@ -128,7 +124,6 @@ test.describe('Standalone Calculator', () => {
         break;
       }
     }
-    await page.waitForTimeout(800);
 
     // Verify grenade view
     await expect(page.getByRole('heading', { name: 'ГРАНАТА' })).toBeVisible({ timeout: 5000 });

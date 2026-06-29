@@ -1,4 +1,4 @@
-import { ArmyUnit, PanicTestResult, RulesVersionID } from './types';
+import { ArmyUnit, PanicTestResult, RulesVersionID, isSquad, Squad } from './types';
 
 /**
  * Check if panic test should be triggered for a unit
@@ -19,12 +19,11 @@ export function checkPanicTrigger(
   }
 
   // Only squads can panic
-  if (unit.type !== 'squad') {
+  if (!isSquad(unit)) {
     return false;
   }
 
-  const squad = unit.data as any;
-  const totalSoldiers = squad.soldiers.length;
+  const totalSoldiers = unit.data.soldiers.length;
   const deadCount = unit.deadSoldiers?.length || 0;
 
   // Check if all soldiers are dead
@@ -64,7 +63,7 @@ export function executePanicTest(
   soldierIndex: number,
   rulesVersion: RulesVersionID
 ): PanicTestResult {
-  const soldier = (unit.data as any).soldiers?.[soldierIndex];
+  const soldier = (unit.data as Squad).soldiers?.[soldierIndex];
   if (!soldier) {
     return {
       soldierIndex,

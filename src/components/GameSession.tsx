@@ -588,7 +588,7 @@ export default function GameSession({
         // Resolve buffs: squad-level + soldier-level modifiers from catalog
         const sourceData = army.sourceId ? getSourceWithCustom(army.sourceId) : null;
         const liveSquad = sourceData?.squads.find(s => s.id === unit.data.id);
-        const squadBuffs = (liveSquad?.buffs || (unit.data as any).buffs || []);
+        const squadBuffs = (liveSquad?.buffs || unit.data.buffs || []);
         const si = effectsModalState.soldierIndex;
         // Resolve per-soldier modifier IDs against catalog
         const soldier = (unit.data as Squad).soldiers[si];

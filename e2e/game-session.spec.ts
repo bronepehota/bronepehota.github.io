@@ -1,10 +1,15 @@
 import { test, expect } from '@playwright/test';
+import { clearStorage } from './helpers/setup';
 
 /**
  * Game Session E2E tests
  * Tests combat gameplay and unit management in battle
  */
 test.describe('Game Session', () => {
+  test.beforeEach(async ({ page }) => {
+    await clearStorage(page);
+  });
+
   test('should display game session interface when in battle', async ({ page }) => {
     await page.goto('/app');
     await page.evaluate(() => {

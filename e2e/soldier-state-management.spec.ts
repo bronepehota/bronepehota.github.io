@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { setupGameSessionWithSquad, expandFirstUnit } from './helpers/setup';
+import { setupGameSessionWithSquad, expandFirstUnit, clearStorage } from './helpers/setup';
 
 /**
  * Soldier State Management E2E tests
@@ -14,6 +14,7 @@ import { setupGameSessionWithSquad, expandFirstUnit } from './helpers/setup';
  */
 test.describe('Soldier State Management', () => {
   test.beforeEach(async ({ page }) => {
+    await clearStorage(page);
     await setupGameSessionWithSquad(page, {
       unitOverrides: { instanceId: 'soldier-state-unit-1' },
     });
@@ -29,19 +30,16 @@ test.describe('Soldier State Management', () => {
 
     const firstButton = killButtons.nth(0);
     await firstButton.click({ force: true, timeout: 5000 });
-    await page.waitForTimeout(500);
     await expect(firstButton).toHaveAttribute('aria-pressed', 'true');
 
     const secondButton = killButtons.nth(1);
     await secondButton.click({ force: true, timeout: 5000 });
-    await page.waitForTimeout(500);
     await expect(secondButton).toHaveAttribute('aria-pressed', 'true');
 
     await expect(firstButton).toHaveAttribute('aria-pressed', 'true');
 
     const thirdButton = killButtons.nth(2);
     await thirdButton.click({ force: true, timeout: 5000 });
-    await page.waitForTimeout(500);
     await expect(thirdButton).toHaveAttribute('aria-pressed', 'true');
 
     await expect(firstButton).toHaveAttribute('aria-pressed', 'true');
@@ -55,19 +53,16 @@ test.describe('Soldier State Management', () => {
 
     const firstButton = doneButtons.nth(0);
     await firstButton.click({ force: true, timeout: 5000 });
-    await page.waitForTimeout(300);
     await expect(firstButton).toHaveAttribute('aria-pressed', 'true');
 
     const secondButton = doneButtons.nth(1);
     await secondButton.click({ force: true, timeout: 5000 });
-    await page.waitForTimeout(300);
     await expect(secondButton).toHaveAttribute('aria-pressed', 'true');
 
     await expect(firstButton).toHaveAttribute('aria-pressed', 'true');
 
     const thirdButton = doneButtons.nth(2);
     await thirdButton.click({ force: true, timeout: 5000 });
-    await page.waitForTimeout(300);
     await expect(thirdButton).toHaveAttribute('aria-pressed', 'true');
 
     await expect(firstButton).toHaveAttribute('aria-pressed', 'true');
@@ -80,17 +75,14 @@ test.describe('Soldier State Management', () => {
 
     const firstKillButton = killButtons.nth(0);
     await firstKillButton.click({ force: true, timeout: 5000 });
-    await page.waitForTimeout(300);
     await expect(firstKillButton).toHaveAttribute('aria-pressed', 'true');
 
     const secondDoneButton = doneButtons.nth(1);
     await secondDoneButton.click({ force: true, timeout: 5000 });
-    await page.waitForTimeout(300);
     await expect(secondDoneButton).toHaveAttribute('aria-pressed', 'true');
 
     const thirdKillButton = killButtons.nth(2);
     await thirdKillButton.click({ force: true, timeout: 5000 });
-    await page.waitForTimeout(300);
     await expect(thirdKillButton).toHaveAttribute('aria-pressed', 'true');
 
     await expect(firstKillButton).toHaveAttribute('aria-pressed', 'true');
@@ -142,7 +134,6 @@ test.describe('Soldier State Management', () => {
 
     const fourthKillButton = killButtons.nth(3);
     await fourthKillButton.click({ force: true, timeout: 5000 });
-    await page.waitForTimeout(300);
 
     await expect(firstKillButton).toHaveAttribute('aria-pressed', 'true');
     await expect(fourthKillButton).toHaveAttribute('aria-pressed', 'true');
@@ -153,16 +144,13 @@ test.describe('Soldier State Management', () => {
 
     const firstKillButton = killButtons.nth(0);
     await firstKillButton.click({ force: true, timeout: 5000 });
-    await page.waitForTimeout(300);
     await expect(firstKillButton).toHaveAttribute('aria-pressed', 'true');
 
     const secondKillButton = killButtons.nth(1);
     await secondKillButton.click({ force: true, timeout: 5000 });
-    await page.waitForTimeout(300);
     await expect(secondKillButton).toHaveAttribute('aria-pressed', 'true');
 
     await firstKillButton.click({ force: true, timeout: 5000 });
-    await page.waitForTimeout(300);
 
     await expect(firstKillButton).toHaveAttribute('aria-pressed', 'true');
     await expect(secondKillButton).toHaveAttribute('aria-pressed', 'true');
@@ -173,16 +161,13 @@ test.describe('Soldier State Management', () => {
 
     const firstDoneButton = doneButtons.nth(0);
     await firstDoneButton.click({ force: true, timeout: 5000 });
-    await page.waitForTimeout(300);
     await expect(firstDoneButton).toHaveAttribute('aria-pressed', 'true');
 
     const secondDoneButton = doneButtons.nth(1);
     await secondDoneButton.click({ force: true, timeout: 5000 });
-    await page.waitForTimeout(300);
     await expect(secondDoneButton).toHaveAttribute('aria-pressed', 'true');
 
     await firstDoneButton.click({ force: true, timeout: 5000 });
-    await page.waitForTimeout(300);
 
     await expect(firstDoneButton).toHaveAttribute('aria-pressed', 'false');
     await expect(secondDoneButton).toHaveAttribute('aria-pressed', 'true');

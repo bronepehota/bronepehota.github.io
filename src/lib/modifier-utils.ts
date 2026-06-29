@@ -1,4 +1,4 @@
-import type { ArmyUnit, Army } from './types';
+import { isSquad, type ArmyUnit, type Army, type Machine } from './types';
 import type {
   BuffDefinition,
   ActiveDebuff,
@@ -116,8 +116,7 @@ export function resolveSoldierEffects(
  * Filters out one-time-use buffs that have already been consumed.
  */
 export function getUnitBuffs(unit: ArmyUnit): BuffDefinition[] {
-  const data = unit.data as any;
-  const templateBuffs: BuffDefinition[] = data.buffs || [];
+  const templateBuffs: BuffDefinition[] = unit.data.buffs || [];
   const usedBuffIds = new Set(unit.buffsUsed || []);
   return templateBuffs.filter(
     (b: BuffDefinition) => !b.oneTimeUse || !usedBuffIds.has(b.id)
@@ -130,12 +129,13 @@ export function getUnitBuffs(unit: ArmyUnit): BuffDefinition[] {
  * - Machines: currentDurability > 0
  */
 export function isUnitAlive(unit: ArmyUnit): boolean {
-  if (unit.type === 'squad') {
-    const soldierCount = (unit.data as any).soldiers?.length || 0;
+  if (isSquad(unit)) {
+    const soldierCount = unit.data.soldiers.length;
     const deadCount = unit.deadSoldiers?.length || 0;
     return deadCount < soldierCount;
   }
-  const maxDur = (unit.data as any).durability_max || 1;
+  // machine
+  const maxDur = (unit.data as Machine).durability_max || 1;
   const current = unit.currentDurability ?? maxDur;
   return current > 0;
 }
@@ -362,11 +362,12 @@ function applyModifier(
  * and soldier-level modifiers (if soldierIndex provided).
  */
 export function resolveModifierSummary(
-  unit: ArmyUnit,
+  unit: ArmyUnit | null | undefined,
   army: Army,
   phase: ModifierPhase,
   soldierIndex?: number
 ): ModifierSummary {
+  if (!unit) return EMPTY_MODIFIER_SUMMARY;
   const buffs = collectBuffsForUnit(unit, army, phase);
   const activeBuffs = collectActiveBuffsForUnit(unit, army, phase);
   const debuffs = collectDebuffsForUnit(unit, army, phase);

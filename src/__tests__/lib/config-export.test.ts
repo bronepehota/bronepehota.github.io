@@ -3,6 +3,7 @@ import {
   validateConfigEnvelope,
   generateConfigFileName,
   CURRENT_CONFIG_VERSION,
+  MAX_CONFIG_BYTES,
 } from '@/lib/config-export';
 import { CustomSource } from '@/lib/editor/types';
 
@@ -65,6 +66,69 @@ describe('config-export', () => {
       const raw = JSON.stringify(envelope);
       const result = validateConfigEnvelope(raw);
       expect(result.valid).toBe(true);
+    });
+  });
+
+  describe('validateConfigEnvelope — hardening', () => {
+    const validSource = {
+      id: 'src1', name: 'Source 1', description: '', version: '1',
+      baseSource: null, factions: [], squads: [], machines: [],
+      createdAt: '', updatedAt: '',
+    } as unknown as CustomSource;
+
+    it('rejects oversized input with a size-specific error (before parsing)', () => {
+      const huge = 'x'.repeat(MAX_CONFIG_BYTES + 1);
+      const result = validateConfigEnvelope(huge);
+      expect(result.valid).toBe(false);
+      expect(result.error).toMatch(/большой|размер/i);
+    });
+
+    it('rejects a source with an empty id', () => {
+      const env = createConfigEnvelope(
+        [{ ...validSource, id: '' } as CustomSource],
+        { buffs: [], debuffs: [] },
+      );
+      const result = validateConfigEnvelope(JSON.stringify(env));
+      expect(result.valid).toBe(false);
+    });
+
+    it('rejects a source that is not an object', () => {
+      const env = createConfigEnvelope(
+        ['not-an-object' as unknown as CustomSource],
+        { buffs: [], debuffs: [] },
+      );
+      const result = validateConfigEnvelope(JSON.stringify(env));
+      expect(result.valid).toBe(false);
+    });
+
+    it('strips prototype-pollution keys (constructor) from accepted sources', () => {
+      const src = { ...validSource, constructor: { polluted: true } } as unknown as CustomSource;
+      const env = createConfigEnvelope([src], { buffs: [], debuffs: [] });
+      const result = validateConfigEnvelope(JSON.stringify(env));
+      expect(result.valid).toBe(true);
+      expect(result.data).toBeDefined();
+      expect(Object.keys(result.data!.sources[0])).not.toContain('constructor');
+    });
+  });
+
+  describe('round-trip: create → serialize → validate → restore', () => {
+    it('preserves sources and modifiers across export/import', () => {
+      const source = {
+        id: 'rt-src', name: 'Round Trip', description: '', version: '1',
+        baseSource: null, factions: [], squads: [], machines: [],
+        createdAt: '2026-01-01', updatedAt: '2026-01-01',
+      } as unknown as CustomSource;
+      const modifiers = {
+        buffs: [{ id: 'b1', name: 'Buff', target: 'soldier' } as never],
+        debuffs: [{ id: 'd1', name: 'Debuff', target: 'soldier' } as never],
+      };
+      const envelope = createConfigEnvelope([source], modifiers);
+      const result = validateConfigEnvelope(JSON.stringify(envelope));
+      expect(result.valid).toBe(true);
+      expect(result.data!.sources[0].id).toBe('rt-src');
+      expect(result.data!.sources[0].name).toBe('Round Trip');
+      expect(result.data!.modifiers.buffs.length).toBe(1);
+      expect(result.data!.modifiers.debuffs[0].id).toBe('d1');
     });
   });
 

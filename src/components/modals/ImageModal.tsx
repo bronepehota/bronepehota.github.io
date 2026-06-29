@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { GitHubPagesImage as Image } from '../GitHubPagesImage';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 
 interface ImageModalProps {
   src: string;
@@ -16,6 +17,8 @@ export function ImageModal({ src, alt, isOpen, onClose }: ImageModalProps) {
   const [mounted, setMounted] = useState(false);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const backdropRef = useRef<HTMLDivElement>(null);
+  const focusRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(focusRef, isOpen);
 
   // Ensure component is mounted on client before rendering portal
   useEffect(() => {
@@ -83,7 +86,7 @@ export function ImageModal({ src, alt, isOpen, onClose }: ImageModalProps) {
       </button>
 
       {/* Image container */}
-      <div className="relative max-w-4xl max-h-[90vh] p-4" onClick={(e) => e.stopPropagation()}>
+      <div ref={focusRef} className="relative max-w-4xl max-h-[90vh] p-4" onClick={(e) => e.stopPropagation()}>
         <div className="relative bg-slate-900 rounded-2xl overflow-hidden shadow-2xl">
           <Image
             src={src}

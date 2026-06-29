@@ -7,6 +7,7 @@ import GameSession from '@/components/GameSession';
 import { AlertTriangle, X } from 'lucide-react';
 import { isValidRulesVersion } from '@/lib/rules-registry';
 import { LOCAL_STORAGE_KEYS } from '@/lib/constants';
+import { loadArmy, saveArmy } from '@/lib/army-storage';
 import { CombatTargetProvider } from '@/contexts/CombatTargetContext';
 import { trackScreenView } from '@/lib/analytics';
 
@@ -170,72 +171,31 @@ export default function Home() {
   // Load army from localStorage on mount (client-side only)
   useEffect(() => {
     if (!isMounted) return;
-    const saved = localStorage.getItem('bronepehota_army');
-    if (saved) {
-      try {
-        const loadedArmy = JSON.parse(saved);
-        // Initialize currentStep if not present (for backward compatibility)
-        if (!loadedArmy.currentStep) {
-          loadedArmy.currentStep = 'faction-select';
-        }
-        if (loadedArmy.isInBattle === undefined) {
-          loadedArmy.isInBattle = false;
-        }
-        if (!loadedArmy.currentTurn) {
-          loadedArmy.currentTurn = 1;
-        }
-
-        // Reset machine shot counters if battle is stale (more than 1 hour since last action)
-        // This prevents buttons being disabled after page reload in old sessions
-        const STALE_BATTLE_MS = 60 * 60 * 1000; // 1 hour
-        const now = Date.now();
-        const lastBattleTime = loadedArmy.lastBattleDate ? new Date(loadedArmy.lastBattleDate).getTime() : 0;
-        const isStaleBattle = loadedArmy.isInBattle && lastBattleTime && (now - lastBattleTime) > STALE_BATTLE_MS;
-
-        if (isStaleBattle) {
-          console.log('[Bronepehota] Stale battle detected, resetting machine shot counters');
-          loadedArmy.units = loadedArmy.units.map((unit: ArmyUnit) => {
-            if (unit.type === 'machine') {
-              return {
-                ...unit,
-                machineShotsUsed: 0,
-                machineWeaponShots: {},
-                isMachineShot: false,
-                isMachineMoved: false,
-                isMachineMelee: false,
-                isMachineDone: false,
-              };
-            }
-            // Also reset squad action states for stale battles
-            if (unit.type === 'squad' && unit.actionsUsed) {
-              return {
-                ...unit,
-                actionsUsed: (unit.data as any).soldiers.map(() => ({
-                  moved: false,
-                  shot: false,
-                  melee: false,
-                  done: false,
-                })),
-              };
-            }
-            return unit;
-          });
-        }
-
-        setArmy(loadedArmy);
-      } catch (e) {
-        console.error('Failed to load army', e);
-      }
+    const loadedArmy = loadArmy();
+    if (loadedArmy) {
+      setArmy(loadedArmy);
     }
     // Mark army as loaded regardless of whether localStorage had data
     setIsArmyLoaded(true);
   }, [isMounted]);
 
-  // Save army to localStorage when it changes (only after initial load)
+  // Save army to localStorage when it changes. Debounced (300ms) — serializing a
+  // large army on every action caused main-thread jank on mobile. Only after load.
   useEffect(() => {
     if (!isArmyLoaded) return;
-    localStorage.setItem('bronepehota_army', JSON.stringify(army));
+    const timer = setTimeout(() => saveArmy(army), 300);
+    return () => clearTimeout(timer);
   }, [army, isArmyLoaded]);
+
+  // Flush on page hide (reload/close/tab-switch) so the debounce never loses data.
+  const armyRef = useRef(army);
+  useEffect(() => { armyRef.current = army; }, [army]);
+  useEffect(() => {
+    if (!isArmyLoaded) return;
+    const flush = () => saveArmy(armyRef.current);
+    window.addEventListener('pagehide', flush);
+    return () => window.removeEventListener('pagehide', flush);
+  }, [isArmyLoaded]);
 
   return (
     <CombatTargetProvider>
