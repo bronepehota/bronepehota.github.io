@@ -8,7 +8,7 @@
     "soldiers": [
       {
         "num": 1,
-        "rank": 2,
+        "rank": 1,
         "speed": 5,
         "range": "",
         "power": "",
@@ -18,7 +18,7 @@
       },
       {
         "num": 2,
-        "rank": 2,
+        "rank": 1,
         "speed": 5,
         "range": "D6",
         "power": "2D6",
@@ -28,7 +28,7 @@
       },
       {
         "num": 3,
-        "rank": 2,
+        "rank": 1,
         "speed": 5,
         "range": "",
         "power": "",
@@ -38,7 +38,7 @@
       },
       {
         "num": 4,
-        "rank": 2,
+        "rank": 1,
         "speed": 5,
         "range": "",
         "power": "",
@@ -48,7 +48,7 @@
       },
       {
         "num": 5,
-        "rank": 2,
+        "rank": 1,
         "speed": 5,
         "range": "",
         "power": "",
@@ -58,7 +58,7 @@
       },
       {
         "num": 6,
-        "rank": 2,
+        "rank": 1,
         "speed": 5,
         "range": "D6",
         "power": "2D6",
@@ -316,8 +316,8 @@
         "num": 3,
         "rank": 2,
         "speed": 5,
-        "range": "",
-        "power": "",
+        "range": "2D6",
+        "power": "1D6+1",
         "melee": 2,
         "modifiers": [
           "jump_boost_5"
@@ -342,8 +342,8 @@
         "num": 5,
         "rank": 2,
         "speed": 5,
-        "range": "",
-        "power": "",
+        "range": "2D12",
+        "power": "1D6+1",
         "melee": 2,
         "modifiers": [
           "jump_boost_5"
@@ -355,8 +355,8 @@
         "num": 6,
         "rank": 2,
         "speed": 5,
-        "range": "",
-        "power": "",
+        "range": "D12",
+        "power": "2D12",
         "melee": 2,
         "modifiers": [
           "jump_boost_5"
@@ -623,7 +623,7 @@
       {
         "num": 1,
         "rank": 3,
-        "speed": 5,
+        "speed": 3,
         "range": "D6",
         "power": "2D6",
         "melee": 3,
@@ -633,7 +633,7 @@
       {
         "num": 2,
         "rank": 3,
-        "speed": 5,
+        "speed": 3,
         "range": "D12",
         "power": "2D6",
         "melee": 3,
@@ -643,7 +643,7 @@
       {
         "num": 3,
         "rank": 3,
-        "speed": 5,
+        "speed": 3,
         "range": "D12",
         "power": "2D12",
         "melee": 3,
@@ -653,7 +653,7 @@
       {
         "num": 4,
         "rank": 3,
-        "speed": 5,
+        "speed": 3,
         "range": "D12",
         "power": "2D12",
         "melee": 3,
@@ -820,7 +820,7 @@
         "modifiers": [
           "jump_boost_5"
         ],
-        "armor": 5,
+        "armor": 4,
         "image": "/images/squads/protectorate/shturmovoy_otryad_stervyatniki/1.png"
       },
       {
@@ -833,7 +833,7 @@
         "modifiers": [
           "jump_boost_5"
         ],
-        "armor": 5,
+        "armor": 4,
         "image": "/images/squads/protectorate/shturmovoy_otryad_stervyatniki/2.png"
       },
       {
@@ -846,7 +846,7 @@
         "modifiers": [
           "jump_boost_5"
         ],
-        "armor": 5,
+        "armor": 4,
         "image": "/images/squads/protectorate/shturmovoy_otryad_stervyatniki/3.png"
       },
       {
@@ -859,7 +859,7 @@
         "modifiers": [
           "jump_boost_5"
         ],
-        "armor": 5,
+        "armor": 4,
         "image": "/images/squads/protectorate/shturmovoy_otryad_stervyatniki/4.png"
       },
       {
@@ -872,7 +872,7 @@
         "modifiers": [
           "jump_boost_5"
         ],
-        "armor": 5,
+        "armor": 4,
         "image": "/images/squads/protectorate/shturmovoy_otryad_stervyatniki/5.png"
       },
       {
@@ -885,7 +885,7 @@
         "modifiers": [
           "jump_boost_5"
         ],
-        "armor": 5,
+        "armor": 4,
         "image": "/images/squads/protectorate/shturmovoy_otryad_stervyatniki/6.png"
       }
     ],

@@ -16,6 +16,7 @@ export const SQUAD_GROUP_IMAGE: Record<string, string> = {
   protectorate_voyska_planety_ruteniya: '/images/squads/protectorate/voyska_planety_ruteniya/group.jpg',
   protectorate_shturmovoy_spetsnaz_starye: '/images/squads/protectorate/shturmovoy_spetsnaz_starye/group.jpg',
   mercenaries_mutanty: '/images/squads/mercenaries/mutanty/group.jpg',
+  protectorate_lyogkaya_kiberpehota: '/images/squads/protectorate/lyogkaya_kiberpehota/group.jpg',
 };
 
 /** Photo credit per painter/photographer source. */
