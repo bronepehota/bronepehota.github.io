@@ -9,27 +9,27 @@
     "weapons": [
       {
         "name": "Спаренная пусковая установка Алебарда",
-        "range": "D6+3",
-        "power": "2D20",
+        "range": "D12",
+        "power": "D20",
         "ammo": 4
       },
       {
         "name": "Легкий 3-х ствольный пулемет Триплет Mk56",
-        "range": "D6",
-        "power": "1D6",
+        "range": "D12",
+        "power": "2D6",
         "ammo": 6,
         "special": "3 выстрела в 3х направлениях"
       },
       {
         "name": "Лазерная пушка Световой меч LG-25",
-        "range": "D20",
-        "power": "1D12",
+        "range": "2D12",
+        "power": "D20",
         "ammo": 4
       },
       {
         "name": "Плазменная пушка Драконье пламя PGM-13 Mk1",
         "range": "D12",
-        "power": "2D12",
+        "power": "D20+3",
         "ammo": 5
       }
     ],
@@ -50,7 +50,7 @@
         "speed": 4
       }
     ],
-    "rank": 2,
+    "rank": 3,
     "fire_rate": 2,
     "ammo_max": 14,
     "durability_max": 11
@@ -78,20 +78,25 @@
     ],
     "speed_sectors": [
       {
-        "min_durability": 9,
-        "max_durability": 14,
+        "min_durability": 10,
+        "max_durability": 15,
         "speed": 4
       },
       {
-        "min_durability": 1,
-        "max_durability": 8,
+        "min_durability": 5,
+        "max_durability": 9,
         "speed": 3
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 4,
+        "speed": 2
       }
     ],
     "rank": 3,
     "fire_rate": 2,
     "ammo_max": 16,
-    "durability_max": 14
+    "durability_max": 15
   },
   {
     "id": "bronekhod",
@@ -127,7 +132,7 @@
     ],
     "rank": 2,
     "fire_rate": 1,
-    "ammo_max": 12,
+    "ammo_max": 6,
     "durability_max": 10
   },
   {
@@ -161,23 +166,23 @@
       {
         "min_durability": 8,
         "max_durability": 14,
-        "speed": 4
+        "speed": 5
       },
       {
         "min_durability": 4,
         "max_durability": 7,
-        "speed": 3
+        "speed": 4
       },
       {
         "min_durability": 1,
         "max_durability": 3,
-        "speed": 2
+        "speed": 3
       }
     ],
-    "rank": 3,
+    "rank": 2,
     "fire_rate": 1,
     "ammo_max": 14,
-    "durability_max": 12
+    "durability_max": 14
   },
   {
     "id": "tornado",
@@ -190,7 +195,7 @@
       {
         "name": "Спаренная шестиствольная автоматическая пушка Гатлинг Mk20",
         "range": "D12",
-        "power": "3D20",
+        "power": "3D12",
         "ammo": 10
       },
       {
@@ -208,25 +213,25 @@
     ],
     "speed_sectors": [
       {
-        "min_durability": 9,
-        "max_durability": 13,
+        "min_durability": 10,
+        "max_durability": 15,
+        "speed": 4
+      },
+      {
+        "min_durability": 6,
+        "max_durability": 9,
         "speed": 3
       },
       {
-        "min_durability": 5,
-        "max_durability": 8,
-        "speed": 2
-      },
-      {
         "min_durability": 1,
-        "max_durability": 4,
-        "speed": 1
+        "max_durability": 5,
+        "speed": 2
       }
     ],
     "rank": 3,
     "fire_rate": 2,
     "ammo_max": 16,
-    "durability_max": 13
+    "durability_max": 15
   },
   {
     "id": "salamander",
@@ -246,7 +251,7 @@
     "speed_sectors": [
       {
         "min_durability": 6,
-        "max_durability": 8,
+        "max_durability": 7,
         "speed": 5
       },
       {
@@ -257,8 +262,8 @@
     ],
     "rank": 2,
     "fire_rate": 1,
-    "ammo_max": 10,
-    "durability_max": 8
+    "ammo_max": 6,
+    "durability_max": 7
   },
   {
     "id": "hurricane",
@@ -291,15 +296,20 @@
       {
         "min_durability": 10,
         "max_durability": 15,
+        "speed": 4
+      },
+      {
+        "min_durability": 6,
+        "max_durability": 9,
         "speed": 3
       },
       {
         "min_durability": 1,
-        "max_durability": 9,
+        "max_durability": 5,
         "speed": 2
       }
     ],
-    "rank": 2,
+    "rank": 3,
     "fire_rate": 2,
     "ammo_max": 18,
     "durability_max": 15
@@ -315,7 +325,7 @@
       {
         "name": "Лазерная пушка Световой меч LG-25",
         "range": "2D12",
-        "power": "D12",
+        "power": "D20",
         "ammo": 4
       },
       {
@@ -333,20 +343,25 @@
     ],
     "speed_sectors": [
       {
-        "min_durability": 8,
-        "max_durability": 12,
+        "min_durability": 10,
+        "max_durability": 14,
         "speed": 5
       },
       {
-        "min_durability": 1,
-        "max_durability": 7,
+        "min_durability": 6,
+        "max_durability": 9,
         "speed": 4
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 5,
+        "speed": 3
       }
     ],
     "rank": 3,
     "fire_rate": 2,
     "ammo_max": 14,
-    "durability_max": 12
+    "durability_max": 14
   },
   {
     "id": "varan",
@@ -409,20 +424,25 @@
     ],
     "speed_sectors": [
       {
-        "min_durability": 9,
-        "max_durability": 13,
+        "min_durability": 10,
+        "max_durability": 14,
+        "speed": 5
+      },
+      {
+        "min_durability": 6,
+        "max_durability": 9,
         "speed": 4
       },
       {
         "min_durability": 1,
-        "max_durability": 8,
+        "max_durability": 5,
         "speed": 3
       }
     ],
     "rank": 3,
     "fire_rate": 2,
     "ammo_max": 14,
-    "durability_max": 13
+    "durability_max": 14
   },
   {
     "id": "octopus",
@@ -523,20 +543,25 @@
     ],
     "speed_sectors": [
       {
-        "min_durability": 6,
+        "min_durability": 8,
         "max_durability": 10,
         "speed": 5
       },
       {
-        "min_durability": 1,
-        "max_durability": 5,
+        "min_durability": 5,
+        "max_durability": 7,
         "speed": 4
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 4,
+        "speed": 3
       }
     ],
     "rank": 2,
     "fire_rate": 2,
-    "ammo_max": 10,
-    "durability_max": 9
+    "ammo_max": 6,
+    "durability_max": 10
   },
   {
     "id": "viper",
@@ -555,19 +580,67 @@
     ],
     "speed_sectors": [
       {
-        "min_durability": 5,
+        "min_durability": 7,
         "max_durability": 8,
         "speed": 7
       },
       {
+        "min_durability": 5,
+        "max_durability": 6,
+        "speed": 5
+      },
+      {
         "min_durability": 1,
         "max_durability": 4,
-        "speed": 5
+        "speed": 3
       }
     ],
-    "rank": 1,
+    "rank": 2,
     "fire_rate": 1,
     "ammo_max": 10,
     "durability_max": 8
+  },
+  {
+    "id": "t1000",
+    "name": "Т-1000",
+    "shortName": "Т-1000",
+    "faction": "protectorate",
+    "cost": 330,
+    "image": "/images/machines/t1000.jpg",
+    "weapons": [
+      {
+        "name": "Пушка Гатлинга",
+        "range": "D12",
+        "power": "3D12",
+        "ammo": 5
+      },
+      {
+        "name": "Спаренная пусковая установка «Шторм»",
+        "range": "D12",
+        "power": "2D20",
+        "ammo": 2
+      }
+    ],
+    "speed_sectors": [
+      {
+        "min_durability": 12,
+        "max_durability": 15,
+        "speed": 4
+      },
+      {
+        "min_durability": 8,
+        "max_durability": 11,
+        "speed": 3
+      },
+      {
+        "min_durability": 1,
+        "max_durability": 7,
+        "speed": 2
+      }
+    ],
+    "rank": 3,
+    "fire_rate": 2,
+    "ammo_max": 7,
+    "durability_max": 15
   }
 ]
