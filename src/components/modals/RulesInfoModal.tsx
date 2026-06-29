@@ -67,7 +67,7 @@ const COMMUNITY_CONTENT = (
       <li>Полное (более 50%): +2 к дистанции</li>
     </ul>
 
-    <p className="text-sm text-slate-400 italic">Источник: docs/panov/fan_rules.txt</p>
+    <p className="text-sm text-slate-400 italic">Источник: docs/panov/fan_rules.md</p>
   </>
 );
 

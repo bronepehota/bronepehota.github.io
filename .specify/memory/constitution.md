@@ -215,7 +215,7 @@ The application MUST support multiple rules editions (official 'tehnolog' and fa
 
 Official and fan game rules are located in `docs/` as TXT files (converted from PDF):
 - `docs/original/official_rules.txt` - Official rules by Технолог (БРОНЕПЕХОТА Правила игры)
-- `docs/panov/fan_rules.txt` - Fan rules by Панов (Правила игры Фанатская редакция 2025)
+- `docs/panov/fan_rules.md` - Fan rules by Панов (Правила игры Фанатская редакция 2025)
 
 These TXT files contain the authoritative source of truth for game mechanics, unit statistics, and faction rules. All game logic implementation MUST align with these reference materials.
 
@@ -286,7 +286,7 @@ Adding a new faction requires:
 - Image upload functionality validated (all three methods)
 - Faction colors consistent across UI
 - Game mechanics verified against `docs/original/official_rules.txt` for 'tehnolog' edition
-- Game mechanics verified against `docs/panov/fan_rules.txt` for 'fan' edition
+- Game mechanics verified against `docs/panov/fan_rules.md` for 'fan' edition
 - **Mobile testing**: All core flows tested on mobile device or emulation
 - **Touch targets**: Minimum 44x44px for all interactive elements verified
 - **Soldier images**: Visible and identifiable on mobile for unit selection
