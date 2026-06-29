@@ -11,14 +11,11 @@
   `tehnolog` (`src/lib/rules/tehnolog.ts`), показывается игроку в `RulesInfoModal`.
   Машинная конвертация из PDF.
 - `Bronepekhota_Pravila_05_08_08.pdf` — **каноничный авторитетный источник**.
-- `bp_all_armsheets.pdf`, `bp_all_techsheets.pdf` — оригиналы листов (армлисты/техлисты).
 
 ### `star_system/` — фанатская редакция Star System (v0.3)
 - `fan_rules.md` — правила в Markdown. Источник для версии правил
   `community_star_system` (`src/lib/rules/community_star_system.ts`). Машинная конвертация из PDF.
 - `fan_rules_v0.3.pdf` — **каноничный авторитетный источник** (тестовая версия 0.3, 2025).
-- `Kalkulyator_armlistov_pekhoty_Alfa_v-1_02.xlsx` — калькулятор армлистов пехоты.
-- `Шаблоны АрмЛистов.jpg` — шаблоны армлистов.
 
 > Имена директорий соответствуют редакциям правил (`tehnolog`, `star_system`).
 > Файлы `.md` — редактируемый текст; PDF — замороженный авторитетный источник
