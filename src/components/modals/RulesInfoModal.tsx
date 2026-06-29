@@ -35,7 +35,7 @@ const TEHNOLOG_CONTENT = (
       <li>Полное (более 50%): +2 к броне</li>
     </ul>
 
-    <p className="text-sm text-slate-400 italic">Источник: docs/tehnolog/official_rules.txt</p>
+    <p className="text-sm text-slate-400 italic">Источник: docs/tehnolog/official_rules.md</p>
   </>
 );
 

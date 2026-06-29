@@ -168,6 +168,12 @@ src/data/sources/
 
 **Campaigns (Хроники войн)** — in-app lore from build-time Markdown: content `src/content/campaigns/*.md` (frontmatter + body), loader `src/lib/campaigns.ts`. `getAllCampaigns()` is sync (frontmatter only, via `gray-matter`); `getCampaign(slug)` is async and renders the body→HTML via **dynamically-imported** `remark`/`remark-gfm`/`remark-html` (dynamic import keeps the module Jest-importable — unit-test only `getAllCampaigns`, never `getCampaign`). Routes `/campaigns` + `/campaigns/[slug]`. **Markdown under `docs/` is NOT published** (not in the static export) — in-app content must live under `src/` and be build-imported.
 
+**Rules source documents** (`docs/`): authoritative rule texts live outside `src/` (dev/player reference only — NOT imported by the app). Edition ↔ directory:
+- `docs/tehnolog/official_rules.md` (+ `Bronepekhota_Pravila_05_08_08.pdf` canonical) — official Tehnolog rules; `source` ref in `src/lib/rules/tehnolog.ts`.
+- `docs/star_system/fan_rules.md` (+ `fan_rules_v0.3.pdf` canonical) — fan/community Star System rules (v0.3); `source` ref in `src/lib/rules/community_star_system.ts`.
+
+Both `.md` files are machine-converted from their PDFs; the PDF is authoritative on disagreement. `docs/README.md` maps the full `docs/` layout; `RulesInfoModal.tsx` shows the source path to players (covered by `src/__tests__/RulesInfoModal.test.tsx`).
+
 ### State Management
 
 **Client-side persistence** (localStorage keys — canonical list in `src/lib/constants.ts`):

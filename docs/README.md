@@ -1,33 +1,31 @@
 # Документация Бронепехоты
 
-Этот каталог — справочный материал для разработчиков и игроков (правила,
-армлисты, промо-материалы, планы работ). В приложение попадает только то,
-что лежит под `src/` и импортируется при сборке; `docs/` в продакшен-сборку
-**не входит**.
+Справочный материал для разработчиков и игроков (правила, армлисты, планы работ).
+В приложение попадает только то, что под `src/` и импортируется при сборке;
+`docs/` в продакшен-сборку **не входит**.
 
 ## Структура
 
-### `original/` — официальные правила (Tehnolog)
-- `official_rules.txt` — текст официальных правил. Источник для версии правил
-  `tehnolog` (см. `src/lib/rules/tehnolog.ts`).
-- `Bronepekhota_Pravila_*.pdf`, `bp_all_armsheets.pdf`, `bp_all_techsheets.pdf` —
-  оригиналы официальных правил и листов.
+### `tehnolog/` — официальные правила (Tehnolog)
+- `official_rules.md` — официальные правила в Markdown. Источник для версии правил
+  `tehnolog` (`src/lib/rules/tehnolog.ts`), показывается игроку в `RulesInfoModal`.
+  Машинная конвертация из PDF.
+- `Bronepekhota_Pravila_05_08_08.pdf` — **каноничный авторитетный источник**.
+- `bp_all_armsheets.pdf`, `bp_all_techsheets.pdf` — оригиналы листов (армлисты/техлисты).
 
 ### `star_system/` — фанатская редакция Star System (v0.3)
 - `fan_rules.md` — правила в Markdown. Источник для версии правил
-  `community_star_system` (`src/lib/rules/community_star_system.ts`),
-  показывается игроку в `RulesInfoModal`. Машинная конвертация из PDF.
-- `fan_rules_v0.3.pdf` — **каноничный авторитетный источник** правил
-  (тестовая версия 0.3, 2025). При расхождениях верен PDF.
+  `community_star_system` (`src/lib/rules/community_star_system.ts`). Машинная конвертация из PDF.
+- `fan_rules_v0.3.pdf` — **каноничный авторитетный источник** (тестовая версия 0.3, 2025).
 - `Kalkulyator_armlistov_pekhoty_Alfa_v-1_02.xlsx` — калькулятор армлистов пехоты.
 - `Шаблоны АрмЛистов.jpg` — шаблоны армлистов.
 
-### `promo/` — маркетинговые материалы
-VK/Telegram-посты, скриншоты экранов приложения, обложки и логотипы.
+> Имена директорий соответствуют редакциям правил (`tehnolog`, `star_system`).
+> Файлы `.md` — редактируемый текст; PDF — замороженный авторитетный источник
+> (при расхождениях верен PDF).
 
-### `superpowers/` — рабочие процессы
-- `plans/` — планы реализации (superpowers writing-plans).
-- `specs/` — дизайн-документы (superpowers brainstorming).
+### `promo/` — маркетинговые материалы (VK/Telegram-посты, скриншоты, обложки). **Gitignored** (не отслеживается).
+### `superpowers/` — рабочие процессы: `plans/` (планы реализации) и `specs/` (дизайн-документы).
 
 ## Корневые документы
 - `ADDING_ARMLISTS.md` — как добавлять новые армлисты в источники.
@@ -35,7 +33,7 @@ VK/Telegram-посты, скриншоты экранов приложения, 
 
 ## Связь с кодом
 Пути к текстам правил захардкожены как «источник» в:
-- `src/lib/rules/tehnolog.ts` → `docs/tehnolog/official_rules.txt`
+- `src/lib/rules/tehnolog.ts` → `docs/tehnolog/official_rules.md`
 - `src/lib/rules/community_star_system.ts` → `docs/star_system/fan_rules.md`
 - `src/components/modals/RulesInfoModal.tsx` (отображается игроку в модалке правил)
 

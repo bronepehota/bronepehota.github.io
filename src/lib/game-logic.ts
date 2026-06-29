@@ -144,7 +144,7 @@ export interface GrenadeDistanceResult {
 /**
  * Grenade attack — phase 1: determine the blast location.
  *
- * Official Tehnolog rules (docs/tehnolog/official_rules.txt §7.8):
+ * Official Tehnolog rules (docs/tehnolog/official_rules.md §7.8):
  *   "игрок бросает кубик Д6, чтобы определить дальность" — a single D6, and the
  *   roll IS the distance in steps. No rank bonus.
  *

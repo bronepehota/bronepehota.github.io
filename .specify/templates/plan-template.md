@@ -40,7 +40,7 @@ Based on `.specify/memory/constitution.md`:
 - [ ] **Game Logic Tests**: Tests in `src/__tests__/` for mechanics in `game-logic.ts`?
 - [ ] **Dice Notation**: Correct formats (D6, D12+2, 2D12, ББ)?
 - [ ] **Faction System**: FactionID type updated? JSON data files updated?
-- [ ] **Reference Docs**: Game mechanics verified against `docs/tehnolog/official_rules.txt` (tehnolog) or `docs/star_system/fan_rules.md` (fan)?
+- [ ] **Reference Docs**: Game mechanics verified against `docs/tehnolog/official_rules.md` (tehnolog) or `docs/star_system/fan_rules.md` (fan)?
 - [ ] **Rules Version**: localStorage key `bronepehota_rules_version` used? Both 'tehnolog' and 'fan' editions supported?
 - [ ] **Mobile-First**: Touch-friendly? Responsive layout? 44x44px min tap targets?
 - [ ] **Mobile Testing**: Core flows tested on mobile/emulation?
