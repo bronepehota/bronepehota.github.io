@@ -84,7 +84,7 @@ function getDurabilityZone(
 export const communityStarSystemRules: RulesVersion = {
   id: 'community_star_system',
   name: 'Правила от Сообщества Star System',
-  source: 'docs/panov/fan_rules.md',
+  source: 'docs/star_system/fan_rules.md',
   description: 'Альтернативные правила с расширенными механиками. Используют зонную систему повреждений для техники и поддерживают спецэффекты оружия. Более сложные, но тактически глубокие правила для опытных игроков.',
   features: [
     'Зонные повреждения техники',

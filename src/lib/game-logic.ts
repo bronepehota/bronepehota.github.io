@@ -144,11 +144,11 @@ export interface GrenadeDistanceResult {
 /**
  * Grenade attack — phase 1: determine the blast location.
  *
- * Official Tehnolog rules (docs/original/official_rules.txt §7.8):
+ * Official Tehnolog rules (docs/tehnolog/official_rules.txt §7.8):
  *   "игрок бросает кубик Д6, чтобы определить дальность" — a single D6, and the
  *   roll IS the distance in steps. No rank bonus.
  *
- * Community Star System rules (docs/panov/fan_rules.md):
+ * Community Star System rules (docs/star_system/fan_rules.md):
  *   roll D6 a number of times equal to the thrower's Army Rank, keep the best.
  *
  * Blast zone is ±1 step around the impact point (1 step = 4 cm). A roll of 1

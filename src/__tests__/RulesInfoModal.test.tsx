@@ -41,7 +41,7 @@ describe('RulesInfoModal', () => {
 
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(screen.getByText('Правила от Сообщества Star System')).toBeInTheDocument();
-    expect(screen.getByText(/docs\/panov\/fan_rules.md/)).toBeInTheDocument();
+    expect(screen.getByText(/docs\/star_system\/fan_rules.md/)).toBeInTheDocument();
   });
 
   it('calls onClose when X button clicked', async () => {

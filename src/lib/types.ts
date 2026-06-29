@@ -94,7 +94,7 @@ export interface SpeedSector {
   speed: number;
 }
 
-// Special weapon effects (Panov rules)
+// Special weapon effects (Star System rules)
 export interface AoEEffect {
   type: 'aoe';
   radius: number; // Количество hex-ов радиуса
@@ -120,7 +120,7 @@ export type FortificationType = 'none' | 'light' | 'heavy';
 
 export interface FortificationModifiers {
   armor: number;     // For official rules (tehnolog) - adds to target armor
-  distance: number;  // For fan rules (panov) - adds to effective distance
+  distance: number;  // For fan rules (star_system) - adds to effective distance
 }
 
 export const FORTIFICATION_MODIFIERS: Record<FortificationType, FortificationModifiers> = {

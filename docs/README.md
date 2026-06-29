@@ -13,7 +13,7 @@
 - `Bronepekhota_Pravila_*.pdf`, `bp_all_armsheets.pdf`, `bp_all_techsheets.pdf` —
   оригиналы официальных правил и листов.
 
-### `panov/` — фанатская редакция Star System (v0.3)
+### `star_system/` — фанатская редакция Star System (v0.3)
 - `fan_rules.md` — правила в Markdown. Источник для версии правил
   `community_star_system` (`src/lib/rules/community_star_system.ts`),
   показывается игроку в `RulesInfoModal`. Машинная конвертация из PDF.
@@ -35,8 +35,8 @@ VK/Telegram-посты, скриншоты экранов приложения, 
 
 ## Связь с кодом
 Пути к текстам правил захардкожены как «источник» в:
-- `src/lib/rules/tehnolog.ts` → `docs/original/official_rules.txt`
-- `src/lib/rules/community_star_system.ts` → `docs/panov/fan_rules.md`
+- `src/lib/rules/tehnolog.ts` → `docs/tehnolog/official_rules.txt`
+- `src/lib/rules/community_star_system.ts` → `docs/star_system/fan_rules.md`
 - `src/components/modals/RulesInfoModal.tsx` (отображается игроку в модалке правил)
 
 При переименовании/перемещении этих файлов — обновить ссылки и тест
