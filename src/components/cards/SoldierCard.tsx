@@ -6,8 +6,7 @@ import { SoldierStats } from './soldier-card/SoldierStats';
 import { SoldierImage } from './soldier-card/SoldierImage';
 import StatusStripe, { type SoldierState } from './soldier-card/StatusStripe';
 import { cn } from '@/lib/utils';
-import type { Squad, ArmyUnit, Army, RulesVersionID } from '@/lib/types';
-import { checkPanicTrigger } from '@/lib/panic-logic';
+import type { Squad, ArmyUnit, Army } from '@/lib/types';
 import { collectBuffsForUnit, getSoldierModifiers, resolveModifierSummary, isModifierActive } from '@/lib/modifier-utils';
 import { getSourceWithCustom } from '@/lib/sources-registry';
 
@@ -16,11 +15,9 @@ interface SoldierCardProps {
   unit: ArmyUnit;
   soldierIndex: number;
   allUnits: ArmyUnit[];
-  rulesVersion: RulesVersionID;
   updateUnit: (instanceId: string, updateFn: (currentUnit: ArmyUnit) => ArmyUnit) => void;
   onSoldierAction: (soldierIndex: number) => void;
   setShowSoldierImage: (idx: number | null) => void;
-  setShowPanicModal: (show: boolean) => void;
   getSoldierImage: (idx: number) => string;
   distanceInputUnit?: 'steps' | 'cm';
   stepToCmFactor?: number;
@@ -37,11 +34,9 @@ function SoldierCard({
   unit,
   soldierIndex,
   allUnits: _allUnits,
-  rulesVersion,
   updateUnit,
   onSoldierAction,
   setShowSoldierImage,
-  setShowPanicModal,
   getSoldierImage,
   distanceInputUnit = 'steps',
   stepToCmFactor = 5,
@@ -162,28 +157,12 @@ function SoldierCard({
   };
 
   const handleToggleDead = () => {
-    // Store whether this is adding or removing a kill (before state changes)
-    const dead = unit.deadSoldiers || [];
-    const isAddingKill = !dead.includes(soldierIndex);
-
-    // Use explicit instanceId to avoid updating all units
     updateUnit(unit.instanceId, (currentUnit: ArmyUnit) => {
       const currentDead = currentUnit.deadSoldiers || [];
       const newDead = currentDead.includes(soldierIndex)
         ? currentDead.filter(i => i !== soldierIndex)
         : [...currentDead, soldierIndex];
-
-      const updatedUnit = { ...currentUnit, deadSoldiers: newDead };
-
-      // Check panic trigger for community rules when adding a kill
-      if (isAddingKill && rulesVersion === 'community_star_system') {
-        const shouldTestPanic = checkPanicTrigger(updatedUnit, 'community_star_system');
-        if (shouldTestPanic) {
-          setShowPanicModal(true);
-        }
-      }
-
-      return updatedUnit;
+      return { ...currentUnit, deadSoldiers: newDead };
     });
   };
 
