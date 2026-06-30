@@ -230,11 +230,11 @@ export const communityStarSystemRules: RulesVersion = {
     return { damage, rolls };
   },
 
-  calculateMelee: (attackerMelee: number, defenderMelee: number): MeleeResult => {
+  calculateMelee: (attackerMelee: number, defenderArmor: number): MeleeResult => {
     const aRoll = rollDie(6);
     const dRoll = rollDie(6);
     const aTotal = aRoll + attackerMelee;
-    const dTotal = dRoll + defenderMelee;
+    const dTotal = dRoll + defenderArmor;
 
     let winner: 'attacker' | 'defender' | 'draw' = 'draw';
     if (aTotal > dTotal) winner = 'attacker';

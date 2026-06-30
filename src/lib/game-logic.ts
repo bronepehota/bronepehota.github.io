@@ -186,7 +186,7 @@ export function rollGrenadeDistance(
   };
 }
 
-export const calculateMelee = (attackerMelee: number, defenderMelee: number): {
+export const calculateMelee = (attackerMelee: number, defenderArmor: number): {
   attackerRoll: number,
   attackerTotal: number,
   defenderRoll: number,
@@ -196,7 +196,7 @@ export const calculateMelee = (attackerMelee: number, defenderMelee: number): {
   const aRoll = rollDie(6);
   const dRoll = rollDie(6);
   const aTotal = aRoll + attackerMelee;
-  const dTotal = dRoll + defenderMelee;
+  const dTotal = dRoll + defenderArmor;
 
   let winner: 'attacker' | 'defender' | 'draw' = 'draw';
   if (aTotal > dTotal) winner = 'attacker';
@@ -255,10 +255,10 @@ export function calculateDamageWithSurpriseAttack(powerStr: string, targetArmor:
 /**
  * Calculate melee with surprise attack (Fan rules: attacker rolls twice, takes best)
  * @param attackerMelee - Attacker's melee stat
- * @param defenderMelee - Defender's melee stat (use 0 for machine in surprise attack)
+ * @param defenderArmor - Defender's armor stat (use 0 for machine in surprise attack)
  * @returns MeleeResult with both attacker rolls and best result
  */
-export function calculateMeleeWithSurpriseAttack(attackerMelee: number, defenderMelee: number): {
+export function calculateMeleeWithSurpriseAttack(attackerMelee: number, defenderArmor: number): {
   attackerRoll1: number;
   attackerRoll2: number;
   attackerRoll: number;
@@ -270,7 +270,7 @@ export function calculateMeleeWithSurpriseAttack(attackerMelee: number, defender
   const { roll1: aRoll1, roll2: aRoll2, best: aRoll } = rollWithAdvantage(6);
   const dRoll = rollDie(6);
   const aTotal = aRoll + attackerMelee;
-  const dTotal = dRoll + defenderMelee;
+  const dTotal = dRoll + defenderArmor;
 
   let winner: 'attacker' | 'defender' | 'draw' = 'draw';
   if (aTotal > dTotal) winner = 'attacker';
