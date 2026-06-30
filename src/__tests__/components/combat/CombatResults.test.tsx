@@ -302,6 +302,97 @@ describe('CombatResults - Grenade Display', () => {
       // Default armor is 2
       expect(onGrenadeCheckTarget).toHaveBeenCalledWith(2);
     });
+
+    it('should render a "ЦЕЛЬ N" label and testid for each blast check', () => {
+      const resultWithChecks: CombatResult = {
+        ...mockGrenadeResult,
+        grenadeBlastChecks: [
+          { armor: 2, roll: 15, hit: true },
+          { armor: 3, roll: 8, hit: false },
+          { armor: 2, roll: 20, hit: true },
+        ],
+      };
+
+      render(<CombatResults {...defaultProps} result={resultWithChecks} />);
+
+      const checks = screen.getAllByTestId('grenade-blast-check');
+      expect(checks).toHaveLength(3);
+
+      expect(screen.getByText('ЦЕЛЬ 1')).toBeInTheDocument();
+      expect(screen.getByText('ЦЕЛЬ 2')).toBeInTheDocument();
+      expect(screen.getByText('ЦЕЛЬ 3')).toBeInTheDocument();
+    });
+
+    it('should highlight only the newest (last) blast check with a ring', () => {
+      const resultWithChecks: CombatResult = {
+        ...mockGrenadeResult,
+        grenadeBlastChecks: [
+          { armor: 2, roll: 15, hit: true },
+          { armor: 3, roll: 8, hit: false },
+        ],
+      };
+
+      render(<CombatResults {...defaultProps} result={resultWithChecks} />);
+
+      const checks = screen.getAllByTestId('grenade-blast-check');
+      expect(checks[1]).toHaveClass('ring-2');
+      expect(checks[0]).not.toHaveClass('ring-2');
+    });
+
+    it('should show live hit tally and sticky input section', () => {
+      const resultWithChecks: CombatResult = {
+        ...mockGrenadeResult,
+        grenadeBlastChecks: [
+          { armor: 2, roll: 15, hit: true },
+          { armor: 3, roll: 8, hit: false },
+          { armor: 2, roll: 20, hit: true },
+          { armor: 3, roll: 5, hit: false },
+          { armor: 2, roll: 18, hit: true },
+          { armor: 3, roll: 2, hit: false },
+        ],
+      };
+
+      render(<CombatResults {...defaultProps} result={resultWithChecks} />);
+
+      const tally = screen.getByTestId('grenade-hit-tally');
+      expect(tally).toHaveTextContent('💥 3/6 пробито');
+
+      const section = screen.getByTestId('grenade-target-check-section');
+      expect(section).toHaveClass('sticky');
+    });
+
+    it('should hide hit tally when there are no checks', () => {
+      render(<CombatResults {...defaultProps} />);
+
+      expect(screen.queryByTestId('grenade-hit-tally')).not.toBeInTheDocument();
+    });
+
+    it('should vibrate on explode when supported, and still check the target', async () => {
+      const vibrateSpy = jest.fn();
+      Object.defineProperty(window.navigator, 'vibrate', {
+        value: vibrateSpy,
+        configurable: true,
+      });
+
+      const onGrenadeCheckTarget = jest.fn();
+      render(
+        <CombatResults
+          {...defaultProps}
+          onGrenadeCheckTarget={onGrenadeCheckTarget}
+        />
+      );
+
+      await userEvent.click(screen.getByTestId('grenade-explode-button'));
+
+      expect(vibrateSpy).toHaveBeenCalledWith(30);
+      expect(onGrenadeCheckTarget).toHaveBeenCalledWith(2);
+
+      // restore
+      Object.defineProperty(window.navigator, 'vibrate', {
+        value: undefined,
+        configurable: true,
+      });
+    });
   });
 
   describe('Grenade distance calculation', () => {

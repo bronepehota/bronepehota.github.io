@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { CombatResult, CombatParameters } from '@/lib/combat-types';
 import { RulesVersionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -34,6 +34,18 @@ export function CombatResults({
   // Auto-complete logic: mark as done if enabled and it's a squad (not a machine)
   const markAsDone = autoCompleteEnabled && unitType === 'squad';
   const [grenadeTargetArmor, setGrenadeTargetArmor] = useState(2);
+
+  // Grenade target-check derived state (Phase 2)
+  const grenadeChecks = result.grenadeBlastChecks ?? [];
+  const grenadeHits = grenadeChecks.filter((c) => c.hit).length;
+  const grenadeTotal = grenadeChecks.length;
+  const isGrenadeDanger = isGrenade && (result.hitResult?.roll ?? 0) === 1;
+
+  // Auto-scroll the newest blast check into view above the sticky arming panel
+  const lastCheckRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    lastCheckRef.current?.scrollIntoView?.({ block: 'nearest' });
+  }, [grenadeTotal]);
 
   const getEffectiveDistance = () => {
     if (rulesVersion === 'community_star_system' && parameters.fortification !== 'none') {
@@ -391,17 +403,30 @@ export function CombatResults({
           {/* Target Checks Section */}
           {result.grenadeBlastChecks && result.grenadeBlastChecks.length > 0 && (
             <div data-testid="grenade-blast-checks" className="space-y-3">
-              {result.grenadeBlastChecks.map((check, idx) => (
+              {result.grenadeBlastChecks.map((check, idx) => {
+                const isLast = idx === result.grenadeBlastChecks!.length - 1;
+                return (
                 <div
                   key={idx}
-                  className="space-y-3"
+                  ref={isLast ? lastCheckRef : undefined}
+                  data-testid="grenade-blast-check"
+                  className={cn(
+                    "space-y-3 rounded-lg",
+                    isLast && "ring-2 ring-emerald-400/50 ring-offset-0"
+                  )}
                   style={{ animationDelay: `${idx * 100}ms` }}
                 >
+                  {/* Per-target label */}
+                  <div className="flex items-center">
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-400/80 bg-emerald-950/40 border border-emerald-700/40 rounded px-1.5 py-0.5">
+                      ЦЕЛЬ {idx + 1}
+                    </span>
+                  </div>
                   {/* Grid layout - same as shot */}
                   <div className="grid grid-cols-2 gap-3">
                     {/* D20 Roll */}
                     <div className={cn(
-                      "relative bg-slate-900/80 p-4 rounded-lg border-2",
+                      "relative bg-slate-900/80 p-3 rounded-lg border-2",
                       check.hit
                         ? "border-orange-600/50"
                         : "border-slate-600/50"
@@ -428,7 +453,7 @@ export function CombatResults({
                     </div>
 
                     {/* Armor */}
-                    <div className="relative bg-slate-900/80 p-4 rounded-lg border-2 border-slate-600/50">
+                    <div className="relative bg-slate-900/80 p-3 rounded-lg border-2 border-slate-600/50">
                       <div className="text-xs font-mono opacity-60 text-slate-400 mb-3 text-center">
                         Броня цели
                       </div>
@@ -465,16 +490,43 @@ export function CombatResults({
                     </div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
 
-          {/* Grenade Target Check Input Section */}
+          {/* Grenade Target Check Input Section — sticky arming panel */}
           {isGrenade && onGrenadeCheckTarget && (
-            <div data-testid="grenade-target-check-section" className="bg-slate-800 p-4 rounded-lg border border-slate-700">
-              <div className="text-xs opacity-60 uppercase font-bold mb-4 tracking-wider">
-                ПРОВЕРИТЬ ЦЕЛЬ В ЗОНЕ ВЗРЫВА
+            <div
+              data-testid="grenade-target-check-section"
+              className={cn(
+                "sticky bottom-0 z-10 bg-slate-800 p-4 rounded-lg border border-slate-700 border-t-2 shadow-[0_-10px_20px_rgba(0,0,0,0.45)]",
+                isGrenadeDanger ? "border-t-red-500 animate-pulse" : "border-t-emerald-600/70"
+              )}
+            >
+              <div className="flex items-center justify-between mb-3">
+                <div className="text-xs opacity-60 uppercase font-bold tracking-wider">
+                  ПРОВЕРИТЬ ЦЕЛЬ В ЗОНЕ ВЗРЫВА
+                </div>
+                {grenadeTotal > 0 ? (
+                  <span
+                    data-testid="grenade-hit-tally"
+                    className={cn(
+                      "font-mono font-black text-xs whitespace-nowrap",
+                      grenadeHits > 0 ? "text-emerald-400" : "text-slate-500"
+                    )}
+                  >
+                    💥 {grenadeHits}/{grenadeTotal} пробито
+                  </span>
+                ) : null}
               </div>
+
+              {grenadeTotal === 0 && (
+                <div className="text-center text-[11px] text-slate-500 font-mono uppercase tracking-wider mb-3">
+                  <Bomb className="inline w-3.5 h-3.5 mr-1 align-middle" />
+                  Цели в зоне взрыва не проверены
+                </div>
+              )}
 
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
@@ -517,7 +569,12 @@ export function CombatResults({
 
                 <button
                   data-testid="grenade-explode-button"
-                  onClick={() => onGrenadeCheckTarget(grenadeTargetArmor)}
+                  onClick={() => {
+                    if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+                      navigator.vibrate(30);
+                    }
+                    onGrenadeCheckTarget(grenadeTargetArmor);
+                  }}
                   className={cn(
                     "relative w-full py-2 md:py-3 rounded-lg font-mono text-base font-bold uppercase tracking-wider border-2 transition-all min-h-[48px] md:min-h-[52px]",
                     "active:scale-95",

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { X, ChevronLeft, Target, Sword, Bomb, EyeOff, Crosshair } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useBottomSheet } from '@/hooks/useBottomSheet';
@@ -94,6 +94,9 @@ export function BottomSheetCombatModal({
     closeThreshold: 100,
     isEnabled: true,
   });
+
+  // Track whether the content area is scrolled, to show a top-edge fade hint (#165)
+  const [contentScrolled, setContentScrolled] = useState(false);
 
   // Access combat target context for memory
   const { getTargetMemory, updateTargetMemory } = useCombatTargetContext();
@@ -240,7 +243,16 @@ export function BottomSheetCombatModal({
         </div>
 
         {/* Content - Scrollable */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-2 md:p-3">
+        <div
+          className="flex-1 min-h-0 overflow-y-auto custom-scrollbar p-2 md:p-3"
+          onScroll={(e) => setContentScrolled(e.currentTarget.scrollTop > 4)}
+        >
+          {contentScrolled && (
+            <div
+              aria-hidden="true"
+              className="sticky top-0 -mt-2 md:-mt-3 h-2 bg-gradient-to-b from-slate-950 to-transparent pointer-events-none z-[5]"
+            />
+          )}
           {state.phase === 'ACTION_SELECT' && (
             <ActionSelector
               onSelect={(action) => onSelectAction(action)}
