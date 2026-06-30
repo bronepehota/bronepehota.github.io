@@ -524,7 +524,7 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
       const defenderRoll = rollDie(6);
 
       const aTotal = attackerRoll + attackerMelee;
-      const dTotal = defenderRoll + state.parameters.targetMelee;
+      const dTotal = defenderRoll + state.parameters.targetArmor;
 
       let winner: 'attacker' | 'defender' | 'draw' = 'draw';
       if (aTotal > dTotal) winner = 'attacker';
@@ -540,7 +540,7 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
         attackerRolls: [roll1a, roll2a]
       };
     } else {
-      meleeResult = rules.calculateMelee(attackerMelee, state.parameters.targetMelee);
+      meleeResult = rules.calculateMelee(attackerMelee, state.parameters.targetArmor);
     }
 
     const result: CombatResult = {

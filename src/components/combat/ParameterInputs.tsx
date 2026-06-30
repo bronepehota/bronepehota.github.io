@@ -62,10 +62,6 @@ export function ParameterInputs({
     ? targetMemory.targetArmor
     : parameters.targetArmor;
 
-  const effectiveTargetMelee = targetMemory?.isDirty && targetMemory?.targetMelee !== null
-    ? targetMemory.targetMelee
-    : parameters.targetMelee;
-
   // Get unit stats for preview — combatantData takes priority (calculator mode)
   const unitStats = combatantData
     ? { range: combatantData.range || '', power: combatantData.power || '', melee: combatantData.melee, displayName: 'Боец' }
@@ -301,7 +297,7 @@ export function ParameterInputs({
           <div className="bg-slate-950/80 p-2 rounded-md border border-red-500/30 relative">
             <div className="text-[8px] opacity-40 uppercase font-bold mb-1 text-center">Цель</div>
             <div className="flex justify-center">
-              <DiceNotationDisplay rollStr={`1D6+${effectiveTargetMelee}`} color="red" />
+              <DiceNotationDisplay rollStr={`1D6+${effectiveTargetArmor}`} color="red" />
             </div>
           </div>
         </div>
@@ -347,7 +343,7 @@ export function ParameterInputs({
           )}
 
           {/* Target Armor Input */}
-          {(actionType === 'shot' || actionType === 'grenade') && (
+          {(actionType === 'shot' || actionType === 'grenade' || actionType === 'melee') && (
             <div className="flex flex-col sm:flex-row sm:grid sm:grid-cols-[auto_1fr] sm:gap-2 sm:items-center gap-1.5">
               <label className="text-[10px] md:text-xs opacity-50 uppercase font-bold whitespace-nowrap sm:min-w-[70px]">
                 Броня цели
@@ -357,27 +353,6 @@ export function ParameterInputs({
                 onChange={(value) => {
                   onChange({ targetArmor: value });
                   onMemoryUpdate?.({ targetArmor: value });
-                }}
-                min={0}
-                max={99}
-                step={1}
-                size="sm"
-                className="flex-1 sm:justify-start"
-              />
-            </div>
-          )}
-
-          {/* Target Melee Input (for melee attacks) */}
-          {actionType === 'melee' && (
-            <div className="flex flex-col sm:flex-row sm:grid sm:grid-cols-[auto_1fr] sm:gap-2 sm:items-center gap-1.5">
-              <label className="text-[10px] md:text-xs opacity-50 uppercase font-bold whitespace-nowrap sm:min-w-[70px]">
-                ББ цели
-              </label>
-              <NumberStepper
-                value={effectiveTargetMelee}
-                onChange={(value) => {
-                  onChange({ targetMelee: value });
-                  onMemoryUpdate?.({ targetMelee: value });
                 }}
                 min={0}
                 max={99}

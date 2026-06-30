@@ -307,7 +307,7 @@ export interface PanicTestResult {
 
 export type CalculateHitFn = (rangeStr: string, distanceSteps: number, fortification?: FortificationType) => HitResult;
 export type CalculateDamageFn = (powerStr: string, targetArmor: number, fortification?: FortificationType, special?: WeaponSpecial, isVehicle?: boolean, currentDurability?: number, durabilityMax?: number, vehicleData?: Machine) => DamageResult;
-export type CalculateMeleeFn = (attackerMelee: number, defenderMelee: number) => MeleeResult;
+export type CalculateMeleeFn = (attackerMelee: number, defenderArmor: number) => MeleeResult;
 
 export interface RulesVersion {
   id: RulesVersionID;
