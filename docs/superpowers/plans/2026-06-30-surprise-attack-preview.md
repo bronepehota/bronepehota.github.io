@@ -311,18 +311,61 @@ git commit -m "feat(preview): #174 — «макс» marker + power-card penetrat
 
 ---
 
-### Task 3: E2E spec + full validation
+### Task 3: Delete dead `HitProbabilityIndicator` + testids on the real display + E2E + validation
 
 **Files:**
+- Modify: `src/components/combat/HitProbabilityIndicator.tsx` (delete the unused `HitProbabilityIndicator` component + props + any helper only it used)
+- Modify: `src/components/combat/ParameterInputs.tsx` (add testids to the two real `CompactProbabilityIndicator` usages)
 - Create: `e2e/surprise-attack-preview.spec.ts`
 
-**Interfaces:**
-- Consumes: `setupGameSessionWithSquad` + `clearStorage` from `e2e/helpers/setup`; the surprise chip `aria-label*="Внезапная атака"`; `data-testid="hit-probability"`, `data-testid="penetration-probability"`, `data-testid="power-max-marker"` (added in Tasks 1-2).
-- Produces: integration proof — toggling «с тыла» does NOT change ПОПАДАНИЕ %, DOES raise ПРОБИТИЕ %, and shows «макс».
+**Context (important):** `HitProbabilityIndicator` (the full ПОПАДАНИЕ/ПРОБИТИЕ bar component) is **dead code — never rendered anywhere** (`grep "<HitProbabilityIndicator" src` → empty). The REAL probability display is `CompactProbabilityIndicator`, rendered in `ParameterInputs` (hit % under the range card, penetration % under the power card). Task 1's UI mods (badge/tooltip/testids) landed in the dead component → no effect; the *calc-function* fixes (hit no-surprise, penetration best-of-2) DO work on the real display (Task 1 changed the functions, Task 2 wired the penetration call in `ParameterInputs`). Per player direction ("удали раз не используется"), delete the dead component and put the testids on the real `CompactProbabilityIndicator` usages.
 
-Note: D6 is random, but the probability % values are deterministic given range/power/armor (the mock squad has fixed stats), so we CAN assert on the % deltas.
+**Interfaces:** testids `hit-probability`/`penetration-probability` move from the dead component to the real `CompactProbabilityIndicator` wrapper divs in `ParameterInputs`; E2E targets those + `power-max-marker`.
 
-- [ ] **Step 1: Write the spec**
+- [ ] **Step 1: Delete the dead `HitProbabilityIndicator` component**
+
+In `src/components/combat/HitProbabilityIndicator.tsx`:
+- Delete `interface HitProbabilityIndicatorProps { ... }` and `export function HitProbabilityIndicator(...) { ... }` (the whole component).
+- KEEP: `getProbabilityColor`, `calculateHitProbability`, `calculatePenetrationProbability`, `CompactProbabilityIndicator` (+ `CompactProbabilityIndicatorProps`), and the Lucide imports they use.
+- After deletion, run lint; if `getProbabilityBg` (or any other helper/interface) becomes unused, delete it too.
+
+Verify nothing references the deleted component: `grep -rn "HitProbabilityIndicator" src --include=*.tsx` (should return only the filename/keeps if any — must NOT be rendered or imported as a component).
+
+- [ ] **Step 2: Move testids to the real display**
+
+In `src/components/combat/ParameterInputs.tsx`, add `data-testid` to the two `CompactProbabilityIndicator` wrapper divs. Hit:
+```tsx
+              {/* Hit probability indicator */}
+              {hitProb && (
+                <div data-testid="hit-probability" className="flex justify-center">
+                  <CompactProbabilityIndicator
+                    type="hit"
+                    probability={hitProb.probability}
+                    className="text-[7px] md:text-[9px]"
+                  />
+                </div>
+              )}
+```
+Penetration:
+```tsx
+              {/* Penetration probability indicator */}
+              {penProb && (
+                <div data-testid="penetration-probability" className="flex justify-center">
+                  <CompactProbabilityIndicator
+                    type="penetration"
+                    probability={penProb.probability}
+                    className="text-[7px] md:text-[9px]"
+                  />
+                </div>
+              )}
+```
+
+- [ ] **Step 3: Type-check + lint**
+
+Run: `npm run type-check && npm run lint`
+Expected: clean (no unused imports/vars/helpers after the deletion; no remaining component reference to `HitProbabilityIndicator`).
+
+- [ ] **Step 4: Write the E2E spec**
 
 Create `e2e/surprise-attack-preview.spec.ts`:
 
@@ -386,21 +429,24 @@ test.describe('Surprise-attack preview (#174)', () => {
 });
 ```
 
-(Adapt the `openShotModal` sequence to the helper's real behavior — it mirrors `e2e/combat.spec.ts`: click `unit-nav-<id>` → "Выберите действие" → "выстрел". The mock squad from `setupGameSessionWithSquad` has soldiers with range `D6`/`D12` and power `2D6` — fixed stats, so the % values are deterministic.)
+(Adapt `openShotModal` to the helper's real behavior — mirrors `e2e/combat.spec.ts`: click `unit-nav-<id>` → "Выберите действие" → "выстрел". The mock squad has fixed range/power/armor, so the % values are deterministic. The wrapper div's `textContent` is just `{N}%` because the icon is an SVG with no text.)
 
-- [ ] **Step 2: Run the new spec**
+- [ ] **Step 5: Run the new spec**
 
 Run: `npx playwright test e2e/surprise-attack-preview.spec.ts --project=chromium`
-Expected: PASS. (Before Tasks 1-2, ПОПАДАНИЕ would change with surprise and no макс/penetration-delta — the test would fail.)
+Expected: PASS.
 
-- [ ] **Step 3: Full validation**
+- [ ] **Step 6: Full validation**
 
 Run: `npm run validate`
-Expected: type-check clean; lint no NEW warnings in touched files; unit tests all green (incl. the updated hit-prob tests + new penetration best-of-2 tests).
+Expected: type-check clean; lint no NEW warnings; unit tests all green (hit single-roll + penetration best-of-2).
 
 Run: `npm run test:e2e`
 Expected: all specs PASS, incl. new `surprise-attack-preview.spec.ts` AND regression (`combat.spec.ts`, `aimed-shot.spec.ts`, `battle-buffs.spec.ts`, `height-bonus.spec.ts`).
 
-- [ ] **Step 4: Record green verification**
+- [ ] **Step 7: Commit**
 
-If Steps 2–3 surfaced fixups, commit them. Otherwise this task records green verification (no commit needed).
+```bash
+git add src/components/combat/HitProbabilityIndicator.tsx src/components/combat/ParameterInputs.tsx e2e/surprise-attack-preview.spec.ts
+git commit -m "fix(preview): #174 — delete dead HitProbabilityIndicator; testids on real display; E2E"
+```
