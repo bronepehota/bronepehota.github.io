@@ -27,7 +27,7 @@ describe('RulesInfoModal', () => {
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(screen.getByText('Официальные правила (Технолог)')).toBeInTheDocument();
     expect(screen.getAllByText(/каждый кубик.*пробивающий броню/i).length).toBeGreaterThan(0);
-    expect(screen.getByText(/docs\/original\/official_rules.txt/)).toBeInTheDocument();
+    expect(screen.getByText(/docs\/tehnolog\/official_rules.md/)).toBeInTheDocument();
   });
 
   it('displays community star system rules content', () => {
@@ -41,7 +41,7 @@ describe('RulesInfoModal', () => {
 
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(screen.getByText('Правила от Сообщества Star System')).toBeInTheDocument();
-    expect(screen.getByText(/docs\/panov\/fan_rules.txt/)).toBeInTheDocument();
+    expect(screen.getByText(/docs\/star_system\/fan_rules.md/)).toBeInTheDocument();
   });
 
   it('calls onClose when X button clicked', async () => {

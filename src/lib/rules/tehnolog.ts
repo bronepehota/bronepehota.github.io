@@ -4,7 +4,7 @@ import { rollDie, parseRoll, executeRoll } from '../game-logic';
 export const tehnologRules: RulesVersion = {
   id: 'tehnolog',
   name: 'Технолог',
-  source: 'docs/original/official_rules.txt',
+  source: 'docs/tehnolog/official_rules.md',
   description: 'Официальные правила игры от Технолог. Используют прямое сравнение для попадания и "виртуальную стрельбу" для урона — каждый кубик больше брони наносит 1 ранение. Простейшие и наиболее понятные правила для начинающих.',
   features: [
     'Виртуальная стрельба',

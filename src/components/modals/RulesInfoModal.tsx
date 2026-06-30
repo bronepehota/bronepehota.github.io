@@ -35,7 +35,7 @@ const TEHNOLOG_CONTENT = (
       <li>Полное (более 50%): +2 к броне</li>
     </ul>
 
-    <p className="text-sm text-slate-400 italic">Источник: docs/original/official_rules.txt</p>
+    <p className="text-sm text-slate-400 italic">Источник: docs/tehnolog/official_rules.md</p>
   </>
 );
 
@@ -67,7 +67,7 @@ const COMMUNITY_CONTENT = (
       <li>Полное (более 50%): +2 к дистанции</li>
     </ul>
 
-    <p className="text-sm text-slate-400 italic">Источник: docs/panov/fan_rules.txt</p>
+    <p className="text-sm text-slate-400 italic">Источник: docs/star_system/fan_rules.md</p>
   </>
 );
 

@@ -45,3 +45,11 @@ Thumbs.db
 # Temporary data
 src/data/*.json.tmp
 /.superpowers/
+
+# Local tool artifacts
+/.playwright-mcp/
+/.run/
+/tmp/
+
+# Promo/marketing assets (kept locally, not tracked)
+/docs/promo/
