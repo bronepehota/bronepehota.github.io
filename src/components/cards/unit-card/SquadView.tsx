@@ -1,4 +1,4 @@
-import { ArmyUnit, Squad, RulesVersionID } from '@/lib/types';
+import { ArmyUnit, Squad } from '@/lib/types';
 import SoldierCard from '../SoldierCard';
 
 interface SquadViewProps {
@@ -6,8 +6,6 @@ interface SquadViewProps {
   updateUnit: (instanceId: string, updateFn: (currentUnit: ArmyUnit) => ArmyUnit) => void;
   onSoldierAction: (soldierIndex: number) => void;
   setShowSoldierImage: (idx: number | null) => void;
-  setShowPanicModal: (show: boolean) => void;
-  rulesVersion: RulesVersionID;
   distanceInputUnit: 'steps' | 'cm';
   stepToCmFactor: number;
   allUnits?: ArmyUnit[];
@@ -25,8 +23,6 @@ export function SquadView({
   updateUnit,
   onSoldierAction,
   setShowSoldierImage,
-  setShowPanicModal,
-  rulesVersion,
   distanceInputUnit,
   stepToCmFactor,
   allUnits = [],
@@ -50,11 +46,9 @@ export function SquadView({
             unit={unit}
             soldierIndex={idx}
             allUnits={allUnits}
-            rulesVersion={rulesVersion}
             updateUnit={updateUnit}
             onSoldierAction={onSoldierAction}
             setShowSoldierImage={setShowSoldierImage}
-            setShowPanicModal={setShowPanicModal}
             getSoldierImage={getSoldierImage}
             distanceInputUnit={distanceInputUnit}
             stepToCmFactor={stepToCmFactor}

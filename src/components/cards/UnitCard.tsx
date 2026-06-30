@@ -15,6 +15,7 @@ import { PilotTestModal } from '../combat/PilotTestModal';
 import { usePilotTestFlow } from '@/hooks/usePilotTestFlow';
 import { EncyclopediaModal } from '../modals/EncyclopediaModal';
 import { PanicTestModal } from '../modals/PanicTestModal';
+import { checkPanicTrigger } from '@/lib/panic-logic';
 import { EnrichedUnit, getEnrichedUnit } from '@/lib/encyclopedia-utils';
 import { SquadView } from './unit-card/SquadView';
 import { MachineView } from './unit-card/MachineView';
@@ -162,6 +163,21 @@ export default function UnitCard({
   const isAllDead = isSquad && unit.deadSoldiers?.length === (data as Squad).soldiers.length;
   const isMachineDestroyed = !isSquad && (unit.currentDurability === 0);
   const isMachineDone = !isSquad && (unit.isMachineDone || isMachineDestroyed);
+
+  // Centralized panic-on-death trigger (#166): when this squad's deadSoldiers grows past the
+  // threshold (community rules, once per game), open the panic modal. Covers ALL death paths
+  // (manual kill, pilot death) — the squad's own UnitCard detects the loss.
+  const prevDeadCountRef = useRef<number>(unit.deadSoldiers?.length ?? 0);
+  useEffect(() => {
+    if (!isSquad || rulesVersion !== 'community_star_system') return;
+    const currentDead = unit.deadSoldiers?.length ?? 0;
+    if (currentDead > prevDeadCountRef.current) {
+      if (!showPanicModal && checkPanicTrigger(unit, rulesVersion)) {
+        setShowPanicModal(true);
+      }
+    }
+    prevDeadCountRef.current = currentDead;
+  }, [unit, unit.deadSoldiers, rulesVersion, isSquad, showPanicModal]);
 
   const handlePanicTestComplete = (results: PanicTestResult[]) => {
     const turn = army?.currentTurn || 1;
@@ -644,8 +660,6 @@ export default function UnitCard({
             updateUnit={updateUnit}
             onSoldierAction={_handleSoldierAction}
             setShowSoldierImage={setShowSoldierImage}
-            setShowPanicModal={setShowPanicModal}
-            rulesVersion={rulesVersion}
             distanceInputUnit={distanceInputUnit}
             stepToCmFactor={stepToCmFactor}
             allUnits={allUnits}
