@@ -133,15 +133,16 @@ describe('useCombatFlow — combat outcomes', () => {
     expect(result.current.state.phase).toBe('RESULTS');
   });
 
-  it('melee: resolves a winner and adds soldier melee (rank melee=2)', async () => {
-    const res = await runAction('melee', { targetMelee: 2 });
+  it('melee: defender uses armor (Бр), not ББ', async () => {
+    // targetArmor(5) differs from default targetMelee(2) to prove the fix
+    const res = await runAction('melee', { targetArmor: 5 });
     expect(res.actionType).toBe('melee');
     expect(res.meleeResult).toBeDefined();
     expect(['attacker', 'defender', 'draw']).toContain(res.meleeResult!.winner);
-    // attackerTotal = attackerRoll(1–6) + soldier.melee(2)
+    // attackerTotal = attackerRoll(1–6) + soldier.melee(2) — attacker still ББ
     expect(res.meleeResult!.attackerTotal).toBe(res.meleeResult!.attackerRoll + 2);
-    expect(res.meleeResult!.attackerTotal).toBeGreaterThanOrEqual(3);
-    expect(res.meleeResult!.attackerTotal).toBeLessThanOrEqual(8);
+    // defenderTotal = defenderRoll(1–6) + targetArmor(5) — defender uses Бр
+    expect(res.meleeResult!.defenderTotal).toBe(res.meleeResult!.defenderRoll + 5);
   });
 
   it('grenade: produces a blast distance (1–6) and ±1 zone', async () => {
