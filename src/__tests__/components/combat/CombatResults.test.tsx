@@ -338,6 +338,34 @@ describe('CombatResults - Grenade Display', () => {
       expect(checks[1]).toHaveClass('ring-2');
       expect(checks[0]).not.toHaveClass('ring-2');
     });
+
+    it('should show live hit tally and sticky input section', () => {
+      const resultWithChecks: CombatResult = {
+        ...mockGrenadeResult,
+        grenadeBlastChecks: [
+          { armor: 2, roll: 15, hit: true },
+          { armor: 3, roll: 8, hit: false },
+          { armor: 2, roll: 20, hit: true },
+          { armor: 3, roll: 5, hit: false },
+          { armor: 2, roll: 18, hit: true },
+          { armor: 3, roll: 2, hit: false },
+        ],
+      };
+
+      render(<CombatResults {...defaultProps} result={resultWithChecks} />);
+
+      const tally = screen.getByTestId('grenade-hit-tally');
+      expect(tally).toHaveTextContent('💥 3/6 пробито');
+
+      const section = screen.getByTestId('grenade-target-check-section');
+      expect(section).toHaveClass('sticky');
+    });
+
+    it('should hide hit tally when there are no checks', () => {
+      render(<CombatResults {...defaultProps} />);
+
+      expect(screen.queryByTestId('grenade-hit-tally')).not.toBeInTheDocument();
+    });
   });
 
   describe('Grenade distance calculation', () => {

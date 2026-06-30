@@ -35,6 +35,12 @@ export function CombatResults({
   const markAsDone = autoCompleteEnabled && unitType === 'squad';
   const [grenadeTargetArmor, setGrenadeTargetArmor] = useState(2);
 
+  // Grenade target-check derived state (Phase 2)
+  const grenadeChecks = result.grenadeBlastChecks ?? [];
+  const grenadeHits = grenadeChecks.filter((c) => c.hit).length;
+  const grenadeTotal = grenadeChecks.length;
+  const isGrenadeDanger = isGrenade && (result.hitResult?.roll ?? 0) === 1;
+
   const getEffectiveDistance = () => {
     if (rulesVersion === 'community_star_system' && parameters.fortification !== 'none') {
       const bonus = parameters.fortification === 'light' ? 1 : 2;
@@ -482,12 +488,38 @@ export function CombatResults({
             </div>
           )}
 
-          {/* Grenade Target Check Input Section */}
+          {/* Grenade Target Check Input Section — sticky arming panel */}
           {isGrenade && onGrenadeCheckTarget && (
-            <div data-testid="grenade-target-check-section" className="bg-slate-800 p-4 rounded-lg border border-slate-700">
-              <div className="text-xs opacity-60 uppercase font-bold mb-4 tracking-wider">
-                ПРОВЕРИТЬ ЦЕЛЬ В ЗОНЕ ВЗРЫВА
+            <div
+              data-testid="grenade-target-check-section"
+              className={cn(
+                "sticky bottom-0 z-10 bg-slate-800 p-4 rounded-lg border border-slate-700 border-t-2 shadow-[0_-10px_20px_rgba(0,0,0,0.45)]",
+                isGrenadeDanger ? "border-t-red-500 animate-pulse" : "border-t-emerald-600/70"
+              )}
+            >
+              <div className="flex items-center justify-between mb-3">
+                <div className="text-xs opacity-60 uppercase font-bold tracking-wider">
+                  ПРОВЕРИТЬ ЦЕЛЬ В ЗОНЕ ВЗРЫВА
+                </div>
+                {grenadeTotal > 0 ? (
+                  <span
+                    data-testid="grenade-hit-tally"
+                    className={cn(
+                      "font-mono font-black text-xs whitespace-nowrap",
+                      grenadeHits > 0 ? "text-emerald-400" : "text-slate-500"
+                    )}
+                  >
+                    💥 {grenadeHits}/{grenadeTotal} пробито
+                  </span>
+                ) : null}
               </div>
+
+              {grenadeTotal === 0 && (
+                <div className="text-center text-[11px] text-slate-500 font-mono uppercase tracking-wider mb-3">
+                  <Bomb className="inline w-3.5 h-3.5 mr-1 align-middle" />
+                  Цели в зоне взрыва не проверены
+                </div>
+              )}
 
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
