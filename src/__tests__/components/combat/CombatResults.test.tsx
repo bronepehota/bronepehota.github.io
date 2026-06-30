@@ -302,6 +302,42 @@ describe('CombatResults - Grenade Display', () => {
       // Default armor is 2
       expect(onGrenadeCheckTarget).toHaveBeenCalledWith(2);
     });
+
+    it('should render a "ЦЕЛЬ N" label and testid for each blast check', () => {
+      const resultWithChecks: CombatResult = {
+        ...mockGrenadeResult,
+        grenadeBlastChecks: [
+          { armor: 2, roll: 15, hit: true },
+          { armor: 3, roll: 8, hit: false },
+          { armor: 2, roll: 20, hit: true },
+        ],
+      };
+
+      render(<CombatResults {...defaultProps} result={resultWithChecks} />);
+
+      const checks = screen.getAllByTestId('grenade-blast-check');
+      expect(checks).toHaveLength(3);
+
+      expect(screen.getByText('ЦЕЛЬ 1')).toBeInTheDocument();
+      expect(screen.getByText('ЦЕЛЬ 2')).toBeInTheDocument();
+      expect(screen.getByText('ЦЕЛЬ 3')).toBeInTheDocument();
+    });
+
+    it('should highlight only the newest (last) blast check with a ring', () => {
+      const resultWithChecks: CombatResult = {
+        ...mockGrenadeResult,
+        grenadeBlastChecks: [
+          { armor: 2, roll: 15, hit: true },
+          { armor: 3, roll: 8, hit: false },
+        ],
+      };
+
+      render(<CombatResults {...defaultProps} result={resultWithChecks} />);
+
+      const checks = screen.getAllByTestId('grenade-blast-check');
+      expect(checks[1]).toHaveClass('ring-2');
+      expect(checks[0]).not.toHaveClass('ring-2');
+    });
   });
 
   describe('Grenade distance calculation', () => {

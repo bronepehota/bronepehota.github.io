@@ -391,12 +391,24 @@ export function CombatResults({
           {/* Target Checks Section */}
           {result.grenadeBlastChecks && result.grenadeBlastChecks.length > 0 && (
             <div data-testid="grenade-blast-checks" className="space-y-3">
-              {result.grenadeBlastChecks.map((check, idx) => (
+              {result.grenadeBlastChecks.map((check, idx) => {
+                const isLast = idx === result.grenadeBlastChecks!.length - 1;
+                return (
                 <div
                   key={idx}
-                  className="space-y-3"
+                  data-testid="grenade-blast-check"
+                  className={cn(
+                    "space-y-3 rounded-lg",
+                    isLast && "ring-2 ring-emerald-400/50 ring-offset-0"
+                  )}
                   style={{ animationDelay: `${idx * 100}ms` }}
                 >
+                  {/* Per-target label */}
+                  <div className="flex items-center">
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-400/80 bg-emerald-950/40 border border-emerald-700/40 rounded px-1.5 py-0.5">
+                      ЦЕЛЬ {idx + 1}
+                    </span>
+                  </div>
                   {/* Grid layout - same as shot */}
                   <div className="grid grid-cols-2 gap-3">
                     {/* D20 Roll */}
@@ -465,7 +477,8 @@ export function CombatResults({
                     </div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
 
