@@ -76,6 +76,39 @@ export function SoldierActions({
     }
   };
 
+  // Shared kill button (rendered both in the normal stack and in the panic state)
+  const renderKillButton = () => (
+    <button
+      onMouseDown={handleDeadMouseDown}
+      onMouseUp={onEndLongPress}
+      onMouseLeave={onEndLongPress}
+      onTouchStart={handleDeadMouseDown}
+      onTouchEnd={onEndLongPress}
+      onClick={handleDeadClick}
+      className={cn(
+        "relative min-w-[44px] min-h-[44px] p-1.5 rounded-sm font-mono font-black uppercase tracking-wider flex items-center justify-center border overflow-hidden transition-all",
+        isDead
+          ? "bg-red-900/40 hover:bg-red-900/60 border-red-700/50 text-red-400"
+          : "bg-slate-800/30 hover:bg-slate-700/40 border-slate-700/40 text-slate-500",
+        isLongPressing && "scale-95 opacity-80"
+      )}
+      type="button"
+      title={isDead ? "Долгое нажатие для воскрешения" : "Пометить как убитый"}
+      aria-label={isDead ? "Боец убит. Долгое нажатие для отмены." : "Пометить бойца как убитого"}
+      aria-pressed={isDead}
+      data-testid="soldier-kill-button"
+      data-soldier-index={soldierIndex}
+    >
+      {isDead && (
+        <>
+          <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-red-500/30" aria-hidden="true" />
+          <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-red-500/30" aria-hidden="true" />
+        </>
+      )}
+      <Skull className="w-5 h-5 flex-shrink-0" />
+    </button>
+  );
+
   // Pilot navigation replaces done/kill
   if (isPilot && onNavigateToMachine) {
     return (
@@ -96,13 +129,16 @@ export function SoldierActions({
     );
   }
 
-  // Panic state
+  // Panic state — can be destroyed (rules §10), but cannot act (no DONE)
   if (isInPanic) {
     return (
       <div className="flex flex-col gap-1">
-        <div className="relative min-w-[44px] min-h-[44px] p-1.5 rounded-sm flex items-center justify-center border-2 bg-orange-950/30 border-orange-700/50 text-orange-400">
-          <Footprints className="w-5 h-5" />
-        </div>
+        {!isDead && (
+          <div className="relative min-w-[44px] min-h-[44px] p-1.5 rounded-sm flex items-center justify-center border-2 bg-orange-950/30 border-orange-700/50 text-orange-400">
+            <Footprints className="w-5 h-5" />
+          </div>
+        )}
+        {renderKillButton()}
       </div>
     );
   }
@@ -143,35 +179,7 @@ export function SoldierActions({
       </button>
 
       {/* УБИТЬ button */}
-      <button
-        onMouseDown={handleDeadMouseDown}
-        onMouseUp={onEndLongPress}
-        onMouseLeave={onEndLongPress}
-        onTouchStart={handleDeadMouseDown}
-        onTouchEnd={onEndLongPress}
-        onClick={handleDeadClick}
-        className={cn(
-          "relative min-w-[44px] min-h-[44px] p-1.5 rounded-sm font-mono font-black uppercase tracking-wider flex items-center justify-center border overflow-hidden transition-all",
-          isDead
-            ? "bg-red-900/40 hover:bg-red-900/60 border-red-700/50 text-red-400"
-            : "bg-slate-800/30 hover:bg-slate-700/40 border-slate-700/40 text-slate-500",
-          isLongPressing && "scale-95 opacity-80"
-        )}
-        type="button"
-        title={isDead ? "Долгое нажатие для воскрешения" : "Пометить как убитый"}
-        aria-label={isDead ? "Боец убит. Долгое нажатие для отмены." : "Пометить бойца как убитого"}
-        aria-pressed={isDead}
-        data-testid="soldier-kill-button"
-        data-soldier-index={soldierIndex}
-      >
-        {isDead && (
-          <>
-            <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-red-500/30" aria-hidden="true" />
-            <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-red-500/30" aria-hidden="true" />
-          </>
-        )}
-        <Skull className="w-5 h-5 flex-shrink-0" />
-      </button>
+      {renderKillButton()}
     </div>
   );
 }

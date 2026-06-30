@@ -119,4 +119,37 @@ describe('SoldierActions', () => {
       }).not.toThrow();
     });
   });
+
+  describe('Panic state rendering', () => {
+    it('should show УБИТЬ button in panic state', () => {
+      render(<SoldierActions {...defaultProps} isInPanic={true} />);
+
+      expect(screen.getByTestId('soldier-kill-button')).toBeInTheDocument();
+    });
+
+    it('should NOT show ГОТОВ button in panic state', () => {
+      render(<SoldierActions {...defaultProps} isInPanic={true} />);
+
+      expect(screen.queryByTestId('soldier-done-button')).not.toBeInTheDocument();
+    });
+
+    it('should call onToggleDead when clicking УБИТЬ in panic state', () => {
+      const onToggleDead = jest.fn();
+      render(
+        <SoldierActions {...defaultProps} isInPanic={true} onToggleDead={onToggleDead} />
+      );
+
+      fireEvent.click(screen.getByTestId('soldier-kill-button'));
+
+      expect(onToggleDead).toHaveBeenCalledTimes(1);
+    });
+
+    it('should still render УБИТЬ (killed state) when panicking and dead', () => {
+      render(<SoldierActions {...defaultProps} isInPanic={true} isDead={true} />);
+
+      const killButton = screen.getByTestId('soldier-kill-button');
+      expect(killButton).toBeInTheDocument();
+      expect(killButton).toHaveAttribute('aria-pressed', 'true');
+    });
+  });
 });
