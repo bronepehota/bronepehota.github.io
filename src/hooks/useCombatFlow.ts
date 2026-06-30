@@ -32,6 +32,7 @@ const initialCombatFlowState: CombatFlowState = {
     fortification: 'none',
     isSurpriseAttack: false,
     isAimedShot: false,
+    isHeightBonus: false,
   },
   diceDisplay: {},
   result: null,
@@ -262,6 +263,11 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
     // 3. Aimed shot (applied on top of all modifiers)
     if (state.parameters.isAimedShot && state.unitType === 'squad') {
       range = multiplyRange(range, 2);
+    }
+
+    // 3.5 Height bonus: +1 to the hit roll (player convenience, not in v0.3 rules)
+    if (state.parameters.isHeightBonus) {
+      range = addBonusToRoll(range, 1);
     }
 
     // 4. Power bonus (additive)

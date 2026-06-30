@@ -81,6 +81,15 @@ export default function ArmyBuilder({
     return false;
   });
 
+  // Height bonus enabled state (gate) - persisted in localStorage
+  const [heightBonusEnabled, setHeightBonusEnabled] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('bronepehota_height_bonus_enabled');
+      return saved !== null ? saved === 'true' : false; // Default to disabled
+    }
+    return false;
+  });
+
   // Source selection state - persisted in localStorage
   const [selectedSource, setSelectedSource] = useState<SourceID>(() => {
     if (typeof window !== 'undefined') {
@@ -254,6 +263,8 @@ export default function ArmyBuilder({
                 onAimedShotEnabledChange={setAimedShotEnabled}
                 surpriseAttackEnabled={surpriseAttackEnabled}
                 onSurpriseAttackEnabledChange={setSurpriseAttackEnabled}
+                heightBonusEnabled={heightBonusEnabled}
+                onHeightBonusEnabledChange={setHeightBonusEnabled}
                 strictPilotRankEnabled={strictPilotRankEnabled}
                 onStrictPilotRankEnabledChange={onStrictPilotRankEnabledChange}
                 distanceInputUnit={distanceInputUnit}

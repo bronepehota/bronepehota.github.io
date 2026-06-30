@@ -159,6 +159,25 @@ describe('useCombatFlow — combat outcomes', () => {
     expect(mr!.defenderTotal).toBe(mr!.defenderRoll + 5);
   });
 
+  it('shot: height bonus adds +1 to the hit roll (range bonus)', async () => {
+    const { result } = renderHook(() => useCombatFlow());
+    await act(async () => { result.current.startCombat(makeSquadUnit(), 0, undefined, 'shot'); });
+    await act(async () => {
+      result.current.setParameters({ distance: 3, targetArmor: 2, isHeightBonus: true });
+    });
+    await act(async () => { await result.current.executeAction(); });
+    const hr = result.current.state.result?.hitResult;
+    expect(hr).toBeDefined();
+    // soldier.range = 'D6' (bonus 0) → height adds +1 → 'D6+1' → parsed bonus = 1
+    expect(hr!.bonus).toBe(1);
+  });
+
+  it('shot: without height bonus the range has no added bonus', async () => {
+    const res = await runAction('shot', { distance: 3, targetArmor: 2 });
+    // soldier.range = 'D6' (bonus 0), no height
+    expect(res.hitResult!.bonus).toBe(0);
+  });
+
   it('grenade: produces a blast distance (1–6) and ±1 zone', async () => {
     const res = await runAction('grenade', { distance: 3, targetArmor: 2 });
     expect(res.actionType).toBe('grenade');

@@ -35,6 +35,8 @@ export interface CombatParameters {
   weaponIndex?: number;       // For machines: which weapon to use
   isSurpriseAttack?: boolean; // Attack from behind (Fan rules: roll twice, take best; machine's BB ignored)
   isAimedShot?: boolean;      // Aimed shot: squad only shoots (no movement/melee), doubles range
+  /** Height advantage: +1 to the hit roll for this shot (player convenience, not in v0.3 rules). */
+  isHeightBonus?: boolean;
   activeModifiers?: ModifierSummary; // Resolved buffs/debuffs for this combat action
 }
 
