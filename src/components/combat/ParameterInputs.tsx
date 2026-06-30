@@ -62,6 +62,10 @@ export function ParameterInputs({
     ? targetMemory.targetArmor
     : parameters.targetArmor;
 
+  const effectiveTargetIsVehicle = targetMemory?.isDirty && targetMemory?.targetIsVehicle !== null
+    ? !!targetMemory.targetIsVehicle
+    : !!parameters.targetIsVehicle;
+
   // Get unit stats for preview — combatantData takes priority (calculator mode)
   const unitStats = combatantData
     ? { range: combatantData.range || '', power: combatantData.power || '', melee: combatantData.melee, displayName: 'Боец' }
@@ -361,20 +365,36 @@ export function ParameterInputs({
           {(actionType === 'shot' || actionType === 'grenade' || actionType === 'melee') && (
             <div className="flex flex-col sm:flex-row sm:grid sm:grid-cols-[auto_1fr] sm:gap-2 sm:items-center gap-1.5">
               <label className="text-[10px] md:text-xs opacity-50 uppercase font-bold whitespace-nowrap sm:min-w-[70px]">
-                Броня цели
+                {effectiveTargetIsVehicle ? 'макс зоны' : 'Броня цели'}
               </label>
-              <NumberStepper
-                value={effectiveTargetArmor}
-                onChange={(value) => {
-                  onChange({ targetArmor: value });
-                  onMemoryUpdate?.({ targetArmor: value });
-                }}
-                min={0}
-                max={99}
-                step={1}
-                size="sm"
-                className="flex-1 sm:justify-start"
-              />
+              <div className="flex items-center gap-2">
+                <NumberStepper
+                  value={effectiveTargetArmor}
+                  onChange={(value) => {
+                    onChange({ targetArmor: value });
+                    onMemoryUpdate?.({ targetArmor: value });
+                  }}
+                  min={0}
+                  max={99}
+                  step={1}
+                  size="sm"
+                  className="flex-1 sm:justify-start"
+                />
+                {rulesVersion === 'community_star_system' && actionType === 'shot' && (
+                  <label className="flex items-center gap-1 text-[9px] md:text-[10px] font-mono uppercase text-slate-400 cursor-pointer select-none shrink-0">
+                    <input
+                      type="checkbox"
+                      className="accent-cyan-500 w-3.5 h-3.5"
+                      checked={effectiveTargetIsVehicle}
+                      onChange={(e) => {
+                        onChange({ targetIsVehicle: e.target.checked });
+                        onMemoryUpdate?.({ targetIsVehicle: e.target.checked });
+                      }}
+                    />
+                    цель — техника
+                  </label>
+                )}
+              </div>
             </div>
           )}
 
