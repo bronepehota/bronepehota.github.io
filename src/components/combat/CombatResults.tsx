@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { CombatResult, CombatParameters } from '@/lib/combat-types';
 import { RulesVersionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -40,6 +40,12 @@ export function CombatResults({
   const grenadeHits = grenadeChecks.filter((c) => c.hit).length;
   const grenadeTotal = grenadeChecks.length;
   const isGrenadeDanger = isGrenade && (result.hitResult?.roll ?? 0) === 1;
+
+  // Auto-scroll the newest blast check into view above the sticky arming panel
+  const lastCheckRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    lastCheckRef.current?.scrollIntoView?.({ block: 'nearest' });
+  }, [grenadeTotal]);
 
   const getEffectiveDistance = () => {
     if (rulesVersion === 'community_star_system' && parameters.fortification !== 'none') {
@@ -402,6 +408,7 @@ export function CombatResults({
                 return (
                 <div
                   key={idx}
+                  ref={isLast ? lastCheckRef : undefined}
                   data-testid="grenade-blast-check"
                   className={cn(
                     "space-y-3 rounded-lg",
