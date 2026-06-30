@@ -157,10 +157,10 @@ export function ParameterInputs({
         effectiveRange = addBonusToRoll(effectiveRange, 1);
       }
       const hitProb = actionType === 'shot'
-        ? calculateHitProbability(effectiveRange, effectiveDistance, parameters.fortification, rulesVersion, parameters.isSurpriseAttack)
+        ? calculateHitProbability(effectiveRange, effectiveDistance, parameters.fortification, rulesVersion)
         : null;
       const penProb = actionType === 'shot'
-        ? calculatePenetrationProbability(unitStats.power, effectiveTargetArmor, parameters.fortification, rulesVersion)
+        ? calculatePenetrationProbability(unitStats.power, effectiveTargetArmor, parameters.fortification, rulesVersion, actionType === 'shot' && parameters.isSurpriseAttack)
         : null;
 
       return (
@@ -206,7 +206,7 @@ export function ParameterInputs({
               </div>
               {/* Hit probability indicator */}
               {hitProb && (
-                <div className="flex justify-center">
+                <div data-testid="hit-probability" className="flex justify-center">
                   <CompactProbabilityIndicator
                     type="hit"
                     probability={hitProb.probability}
@@ -233,15 +233,27 @@ export function ParameterInputs({
                         : "hover:bg-orange-950/20 px-1 py-0.5"
                     )}
                   >
-                    {!unitStats.power ? 'Нажмите для ввода' : <DiceNotationDisplay rollStr={unitStats.power} color="orange" />}
+                    {!unitStats.power ? 'Нажмите для ввода' : (
+                      <span className="flex items-center gap-1">
+                        <DiceNotationDisplay rollStr={unitStats.power} color="orange" />
+                        {parameters.isSurpriseAttack && actionType === 'shot' && (
+                          <span className="text-purple-400 text-[10px] font-mono font-bold" data-testid="power-max-marker">макс</span>
+                        )}
+                      </span>
+                    )}
                   </button>
                 ) : (
-                  <DiceNotationDisplay rollStr={unitStats.power} color="orange" />
+                  <span className="flex items-center gap-1">
+                    <DiceNotationDisplay rollStr={unitStats.power} color="orange" />
+                    {parameters.isSurpriseAttack && actionType === 'shot' && (
+                      <span className="text-purple-400 text-[10px] font-mono font-bold" data-testid="power-max-marker">макс</span>
+                    )}
+                  </span>
                 )}
               </div>
               {/* Penetration probability indicator */}
               {penProb && (
-                <div className="flex justify-center">
+                <div data-testid="penetration-probability" className="flex justify-center">
                   <CompactProbabilityIndicator
                     type="penetration"
                     probability={penProb.probability}
