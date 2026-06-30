@@ -26,8 +26,6 @@ describe('SquadView', () => {
     updateUnit: jest.fn(),
     onSoldierAction: jest.fn(),
     setShowSoldierImage: jest.fn(),
-    setShowPanicModal: jest.fn(),
-    rulesVersion: 'tehnolog' as const,
     distanceInputUnit: 'steps' as const,
     stepToCmFactor: 5,
     allUnits: [],
