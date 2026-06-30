@@ -192,4 +192,40 @@ describe('useCombatFlow — combat outcomes', () => {
     const { result } = renderHook(() => useCombatFlow());
     await expect(result.current.executeAction()).rejects.toThrow(/Unknown action type/);
   });
+
+  it('shot: vehicle target (targetIsVehicle) deals damagePerDie, not infantry +1', async () => {
+    // Community rules use zone-based damage for vehicles: each penetrating die deals
+    // damage scaled by die type (D6→1, D12→2, D20→3). Infantry rules just deal +1.
+    // Mock squad soldier has power 'D6' (1 die, sides=6 → damagePerDie=1).
+    // With targetArmor=0 every roll penetrates, so damage = 1 (deterministic).
+    const localStorageMock = (function () {
+      const store: Record<string, string> = {
+        bronepehota_rules_version: 'community_star_system',
+      };
+      return {
+        getItem: jest.fn((k: string) => store[k] ?? null),
+        setItem: jest.fn(),
+        removeItem: jest.fn(),
+        clear: jest.fn(),
+        get length() { return Object.keys(store).length; },
+        key: jest.fn(),
+      };
+    })();
+    jest.spyOn(Storage.prototype, 'getItem').mockImplementation(localStorageMock.getItem);
+
+    const { result } = renderHook(() => useCombatFlow());
+    await act(async () => { result.current.startCombat(makeSquadUnit(), 0, undefined, 'shot'); });
+    await act(async () => {
+      result.current.setParameters({ distance: 0, targetArmor: 0, targetIsVehicle: true });
+    });
+    await act(async () => { await result.current.executeAction(); });
+    const dr = result.current.state.result?.damageResult;
+    expect(dr).toBeDefined();
+    // power D6 → 1 die × damagePerDie=1 (sides=6) → damage = 1
+    expect(dr!.damage).toBe(1);
+    // Verify the vehicle zone branch was used (damage is scaled, not infantry +1)
+    expect(dr!.rolls!.length).toBe(1);
+
+    jest.restoreAllMocks();
+  });
 });

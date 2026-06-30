@@ -30,6 +30,7 @@ export type CombatUnitType = 'squad' | 'machine';
 export interface CombatParameters {
   distance: number;           // Distance to target (hex steps)
   targetArmor: number;        // Target's armor value
+  targetIsVehicle?: boolean;  // Target is a vehicle → community zone-based damage (#162)
   targetMelee: number;        // Target's melee stat (for melee combat)
   fortification: FortificationType;  // Target's cover/fortification
   weaponIndex?: number;       // For machines: which weapon to use
