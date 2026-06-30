@@ -288,95 +288,85 @@ export function BottomSheetCombatModal({
                 />
               )}
 
-              {/* Execute button with surprise attack toggle */}
-              <div className="flex gap-2 md:gap-3">
-                {/* Surprise Attack toggle - shot and melee only */}
+              {/* Modifier bar — labeled pills (no section header) */}
+              <div className="flex flex-wrap gap-1.5">
+                {/* Surprise attack — shot and melee */}
                 {(state.actionType === 'shot' || state.actionType === 'melee') && (
                   <button
                     type="button"
                     onClick={() => onSetParameters({ isSurpriseAttack: !state.parameters.isSurpriseAttack })}
+                    aria-label={state.parameters.isSurpriseAttack ? 'Внезапная атака включена' : 'Внезапная атака выключена'}
                     className={cn(
-                      'relative h-10 w-10 min-h-[40px] min-w-[40px] md:h-12 md:w-12 md:min-h-[48px] md:min-w-[48px] rounded-lg border-2 flex items-center justify-center shrink-0',
+                      'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-mono min-h-[36px]',
                       'touch-manipulation active:scale-95 transition-all duration-200',
                       state.parameters.isSurpriseAttack
-                        ? 'bg-purple-600/20 border-purple-500 shadow-lg shadow-purple-500/20'
-                        : 'bg-slate-700/50 border-slate-600 hover:bg-slate-700'
+                        ? 'bg-purple-600/20 border-purple-500 text-purple-200 shadow-lg shadow-purple-500/20'
+                        : 'bg-slate-700/50 border-slate-600 text-slate-400 hover:bg-slate-700'
                     )}
-                    aria-label={state.parameters.isSurpriseAttack ? 'Внезапная атака включена' : 'Внезапная атака выключена'}
                   >
-                    <EyeOff
-                      className={cn('transition-colors duration-200', state.parameters.isSurpriseAttack ? 'text-purple-400' : 'text-slate-400')}
-                      size={16}
-                    />
-                    {/* Pulsing status indicator when active */}
+                    <EyeOff className={cn('w-3.5 h-3.5', state.parameters.isSurpriseAttack ? 'text-purple-400' : 'text-slate-400')} size={14} />
+                    <span>с тыла</span>
                     {state.parameters.isSurpriseAttack && (
-                      <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-purple-400 rounded-full animate-pulse" />
+                      <span className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-pulse" />
                     )}
                   </button>
                 )}
 
-                {/* Aimed Shot toggle - shot only, squads only */}
+                {/* Aimed shot — shot, squads only */}
                 {state.actionType === 'shot' && state.unitType === 'squad' && (
                   <button
                     type="button"
                     onClick={() => onSetParameters({ isAimedShot: !state.parameters.isAimedShot })}
+                    aria-label={state.parameters.isAimedShot ? 'Прицельный выстрел включён' : 'Прицельный выстрел выключен'}
                     className={cn(
-                      'relative h-10 w-10 min-h-[40px] min-w-[40px] md:h-12 md:w-12 md:min-h-[48px] md:min-w-[48px] rounded-lg border-2 flex items-center justify-center shrink-0',
+                      'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-mono min-h-[36px]',
                       'touch-manipulation active:scale-95 transition-all duration-200',
                       state.parameters.isAimedShot
-                        ? 'bg-cyan-600/20 border-cyan-500 shadow-lg shadow-cyan-500/20'
-                        : 'bg-slate-700/50 border-slate-600 hover:bg-slate-700'
+                        ? 'bg-cyan-600/20 border-cyan-500 text-cyan-200 shadow-lg shadow-cyan-500/20'
+                        : 'bg-slate-700/50 border-slate-600 text-slate-400 hover:bg-slate-700'
                     )}
-                    aria-label={state.parameters.isAimedShot ? 'Прицельный выстрел включён' : 'Прицельный выстрел выключен'}
                   >
-                    <Crosshair
-                      className={cn('transition-colors duration-200', state.parameters.isAimedShot ? 'text-cyan-400' : 'text-slate-400')}
-                      size={16}
-                    />
+                    <Crosshair className={cn('w-3.5 h-3.5', state.parameters.isAimedShot ? 'text-cyan-400' : 'text-slate-400')} size={14} />
+                    <span>прицельный</span>
                     {state.parameters.isAimedShot && (
-                      <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-cyan-400 rounded-full animate-pulse" />
+                      <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-pulse" />
                     )}
                   </button>
                 )}
-
-                {/* Execute button - Tactical Control with enhanced effects */}
-                <button
-                  onClick={onExecuteAction}
-                  className={cn(
-                    "relative flex-1 font-mono text-xs md:text-sm font-bold uppercase tracking-wider border-2 transition-all min-h-[44px] md:min-h-[48px]",
-                    "hover:scale-[1.02] active:scale-95 overflow-hidden shimmer-effect",
-                    "shadow-lg",
-                    actionColors.button
-                  )}
-                  style={{
-                    textShadow: '0 0 10px rgba(255,255,255,0.3)'
-                  }}
-                >
-                  {/* Tech decoration corners */}
-                  <div className={cn("absolute top-0 left-0 w-2 h-2 border-l-2 border-t-2 opacity-40", actionColors.accent)} />
-                  <div className={cn("absolute top-0 right-0 w-2 h-2 border-r-2 border-t-2 opacity-40", actionColors.accent)} />
-                  <div className={cn("absolute bottom-0 left-0 w-2 h-2 border-l-2 border-b-2 opacity-40", actionColors.accent)} />
-                  <div className={cn("absolute bottom-0 right-0 w-2 h-2 border-r-2 border-b-2 opacity-40", actionColors.accent)} />
-
-                  {/* Inner shadow for depth */}
-                  <div className="absolute inset-0 shadow-inner pointer-events-none" />
-
-                  <div className="relative flex items-center justify-center gap-2 px-2 md:px-6 py-2 md:py-3">
-                    <span>
-                      {state.actionType === 'shot' ? 'ВЫСТРЕЛИТЬ' :
-                       state.actionType === 'melee' ? 'АТАКОВАТЬ' : 'БРОСИТЬ'}
-                    </span>
-                    {/* Show modifiers in button */}
-                    {(state.parameters.isSurpriseAttack || state.parameters.isAimedShot) && (
-                      <span className="text-purple-300 text-[10px] opacity-80 hidden md:inline">
-                        {state.parameters.isSurpriseAttack && 'с тыла'}
-                        {state.parameters.isSurpriseAttack && state.parameters.isAimedShot && ' + '}
-                        {state.parameters.isAimedShot && 'прицельный'}
-                      </span>
-                    )}
-                  </div>
-                </button>
               </div>
+
+              {/* Execute button — full width, own row */}
+              <button
+                onClick={onExecuteAction}
+                className={cn(
+                  "relative w-full font-mono text-xs md:text-sm font-bold uppercase tracking-wider border-2 transition-all min-h-[44px] md:min-h-[48px] mt-2",
+                  "hover:scale-[1.01] active:scale-95 overflow-hidden shimmer-effect",
+                  "shadow-lg",
+                  actionColors.button
+                )}
+                style={{ textShadow: '0 0 10px rgba(255,255,255,0.3)' }}
+              >
+                <div className={cn("absolute top-0 left-0 w-2 h-2 border-l-2 border-t-2 opacity-40", actionColors.accent)} />
+                <div className={cn("absolute top-0 right-0 w-2 h-2 border-r-2 border-t-2 opacity-40", actionColors.accent)} />
+                <div className={cn("absolute bottom-0 left-0 w-2 h-2 border-l-2 border-b-2 opacity-40", actionColors.accent)} />
+                <div className={cn("absolute bottom-0 right-0 w-2 h-2 border-r-2 border-b-2 opacity-40", actionColors.accent)} />
+                <div className="absolute inset-0 shadow-inner pointer-events-none" />
+                <div className="relative flex items-center justify-center gap-2 px-2 md:px-6 py-2 md:py-3">
+                  <span>
+                    {state.actionType === 'shot' ? 'ВЫСТРЕЛИТЬ' :
+                     state.actionType === 'melee' ? 'АТАКОВАТЬ' : 'БРОСИТЬ'}
+                  </span>
+                  {/* Active modifiers subtitle (always visible) */}
+                  {(state.parameters.isSurpriseAttack || state.parameters.isAimedShot) && (
+                    <span className="text-[10px] opacity-80">
+                      {[
+                        state.parameters.isSurpriseAttack && 'с тыла',
+                        state.parameters.isAimedShot && 'прицельный',
+                      ].filter(Boolean).join(' + ')}
+                    </span>
+                  )}
+                </div>
+              </button>
             </div>
           )}
 
