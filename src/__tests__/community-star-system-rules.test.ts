@@ -98,71 +98,33 @@ describe('Community Star System Rules - Hit Calculation with Fortifications', ()
 });
 
 describe('Community Star System Rules - Vehicle Damage (Zone-based)', () => {
-  // Create mock machine data for testing
-  const mockMachine = {
-    id: 'test-vehicle',
-    name: 'Test Vehicle',
-    faction: 'polaris' as const,
-    cost: 100,
-    rank: 1,
-    fire_rate: 1,
-    ammo_max: 10,
-    durability_max: 9,
-    speed_sectors: [
-      { min_durability: 7, max_durability: 9, speed: 6 },
-      { min_durability: 4, max_durability: 6, speed: 4 },
-      { min_durability: 0, max_durability: 3, speed: 2 }
-    ],
-    weapons: []
-  };
-
   describe('calculateDamage - Vehicles', () => {
-    it('uses zone-based calculation for vehicle targets', () => {
-      // Vehicle at durability 7 (green zone: max 6)
-      const result = communityStarSystemRules.calculateDamage('2D12', 0, undefined, undefined, true, 7, 9, mockMachine);
-      expect(result).toHaveProperty('damage');
-      expect(result).toHaveProperty('rolls');
-      expect(result.rolls.length).toBe(2);
+    it('vehicle target: each penetrating die deals damagePerDie (D6=1, D12=2, D20=3)', () => {
+      // threshold 5; high bonus guarantees penetration → damage = dice × damagePerDie
+      const r6 = communityStarSystemRules.calculateDamage('D6+99', 5, undefined, undefined, true);
+      const r12 = communityStarSystemRules.calculateDamage('D12+99', 5, undefined, undefined, true);
+      const r20 = communityStarSystemRules.calculateDamage('D20+99', 5, undefined, undefined, true);
+      expect(r6.damage).toBe(1);   // 1 die × D6 → 1
+      expect(r12.damage).toBe(2);  // 1 die × D12 → 2
+      expect(r20.damage).toBe(3);  // 1 die × D20 → 3
     });
 
-    it('applies correct damage per die type (D6=1, D12=2, D20=3)', () => {
-      // We can't test exact values due to randomness, but we can verify structure
-      const resultD6 = communityStarSystemRules.calculateDamage('D6', 0, undefined, undefined, true, 7, 9, mockMachine);
-      const resultD12 = communityStarSystemRules.calculateDamage('D12', 0, undefined, undefined, true, 7, 9, mockMachine);
-      const resultD20 = communityStarSystemRules.calculateDamage('D20', 0, undefined, undefined, true, 7, 9, mockMachine);
-
-      expect(resultD6.rolls.length).toBe(1);
-      expect(resultD12.rolls.length).toBe(1);
-      expect(resultD20.rolls.length).toBe(1);
+    it('vehicle target: dice below the threshold deal no damage', () => {
+      // threshold 99; bonus 0 → no die can exceed 99 → 0 damage
+      const r = communityStarSystemRules.calculateDamage('2D12', 99, undefined, undefined, true);
+      expect(r.damage).toBe(0);
+      expect(r.rolls.length).toBe(2);
     });
 
-    it('handles different durability zones correctly', () => {
-      // Green zone (durability 7-9): max 6
-      const greenResult = communityStarSystemRules.calculateDamage('D12', 0, undefined, undefined, true, 8, 9, mockMachine);
-
-      // Yellow zone (durability 4-6): max 3
-      const yellowResult = communityStarSystemRules.calculateDamage('D12', 0, undefined, undefined, true, 5, 9, mockMachine);
-
-      // Red zone (durability 0-3): max 0
-      const redResult = communityStarSystemRules.calculateDamage('D12', 0, undefined, undefined, true, 2, 9, mockMachine);
-
-      expect(greenResult.rolls.length).toBe(1);
-      expect(yellowResult.rolls.length).toBe(1);
-      expect(redResult.rolls.length).toBe(1);
+    it('vehicle target: multi-die power sums damagePerDie per penetrating die', () => {
+      // 2D12, threshold 0 → every die penetrates → 2 × 2 = 4
+      const r = communityStarSystemRules.calculateDamage('2D12+99', 0, undefined, undefined, true);
+      expect(r.damage).toBe(4);
     });
 
-    it('uses machine durabilityZones if provided', () => {
-      const machineWithZones = {
-        ...mockMachine,
-        durabilityZones: [
-          { max: 9, color: 'green' as const, damagePerDie: { D6: 1, D12: 2, D20: 3 } },
-          { max: 5, color: 'yellow' as const, damagePerDie: { D6: 1, D12: 2, D20: 3 } },
-          { max: 0, color: 'red' as const, damagePerDie: { D6: 1, D12: 2, D20: 3 } }
-        ]
-      };
-
-      const result = communityStarSystemRules.calculateDamage('2D12', 0, undefined, undefined, true, 6, 9, machineWithZones);
-      expect(result.rolls.length).toBe(2);
+    it('non-vehicle target: still +1 per penetrating die (infantry)', () => {
+      const r = communityStarSystemRules.calculateDamage('D6+99', 5, undefined, undefined, false);
+      expect(r.damage).toBe(1);
     });
   });
 });
