@@ -157,7 +157,7 @@ export function ParameterInputs({
         effectiveRange = addBonusToRoll(effectiveRange, 1);
       }
       const hitProb = actionType === 'shot'
-        ? calculateHitProbability(effectiveRange, effectiveDistance, parameters.fortification, rulesVersion, parameters.isSurpriseAttack)
+        ? calculateHitProbability(effectiveRange, effectiveDistance, parameters.fortification, rulesVersion)
         : null;
       const penProb = actionType === 'shot'
         ? calculatePenetrationProbability(unitStats.power, effectiveTargetArmor, parameters.fortification, rulesVersion)

@@ -20,29 +20,22 @@ interface HitProbabilityIndicatorProps {
  * Calculate hit probability based on range dice and distance
  * Hit occurs when roll >= effectiveDistance
  *
- * Surprise attack (rear attack): roll twice, take best result
- * Significantly increases hit probability
+ * Surprise attack (§8.3) does NOT affect the hit roll — the double-roll
+ * belongs to power (see calculatePenetrationProbability).
  *
- * Example: D6 vs distance 4
- * - Normal: Possible rolls: 1, 2, 3, 4, 5, 6
- * - Successful rolls (>=4): 4, 5, 6 (3 outcomes)
+ * Example: D6 vs distance 3
+ * - Possible rolls: 1, 2, 3, 4, 5, 6
+ * - Successful rolls (>=3): 3, 4, 5, 6 (3 outcomes)
  * - Probability: 3/6 = 50%
- * - Surprise: P(best >= 4) = 1 - P(both < 4)^2 = 1 - (3/6)^2 = 75%
- *
- * Example: D6+2 vs distance 4
- * - Normal: maxRoll = 8, favorable: 4-8 (5 outcomes), Probability: 5/6 = 83%
- * - Surprise: unfavorable = 3, P(best >= 4) = 1 - (3/6)^2 = 96.7%
  */
 export function calculateHitProbability(
   rangeStr: string,
   distanceSteps: number,
   fortification: 'none' | 'light' | 'heavy',
-  rulesVersion: RulesVersionID,
-  isSurpriseAttack: boolean = false
+  rulesVersion: RulesVersionID
 ): { probability: number; favorableRolls: number; totalRolls: number } {
   const { sides, bonus } = parseRoll(rangeStr);
   // Invalid/unusable notation (e.g. 'ББ', malformed editor input) → sides:0.
-  // Bail out before the surprise-attack branch divides by totalRolls (=sides).
   if (sides < 1) return { probability: 0, favorableRolls: 0, totalRolls: 0 };
 
   // Community Star System: fortification adds to distance
@@ -52,30 +45,12 @@ export function calculateHitProbability(
 
   const maxRoll = sides + bonus;
 
-  // Count unfavorable outcomes (rolls < effectiveDistance)
-  const unfavorableRolls = Math.max(0, effectiveDistance - 1 - bonus);
-
-  // Single roll probability
-  if (!isSurpriseAttack) {
-    // Count favorable outcomes (rolls >= effectiveDistance)
-    // Must be capped at 'sides' to avoid probability > 100%
-    const favorableRolls = Math.min(sides, Math.max(0, maxRoll - effectiveDistance + 1));
-    const totalRolls = sides;
-    const probability = totalRolls > 0 ? (favorableRolls / totalRolls) * 100 : 0;
-    return { probability, favorableRolls, totalRolls };
-  }
-
-  // Surprise attack: roll twice, take best result
-  // P(best >= target) = 1 - P(both < target)
+  // Single-roll hit probability. Surprise attack (§8.3) does NOT affect the hit roll —
+  // the double-roll belongs to power (see calculatePenetrationProbability).
+  const favorableRolls = Math.min(sides, Math.max(0, maxRoll - effectiveDistance + 1));
   const totalRolls = sides;
-  const probOneFail = unfavorableRolls / totalRolls;
-  const probBothFail = probOneFail * probOneFail;
-  const probability = (1 - probBothFail) * 100;
-
-  // For display: show equivalent favorable outcomes
-  const favorableRolls = Math.round(totalRolls * totalRolls * (probability / 100));
-
-  return { probability, favorableRolls, totalRolls: totalRolls * totalRolls };
+  const probability = totalRolls > 0 ? (favorableRolls / totalRolls) * 100 : 0;
+  return { probability, favorableRolls, totalRolls };
 }
 
 /**
@@ -86,21 +61,19 @@ export function calculateHitProbability(
  * Tehnolog rules: fortification adds to armor
  * Community Star System: fortification adds to distance (handled in hit probability)
  *
- * Example: 1D6 vs armor 3
- * - Possible rolls: 1, 2, 3, 4, 5, 6
- * - Penetrating rolls (>3): 4, 5, 6 (3 outcomes)
- * - Probability: 3/6 = 50%
+ * Surprise attack (§8.3 «с тыла»): power is rolled twice, take best.
+ * Best-of-2 per-die: P(best of 2 penetrates) = 1 − (1 − p)²
  *
- * Example: 1D6+1 vs armor 3
- * - Possible rolls: 2, 3, 4, 5, 6, 7
- * - Penetrating rolls (>3): 4, 5, 6, 7 (4 outcomes)
- * - Probability: 4/6 = 67%
+ * Example: 1D6 vs armor 3
+ * - Normal: 3/6 = 50%
+ * - Surprise: 1 − (1−0.5)² = 75%
  */
 export function calculatePenetrationProbability(
   powerStr: string,
   targetArmor: number,
   fortification: 'none' | 'light' | 'heavy' = 'none',
-  rulesVersion: RulesVersionID = 'tehnolog'
+  rulesVersion: RulesVersionID = 'tehnolog',
+  isSurpriseAttack: boolean = false
 ): { probability: number; penetratingDice: number; totalDice: number } {
   const { dice, sides, bonus } = parseRoll(powerStr);
   // Invalid notation → sides:0 would divide by zero below; report 0% instead.
@@ -111,22 +84,22 @@ export function calculatePenetrationProbability(
     ? targetArmor + (fortification === 'light' ? 1 : fortification === 'heavy' ? 2 : 0)
     : targetArmor;
 
-  // Calculate probability for one die
-  // Favorable outcomes: rolls where result > effectiveArmor
-  // With bonus, possible results are: (1+bonus) to (sides+bonus)
-  // Result > armor means result >= (armor + 1)
-  // So we need: (sides + bonus) - (armor + 1) + 1 = sides + bonus - armor favorable outcomes
-  // Must be capped at 'sides' to avoid probability > 100%
+  // Single-roll per-die penetration chance: result > effectiveArmor.
   const favorableOutcomes = Math.min(sides, Math.max(0, sides + bonus - effectiveArmor));
-  const probabilityPerDie = (favorableOutcomes / sides) * 100;
+  const pPerDie = favorableOutcomes / sides;
 
-  // For multiple dice, probability is the same per die
-  // penetratingDice represents expected number of penetrating dice
-  const expectedPenetratingDice = (favorableOutcomes / sides) * dice;
+  // Surprise attack (§8.3 «с тыла»): power is rolled twice, take best.
+  // Best-of-2 on the per-die metric: P(best of 2 penetrates) = 1 − (1 − p)².
+  // Exact for single-die power; slight over-estimate for multi-dice vs the true
+  // "best pool" (acceptable for a preview).
+  const pBest = isSurpriseAttack ? 1 - Math.pow(1 - pPerDie, 2) : pPerDie;
+
+  const probability = pBest * 100;
+  const expectedPenetratingDice = pBest * dice;
 
   return {
-    probability: probabilityPerDie,
-    penetratingDice: Math.round(expectedPenetratingDice * 10) / 10, // Round to 1 decimal
+    probability,
+    penetratingDice: Math.round(expectedPenetratingDice * 10) / 10,
     totalDice: dice
   };
 }
@@ -161,8 +134,8 @@ export function HitProbabilityIndicator({
   isSurpriseAttack = false,
   className,
 }: HitProbabilityIndicatorProps) {
-  const hitProb = calculateHitProbability(rangeStr, distanceSteps, fortification, rulesVersion, isSurpriseAttack);
-  const penProb = calculatePenetrationProbability(powerStr, targetArmor, fortification, rulesVersion);
+  const hitProb = calculateHitProbability(rangeStr, distanceSteps, fortification, rulesVersion);
+  const penProb = calculatePenetrationProbability(powerStr, targetArmor, fortification, rulesVersion, isSurpriseAttack);
 
   const hitColor = getProbabilityColor(hitProb.probability);
   const penColor = getProbabilityColor(penProb.probability);
@@ -182,7 +155,7 @@ export function HitProbabilityIndicator({
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between mb-1">
               <span className="text-[8px] uppercase font-bold text-slate-500">ПОПАДАНИЕ</span>
-              <span className={cn("text-sm font-black font-mono leading-none", hitColor)}>
+              <span data-testid="hit-probability" className={cn("text-sm font-black font-mono leading-none", hitColor)}>
                 {Math.round(hitProb.probability)}%
               </span>
             </div>
@@ -213,8 +186,13 @@ export function HitProbabilityIndicator({
           <Shield className="w-4 h-4 shrink-0 text-slate-400" />
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[8px] uppercase font-bold text-slate-500">ПРОБИТИЕ</span>
-              <span className={cn("text-sm font-black font-mono leading-none", penColor)}>
+              <span className="text-[8px] uppercase font-bold text-slate-500">
+                ПРОБИТИЕ
+                {isSurpriseAttack && (
+                  <span className="text-purple-400 normal-case font-mono">макс</span>
+                )}
+              </span>
+              <span data-testid="penetration-probability" className={cn("text-sm font-black font-mono leading-none", penColor)}>
                 {Math.round(penProb.probability)}%
               </span>
             </div>
@@ -240,11 +218,10 @@ export function HitProbabilityIndicator({
 
       {/* Roll details tooltip */}
       <div className="text-center text-[9px] text-slate-600 font-mono">
-        {isSurpriseAttack ? (
-          <span>Бросок x2, лучший результат</span>
-        ) : (
-          <span>Нужно бросить ≥{distanceSteps}{rulesVersion === 'community_star_system' && fortification !== 'none' ? ` +${fortification === 'light' ? '1' : '2'}` : ''}</span>
-        )}
+        <span>
+          Нужно бросить ≥{distanceSteps}{rulesVersion === 'community_star_system' && fortification !== 'none' ? ` +${fortification === 'light' ? 1 : 2}` : ''}
+          {isSurpriseAttack && ' · мощность: максимум'}
+        </span>
       </div>
     </div>
   );
