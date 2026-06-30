@@ -42,9 +42,9 @@ test.describe('Vehicle zone damage (#162)', () => {
     await openShotModal(page);
 
     // Toggle «цель — техника» on
-    const vehicleToggle = page.getByLabel('цель — техника');
+    const vehicleToggle = page.getByRole('switch', { name: 'техника' });
     await expect(vehicleToggle).toBeVisible({ timeout: 3000 });
-    await vehicleToggle.check();
+    await vehicleToggle.click();
 
     // Label flipped to «макс зоны»
     await expect(page.getByText('макс зоны')).toBeVisible({ timeout: 2000 });
@@ -76,9 +76,9 @@ test.describe('Vehicle zone damage (#162)', () => {
 
     // Open shot modal, toggle on
     await openShotModal(page);
-    const vehicleToggle = page.getByLabel('цель — техника');
+    const vehicleToggle = page.getByRole('switch', { name: 'техника' });
     await expect(vehicleToggle).toBeVisible({ timeout: 3000 });
-    await vehicleToggle.check();
+    await vehicleToggle.click();
 
     // Confirm «макс зоны» label
     await expect(page.getByText('макс зоны')).toBeVisible({ timeout: 2000 });
@@ -91,8 +91,8 @@ test.describe('Vehicle zone damage (#162)', () => {
     // Re-open shot modal for the same unit
     await openShotModal(page);
 
-    // Toggle should still be checked (memory persisted)
-    await expect(vehicleToggle).toBeChecked({ timeout: 3000 });
+    // Toggle should still be on (memory persisted)
+    await expect(vehicleToggle).toHaveAttribute('aria-checked', 'true', { timeout: 3000 });
     await expect(page.getByText('макс зоны')).toBeVisible({ timeout: 2000 });
   });
 });

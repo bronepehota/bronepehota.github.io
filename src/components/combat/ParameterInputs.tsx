@@ -381,18 +381,24 @@ export function ParameterInputs({
                   className="flex-1 sm:justify-start"
                 />
                 {rulesVersion === 'community_star_system' && actionType === 'shot' && (
-                  <label className="flex items-center gap-1 text-[9px] md:text-[10px] font-mono uppercase text-slate-400 cursor-pointer select-none shrink-0">
-                    <input
-                      type="checkbox"
-                      className="accent-cyan-500 w-3.5 h-3.5"
-                      checked={effectiveTargetIsVehicle}
-                      onChange={(e) => {
-                        onChange({ targetIsVehicle: e.target.checked });
-                        onMemoryUpdate?.({ targetIsVehicle: e.target.checked });
-                      }}
-                    />
-                    цель — техника
-                  </label>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={effectiveTargetIsVehicle}
+                    onClick={() => {
+                      const next = !effectiveTargetIsVehicle;
+                      onChange({ targetIsVehicle: next });
+                      onMemoryUpdate?.({ targetIsVehicle: next });
+                    }}
+                    className={cn(
+                      'shrink-0 inline-flex items-center h-7 px-2 rounded border text-[9px] md:text-[10px] font-mono uppercase tracking-wide transition-all touch-manipulation',
+                      effectiveTargetIsVehicle
+                        ? 'bg-cyan-500/10 border-cyan-500/60 text-cyan-300'
+                        : 'bg-slate-800/40 border-slate-700/60 text-slate-500 hover:border-slate-600 hover:text-slate-400'
+                    )}
+                  >
+                    техника
+                  </button>
                 )}
               </div>
             </div>
