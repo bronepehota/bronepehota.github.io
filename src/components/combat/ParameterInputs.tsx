@@ -160,7 +160,7 @@ export function ParameterInputs({
         ? calculateHitProbability(effectiveRange, effectiveDistance, parameters.fortification, rulesVersion)
         : null;
       const penProb = actionType === 'shot'
-        ? calculatePenetrationProbability(unitStats.power, effectiveTargetArmor, parameters.fortification, rulesVersion)
+        ? calculatePenetrationProbability(unitStats.power, effectiveTargetArmor, parameters.fortification, rulesVersion, actionType === 'shot' && parameters.isSurpriseAttack)
         : null;
 
       return (
@@ -233,10 +233,22 @@ export function ParameterInputs({
                         : "hover:bg-orange-950/20 px-1 py-0.5"
                     )}
                   >
-                    {!unitStats.power ? 'Нажмите для ввода' : <DiceNotationDisplay rollStr={unitStats.power} color="orange" />}
+                    {!unitStats.power ? 'Нажмите для ввода' : (
+                      <span className="flex items-center gap-1">
+                        <DiceNotationDisplay rollStr={unitStats.power} color="orange" />
+                        {parameters.isSurpriseAttack && actionType === 'shot' && (
+                          <span className="text-purple-400 text-[10px] font-mono font-bold" data-testid="power-max-marker">макс</span>
+                        )}
+                      </span>
+                    )}
                   </button>
                 ) : (
-                  <DiceNotationDisplay rollStr={unitStats.power} color="orange" />
+                  <span className="flex items-center gap-1">
+                    <DiceNotationDisplay rollStr={unitStats.power} color="orange" />
+                    {parameters.isSurpriseAttack && actionType === 'shot' && (
+                      <span className="text-purple-400 text-[10px] font-mono font-bold" data-testid="power-max-marker">макс</span>
+                    )}
+                  </span>
                 )}
               </div>
               {/* Penetration probability indicator */}

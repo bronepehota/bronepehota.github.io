@@ -25,8 +25,8 @@ interface HitProbabilityIndicatorProps {
  *
  * Example: D6 vs distance 3
  * - Possible rolls: 1, 2, 3, 4, 5, 6
- * - Successful rolls (>=3): 3, 4, 5, 6 (3 outcomes)
- * - Probability: 3/6 = 50%
+ * - Successful rolls (>=3): 3, 4, 5, 6 (4 outcomes)
+ * - Probability: 4/6 ≈ 67%
  */
 export function calculateHitProbability(
   rangeStr: string,
