@@ -223,12 +223,13 @@ git commit -m "fix(preview): #174 — hit not inflated by surprise; penetration 
 
 ---
 
-### Task 2: «макс» marker on the power dice notation (`ParameterInputs`)
+### Task 2: Power/penetration reflects the double roll in `ParameterInputs` + stale-JSDoc fix
 
 **Files:**
-- Modify: `src/components/combat/ParameterInputs.tsx` (power display block `~:218-240`)
+- Modify: `src/components/combat/ParameterInputs.tsx` (power display block `~:218-240` AND the penetration-probability call `~:163`)
+- Modify: `src/components/combat/HitProbabilityIndicator.tsx` (stale JSDoc above `calculateHitProbability` `~:28-30`)
 
-**Interfaces:** None new. When `parameters.isSurpriseAttack && actionType === 'shot'`, the power dice-notation area shows a «макс» marker (e.g. a small badge after the `DiceNotationDisplay`), visualizing the double power roll. The roll string itself is NOT modified (it stays parseable).
+**Interfaces:** None new. Two consistency fixes found in Task 1's review: (a) the compact penetration indicator in the power card (`ParameterInputs`) computes penetration WITHOUT surprise, so it doesn't show best-of-2 — wire it; (b) a stale JSDoc above `calculateHitProbability` claims "3 outcomes / 50%" for D6 vs distance 3 (actually 4 outcomes / 67%). Plus the «макс» marker on the power notation.
 
 - [ ] **Step 1: Add the «макс» marker next to the power notation**
 
@@ -266,21 +267,46 @@ to:
 
 (`parameters` and `actionType` are already props of `ParameterInputs` — `parameters.isSurpriseAttack` is read elsewhere in this file at `:160`.)
 
-- [ ] **Step 2: Type-check + lint**
+- [ ] **Step 2: Wire the power-card penetration indicator to best-of-2**
+
+In `src/components/combat/ParameterInputs.tsx`, find the penetration-probability call (`~:163`):
+```ts
+        ? calculatePenetrationProbability(unitStats.power, effectiveTargetArmor, parameters.fortification, rulesVersion)
+```
+Add the `isSurpriseAttack` arg (shot-gated, matching the rule that the double-roll is for shots):
+```ts
+        ? calculatePenetrationProbability(unitStats.power, effectiveTargetArmor, parameters.fortification, rulesVersion, actionType === 'shot' && parameters.isSurpriseAttack)
+```
+(Now the compact penetration indicator in the power card reflects best-of-2 when «с тыла», consistent with the full `HitProbabilityIndicator` wired in Task 1.)
+
+- [ ] **Step 3: Fix the stale JSDoc above `calculateHitProbability`**
+
+In `src/components/combat/HitProbabilityIndicator.tsx`, the JSDoc block above `calculateHitProbability` (`~:28-30`) wrongly says:
+```
+ * - Successful rolls (>=3): 3, 4, 5, 6 (3 outcomes)
+ * - Probability: 3/6 = 50%
+```
+The `>=` convention means {3,4,5,6} = **4** favorable outcomes → 4/6 ≈ 67%. Correct to:
+```
+ * - Successful rolls (>=3): 3, 4, 5, 6 (4 outcomes)
+ * - Probability: 4/6 ≈ 67%
+```
+
+- [ ] **Step 4: Type-check + lint**
 
 Run: `npm run type-check && npm run lint`
 Expected: clean.
 
-- [ ] **Step 3: Run the combat unit tests**
+- [ ] **Step 5: Run the combat unit tests**
 
 Run: `npx jest src/__tests__/hooks/useCombatFlow.test.ts src/__tests__/hit-probability-indicator.test.ts`
-Expected: PASS (Task 1 + existing combat tests still green — this task is display-only).
+Expected: PASS (Task 1 + existing tests still green).
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
-git add src/components/combat/ParameterInputs.tsx
-git commit -m "feat(preview): #174 — «макс» marker on power notation for «с тыла» shots"
+git add src/components/combat/ParameterInputs.tsx src/components/combat/HitProbabilityIndicator.tsx
+git commit -m "feat(preview): #174 — «макс» marker + power-card penetration best-of-2; fix stale JSDoc"
 ```
 
 ---
