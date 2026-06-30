@@ -236,9 +236,6 @@ function CombatLogDetail({ entry }: CombatLogDetailProps) {
         <div className="grid grid-cols-2 gap-2 text-slate-400">
           <div>Дистанция: {result.parameters.distance}</div>
           <div>Броня цели: {result.parameters.targetArmor}</div>
-          {result.actionType === 'melee' && (
-            <div>ББ цели: {result.parameters.targetMelee}</div>
-          )}
           <div>Укрытие: {result.parameters.fortification === 'none' ? 'Нет' : result.parameters.fortification}</div>
         </div>
       </div>

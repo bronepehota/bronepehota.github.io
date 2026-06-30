@@ -145,6 +145,20 @@ describe('useCombatFlow — combat outcomes', () => {
     expect(res.meleeResult!.defenderTotal).toBe(res.meleeResult!.defenderRoll + 5);
   });
 
+  it('melee surprise-attack: defender uses armor', async () => {
+    const { result } = renderHook(() => useCombatFlow());
+    await act(async () => { result.current.startCombat(makeSquadUnit(), 0, undefined, 'melee'); });
+    await act(async () => {
+      result.current.setParameters({ targetArmor: 5, isSurpriseAttack: true });
+    });
+    await act(async () => { await result.current.executeAction(); });
+    const mr = result.current.state.result?.meleeResult;
+    expect(mr).toBeDefined();
+    expect(mr!.isSurpriseAttack).toBe(true);
+    // defenderTotal = defenderRoll + targetArmor (5) — surprise-attack inline path uses armor
+    expect(mr!.defenderTotal).toBe(mr!.defenderRoll + 5);
+  });
+
   it('grenade: produces a blast distance (1–6) and ±1 zone', async () => {
     const res = await runAction('grenade', { distance: 3, targetArmor: 2 });
     expect(res.actionType).toBe('grenade');
