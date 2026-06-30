@@ -366,6 +366,33 @@ describe('CombatResults - Grenade Display', () => {
 
       expect(screen.queryByTestId('grenade-hit-tally')).not.toBeInTheDocument();
     });
+
+    it('should vibrate on explode when supported, and still check the target', async () => {
+      const vibrateSpy = jest.fn();
+      Object.defineProperty(window.navigator, 'vibrate', {
+        value: vibrateSpy,
+        configurable: true,
+      });
+
+      const onGrenadeCheckTarget = jest.fn();
+      render(
+        <CombatResults
+          {...defaultProps}
+          onGrenadeCheckTarget={onGrenadeCheckTarget}
+        />
+      );
+
+      await userEvent.click(screen.getByTestId('grenade-explode-button'));
+
+      expect(vibrateSpy).toHaveBeenCalledWith(30);
+      expect(onGrenadeCheckTarget).toHaveBeenCalledWith(2);
+
+      // restore
+      Object.defineProperty(window.navigator, 'vibrate', {
+        value: undefined,
+        configurable: true,
+      });
+    });
   });
 
   describe('Grenade distance calculation', () => {

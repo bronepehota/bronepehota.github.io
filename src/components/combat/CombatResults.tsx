@@ -426,7 +426,7 @@ export function CombatResults({
                   <div className="grid grid-cols-2 gap-3">
                     {/* D20 Roll */}
                     <div className={cn(
-                      "relative bg-slate-900/80 p-4 rounded-lg border-2",
+                      "relative bg-slate-900/80 p-3 rounded-lg border-2",
                       check.hit
                         ? "border-orange-600/50"
                         : "border-slate-600/50"
@@ -453,7 +453,7 @@ export function CombatResults({
                     </div>
 
                     {/* Armor */}
-                    <div className="relative bg-slate-900/80 p-4 rounded-lg border-2 border-slate-600/50">
+                    <div className="relative bg-slate-900/80 p-3 rounded-lg border-2 border-slate-600/50">
                       <div className="text-xs font-mono opacity-60 text-slate-400 mb-3 text-center">
                         Броня цели
                       </div>
@@ -569,7 +569,12 @@ export function CombatResults({
 
                 <button
                   data-testid="grenade-explode-button"
-                  onClick={() => onGrenadeCheckTarget(grenadeTargetArmor)}
+                  onClick={() => {
+                    if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+                      navigator.vibrate(30);
+                    }
+                    onGrenadeCheckTarget(grenadeTargetArmor);
+                  }}
                   className={cn(
                     "relative w-full py-2 md:py-3 rounded-lg font-mono text-base font-bold uppercase tracking-wider border-2 transition-all min-h-[48px] md:min-h-[52px]",
                     "active:scale-95",
