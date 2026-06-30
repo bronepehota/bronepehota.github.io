@@ -206,7 +206,7 @@ export function ParameterInputs({
               </div>
               {/* Hit probability indicator */}
               {hitProb && (
-                <div className="flex justify-center">
+                <div data-testid="hit-probability" className="flex justify-center">
                   <CompactProbabilityIndicator
                     type="hit"
                     probability={hitProb.probability}
@@ -253,7 +253,7 @@ export function ParameterInputs({
               </div>
               {/* Penetration probability indicator */}
               {penProb && (
-                <div className="flex justify-center">
+                <div data-testid="penetration-probability" className="flex justify-center">
                   <CompactProbabilityIndicator
                     type="penetration"
                     probability={penProb.probability}

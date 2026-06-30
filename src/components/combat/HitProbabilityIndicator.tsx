@@ -5,17 +5,6 @@ import { cn } from '@/lib/utils';
 import { RulesVersionID } from '@/lib/types';
 import { Target, Shield } from 'lucide-react';
 
-interface HitProbabilityIndicatorProps {
-  rangeStr: string;
-  distanceSteps: number;
-  powerStr: string;
-  targetArmor: number;
-  fortification?: 'none' | 'light' | 'heavy';
-  rulesVersion?: RulesVersionID;
-  isSurpriseAttack?: boolean;
-  className?: string;
-}
-
 /**
  * Calculate hit probability based on range dice and distance
  * Hit occurs when roll >= effectiveDistance
@@ -112,119 +101,6 @@ export function getProbabilityColor(probability: number): string {
   if (probability >= 50) return 'text-amber-400';
   if (probability >= 25) return 'text-orange-400';
   return 'text-red-400';
-}
-
-/**
- * Get background style based on probability
- */
-function getProbabilityBg(probability: number): string {
-  if (probability >= 75) return 'bg-emerald-950/40 border-emerald-500/30';
-  if (probability >= 50) return 'bg-amber-950/40 border-amber-500/30';
-  if (probability >= 25) return 'bg-orange-950/40 border-orange-500/30';
-  return 'bg-red-950/40 border-red-500/30';
-}
-
-export function HitProbabilityIndicator({
-  rangeStr,
-  distanceSteps,
-  powerStr,
-  targetArmor,
-  fortification = 'none',
-  rulesVersion = 'tehnolog',
-  isSurpriseAttack = false,
-  className,
-}: HitProbabilityIndicatorProps) {
-  const hitProb = calculateHitProbability(rangeStr, distanceSteps, fortification, rulesVersion);
-  const penProb = calculatePenetrationProbability(powerStr, targetArmor, fortification, rulesVersion, isSurpriseAttack);
-
-  const hitColor = getProbabilityColor(hitProb.probability);
-  const penColor = getProbabilityColor(penProb.probability);
-  const hitBg = getProbabilityBg(hitProb.probability);
-  const penBg = getProbabilityBg(penProb.probability);
-
-  return (
-    <div className={cn("space-y-2 fade-in-up", className)}>
-      {/* Compact horizontal probability bars */}
-      <div className="flex items-center gap-2">
-        {/* Hit probability */}
-        <div className={cn(
-          'flex-1 flex items-center gap-2 px-3 py-2 rounded-lg border transition-all',
-          hitBg
-        )}>
-          <Target className="w-4 h-4 shrink-0 text-slate-400" />
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-[8px] uppercase font-bold text-slate-500">ПОПАДАНИЕ</span>
-              <span data-testid="hit-probability" className={cn("text-sm font-black font-mono leading-none", hitColor)}>
-                {Math.round(hitProb.probability)}%
-              </span>
-            </div>
-            {/* Progress bar */}
-            <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
-              <div
-                className={cn(
-                  "h-full rounded-full transition-all duration-300",
-                  hitProb.probability >= 75 && "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]",
-                  hitProb.probability >= 50 && hitProb.probability < 75 && "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]",
-                  hitProb.probability >= 25 && hitProb.probability < 50 && "bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.5)]",
-                  hitProb.probability < 25 && "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"
-                )}
-                style={{ width: `${hitProb.probability}%` }}
-              />
-            </div>
-            <div className="text-[8px] text-slate-600 font-mono">
-              {hitProb.favorableRolls}/{hitProb.totalRolls}
-            </div>
-          </div>
-        </div>
-
-        {/* Penetration probability */}
-        <div className={cn(
-          'flex-1 flex items-center gap-2 px-3 py-2 rounded-lg border transition-all',
-          penBg
-        )}>
-          <Shield className="w-4 h-4 shrink-0 text-slate-400" />
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-[8px] uppercase font-bold text-slate-500">
-                ПРОБИТИЕ
-                {isSurpriseAttack && (
-                  <span className="text-purple-400 normal-case font-mono">макс</span>
-                )}
-              </span>
-              <span data-testid="penetration-probability" className={cn("text-sm font-black font-mono leading-none", penColor)}>
-                {Math.round(penProb.probability)}%
-              </span>
-            </div>
-            {/* Progress bar */}
-            <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
-              <div
-                className={cn(
-                  "h-full rounded-full transition-all duration-300",
-                  penProb.probability >= 75 && "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]",
-                  penProb.probability >= 50 && penProb.probability < 75 && "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]",
-                  penProb.probability >= 25 && penProb.probability < 50 && "bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.5)]",
-                  penProb.probability < 25 && "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"
-                )}
-                style={{ width: `${penProb.probability}%` }}
-              />
-            </div>
-            <div className="text-[8px] text-slate-600 font-mono">
-              {penProb.penetratingDice}/{penProb.totalDice} куб
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Roll details tooltip */}
-      <div className="text-center text-[9px] text-slate-600 font-mono">
-        <span>
-          Нужно бросить ≥{distanceSteps}{rulesVersion === 'community_star_system' && fortification !== 'none' ? ` +${fortification === 'light' ? 1 : 2}` : ''}
-          {isSurpriseAttack && ' · мощность: максимум'}
-        </span>
-      </div>
-    </div>
-  );
 }
 
 /**
