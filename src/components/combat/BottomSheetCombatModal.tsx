@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { X, ChevronLeft, Target, Sword, Bomb, EyeOff, Crosshair } from 'lucide-react';
+import { X, ChevronLeft, Target, Sword, Bomb, EyeOff, Crosshair, Mountain } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useBottomSheet } from '@/hooks/useBottomSheet';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
@@ -13,6 +13,7 @@ import ActiveModifiersDisplay from './ActiveModifiersDisplay';
 import { RulesVersionID, Army } from '@/lib/types';
 import { resolveModifierSummary } from '@/lib/modifier-utils';
 import { useCombatTargetContext } from '@/contexts/CombatTargetContext';
+import { getHeightBonusEnabled } from '@/components/toggles/HeightBonusToggle';
 
 interface BottomSheetCombatModalProps {
   state: CombatFlowState;
@@ -89,6 +90,8 @@ export function BottomSheetCombatModal({
   distanceInputUnit = 'steps',
   stepToCmFactor = 5,
 }: BottomSheetCombatModalProps) {
+  const heightBonusAvailable = getHeightBonusEnabled();
+
   const { sheetRef, touchHandlers } = useBottomSheet({
     onClose,
     closeThreshold: 100,
@@ -333,6 +336,28 @@ export function BottomSheetCombatModal({
                     )}
                   </button>
                 )}
+
+                {/* Height bonus — shot only, gated by the config toggle */}
+                {heightBonusAvailable && state.actionType === 'shot' && (
+                  <button
+                    type="button"
+                    onClick={() => onSetParameters({ isHeightBonus: !state.parameters.isHeightBonus })}
+                    aria-label={state.parameters.isHeightBonus ? 'Бонус за высоту включён' : 'Бонус за высоту выключен'}
+                    className={cn(
+                      'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[11px] font-mono min-h-[36px]',
+                      'touch-manipulation active:scale-95 transition-all duration-200',
+                      state.parameters.isHeightBonus
+                        ? 'bg-emerald-600/20 border-emerald-500 text-emerald-200 shadow-lg shadow-emerald-500/20'
+                        : 'bg-slate-700/50 border-slate-600 text-slate-400 hover:bg-slate-700'
+                    )}
+                  >
+                    <Mountain className={cn('w-3.5 h-3.5', state.parameters.isHeightBonus ? 'text-emerald-400' : 'text-slate-400')} size={14} />
+                    <span>с высоты</span>
+                    {state.parameters.isHeightBonus && (
+                      <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
+                    )}
+                  </button>
+                )}
               </div>
 
               {/* Execute button — full width, own row */}
@@ -357,11 +382,12 @@ export function BottomSheetCombatModal({
                      state.actionType === 'melee' ? 'АТАКОВАТЬ' : 'БРОСИТЬ'}
                   </span>
                   {/* Active modifiers subtitle (always visible) */}
-                  {(state.parameters.isSurpriseAttack || state.parameters.isAimedShot) && (
+                  {(state.parameters.isSurpriseAttack || state.parameters.isAimedShot || state.parameters.isHeightBonus) && (
                     <span className="text-[10px] opacity-80">
                       {[
                         state.parameters.isSurpriseAttack && 'с тыла',
                         state.parameters.isAimedShot && 'прицельный',
+                        state.parameters.isHeightBonus && 'с высоты',
                       ].filter(Boolean).join(' + ')}
                     </span>
                   )}

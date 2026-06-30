@@ -7,7 +7,7 @@ import type { ModifierSummary } from '@/lib/modifier-types';
 import { RulesVersionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { DiceNotationDisplay } from './DiceNotationDisplay';
-import { getUnitStats, multiplyRange } from '@/lib/game-logic';
+import { getUnitStats, multiplyRange, addBonusToRoll } from '@/lib/game-logic';
 import { Target, Shield } from 'lucide-react';
 import type { CombatantData } from '@/lib/combatant-data';
 import { Machine } from '@/lib/types';
@@ -152,7 +152,10 @@ export function ParameterInputs({
         : null;
 
       // Calculate probabilities for shot action
-      const effectiveRange = isAimedShot && actionType === 'shot' ? multiplyRange(unitStats.range, 2) : unitStats.range;
+      let effectiveRange = isAimedShot && actionType === 'shot' ? multiplyRange(unitStats.range, 2) : unitStats.range;
+      if (parameters.isHeightBonus && actionType === 'shot') {
+        effectiveRange = addBonusToRoll(effectiveRange, 1);
+      }
       const hitProb = actionType === 'shot'
         ? calculateHitProbability(effectiveRange, effectiveDistance, parameters.fortification, rulesVersion, parameters.isSurpriseAttack)
         : null;
