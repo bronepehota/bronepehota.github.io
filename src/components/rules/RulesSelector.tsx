@@ -8,6 +8,7 @@ import { FloatingContinueButton } from '../controls/FloatingContinueButton';
 import { PanicToggle } from '../toggles/PanicToggle';
 import { AimedShotToggle } from '../toggles/AimedShotToggle';
 import { SurpriseAttackToggle } from '../toggles/SurpriseAttackToggle';
+import { HeightBonusToggle } from '../toggles/HeightBonusToggle';
 import { StrictPilotRankToggle } from '../toggles/StrictPilotRankToggle';
 import { DistanceUnitToggle } from '../toggles/DistanceUnitToggle';
 import { StepToCmFactorToggle } from '../toggles/StepToCmFactorToggle';
@@ -24,6 +25,8 @@ interface RulesSelectorProps {
   onAimedShotEnabledChange?: (enabled: boolean) => void;
   surpriseAttackEnabled?: boolean;
   onSurpriseAttackEnabledChange?: (enabled: boolean) => void;
+  heightBonusEnabled?: boolean;
+  onHeightBonusEnabledChange?: (enabled: boolean) => void;
   strictPilotRankEnabled?: boolean;
   onStrictPilotRankEnabledChange?: (enabled: boolean) => void;
   distanceInputUnit?: 'steps' | 'cm';
@@ -45,6 +48,8 @@ export function RulesSelector({
   onAimedShotEnabledChange,
   surpriseAttackEnabled = false,
   onSurpriseAttackEnabledChange,
+  heightBonusEnabled = false,
+  onHeightBonusEnabledChange,
   strictPilotRankEnabled = true,
   onStrictPilotRankEnabledChange,
   distanceInputUnit = 'steps',
@@ -233,6 +238,12 @@ export function RulesSelector({
               <SurpriseAttackToggle
                 enabled={surpriseAttackEnabled}
                 onEnabledChange={onSurpriseAttackEnabledChange}
+              />
+            )}
+            {onHeightBonusEnabledChange && (
+              <HeightBonusToggle
+                enabled={heightBonusEnabled}
+                onEnabledChange={onHeightBonusEnabledChange}
               />
             )}
             {onStrictPilotRankEnabledChange && (
