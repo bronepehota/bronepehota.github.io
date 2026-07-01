@@ -363,51 +363,76 @@ export function ParameterInputs({
 
           {/* Target Armor Input */}
           {(actionType === 'shot' || actionType === 'grenade' || actionType === 'melee') && (
-            <div className="flex flex-col sm:flex-row sm:grid sm:grid-cols-[auto_1fr] sm:gap-2 sm:items-center gap-1.5">
-              <label className="text-[10px] md:text-xs opacity-50 uppercase font-bold whitespace-nowrap sm:min-w-[70px]">
-                {effectiveTargetIsVehicle ? 'макс зоны' : 'Броня цели'}
-              </label>
-              <div className="flex items-center gap-2">
-                <NumberStepper
-                  value={effectiveTargetArmor}
-                  onChange={(value) => {
-                    onChange({ targetArmor: value });
-                    onMemoryUpdate?.({ targetArmor: value });
-                  }}
-                  min={0}
-                  max={99}
-                  step={1}
-                  size="sm"
-                  className="flex-1 sm:justify-start"
-                />
-                {rulesVersion === 'community_star_system' && actionType === 'shot' && (
+            <div className="flex flex-col gap-1.5">
+              {/* Target-type segmented control (community rules, shot only) — #162 */}
+              {rulesVersion === 'community_star_system' && actionType === 'shot' && (
+                <div
+                  role="group"
+                  aria-label="Тип цели"
+                  className="flex gap-0.5 p-0.5 rounded-md bg-slate-800/50 border border-slate-700/50"
+                >
                   <button
                     type="button"
-                    role="switch"
-                    aria-checked={effectiveTargetIsVehicle}
+                    aria-pressed={!effectiveTargetIsVehicle}
                     onClick={() => {
-                      const next = !effectiveTargetIsVehicle;
-                      onChange({ targetIsVehicle: next });
-                      onMemoryUpdate?.({ targetIsVehicle: next });
+                      onChange({ targetIsVehicle: false });
+                      onMemoryUpdate?.({ targetIsVehicle: false });
                     }}
                     className={cn(
-                      'shrink-0 inline-flex items-center h-7 px-2 rounded border text-[9px] md:text-[10px] font-mono uppercase tracking-wide transition-all touch-manipulation',
-                      effectiveTargetIsVehicle
-                        ? 'bg-cyan-500/10 border-cyan-500/60 text-cyan-300'
-                        : 'bg-slate-800/40 border-slate-700/60 text-slate-500 hover:border-slate-600 hover:text-slate-400'
+                      'flex-1 min-h-[32px] px-2 rounded text-[10px] md:text-xs font-mono uppercase tracking-wide transition-all touch-manipulation',
+                      !effectiveTargetIsVehicle
+                        ? 'bg-slate-600/70 text-slate-100'
+                        : 'text-slate-500 hover:text-slate-300'
                     )}
                   >
-                    техника
+                    Пехота
                   </button>
-                )}
-              </div>
+                  <button
+                    type="button"
+                    aria-pressed={effectiveTargetIsVehicle}
+                    onClick={() => {
+                      onChange({ targetIsVehicle: true });
+                      onMemoryUpdate?.({ targetIsVehicle: true });
+                    }}
+                    className={cn(
+                      'flex-1 min-h-[32px] px-2 rounded text-[10px] md:text-xs font-mono uppercase tracking-wide transition-all touch-manipulation',
+                      effectiveTargetIsVehicle
+                        ? 'bg-cyan-600/30 text-cyan-200 ring-1 ring-cyan-500/50'
+                        : 'text-slate-500 hover:text-slate-300'
+                    )}
+                  >
+                    Техника
+                  </button>
+                </div>
+              )}
+
+              <label className="text-[10px] md:text-xs opacity-50 uppercase font-bold">
+                {effectiveTargetIsVehicle ? 'макс зоны' : 'Броня цели'}
+              </label>
+              <NumberStepper
+                value={effectiveTargetArmor}
+                onChange={(value) => {
+                  onChange({ targetArmor: value });
+                  onMemoryUpdate?.({ targetArmor: value });
+                }}
+                min={0}
+                max={99}
+                step={1}
+                size="sm"
+                className="flex-1"
+              />
+              {effectiveTargetIsVehicle && rulesVersion === 'community_star_system' && actionType === 'shot' && (
+                <div className="text-[9px] md:text-[10px] font-mono text-cyan-400/70 leading-tight">
+                  Урон по зонам прочности: D6→1, D12→2, D20→3
+                </div>
+              )}
             </div>
           )}
 
           {/* Fortification Selector */}
           {(actionType === 'shot' || actionType === 'grenade') && (
-            <div className="flex flex-col sm:flex-row sm:grid sm:grid-cols-[auto_1fr] sm:gap-2 sm:items-start gap-1.5">
-              <label className="text-[10px] md:text-xs opacity-50 uppercase font-bold whitespace-nowrap sm:min-w-[70px] sm:pt-1.5">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] md:text-xs opacity-50 uppercase font-bold">
                 Укрытие
               </label>
               <FortificationSelector
