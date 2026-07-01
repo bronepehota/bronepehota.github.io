@@ -1,7 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import { UnitCardHeader } from '@/components/cards/unit-card/UnitCardHeader';
 import { MachineAmmoPanel } from '@/components/cards/unit-card/machine-view/MachineAmmoPanel';
-import { ArmyUnit, Squad, Machine } from '@/lib/types';
+import { PilotChip } from '@/components/cards/unit-card/machine-view/PilotChip';
+import { PilotSheet } from '@/components/cards/unit-card/machine-view/PilotSheet';
+import { MachineView } from '@/components/cards/unit-card/MachineView';
+import { ArmyUnit, Squad, Machine, DurabilityZone } from '@/lib/types';
 
 describe('UnitCard Accessibility', () => {
   describe('Minimum touch target size (44x44px)', () => {
@@ -68,6 +71,100 @@ describe('UnitCard Accessibility', () => {
           expect(classes).toContain('min-w-[44px]');
           expect(classes).toContain('min-h-[44px]');
         });
+      });
+    });
+
+    describe('PilotChip', () => {
+      it('chip meets 44px min touch target', () => {
+        const { container } = render(<PilotChip pilotInfo={null} pilotTestUrgent={false} onOpenPilot={jest.fn()} />);
+        const btn = container.querySelector('button');
+        expect(btn?.className).toContain('min-h-[44px]');
+      });
+    });
+
+    describe('PilotSheet', () => {
+      it('buttons meet 44px min touch target', () => {
+        const { container } = render(<PilotSheet
+          isOpen={true} onClose={jest.fn()}
+          pilotInfo={{ squadInstanceId: 's', soldierIndex: 0, pilotArmor: 2, alive: true }}
+          pilotImage={null} survivalTest={null} isTestRunning={false}
+          onSurvivalTest={jest.fn()} onAssignPilot={jest.fn()} />);
+        container.querySelectorAll('button').forEach(b => {
+          expect(b.className).toContain('min-h-[44px]');
+        });
+      });
+    });
+
+    describe('MachineView damage/repair row', () => {
+      it('damage and repair buttons meet 44px min touch target', () => {
+        const mockMachine: Machine = {
+          id: 'test_machine',
+          name: 'Test Machine',
+          shortName: 'TM',
+          faction: 'polaris',
+          cost: 150,
+          rank: 2,
+          fire_rate: 2,
+          ammo_max: 20,
+          durability_max: 16,
+          image: '/images/test.jpg',
+          speed_sectors: [
+            { min_durability: 9, max_durability: 16, speed: 2 }
+          ],
+          weapons: [
+            { name: 'Cannon', range: 'D12', power: '2D20' }
+          ]
+        };
+
+        const mockUnit: ArmyUnit = {
+          instanceId: 'machine-1',
+          instanceNumber: 1,
+          type: 'machine',
+          data: mockMachine,
+          currentDurability: 12,
+          currentAmmo: 15,
+          actionsUsed: [{ moved: false, shot: false, melee: false, done: false }]
+        };
+
+        const mockZone: DurabilityZone = {
+          max: 16,
+          color: 'green',
+          damagePerDie: { D6: 1, D12: 2, D20: 3 }
+        };
+
+        const { container } = render(
+          <MachineView
+            unit={mockUnit}
+            zone={mockZone}
+            speed={2}
+            updateDurability={jest.fn()}
+            updateAmmo={jest.fn()}
+            onWeaponAttack={jest.fn()}
+            onWeaponInfo={jest.fn()}
+            onPilotAssign={jest.fn()}
+            onPilotSurvivalTest={jest.fn()}
+            pilotSurvivalTest={null}
+            pilotImage={null}
+            isPilotTestRunning={false}
+            pilotTestUrgent={false}
+            usePerWeaponAmmo={false}
+            distanceInputUnit="steps"
+            stepToCmFactor={5}
+            imageUrl={mockMachine.image}
+            machineName={mockMachine.name}
+            isDestroyed={false}
+            onShowImage={jest.fn()}
+          />
+        );
+
+        // Find the damage (-1) and repair (+1) buttons by their text content
+        const damageBtn = container.querySelector('button svg.lucide-flame')?.closest('button');
+        const repairBtn = container.querySelector('button svg.lucide-wrench')?.closest('button');
+
+        expect(damageBtn).not.toBeNull();
+        expect(damageBtn?.className).toContain('min-h-[44px]');
+        expect(repairBtn).not.toBeNull();
+        expect(repairBtn?.className).toContain('min-h-[44px]');
       });
     });
 
