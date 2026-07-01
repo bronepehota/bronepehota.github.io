@@ -366,6 +366,8 @@ export function ParameterInputs({
             <div className="flex flex-col gap-1.5">
               {/* Target-type segmented control (community rules, shot only) — #162 */}
               {rulesVersion === 'community_star_system' && actionType === 'shot' && (
+                <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] md:text-xs opacity-50 uppercase font-bold">Тип цели</label>
                 <div
                   role="group"
                   aria-label="Тип цели"
@@ -403,6 +405,7 @@ export function ParameterInputs({
                   >
                     Техника
                   </button>
+                </div>
                 </div>
               )}
 
