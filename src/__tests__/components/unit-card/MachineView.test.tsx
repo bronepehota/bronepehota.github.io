@@ -68,7 +68,7 @@ describe('MachineView', () => {
   it('renders machine stats panel', () => {
     render(<MachineView {...defaultProps} />);
 
-    expect(screen.getByText(/прочность/i)).toBeInTheDocument();
+    expect(screen.getByText(/прочн/i)).toBeInTheDocument();
   });
 
   it('renders ammo panel', () => {
@@ -157,7 +157,7 @@ describe('MachineView', () => {
   });
 
   describe('Pilot panel integration', () => {
-    it('renders pilot panel when pilot info is present', () => {
+    it('renders pilot chip when pilot info is present', () => {
       const unit = createMockUnit({
         pilotInfo: {
           squadInstanceId: 'squad-1',
@@ -169,12 +169,11 @@ describe('MachineView', () => {
 
       render(<MachineView {...defaultProps} unit={unit} />);
 
-      // Pilot panel should be rendered - check for pilot image button
-      const pilotButton = screen.getByAltText('Пилот');
-      expect(pilotButton).toBeInTheDocument();
+      // Pilot chip is rendered in the header (portrait now lives in the sheet)
+      expect(screen.getByText(/жив/i)).toBeInTheDocument();
     });
 
-    it('renders pilot survival test result', () => {
+    it('survival test result does not crash render', () => {
       const unit = createMockUnit({
         pilotInfo: {
           squadInstanceId: 'squad-1',
@@ -196,9 +195,8 @@ describe('MachineView', () => {
 
       render(<MachineView {...props} />);
 
-      // Pilot panel should show survival test result
-      const pilotButton = screen.getByAltText('Пилот');
-      expect(pilotButton).toBeInTheDocument();
+      // Pilot chip still renders alongside a survival-test result
+      expect(screen.getByText(/жив/i)).toBeInTheDocument();
     });
   });
 

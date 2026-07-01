@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { MachineAmmoPanel } from './machine-view/MachineAmmoPanel';
 import { MachineWeaponsList } from './machine-view/MachineWeaponsList';
-import { TacticalDashboard } from './machine-view/TacticalDashboard';
+import { MachineStatusHeader } from './machine-view/MachineStatusHeader';
+import { PilotSheet } from './machine-view/PilotSheet';
 import { ArmyUnit, Machine, DurabilityZone, PilotInfo } from '@/lib/types';
-import { Sword } from 'lucide-react';
+import { Sword, Flame, Wrench } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface MachineViewProps {
@@ -51,9 +53,13 @@ export function MachineView({
   onShowImage
 }: MachineViewProps) {
   const machine = unit.data as Machine;
+  const [pilotSheetOpen, setPilotSheetOpen] = useState(false);
 
   // Get pilot info from unit
   const pilotInfo: PilotInfo | null = unit.pilotInfo || null;
+
+  const currentDurability = unit.currentDurability || 0;
+  const maxDurability = machine.durability_max;
 
   // Get weapon shots tracking from unit state
   const weaponShots: Record<number, number> = unit.machineWeaponShots || {};
@@ -66,25 +72,26 @@ export function MachineView({
 
   return (
     <div className="space-y-1.5">
-      {/* Tactical Dashboard - Unified panel with machine image, stats, and pilot */}
+      {/* Machine Status Header — clean badges + PilotChip + durability bar */}
       {imageUrl ? (
-        <TacticalDashboard
+        <MachineStatusHeader
           faction={machine.faction}
           imageUrl={imageUrl}
           machineName={machineName || machine.name}
           isDestroyed={isDestroyed || false}
-          currentDurability={unit.currentDurability || 0}
-          maxDurability={machine.durability_max}
+          currentDurability={currentDurability}
+          maxDurability={maxDurability}
           speed={speed}
           zone={zone}
-          onUpdateDurability={updateDurability}
           pilotInfo={pilotInfo}
-          pilotImage={pilotImage}
           survivalTest={pilotSurvivalTest}
-          onAssignPilot={onPilotAssign}
           onSurvivalTest={onPilotSurvivalTest}
           isPilotTestRunning={isPilotTestRunning}
           pilotTestUrgent={pilotTestUrgent}
+          onOpenPilot={() => {
+            if (!pilotInfo) onPilotAssign();
+            else setPilotSheetOpen(true);
+          }}
           onImageClick={onShowImage || (() => {})}
           distanceInputUnit={distanceInputUnit}
           stepToCmFactor={stepToCmFactor}
@@ -93,6 +100,28 @@ export function MachineView({
         /* Fallback: Original layout if no image */
         <div className="relative bg-slate-900/60 p-2 rounded-sm border border-slate-700/50">
           <div className="text-center text-xs font-mono opacity-50">Нет изображения</div>
+        </div>
+      )}
+
+      {/* Damage / repair row — secondary controls (moved out of the header) */}
+      {imageUrl && (
+        <div className="flex gap-1.5">
+          <button
+            type="button"
+            onClick={() => updateDurability(-1)}
+            disabled={currentDurability === 0}
+            className="flex-1 min-h-[44px] rounded-lg py-2 text-xs font-bold border bg-red-950/30 border-red-800/40 text-red-300 flex items-center justify-center gap-1.5 disabled:opacity-30"
+          >
+            <Flame className="w-4 h-4" /> <span>−1 Урон</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => updateDurability(1)}
+            disabled={currentDurability === maxDurability}
+            className="flex-1 min-h-[44px] rounded-lg py-2 text-xs font-bold border bg-emerald-950/30 border-emerald-800/40 text-emerald-300 flex items-center justify-center gap-1.5 disabled:opacity-30"
+          >
+            <Wrench className="w-4 h-4" /> <span>+1 Ремонт</span>
+          </button>
         </div>
       )}
 
@@ -138,6 +167,20 @@ export function MachineView({
           СКОРО
         </span>
       </div>
+
+      {/* Pilot sheet — opened from PilotChip when a pilot is assigned */}
+      {pilotInfo && (
+        <PilotSheet
+          isOpen={pilotSheetOpen}
+          onClose={() => setPilotSheetOpen(false)}
+          pilotInfo={pilotInfo}
+          pilotImage={pilotImage}
+          survivalTest={pilotSurvivalTest}
+          isTestRunning={isPilotTestRunning}
+          onSurvivalTest={onPilotSurvivalTest}
+          onAssignPilot={() => { setPilotSheetOpen(false); onPilotAssign(); }}
+        />
+      )}
     </div>
   );
 }
