@@ -4,8 +4,7 @@ import { MachineWeaponsList } from './machine-view/MachineWeaponsList';
 import { MachineStatusHeader } from './machine-view/MachineStatusHeader';
 import { PilotSheet } from './machine-view/PilotSheet';
 import { ArmyUnit, Machine, DurabilityZone, PilotInfo } from '@/lib/types';
-import { Sword, Flame, Wrench } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Flame, Wrench } from 'lucide-react';
 
 export interface MachineViewProps {
   unit: ArmyUnit;
@@ -64,14 +63,8 @@ export function MachineView({
   // Get weapon shots tracking from unit state
   const weaponShots: Record<number, number> = unit.machineWeaponShots || {};
 
-  // Calculate total melee bonus from ББ weapons
-  const meleeBonus = machine.weapons
-    .filter(w => w.range === 'ББ')
-    .map(w => parseInt(w.power, 10) || 0)
-    .reduce((sum, bonus) => sum + bonus, 0);
-
   return (
-    <div className="space-y-1.5">
+    <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-3 flex flex-col gap-3">
       {/* Machine Status Header — clean badges + PilotChip + durability bar */}
       {imageUrl ? (
         <MachineStatusHeader
@@ -103,7 +96,7 @@ export function MachineView({
         </div>
       )}
 
-      {/* Damage / repair row — secondary controls (moved out of the header) */}
+      {/* Damage / repair row — secondary controls */}
       {imageUrl && (
         <div className="flex gap-1.5">
           <button
@@ -125,18 +118,6 @@ export function MachineView({
         </div>
       )}
 
-      {/* Ammo Panel - full width */}
-      <MachineAmmoPanel
-        currentAmmo={unit.currentAmmo || 0}
-        maxAmmo={machine.ammo_max}
-        shotsUsed={unit.machineShotsUsed || 0}
-        fireRate={machine.fire_rate}
-        weapons={machine.weapons}
-        weaponAmmo={unit.weaponAmmo}
-        onUpdateAmmo={updateAmmo}
-        usePerWeaponAmmo={usePerWeaponAmmo}
-      />
-
       {/* Weapons List - always show for all rules versions */}
       <MachineWeaponsList
         weapons={machine.weapons}
@@ -152,22 +133,17 @@ export function MachineView({
         stepToCmFactor={stepToCmFactor}
       />
 
-      {/* Ram attack button - disabled, not implemented */}
-      <div
-        className={cn(
-          "relative w-full flex items-center justify-center gap-2 px-3 py-2 rounded-sm border-2",
-          "bg-slate-900/30 border-slate-700/50 opacity-50 min-h-[48px]"
-        )}
-        title="Таран пехоты - в разработке"
-      >
-        <Sword className="w-5 h-5 text-slate-600" />
-        <span className="text-sm font-mono font-bold uppercase tracking-wider text-slate-600">
-          ТАРАН {meleeBonus > 0 && `+${meleeBonus}`}
-        </span>
-        <span className="absolute -top-1 -right-1 px-1.5 py-0.5 text-[8px] font-mono font-bold bg-amber-600 text-white rounded-sm">
-          СКОРО
-        </span>
-      </div>
+      {/* Ammo Panel - full width */}
+      <MachineAmmoPanel
+        currentAmmo={unit.currentAmmo || 0}
+        maxAmmo={machine.ammo_max}
+        shotsUsed={unit.machineShotsUsed || 0}
+        fireRate={machine.fire_rate}
+        weapons={machine.weapons}
+        weaponAmmo={unit.weaponAmmo}
+        onUpdateAmmo={updateAmmo}
+        usePerWeaponAmmo={usePerWeaponAmmo}
+      />
 
       {/* Pilot sheet — opened from PilotChip when a pilot is assigned */}
       {pilotInfo && (

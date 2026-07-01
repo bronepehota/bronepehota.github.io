@@ -24,15 +24,9 @@ export function MachineAmmoPanel({
   usePerWeaponAmmo
 }: MachineAmmoPanelProps) {
   return (
-    <div className="space-y-1.5">
+    <div>
       {/* Ammo + Shots Combined - Tactical Display */}
-      <div className="relative bg-slate-900/60 p-1.5 rounded-sm">
-        {/* Tech corners */}
-        <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-slate-600/50" />
-        <div className="absolute top-0 right-0 w-1 h-1 border-r border-t border-slate-600/50" />
-        <div className="absolute bottom-0 left-0 w-1 h-1 border-l border-b border-slate-600/50" />
-        <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-slate-600/50" />
-
+      <div className="p-1.5">
         <div className="flex justify-between items-center mb-1">
           <span className="text-[8px] md:text-[9px] font-mono opacity-40 uppercase flex items-center gap-1">
             <Bomb className="w-2.5 h-2.5 md:w-3 md:h-3" /> Боезапас
