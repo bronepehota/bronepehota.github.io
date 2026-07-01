@@ -1,4 +1,4 @@
-import { RulesVersion, HitResult, DamageResult, MeleeResult, WeaponSpecial, AoEEffect, RepairEffect, BurstEffect, FortificationType, FORTIFICATION_MODIFIERS, Machine, DurabilityZone } from '../types';
+import { RulesVersion, HitResult, DamageResult, MeleeResult, WeaponSpecial, AoEEffect, RepairEffect, BurstEffect, FortificationType, FORTIFICATION_MODIFIERS, Machine } from '../types';
 import { rollDie, parseRoll, executeRoll } from '../game-logic';
 
 // Вспомогательные функции для парсинга special-эффектов
@@ -41,46 +41,6 @@ function parseBurstEffect(special: string): BurstEffect | null {
   return null;
 }
 
-/**
- * Get durability zone for fan rules vehicle damage calculation
- * Uses explicit zones if provided, otherwise derives from speed_sectors
- */
-function getDurabilityZone(
-  machine: Machine | undefined,
-  currentDurability: number
-): DurabilityZone {
-  if (machine?.durabilityZones && machine.durabilityZones.length > 0) {
-    return machine.durabilityZones.find(
-      zone => currentDurability <= zone.max
-    ) || machine.durabilityZones[machine.durabilityZones.length - 1];
-  }
-
-  // Default: derive from speed_sectors (3 zones)
-  // If machine data is not available, use generic zone calculation
-  const max = machine?.durability_max || 9;
-
-  // Create default zones based on durability max
-  const zones: DurabilityZone[] = [
-    {
-      max: Math.ceil(max * 2 / 3),
-      color: 'green',
-      damagePerDie: { D6: 1, D12: 2, D20: 3 }
-    },
-    {
-      max: Math.ceil(max / 3),
-      color: 'yellow',
-      damagePerDie: { D6: 1, D12: 2, D20: 3 }
-    },
-    {
-      max: 0,
-      color: 'red',
-      damagePerDie: { D6: 1, D12: 2, D20: 3 }
-    }
-  ];
-
-  return zones.find(zone => currentDurability > zone.max) || zones[2];
-}
-
 export const communityStarSystemRules: RulesVersion = {
   id: 'community_star_system',
   name: 'Правила от Сообщества Star System',
@@ -116,9 +76,9 @@ export const communityStarSystemRules: RulesVersion = {
     _fortification: FortificationType = 'none',
     special?: WeaponSpecial,
     isVehicle?: boolean,
-    currentDurability?: number,
-    durabilityMax?: number,
-    vehicleData?: Machine
+    _currentDurability?: number,
+    _durabilityMax?: number,
+    _vehicleData?: Machine
   ): DamageResult => {
     const { dice, sides, bonus } = parseRoll(powerStr);
     const rolls = [];
@@ -193,27 +153,21 @@ export const communityStarSystemRules: RulesVersion = {
       return result;
     }
 
-    // Vehicle attack uses zone-based damage (fan rules) - each die can add damage
-    if (isVehicle && vehicleData && currentDurability !== undefined) {
-      const zone = getDurabilityZone(vehicleData, currentDurability);
-      const zoneMax = zone.max;
-      const damagePerDie = zone.damagePerDie;
+    // Vehicle target (community rules §6): armor = entered zone-max threshold (targetArmor);
+    // each penetrating die deals damage scaled by die type (D6→1, D12→2, D20→3).
+    if (isVehicle) {
+      const zoneMax = targetArmor;
       let damage = 0;
-
       for (let i = 0; i < dice; i++) {
         const r = rollDie(sides) + bonus;
         rolls.push(r);
-
-        // Check if die penetrates zone
         if (r > zoneMax) {
-          // Add damage based on die type
-          if (sides === 6) damage += damagePerDie.D6;
-          else if (sides === 12) damage += damagePerDie.D12;
-          else if (sides === 20) damage += damagePerDie.D20;
-          else damage += 1; // Fallback for other die types
+          if (sides === 6) damage += 1;
+          else if (sides === 12) damage += 2;
+          else if (sides === 20) damage += 3;
+          else damage += 1; // fallback for other die types
         }
       }
-
       return { damage, rolls };
     }
 

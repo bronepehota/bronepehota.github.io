@@ -6,6 +6,7 @@ export interface TargetMemory {
   distance: number | null;
   targetArmor: number | null;
   targetMelee: number | null;
+  targetIsVehicle: boolean | null;  // Remembered vehicle-target toggle (#162)
   lastUpdateTimestamp: number;
   isDirty: boolean;  // True if values were set this turn
 }
@@ -40,6 +41,7 @@ const createEmptyMemory = (): TargetMemory => ({
   distance: null,
   targetArmor: null,
   targetMelee: null,
+  targetIsVehicle: null,
   lastUpdateTimestamp: 0,
   isDirty: false,
 });

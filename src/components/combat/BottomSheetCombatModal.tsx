@@ -128,6 +128,7 @@ export function BottomSheetCombatModal({
     distance: null,
     targetArmor: null,
     targetMelee: null,
+    targetIsVehicle: null,
     lastUpdateTimestamp: 0,
     isDirty: false,
   };

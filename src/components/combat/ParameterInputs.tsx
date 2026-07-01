@@ -62,6 +62,10 @@ export function ParameterInputs({
     ? targetMemory.targetArmor
     : parameters.targetArmor;
 
+  const effectiveTargetIsVehicle = targetMemory?.isDirty && targetMemory?.targetIsVehicle !== null
+    ? !!targetMemory.targetIsVehicle
+    : !!parameters.targetIsVehicle;
+
   // Get unit stats for preview — combatantData takes priority (calculator mode)
   const unitStats = combatantData
     ? { range: combatantData.range || '', power: combatantData.power || '', melee: combatantData.melee, displayName: 'Боец' }
@@ -340,7 +344,48 @@ export function ParameterInputs({
         {/* Subtle scanline effect */}
         <div className="absolute inset-0 bg-gradient-to-r from-slate-500/5 via-transparent to-slate-500/5 opacity-30 pointer-events-none" />
 
-        <div className="text-[10px] md:text-xs opacity-50 uppercase font-bold mb-2 md:mb-3 tracking-wider relative text-center">Параметры атаки</div>
+        {rulesVersion === 'community_star_system' && actionType === 'shot' ? (
+          <div
+            role="group"
+            aria-label="Тип цели"
+            className="flex gap-1 p-1 rounded-lg bg-slate-800/60 border border-slate-700/60 mb-2 md:mb-3 relative"
+          >
+            <button
+              type="button"
+              aria-pressed={!effectiveTargetIsVehicle}
+              onClick={() => {
+                onChange({ targetIsVehicle: false });
+                onMemoryUpdate?.({ targetIsVehicle: false });
+              }}
+              className={cn(
+                'flex-1 min-h-[36px] px-3 rounded-md text-xs md:text-sm font-mono uppercase font-bold tracking-wide transition-all touch-manipulation',
+                !effectiveTargetIsVehicle
+                  ? 'bg-slate-600/70 text-slate-100 shadow'
+                  : 'text-slate-500 hover:text-slate-300'
+              )}
+            >
+              Пехота
+            </button>
+            <button
+              type="button"
+              aria-pressed={effectiveTargetIsVehicle}
+              onClick={() => {
+                onChange({ targetIsVehicle: true });
+                onMemoryUpdate?.({ targetIsVehicle: true });
+              }}
+              className={cn(
+                'flex-1 min-h-[36px] px-3 rounded-md text-xs md:text-sm font-mono uppercase font-bold tracking-wide transition-all touch-manipulation',
+                effectiveTargetIsVehicle
+                  ? 'bg-cyan-600/30 text-cyan-200 ring-1 ring-cyan-500/60'
+                  : 'text-slate-500 hover:text-slate-300'
+              )}
+            >
+              Техника
+            </button>
+          </div>
+        ) : (
+          <div className="text-[10px] md:text-xs opacity-50 uppercase font-bold mb-2 md:mb-3 tracking-wider relative text-center">Параметры атаки</div>
+        )}
 
         <div className="grid grid-cols-1 gap-2 md:gap-3">
           {/* Distance Input with Converter */}
@@ -359,9 +404,9 @@ export function ParameterInputs({
 
           {/* Target Armor Input */}
           {(actionType === 'shot' || actionType === 'grenade' || actionType === 'melee') && (
-            <div className="flex flex-col sm:flex-row sm:grid sm:grid-cols-[auto_1fr] sm:gap-2 sm:items-center gap-1.5">
-              <label className="text-[10px] md:text-xs opacity-50 uppercase font-bold whitespace-nowrap sm:min-w-[70px]">
-                Броня цели
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] md:text-xs opacity-50 uppercase font-bold">
+                {effectiveTargetIsVehicle ? 'макс зоны' : 'Броня цели'}
               </label>
               <NumberStepper
                 value={effectiveTargetArmor}
@@ -373,15 +418,20 @@ export function ParameterInputs({
                 max={99}
                 step={1}
                 size="sm"
-                className="flex-1 sm:justify-start"
+                className="flex-1"
               />
+              {effectiveTargetIsVehicle && rulesVersion === 'community_star_system' && actionType === 'shot' && (
+                <div className="text-[9px] md:text-[10px] font-mono text-cyan-400/70 leading-tight">
+                  Урон по зонам прочности: D6→1, D12→2, D20→3
+                </div>
+              )}
             </div>
           )}
 
           {/* Fortification Selector */}
           {(actionType === 'shot' || actionType === 'grenade') && (
-            <div className="flex flex-col sm:flex-row sm:grid sm:grid-cols-[auto_1fr] sm:gap-2 sm:items-start gap-1.5">
-              <label className="text-[10px] md:text-xs opacity-50 uppercase font-bold whitespace-nowrap sm:min-w-[70px] sm:pt-1.5">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] md:text-xs opacity-50 uppercase font-bold">
                 Укрытие
               </label>
               <FortificationSelector

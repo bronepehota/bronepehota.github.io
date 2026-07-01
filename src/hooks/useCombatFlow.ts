@@ -306,14 +306,14 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
           state.parameters.targetArmor,
           state.parameters.fortification,
           undefined,
-          state.unitType === 'machine'
+          state.parameters.targetIsVehicle === true
         );
         const damage2 = rules.calculateDamage(
           power,
           state.parameters.targetArmor,
           state.parameters.fortification,
           undefined,
-          state.unitType === 'machine'
+          state.parameters.targetIsVehicle === true
         );
 
         // Take the better damage result (more damage is better)
@@ -326,7 +326,7 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
           state.parameters.targetArmor,
           state.parameters.fortification,
           undefined,
-          state.unitType === 'machine'
+          state.parameters.targetIsVehicle === true
         );
       }
 
