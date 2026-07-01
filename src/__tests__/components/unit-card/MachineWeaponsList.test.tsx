@@ -15,6 +15,7 @@ describe('MachineWeaponsList', () => {
     fireRate: 2,
     totalShotsUsed: 0,
     currentAmmo: 10,
+    maxAmmo: 10,
     weaponAmmo: undefined,
     usePerWeaponAmmo: false,
     onWeaponAttack: jest.fn(),
@@ -216,7 +217,7 @@ describe('MachineWeaponsList', () => {
       };
       render(<MachineWeaponsList {...props} />);
 
-      const weaponCards = document.querySelectorAll('.bg-amber-950\\/20');
+      const weaponCards = document.querySelectorAll('.bg-amber-950\\/15');
       expect(weaponCards.length).toBeGreaterThan(0);
     });
   });
@@ -311,6 +312,70 @@ describe('MachineWeaponsList', () => {
       expect(screen.getByText('Melee Spike')).toBeInTheDocument();
       const infoButtons = screen.getAllByTitle('Информация об оружии');
       expect(infoButtons.length).toBe(3);
+    });
+  });
+
+  describe('Inline per-weapon ammo bars (community rules)', () => {
+    it('renders per-weapon ammo mini-bar when usePerWeaponAmmo is true', () => {
+      const props = {
+        ...defaultProps,
+        usePerWeaponAmmo: true,
+        weaponAmmo: [5, 3],
+        maxAmmo: 10
+      };
+      const { container } = render(<MachineWeaponsList {...props} />);
+
+      // Should render ammo text for each ranged weapon (Cannon 5/10, MG 3/10)
+      expect(container.textContent).toContain('5/10');
+      expect(container.textContent).toContain('3/10');
+    });
+
+    it('does not render per-weapon ammo mini-bar when usePerWeaponAmmo is false', () => {
+      const props = {
+        ...defaultProps,
+        usePerWeaponAmmo: false,
+        maxAmmo: 10
+      };
+      const { container } = render(<MachineWeaponsList {...props} />);
+
+      // No inline ammo text outside of weapon row itself
+      const ammoTexts = container.querySelectorAll('.text-blue-400');
+      // Only the per-weapon count spans would have text-blue-400 (info buttons use text-slate-500)
+      expect(ammoTexts.length).toBe(0);
+    });
+
+    it('uses weapon.ammo as max when available', () => {
+      const weaponsWithAmmo: Weapon[] = [
+        { name: 'Cannon', range: 'D12', power: '2D20', ammo: 8 },
+        { name: 'MG', range: 'D6', power: '1D12', ammo: 4 }
+      ];
+      const props = {
+        ...defaultProps,
+        weapons: weaponsWithAmmo,
+        weaponShots: { 0: 0, 1: 0 },
+        usePerWeaponAmmo: true,
+        weaponAmmo: [6, 2],
+        maxAmmo: 10
+      };
+      const { container } = render(<MachineWeaponsList {...props} />);
+
+      // Weapon ammo overrides maxAmmo fallback
+      expect(container.textContent).toContain('6/8');
+      expect(container.textContent).toContain('2/4');
+    });
+
+    it('falls back to maxAmmo when weapon has no ammo property', () => {
+      const props = {
+        ...defaultProps,
+        usePerWeaponAmmo: true,
+        weaponAmmo: [7, 3],
+        maxAmmo: 10
+      };
+      const { container } = render(<MachineWeaponsList {...props} />);
+
+      // No weapon.ammo → falls back to maxAmmo (10)
+      expect(container.textContent).toContain('7/10');
+      expect(container.textContent).toContain('3/10');
     });
   });
 

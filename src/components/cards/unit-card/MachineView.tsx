@@ -144,6 +144,7 @@ export function MachineView({
         fireRate={machine.fire_rate}
         totalShotsUsed={unit.machineShotsUsed || 0}
         currentAmmo={unit.currentAmmo || 0}
+        maxAmmo={machine.ammo_max}
         weaponAmmo={unit.weaponAmmo}
         usePerWeaponAmmo={usePerWeaponAmmo}
         onWeaponAttack={onWeaponAttack}
