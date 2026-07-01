@@ -33,14 +33,19 @@
 
 1. **Удалить** тест пилота из `executeShot` (блок `if (isMachine(state.unit) && damageResult.damage > 0) { … }`).
    Его никто не потребляет (`CombatResults` не отображает pilotDied/armorTestRoll оттуда) — чистое удаление.
-2. **Ручная кнопка «Тест пилота» остаётся триггером**, но становится **заметной после урона**:
+2. **Полноширинная alert-полоса «Тест пилота»** (заменяющая мелкий угловой череп):
    - `UnitCard`: `pilotTestUrgent` state (false) + `prevDurabilityRef` (текущая прочность).
    - `useEffect` на `unit.currentDurability` (только машины): при **снижении** → `setPilotTestUrgent(true)`.
      (mount/загрузка не триггерят — `prevDurabilityRef` инициализирован текущей; рост/ремонт не триггерит.)
-   - Проп `pilotTestUrgent` прокидывается → `MachineView` → `TacticalDashboard` → кнопка теста
-     **пульсирует/подсвечивается**, когда `pilotTestUrgent && pilotInfo?.alive`.
-   - `handlePilotSurvivalTest` (вызов по тапу) сбрасывает `setPilotTestUrgent(false)` + запускает
-     существующий флоу (D12 vs currentDurability → D6 vs pilotInfo.pilotArmor → гибель/выживание).
+   - Проп `pilotTestUrgent` → `MachineView` → `TacticalDashboard`: вместо углового Skull-радика —
+     **полноширинная полоса** под блоком прочности/кнопок:
+     - **idle** (нет урона, нет свежего результата): скрыта.
+     - **urgent** (`pilotTestUrgent && pilotInfo?.alive && !isPilotTestRunning`): amber, **пульс**,
+       «⚠ ТЕСТ ПИЛОТА · получен урон» — тап запускает тест.
+     - **running** (`isPilotTestRunning`): спиннер «ТЕСТ…».
+     - **результат** (`survivalTest` без urgent/running): зелёная «✓ ВЫЖИЛ» / красная «✗ ПОГИБ» (тап = повторить).
+   - `handlePilotSurvivalTest` (тап) сбрасывает `setPilotTestUrgent(false)` + запускает флоу
+     (D12 vs currentDurability → D6 vs pilotInfo.pilotArmor → гибель/выживание).
 3. **Гарантия «раз за выстрел»**: игрок применяет урон выстрела (любое число повреждений), затем
    тапает кнопку **один раз** → один тест. 3 повреждения = 1 тап = 1 тест. Нет авто-мульти-срабатывания.
 
