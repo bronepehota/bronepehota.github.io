@@ -344,7 +344,48 @@ export function ParameterInputs({
         {/* Subtle scanline effect */}
         <div className="absolute inset-0 bg-gradient-to-r from-slate-500/5 via-transparent to-slate-500/5 opacity-30 pointer-events-none" />
 
-        <div className="text-[10px] md:text-xs opacity-50 uppercase font-bold mb-2 md:mb-3 tracking-wider relative text-center">Параметры атаки</div>
+        {rulesVersion === 'community_star_system' && actionType === 'shot' ? (
+          <div
+            role="group"
+            aria-label="Тип цели"
+            className="flex gap-1 p-1 rounded-lg bg-slate-800/60 border border-slate-700/60 mb-2 md:mb-3 relative"
+          >
+            <button
+              type="button"
+              aria-pressed={!effectiveTargetIsVehicle}
+              onClick={() => {
+                onChange({ targetIsVehicle: false });
+                onMemoryUpdate?.({ targetIsVehicle: false });
+              }}
+              className={cn(
+                'flex-1 min-h-[36px] px-3 rounded-md text-xs md:text-sm font-mono uppercase font-bold tracking-wide transition-all touch-manipulation',
+                !effectiveTargetIsVehicle
+                  ? 'bg-slate-600/70 text-slate-100 shadow'
+                  : 'text-slate-500 hover:text-slate-300'
+              )}
+            >
+              Пехота
+            </button>
+            <button
+              type="button"
+              aria-pressed={effectiveTargetIsVehicle}
+              onClick={() => {
+                onChange({ targetIsVehicle: true });
+                onMemoryUpdate?.({ targetIsVehicle: true });
+              }}
+              className={cn(
+                'flex-1 min-h-[36px] px-3 rounded-md text-xs md:text-sm font-mono uppercase font-bold tracking-wide transition-all touch-manipulation',
+                effectiveTargetIsVehicle
+                  ? 'bg-cyan-600/30 text-cyan-200 ring-1 ring-cyan-500/60'
+                  : 'text-slate-500 hover:text-slate-300'
+              )}
+            >
+              Техника
+            </button>
+          </div>
+        ) : (
+          <div className="text-[10px] md:text-xs opacity-50 uppercase font-bold mb-2 md:mb-3 tracking-wider relative text-center">Параметры атаки</div>
+        )}
 
         <div className="grid grid-cols-1 gap-2 md:gap-3">
           {/* Distance Input with Converter */}
@@ -364,51 +405,6 @@ export function ParameterInputs({
           {/* Target Armor Input */}
           {(actionType === 'shot' || actionType === 'grenade' || actionType === 'melee') && (
             <div className="flex flex-col gap-1.5">
-              {/* Target-type segmented control (community rules, shot only) — #162 */}
-              {rulesVersion === 'community_star_system' && actionType === 'shot' && (
-                <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] md:text-xs opacity-50 uppercase font-bold">Тип цели</label>
-                <div
-                  role="group"
-                  aria-label="Тип цели"
-                  className="flex gap-0.5 p-0.5 rounded-md bg-slate-800/50 border border-slate-700/50"
-                >
-                  <button
-                    type="button"
-                    aria-pressed={!effectiveTargetIsVehicle}
-                    onClick={() => {
-                      onChange({ targetIsVehicle: false });
-                      onMemoryUpdate?.({ targetIsVehicle: false });
-                    }}
-                    className={cn(
-                      'flex-1 min-h-[32px] px-2 rounded text-[10px] md:text-xs font-mono uppercase tracking-wide transition-all touch-manipulation',
-                      !effectiveTargetIsVehicle
-                        ? 'bg-slate-600/70 text-slate-100'
-                        : 'text-slate-500 hover:text-slate-300'
-                    )}
-                  >
-                    Пехота
-                  </button>
-                  <button
-                    type="button"
-                    aria-pressed={effectiveTargetIsVehicle}
-                    onClick={() => {
-                      onChange({ targetIsVehicle: true });
-                      onMemoryUpdate?.({ targetIsVehicle: true });
-                    }}
-                    className={cn(
-                      'flex-1 min-h-[32px] px-2 rounded text-[10px] md:text-xs font-mono uppercase tracking-wide transition-all touch-manipulation',
-                      effectiveTargetIsVehicle
-                        ? 'bg-cyan-600/30 text-cyan-200 ring-1 ring-cyan-500/50'
-                        : 'text-slate-500 hover:text-slate-300'
-                    )}
-                  >
-                    Техника
-                  </button>
-                </div>
-                </div>
-              )}
-
               <label className="text-[10px] md:text-xs opacity-50 uppercase font-bold">
                 {effectiveTargetIsVehicle ? 'макс зоны' : 'Броня цели'}
               </label>
