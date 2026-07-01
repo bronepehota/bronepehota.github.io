@@ -22,6 +22,7 @@ interface TacticalDashboardProps {
   onAssignPilot: () => void;
   onSurvivalTest: () => void;
   isPilotTestRunning: boolean;
+  pilotTestUrgent: boolean;
   onImageClick: () => void;
   distanceInputUnit: 'steps' | 'cm';
   stepToCmFactor: number;
@@ -52,6 +53,7 @@ export function TacticalDashboard({
   onAssignPilot,
   onSurvivalTest,
   isPilotTestRunning,
+  pilotTestUrgent, // eslint-disable-line @typescript-eslint/no-unused-vars -- consumed in Task #2
   onImageClick,
   distanceInputUnit,
   stepToCmFactor

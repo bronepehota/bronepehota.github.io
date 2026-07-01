@@ -331,40 +331,6 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
       }
 
       finalDisplay.power = damageResult.rolls;
-
-      // Armor Test and Pilot Survival Test for machines with pilots
-      if (isMachine(state.unit) && damageResult.damage > 0) {
-        const machine = state.unit;
-        if (machine.pilotInfo && machine.pilotInfo.alive) {
-          // Machine armor = current durability (where marker is on damage scale)
-          const currentDurability = machine.currentDurability || machine.data.durability_max;
-          const machineArmor = currentDurability;
-
-          // ARMOR TEST (Тест брони)
-          const armorTestRoll = rollDie(12);
-
-          // Animate armor test roll
-          await animateDiceRoll();
-
-          // Armor test: roll > machine armor means armor is penetrated
-          if (armorTestRoll > machineArmor) {
-            // Armor failed - run PILOT SURVIVAL TEST
-            const survivalTestRoll = rollDie(6);
-            const pilotArmor = machine.pilotInfo.pilotArmor;
-
-            // Critical hit: roll of 6 always kills pilot
-            // Otherwise, pilot dies if roll > pilot armor
-            const pilotDied = survivalTestRoll === 6 || survivalTestRoll > pilotArmor;
-
-            damageResult.pilotDied = pilotDied;
-            damageResult.armorTestRoll = armorTestRoll;
-            damageResult.survivalTestRoll = survivalTestRoll;
-          } else {
-            // Armor held - pilot survives
-            damageResult.armorTestRoll = armorTestRoll;
-          }
-        }
-      }
     }
 
     const result: CombatResult = {
