@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { GitHubPagesImage as Image } from '../GitHubPagesImage';
-import { ArmyUnit, Squad, Machine, Weapon, PanicTestResult, PilotInfo, Army } from '@/lib/types';
+import { ArmyUnit, Squad, Machine, Weapon, PanicTestResult, PilotInfo, Army, isMachine } from '@/lib/types';
 import { Crosshair, X } from 'lucide-react';
 import { formatUnitNumber } from '@/lib/unit-utils';
 import { cn } from '@/lib/utils';
@@ -86,6 +86,18 @@ export default function UnitCard({
   const combatController = useCombatFlowController();
   const pilotTestFlow = usePilotTestFlow();
   const lastProcessedResultRef = useRef<number | null>(null);
+
+  // #163: machine took damage → pilot test is urgent (alert bar). Reset on test run.
+  const prevDurabilityRef = useRef<number>(unit.currentDurability ?? (isMachine(unit) ? (unit.data as Machine).durability_max : 0));
+  const [pilotTestUrgent, setPilotTestUrgent] = useState(false);
+  useEffect(() => {
+    if (!isMachine(unit)) return;
+    const current = unit.currentDurability ?? 0;
+    if (current < prevDurabilityRef.current) {
+      setPilotTestUrgent(true);
+    }
+    prevDurabilityRef.current = current;
+  }, [unit.currentDurability, unit]);
 
   // Machine stats hook (only for machines)
   // Machine stats hook (only for machines) - called unconditionally but only used for machines
@@ -237,6 +249,7 @@ export default function UnitCard({
   // Handle pilot survival test - start the modal flow
   const handlePilotSurvivalTest = () => {
     if (!unit.pilotInfo || !unit.pilotInfo.alive) return;
+    setPilotTestUrgent(false);
 
     const machineArmor = unit.currentDurability || (unit.data as Machine).durability_max;
     const pilotArmor = unit.pilotInfo.pilotArmor || 0;
@@ -700,6 +713,7 @@ export default function UnitCard({
             machineName={(unit.data as Machine).name}
             isDestroyed={unit.currentDurability === 0}
             onShowImage={() => setShowImage(true)}
+            pilotTestUrgent={pilotTestUrgent}
           />
         )}
       </div>

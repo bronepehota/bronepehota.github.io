@@ -1,6 +1,6 @@
 'use client';
 
-import { Shield, Footprints, Flame, Wrench, Skull, Plane } from 'lucide-react';
+import { Shield, Footprints, Flame, Wrench, Skull, Plane, AlertTriangle, Check, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DurabilityZone, PilotInfo, FactionID } from '@/lib/types';
 import { getFactionColors } from '@/lib/faction-colors';
@@ -22,6 +22,7 @@ interface TacticalDashboardProps {
   onAssignPilot: () => void;
   onSurvivalTest: () => void;
   isPilotTestRunning: boolean;
+  pilotTestUrgent: boolean;
   onImageClick: () => void;
   distanceInputUnit: 'steps' | 'cm';
   stepToCmFactor: number;
@@ -52,6 +53,7 @@ export function TacticalDashboard({
   onAssignPilot,
   onSurvivalTest,
   isPilotTestRunning,
+  pilotTestUrgent,
   onImageClick,
   distanceInputUnit,
   stepToCmFactor
@@ -246,31 +248,6 @@ export function TacticalDashboard({
               )}
             </button>
 
-            {/* Survival Test Button - Overlay - compact on mobile */}
-            {pilotInfo && pilotInfo.alive && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onSurvivalTest();
-                }}
-                disabled={isPilotTestRunning}
-                data-testid="pilot-survival-test-button"
-                className={cn(
-                  "absolute -bottom-1 -right-1 sm:-bottom-1.5 sm:-right-1.5 w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all border-2 min-w-[28px] min-h-[28px] sm:min-w-[36px] sm:min-h-[36px] z-20",
-                  isPilotTestRunning && "animate-pulse",
-                  survivalTest
-                    ? survivalTest.survived
-                      ? "bg-green-600 border-green-900 text-white"
-                      : "bg-red-600 border-red-900 text-white"
-                    : isPilotTestRunning
-                    ? "bg-purple-600 border-purple-900 text-white animate-spin"
-                    : "bg-purple-900 border-purple-950 text-purple-300 hover:bg-purple-800 hover:scale-110"
-                )}
-                title={survivalTest ? `Повторить тест (последний: ${survivalTest.survived ? 'ВЫЖИЛ' : 'ПОГИБ'})` : "Тест выживаемости пилота"}
-              >
-                <Skull className="w-3 h-3 sm:w-4 sm:h-4" />
-              </button>
-            )}
           </div>
 
           {/* Pilot label - hidden on very small screens */}
@@ -281,6 +258,38 @@ export function TacticalDashboard({
           </div>
         </div>
       </div>
+
+      {/* Pilot test alert bar — #163: prominent after damage (full-width) */}
+      {pilotInfo && pilotInfo.alive && (pilotTestUrgent || isPilotTestRunning || survivalTest) && (
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onSurvivalTest(); }}
+          disabled={isPilotTestRunning}
+          data-testid="pilot-survival-test-button"
+          className={cn(
+            "mt-1.5 w-full flex items-center justify-center gap-1.5 py-1.5 sm:py-2 rounded-sm border text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wider transition-all touch-manipulation",
+            isPilotTestRunning
+              ? "bg-purple-950/50 border-purple-700/50 text-purple-300"
+              : pilotTestUrgent
+                ? "bg-amber-950/50 border-amber-500/60 text-amber-200 animate-pulse shadow-[0_0_12px_-3px_rgba(245,158,11,0.6)]"
+                : survivalTest
+                  ? survivalTest.survived
+                    ? "bg-green-950/40 border-green-700/50 text-green-300"
+                    : "bg-red-950/40 border-red-700/50 text-red-300"
+                  : "bg-slate-800/40 border-slate-700/50 text-slate-400"
+          )}
+        >
+          {isPilotTestRunning ? (
+            <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Тест пилота…</>
+          ) : pilotTestUrgent ? (
+            <><AlertTriangle className="w-3.5 h-3.5" /> Тест пилота · получен урон</>
+          ) : survivalTest ? (
+            survivalTest.survived
+              ? <><Check className="w-3.5 h-3.5" /> Пилот выжил</>
+              : <><Skull className="w-3.5 h-3.5" /> Пилот погиб</>
+          ) : null}
+        </button>
+      )}
 
       {/* Bottom accent line */}
       <div className="absolute bottom-0 left-0 w-full h-px" style={{

@@ -18,6 +18,7 @@ export interface MachineViewProps {
   pilotSurvivalTest: { roll: number; survived: boolean; testedAt: number } | null;
   pilotImage: string | null;
   isPilotTestRunning: boolean;
+  pilotTestUrgent: boolean;
   usePerWeaponAmmo: boolean;
   distanceInputUnit: 'steps' | 'cm';
   stepToCmFactor: number;
@@ -40,6 +41,7 @@ export function MachineView({
   pilotSurvivalTest,
   pilotImage,
   isPilotTestRunning,
+  pilotTestUrgent,
   usePerWeaponAmmo,
   distanceInputUnit,
   stepToCmFactor,
@@ -82,6 +84,7 @@ export function MachineView({
           onAssignPilot={onPilotAssign}
           onSurvivalTest={onPilotSurvivalTest}
           isPilotTestRunning={isPilotTestRunning}
+          pilotTestUrgent={pilotTestUrgent}
           onImageClick={onShowImage || (() => {})}
           distanceInputUnit={distanceInputUnit}
           stepToCmFactor={stepToCmFactor}

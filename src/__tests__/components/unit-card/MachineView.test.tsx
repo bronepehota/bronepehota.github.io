@@ -54,6 +54,7 @@ describe('MachineView', () => {
     pilotSurvivalTest: null,
     pilotImage: null,
     isPilotTestRunning: false,
+    pilotTestUrgent: false,
     rulesVersion: 'tehnolog' as const,
     usePerWeaponAmmo: false,
     distanceInputUnit: 'steps' as const,
