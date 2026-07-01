@@ -65,6 +65,8 @@ npm run test:e2e            # All E2E tests pass
 
 `npm run validate` runs type-check + lint + unit tests but does NOT run E2E — run E2E separately.
 
+**LSP diagnostics can be stale**: type errors shown mid-edit often resolve in the final state. Trust `npm run type-check` (exit code) over LSP diagnostics.
+
 ### E2E test conventions
 
 - **Selector priority**: `getByTestId()` > `getByRole()` > `getByText()` > CSS selectors
@@ -79,6 +81,7 @@ npm run test:e2e            # All E2E tests pass
 - **Headed mode**: `npm run test:e2e:headed` (visible browser)
 - **Debug mode**: `npm run test:e2e:debug` (Playwright Inspector)
 - **Shared setup helpers**: `e2e/helpers/setup.ts` — use `setupToArmyBuilder`, `setupGameSessionWithSquad`, `setupToPreparation` etc. to reduce setup duplication
+- **`setupGameSessionWithSquad` clears localStorage**: its `addInitScript` calls `localStorage.clear()`. To persist custom keys (rules, flags), register your `addInitScript` AFTER calling the helper (execution order = registration order), then `page.reload()`.
 
 ### Existing E2E coverage
 
@@ -235,6 +238,7 @@ Dice notation parsing: `D6`, `D12+2`, `2D12`, `ББ` (melee)
 - `calculateMelee(attackerMelee, defenderMelee)` → combat resolution
 - `multiplyRange(rangeStr, multiplier)` → multiply dice range (e.g., D6 → D12, D6+2 → D12+4)
 - **Negative bonuses supported**: `parseRoll`/`multiplyRange`/`addBonusToRoll` (all in `src/lib/game-logic.ts`) match an optional `+N`/`-N` (e.g. `D6-1`, `2D6-1`). `2D6-1` parses to bonus -1; such values are valid in unit `range`/`power`.
+- **Combat target is manual input**: the app is single-army (one player's units per session). `useCombatFlow` is attacker-focused — the target is manually-entered numbers (`targetArmor`, `distance`), NOT a tracked enemy unit. Target-side mechanics (zone damage, pilot test) read from manual input or the player's own machine state (when they damage THEIR machine).
 
 ### Rules System (`src/lib/`)
 
@@ -252,6 +256,8 @@ Adding a new rules version:
 3. Register in `rules-registry.ts`
 
 **Note**: Rules versions and army list sources are independent - any rules version can be used with any source.
+
+**Default rules version**: `getDefaultRulesVersion()` returns `'tehnolog'`. Community-only features (panic auto-trigger, vehicle zone damage, height bonus) require `rulesVersion === 'community_star_system'`.
 
 ### Component Structure
 
