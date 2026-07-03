@@ -1,4 +1,4 @@
-import { Target, Sword, Flame } from 'lucide-react';
+import { Target, Sword, Flame, Bomb } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Weapon } from '@/lib/types';
 
@@ -126,14 +126,14 @@ export function MachineWeaponsList({
                 const weaponAmmoCount = weaponAmmo?.[weaponIdx] ?? weapon.ammo ?? maxAmmo;
                 const weaponMaxAmmo = weapon.ammo ?? maxAmmo;
                 return (
-                  <div className="flex items-center gap-1 px-1 mt-1">
-                    <span className="text-[8px] text-slate-500 lowercase truncate">{weapon.name}</span>
+                  <div className="flex items-center gap-1 px-1 mt-1" title="Боезапас орудия">
+                    <Bomb className="w-2.5 h-2.5 text-blue-400/70 shrink-0" aria-hidden="true" />
                     <div className="flex-1 flex gap-px">
                       {Array.from({ length: weaponMaxAmmo }).map((_, i) => (
                         <div key={i} className={cn('h-1 flex-1 rounded-sm', i < weaponAmmoCount ? 'bg-blue-500' : 'bg-slate-800')} />
                       ))}
                     </div>
-                    <span className="text-[9px] text-blue-400">{weaponAmmoCount}/{weaponMaxAmmo}</span>
+                    <span className="text-[9px] text-blue-400 font-mono">{weaponAmmoCount}/{weaponMaxAmmo}</span>
                   </div>
                 );
               })()
