@@ -3,7 +3,6 @@
 import { useEffect } from 'react';
 import { Check, Shield, Skull, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useBottomSheet } from '@/hooks/useBottomSheet';
 
 export type PilotTestPhase = 'ARMOR_ROLL' | 'SURVIVAL_ROLL' | 'RESULTS';
 
@@ -31,12 +30,6 @@ export function PilotTestModal({
   onClose,
   onApply,
 }: PilotTestModalProps) {
-  const { sheetRef, touchHandlers } = useBottomSheet({
-    onClose,
-    closeThreshold: 100,
-    isEnabled: true,
-  });
-
   // Handle escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -92,17 +85,14 @@ export function PilotTestModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-4">
+    <div
+      className="fixed inset-0 z-[250] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4"
+      onClick={onClose}
+    >
       <div
-        ref={sheetRef}
-        {...touchHandlers}
-        className="w-full md:w-[500px] bg-slate-900 rounded-t-3xl md:rounded-3xl border-t-2 md:border-2 border-slate-700 shadow-2xl max-h-[90vh] md:max-h-[85vh] overflow-hidden flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-md bg-slate-900 rounded-2xl border border-slate-700 shadow-2xl max-h-[85vh] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-150"
       >
-        {/* Drag Handle */}
-        <div className="flex justify-center pt-3 pb-2 shrink-0">
-          <div className="w-12 h-1.5 bg-slate-700 rounded-full" />
-        </div>
-
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800 shrink-0">
           <h2 className={cn("text-sm font-black uppercase tracking-wider", getPhaseColor())}>
