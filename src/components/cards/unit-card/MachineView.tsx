@@ -18,6 +18,7 @@ export interface MachineViewProps {
   onPilotSurvivalTest: () => void;
   pilotSurvivalTest: { roll: number; survived: boolean; testedAt: number } | null;
   pilotImage: string | null;
+  pilotLabel?: string;
   isPilotTestRunning: boolean;
   pilotTestUrgent: boolean;
   usePerWeaponAmmo: boolean;
@@ -41,6 +42,7 @@ export function MachineView({
   onPilotSurvivalTest,
   pilotSurvivalTest,
   pilotImage,
+  pilotLabel,
   isPilotTestRunning,
   pilotTestUrgent,
   usePerWeaponAmmo,
@@ -77,6 +79,7 @@ export function MachineView({
           speed={speed}
           zone={zone}
           pilotInfo={pilotInfo}
+          pilotLabel={pilotLabel}
           survivalTest={pilotSurvivalTest}
           onSurvivalTest={onPilotSurvivalTest}
           isPilotTestRunning={isPilotTestRunning}
@@ -151,6 +154,7 @@ export function MachineView({
           isOpen={pilotSheetOpen}
           onClose={() => setPilotSheetOpen(false)}
           pilotInfo={pilotInfo}
+          pilotLabel={pilotLabel}
           pilotImage={pilotImage}
           survivalTest={pilotSurvivalTest}
           isTestRunning={isPilotTestRunning}

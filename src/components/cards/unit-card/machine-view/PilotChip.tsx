@@ -7,10 +7,12 @@ import { PilotInfo } from '@/lib/types';
 interface PilotChipProps {
   pilotInfo: PilotInfo | null;
   pilotTestUrgent: boolean;
+  /** Resolved pilot label, e.g. "ЛИНЕ #3·1" (squad short name + squad № + soldier №). */
+  pilotLabel?: string;
   onOpenPilot: () => void;
 }
 
-export function PilotChip({ pilotInfo, pilotTestUrgent, onOpenPilot }: PilotChipProps) {
+export function PilotChip({ pilotInfo, pilotTestUrgent, pilotLabel, onOpenPilot }: PilotChipProps) {
   const hasPilot = !!pilotInfo;
   const alive = !!pilotInfo?.alive;
   const urgent = hasPilot && alive && pilotTestUrgent;
@@ -22,8 +24,8 @@ export function PilotChip({ pilotInfo, pilotTestUrgent, onOpenPilot }: PilotChip
       data-testid={hasPilot ? undefined : 'assign-pilot-button'}
       aria-label={
         !hasPilot ? 'Назначить пилота' :
-        alive ? (urgent ? 'Тест пилота: получен урон' : 'Открыть карточку пилота') :
-        'Пилот погиб'
+        alive ? (urgent ? `Тест пилота: получен урон${pilotLabel ? ` (${pilotLabel})` : ''}` : `Открыть карточку пилота${pilotLabel ? `: ${pilotLabel}` : ''}`) :
+        `Пилот погиб${pilotLabel ? `: ${pilotLabel}` : ''}`
       }
       className={cn(
         'w-full min-h-[44px] rounded-lg px-2.5 py-1.5 flex items-center justify-between gap-2 text-xs font-semibold transition-colors',
@@ -40,7 +42,7 @@ export function PilotChip({ pilotInfo, pilotTestUrgent, onOpenPilot }: PilotChip
       <span className="flex items-center gap-1.5 truncate">
         {urgent ? <AlertTriangle className="w-3.5 h-3.5 shrink-0" /> : <Plane className="w-3.5 h-3.5 shrink-0" />}
         <span className="truncate">
-          {!hasPilot ? 'Пилота нет' : urgent ? 'Пилот' : 'Пилот назначен'}
+          {!hasPilot ? 'Пилота нет' : (pilotLabel || 'Пилот назначен')}
         </span>
       </span>
       <span className="flex items-center gap-1.5 shrink-0">

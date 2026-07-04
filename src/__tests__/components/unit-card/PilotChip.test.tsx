@@ -19,6 +19,17 @@ describe('PilotChip', () => {
     expect(screen.getByText(/жив/i)).toBeInTheDocument();
   });
 
+  it('shows pilotLabel (name + number) instead of "Пилот назначен" when provided', () => {
+    render(<PilotChip pilotInfo={alivePilot} pilotLabel="ЛИНЕ #3·1" pilotTestUrgent={false} onOpenPilot={jest.fn()} />);
+    expect(screen.getByText('ЛИНЕ #3·1')).toBeInTheDocument();
+    expect(screen.queryByText('Пилот назначен')).not.toBeInTheDocument();
+  });
+
+  it('falls back to "Пилот назначен" when pilotLabel is not provided', () => {
+    render(<PilotChip pilotInfo={alivePilot} pilotTestUrgent={false} onOpenPilot={jest.fn()} />);
+    expect(screen.getByText('Пилот назначен')).toBeInTheDocument();
+  });
+
   it('dead pilot: shows ПОГИБ', () => {
     const dead = { ...alivePilot, alive: false };
     render(<PilotChip pilotInfo={dead} pilotTestUrgent={false} onOpenPilot={jest.fn()} />);

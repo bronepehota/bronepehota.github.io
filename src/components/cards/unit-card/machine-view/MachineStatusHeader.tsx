@@ -17,6 +17,7 @@ interface MachineStatusHeaderProps {
   speed: number;
   zone: DurabilityZone;
   pilotInfo: PilotInfo | null;
+  pilotLabel?: string;
   survivalTest: { roll: number; survived: boolean; testedAt: number } | null;
   onSurvivalTest: () => void;
   isPilotTestRunning: boolean;
@@ -46,6 +47,7 @@ export function MachineStatusHeader({
   speed,
   zone,
   pilotInfo,
+  pilotLabel,
   survivalTest,
   onSurvivalTest,
   isPilotTestRunning,
@@ -101,7 +103,7 @@ export function MachineStatusHeader({
             </div>
           </div>
           <div className="col-span-2">
-            <PilotChip pilotInfo={pilotInfo} pilotTestUrgent={pilotTestUrgent} onOpenPilot={onOpenPilot} />
+            <PilotChip pilotInfo={pilotInfo} pilotLabel={pilotLabel} pilotTestUrgent={pilotTestUrgent} onOpenPilot={onOpenPilot} />
           </div>
         </div>
       </div>

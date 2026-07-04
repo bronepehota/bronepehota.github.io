@@ -12,6 +12,7 @@ interface PilotSheetProps {
   onClose: () => void;
   pilotInfo: PilotInfo;
   pilotImage: string | null;
+  pilotLabel?: string;
   survivalTest: { roll: number; survived: boolean; testedAt: number } | null;
   isTestRunning: boolean;
   onSurvivalTest: () => void;
@@ -19,7 +20,7 @@ interface PilotSheetProps {
 }
 
 export function PilotSheet({
-  isOpen, onClose, pilotInfo, pilotImage, survivalTest, isTestRunning, onSurvivalTest, onAssignPilot,
+  isOpen, onClose, pilotInfo, pilotImage, pilotLabel, survivalTest, isTestRunning, onSurvivalTest, onAssignPilot,
 }: PilotSheetProps) {
   const { sheetRef, touchHandlers } = useBottomSheet({ onClose, isEnabled: isOpen });
 
@@ -63,7 +64,7 @@ export function PilotSheet({
             />
           </div>
           <div className="min-w-0">
-            <div className="text-sm font-semibold text-slate-100">Пилот</div>
+            <div className="text-sm font-semibold text-slate-100">{pilotLabel || 'Пилот'}</div>
             <div className={cn(
               'text-xs mt-0.5 inline-block px-2 py-0.5 rounded',
               alive ? 'bg-emerald-900/50 text-emerald-300' : 'bg-red-900/50 text-red-300'
