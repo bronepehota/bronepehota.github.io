@@ -10,8 +10,17 @@ import {
   CombatResult,
   CombatConfig,
   GrenadeBlastResult,
+  MeleeDefenderType,
 } from '@/lib/combat-types';
-import { rollDie, multiplyRange, addBonusToRoll, rollGrenadeDistance } from '@/lib/game-logic';
+import {
+  rollDie,
+  multiplyRange,
+  addBonusToRoll,
+  rollGrenadeDistance,
+  machineMeleeAttackerStrength,
+  resolveMachineMeleeOutcome,
+  calculateRam,
+} from '@/lib/game-logic';
 import type { CombatantData } from '@/lib/combatant-data';
 import { isSquad, isMachine } from '@/lib/types';
 import { rulesRegistry, getDefaultRulesVersion, isValidRulesVersion } from '@/lib/rules-registry';
@@ -472,8 +481,18 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
 
     // Get attacker melee stat
     let attackerMelee = 0;
+    let isMachineAttacker = false;
     if (state.combatantData) {
       attackerMelee = state.combatantData.melee;
+    } else if (isMachine(state.unit)) {
+      isMachineAttacker = true;
+      const machine = state.unit.data as import('@/lib/types').Machine;
+      const durability = state.unit.currentDurability || 0;
+      const sumBB = machine.weapons
+        .filter(w => w.range === 'ББ')
+        .map(w => parseInt(String(w.power), 10) || 0)
+        .reduce((s, b) => s + b, 0);
+      attackerMelee = machineMeleeAttackerStrength(durability, sumBB);
     } else if (isSquad(state.unit) && state.soldierIndex !== null) {
       attackerMelee = state.unit.data.soldiers[state.soldierIndex].melee;
     }
@@ -515,11 +534,37 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
       meleeResult = rules.calculateMelee(attackerMelee, state.parameters.targetArmor);
     }
 
+    // Machine melee: resolve outcome vs a typed defender (Таблица 7)
+    let meleeOutcome: { outcome: 'repelled' | 'destroyed' | 'damage'; damage: number } | undefined;
+    if (isMachineAttacker) {
+      const targetType: MeleeDefenderType = state.parameters.targetType || 'infantry';
+      const armor = state.parameters.targetArmor;
+      if (targetType === 'artillery') {
+        // Artillery/no-pilot: defense = armor only (no D6). Attacker still rolled above.
+        const defenderTotal = armor;
+        const o = resolveMachineMeleeOutcome(meleeResult.attackerTotal, defenderTotal, targetType);
+        meleeOutcome = { outcome: o.outcome, damage: o.damage };
+      } else {
+        // infantry / machine defender: existing meleeResult already rolled D6 for defender.
+        // For a machine defender, add its ΣББ unless surprise (rear) attack.
+        let defenderTotal = meleeResult.defenderTotal;
+        if (targetType === 'machine') {
+          const defBB = state.parameters.defenderMeleeBonus || 0;
+          defenderTotal = meleeResult.defenderRoll + armor + (state.parameters.isSurpriseAttack ? 0 : defBB);
+        }
+        const o = resolveMachineMeleeOutcome(meleeResult.attackerTotal, defenderTotal, targetType);
+        meleeOutcome = { outcome: o.outcome, damage: o.damage };
+        // Patch defenderTotal on the result so CombatResults shows the right number.
+        (meleeResult as any).defenderTotal = defenderTotal;
+      }
+    }
+
     const result: CombatResult = {
       actionType: 'melee',
       unitType: state.unitType,
       parameters: { ...state.parameters },
       meleeResult,
+      meleeOutcome,
       timestamp: Date.now(),
       unitName: state.combatantData ? 'Калькулятор' : state.unit.data.name,
       unitId: state.combatantData ? 'calculator' : state.unit.instanceId,
@@ -535,6 +580,38 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
   }, [state, rulesVersion, animateDiceRoll]);
 
   /**
+   * Execute ram (Таран) — community Star System only.
+   * Roll D6 per rammed infantryman: 1-4 killed, 5-6 survived.
+   */
+  const executeRam = useCallback(async (): Promise<CombatResult> => {
+    if (!state.unit || state.actionType !== 'ram') {
+      throw new Error('Cannot execute ram: invalid state');
+    }
+    dispatch({ type: 'EXECUTE_ROLL' });
+    await animateDiceRoll();
+
+    const count = Math.max(1, state.parameters.ramInfantryCount || 1);
+    const ramInfantryResults = calculateRam(count);
+
+    const result: CombatResult = {
+      actionType: 'ram',
+      unitType: state.unitType,
+      parameters: { ...state.parameters },
+      timestamp: Date.now(),
+      unitName: state.combatantData ? 'Калькулятор' : state.unit.data.name,
+      unitId: state.combatantData ? 'calculator' : state.unit.instanceId,
+      ramInfantryResults,
+    };
+
+    dispatch({
+      type: 'ROLL_COMPLETE',
+      result,
+      diceDisplay: { hit: ramInfantryResults[0]?.roll },
+    });
+    return result;
+  }, [state, animateDiceRoll]);
+
+  /**
    * Execute the current action based on actionType
    */
   const executeAction = useCallback(async () => {
@@ -545,10 +622,12 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
         return await executeGrenade();
       case 'melee':
         return await executeMelee();
+      case 'ram':
+        return await executeRam();
       default:
         throw new Error(`Unknown action type: ${state.actionType}`);
     }
-  }, [state.actionType, executeShot, executeGrenade, executeMelee]);
+  }, [state.actionType, executeShot, executeGrenade, executeMelee, executeRam]);
 
   /**
    * Apply result to unit

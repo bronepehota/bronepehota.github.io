@@ -229,3 +229,56 @@ describe('useCombatFlow — combat outcomes', () => {
     jest.restoreAllMocks();
   });
 });
+
+// #125: machine melee + ram wiring (shallow — deep execution is covered by Task 1
+// pure-logic tests + Task 6 E2E, matching the existing file's style).
+describe('useCombatFlow — machine melee + ram wiring (#125)', () => {
+  const makeMachineUnit = (): ArmyUnit => ({
+    instanceId: 'm1',
+    type: 'machine',
+    instanceNumber: 1,
+    data: {
+      id: 'demolisher',
+      name: 'Demolisher',
+      faction: 'polaris',
+      cost: 100,
+      rank: 2,
+      fire_rate: 2,
+      ammo_max: 5,
+      durability_max: 16,
+      image: '',
+      speed_sectors: [],
+      weapons: [{ name: 'Claw', range: 'ББ', power: '2' }],
+    },
+    currentDurability: 10,
+  } as any);
+
+  it('starts ram combat with actionType=ram and phase=PARAMETERS (#125)', () => {
+    const { result } = renderHook(() => useCombatFlow());
+    act(() => {
+      result.current.startCombat(makeMachineUnit(), undefined, undefined, 'ram');
+    });
+    expect(result.current.state.actionType).toBe('ram');
+    expect(result.current.state.phase).toBe('PARAMETERS');
+    expect(result.current.isOpen).toBe(true);
+  });
+
+  it('starts machine melee combat with actionType=melee (#125)', () => {
+    const { result } = renderHook(() => useCombatFlow());
+    act(() => {
+      result.current.startCombat(makeMachineUnit(), undefined, undefined, 'melee');
+    });
+    expect(result.current.state.actionType).toBe('melee');
+    expect(result.current.state.phase).toBe('PARAMETERS');
+  });
+
+  it('accepts ramInfantryCount / targetType parameters (#125)', () => {
+    const { result } = renderHook(() => useCombatFlow());
+    act(() => {
+      result.current.setParameters({ ramInfantryCount: 4, targetType: 'machine', defenderMeleeBonus: 3 });
+    });
+    expect(result.current.state.parameters.ramInfantryCount).toBe(4);
+    expect(result.current.state.parameters.targetType).toBe('machine');
+    expect(result.current.state.parameters.defenderMeleeBonus).toBe(3);
+  });
+});
