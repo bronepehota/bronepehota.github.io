@@ -2,16 +2,6 @@ import { Bomb, Target, Plus, Minus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Weapon } from '@/lib/types';
 
-// Helper to check if weapon is non-ranged (melee/special) - same logic as MachineWeaponsList
-const isNonRangedWeapon = (weapon: Weapon) => {
-  // Melee range (ББ)
-  if (weapon.range === 'ББ') return true;
-  // Power is a simple number (not dice notation like "2D6")
-  const powerStr = String(weapon.power);
-  if (/^\d+$/.test(powerStr)) return true;
-  return false;
-};
-
 interface MachineAmmoPanelProps {
   currentAmmo: number;
   maxAmmo: number;
@@ -34,15 +24,9 @@ export function MachineAmmoPanel({
   usePerWeaponAmmo
 }: MachineAmmoPanelProps) {
   return (
-    <div className="space-y-1.5">
+    <div>
       {/* Ammo + Shots Combined - Tactical Display */}
-      <div className="relative bg-slate-900/60 p-1.5 rounded-sm">
-        {/* Tech corners */}
-        <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-slate-600/50" />
-        <div className="absolute top-0 right-0 w-1 h-1 border-r border-t border-slate-600/50" />
-        <div className="absolute bottom-0 left-0 w-1 h-1 border-l border-b border-slate-600/50" />
-        <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-slate-600/50" />
-
+      <div className="p-1.5">
         <div className="flex justify-between items-center mb-1">
           <span className="text-[8px] md:text-[9px] font-mono opacity-40 uppercase flex items-center gap-1">
             <Bomb className="w-2.5 h-2.5 md:w-3 md:h-3" /> Боезапас
@@ -147,40 +131,6 @@ export function MachineAmmoPanel({
         </div>
       </div>
 
-      {/* Per-weapon ammo bars for community_star_system */}
-      {usePerWeaponAmmo && weapons
-        .map((weapon, idx) => ({ weapon, idx }))
-        .filter(({ weapon }) => !isNonRangedWeapon(weapon))
-        .map(({ weapon, idx }) => {
-        const weaponAmmoCount = weaponAmmo?.[idx] ?? weapon.ammo ?? maxAmmo;
-        const weaponMaxAmmo = weapon.ammo ?? maxAmmo;
-
-        return (
-          <div key={idx} className="bg-slate-900/40 p-2 rounded-sm">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-[8px] md:text-[9px] font-mono opacity-60 uppercase">
-                {weapon.name}
-              </span>
-              <span className="text-xs md:text-sm font-mono font-bold text-blue-400">
-                {weaponAmmoCount}/{weaponMaxAmmo}
-              </span>
-            </div>
-            <div className="flex items-center gap-px">
-              {Array.from({ length: weaponMaxAmmo }).map((_, i) => (
-                <div
-                  key={i}
-                  className={cn(
-                    "h-1.5 rounded-sm transition-all flex-1",
-                    i < weaponAmmoCount
-                      ? "bg-blue-500"
-                      : "bg-slate-800"
-                  )}
-                />
-              ))}
-            </div>
-          </div>
-        );
-      })}
     </div>
   );
 }

@@ -117,6 +117,14 @@ export default function UnitCard({
       return sector ? sector.speed : 0;
     })();
 
+    // Max speed = speed at full durability (the "how much it was" baseline)
+    const maxSpeed = (() => {
+      const sector = machine.speed_sectors.find(
+        s => machine.durability_max >= s.min_durability && machine.durability_max <= s.max_durability
+      );
+      return sector ? sector.speed : speed;
+    })();
+
     // Calculate durability zone
     const max = machine.durability_max;
     let zone;
@@ -150,7 +158,7 @@ export default function UnitCard({
       });
     };
 
-    return { currentDurability, maxDurability: max, speed, zone, updateDurability };
+    return { currentDurability, maxDurability: max, speed, maxSpeed, zone, updateDurability };
   };
 
   const machineStats = getMachineStats();
@@ -438,6 +446,16 @@ export default function UnitCard({
     return soldier.image || null;
   };
 
+  // Resolve a compact pilot label "SHORTNAME #N·M" (squad short name + squad № + soldier №).
+  const getPilotLabel = (): string => {
+    if (!unit.pilotInfo) return '';
+    const squad = allUnits.find(u => u.instanceId === unit.pilotInfo?.squadInstanceId);
+    if (!squad || squad.type !== 'squad') return '';
+    const squadData = squad.data as Squad;
+    const name = squadData.shortName || squadData.name || 'Пилот';
+    return `${name} ${formatUnitNumber(squad)}·${(unit.pilotInfo.soldierIndex || 0) + 1}`;
+  };
+
   // Helper to update pilot's done state when machine acts
   const setPilotDoneState = (done: boolean) => {
     if (!unit.pilotInfo) return;
@@ -689,6 +707,7 @@ export default function UnitCard({
             unit={unit}
             zone={machineStats!.zone}
             speed={machineStats!.speed}
+            maxSpeed={machineStats!.maxSpeed}
             updateDurability={machineStats!.updateDurability}
             updateAmmo={(delta) => {
               const max = (data as Machine).ammo_max;
@@ -705,6 +724,8 @@ export default function UnitCard({
             onPilotSurvivalTest={handlePilotSurvivalTest}
             pilotSurvivalTest={pilotSurvivalTest}
             pilotImage={getPilotImage()}
+            pilotLabel={getPilotLabel()}
+            onNavigateToUnit={_onNavigateToUnit}
             isPilotTestRunning={pilotTestFlow.isOpen}
             usePerWeaponAmmo={usePerWeaponAmmo}
             distanceInputUnit={distanceInputUnit}

@@ -37,14 +37,6 @@ describe('MachineAmmoPanel', () => {
     expect(screen.getByText(/15.*20/)).toBeInTheDocument();
   });
 
-  it('renders per-weapon ammo display for community star system', () => {
-    render(<MachineAmmoPanel {...defaultProps} usePerWeaponAmmo={true} />);
-
-    // Should show weapon names with ammo counts
-    expect(screen.getByText('Cannon')).toBeInTheDocument();
-    expect(screen.getByText('MG')).toBeInTheDocument();
-  });
-
   it('calls onUpdateAmmo when increment button clicked', () => {
     const onUpdateAmmo = jest.fn();
     render(<MachineAmmoPanel {...defaultProps} usePerWeaponAmmo={false} onUpdateAmmo={onUpdateAmmo} />);
@@ -124,75 +116,4 @@ describe('MachineAmmoPanel', () => {
     expect(shotsText).toBeInTheDocument();
   });
 
-  describe('melee weapons filtering', () => {
-    it('excludes melee weapons (ББ range) from per-weapon ammo display', () => {
-      const weaponsWithMelee: Weapon[] = [
-        { name: 'Cannon', range: 'D12', power: '2D20' },
-        { name: 'Melee Claw', range: 'ББ', power: '4' }  // Melee weapon
-      ];
-
-      render(
-        <MachineAmmoPanel
-          {...defaultProps}
-          weapons={weaponsWithMelee}
-          weaponAmmo={[15, 10]}
-          usePerWeaponAmmo={true}
-        />
-      );
-
-      // Should show ranged weapon
-      expect(screen.getByText('Cannon')).toBeInTheDocument();
-
-      // Should NOT show melee weapon in ammo panel
-      expect(screen.queryByText('Melee Claw')).not.toBeInTheDocument();
-    });
-
-    it('excludes melee weapons (numeric power) from per-weapon ammo display', () => {
-      const weaponsWithMelee: Weapon[] = [
-        { name: 'MG', range: 'D6', power: '1D12' },
-        { name: 'Crusher', range: 'D6', power: '3' }  // Melee (numeric power)
-      ];
-
-      render(
-        <MachineAmmoPanel
-          {...defaultProps}
-          weapons={weaponsWithMelee}
-          weaponAmmo={[15, 10]}
-          usePerWeaponAmmo={true}
-        />
-      );
-
-      // Should show ranged weapon
-      expect(screen.getByText('MG')).toBeInTheDocument();
-
-      // Should NOT show melee weapon in ammo panel
-      expect(screen.queryByText('Crusher')).not.toBeInTheDocument();
-    });
-
-    it('excludes only melee weapons when mixed', () => {
-      const mixedWeapons: Weapon[] = [
-        { name: 'Cannon', range: 'D12', power: '2D20' },
-        { name: 'MG', range: 'D6', power: '1D12' },
-        { name: 'Melee Claw', range: 'ББ', power: '4' },
-        { name: 'Crusher', range: 'D6', power: '3' }
-      ];
-
-      render(
-        <MachineAmmoPanel
-          {...defaultProps}
-          weapons={mixedWeapons}
-          weaponAmmo={[15, 12, 10, 8]}
-          usePerWeaponAmmo={true}
-        />
-      );
-
-      // Should show ranged weapons only
-      expect(screen.getByText('Cannon')).toBeInTheDocument();
-      expect(screen.getByText('MG')).toBeInTheDocument();
-
-      // Should NOT show melee weapons
-      expect(screen.queryByText('Melee Claw')).not.toBeInTheDocument();
-      expect(screen.queryByText('Crusher')).not.toBeInTheDocument();
-    });
-  });
 });

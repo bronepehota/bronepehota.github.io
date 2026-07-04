@@ -1,14 +1,16 @@
+import { useState } from 'react';
 import { MachineAmmoPanel } from './machine-view/MachineAmmoPanel';
 import { MachineWeaponsList } from './machine-view/MachineWeaponsList';
-import { TacticalDashboard } from './machine-view/TacticalDashboard';
+import { MachineStatusHeader } from './machine-view/MachineStatusHeader';
+import { PilotModal } from './machine-view/PilotModal';
 import { ArmyUnit, Machine, DurabilityZone, PilotInfo } from '@/lib/types';
-import { Sword } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Flame, Sword, Wrench } from 'lucide-react';
 
 export interface MachineViewProps {
   unit: ArmyUnit;
   zone: DurabilityZone;
   speed: number;
+  maxSpeed?: number;
   updateDurability: (delta: number) => void;
   updateAmmo?: (delta: number) => void;
   onWeaponAttack: (weaponIndex: number) => void;
@@ -17,6 +19,7 @@ export interface MachineViewProps {
   onPilotSurvivalTest: () => void;
   pilotSurvivalTest: { roll: number; survived: boolean; testedAt: number } | null;
   pilotImage: string | null;
+  pilotLabel?: string;
   isPilotTestRunning: boolean;
   pilotTestUrgent: boolean;
   usePerWeaponAmmo: boolean;
@@ -26,12 +29,14 @@ export interface MachineViewProps {
   machineName?: string;
   isDestroyed?: boolean;
   onShowImage?: () => void;
+  onNavigateToUnit?: (unitInstanceId: string) => void;
 }
 
 export function MachineView({
   unit,
   zone,
   speed,
+  maxSpeed,
   updateDurability,
   updateAmmo,
   onWeaponAttack,
@@ -40,6 +45,7 @@ export function MachineView({
   onPilotSurvivalTest,
   pilotSurvivalTest,
   pilotImage,
+  pilotLabel,
   isPilotTestRunning,
   pilotTestUrgent,
   usePerWeaponAmmo,
@@ -48,43 +54,54 @@ export function MachineView({
   imageUrl,
   machineName,
   isDestroyed,
-  onShowImage
+  onShowImage,
+  onNavigateToUnit
 }: MachineViewProps) {
   const machine = unit.data as Machine;
+  const [pilotModalOpen, setPilotModalOpen] = useState(false);
 
   // Get pilot info from unit
   const pilotInfo: PilotInfo | null = unit.pilotInfo || null;
 
+  const currentDurability = unit.currentDurability || 0;
+  const maxDurability = machine.durability_max;
+
+  // Melee capability = sum of all ББ (close-combat) weapon bonuses. Machine melee
+  // combat isn't implemented yet → one disabled "Скоро" button at the bottom of the
+  // card (not per-weapon attack buttons).
+  const hasMelee = machine.weapons.some(w => w.range === 'ББ');
+  const meleeBonus = machine.weapons
+    .filter(w => w.range === 'ББ')
+    .map(w => parseInt(String(w.power), 10) || 0)
+    .reduce((sum, bonus) => sum + bonus, 0);
+
   // Get weapon shots tracking from unit state
   const weaponShots: Record<number, number> = unit.machineWeaponShots || {};
 
-  // Calculate total melee bonus from ББ weapons
-  const meleeBonus = machine.weapons
-    .filter(w => w.range === 'ББ')
-    .map(w => parseInt(w.power, 10) || 0)
-    .reduce((sum, bonus) => sum + bonus, 0);
-
   return (
-    <div className="space-y-1.5">
-      {/* Tactical Dashboard - Unified panel with machine image, stats, and pilot */}
+    <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-3 flex flex-col gap-3">
+      {/* Machine Status Header — clean badges + PilotChip + durability bar */}
       {imageUrl ? (
-        <TacticalDashboard
+        <MachineStatusHeader
           faction={machine.faction}
           imageUrl={imageUrl}
           machineName={machineName || machine.name}
           isDestroyed={isDestroyed || false}
-          currentDurability={unit.currentDurability || 0}
-          maxDurability={machine.durability_max}
+          currentDurability={currentDurability}
+          maxDurability={maxDurability}
           speed={speed}
+          maxSpeed={maxSpeed}
           zone={zone}
-          onUpdateDurability={updateDurability}
           pilotInfo={pilotInfo}
-          pilotImage={pilotImage}
+          pilotLabel={pilotLabel}
           survivalTest={pilotSurvivalTest}
-          onAssignPilot={onPilotAssign}
           onSurvivalTest={onPilotSurvivalTest}
           isPilotTestRunning={isPilotTestRunning}
           pilotTestUrgent={pilotTestUrgent}
+          onOpenPilot={() => {
+            if (!pilotInfo) onPilotAssign();
+            else setPilotModalOpen(true);
+          }}
           onImageClick={onShowImage || (() => {})}
           distanceInputUnit={distanceInputUnit}
           stepToCmFactor={stepToCmFactor}
@@ -95,6 +112,43 @@ export function MachineView({
           <div className="text-center text-xs font-mono opacity-50">Нет изображения</div>
         </div>
       )}
+
+      {/* Damage / repair row — secondary controls */}
+      {imageUrl && (
+        <div className="flex gap-1.5">
+          <button
+            type="button"
+            onClick={() => updateDurability(-1)}
+            disabled={currentDurability === 0}
+            className="flex-1 min-h-[44px] rounded-lg py-2 text-xs font-bold border bg-red-950/30 border-red-800/40 text-red-300 flex items-center justify-center gap-1.5 disabled:opacity-30"
+          >
+            <Flame className="w-4 h-4" /> <span>−1 Урон</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => updateDurability(1)}
+            disabled={currentDurability === maxDurability}
+            className="flex-1 min-h-[44px] rounded-lg py-2 text-xs font-bold border bg-emerald-950/30 border-emerald-800/40 text-emerald-300 flex items-center justify-center gap-1.5 disabled:opacity-30"
+          >
+            <Wrench className="w-4 h-4" /> <span>+1 Ремонт</span>
+          </button>
+        </div>
+      )}
+
+      {/* Weapons List - always show for all rules versions */}
+      <MachineWeaponsList
+        weapons={machine.weapons}
+        weaponShots={weaponShots}
+        fireRate={machine.fire_rate}
+        totalShotsUsed={unit.machineShotsUsed || 0}
+        currentAmmo={unit.currentAmmo || 0}
+        maxAmmo={machine.ammo_max}
+        weaponAmmo={unit.weaponAmmo}
+        usePerWeaponAmmo={usePerWeaponAmmo}
+        onWeaponAttack={onWeaponAttack}
+        onWeaponInfo={onWeaponInfo}
+        stepToCmFactor={stepToCmFactor}
+      />
 
       {/* Ammo Panel - full width */}
       <MachineAmmoPanel
@@ -108,36 +162,38 @@ export function MachineView({
         usePerWeaponAmmo={usePerWeaponAmmo}
       />
 
-      {/* Weapons List - always show for all rules versions */}
-      <MachineWeaponsList
-        weapons={machine.weapons}
-        weaponShots={weaponShots}
-        fireRate={machine.fire_rate}
-        totalShotsUsed={unit.machineShotsUsed || 0}
-        currentAmmo={unit.currentAmmo || 0}
-        weaponAmmo={unit.weaponAmmo}
-        usePerWeaponAmmo={usePerWeaponAmmo}
-        onWeaponAttack={onWeaponAttack}
-        onWeaponInfo={onWeaponInfo}
-        stepToCmFactor={stepToCmFactor}
-      />
+      {/* Ram / melee — sum of ББ add-ons. Not implemented yet (disabled). */}
+      {hasMelee && (
+        <div
+          className="relative w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border-2 border-slate-700/50 bg-slate-900/30 min-h-[48px] opacity-70"
+          title="Таран — в разработке"
+          aria-label="Таран — в разработке"
+        >
+          <Sword className="w-5 h-5 text-slate-500" />
+          <span className="text-sm font-mono font-bold uppercase tracking-wider text-slate-500">
+            Таран{meleeBonus > 0 ? ` +${meleeBonus}` : ''}
+          </span>
+          <span className="absolute -top-1.5 right-3 px-1.5 py-0.5 text-[8px] font-mono font-bold uppercase bg-amber-600 text-white rounded-sm leading-none">
+            Скоро
+          </span>
+        </div>
+      )}
 
-      {/* Ram attack button - disabled, not implemented */}
-      <div
-        className={cn(
-          "relative w-full flex items-center justify-center gap-2 px-3 py-2 rounded-sm border-2",
-          "bg-slate-900/30 border-slate-700/50 opacity-50 min-h-[48px]"
-        )}
-        title="Таран пехоты - в разработке"
-      >
-        <Sword className="w-5 h-5 text-slate-600" />
-        <span className="text-sm font-mono font-bold uppercase tracking-wider text-slate-600">
-          ТАРАН {meleeBonus > 0 && `+${meleeBonus}`}
-        </span>
-        <span className="absolute -top-1 -right-1 px-1.5 py-0.5 text-[8px] font-mono font-bold bg-amber-600 text-white rounded-sm">
-          СКОРО
-        </span>
-      </div>
+      {/* Pilot sheet — opened from PilotChip when a pilot is assigned */}
+      {pilotInfo && (
+        <PilotModal
+          isOpen={pilotModalOpen}
+          onClose={() => setPilotModalOpen(false)}
+          pilotInfo={pilotInfo}
+          pilotLabel={pilotLabel}
+          pilotImage={pilotImage}
+          survivalTest={pilotSurvivalTest}
+          isTestRunning={isPilotTestRunning}
+          onSurvivalTest={() => { setPilotModalOpen(false); onPilotSurvivalTest(); }}
+          onAssignPilot={() => { setPilotModalOpen(false); onPilotAssign(); }}
+          onNavigateToUnit={onNavigateToUnit}
+        />
+      )}
     </div>
   );
 }
