@@ -10,6 +10,7 @@ export interface MachineViewProps {
   unit: ArmyUnit;
   zone: DurabilityZone;
   speed: number;
+  maxSpeed?: number;
   updateDurability: (delta: number) => void;
   updateAmmo?: (delta: number) => void;
   onWeaponAttack: (weaponIndex: number) => void;
@@ -28,12 +29,14 @@ export interface MachineViewProps {
   machineName?: string;
   isDestroyed?: boolean;
   onShowImage?: () => void;
+  onNavigateToUnit?: (unitInstanceId: string) => void;
 }
 
 export function MachineView({
   unit,
   zone,
   speed,
+  maxSpeed,
   updateDurability,
   updateAmmo,
   onWeaponAttack,
@@ -51,7 +54,8 @@ export function MachineView({
   imageUrl,
   machineName,
   isDestroyed,
-  onShowImage
+  onShowImage,
+  onNavigateToUnit
 }: MachineViewProps) {
   const machine = unit.data as Machine;
   const [pilotModalOpen, setPilotModalOpen] = useState(false);
@@ -86,6 +90,7 @@ export function MachineView({
           currentDurability={currentDurability}
           maxDurability={maxDurability}
           speed={speed}
+          maxSpeed={maxSpeed}
           zone={zone}
           pilotInfo={pilotInfo}
           pilotLabel={pilotLabel}
@@ -186,6 +191,7 @@ export function MachineView({
           isTestRunning={isPilotTestRunning}
           onSurvivalTest={() => { setPilotModalOpen(false); onPilotSurvivalTest(); }}
           onAssignPilot={() => { setPilotModalOpen(false); onPilotAssign(); }}
+          onNavigateToUnit={onNavigateToUnit}
         />
       )}
     </div>

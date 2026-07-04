@@ -15,6 +15,7 @@ interface MachineStatusHeaderProps {
   currentDurability: number;
   maxDurability: number;
   speed: number;
+  maxSpeed?: number;
   zone: DurabilityZone;
   pilotInfo: PilotInfo | null;
   pilotLabel?: string;
@@ -45,6 +46,7 @@ export function MachineStatusHeader({
   currentDurability,
   maxDurability,
   speed,
+  maxSpeed,
   zone,
   pilotInfo,
   pilotLabel,
@@ -99,7 +101,12 @@ export function MachineStatusHeader({
             <div className="text-[8px] uppercase tracking-wide text-slate-500">Скор</div>
             <div className="text-base font-black leading-tight text-cyan-400">
               {distanceInputUnit === 'cm' ? speed * stepToCmFactor : speed}
-              <span className="text-[8px] opacity-60">{distanceInputUnit === 'cm' ? ' см' : ' ш'}</span>
+              {maxSpeed !== undefined && maxSpeed > 0 && (
+                <span className="text-[9px] opacity-60">
+                  /{distanceInputUnit === 'cm' ? maxSpeed * stepToCmFactor : maxSpeed}
+                </span>
+              )}
+              <span className="text-[8px] opacity-60 ml-0.5">{distanceInputUnit === 'cm' ? 'см' : 'ш'}</span>
             </div>
           </div>
           <div className="col-span-2">

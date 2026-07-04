@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { AlertTriangle, Loader2, Plane, X } from 'lucide-react';
+import { AlertTriangle, ArrowRightCircle, Loader2, Plane, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PilotInfo } from '@/lib/types';
 import { GitHubPagesImage } from '@/components/GitHubPagesImage';
@@ -16,10 +16,11 @@ interface PilotModalProps {
   isTestRunning: boolean;
   onSurvivalTest: () => void;
   onAssignPilot: () => void;
+  onNavigateToUnit?: (unitInstanceId: string) => void;
 }
 
 export function PilotModal({
-  isOpen, onClose, pilotInfo, pilotImage, pilotLabel, survivalTest, isTestRunning, onSurvivalTest, onAssignPilot,
+  isOpen, onClose, pilotInfo, pilotImage, pilotLabel, survivalTest, isTestRunning, onSurvivalTest, onAssignPilot, onNavigateToUnit,
 }: PilotModalProps) {
   // Close on Escape
   useEffect(() => {
@@ -115,6 +116,17 @@ export function PilotModal({
               Сменить
             </button>
           </div>
+
+          {onNavigateToUnit && pilotInfo.squadInstanceId && (
+            <button
+              type="button"
+              onClick={() => { onClose(); onNavigateToUnit(pilotInfo.squadInstanceId); }}
+              className="w-full min-h-[44px] mt-2 rounded-lg px-3 py-2 text-xs font-bold border border-purple-700/40 bg-purple-950/20 text-purple-300 hover:bg-purple-950/40 transition-colors flex items-center justify-center gap-1.5"
+            >
+              <ArrowRightCircle className="w-4 h-4" />
+              Перейти к отряду
+            </button>
+          )}
         </div>
       </div>
     </div>

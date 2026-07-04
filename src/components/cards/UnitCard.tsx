@@ -117,6 +117,14 @@ export default function UnitCard({
       return sector ? sector.speed : 0;
     })();
 
+    // Max speed = speed at full durability (the "how much it was" baseline)
+    const maxSpeed = (() => {
+      const sector = machine.speed_sectors.find(
+        s => machine.durability_max >= s.min_durability && machine.durability_max <= s.max_durability
+      );
+      return sector ? sector.speed : speed;
+    })();
+
     // Calculate durability zone
     const max = machine.durability_max;
     let zone;
@@ -150,7 +158,7 @@ export default function UnitCard({
       });
     };
 
-    return { currentDurability, maxDurability: max, speed, zone, updateDurability };
+    return { currentDurability, maxDurability: max, speed, maxSpeed, zone, updateDurability };
   };
 
   const machineStats = getMachineStats();
@@ -699,6 +707,7 @@ export default function UnitCard({
             unit={unit}
             zone={machineStats!.zone}
             speed={machineStats!.speed}
+            maxSpeed={machineStats!.maxSpeed}
             updateDurability={machineStats!.updateDurability}
             updateAmmo={(delta) => {
               const max = (data as Machine).ammo_max;
@@ -716,6 +725,7 @@ export default function UnitCard({
             pilotSurvivalTest={pilotSurvivalTest}
             pilotImage={getPilotImage()}
             pilotLabel={getPilotLabel()}
+            onNavigateToUnit={_onNavigateToUnit}
             isPilotTestRunning={pilotTestFlow.isOpen}
             usePerWeaponAmmo={usePerWeaponAmmo}
             distanceInputUnit={distanceInputUnit}

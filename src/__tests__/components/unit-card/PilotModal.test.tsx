@@ -55,4 +55,18 @@ describe('PilotModal', () => {
     fireEvent.click(screen.getByRole('dialog'));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
+
+  it('shows "Перейти к отряду" only when onNavigateToUnit provided; click navigates + closes', () => {
+    // No nav handler → button absent
+    const { rerender } = render(<PilotModal {...baseProps} />);
+    expect(screen.queryByRole('button', { name: /перейти к отряду/i })).not.toBeInTheDocument();
+
+    // With handler → button present, navigates to the pilot's squad and closes
+    const onNavigateToUnit = jest.fn();
+    const onClose = jest.fn();
+    rerender(<PilotModal {...baseProps} onClose={onClose} onNavigateToUnit={onNavigateToUnit} />);
+    fireEvent.click(screen.getByRole('button', { name: /перейти к отряду/i }));
+    expect(onNavigateToUnit).toHaveBeenCalledWith('squad-1');
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
 });
