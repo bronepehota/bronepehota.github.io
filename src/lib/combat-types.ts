@@ -17,7 +17,7 @@ export type CombatPhase =
 /**
  * Combat action types
  */
-export type CombatActionType = 'shot' | 'melee' | 'grenade';
+export type CombatActionType = 'shot' | 'melee' | 'grenade' | 'ram';
 
 /**
  * Unit type for combat
@@ -32,6 +32,9 @@ export interface CombatParameters {
   targetArmor: number;        // Target's armor value
   targetIsVehicle?: boolean;  // Target is a vehicle → community zone-based damage (#162)
   targetMelee: number;        // Target's melee stat (for melee combat)
+  targetType?: MeleeDefenderType;     // Machine melee: defender type
+  defenderMeleeBonus?: number;        // Machine melee: defender machine's ΣББ
+  ramInfantryCount?: number;          // Таран: number of infantry rammed
   fortification: FortificationType;  // Target's cover/fortification
   weaponIndex?: number;       // For machines: which weapon to use
   isSurpriseAttack?: boolean; // Attack from behind (Fan rules: roll twice, take best; machine's BB ignored)
@@ -54,6 +57,16 @@ export interface DiceDisplay {
   meleeD?: number;            // Defender melee roll
 }
 
+/** Defender type for machine melee (Таблица 6 defense formula differs). */
+export type MeleeDefenderType = 'infantry' | 'machine' | 'artillery';
+
+/** One rammed-infantry result (Таран: D6 → 1-4 killed, 5-6 survived). */
+export interface RamInfantryResult {
+  index: number;
+  roll: number;
+  killed: boolean;
+}
+
 /**
  * Result of a single grenade blast check
  */
@@ -73,6 +86,8 @@ export interface CombatResult {
   hitResult?: HitResult;
   damageResult?: DamageResult;
   meleeResult?: MeleeResult;
+  meleeOutcome?: { outcome: 'repelled' | 'destroyed' | 'damage'; damage: number };
+  ramInfantryResults?: RamInfantryResult[];
   timestamp: number;
   unitName: string;
   unitId: string;
