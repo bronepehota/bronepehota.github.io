@@ -152,7 +152,9 @@ describe('MachineView', () => {
       render(<MachineView {...defaultProps} unit={unit} />);
 
       expect(screen.getByText('Melee Spike')).toBeInTheDocument();
-      expect(screen.getByText(/ближний бой/i)).toBeInTheDocument();
+      // «Ближний бой» now appears both as the weapon's range label (MachineWeaponsList)
+      // and as the close-combat action button (#125).
+      expect(screen.getAllByText(/ближний бой/i).length).toBeGreaterThan(0);
     });
   });
 

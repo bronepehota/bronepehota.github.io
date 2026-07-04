@@ -30,6 +30,9 @@ export interface MachineViewProps {
   isDestroyed?: boolean;
   onShowImage?: () => void;
   onNavigateToUnit?: (unitInstanceId: string) => void;
+  rulesVersion?: string;
+  onMelee?: () => void;
+  onRam?: () => void;
 }
 
 export function MachineView({
@@ -55,7 +58,10 @@ export function MachineView({
   machineName,
   isDestroyed,
   onShowImage,
-  onNavigateToUnit
+  onNavigateToUnit,
+  rulesVersion,
+  onMelee,
+  onRam
 }: MachineViewProps) {
   const machine = unit.data as Machine;
   const [pilotModalOpen, setPilotModalOpen] = useState(false);
@@ -66,10 +72,8 @@ export function MachineView({
   const currentDurability = unit.currentDurability || 0;
   const maxDurability = machine.durability_max;
 
-  // Melee capability = sum of all ББ (close-combat) weapon bonuses. Machine melee
-  // combat isn't implemented yet → one disabled "Скоро" button at the bottom of the
-  // card (not per-weapon attack buttons).
-  const hasMelee = machine.weapons.some(w => w.range === 'ББ');
+  // Melee capability = sum of all ББ (close-combat) weapon bonuses. Labels the
+  // «Ближний бой» button. Melee is allowed even with ΣББ = 0 (#125).
   const meleeBonus = machine.weapons
     .filter(w => w.range === 'ББ')
     .map(w => parseInt(String(w.power), 10) || 0)
@@ -162,22 +166,29 @@ export function MachineView({
         usePerWeaponAmmo={usePerWeaponAmmo}
       />
 
-      {/* Ram / melee — sum of ББ add-ons. Not implemented yet (disabled). */}
-      {hasMelee && (
-        <div
-          className="relative w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border-2 border-slate-700/50 bg-slate-900/30 min-h-[48px] opacity-70"
-          title="Таран — в разработке"
-          aria-label="Таран — в разработке"
+      {/* Close-combat actions (#125). Melee always available; Ram = community only. */}
+      <div className="grid grid-cols-2 gap-1.5">
+        <button
+          type="button"
+          disabled={isDestroyed}
+          onClick={onMelee}
+          className="min-h-[44px] rounded-lg px-2 py-2 text-xs font-bold border border-red-700/50 bg-red-950/30 text-red-300 hover:bg-red-950/50 disabled:opacity-40 transition-colors flex items-center justify-center gap-1.5"
         >
-          <Sword className="w-5 h-5 text-slate-500" />
-          <span className="text-sm font-mono font-bold uppercase tracking-wider text-slate-500">
-            Таран{meleeBonus > 0 ? ` +${meleeBonus}` : ''}
-          </span>
-          <span className="absolute -top-1.5 right-3 px-1.5 py-0.5 text-[8px] font-mono font-bold uppercase bg-amber-600 text-white rounded-sm leading-none">
-            Скоро
-          </span>
-        </div>
-      )}
+          <Sword className="w-4 h-4" />
+          Ближний бой{meleeBonus > 0 ? ` +${meleeBonus}` : ''}
+        </button>
+        {rulesVersion === 'community_star_system' && (
+          <button
+            type="button"
+            disabled={isDestroyed}
+            onClick={onRam}
+            className="min-h-[44px] rounded-lg px-2 py-2 text-xs font-bold border border-amber-700/50 bg-amber-950/30 text-amber-300 hover:bg-amber-950/50 disabled:opacity-40 transition-colors flex items-center justify-center gap-1.5"
+          >
+            <Flame className="w-4 h-4" />
+            Таран
+          </button>
+        )}
+      </div>
 
       {/* Pilot sheet — opened from PilotChip when a pilot is assigned */}
       {pilotInfo && (

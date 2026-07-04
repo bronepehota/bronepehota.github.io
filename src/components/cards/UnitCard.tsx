@@ -241,6 +241,14 @@ export default function UnitCard({
     combatController.startCombat(unit, undefined, weaponIndex, 'shot');
   };
 
+  // Close-combat entry points (#125). Melee always available; Ram = community only.
+  const handleVehicleMelee = () => {
+    combatController.startCombat(unit, undefined, undefined, 'melee');
+  };
+  const handleVehicleRam = () => {
+    combatController.startCombat(unit, undefined, undefined, 'ram');
+  };
+
   // Handle pilot assignment
   const handlePilotAssign = (pilotInfo: PilotInfo) => {
     if (onPilotAssign) {
@@ -405,6 +413,8 @@ export default function UnitCard({
             }));
           }
         } else if (result.actionType === 'melee') {
+          updateThisUnit((u) => ({ ...u, isMachineMelee: true }));
+        } else if (result.actionType === 'ram') {
           updateThisUnit((u) => ({ ...u, isMachineMelee: true }));
         }
 
@@ -735,6 +745,9 @@ export default function UnitCard({
             isDestroyed={unit.currentDurability === 0}
             onShowImage={() => setShowImage(true)}
             pilotTestUrgent={pilotTestUrgent}
+            rulesVersion={rulesVersion}
+            onMelee={handleVehicleMelee}
+            onRam={handleVehicleRam}
           />
         )}
       </div>
