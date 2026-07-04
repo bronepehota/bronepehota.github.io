@@ -31,6 +31,9 @@ export function CombatResults({
   const isShot = result.actionType === 'shot';
   const isGrenade = result.actionType === 'grenade';
   const isMelee = result.actionType === 'melee';
+  const isRam = result.actionType === 'ram';
+  const ramResults = result.ramInfantryResults ?? [];
+  const ramKilled = ramResults.filter(r => r.killed).length;
   // Auto-complete logic: mark as done if enabled and it's a squad (not a machine)
   const markAsDone = autoCompleteEnabled && unitType === 'squad';
   const [grenadeTargetArmor, setGrenadeTargetArmor] = useState(2);
@@ -593,11 +596,45 @@ export function CombatResults({
         </>
       )}
 
+      {/* Таран results (#125) */}
+      {isRam && ramResults.length > 0 && (
+        <div data-testid="ram-infantry-results" className="space-y-2">
+          {ramResults.map((r) => (
+            <div key={r.index} data-testid="ram-infantry-result"
+              className={cn('flex items-center justify-between px-3 py-2 rounded-lg border',
+                r.killed ? 'bg-red-950/30 border-red-700/40' : 'bg-slate-900/40 border-slate-700/40')}>
+              <span className="text-xs text-slate-400">Пехотинец {r.index + 1}</span>
+              <span className="flex items-center gap-2">
+                <span className="font-mono font-black text-slate-200">D6: {r.roll}</span>
+                <span className={cn('text-xs font-bold', r.killed ? 'text-red-400' : 'text-slate-400')}>
+                  {r.killed ? 'Убит' : 'Отброшен'}
+                </span>
+              </span>
+            </div>
+          ))}
+          <div data-testid="ram-kill-tally" className="text-center text-sm font-bold text-amber-300">
+            💀 {ramKilled}/{ramResults.length} убито
+          </div>
+        </div>
+      )}
+
       {/* Melee Results */}
       {isMelee && result.meleeResult && (() => {
         const meleeResult = result.meleeResult!;
         return (
           <div className="space-y-3">
+            {result.meleeOutcome && (
+              <div className={cn('text-center px-4 py-3 rounded-lg border-2',
+                result.meleeOutcome.outcome === 'destroyed' ? 'bg-red-900/30 border-red-500/50' :
+                result.meleeOutcome.outcome === 'damage' ? 'bg-amber-900/30 border-amber-500/50' :
+                'bg-slate-800/40 border-slate-600/50')}>
+                <div className="text-lg font-black text-slate-100">
+                  {result.meleeOutcome.outcome === 'destroyed' ? 'Цель уничтожена' :
+                   result.meleeOutcome.outcome === 'damage' ? `Повреждений: ${result.meleeOutcome.damage}` :
+                   'Атака отбита'}
+                </div>
+              </div>
+            )}
             {parameters.isSurpriseAttack && meleeResult.attackerRolls ? (
               <div className="bg-purple-900/20 p-3 rounded-lg border border-purple-700">
                 <div className="flex items-center justify-center gap-3">
