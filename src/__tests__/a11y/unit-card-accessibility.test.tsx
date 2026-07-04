@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { UnitCardHeader } from '@/components/cards/unit-card/UnitCardHeader';
 import { MachineAmmoPanel } from '@/components/cards/unit-card/machine-view/MachineAmmoPanel';
 import { PilotChip } from '@/components/cards/unit-card/machine-view/PilotChip';
-import { PilotSheet } from '@/components/cards/unit-card/machine-view/PilotSheet';
+import { PilotModal } from '@/components/cards/unit-card/machine-view/PilotModal';
 import { MachineView } from '@/components/cards/unit-card/MachineView';
 import { ArmyUnit, Squad, Machine, DurabilityZone } from '@/lib/types';
 
@@ -82,9 +82,9 @@ describe('UnitCard Accessibility', () => {
       });
     });
 
-    describe('PilotSheet', () => {
+    describe('PilotModal', () => {
       it('buttons meet 44px min touch target', () => {
-        const { container } = render(<PilotSheet
+        const { container } = render(<PilotModal
           isOpen={true} onClose={jest.fn()}
           pilotInfo={{ squadInstanceId: 's', soldierIndex: 0, pilotArmor: 2, alive: true }}
           pilotImage={null} survivalTest={null} isTestRunning={false}

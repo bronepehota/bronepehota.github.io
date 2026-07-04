@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { MachineAmmoPanel } from './machine-view/MachineAmmoPanel';
 import { MachineWeaponsList } from './machine-view/MachineWeaponsList';
 import { MachineStatusHeader } from './machine-view/MachineStatusHeader';
-import { PilotSheet } from './machine-view/PilotSheet';
+import { PilotModal } from './machine-view/PilotModal';
 import { ArmyUnit, Machine, DurabilityZone, PilotInfo } from '@/lib/types';
 import { Flame, Wrench } from 'lucide-react';
 
@@ -54,7 +54,7 @@ export function MachineView({
   onShowImage
 }: MachineViewProps) {
   const machine = unit.data as Machine;
-  const [pilotSheetOpen, setPilotSheetOpen] = useState(false);
+  const [pilotModalOpen, setPilotModalOpen] = useState(false);
 
   // Get pilot info from unit
   const pilotInfo: PilotInfo | null = unit.pilotInfo || null;
@@ -86,7 +86,7 @@ export function MachineView({
           pilotTestUrgent={pilotTestUrgent}
           onOpenPilot={() => {
             if (!pilotInfo) onPilotAssign();
-            else setPilotSheetOpen(true);
+            else setPilotModalOpen(true);
           }}
           onImageClick={onShowImage || (() => {})}
           distanceInputUnit={distanceInputUnit}
@@ -150,16 +150,16 @@ export function MachineView({
 
       {/* Pilot sheet — opened from PilotChip when a pilot is assigned */}
       {pilotInfo && (
-        <PilotSheet
-          isOpen={pilotSheetOpen}
-          onClose={() => setPilotSheetOpen(false)}
+        <PilotModal
+          isOpen={pilotModalOpen}
+          onClose={() => setPilotModalOpen(false)}
           pilotInfo={pilotInfo}
           pilotLabel={pilotLabel}
           pilotImage={pilotImage}
           survivalTest={pilotSurvivalTest}
           isTestRunning={isPilotTestRunning}
           onSurvivalTest={onPilotSurvivalTest}
-          onAssignPilot={() => { setPilotSheetOpen(false); onPilotAssign(); }}
+          onAssignPilot={() => { setPilotModalOpen(false); onPilotAssign(); }}
         />
       )}
     </div>

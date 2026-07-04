@@ -166,13 +166,15 @@ export function MachineWeaponsList({
                   <span className="font-mono font-black text-sm text-red-300">{weapon.power}</span>
                 </div>
 
-                {/* Attack button */}
+                {/* Attack button — melee combat for machines is not implemented yet (disabled) */}
                 <button
-                  onClick={() => onWeaponAttack(weaponIdx)}
-                  className="shrink-0 w-8 h-8 rounded-sm border-2 border-red-700/50 bg-red-950/30 flex items-center justify-center min-w-[36px] min-h-[36px] hover:bg-red-950/50 hover:border-red-600/60 transition-all"
-                  title="Атака"
+                  disabled
+                  className="relative shrink-0 min-w-[36px] min-h-[36px] rounded-sm border-2 border-slate-700/50 bg-slate-900/40 flex items-center justify-center opacity-50 cursor-not-allowed"
+                  title="Ближний бой — в разработке"
+                  aria-label="Ближний бой — в разработке"
                 >
-                  <Sword className="w-3 h-3 text-red-400" />
+                  <Sword className="w-3.5 h-3.5 text-slate-600" />
+                  <span className="absolute -top-1.5 -right-1.5 px-1 py-0.5 text-[7px] font-mono font-bold uppercase bg-amber-600 text-white rounded-sm leading-none">Скоро</span>
                 </button>
 
                 {/* Info button */}
