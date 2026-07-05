@@ -693,18 +693,25 @@ export function CombatResults({
               {/* Defender */}
               <div className="bg-slate-900/60 p-4 rounded-lg border-2 border-red-600/50">
                 <div className="text-xs font-mono opacity-60 text-red-400 mb-3 text-center">Защищающийся</div>
-                <div className="flex flex-col items-center">
-                  <AnimatedDice
-                    value={meleeResult.defenderRoll}
-                    maxSide={6}
-                    color="red"
-                    size="md"
-                    delay={150}
-                    isHit={meleeResult.winner === 'defender'}
-                    bonus={meleeResult.defenderTotal - meleeResult.defenderRoll}
-                    total={meleeResult.defenderTotal}
-                  />
-                </div>
+                {result.meleeOutcome && parameters.targetType === 'artillery' ? (
+                  // Artillery (machine melee) defender rolls NO D6 — defense = armor only (#125).
+                  <div className="flex flex-col items-center justify-center gap-1 py-2">
+                    <div className="text-base font-black text-red-400">Броня: {parameters.targetArmor}</div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center">
+                    <AnimatedDice
+                      value={meleeResult.defenderRoll}
+                      maxSide={6}
+                      color="red"
+                      size="md"
+                      delay={150}
+                      isHit={meleeResult.winner === 'defender'}
+                      bonus={meleeResult.defenderTotal - meleeResult.defenderRoll}
+                      total={meleeResult.defenderTotal}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           )}

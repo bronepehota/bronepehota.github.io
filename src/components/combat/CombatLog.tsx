@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { CombatLogEntry, CombatResult } from '@/lib/combat-types';
-import { History, Download, Trash2, ChevronDown, ChevronUp, Target, Sword, Bomb } from 'lucide-react';
+import { History, Download, Trash2, ChevronDown, ChevronUp, Target, Sword, Bomb, Flame } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface CombatLogProps {
@@ -33,6 +33,8 @@ export function CombatLog({ entries, onClear, onExport, className }: CombatLogPr
         return <Sword className="w-4 h-4 text-red-400" />;
       case 'grenade':
         return <Bomb className="w-4 h-4 text-green-400" />;
+      case 'ram':
+        return <Flame className="w-4 h-4 text-orange-400" />;
       default:
         return null;
     }
@@ -46,6 +48,8 @@ export function CombatLog({ entries, onClear, onExport, className }: CombatLogPr
         return 'Ближний бой';
       case 'grenade':
         return 'Граната';
+      case 'ram':
+        return 'Таран';
       default:
         return actionType;
     }

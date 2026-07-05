@@ -5,6 +5,7 @@ import { MachineStatusHeader } from './machine-view/MachineStatusHeader';
 import { PilotModal } from './machine-view/PilotModal';
 import { ArmyUnit, Machine, DurabilityZone, PilotInfo } from '@/lib/types';
 import { Flame, Sword, Wrench } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export interface MachineViewProps {
   unit: ArmyUnit;
@@ -167,7 +168,7 @@ export function MachineView({
       />
 
       {/* Close-combat actions (#125). Melee always available; Ram = community only. */}
-      <div className="grid grid-cols-2 gap-1.5">
+      <div className={cn("grid gap-1.5", rulesVersion === 'community_star_system' ? 'grid-cols-2' : 'grid-cols-1')}>
         <button
           type="button"
           disabled={isDestroyed}
