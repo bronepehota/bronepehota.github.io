@@ -317,13 +317,26 @@ export default function UnitCard({
       const idx = captureSoldierIdx;
       const pilotArmor = (data as Squad).soldiers[idx]?.armor ?? 0;
 
+      // #168: Initialize ammo correctly per rules version.
+      // Tehnolog: single pool (currentAmmo from player input).
+      // Community: per-weapon ammo from template (full load); currentAmmo = sum for display.
+      const weapons = (fullMachine as Machine).weapons || [];
+      const usePerWeapon = usePerWeaponAmmo; // rulesVersion === 'community_star_system'
+      const weaponAmmo = usePerWeapon
+        ? weapons.map((w: any) => w.ammo ?? fullMachine.ammo_max ?? 0)
+        : undefined;
+      const effectiveAmmo = usePerWeapon
+        ? (weaponAmmo as number[]).reduce((s: number, a: number) => s + a, 0)
+        : currentAmmo;
+
       const newMachineUnit: ArmyUnit = assignInstanceNumber(
         {
           instanceId,
           type: 'machine',
           data: fullMachine,
           currentDurability,
-          currentAmmo,
+          currentAmmo: effectiveAmmo,
+          ...(weaponAmmo ? { weaponAmmo } : {}),
           pilotInfo: {
             squadInstanceId: unit.instanceId,
             soldierIndex: idx,
