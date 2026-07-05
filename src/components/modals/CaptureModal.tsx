@@ -19,6 +19,7 @@ interface CaptureModalProps {
   armyFaction: string;
   capturingSoldierRank: number;
   strictPilotRankEnabled: boolean;
+  usePerWeaponAmmo?: boolean;
   onConfirm: (
     machine: CaptureCandidate,
     currentDurability: number,
@@ -41,6 +42,7 @@ export function CaptureModal({
   armyFaction,
   capturingSoldierRank,
   strictPilotRankEnabled,
+  usePerWeaponAmmo,
   onConfirm,
 }: CaptureModalProps) {
   useEscapeToClose(isOpen, onClose);
@@ -465,7 +467,13 @@ export function CaptureModal({
                 </div>
               </div>
 
-              {/* Ammo stepper */}
+              {/* Ammo stepper — Tehnolog only (single pool).
+                  Community: per-weapon ammo from template, total = sum. */}
+              {usePerWeaponAmmo ? (
+                <div className="px-3 py-2.5 rounded-lg bg-slate-800/50 border border-slate-700/50 text-xs text-slate-400">
+                  💡 Боезапас по орудиям установится из карточки машины (полный). Общий = сумма по орудиям.
+                </div>
+              ) : (
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label
@@ -530,6 +538,7 @@ export function CaptureModal({
                   </button>
                 </div>
               </div>
+              )}
             </div>
           )}
         </div>

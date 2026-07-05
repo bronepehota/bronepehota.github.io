@@ -702,6 +702,7 @@ export default function UnitCard({
           armyFaction={army?.faction || 'polaris'}
           capturingSoldierRank={(data as Squad).soldiers[captureSoldierIdx]?.rank ?? 0}
           strictPilotRankEnabled={strictPilotRankEnabled}
+          usePerWeaponAmmo={usePerWeaponAmmo}
           onConfirm={handleCaptureConfirm}
         />
       )}
