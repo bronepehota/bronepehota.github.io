@@ -882,6 +882,8 @@ export default function UnitCard({
             rulesVersion={rulesVersion}
             onMelee={handleVehicleMelee}
             onRam={handleVehicleRam}
+            isCaptured={!!unit.isCaptured}
+            onToggleCaptured={() => updateUnit(unit.instanceId, (u) => ({ ...u, isCaptured: !u.isCaptured }))}
           />
         )}
       </div>
