@@ -324,7 +324,6 @@ export default function UnitCard({
           data: fullMachine,
           currentDurability,
           currentAmmo,
-          isCaptured: true,
           pilotInfo: {
             squadInstanceId: unit.instanceId,
             soldierIndex: idx,
