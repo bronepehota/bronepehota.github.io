@@ -257,11 +257,14 @@ export default function GameSession({
     setArmy({ ...army, units: updatedUnits });
   }, [army, setArmy]);
 
-  // #168: Append a captured machine to the army. The machine ArmyUnit is built
-  // in UnitCard (which has the capturing soldier context); GameSession only adds it.
+  // #168: Append a captured machine to the army. Uses armyRef.current (not closure
+  // army) so that the immediately-following updateUnit() call in handleCaptureConfirm
+  // sees the new machine — otherwise React 18 batching + stale closure would overwrite.
   const handleCaptureMachine = useCallback((newMachine: ArmyUnit) => {
-    setArmy({ ...army, units: [...army.units, newMachine] });
-  }, [army, setArmy]);
+    const newArmy = { ...armyRef.current, units: [...armyRef.current.units, newMachine] };
+    armyRef.current = newArmy;
+    setArmy(newArmy);
+  }, [setArmy]);
 
   // Handle navigation to a specific unit
   const handleNavigateToUnit = useCallback((unitInstanceId: string) => {
