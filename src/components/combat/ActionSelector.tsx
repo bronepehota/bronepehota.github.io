@@ -2,8 +2,9 @@
 
 import { CombatActionType } from '@/lib/combat-types';
 import { ArmyUnit, Squad } from '@/lib/types';
-import { Target, Sword, Bomb } from 'lucide-react';
+import { Target, Sword, Bomb, Flag } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getCaptureCandidates } from '@/lib/capture-catalog';
 
 interface ActionSelectorProps {
   onSelect: (action: CombatActionType) => void;
@@ -43,6 +44,13 @@ const getActionStyle = (actionType: CombatActionType) => {
       bg: 'bg-orange-950/30',
       hover: 'hover:bg-orange-950/50 hover:border-orange-500/60',
       shadow: 'shadow-orange-900/20',
+    },
+    capture: {
+      primary: 'text-fuchsia-400',
+      border: 'border-fuchsia-600/50',
+      bg: 'bg-fuchsia-950/30',
+      hover: 'hover:bg-fuchsia-950/50 hover:border-fuchsia-500/60',
+      shadow: 'shadow-fuchsia-900/20',
     },
   };
   return styles[actionType];
@@ -91,6 +99,21 @@ export function ActionSelector({
     : true;
   const canMelee = canSoldierMelee(unit, soldierIndex);
 
+  // #168: capture is soldier-only (squads), requires a non-pilot soldier and a non-empty catalog.
+  // Machines and calculator mode (no unit) never offer capture.
+  const catalogNonEmpty = unit ? getCaptureCandidates().length > 0 : false;
+  const soldierAlreadyPilot = (() => {
+    if (!unit || unit.type !== 'squad' || soldierIndex === null || soldierIndex === undefined) return false;
+    const s = (unit.data as Squad).soldiers[soldierIndex];
+    return !!s?.isPilot;
+  })();
+  const canCapture = !!unit
+    && unit.type === 'squad'
+    && soldierIndex !== null
+    && soldierIndex !== undefined
+    && catalogNonEmpty
+    && !soldierAlreadyPilot;
+
   const actions: Array<{
     type: CombatActionType;
     label: string;
@@ -121,6 +144,13 @@ export function ActionSelector({
       description: '1D20 на площадь • D6 дистанция',
       icon: <Bomb className="w-6 h-6" />,
       disabled: !grenadesAvailable,
+    },
+    {
+      type: 'capture',
+      label: 'ЗАХВАТ',
+      description: 'Захватить технику',
+      icon: <Flag className="w-6 h-6" />,
+      hidden: !canCapture,
     },
   ];
 

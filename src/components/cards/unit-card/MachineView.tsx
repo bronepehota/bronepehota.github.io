@@ -34,6 +34,8 @@ export interface MachineViewProps {
   rulesVersion?: string;
   onMelee?: () => void;
   onRam?: () => void;
+  isCaptured?: boolean;
+  onToggleCaptured?: () => void;
 }
 
 export function MachineView({
@@ -62,7 +64,9 @@ export function MachineView({
   onNavigateToUnit,
   rulesVersion,
   onMelee,
-  onRam
+  onRam,
+  isCaptured,
+  onToggleCaptured
 }: MachineViewProps) {
   const machine = unit.data as Machine;
   const [pilotModalOpen, setPilotModalOpen] = useState(false);
@@ -83,11 +87,20 @@ export function MachineView({
   // Get weapon shots tracking from unit state
   const weaponShots: Record<number, number> = unit.machineWeaponShots || {};
 
+  // #168: All gameplay actions are locked when the machine is destroyed OR
+  // captured by the opponent (banner + grayscale + disabled controls).
+  const isDestroyedBool = isDestroyed || currentDurability === 0;
+  const inactive = isDestroyedBool || !!isCaptured;
+
   return (
-    <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-3 flex flex-col gap-3">
-      {/* Machine Status Header — clean badges + PilotChip + durability bar */}
-      {imageUrl ? (
-        <MachineStatusHeader
+    <div className={cn(
+      "bg-slate-800/30 border border-slate-700/50 rounded-xl p-3 flex flex-col gap-3",
+      isCaptured ? 'grayscale opacity-60' : ''
+    )}>
+      {/* Machine Status Header — locked when captured (#168) */}
+      <div className={cn(isCaptured ? 'pointer-events-none' : '')}>
+        {imageUrl ? (
+          <MachineStatusHeader
           faction={machine.faction}
           imageUrl={imageUrl}
           machineName={machineName || machine.name}
@@ -116,7 +129,23 @@ export function MachineView({
         <div className="relative bg-slate-900/60 p-2 rounded-sm border border-slate-700/50">
           <div className="text-center text-xs font-mono opacity-50">Нет изображения</div>
         </div>
+        )}
+      </div>
+
+      {/* #168 Side B: captured banner + toggle (after header for discoverability) */}
+      {isCaptured && (
+        <div className="rounded-lg border-2 border-red-600/60 bg-red-950/40 px-3 py-2 text-center">
+          <span className="text-sm font-black uppercase tracking-wider text-red-300">ЗАХВАЧЕНА ПРОТИВНИКОМ</span>
+        </div>
       )}
+      <button
+        type="button"
+        disabled={!onToggleCaptured || currentDurability === 0}
+        onClick={onToggleCaptured}
+        className="min-h-[44px] rounded-lg px-2 py-2 text-xs font-bold border border-slate-700/50 bg-slate-900/30 text-slate-400 hover:bg-slate-800/50 disabled:opacity-30 transition-colors"
+      >
+        {isCaptured ? 'Вернуть (перезахват)' : 'Отметить захваченной'}
+      </button>
 
       {/* Damage / repair row — secondary controls */}
       {imageUrl && (
@@ -124,7 +153,7 @@ export function MachineView({
           <button
             type="button"
             onClick={() => updateDurability(-1)}
-            disabled={currentDurability === 0}
+            disabled={inactive || currentDurability === 0}
             className="flex-1 min-h-[44px] rounded-lg py-2 text-xs font-bold border bg-red-950/30 border-red-800/40 text-red-300 flex items-center justify-center gap-1.5 disabled:opacity-30"
           >
             <Flame className="w-4 h-4" /> <span>−1 Урон</span>
@@ -132,7 +161,7 @@ export function MachineView({
           <button
             type="button"
             onClick={() => updateDurability(1)}
-            disabled={currentDurability === maxDurability}
+            disabled={!!isCaptured || currentDurability === maxDurability}
             className="flex-1 min-h-[44px] rounded-lg py-2 text-xs font-bold border bg-emerald-950/30 border-emerald-800/40 text-emerald-300 flex items-center justify-center gap-1.5 disabled:opacity-30"
           >
             <Wrench className="w-4 h-4" /> <span>+1 Ремонт</span>
@@ -140,23 +169,27 @@ export function MachineView({
         </div>
       )}
 
-      {/* Weapons List - always show for all rules versions */}
-      <MachineWeaponsList
-        weapons={machine.weapons}
-        weaponShots={weaponShots}
-        fireRate={machine.fire_rate}
-        totalShotsUsed={unit.machineShotsUsed || 0}
-        currentAmmo={unit.currentAmmo || 0}
-        maxAmmo={machine.ammo_max}
-        weaponAmmo={unit.weaponAmmo}
-        usePerWeaponAmmo={usePerWeaponAmmo}
-        onWeaponAttack={onWeaponAttack}
-        onWeaponInfo={onWeaponInfo}
-        stepToCmFactor={stepToCmFactor}
-      />
+      {/* Weapons List - always show for all rules versions.
+          #168: lock (no clicks, faded) when machine is captured. */}
+      <div className={cn(isCaptured ? 'pointer-events-none opacity-40' : '')}>
+        <MachineWeaponsList
+          weapons={machine.weapons}
+          weaponShots={weaponShots}
+          fireRate={machine.fire_rate}
+          totalShotsUsed={unit.machineShotsUsed || 0}
+          currentAmmo={unit.currentAmmo || 0}
+          maxAmmo={machine.ammo_max}
+          weaponAmmo={unit.weaponAmmo}
+          usePerWeaponAmmo={usePerWeaponAmmo}
+          onWeaponAttack={onWeaponAttack}
+          onWeaponInfo={onWeaponInfo}
+          stepToCmFactor={stepToCmFactor}
+        />
+      </div>
 
-      {/* Ammo Panel - full width */}
-      <MachineAmmoPanel
+      {/* Ammo Panel - locked when captured (#168) */}
+      <div className={cn(isCaptured ? 'pointer-events-none opacity-40' : '')}>
+        <MachineAmmoPanel
         currentAmmo={unit.currentAmmo || 0}
         maxAmmo={machine.ammo_max}
         shotsUsed={unit.machineShotsUsed || 0}
@@ -166,12 +199,14 @@ export function MachineView({
         onUpdateAmmo={updateAmmo}
         usePerWeaponAmmo={usePerWeaponAmmo}
       />
+      </div>
 
-      {/* Close-combat actions (#125). Melee always available; Ram = community only. */}
+      {/* Close-combat actions (#125). Melee always available; Ram = community only.
+          #168: locked when destroyed or captured (inactive). */}
       <div className={cn("grid gap-1.5", rulesVersion === 'community_star_system' ? 'grid-cols-2' : 'grid-cols-1')}>
         <button
           type="button"
-          disabled={isDestroyed}
+          disabled={inactive}
           onClick={onMelee}
           className="min-h-[44px] rounded-lg px-2 py-2 text-xs font-bold border border-red-700/50 bg-red-950/30 text-red-300 hover:bg-red-950/50 disabled:opacity-40 transition-colors flex items-center justify-center gap-1.5"
         >
@@ -181,7 +216,7 @@ export function MachineView({
         {rulesVersion === 'community_star_system' && (
           <button
             type="button"
-            disabled={isDestroyed}
+            disabled={inactive}
             onClick={onRam}
             className="min-h-[44px] rounded-lg px-2 py-2 text-xs font-bold border border-amber-700/50 bg-amber-950/30 text-amber-300 hover:bg-amber-950/50 disabled:opacity-40 transition-colors flex items-center justify-center gap-1.5"
           >

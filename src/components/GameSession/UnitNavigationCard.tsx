@@ -2,7 +2,7 @@
 
 import { memo } from 'react';
 import { ArmyUnit, Squad, FactionID } from '@/lib/types';
-import { Check, X } from 'lucide-react';
+import { Check, X, Flag } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { BASE_PATH } from '@/lib/constants';
 
@@ -12,6 +12,7 @@ interface UnitNavigationCardProps {
   isActive: boolean;
   isDone: boolean;
   isDead: boolean;
+  isCaptured?: boolean;
   isMachine: boolean;
   onClick: () => void;
   faction: FactionID;
@@ -45,6 +46,7 @@ export const UnitNavigationCard = memo(function UnitNavigationCard({
   isActive,
   isDone,
   isDead,
+  isCaptured,
   isMachine,
   onClick,
   dockStyles,
@@ -84,6 +86,7 @@ export const UnitNavigationCard = memo(function UnitNavigationCard({
 
       {isActive && <div className="absolute inset-0 bg-slate-700/30" />}
       {isDead && <div className="absolute inset-0 bg-red-900/50" />}
+      {isCaptured && <div className="absolute inset-0 bg-orange-900/50" />}
 
       <div className={cn(
         "absolute w-4 h-4 transition-all z-20",
@@ -133,6 +136,14 @@ export const UnitNavigationCard = memo(function UnitNavigationCard({
           </div>
         </div>
       )}
+
+      {isCaptured && (
+        <div className="absolute inset-0 flex items-center justify-center z-30 bg-orange-900/30">
+          <div className="w-8 h-8 md:w-10 md:h-10 bg-orange-600 rounded-full flex items-center justify-center shadow-xl">
+            <Flag className="w-4 h-4 md:w-5 md:h-5 text-white" strokeWidth={2.5} />
+          </div>
+        </div>
+      )}
     </button>
   );
 }, (prevProps, nextProps) => {
@@ -141,6 +152,7 @@ export const UnitNavigationCard = memo(function UnitNavigationCard({
     prevProps.unit.instanceId === nextProps.unit.instanceId &&
     prevProps.isActive === nextProps.isActive &&
     prevProps.isDone === nextProps.isDone &&
-    prevProps.isDead === nextProps.isDead
+    prevProps.isDead === nextProps.isDead &&
+    prevProps.isCaptured === nextProps.isCaptured
   );
 });

@@ -257,6 +257,15 @@ export default function GameSession({
     setArmy({ ...army, units: updatedUnits });
   }, [army, setArmy]);
 
+  // #168: Append a captured machine to the army. Uses armyRef.current (not closure
+  // army) so that the immediately-following updateUnit() call in handleCaptureConfirm
+  // sees the new machine — otherwise React 18 batching + stale closure would overwrite.
+  const handleCaptureMachine = useCallback((newMachine: ArmyUnit) => {
+    const newArmy = { ...armyRef.current, units: [...armyRef.current.units, newMachine] };
+    armyRef.current = newArmy;
+    setArmy(newArmy);
+  }, [setArmy]);
+
   // Handle navigation to a specific unit
   const handleNavigateToUnit = useCallback((unitInstanceId: string) => {
     const targetIdx = army.units.findIndex((u: ArmyUnit) => u.instanceId === unitInstanceId);
@@ -783,6 +792,7 @@ export default function GameSession({
               army={army}
               onPilotAssign={handlePilotAssign}
               onPilotRemove={handlePilotRemove}
+              onCaptureMachine={handleCaptureMachine}
               onNavigateToUnit={handleNavigateToUnit}
               strictPilotRankEnabled={strictPilotRankEnabled}
               distanceInputUnit={distanceInputUnit}
@@ -836,7 +846,7 @@ export default function GameSession({
             <div className="relative">
               <div className="flex overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-hide items-center px-1 py-1.5 gap-1">
             {(() => {
-              const statusOrder: Record<string, number> = { active: 0, done: 1, dead: 2 };
+              const statusOrder: Record<string, number> = { active: 0, done: 1, dead: 2, captured: 3 };
               // Sort and group units: active first, then done/dead
               const sortedUnits = army.units
               .map((unit, idx) => ({ unit, idx, originalIndex: idx }))
@@ -865,8 +875,9 @@ export default function GameSession({
               }
               lastStatus = currentStatus;
 
-              const isDone = unitStatus === 'done' || unitStatus === 'dead';
+              const isDone = unitStatus === 'done' || unitStatus === 'dead' || unitStatus === 'captured';
               const isDead = unitStatus === 'dead';
+              const isCaptured = unitStatus === 'captured';
 
               elements.push(
                 <UnitNavigationCard
@@ -875,6 +886,7 @@ export default function GameSession({
                   isActive={isActive}
                   isDone={isDone}
                   isDead={isDead}
+                  isCaptured={isCaptured}
                   isMachine={isMachine}
                   onClick={() => setFocusedUnitIdx(originalIndex)}
                   dockStyles={dockStyles}
