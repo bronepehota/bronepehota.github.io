@@ -139,6 +139,8 @@ src/data/encyclopedia/
 
 **Key Pattern**: Game data (cost, soldiers, weapons) lives in `sources/`. Lore data (descriptions, history, tactics) lives in `encyclopedia/`. `encyclopedia-utils.ts` merges them for display.
 
+**`EncyclopediaUnit` carries LORE only** — no gameplay stats (`rank`, `weapons`, `durability_max`, `ammo_max` are undefined). To resolve real Machine data: `resolveMachineFromSource(id)` from `src/lib/machine-resolver.ts` — looks up `getSource(id).machines` via the encyclopedia's `sources` list.
+
 **Source-based JSON storage** in `src/data/sources/`:
 ```
 src/data/sources/
@@ -180,7 +182,7 @@ Both `.md` files are machine-converted from their PDFs; the PDF is authoritative
 ### State Management
 
 **Client-side persistence** (localStorage keys — canonical list in `src/lib/constants.ts`):
-- `bronepehota_army` - Player's army state (units, totalCost, faction, sourceId)
+- `bronepehota_army` - Player's army state (units, totalCost, faction, sourceId). Stored as `{ schemaVersion: 1, army: Army }`. When seeding for testing, set localStorage on the landing page (`/`) BEFORE navigating to `/app` — the `/app` pagehide handler flushes the in-memory army, overwriting any seed set while `/app` is loaded.
 - `bronepehota_view` - Current view: 'army' (builder) or 'game' (session)
 - `bronepehota_display_mode` - Display mode preference
 - `bronepehota_army_list_source` - Selected army list source ('star_system' or 'tehnolog')
@@ -238,6 +240,7 @@ Dice notation parsing: `D6`, `D12+2`, `2D12`, `ББ` (melee)
 - `calculateMelee(attackerMelee, defenderMelee)` → combat resolution
 - `multiplyRange(rangeStr, multiplier)` → multiply dice range (e.g., D6 → D12, D6+2 → D12+4)
 - **Negative bonuses supported**: `parseRoll`/`multiplyRange`/`addBonusToRoll` (all in `src/lib/game-logic.ts`) match an optional `+N`/`-N` (e.g. `D6-1`, `2D6-1`). `2D6-1` parses to bonus -1; such values are valid in unit `range`/`power`.
+- **Extending `CombatActionType`**: add to the union (`combat-types.ts`), add a style entry to `ActionSelector.tsx`'s `getActionStyle` map, handle in `executeAction` switch (`useCombatFlow.ts`), handle in `handleApplyResult` (`UnitCard.tsx`), and — for non-dice actions — intercept in `onSelectAction` to skip PARAMETERS/ROLLING/RESULTS phases.
 - **Combat target is manual input**: the app is single-army (one player's units per session). `useCombatFlow` is attacker-focused — the target is manually-entered numbers (`targetArmor`, `distance`), NOT a tracked enemy unit. Target-side mechanics (zone damage, pilot test) read from manual input or the player's own machine state (when they damage THEIR machine).
 
 ### Rules System (`src/lib/`)
@@ -285,6 +288,10 @@ src/components/
 ```
 
 **Main Page** (`src/app/app/page.tsx`): ArmyBuilder (construction) OR GameSession (gameplay).
+
+**`GameSession.updateUnit`** uses `armyRef.current` (a ref synced to `army` via useEffect), not the closure `army`. When mutating army in the same event handler as `updateUnit` (e.g. adding a unit + marking a soldier), use `armyRef.current` + update the ref synchronously before `setArmy` — otherwise React 18 batching silently overwrites the earlier mutation.
+
+**`deriveUnitStatus`** (`src/lib/unit-status.ts`) returns `'active' | 'done' | 'dead' | 'captured'`. `'captured'` (machines only, `isCaptured` flag) renders orange in the navigator (Flag icon) — de facto dead but recaptureable.
 
 **Calculator Page** (`src/app/calculator/page.tsx`): Standalone combat calculator — fully decoupled from Army/ArmyUnit. Users manually input all combat parameters (range, power, melee, armor, rank) via `DiceInputPopup`. Reuses combat components (`ActionSelector`, `ParameterInputs`, `CombatResults`) via the `CombatantData` adapter pattern. Accessible from landing page and direct URL.
 
