@@ -10,6 +10,7 @@ import {
   getCaptureCandidates,
   opposingFaction,
 } from '@/lib/capture-catalog';
+import { resolveMachineFromSource } from '@/lib/machine-resolver';
 import { Shield, X, ArrowLeft, Crosshair, Minus, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -23,7 +24,8 @@ interface CaptureModalProps {
   onConfirm: (
     machine: CaptureCandidate,
     currentDurability: number,
-    currentAmmo: number
+    currentAmmo: number,
+    weaponAmmo?: number[]
   ) => void;
 }
 
@@ -62,6 +64,8 @@ export function CaptureModal({
   const [selected, setSelected] = useState<CaptureCandidate | null>(null);
   const [durability, setDurability] = useState<number>(1);
   const [ammo, setAmmo] = useState<number>(0);
+  const [weaponAmmoState, setWeaponAmmoState] = useState<number[]>([]);
+  const [resolvedWeapons, setResolvedWeapons] = useState<{ name: string; ammo: number }[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
 
   // Initialize + reset state on open/close
@@ -70,6 +74,8 @@ export function CaptureModal({
       setStep('machine');
       setSelected(null);
       setSearchQuery('');
+      setWeaponAmmoState([]);
+      setResolvedWeapons([]);
       setFactionFilter(
         opposingFaction(
           armyFaction,
@@ -79,12 +85,16 @@ export function CaptureModal({
     }
   }, [isOpen, armyFaction, allFactions]);
 
-  // When a new machine is selected, default durability/ammo to its max (most
-  // convenient for the player — they reduce as damage is taken / ammo is spent).
+  // When a new machine is selected, resolve its weapons (for per-weapon ammo)
+  // and default durability/ammo to max.
   useEffect(() => {
     if (selected) {
       setDurability(selected.durability_max);
       setAmmo(selected.ammo_max);
+      const full = resolveMachineFromSource(selected.id);
+      const ranged = (full?.weapons || []).filter((w: any) => w.range !== 'ББ');
+      setResolvedWeapons(ranged.map((w: any) => ({ name: w.name, ammo: w.ammo ?? selected.ammo_max ?? 0 })));
+      setWeaponAmmoState(ranged.map((w: any) => w.ammo ?? selected.ammo_max ?? 0));
     }
   }, [selected]);
 
@@ -107,8 +117,13 @@ export function CaptureModal({
   const handleConfirm = () => {
     if (!selected) return;
     const d = Math.max(1, Math.min(selected.durability_max, durability));
-    const a = Math.max(0, Math.min(selected.ammo_max, ammo));
-    onConfirm(selected, d, a);
+    if (usePerWeaponAmmo) {
+      const total = weaponAmmoState.reduce((s, v) => s + Math.max(0, v), 0);
+      onConfirm(selected, d, total, weaponAmmoState.map((v) => Math.max(0, v)));
+    } else {
+      const a = Math.max(0, Math.min(selected.ammo_max, ammo));
+      onConfirm(selected, d, a);
+    }
     onClose();
   };
 
@@ -467,11 +482,62 @@ export function CaptureModal({
                 </div>
               </div>
 
-              {/* Ammo stepper — Tehnolog only (single pool).
-                  Community: per-weapon ammo from template, total = sum. */}
+              {/* Ammo — community: per-weapon steppers; Tehnolog: single pool. */}
               {usePerWeaponAmmo ? (
-                <div className="px-3 py-2.5 rounded-lg bg-slate-800/50 border border-slate-700/50 text-xs text-slate-400">
-                  💡 Боезапас по орудиям установится из карточки машины (полный). Общий = сумма по орудиям.
+                <div className="space-y-3">
+                  <div className="text-sm font-bold flex items-center gap-1.5">
+                    <Crosshair className="w-4 h-4 text-slate-400" />
+                    Боезапас по орудиям
+                  </div>
+                  {resolvedWeapons.map((w, idx) => (
+                    <div key={idx}>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-slate-300 truncate">{w.name}</span>
+                        <span className="text-xs text-slate-500 ml-2">макс. {w.ammo}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setWeaponAmmoState((prev) => { const n = [...prev]; n[idx] = Math.max(0, (n[idx] || 0) - 1); return n; })}
+                          disabled={(weaponAmmoState[idx] || 0) <= 0}
+                          aria-label={`Уменьшить: ${w.name}`}
+                          className={cn(
+                            'w-11 h-11 rounded-lg flex items-center justify-center transition-colors min-w-[44px] min-h-[44px]',
+                            (weaponAmmoState[idx] || 0) <= 0
+                              ? 'bg-slate-800 text-slate-600 cursor-not-allowed'
+                              : 'bg-slate-800 text-slate-200 hover:bg-slate-700'
+                          )}
+                        >
+                          <Minus className="w-4 h-4" />
+                        </button>
+                        <input
+                          type="number"
+                          min={0}
+                          max={w.ammo}
+                          value={weaponAmmoState[idx] || 0}
+                          onChange={(e) => {
+                            const v = parseInt(e.target.value, 10);
+                            setWeaponAmmoState((prev) => { const n = [...prev]; n[idx] = Number.isNaN(v) ? 0 : Math.min(w.ammo, Math.max(0, v)); return n; });
+                          }}
+                          className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-center text-lg font-bold min-h-[44px] focus:outline-none focus:border-amber-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setWeaponAmmoState((prev) => { const n = [...prev]; n[idx] = Math.min(w.ammo, (n[idx] || 0) + 1); return n; })}
+                          disabled={(weaponAmmoState[idx] || 0) >= w.ammo}
+                          aria-label={`Увеличить: ${w.name}`}
+                          className={cn(
+                            'w-11 h-11 rounded-lg flex items-center justify-center transition-colors min-w-[44px] min-h-[44px]',
+                            (weaponAmmoState[idx] || 0) >= w.ammo
+                              ? 'bg-slate-800 text-slate-600 cursor-not-allowed'
+                              : 'bg-slate-800 text-slate-200 hover:bg-slate-700'
+                          )}
+                        >
+                          <Plus className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ) : (
               <div>

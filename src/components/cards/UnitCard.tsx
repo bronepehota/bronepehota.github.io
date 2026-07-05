@@ -305,7 +305,7 @@ export default function UnitCard({
   // mark the soldier's action as done (mirrors PilotAssignmentModal's soldier
   // marking). onCaptureMachine must be threaded from GameSession (which holds setArmy).
   const handleCaptureConfirm = useCallback(
-    (machine: CaptureCandidate, currentDurability: number, currentAmmo: number) => {
+    (machine: CaptureCandidate, currentDurability: number, currentAmmo: number, enteredWeaponAmmo?: number[]) => {
       if (!onCaptureMachine || !army || captureSoldierIdx === null) {
         setShowCaptureModal(false);
         setCaptureSoldierIdx(null);
@@ -319,11 +319,11 @@ export default function UnitCard({
 
       // #168: Initialize ammo correctly per rules version.
       // Tehnolog: single pool (currentAmmo from player input).
-      // Community: per-weapon ammo from template (full load); currentAmmo = sum for display.
+      // Community: per-weapon ammo entered by player (or template fallback); currentAmmo = sum.
       const weapons = (fullMachine as Machine).weapons || [];
-      const usePerWeapon = usePerWeaponAmmo; // rulesVersion === 'community_star_system'
+      const usePerWeapon = usePerWeaponAmmo;
       const weaponAmmo = usePerWeapon
-        ? weapons.map((w: any) => w.ammo ?? fullMachine.ammo_max ?? 0)
+        ? (enteredWeaponAmmo ?? weapons.map((w: any) => w.ammo ?? fullMachine.ammo_max ?? 0))
         : undefined;
       const effectiveAmmo = usePerWeapon
         ? (weaponAmmo as number[]).reduce((s: number, a: number) => s + a, 0)
