@@ -846,7 +846,7 @@ export default function GameSession({
             <div className="relative">
               <div className="flex overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-hide items-center px-1 py-1.5 gap-1">
             {(() => {
-              const statusOrder: Record<string, number> = { active: 0, done: 1, dead: 2 };
+              const statusOrder: Record<string, number> = { active: 0, done: 1, dead: 2, captured: 3 };
               // Sort and group units: active first, then done/dead
               const sortedUnits = army.units
               .map((unit, idx) => ({ unit, idx, originalIndex: idx }))
@@ -875,8 +875,9 @@ export default function GameSession({
               }
               lastStatus = currentStatus;
 
-              const isDone = unitStatus === 'done' || unitStatus === 'dead';
+              const isDone = unitStatus === 'done' || unitStatus === 'dead' || unitStatus === 'captured';
               const isDead = unitStatus === 'dead';
+              const isCaptured = unitStatus === 'captured';
 
               elements.push(
                 <UnitNavigationCard
@@ -885,6 +886,7 @@ export default function GameSession({
                   isActive={isActive}
                   isDone={isDone}
                   isDead={isDead}
+                  isCaptured={isCaptured}
                   isMachine={isMachine}
                   onClick={() => setFocusedUnitIdx(originalIndex)}
                   dockStyles={dockStyles}

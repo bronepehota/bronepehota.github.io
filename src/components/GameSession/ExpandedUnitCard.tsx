@@ -46,6 +46,13 @@ const sectionStyles: Record<UnitStatus, {
     text: 'text-red-300 line-through',
     opacity: 'opacity-50',
   },
+  captured: {
+    cardBg: 'bg-gradient-to-b from-[#1a1207] to-[#120a05]',
+    cardBorder: 'border-orange-700',
+    imageBg: 'bg-gradient-to-br from-[#2a1a0a] to-[#1a1207]',
+    text: 'text-orange-300',
+    opacity: 'opacity-50',
+  },
 };
 
 function getUnitStats(unit: ArmyUnit, isMachine: boolean): string[] {

@@ -58,6 +58,7 @@ export function ExpandedNavigator({ army, focusedUnitIdx, onSelectUnit }: Expand
       active: [],
       done: [],
       dead: [],
+      captured: [],
     };
     army.units.forEach((unit, idx) => {
       const status = deriveUnitStatus(unit);
