@@ -201,11 +201,11 @@ test.describe('Machine capture (#168)', () => {
     await confirmButton.click();
     await page.waitForTimeout(500);
 
-    // A new machine unit appears in the navigator (the seeded squad + the
-    // captured machine). The captured machine instanceId is timestamp-based,
-    // so assert by navigator count growth and the pilot badge on the soldier.
+    // A new machine unit appears in the navigator (squad + existing machine +
+    // the captured machine = 3 units). The captured machine instanceId is
+    // timestamp-based, so assert by navigator count growth and the pilot badge.
     const navCards = page.locator('[data-testid^="unit-nav-"]');
-    await expect(navCards).toHaveCount(2, { timeout: 5000 });
+    await expect(navCards).toHaveCount(3, { timeout: 5000 });
 
     // Re-open the squad card and verify the first soldier now carries the
     // «ПИЛОТ» pilot badge.
