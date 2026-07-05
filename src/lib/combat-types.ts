@@ -17,7 +17,7 @@ export type CombatPhase =
 /**
  * Combat action types
  */
-export type CombatActionType = 'shot' | 'melee' | 'grenade' | 'ram';
+export type CombatActionType = 'shot' | 'melee' | 'grenade' | 'ram' | 'capture';
 
 /**
  * Unit type for combat

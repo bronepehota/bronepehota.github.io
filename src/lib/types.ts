@@ -210,6 +210,8 @@ export interface ArmyUnit {
   isMachineShot?: boolean;
   isMachineMelee?: boolean;
   isMachineDone?: boolean;
+  /** Machine captured by the opponent (inactive, recapture-able). #168 */
+  isCaptured?: boolean;
   machineShotsUsed?: number; // количество выстрелов в этом ходу
   machineWeaponShots?: { [weaponIndex: number]: number }; // количество выстрелов из каждого оружия
   pilotInfo?: PilotInfo;     // Pilot information for machines
