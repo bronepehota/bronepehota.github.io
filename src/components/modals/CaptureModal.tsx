@@ -210,6 +210,11 @@ export function CaptureModal({
           {/* Step 1: Machine picker */}
           {step === 'machine' && (
             <>
+              {/* Rules reminder */}
+              <div className="mb-3 px-3 py-2 rounded-lg bg-amber-900/20 border border-amber-700/30 text-[11px] text-amber-400">
+                ⚠ Захвату подлежит только машина без пилота. Узнайте у соперника её текущую прочность и боезапас.
+              </div>
+
               {/* Faction chips */}
               <div className="flex flex-wrap gap-2 mb-4">
                 <button

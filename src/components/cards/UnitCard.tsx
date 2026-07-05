@@ -17,8 +17,7 @@ import { EncyclopediaModal } from '../modals/EncyclopediaModal';
 import { PanicTestModal } from '../modals/PanicTestModal';
 import { checkPanicTrigger } from '@/lib/panic-logic';
 import { EnrichedUnit, getEnrichedUnit } from '@/lib/encyclopedia-utils';
-import { getEncyclopediaUnit } from '@/lib/encyclopedia-registry';
-import { getSource } from '@/lib/sources-registry';
+import { resolveMachineFromSource } from '@/lib/machine-resolver';
 import { CaptureCandidate } from '@/lib/capture-catalog';
 import { CaptureModal } from '../modals/CaptureModal';
 import { SquadView } from './unit-card/SquadView';
@@ -34,13 +33,8 @@ import { useUnitCardState } from './unit-card/hooks/useUnitCardState';
  * the candidate's flat fields if no source has it (defensive — should not happen).
  */
 function resolveMachineData(machine: CaptureCandidate): Machine {
-  const enc = getEncyclopediaUnit(machine.id);
-  const sourceIds = enc?.sources?.map((s) => s.id) ?? [];
-  for (const sourceId of sourceIds) {
-    const sourceData = getSource(sourceId);
-    const found = sourceData?.machines.find((m) => m.id === machine.id);
-    if (found) return found as Machine;
-  }
+  const found = resolveMachineFromSource(machine.id);
+  if (found) return found;
   // Fallback: synthesize a minimal Machine from the candidate fields.
   return {
     id: machine.id,

@@ -97,9 +97,10 @@ export function MachineView({
       "bg-slate-800/30 border border-slate-700/50 rounded-xl p-3 flex flex-col gap-3",
       isCaptured ? 'grayscale opacity-60' : ''
     )}>
-      {/* Machine Status Header — clean badges + PilotChip + durability bar */}
-      {imageUrl ? (
-        <MachineStatusHeader
+      {/* Machine Status Header — locked when captured (#168) */}
+      <div className={cn(isCaptured ? 'pointer-events-none' : '')}>
+        {imageUrl ? (
+          <MachineStatusHeader
           faction={machine.faction}
           imageUrl={imageUrl}
           machineName={machineName || machine.name}
@@ -128,7 +129,23 @@ export function MachineView({
         <div className="relative bg-slate-900/60 p-2 rounded-sm border border-slate-700/50">
           <div className="text-center text-xs font-mono opacity-50">Нет изображения</div>
         </div>
+        )}
+      </div>
+
+      {/* #168 Side B: captured banner + toggle (after header for discoverability) */}
+      {isCaptured && (
+        <div className="rounded-lg border-2 border-red-600/60 bg-red-950/40 px-3 py-2 text-center">
+          <span className="text-sm font-black uppercase tracking-wider text-red-300">ЗАХВАЧЕНА ПРОТИВНИКОМ</span>
+        </div>
       )}
+      <button
+        type="button"
+        disabled={!onToggleCaptured || currentDurability === 0}
+        onClick={onToggleCaptured}
+        className="min-h-[44px] rounded-lg px-2 py-2 text-xs font-bold border border-slate-700/50 bg-slate-900/30 text-slate-400 hover:bg-slate-800/50 disabled:opacity-30 transition-colors"
+      >
+        {isCaptured ? 'Вернуть (перезахват)' : 'Отметить захваченной'}
+      </button>
 
       {/* Damage / repair row — secondary controls */}
       {imageUrl && (
@@ -170,8 +187,9 @@ export function MachineView({
         />
       </div>
 
-      {/* Ammo Panel - full width */}
-      <MachineAmmoPanel
+      {/* Ammo Panel - locked when captured (#168) */}
+      <div className={cn(isCaptured ? 'pointer-events-none opacity-40' : '')}>
+        <MachineAmmoPanel
         currentAmmo={unit.currentAmmo || 0}
         maxAmmo={machine.ammo_max}
         shotsUsed={unit.machineShotsUsed || 0}
@@ -181,6 +199,7 @@ export function MachineView({
         onUpdateAmmo={updateAmmo}
         usePerWeaponAmmo={usePerWeaponAmmo}
       />
+      </div>
 
       {/* Close-combat actions (#125). Melee always available; Ram = community only.
           #168: locked when destroyed or captured (inactive). */}
@@ -206,21 +225,6 @@ export function MachineView({
           </button>
         )}
       </div>
-
-      {/* #168: Side B — captured banner + recapture toggle. */}
-      {isCaptured && (
-        <div className="rounded-lg border-2 border-red-600/60 bg-red-950/40 px-3 py-2 text-center">
-          <span className="text-sm font-black uppercase tracking-wider text-red-300">ЗАХВАЧЕНА ПРОТИВНИКОМ</span>
-        </div>
-      )}
-      <button
-        type="button"
-        disabled={!onToggleCaptured || currentDurability === 0}
-        onClick={onToggleCaptured}
-        className="min-h-[44px] rounded-lg px-2 py-2 text-xs font-bold border border-slate-700/50 bg-slate-900/30 text-slate-400 hover:bg-slate-800/50 disabled:opacity-30 transition-colors"
-      >
-        {isCaptured ? 'Вернуть (перезахват)' : 'Отметить захваченной'}
-      </button>
 
       {/* Pilot sheet — opened from PilotChip when a pilot is assigned */}
       {pilotInfo && (
