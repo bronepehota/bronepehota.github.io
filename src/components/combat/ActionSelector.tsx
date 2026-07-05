@@ -36,7 +36,14 @@ const getActionStyle = (actionType: CombatActionType) => {
       bg: 'bg-emerald-950/30',
       hover: 'hover:bg-emerald-950/50 hover:border-emerald-500/60',
       shadow: 'shadow-emerald-900/20',
-    }
+    },
+    ram: {
+      primary: 'text-orange-400',
+      border: 'border-orange-600/50',
+      bg: 'bg-orange-950/30',
+      hover: 'hover:bg-orange-950/50 hover:border-orange-500/60',
+      shadow: 'shadow-orange-900/20',
+    },
   };
   return styles[actionType];
 };

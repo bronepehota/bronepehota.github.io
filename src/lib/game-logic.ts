@@ -288,6 +288,51 @@ export function calculateMeleeWithSurpriseAttack(attackerMelee: number, defender
 }
 
 /**
+ * Machine melee attacker strength = currentDurability (Броня) + ΣББ (Tehnolog §8 / Star System §8).
+ * ΣББ is the sum of ББ-weapon powers (computed by the caller, e.g. MachineView.meleeBonus).
+ */
+export function machineMeleeAttackerStrength(currentDurability: number, meleeBonus: number): number {
+  return currentDurability + meleeBonus;
+}
+
+export interface MachineMeleeOutcome {
+  winner: 'attacker' | 'defender' | 'draw';
+  outcome: 'repelled' | 'destroyed' | 'damage';
+  damage: number;
+}
+
+/**
+ * Resolve machine-melee outcome (Таблица 7). Caller passes already-computed totals.
+ * attacker > defender → infantry destroyed / machine-artillery take damage = difference.
+ * attacker ≤ defender → repelled.
+ */
+export function resolveMachineMeleeOutcome(
+  attackerTotal: number,
+  defenderTotal: number,
+  defenderType: 'infantry' | 'machine' | 'artillery'
+): MachineMeleeOutcome {
+  if (attackerTotal > defenderTotal) {
+    if (defenderType === 'infantry') return { winner: 'attacker', outcome: 'destroyed', damage: 0 };
+    return { winner: 'attacker', outcome: 'damage', damage: attackerTotal - defenderTotal };
+  }
+  const winner = defenderTotal > attackerTotal ? 'defender' : 'draw';
+  return { winner, outcome: 'repelled', damage: 0 };
+}
+
+/** Таран: D6 1-4 → killed, 5-6 → survived (Star System §8, PDF p.47). */
+export function ramInfantryKilled(roll: number): boolean {
+  return roll >= 1 && roll <= 4;
+}
+
+/** Roll D6 for each rammed infantryman. */
+export function calculateRam(count: number): { index: number; roll: number; killed: boolean }[] {
+  return Array.from({ length: Math.max(0, count) }, (_, i) => {
+    const roll = rollDie(6);
+    return { index: i, roll, killed: ramInfantryKilled(roll) };
+  });
+}
+
+/**
  * Format combat result for display
  */
 export function formatCombatResult(

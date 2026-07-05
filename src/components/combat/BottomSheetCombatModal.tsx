@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { X, ChevronLeft, Target, Sword, Bomb, EyeOff, Crosshair, Mountain } from 'lucide-react';
+import { X, ChevronLeft, Target, Sword, Bomb, Flame, EyeOff, Crosshair, Mountain } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useBottomSheet } from '@/hooks/useBottomSheet';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
@@ -209,6 +209,7 @@ export function BottomSheetCombatModal({
                 {state.actionType === 'shot' && <Target className={cn("w-4 h-4", actionColors.primary)} />}
                 {state.actionType === 'melee' && <Sword className={cn("w-4 h-4", actionColors.primary)} />}
                 {state.actionType === 'grenade' && <Bomb className={cn("w-4 h-4", actionColors.primary)} />}
+                {state.actionType === 'ram' && <Flame className={cn("w-4 h-4", actionColors.primary)} />}
               </div>
             )}
             <div>
@@ -220,7 +221,8 @@ export function BottomSheetCombatModal({
                 {state.actionType && (
                   <div className="text-[8px] font-mono text-slate-600 uppercase tracking-wider">
                     {state.actionType === 'shot' ? 'ВЫСТРЕЛ' :
-                     state.actionType === 'melee' ? 'БЛИЖНИЙ БОЙ' : 'ГРАНАТА'}
+                     state.actionType === 'melee' ? 'БЛИЖНИЙ БОЙ' :
+                     state.actionType === 'ram' ? 'ТАРАН' : 'ГРАНАТА'}
                   </div>
                 )}
                 {/* Status indicator dots */}

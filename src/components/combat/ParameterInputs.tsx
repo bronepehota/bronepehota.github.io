@@ -329,6 +329,21 @@ export function ParameterInputs({
 
   return (
     <div className={cn("space-y-2 md:space-y-3", className)}>
+      {/* Таран: number of rammed infantry (#125, community only) */}
+      {actionType === 'ram' && (
+        <div className="space-y-2">
+          <div className="text-[10px] uppercase tracking-wider text-slate-400">Пехотинцев переехано</div>
+          <div className="flex items-center justify-center gap-3">
+            <button type="button" onClick={() => onChange({ ramInfantryCount: Math.max(1, (parameters.ramInfantryCount || 1) - 1) })}
+              className="min-w-[44px] min-h-[44px] rounded-lg bg-slate-800 border border-slate-700 text-xl text-slate-200">−</button>
+            <div className="text-3xl font-black font-mono text-amber-300 w-10 text-center">{parameters.ramInfantryCount || 1}</div>
+            <button type="button" onClick={() => onChange({ ramInfantryCount: Math.min(20, (parameters.ramInfantryCount || 1) + 1) })}
+              className="min-w-[44px] min-h-[44px] rounded-lg bg-slate-800 border border-slate-700 text-xl text-slate-200">+</button>
+          </div>
+          <div className="text-[10px] text-slate-500 text-center">D6 на каждого: 1–4 убит, 5–6 выжил</div>
+        </div>
+      )}
+
       {/* Unit Stats Preview */}
       {(actionType === 'shot' || actionType === 'grenade') && renderShotGrenadeStats()}
       {actionType === 'melee' && renderMeleeStats()}
@@ -402,11 +417,53 @@ export function ParameterInputs({
             />
           )}
 
+          {/* Machine melee: defender type selector (#125, Таблица 6) */}
+          {actionType === 'melee' && unit?.type === 'machine' && (
+            <div className="space-y-2">
+              <div className="text-[10px] uppercase tracking-wider text-slate-400">Тип цели</div>
+              <div className="grid grid-cols-3 gap-1.5">
+                {([['infantry', 'Пехотинец'], ['machine', 'Машина'], ['artillery', 'Орудие']] as const).map(([v, label]) => (
+                  <button
+                    key={v}
+                    type="button"
+                    onClick={() => onChange({ targetType: v })}
+                    className={cn(
+                      'min-h-[44px] rounded-lg px-2 py-1.5 text-xs font-bold border transition-colors',
+                      (parameters.targetType || 'infantry') === v
+                        ? 'bg-cyan-950/50 border-cyan-600/60 text-cyan-300'
+                        : 'bg-slate-900/40 border-slate-700/50 text-slate-400'
+                    )}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              {/* Defender machine's ΣББ (excluded on surprise attack) */}
+              {(parameters.targetType || 'infantry') === 'machine' && (
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[10px] uppercase tracking-wider text-slate-400">ΣББ цели</span>
+                  <input
+                    type="number"
+                    min={0}
+                    value={parameters.defenderMeleeBonus ?? 0}
+                    onChange={(e) => onChange({ defenderMeleeBonus: Math.max(0, parseInt(e.target.value, 10) || 0) })}
+                    className="w-16 min-h-[44px] bg-slate-900/60 border border-slate-700/50 rounded-lg text-center text-sm font-mono text-slate-200"
+                  />
+                </div>
+              )}
+              {(parameters.isSurpriseAttack && (parameters.targetType || 'infantry') === 'machine') && (
+                <div className="text-[10px] text-purple-400">Внезапная атака: ΣББ цели не учитывается</div>
+              )}
+            </div>
+          )}
+
           {/* Target Armor Input */}
           {(actionType === 'shot' || actionType === 'grenade' || actionType === 'melee') && (
             <div className="flex flex-col gap-1.5">
               <label className="text-[10px] md:text-xs opacity-50 uppercase font-bold">
-                {effectiveTargetIsVehicle ? 'макс зоны' : 'Броня цели'}
+                {actionType === 'melee' && unit?.type === 'machine'
+                  ? ((parameters.targetType || 'infantry') === 'infantry' ? 'Бр цели' : 'Броня цели')
+                  : (effectiveTargetIsVehicle ? 'макс зоны' : 'Броня цели')}
               </label>
               <NumberStepper
                 value={effectiveTargetArmor}
