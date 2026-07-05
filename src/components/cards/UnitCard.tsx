@@ -4,12 +4,12 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { GitHubPagesImage as Image } from '../GitHubPagesImage';
 import { ArmyUnit, Squad, Machine, Weapon, PanicTestResult, PilotInfo, Army, isMachine } from '@/lib/types';
 import { Crosshair, X } from 'lucide-react';
-import { formatUnitNumber } from '@/lib/unit-utils';
+import { formatUnitNumber, getNextInstanceNumber, assignInstanceNumber } from '@/lib/unit-utils';
 import { cn } from '@/lib/utils';
 import { formatRange } from '@/lib/distance-utils';
 import { BottomSheetCombatModal } from '../combat/BottomSheetCombatModal';
 import { useCombatFlowController } from '../combat/CombatFlowController';
-import { CombatLogEntry } from '@/lib/combat-types';
+import { CombatActionType, CombatLogEntry } from '@/lib/combat-types';
 import { PilotAssignmentModal } from '../modals/PilotAssignmentModal';
 import { PilotTestModal } from '../combat/PilotTestModal';
 import { usePilotTestFlow } from '@/hooks/usePilotTestFlow';
@@ -17,9 +17,46 @@ import { EncyclopediaModal } from '../modals/EncyclopediaModal';
 import { PanicTestModal } from '../modals/PanicTestModal';
 import { checkPanicTrigger } from '@/lib/panic-logic';
 import { EnrichedUnit, getEnrichedUnit } from '@/lib/encyclopedia-utils';
+import { getEncyclopediaUnit } from '@/lib/encyclopedia-registry';
+import { getSource } from '@/lib/sources-registry';
+import { CaptureCandidate } from '@/lib/capture-catalog';
+import { CaptureModal } from '../modals/CaptureModal';
 import { SquadView } from './unit-card/SquadView';
 import { MachineView } from './unit-card/MachineView';
 import { useUnitCardState } from './unit-card/hooks/useUnitCardState';
+
+/**
+ * #168: Resolve the full Machine gameplay data for a captured machine.
+ * The encyclopedia registry only carries lore/metadata (id/name/faction/image);
+ * the actual gameplay fields (rank, fire_rate, weapons, speed_sectors,
+ * durability_max, ammo_max) live in the source JSON. We search every source
+ * listed on the encyclopedia entry and return the first match, falling back to
+ * the candidate's flat fields if no source has it (defensive — should not happen).
+ */
+function resolveMachineData(machine: CaptureCandidate): Machine {
+  const enc = getEncyclopediaUnit(machine.id);
+  const sourceIds = enc?.sources?.map((s) => s.id) ?? [];
+  for (const sourceId of sourceIds) {
+    const sourceData = getSource(sourceId);
+    const found = sourceData?.machines.find((m) => m.id === machine.id);
+    if (found) return found as Machine;
+  }
+  // Fallback: synthesize a minimal Machine from the candidate fields.
+  return {
+    id: machine.id,
+    name: machine.name,
+    shortName: machine.name,
+    faction: machine.faction as Machine['faction'],
+    cost: 0,
+    rank: machine.rank,
+    fire_rate: 0,
+    ammo_max: machine.ammo_max,
+    durability_max: machine.durability_max,
+    speed_sectors: [],
+    weapons: [],
+    image: machine.image,
+  } as Machine;
+}
 
 interface UnitCardProps {
   unit: ArmyUnit;
@@ -29,6 +66,8 @@ interface UnitCardProps {
   allUnits?: ArmyUnit[]; // All units in the army for pilot assignment
   onPilotAssign?: (machineInstanceId: string, pilotInfo: PilotInfo) => void;
   onPilotRemove?: (machineInstanceId: string) => void;
+  /** #168: parent (GameSession) appends the captured machine to the army. */
+  onCaptureMachine?: (newMachine: ArmyUnit) => void;
   onNavigateToUnit?: (unitInstanceId: string) => void; // Navigate to unit card
   strictPilotRankEnabled?: boolean;
   distanceInputUnit?: 'steps' | 'cm';
@@ -53,6 +92,7 @@ export default function UnitCard({
   allUnits = [],
   onPilotAssign,
   onPilotRemove,
+  onCaptureMachine,
   onNavigateToUnit: _onNavigateToUnit,
   strictPilotRankEnabled = true,
   distanceInputUnit = 'steps',
@@ -82,6 +122,10 @@ export default function UnitCard({
   const [selectedWeaponInfo, setSelectedWeaponInfo] = useState<{ weapon: Weapon; weaponIdx: number } | null>(null);
   const [showPanicModal, setShowPanicModal] = useState(false);
   const [enrichedUnit, setEnrichedUnit] = useState<EnrichedUnit | null>(null);
+
+  // #168: capture flow state — which soldier is capturing (captured before cancelCombat resets it).
+  const [showCaptureModal, setShowCaptureModal] = useState(false);
+  const [captureSoldierIdx, setCaptureSoldierIdx] = useState<number | null>(null);
 
   const combatController = useCombatFlowController();
   const pilotTestFlow = usePilotTestFlow();
@@ -261,6 +305,81 @@ export default function UnitCard({
       onPilotRemove(unit.instanceId);
     }
   };
+
+  // #168: Build the captured machine ArmyUnit and ask the parent to add it to
+  // the army, then mark the capturing soldier as the pilot of that machine and
+  // mark the soldier's action as done (mirrors PilotAssignmentModal's soldier
+  // marking). onCaptureMachine must be threaded from GameSession (which holds setArmy).
+  const handleCaptureConfirm = useCallback(
+    (machine: CaptureCandidate, currentDurability: number, currentAmmo: number) => {
+      if (!onCaptureMachine || !army || captureSoldierIdx === null) {
+        setShowCaptureModal(false);
+        setCaptureSoldierIdx(null);
+        return;
+      }
+      const instanceNumber = getNextInstanceNumber(army, machine.id);
+      const fullMachine = resolveMachineData(machine);
+      const instanceId = `${machine.id}_${Date.now()}`;
+      const idx = captureSoldierIdx;
+      const pilotArmor = (data as Squad).soldiers[idx]?.armor ?? 0;
+
+      const newMachineUnit: ArmyUnit = assignInstanceNumber(
+        {
+          instanceId,
+          type: 'machine',
+          data: fullMachine,
+          currentDurability,
+          currentAmmo,
+          isCaptured: true,
+          pilotInfo: {
+            squadInstanceId: unit.instanceId,
+            soldierIndex: idx,
+            pilotArmor,
+            alive: true,
+          },
+        } as ArmyUnit,
+        instanceNumber
+      );
+
+      // 1. Parent appends the machine to the army.
+      onCaptureMachine(newMachineUnit);
+
+      // 2. Mark the soldier as the pilot of the new machine + action done.
+      updateUnit(unit.instanceId, (u) => {
+        if (u.type !== 'squad') return u;
+        const soldiers = [...(u.data as Squad).soldiers];
+        if (soldiers[idx]) {
+          soldiers[idx] = { ...soldiers[idx], isPilot: true, pilotOfInstanceId: instanceId };
+        }
+        const actionsUsed = [...(u.actionsUsed || [])];
+        actionsUsed[idx] = {
+          ...(actionsUsed[idx] || { moved: false, shot: false, melee: false, done: false }),
+          done: true,
+        };
+        return { ...u, data: { ...u.data, soldiers } as Squad, actionsUsed };
+      });
+
+      setShowCaptureModal(false);
+      setCaptureSoldierIdx(null);
+    },
+    [army, captureSoldierIdx, data, onCaptureMachine, unit.instanceId, updateUnit]
+  );
+
+  // Intercept combat action selection — 'capture' opens CaptureModal instead of
+  // entering the combat flow. The soldier index must be captured BEFORE
+  // cancelCombat() (which resets combatController.state).
+  const handleSelectAction = useCallback(
+    (action: CombatActionType) => {
+      if (action === 'capture') {
+        setCaptureSoldierIdx(combatController.state.soldierIndex ?? null);
+        setShowCaptureModal(true);
+        combatController.cancelCombat();
+      } else {
+        combatController.selectAction(action);
+      }
+    },
+    [combatController]
+  );
 
   // Handle pilot survival test - start the modal flow
   const handlePilotSurvivalTest = () => {
@@ -503,7 +622,7 @@ export default function UnitCard({
           army={army || { name: '', totalCost: 0, units: allUnits || [] }}
           onGoBack={combatController.goBack}
           onClose={combatController.cancelCombat}
-          onSelectAction={combatController.selectAction}
+          onSelectAction={handleSelectAction}
           onSetParameters={combatController.setParameters}
           onExecuteAction={combatController.executeAction}
           onApplyResult={handleApplyResult}
@@ -563,6 +682,21 @@ export default function UnitCard({
           rulesVersion={rulesVersion}
           onTestComplete={handlePanicTestComplete}
           onClose={() => setShowPanicModal(false)}
+        />
+      )}
+
+      {/* #168: Capture Modal — only squads can capture; captureSoldierIdx gates render. */}
+      {showCaptureModal && captureSoldierIdx !== null && isSquad && (
+        <CaptureModal
+          isOpen={showCaptureModal}
+          onClose={() => {
+            setShowCaptureModal(false);
+            setCaptureSoldierIdx(null);
+          }}
+          armyFaction={army?.faction || 'polaris'}
+          capturingSoldierRank={(data as Squad).soldiers[captureSoldierIdx]?.rank ?? 0}
+          strictPilotRankEnabled={strictPilotRankEnabled}
+          onConfirm={handleCaptureConfirm}
         />
       )}
 

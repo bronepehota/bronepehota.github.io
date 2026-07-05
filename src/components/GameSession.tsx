@@ -257,6 +257,12 @@ export default function GameSession({
     setArmy({ ...army, units: updatedUnits });
   }, [army, setArmy]);
 
+  // #168: Append a captured machine to the army. The machine ArmyUnit is built
+  // in UnitCard (which has the capturing soldier context); GameSession only adds it.
+  const handleCaptureMachine = useCallback((newMachine: ArmyUnit) => {
+    setArmy({ ...army, units: [...army.units, newMachine] });
+  }, [army, setArmy]);
+
   // Handle navigation to a specific unit
   const handleNavigateToUnit = useCallback((unitInstanceId: string) => {
     const targetIdx = army.units.findIndex((u: ArmyUnit) => u.instanceId === unitInstanceId);
@@ -783,6 +789,7 @@ export default function GameSession({
               army={army}
               onPilotAssign={handlePilotAssign}
               onPilotRemove={handlePilotRemove}
+              onCaptureMachine={handleCaptureMachine}
               onNavigateToUnit={handleNavigateToUnit}
               strictPilotRankEnabled={strictPilotRankEnabled}
               distanceInputUnit={distanceInputUnit}
