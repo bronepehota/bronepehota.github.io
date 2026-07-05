@@ -28,6 +28,13 @@ interface CaptureModalProps {
 
 type StepState = 'machine' | 'state';
 
+const FACTION_LABELS: Record<string, string> = {
+  polaris: 'Полярис',
+  protectorate: 'Протекторат',
+  mercenaries: 'Наемники',
+};
+const factionLabel = (id: string) => FACTION_LABELS[id] ?? id;
+
 export function CaptureModal({
   isOpen,
   onClose,
@@ -239,7 +246,7 @@ export function CaptureModal({
                         : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
                     )}
                   >
-                    {f}
+                    {factionLabel(f)}
                   </button>
                 ))}
               </div>
@@ -321,7 +328,7 @@ export function CaptureModal({
                               {m.name}
                             </div>
                             <div className="flex items-center gap-3 text-xs text-slate-400 mt-1">
-                              <span className="capitalize">{m.faction}</span>
+                              <span>{factionLabel(m.faction)}</span>
                               <span className="flex items-center gap-1">
                                 <Shield className="w-3 h-3" />
                                 {m.durability_max}
@@ -383,7 +390,7 @@ export function CaptureModal({
                     {selected.name}
                   </div>
                   <div className="text-xs text-slate-400 capitalize">
-                    {selected.faction}
+                    {factionLabel(selected.faction)}
                   </div>
                 </div>
               </div>

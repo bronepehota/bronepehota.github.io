@@ -421,8 +421,8 @@ export function ParameterInputs({
           {actionType === 'melee' && unit?.type === 'machine' && (
             <div className="space-y-2">
               <div className="text-[10px] uppercase tracking-wider text-slate-400">Тип цели</div>
-              <div className="grid grid-cols-3 gap-1.5">
-                {([['infantry', 'Пехотинец'], ['machine', 'Машина'], ['artillery', 'Орудие']] as const).map(([v, label]) => (
+              <div className="grid grid-cols-2 gap-1.5">
+                {([['infantry', 'Пехотинец'], ['machine', 'Машина']] as const).map(([v, label]) => (
                   <button
                     key={v}
                     type="button"
