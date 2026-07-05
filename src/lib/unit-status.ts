@@ -4,7 +4,7 @@ export type UnitStatus = 'active' | 'done' | 'dead' | 'captured';
 
 export function deriveUnitStatus(unit: ArmyUnit): UnitStatus {
   // #168: captured machine — de facto dead, but recaptureable
-  if (unit.isCaptured) return 'captured';
+  if (unit.type === 'machine' && unit.isCaptured) return 'captured';
   if (unit.type === 'squad') {
     const data = unit.data as Squad;
     const allDead = (unit.deadSoldiers?.length || 0) === data.soldiers.length;
