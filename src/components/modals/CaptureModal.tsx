@@ -46,17 +46,21 @@ export function CaptureModal({
     [allCatalog]
   );
 
-  const [factionFilter, setFactionFilter] = useState<string | null>(null);
+  const [factionFilter, setFactionFilter] = useState<string | null>(
+    () => opposingFaction(armyFaction, allFactions.length ? allFactions : [armyFaction])
+  );
   const [step, setStep] = useState<StepState>('machine');
   const [selected, setSelected] = useState<CaptureCandidate | null>(null);
   const [durability, setDurability] = useState<number>(1);
   const [ammo, setAmmo] = useState<number>(0);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Initialize + reset state on open/close
   useEffect(() => {
     if (isOpen) {
       setStep('machine');
       setSelected(null);
+      setSearchQuery('');
       setFactionFilter(
         opposingFaction(
           armyFaction,
@@ -81,12 +85,13 @@ export function CaptureModal({
         soldierRank: capturingSoldierRank,
         strictRank: strictPilotRankEnabled,
         factionFilter,
-      }),
+      }).filter((m) => !searchQuery || m.name.toLowerCase().includes(searchQuery.toLowerCase())),
     [
       allCatalog,
       capturingSoldierRank,
       strictPilotRankEnabled,
       factionFilter,
+      searchQuery,
     ]
   );
 
@@ -233,6 +238,15 @@ export function CaptureModal({
                   </button>
                 ))}
               </div>
+
+              {/* Search by name */}
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Поиск по имени…"
+                className="w-full mb-3 px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-500/50 min-h-[44px]"
+              />
 
               {/* Machine list */}
               {candidates.length === 0 ? (

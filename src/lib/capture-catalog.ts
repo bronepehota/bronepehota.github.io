@@ -1,4 +1,5 @@
-import { getUnitsByType } from './encyclopedia-registry';
+import { getUnitsByType, getEncyclopediaUnit } from './encyclopedia-registry';
+import { getSource } from './sources-registry';
 
 /** A machine selectable for capture (cross-faction catalog). */
 export interface CaptureCandidate {
@@ -11,17 +12,39 @@ export interface CaptureCandidate {
   image?: string;
 }
 
-/** Aggregate all machines across factions (encyclopedia). */
+/** Resolve real gameplay stats for a machine from sources (not the stat-less encyclopedia lore). */
+function resolveStats(id: string): { rank: number; durability_max: number; ammo_max: number; image?: string } | null {
+  const enc = getEncyclopediaUnit(id);
+  const sourceIds = enc?.sources?.map((s: any) => s.id) ?? [];
+  for (const sourceId of sourceIds) {
+    const sourceData = getSource(sourceId);
+    const found = sourceData?.machines.find((m: any) => m.id === id);
+    if (found) {
+      return {
+        rank: found.rank ?? 0,
+        durability_max: found.durability_max ?? 0,
+        ammo_max: found.ammo_max ?? 0,
+        image: found.image,
+      };
+    }
+  }
+  return null;
+}
+
+/** Aggregate all machines across factions, resolving real gameplay stats from sources. */
 export function getCaptureCandidates(): CaptureCandidate[] {
-  return getUnitsByType('machine').map((u: any) => ({
-    id: u.id,
-    name: u.name,
-    faction: u.faction,
-    rank: u.rank ?? 0,
-    durability_max: u.durability_max ?? 0,
-    ammo_max: u.ammo_max ?? 0,
-    image: u.image,
-  }));
+  return getUnitsByType('machine').map((u: any) => {
+    const real = resolveStats(u.id);
+    return {
+      id: u.id,
+      name: u.name,
+      faction: u.faction ?? 'unknown',
+      rank: real?.rank ?? 0,
+      durability_max: real?.durability_max ?? 0,
+      ammo_max: real?.ammo_max ?? 0,
+      image: real?.image ?? u.image,
+    };
+  });
 }
 
 /** Filter catalog by capturing soldier's rank (strict) and optionally faction. */
