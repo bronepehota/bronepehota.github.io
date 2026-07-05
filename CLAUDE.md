@@ -78,6 +78,7 @@ npm run test:e2e            # All E2E tests pass
 - Legacy tests still use `await page.waitForTimeout(200)` after clicks; convert to the
   above when refactoring a spec.
 - **Dev server auto-starts** on `http://localhost:3001` before tests
+- **Dev server port cleanup**: multiple `npm run dev` instances pile up on ports 3000-3003. Before restarting: `pkill -9 -f next` + `rm -rf .next`. After a clean start, `/app` takes ~30s to compile on first access (Next.js dev on-demand compilation).
 - **Headed mode**: `npm run test:e2e:headed` (visible browser)
 - **Debug mode**: `npm run test:e2e:debug` (Playwright Inspector)
 - **Shared setup helpers**: `e2e/helpers/setup.ts` — use `setupToArmyBuilder`, `setupGameSessionWithSquad`, `setupToPreparation` etc. to reduce setup duplication
@@ -207,6 +208,7 @@ The main app page (`src/app/app/page.tsx`) manages the `Army` state and passes i
 **Runtime vs Template Data**:
 - Template data (Squad, Machine) = immutable definitions from JSON
 - Runtime data (ArmyUnit) = instances with current state (durability, ammo, deadSoldiers, actionsUsed)
+- **Community per-weapon ammo** (`rulesVersion === 'community_star_system'`): `ArmyUnit.weaponAmmo: number[]` (one entry per weapon); `currentAmmo` = sum for display. `usePerWeaponAmmo` flag gates the UI (per-weapon steppers/bars vs single pool). Tehnolog: single `currentAmmo`/`ammo_max` pool.
 
 ### Core Types (`src/lib/types.ts`)
 
@@ -308,7 +310,7 @@ Soldiers can be assigned as pilots to machines. Assigned pilots show "ПИЛОТ
 
 - `PilotAssignmentModal.tsx`: Two-step modal (squad → soldier)
 - `SoldierActions.tsx`: Shows pilot navigation when `isPilot=true`
-- `TacticalDashboard.tsx`: Displays pilot status/portrait
+- `MachineStatusHeader.tsx`: Status header (badges, PilotChip, durability bar, alert bar). `PilotChip.tsx` (compact pilot indicator) → `PilotModal.tsx` (centered modal: portrait, test, change pilot).
 - Navigation via `onNavigateToUnit(instanceId)` prop chain
 - Types: `PilotInfo { squadInstanceId, soldierIndex, pilotArmor, alive }`; Soldier has `isPilot` and `pilotOfInstanceId` flags
 
