@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Globe, Quote, Users, Shield, Zap, Skull, Flag } from 'lucide-react';
+import { ArrowLeft, Globe, Quote, Users, Shield, Zap, Skull, Flag, Star } from 'lucide-react';
 import type { EncyclopediaFaction } from '@/lib/encyclopedia-registry';
 import { getUnitsForFaction } from '@/lib/encyclopedia-registry';
 import { FactionLogo } from '@/components/FactionLogo';
@@ -18,10 +18,10 @@ export default function FactionsListPage({ factions }: FactionsListPageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   useEffect(() => setIsLoaded(true), []);
 
-  // Stable display order: polaris, protectorate, mercenaries
-  const order = ['polaris', 'protectorate', 'mercenaries'];
+  // Stable display order: polaris, protectorate, mercenaries, rutenia
+  const order = ['polaris', 'protectorate', 'mercenaries', 'rutenia'];
   // Fallback glyph when a faction has no logo image (e.g. mercenaries)
-  const symbolIcon: Record<string, typeof Shield> = { Shield, Zap, Skull, Flag };
+  const symbolIcon: Record<string, typeof Shield> = { Shield, Zap, Skull, Flag, Star };
   const sorted = [...factions].sort(
     (a, b) => order.indexOf(a.id) - order.indexOf(b.id),
   );

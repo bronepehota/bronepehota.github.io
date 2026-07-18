@@ -3,17 +3,17 @@ import type { Army, ArmyUnit, FactionID, RulesVersionID } from '../lib/types';
 describe('Type Validation', () => {
   describe('FactionID', () => {
     test('should accept valid faction IDs', () => {
-      const validFactions: FactionID[] = ['polaris', 'protectorate', 'mercenaries'];
+      const validFactions: FactionID[] = ['polaris', 'protectorate', 'mercenaries', 'rutenia'];
 
       validFactions.forEach(faction => {
-        expect(faction).toMatch(/^(polaris|protectorate|mercenaries)$/);
+        expect(faction).toMatch(/^(polaris|protectorate|mercenaries|rutenia)$/);
       });
     });
 
-    test('should have only three factions', () => {
-      const factions: FactionID[] = ['polaris', 'protectorate', 'mercenaries'];
+    test('should have four factions', () => {
+      const factions: FactionID[] = ['polaris', 'protectorate', 'mercenaries', 'rutenia'];
 
-      expect(factions).toHaveLength(3);
+      expect(factions).toHaveLength(4);
     });
   });
 
