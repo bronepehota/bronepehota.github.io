@@ -30,7 +30,7 @@ test.describe('Vehicle zone damage (#162)', () => {
     await actionButton.click({ force: true });
     await page.getByRole('button', { name: /выстрел/i }).first().click();
     // Wait for parameters phase to render (distance label is always present for shots)
-    await expect(page.getByText('Дистанция')).toBeVisible({ timeout: 3000 });
+    await expect(page.getByText('Дистанция').first()).toBeVisible({ timeout: 3000 });
   }
 
   test('«цель — техника» toggle shows «макс зоны» and yields vehicle damage', async ({ page }) => {

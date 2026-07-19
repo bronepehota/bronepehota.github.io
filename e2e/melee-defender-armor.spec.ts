@@ -30,7 +30,7 @@ test.describe('Melee defender armor (#160)', () => {
     await page.waitForTimeout(300);
 
     // Parameters: «Броня цели» present, «ББ цели» absent
-    await expect(page.getByText('Броня цели')).toBeVisible({ timeout: 3000 });
+    await expect(page.getByText('Броня цели').first()).toBeVisible({ timeout: 3000 });
     await expect(page.getByText('ББ цели')).toHaveCount(0);
 
     // Execute (АТАКОВАТЬ) → results render

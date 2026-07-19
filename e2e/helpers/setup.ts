@@ -77,9 +77,22 @@ export async function selectMission(page: Page, missionId?: string) {
   }
 
   await confirmButton.click();
+  if (missionId) {
+    // For a specific mission: wait until it's persisted to localStorage.
+    // The auto-fill (buildMissionArmy) is an async React effect that fires
+    // AFTER the step transition renders — budget-next-button alone doesn't
+    // guarantee the army write completed.
+    await page.waitForFunction((mid: string) => {
+      try {
+        const raw = localStorage.getItem('bronepehota_army');
+        return !!raw && JSON.parse(raw).army?.missionId === mid;
+      } catch { return false; }
+    }, missionId, { timeout: TIMEOUTS.load });
+  } else {
+    // Free play: wait for the budget step to render.
+    await expect(page.getByTestId('budget-next-button')).toBeVisible({ timeout: TIMEOUTS.load });
+  }
 }
-
-/** Full setup to army builder (unit selection step) */
 export async function setupToArmyBuilder(page: Page, opts?: { faction?: string; budget?: number }) {
   await clearStorage(page);
   await confirmRulesAndSource(page);
