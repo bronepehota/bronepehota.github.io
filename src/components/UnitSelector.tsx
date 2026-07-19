@@ -489,7 +489,6 @@ export function UnitSelector({
                     <div className="p-3 space-y-2">
                       {/* Name row */}
                       <div className="flex items-start gap-2">
-                        <div className="flex-1 min-w-0 flex items-center gap-1">
                           <h3 className={clsx(
                             'font-bold text-sm font-mono tracking-wide truncate flex-1 min-w-0',
                             affordable ? colors.text : 'text-slate-500'
@@ -498,14 +497,13 @@ export function UnitSelector({
                           </h3>
                           {allyFactionId && (
                             <span
-                              className="ml-1 inline-flex items-center justify-center w-5 h-5 rounded flex-shrink-0"
+                              className="inline-flex items-center justify-center w-5 h-5 rounded flex-shrink-0"
                               style={{ backgroundColor: getFactionColors(allyFactionId).primary + '33' }}
                               title={`Союзник: ${factionDisplayNames[allyFactionId] ?? allyFactionId}`}
                             >
                               <FactionLogo faction={allyFactionId} className="w-4 h-4" />
                             </span>
                           )}
-                        </div>
                         {/* Cost badge - absolutely positioned top-right */}
                         <div className="flex-shrink-0">
                           <span className={clsx(

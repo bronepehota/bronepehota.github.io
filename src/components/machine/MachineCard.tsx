@@ -127,28 +127,26 @@ export default function MachineCard({ machine, onAdd, onViewDetails, testId, all
       <div className="p-3 space-y-2">
         {/* Name row */}
         <div className="flex items-start gap-2">
-          <div className="flex-1 min-w-0 flex items-center gap-1">
-            <div className="flex-1 min-w-0">
-              <h3 className={clsx(
-                'font-bold text-sm font-mono tracking-wide truncate',
-                colors.accent
-              )}>
-                {machine.shortName || machine.name.toUpperCase()}
-              </h3>
-              <p className="text-[10px] text-slate-500 truncate font-mono">
-                {machine.class?.toUpperCase()}
-              </p>
-            </div>
-            {allyFactionId && (
-              <span
-                className="ml-1 inline-flex items-center justify-center w-5 h-5 rounded flex-shrink-0"
-                style={{ backgroundColor: getFactionColors(allyFactionId).primary + '33' }}
-                title={`Союзник: ${factionDisplayNames[allyFactionId] ?? allyFactionId}`}
-              >
-                <FactionLogo faction={allyFactionId} className="w-4 h-4" />
-              </span>
-            )}
+          <div className="flex-1 min-w-0">
+            <h3 className={clsx(
+              'font-bold text-sm font-mono tracking-wide truncate',
+              colors.accent
+            )}>
+              {machine.shortName || machine.name.toUpperCase()}
+            </h3>
+            <p className="text-[10px] text-slate-500 truncate font-mono">
+              {machine.class?.toUpperCase()}
+            </p>
           </div>
+          {allyFactionId && (
+            <span
+              className="inline-flex items-center justify-center w-5 h-5 rounded flex-shrink-0"
+              style={{ backgroundColor: getFactionColors(allyFactionId).primary + '33' }}
+              title={`Союзник: ${factionDisplayNames[allyFactionId] ?? allyFactionId}`}
+            >
+              <FactionLogo faction={allyFactionId} className="w-4 h-4" />
+            </span>
+          )}
           {/* Cost badge */}
           <div className="flex-shrink-0">
             <span className={clsx(

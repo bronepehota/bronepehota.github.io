@@ -141,6 +141,6 @@ test.describe('Энциклопедия', () => {
 
     // The polaris filter button lights up once the deep-link is applied (auto-waits).
     const polarisBtn = page.getByRole('button', { name: 'ПОЛЯРИС' });
-    await expect(polarisBtn).toHaveCSS('background-color', 'rgb(220, 38, 38)');
+    await expect(polarisBtn).toHaveCSS('background-color', 'rgb(239, 68, 68)');
   });
 });
