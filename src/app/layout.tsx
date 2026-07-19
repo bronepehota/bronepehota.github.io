@@ -39,8 +39,9 @@ const oswald = Oswald({
 })
 
 const SITE_NAME = 'Бронепехота';
-// Fully-absolute default social card (resolved manually to avoid basePath ambiguity).
-const OG_IMAGE = absoluteUrl('/images/hero-art.jpg');
+// Fully-absolute default social card — a 1200×630 screenshot of the landing hero
+// (regenerate via /tmp/shot-hero.mjs + /tmp/crop-og.py when the landing changes).
+const OG_IMAGE = absoluteUrl('/og-image.png');
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -80,8 +81,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: OG_IMAGE,
-        width: 600,
-        height: 370,
+        width: 1200,
+        height: 630,
         alt: 'Бронепехота — настольный варгейм',
       },
     ],
