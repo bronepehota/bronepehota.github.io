@@ -116,11 +116,20 @@ export function UnitSelector({
   );
 
   const availableUnits: UnitDisplay[] = useMemo(
-    () => [
-      ...availableSquads.map((s) => ({ type: 'squad' as const, data: s })),
-      ...availableMachines.map((m) => ({ type: 'machine' as const, data: m })),
-    ],
-    [availableSquads, availableMachines],
+    () => {
+      const units: UnitDisplay[] = [
+        ...availableSquads.map((s) => ({ type: 'squad' as const, data: s })),
+        ...availableMachines.map((m) => ({ type: 'machine' as const, data: m })),
+      ];
+      // Own-faction units first, allied units after (stable sort keeps source
+      // order within each group). selectedFaction's squads+machines lead, then allies.
+      return units.sort(
+        (a, b) =>
+          (a.data.faction === selectedFaction ? 0 : 1) -
+          (b.data.faction === selectedFaction ? 0 : 1),
+      );
+    },
+    [availableSquads, availableMachines, selectedFaction],
   );
 
   // Apply type filter to available units

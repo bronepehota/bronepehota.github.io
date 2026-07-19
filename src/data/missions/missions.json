@@ -343,7 +343,7 @@
         { "name": "Имперские багги (Хантер)", "type": "machine", "unitId": "hunter" }
       ],
       "protectorate": [
-        { "name": "Рутенийская гвардия", "type": "squad", "unitId": "protectorate_ruteniyskaya_gvardiya" },
+        { "name": "Рутенийская гвардия", "type": "squad", "unitId": "rutenia_ruteniyskaya_gvardiya" },
         { "name": "Рота «Валькирия» (спецназ Фелиции)", "type": "squad", "unitId": "protectorate_spetsnaz_planety_felitsiya" }
       ]
     }
