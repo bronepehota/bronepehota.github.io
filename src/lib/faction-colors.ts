@@ -29,4 +29,6 @@ export const factionDisplayNames: Record<FactionID, string> = {
 export const factionLogos: Partial<Record<FactionID, string>> = {
   polaris: '/images/factions/polaris.png',
   protectorate: '/images/factions/protectorate.png',
+  rutenia: '/images/factions/rutenia.png',
+  mercenaries: '/images/factions/mercenaries.png',
 };
