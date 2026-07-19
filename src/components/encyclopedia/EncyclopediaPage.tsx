@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { Search } from 'lucide-react';
 import { EncyclopediaUnit } from '@/lib/encyclopedia-registry';
 import { FactionID } from '@/lib/types';
+import { FACTIONS } from '@/lib/constants';
+import { factionDisplayNames, getFactionColors } from '@/lib/faction-colors';
 import { UnitCard } from './UnitCard';
 import { EncyclopediaTabs } from './EncyclopediaTabs';
 import { SQUAD_GROUP_IMAGE } from '@/lib/painted-images';
@@ -14,12 +16,7 @@ interface EncyclopediaPageProps {
   initialUnits: EncyclopediaUnit[];
 }
 
-const factions: { value: FactionID | 'all'; label: string; color: string }[] = [
-  { value: 'all', label: 'ВСЕ', color: '#A8A29E' },
-  { value: 'polaris', label: 'ПОЛЯРИС', color: '#DC2626' },
-  { value: 'protectorate', label: 'ПРОТЕКТОРАТ', color: '#06b6d4' },
-  { value: 'mercenaries', label: 'НАЁМНИКИ', color: '#EAB308' },
-];
+// Faction filter is derived from the units data inside the component (data-driven).
 
 type TypeFilter = 'all' | 'squad' | 'hero' | 'machine' | 'орудие';
 
@@ -39,6 +36,22 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoaded, setIsLoaded] = useState(false);
 
+  // Derive the faction filter from the units data — a new faction appears here
+  // automatically once it has units (no hardcoded faction list to maintain).
+  const factions = useMemo(() => {
+    const present = new Set(units.map((u) => u.faction));
+    const ordered = FACTIONS.filter((f) => present.has(f));            // canonical order
+    present.forEach((f) => { if (!FACTIONS.includes(f)) ordered.push(f); }); // custom factions last
+    return [
+      { value: 'all' as const, label: 'ВСЕ', color: '#A8A29E' },
+      ...ordered.map((f) => ({
+        value: f,
+        label: (factionDisplayNames[f] ?? f).toUpperCase(),
+        color: getFactionColors(f).primary,
+      })),
+    ];
+  }, [units]);
+
   useEffect(() => {
     setIsLoaded(true);
   }, []);
@@ -47,7 +60,7 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const f = new URLSearchParams(window.location.search).get('faction');
-    if (f === 'polaris' || f === 'protectorate' || f === 'mercenaries') {
+    if (f && units.some((u) => u.faction === f)) {
       setSelectedFaction(f);
     }
   }, []);

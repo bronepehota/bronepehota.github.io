@@ -12,7 +12,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Frontend Design**: When building new UI components or pages, use the `frontend-design` skill to ensure production-grade, visually polished interfaces that avoid generic AI aesthetics.
 
-**Prefer LSP tools** (`workspaceSymbol`, `goToDefinition`, `findReferences`) for code exploration over spawning Explore agents. Use `grep` for text search, LSP for symbol navigation.
+**Prefer LSP over grep/Explore for symbol navigation.** This repo has a working TypeScript LSP (the `typescript-lsp` plugin → `typescript-language-server` backed by the project's own `tsserver`) AND JetBrains IDE MCP (`mcp__idea__*`). Reach for them whenever you need *semantic* info — do NOT default to `grep` + Read; that grep-first reflex is the anti-pattern this project keeps falling into.
+
+### Code Navigation — LSP cheat sheet
+
+| You need… | Use |
+|---|---|
+| Definition / type / docs of a symbol | `hover`, `goToDefinition`, `get_symbol_info` |
+| Every caller of a function/symbol | `findReferences`, `incomingCalls` / `analyze_calls` |
+| What a function calls | `outgoingCalls` |
+| Find a symbol by name across the repo | `workspaceSymbol`, `search_symbol` |
+| All exports/symbols in one file | `documentSymbol` |
+| Rename a symbol everywhere | `rename_refactoring` (NEVER find/replace) |
+
+Use `grep` / `search_text` only for *literal* text (strings, comments, CSS classes, error messages). Use Explore agents only for broad multi-file sweeps where you want a conclusion, not a single symbol. (LSP diagnostics can lag mid-edit — see the stale-diagnostics note under Testing Workflow.)
 
 ## Development Commands
 
@@ -43,7 +56,7 @@ npm run test:e2e:debug   # Run E2E tests in debug mode with inspector
 
 ## Testing Workflow
 
-**ALWAYS write tests for new features.** The project has 1100+ unit tests (79 test files) and 94 E2E tests across 19 spec files. Both are required.
+**ALWAYS write tests for new features.** The project has 1250+ unit tests (93 test files) and 136 E2E tests across 33 spec files. Both are required.
 
 ### When to write what
 
@@ -79,6 +92,7 @@ npm run test:e2e            # All E2E tests pass
   above when refactoring a spec.
 - **Dev server auto-starts** on `http://localhost:3001` before tests
 - **Dev server port cleanup**: multiple `npm run dev` instances pile up on ports 3000-3003. Before restarting: `pkill -9 -f next` + `rm -rf .next`. After a clean start, `/app` takes ~30s to compile on first access (Next.js dev on-demand compilation).
+- **Background dev server**: run `npm run dev` as its own background command. Don't chain it behind `pkill`/`rm` in the same backgrounded call — that compound form has failed with empty output (exit 1). Do the cleanup in a separate foreground call first.
 - **Headed mode**: `npm run test:e2e:headed` (visible browser)
 - **Debug mode**: `npm run test:e2e:debug` (Playwright Inspector)
 - **Shared setup helpers**: `e2e/helpers/setup.ts` — use `setupToArmyBuilder`, `setupGameSessionWithSquad`, `setupToPreparation` etc. to reduce setup duplication
@@ -88,25 +102,41 @@ npm run test:e2e            # All E2E tests pass
 
 | Area | Spec file | Tests |
 |------|-----------|-------|
-| Calculator | `calculator.spec.ts` | 7 |
-| Combat flow | `combat.spec.ts` | 4 |
 | Aimed shot | `aimed-shot.spec.ts` | 7 |
+| Army creation | `army-creation.spec.ts` | 5 |
 | Battle buffs | `battle-buffs.spec.ts` | 11 |
-| Source selection | `source-selection.spec.ts` | 9 |
-| Editor | `editor.spec.ts` | 7 |
-| Encyclopedia | `encyclopedia.spec.ts` | 7 |
-| Landing | `landing.spec.ts` | 2 |
-| Army creation | `army-creation.spec.ts` | 3 |
-| Game session | `game-session.spec.ts` | 2 |
-| Soldier state | `soldier-state-management.spec.ts` | 6 |
-| Pilot | `pilot-functionality.spec.ts` | 1 |
-| Preparation | `preparation-phase.spec.ts` | 5 |
-| Unit cards | `unit-card-complex-scenarios.spec.ts` | 4 |
-| Fire rate | `unit-card-fire-rate.spec.ts` | 1 |
-| Navigator | `expanded-navigator.spec.ts` | 1 |
-| Modifier display | `modifier-stat-display.spec.ts` | 7 |
+| Calculator | `calculator.spec.ts` | 7 |
 | Calculator tab | `calculator-tab.spec.ts` | 7 |
+| Campaigns (Хроники войн) | `campaigns.spec.ts` | 3 |
+| Combat flow | `combat.spec.ts` | 4 |
+| Editor | `editor.spec.ts` | 7 |
+| Encyclopedia | `encyclopedia.spec.ts` | 11 |
 | Example/smoke | `example.spec.ts` | 3 |
+| Fire rate | `unit-card-fire-rate.spec.ts` | 1 |
+| Focus trap (a11y) | `focus-trap.spec.ts` | 1 |
+| Game session | `game-session.spec.ts` | 2 |
+| Grenade targets | `grenade-targets.spec.ts` | 1 |
+| Height bonus (community) | `height-bonus.spec.ts` | 3 |
+| Landing | `landing.spec.ts` | 2 |
+| Machine capture | `machine-capture.spec.ts` | 2 |
+| Machine melee/ram | `machine-melee-ram.spec.ts` | 2 |
+| Melee defender armor | `melee-defender-armor.spec.ts` | 1 |
+| Missions | `missions.spec.ts` | 14 |
+| Modifier display | `modifier-stat-display.spec.ts` | 7 |
+| Navigator | `expanded-navigator.spec.ts` | 1 |
+| Panic kill | `panic-kill.spec.ts` | 1 |
+| Panic on death | `panic-on-death.spec.ts` | 3 |
+| Pilot | `pilot-functionality.spec.ts` | 1 |
+| Pilot test (defender) | `defender-pilot-test.spec.ts` | 1 |
+| Preparation | `preparation-phase.spec.ts` | 5 |
+| Soldier state | `soldier-state-management.spec.ts` | 6 |
+| Source selection | `source-selection.spec.ts` | 9 |
+| Squad scroll | `squad-scroll.spec.ts` | 1 |
+| Surprise attack preview | `surprise-attack-preview.spec.ts` | 1 |
+| Unit cards | `unit-card-complex-scenarios.spec.ts` | 4 |
+| Vehicle zone damage (community) | `vehicle-zone-damage.spec.ts` | 2 |
+
+> Counts drift as specs evolve — refresh with `npx playwright test --list` (totals) or `grep -cE '^\s*test\(' e2e/<spec>.ts` (per file).
 
 **CI/CD**: Unit tests on every commit (~6s). E2E tests in CI after deployment (~2-5min). See `.github/workflows/test.yml`.
 
@@ -182,7 +212,7 @@ Both `.md` files are machine-converted from their PDFs; the PDF is authoritative
 
 ### State Management
 
-**Client-side persistence** (localStorage keys — canonical list in `src/lib/constants.ts`):
+**Client-side persistence** (localStorage keys — most are defined in `src/lib/constants.ts`, a few live inline in their component/hook):
 - `bronepehota_army` - Player's army state (units, totalCost, faction, sourceId). Stored as `{ schemaVersion: 1, army: Army }`. When seeding for testing, set localStorage on the landing page (`/`) BEFORE navigating to `/app` — the `/app` pagehide handler flushes the in-memory army, overwriting any seed set while `/app` is loaded.
 - `bronepehota_view` - Current view: 'army' (builder) or 'game' (session)
 - `bronepehota_display_mode` - Display mode preference
@@ -193,6 +223,7 @@ Both `.md` files are machine-converted from their PDFs; the PDF is authoritative
 - `bronepehota_panic_enabled` - Panic rule toggle state
 - `bronepehota_aimed_shot_enabled` - Aimed shot rule toggle state
 - `bronepehota_surprise_attack_enabled` - Surprise attack (rear attack) toggle state
+- `bronepehota_height_bonus_enabled` - Height bonus toggle (community Star System only)
 - `bronepehota_auto_complete_enabled` - Auto-complete actions after combat
 - `bronepehota_distance_input_unit` - Distance unit: 'steps' or 'cm'
 - `bronepehota_step_to_cm_factor` - Conversion factor from steps to cm (default: 5)
@@ -230,6 +261,10 @@ Army         // Player's army with units, totalCost, faction, sourceId, currentT
 **Adding a new faction to existing source**:
 1. Add faction definition to `{source}/factions.json`
 2. Create directory `{source}/{faction_id}/`
+
+**Brand-new faction ID** (not just a subdir of a known faction — e.g. `rutenia`): the 2 steps above are NOT enough. Follow the full 13-point plumbing checklist in the `import-cards` skill (Step 6) — `FACTIONS` (constants), `getFactionColors` table, `factionDisplayNames`, both registries, `encyclopedia-utils`, `FactionsListPage`, `FactionsSection`, **`FactionSelector.factionStyles`** (its own map — easy to miss, crashes the card), + 4 tests.
+
+**Faction alliances**: `UnitSelector` shows own + allied units via `faction === selected || alliedFactionIds.has(faction)`, where `alliedFactionIds = getAlliedFactions(...)` (`src/lib/faction-allies.ts` — symmetric + `"*"` wildcard). Factions declare `allies` in `encyclopedia/factions.json` (`mercenaries: ["*"]` = ally of all; `rutenia: ["protectorate"]`). Do NOT re-add hardcoded `selectedFaction === 'mercenaries'` — mercs flow through `allies:["*"]`.
 3. Add `squads.json` and `machines.json` files
 
 ### Game Logic (`src/lib/game-logic.ts`)
@@ -322,7 +357,7 @@ Edit `squads.json` or `machines.json` in `src/data/sources/{source_id}/{faction}
 
 **Machine**: `id`, `name`, `shortName`, `faction`, `cost`, `rank`, `fire_rate`, `ammo_max`, `durability_max`, `image`, `speed_sectors[]` (must cover 1 to durability_max), `weapons[]`.
 
-**Image Standards**: 300x400 px PNG, white background, centered with ~5% margins. Process with `tools/standardize_images.py`. Place in `public/images/squads/` or `public/images/machines/`.
+**Image Standards**: 300x400 px PNG, white background, centered with ~5% margins. Process with `tools/standardize_images.py`. Place in `public/images/squads/` or `public/images/machines/`. **Gotcha**: PIL `im.thumbnail()` is downscale-only — if the source render is smaller than the frame, use `im.resize(...)` to upscale (figures must fill ~90% width per the app standard).
 
 ### Custom Hooks (`src/hooks/`)
 

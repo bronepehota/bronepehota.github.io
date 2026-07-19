@@ -13,7 +13,7 @@ export const SQUAD_GROUP_IMAGE: Record<string, string> = {
   polaris_lyogkiy_shturmovoy_desant: '/images/squads/polaris/lyogkiy_shturmovoy_desant/group.jpg',
   polaris_tribunatory_starye: '/images/squads/polaris/tribunatory_starye/group.jpg',
   protectorate_kiberpehota: '/images/squads/protectorate/kiberpehota/group.jpg',
-  protectorate_voyska_planety_ruteniya: '/images/squads/protectorate/voyska_planety_ruteniya/group.jpg',
+  rutenia_voyska_planety_ruteniya: '/images/squads/rutenia/voyska_planety_ruteniya/group.jpg',
   protectorate_shturmovoy_spetsnaz_starye: '/images/squads/protectorate/shturmovoy_spetsnaz_starye/group.jpg',
   mercenaries_mutanty: '/images/squads/mercenaries/mutanty/group.jpg',
   protectorate_lyogkaya_kiberpehota: '/images/squads/protectorate/lyogkaya_kiberpehota/group.jpg',
@@ -38,7 +38,7 @@ export const SQUAD_PHOTO_SOURCE: Record<string, PhotoSource> = {
   polaris_lyogkiy_shturmovoy_desant: 'shnayder',
   polaris_tribunatory_starye: 'shnayder',
   protectorate_kiberpehota: 'shnayder',
-  protectorate_voyska_planety_ruteniya: 'shnayder',
+  rutenia_voyska_planety_ruteniya: 'shnayder',
   protectorate_shturmovoy_spetsnaz_starye: 'shnayder',
   mercenaries_mutanty: 'shnayder',
 };

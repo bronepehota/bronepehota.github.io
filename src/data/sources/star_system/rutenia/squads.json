@@ -1,0 +1,425 @@
+[
+  {
+    "id": "rutenia_komandnoe_otdelenie",
+    "name": "Командный взвод Рутении",
+    "shortName": "Командный взвод",
+    "faction": "rutenia",
+    "cost": 65,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 3,
+        "speed": 5,
+        "range": "D6",
+        "power": "D6",
+        "melee": 4,
+        "armor": 1,
+        "image": "/images/squads/rutenia/komandnoe_otdelenie/1.png"
+      },
+      {
+        "num": 2,
+        "rank": 3,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 4,
+        "armor": 2,
+        "image": "/images/squads/rutenia/komandnoe_otdelenie/2.png"
+      },
+      {
+        "num": 3,
+        "rank": 3,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 2,
+        "image": "/images/squads/rutenia/komandnoe_otdelenie/3.png"
+      },
+      {
+        "num": 4,
+        "rank": 3,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 3,
+        "armor": 2,
+        "image": "/images/squads/rutenia/komandnoe_otdelenie/4.png"
+      },
+      {
+        "num": 5,
+        "rank": 3,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 3,
+        "armor": 2,
+        "image": "/images/squads/rutenia/komandnoe_otdelenie/5.png"
+      },
+      {
+        "num": 6,
+        "rank": 3,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 3,
+        "armor": 2,
+        "image": "/images/squads/rutenia/komandnoe_otdelenie/6.png"
+      }
+    ],
+    "image": "/images/squads/rutenia/komandnoe_otdelenie/1.png"
+  },
+  {
+    "id": "rutenia_otryad_podderzhki",
+    "name": "Взвод поддержки Рутении",
+    "shortName": "Взвод поддержки",
+    "faction": "rutenia",
+    "cost": 50,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 2,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 4,
+        "armor": 1,
+        "image": "/images/squads/rutenia/otryad_podderzhki/1.png"
+      },
+      {
+        "num": 2,
+        "rank": 2,
+        "speed": 5,
+        "range": "D6",
+        "power": "D6",
+        "melee": 2,
+        "armor": 1,
+        "image": "/images/squads/rutenia/otryad_podderzhki/2.png"
+      },
+      {
+        "num": 3,
+        "rank": 2,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 3,
+        "armor": 1,
+        "image": "/images/squads/rutenia/otryad_podderzhki/3.png",
+        "modifiers": [
+          "mechanic"
+        ]
+      },
+      {
+        "num": 4,
+        "rank": 2,
+        "speed": 5,
+        "range": "D6",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 1,
+        "image": "/images/squads/rutenia/otryad_podderzhki/4.png"
+      },
+      {
+        "num": 5,
+        "rank": 2,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 1,
+        "image": "/images/squads/rutenia/otryad_podderzhki/5.png"
+      },
+      {
+        "num": 6,
+        "rank": 2,
+        "speed": 5,
+        "range": "D6",
+        "power": "3D6",
+        "melee": 4,
+        "armor": 1,
+        "image": "/images/squads/rutenia/otryad_podderzhki/6.png"
+      }
+    ],
+    "image": "/images/squads/rutenia/otryad_podderzhki/1.png"
+  },
+  {
+    "id": "rutenia_staraya_gvardiya",
+    "name": "Старая гвардия",
+    "shortName": "Старая гвардия",
+    "faction": "rutenia",
+    "cost": 80,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 4,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D12",
+        "melee": 0,
+        "armor": 2,
+        "image": "/images/squads/rutenia/staraya_gvardiya/1.png"
+      },
+      {
+        "num": 2,
+        "rank": 4,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 5,
+        "armor": 2,
+        "image": "/images/squads/rutenia/staraya_gvardiya/2.png"
+      },
+      {
+        "num": 3,
+        "rank": 4,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 3,
+        "armor": 2,
+        "image": "/images/squads/rutenia/staraya_gvardiya/3.png"
+      },
+      {
+        "num": 4,
+        "rank": 4,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 4,
+        "armor": 2,
+        "image": "/images/squads/rutenia/staraya_gvardiya/4.png"
+      },
+      {
+        "num": 5,
+        "rank": 4,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 5,
+        "armor": 2,
+        "image": "/images/squads/rutenia/staraya_gvardiya/5.png"
+      },
+      {
+        "num": 6,
+        "rank": 4,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 3,
+        "armor": 2,
+        "image": "/images/squads/rutenia/staraya_gvardiya/6.png"
+      }
+    ],
+    "image": "/images/squads/rutenia/staraya_gvardiya/1.png"
+  },
+  {
+    "id": "rutenia_pervoprohodtsy",
+    "name": "Отряд «Первопроходцы»",
+    "shortName": "Первопроходцы",
+    "faction": "rutenia",
+    "cost": 105,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 3,
+        "speed": 4,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 3,
+        "armor": 3,
+        "image": "/images/squads/rutenia/pervoprohodtsy/1.png"
+      },
+      {
+        "num": 2,
+        "rank": 3,
+        "speed": 4,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 3,
+        "armor": 3,
+        "image": "/images/squads/rutenia/pervoprohodtsy/2.png"
+      },
+      {
+        "num": 3,
+        "rank": 3,
+        "speed": 4,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 3,
+        "image": "/images/squads/rutenia/pervoprohodtsy/3.png"
+      },
+      {
+        "num": 4,
+        "rank": 3,
+        "speed": 4,
+        "range": "D6",
+        "power": "1D20",
+        "melee": 0,
+        "armor": 3,
+        "image": "/images/squads/rutenia/pervoprohodtsy/4.png"
+      },
+      {
+        "num": 5,
+        "rank": 3,
+        "speed": 4,
+        "range": "D12",
+        "power": "1D20",
+        "melee": 0,
+        "armor": 3,
+        "image": "/images/squads/rutenia/pervoprohodtsy/5.png"
+      },
+      {
+        "num": 6,
+        "rank": 3,
+        "speed": 4,
+        "range": "D12",
+        "power": "1D20",
+        "melee": 0,
+        "armor": 3,
+        "image": "/images/squads/rutenia/pervoprohodtsy/6.png"
+      }
+    ],
+    "image": "/images/squads/rutenia/pervoprohodtsy/1.png"
+  },
+  {
+    "id": "rutenia_ruteniyskaya_gvardiya",
+    "name": "Рутенийская гвардия",
+    "shortName": "Рутенийская гвардия",
+    "faction": "rutenia",
+    "cost": 100,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 3,
+        "speed": 5,
+        "range": "2D6",
+        "power": "1D6+1",
+        "melee": 2,
+        "armor": 3,
+        "image": "/images/squads/rutenia/ruteniyskaya_gvardiya/1.png"
+      },
+      {
+        "num": 2,
+        "rank": 3,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 3,
+        "image": "/images/squads/rutenia/ruteniyskaya_gvardiya/2.png"
+      },
+      {
+        "num": 3,
+        "rank": 3,
+        "speed": 5,
+        "range": "D12+2",
+        "power": "1D12",
+        "melee": 2,
+        "armor": 3,
+        "image": "/images/squads/rutenia/ruteniyskaya_gvardiya/3.png"
+      },
+      {
+        "num": 4,
+        "rank": 3,
+        "speed": 5,
+        "range": "D12",
+        "power": "1D20",
+        "melee": 0,
+        "armor": 3,
+        "image": "/images/squads/rutenia/ruteniyskaya_gvardiya/4.png"
+      },
+      {
+        "num": 5,
+        "rank": 3,
+        "speed": 5,
+        "range": "D6",
+        "power": "1D20",
+        "melee": 0,
+        "armor": 3,
+        "image": "/images/squads/rutenia/ruteniyskaya_gvardiya/5.png"
+      },
+      {
+        "num": 6,
+        "rank": 3,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 3,
+        "image": "/images/squads/rutenia/ruteniyskaya_gvardiya/6.png"
+      }
+    ],
+    "image": "/images/squads/rutenia/ruteniyskaya_gvardiya/1.png"
+  },
+  {
+    "id": "rutenia_voyska_planety_ruteniya",
+    "name": "Войска планеты Рутения",
+    "shortName": "Войска планеты Рутения",
+    "faction": "rutenia",
+    "cost": 60,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 2,
+        "speed": 4,
+        "range": "D6",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 1,
+        "image": "/images/squads/rutenia/voyska_planety_ruteniya/1.png"
+      },
+      {
+        "num": 2,
+        "rank": 2,
+        "speed": 4,
+        "range": "D12",
+        "power": "2D12",
+        "melee": 0,
+        "armor": 1,
+        "image": "/images/squads/rutenia/voyska_planety_ruteniya/2.png"
+      },
+      {
+        "num": 3,
+        "rank": 2,
+        "speed": 4,
+        "range": "D12",
+        "power": "2D12",
+        "melee": 0,
+        "armor": 1,
+        "image": "/images/squads/rutenia/voyska_planety_ruteniya/3.png"
+      },
+      {
+        "num": 4,
+        "rank": 2,
+        "speed": 4,
+        "range": "",
+        "power": "",
+        "melee": 4,
+        "armor": 1,
+        "image": "/images/squads/rutenia/voyska_planety_ruteniya/4.png"
+      },
+      {
+        "num": 5,
+        "rank": 2,
+        "speed": 4,
+        "range": "D12",
+        "power": "2D12",
+        "melee": 0,
+        "armor": 1,
+        "image": "/images/squads/rutenia/voyska_planety_ruteniya/5.png"
+      },
+      {
+        "num": 6,
+        "rank": 2,
+        "speed": 4,
+        "range": "D6",
+        "power": "1D6+3",
+        "melee": 2,
+        "armor": 1,
+        "image": "/images/squads/rutenia/voyska_planety_ruteniya/6.png"
+      }
+    ],
+    "image": "/images/squads/rutenia/voyska_planety_ruteniya/1.png"
+  }
+]

@@ -8,7 +8,7 @@ order: 2
 units:
   - { id: mercenaries_piraty_markusa_novye, role: «Банда пиратов Маркуса» }
   - { id: mercenaries_reydery_pylnoy_zony, role: «Рейдеры Пыльной Зоны» }
-  - { id: protectorate_ruteniyskaya_gvardiya, role: «Рутенийская гвардия» }
+  - { id: rutenia_ruteniyskaya_gvardiya, role: «Рутенийская гвардия» }
   - { id: protectorate_spetsnaz_planety_felitsiya, role: «Рота "Валькирия"» }
 missions:
   - { name: Скрытый враг, box: Рутения }

@@ -6,7 +6,8 @@ import { GitHubPagesImage as Image } from './GitHubPagesImage';
 import { ImageModal } from './modals/ImageModal';
 import type { Squad, Machine, FactionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { getFactionColors } from '@/lib/faction-colors';
+import { getFactionColors, factionDisplayNames } from '@/lib/faction-colors';
+import { FactionLogo } from '@/components/FactionLogo';
 
 interface CompactUnitCardProps {
   unit: Squad | Machine;
@@ -16,6 +17,14 @@ interface CompactUnitCardProps {
   factionId: FactionID;
   canAfford: boolean;
   countInArmy?: number;
+  /**
+   * ID of an allied faction. When provided, renders a small colored "ally" pill
+   * next to the unit name (set by UnitSelector for units whose faction differs
+   * from the player's selected faction). The pill's label and color are derived
+   * from this id via factionDisplayNames + getFactionColors. Omitted/undefined
+   * for the player's own-faction units → no badge.
+   */
+  allyFactionId?: FactionID;
 }
 
 export function CompactUnitCard({
@@ -25,7 +34,8 @@ export function CompactUnitCard({
   onClick,
   factionId,
   canAfford,
-  countInArmy = 0
+  countInArmy = 0,
+  allyFactionId
 }: CompactUnitCardProps) {
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [modalImageSrc, setModalImageSrc] = useState('');
@@ -145,6 +155,15 @@ export function CompactUnitCard({
               )} title={unit.name}>
                 {unit.name}
               </h4>
+              {allyFactionId && (
+                <span
+                  className="ml-1 inline-flex items-center justify-center w-5 h-5 rounded flex-shrink-0"
+                  style={{ backgroundColor: getFactionColors(allyFactionId).primary + '33' }}
+                  title={`Союзник: ${factionDisplayNames[allyFactionId] ?? allyFactionId}`}
+                >
+                  <FactionLogo faction={allyFactionId} className="w-4 h-4" />
+                </span>
+              )}
               {countInArmy > 0 && (
                 <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-green-600/80 text-white">
                   {countInArmy}

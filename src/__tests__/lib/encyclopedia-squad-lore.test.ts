@@ -9,7 +9,7 @@ const FORBIDDEN_SQUAD_KEYS = ['traditions', 'keyBattles', 'locations', 'manufact
 
 describe('encyclopedia squad lore', () => {
   it('every squad has exactly the target encyclopedia shape', () => {
-    expect(squads.length).toBe(44);
+    expect(squads.length).toBe(48);
     for (const u of squads) {
       const keys = Object.keys(u.encyclopedia ?? {}).sort();
       expect(keys).toEqual(['class', 'history', 'lore', 'shortDescription', 'tactics'].sort());

@@ -3,17 +3,27 @@
 import { useState } from 'react';
 import { Shield, Zap, Plus, BookOpen } from 'lucide-react';
 import { clsx } from 'clsx';
-import type { Machine } from '@/lib/types';
+import type { Machine, FactionID } from '@/lib/types';
 import SafeImage from '@/components/SafeImage';
+import { getFactionColors, factionDisplayNames } from '@/lib/faction-colors';
+import { FactionLogo } from '@/components/FactionLogo';
 
 interface MachineCardProps {
   machine: Machine;
   onAdd: (machine: Machine) => void;
   onViewDetails: (machine: Machine) => void;
   testId?: string;
+  /**
+   * ID of an allied faction. When provided, renders a small colored "ally" pill
+   * next to the machine name (set by UnitSelector for machines whose faction
+   * differs from the player's selected faction). The pill's label and color are
+   * derived from this id via factionDisplayNames + getFactionColors.
+   * Omitted/undefined for the player's own-faction machines → no badge.
+   */
+  allyFactionId?: FactionID;
 }
 
-export default function MachineCard({ machine, onAdd, onViewDetails, testId }: MachineCardProps) {
+export default function MachineCard({ machine, onAdd, onViewDetails, testId, allyFactionId }: MachineCardProps) {
   const [imageError, setImageError] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
 
@@ -128,6 +138,15 @@ export default function MachineCard({ machine, onAdd, onViewDetails, testId }: M
               {machine.class?.toUpperCase()}
             </p>
           </div>
+          {allyFactionId && (
+            <span
+              className="inline-flex items-center justify-center w-5 h-5 rounded flex-shrink-0"
+              style={{ backgroundColor: getFactionColors(allyFactionId).primary + '33' }}
+              title={`Союзник: ${factionDisplayNames[allyFactionId] ?? allyFactionId}`}
+            >
+              <FactionLogo faction={allyFactionId} className="w-4 h-4" />
+            </span>
+          )}
           {/* Cost badge */}
           <div className="flex-shrink-0">
             <span className={clsx(

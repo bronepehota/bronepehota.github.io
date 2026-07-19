@@ -12,7 +12,7 @@ units:
     role: «Шидуанский спецназ»
   - id: protectorate_spetsnaz_planety_felitsiya
     role: «Фелицианский спецназ»
-  - id: protectorate_ruteniyskaya_gvardiya
+  - id: rutenia_ruteniyskaya_gvardiya
     role: «Рутенийская гвардия»
   - id: mercenaries_piraty_markusa_novye
     role: «Пираты Маркуса»

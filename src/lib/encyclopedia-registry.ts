@@ -16,6 +16,8 @@ import protectorateSquads from '@/data/encyclopedia/units/protectorate/squads.js
 import protectorateMachines from '@/data/encyclopedia/units/protectorate/machines.json';
 import mercenariesSquads from '@/data/encyclopedia/units/mercenaries/squads.json';
 import mercenariesMachines from '@/data/encyclopedia/units/mercenaries/machines.json';
+import ruteniaSquads from '@/data/encyclopedia/units/rutenia/squads.json';
+import ruteniaMachines from '@/data/encyclopedia/units/rutenia/machines.json';
 
 // Type definitions
 export interface UnitSource {
@@ -65,6 +67,7 @@ export interface EncyclopediaFaction {
   icon?: string;
   banner?: string;
   sources: string[];
+  allies?: string[];
 }
 
 // Type assertion for JSON imports
@@ -76,6 +79,8 @@ const encyclopediaUnits: EncyclopediaUnit[] = [
   ...(protectorateMachines as EncyclopediaUnit[]),
   ...(mercenariesSquads as EncyclopediaUnit[]),
   ...(mercenariesMachines as EncyclopediaUnit[]),
+  ...(ruteniaSquads as EncyclopediaUnit[]),
+  ...(ruteniaMachines as EncyclopediaUnit[]),
 ];
 const encyclopediaFactions: EncyclopediaFaction[] = factionsJson as EncyclopediaFaction[];
 

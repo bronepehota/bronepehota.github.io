@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Army, ArmyUnit, RulesVersionID } from '@/lib/types';
 import { FactionSelector } from './controls/FactionSelector';
 import { PointBudgetInput } from './controls/PointBudgetInput';
@@ -14,9 +14,10 @@ import { MissionSelector } from './missions/MissionSelector';
 import { getMission, isFreePlay, missionHasParticipantsForFaction } from '@/lib/missions-registry';
 import { buildMissionArmy } from '@/lib/mission-army';
 import { getEncyclopediaFaction } from '@/lib/encyclopedia-registry';
+import { getAlliedFactions } from '@/lib/faction-allies';
 import { BattlePreparationScreen } from './preparation';
 import { LOCAL_STORAGE_KEYS } from '@/lib/constants';
-import type { SourceID } from '@/lib/types';
+import type { SourceID, FactionID } from '@/lib/types';
 
 interface ArmyBuilderProps {
   army: Army;
@@ -114,25 +115,44 @@ export default function ArmyBuilder({
 
   // Load source data and handle source changes
   const sourceData = getSourceWithCustom(selectedSource);
-  // Enrich factions with data from encyclopedia registry
-  const availableFactions = (sourceData?.factions || [])
-    .map(f => {
-      const encyclopediaFaction = getEncyclopediaFaction(f.id);
-      if (!encyclopediaFaction) return null;
-      // Provide default values for missing fields
-      return {
-        id: encyclopediaFaction.id,
-        name: encyclopediaFaction.name,
-        color: encyclopediaFaction.color || '#94a3b8',
-        symbol: encyclopediaFaction.symbol,
-        description: encyclopediaFaction.description || '',
-        homeWorld: encyclopediaFaction.homeWorld || '',
-        motto: encyclopediaFaction.motto || '',
-      };
-    })
-    .filter((f): f is NonNullable<typeof f> => f !== null);
+  // Enrich factions with data from encyclopedia registry. Memoized so the array
+  // (and downstream alliedFactionIds) keeps a stable identity across renders —
+  // UnitSelector's useCallback/useMemo chain depends on it.
+  const availableFactions = useMemo(
+    () => (sourceData?.factions || [])
+      .map(f => {
+        const encyclopediaFaction = getEncyclopediaFaction(f.id);
+        if (!encyclopediaFaction) return null;
+        // Provide default values for missing fields
+        return {
+          id: encyclopediaFaction.id,
+          name: encyclopediaFaction.name,
+          color: encyclopediaFaction.color || '#94a3b8',
+          symbol: encyclopediaFaction.symbol,
+          description: encyclopediaFaction.description || '',
+          homeWorld: encyclopediaFaction.homeWorld || '',
+          motto: encyclopediaFaction.motto || '',
+          allies: encyclopediaFaction.allies ?? [],
+        };
+      })
+      .filter((f): f is NonNullable<typeof f> => f !== null),
+    [sourceData],
+  );
   const typedSquads = sourceData?.squads || [];
   const typedMachines = sourceData?.machines || [];
+
+  // Compute the set of factions allied with the selected faction (symmetric +
+  // wildcard; mercenaries' allies:["*"] makes them allied with everyone). Passed
+  // to UnitSelector so the filter is driven by data instead of hardcoded checks.
+  // Memoized so the Set identity stays stable across renders — without this,
+  // UnitSelector's isAvailable useCallback (and the filter useMemos downstream)
+  // recompute every render even when nothing relevant changed.
+  const alliedFactionIds = useMemo(
+    () => army.faction
+      ? getAlliedFactions(army.faction, availableFactions)
+      : new Set<FactionID>(),
+    [army.faction, availableFactions],
+  );
 
   // Warn if source data is not found (shouldn't happen with fallback)
   useEffect(() => {
@@ -361,6 +381,7 @@ export default function ArmyBuilder({
             squads={typedSquads}
             machines={typedMachines}
             selectedFaction={army.faction}
+            alliedFactionIds={alliedFactionIds}
             pointBudget={army.pointBudget}
             army={army.units}
             onAddUnit={(squad) => {

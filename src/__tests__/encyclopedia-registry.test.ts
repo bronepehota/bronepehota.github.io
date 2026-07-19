@@ -26,9 +26,9 @@ describe('encyclopedia-registry', () => {
     expect(getUnitsForFaction('nope')).toEqual([]);
   });
 
-  it('getFactions returns the three known factions', () => {
+  it('getFactions returns the four known factions', () => {
     const factions = getFactions();
-    expect(factions.map((f) => f.id).sort()).toEqual(['mercenaries', 'polaris', 'protectorate']);
+    expect(factions.map((f) => f.id).sort()).toEqual(['mercenaries', 'polaris', 'protectorate', 'rutenia']);
   });
 
   it('getEncyclopediaFaction returns the faction / undefined', () => {

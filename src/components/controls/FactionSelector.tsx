@@ -128,6 +128,13 @@ export function FactionSelector({
               accent: 'text-yellow-400',
               glow: 'shadow-yellow-500/20',
               corner: 'border-yellow-500'
+            },
+            rutenia: {
+              border: 'border-orange-500/50 hover:border-orange-500',
+              bg: 'hover:bg-orange-500/10',
+              accent: 'text-orange-400',
+              glow: 'shadow-orange-500/20',
+              corner: 'border-orange-500'
             }
           };
 
