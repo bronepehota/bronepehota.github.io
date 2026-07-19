@@ -194,6 +194,8 @@ im = im.crop(bbox); im.thumbnail((450,600), Image.LANCZOS)    # fill frame
 
 **New faction** (e.g. `rutenia`): touch **all 13 points**, or the faction won't theme/appear correctly:
 
+> **Prefer data-driven faction lists.** Several UIs had hardcoded 3-faction lists (`FactionSelector.factionStyles`, `encyclopedia/FilterBar`, `encyclopedia/EncyclopediaPage`) that silently missed a new faction (Рутения wasn't in the encyclopedia filter). When you touch a faction list, prefer deriving it from `FACTIONS` / `getFactions()` / the units data — the encyclopedia filter now derives from `units` (a new faction appears automatically). `FactionSelector.factionStyles` (touchpoint 12) is a per-faction *style* map — still needs a manual entry.
+
 1. `src/data/sources/{source}/factions.json` — add `{"id":"<fac>"}`.
 2. `src/data/sources/{source}/<fac>/squads.json` + `machines.json` (build_squads.py creates).
 3. `src/data/encyclopedia/factions.json` — add faction lore entry (`id,name,color,symbol,description,homeWorld,motto,sources:["star_system"]`).
