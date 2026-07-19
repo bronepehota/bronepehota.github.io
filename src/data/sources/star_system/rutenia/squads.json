@@ -155,7 +155,7 @@
         "speed": 5,
         "range": "D12",
         "power": "2D12",
-        "melee": 4,
+        "melee": 0,
         "armor": 2,
         "image": "/images/squads/rutenia/staraya_gvardiya/1.png"
       },
