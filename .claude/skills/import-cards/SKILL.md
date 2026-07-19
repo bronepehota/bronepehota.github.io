@@ -192,7 +192,7 @@ im = im.crop(bbox); im.thumbnail((450,600), Image.LANCZOS)    # fill frame
 
 **Existing faction**: `tools/build_squads.py` already merged the squads into the faction file. Done — verify the source appears with units.
 
-**New faction** (e.g. `rutenia`): touch **all 12 points**, or the faction won't theme/appear correctly:
+**New faction** (e.g. `rutenia`): touch **all 13 points**, or the faction won't theme/appear correctly:
 
 1. `src/data/sources/{source}/factions.json` — add `{"id":"<fac>"}`.
 2. `src/data/sources/{source}/<fac>/squads.json` + `machines.json` (build_squads.py creates).
@@ -205,7 +205,8 @@ im = im.crop(bbox); im.thumbnail((450,600), Image.LANCZOS)    # fill frame
 9. `src/lib/encyclopedia-registry.ts` — import + merge the faction's encyclopedia units.
 10. `src/components/encyclopedia/FactionsListPage.tsx` — `order` list + `symbolIcon` map (add the Lucide icon you used for `symbol`).
 11. `src/components/landing/FactionsSection.tsx` — `factionIds` + `iconMap`; bump the grid cols for the new count.
-12. **Tests** that hardcode the 3 factions: `constants.test.ts` (FACTIONS), `encyclopedia-registry.test.ts` (getFactions), `type-validation.test.ts`, `encyclopedia-squad-lore.test.ts` (squad count). Local-array tests (army-state, capture-*) use sample arrays and stay green.
+12. `src/components/controls/FactionSelector.tsx` — the setup-wizard faction picker has its OWN hardcoded `factionStyles` map (border/bg/accent/glow/corner per faction id, consumed via `styles.border`); add an entry for the new faction or its card crashes on `undefined`. Separate from `getFactionColors` — easy to miss.
+13. **Tests** that hardcode the 3 factions: `constants.test.ts` (FACTIONS), `encyclopedia-registry.test.ts` (getFactions), `type-validation.test.ts`, `encyclopedia-squad-lore.test.ts` (squad count). Local-array tests (army-state, capture-*) use sample arrays and stay green.
 
 `FactionID` is a dynamic `string` (no union to edit). `getFactionColors` is a lookup table — unknown factions fall back to polaris, so a missing entry won't crash, just won't theme.
 
