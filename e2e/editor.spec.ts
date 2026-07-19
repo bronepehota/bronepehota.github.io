@@ -5,7 +5,7 @@ import { test, expect } from '@playwright/test';
  * Tests the custom armylist editor functionality
  */
 
-test.describe.serial('Editor', () => {
+test.describe('Editor', () => {
   test.beforeEach(async ({ page }) => {
     // Clear localStorage before each test
     await page.goto('/editor');

@@ -5,7 +5,7 @@ import { test, expect } from '@playwright/test';
  * Tests the squad calculator integration in the editor
  */
 
-test.describe.serial('Calculator Tab', () => {
+test.describe('Calculator Tab', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/editor');
     await page.evaluate(() => localStorage.clear());
