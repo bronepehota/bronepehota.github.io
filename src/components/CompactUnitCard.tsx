@@ -16,6 +16,13 @@ interface CompactUnitCardProps {
   factionId: FactionID;
   canAfford: boolean;
   countInArmy?: number;
+  /**
+   * Display name of an allied faction. When provided, renders a small "ally"
+   * pill next to the unit name (set by UnitSelector for units whose faction
+   * differs from the player's selected faction). Omitted/undefined for the
+   * player's own-faction units → no badge.
+   */
+  allyFactionName?: string;
 }
 
 export function CompactUnitCard({
@@ -25,7 +32,8 @@ export function CompactUnitCard({
   onClick,
   factionId,
   canAfford,
-  countInArmy = 0
+  countInArmy = 0,
+  allyFactionName
 }: CompactUnitCardProps) {
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [modalImageSrc, setModalImageSrc] = useState('');
@@ -145,6 +153,14 @@ export function CompactUnitCard({
               )} title={unit.name}>
                 {unit.name}
               </h4>
+              {allyFactionName && (
+                <span
+                  className="ml-1 px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wide bg-slate-700/70 text-slate-200 flex-shrink-0"
+                  title={`Союзник: ${allyFactionName}`}
+                >
+                  {allyFactionName}
+                </span>
+              )}
               {countInArmy > 0 && (
                 <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-green-600/80 text-white">
                   {countInArmy}

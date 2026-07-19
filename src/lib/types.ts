@@ -18,6 +18,7 @@ export interface Faction {
   description: string;
   homeWorld: string;
   motto: string;
+  allies?: FactionID[]; // faction ids allied with this one (symmetric); "*" = ally of all
 }
 
 export interface KeyBattle {

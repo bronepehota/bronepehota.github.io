@@ -67,6 +67,7 @@ export interface EncyclopediaFaction {
   icon?: string;
   banner?: string;
   sources: string[];
+  allies?: string[];
 }
 
 // Type assertion for JSON imports

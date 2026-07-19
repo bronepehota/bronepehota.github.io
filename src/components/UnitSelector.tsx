@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { GitHubPagesImage as Image } from './GitHubPagesImage';
 import type { Faction, Squad, Machine, ArmyUnit, FactionID, FilterType, SourceID } from '@/lib/types';
 import { Plus, Users, Shield, BookOpen, X, Sword } from 'lucide-react';
@@ -10,7 +10,7 @@ import { ArmyControlPanel } from './ArmyControlPanel';
 import { CompactUnitCard } from './CompactUnitCard';
 import { FloatingContinueButton } from './controls/FloatingContinueButton';
 import { clsx } from 'clsx';
-import { getFactionColors } from '@/lib/faction-colors';
+import { getFactionColors, factionDisplayNames } from '@/lib/faction-colors';
 
 
 interface UnitSelectorProps {
@@ -18,6 +18,13 @@ interface UnitSelectorProps {
   squads: Squad[];
   machines?: Machine[];
   selectedFaction?: FactionID; // Optional to handle case where no faction is selected yet
+  /**
+   * Set of faction ids allied with `selectedFaction` (symmetric + wildcard;
+   * computed by ArmyBuilder via getAlliedFactions). A unit is available when its
+   * faction matches `selectedFaction` OR is in this set. Replaces the former
+   * hardcoded `selectedFaction === 'mercenaries'` special-cases.
+   */
+  alliedFactionIds: Set<FactionID>;
   pointBudget: number;
   army: ArmyUnit[];
   onAddUnit: (squad: Squad) => void;
@@ -54,6 +61,7 @@ export function UnitSelector({
   squads,
   machines = [],
   selectedFaction,
+  alliedFactionIds,
   pointBudget,
   army,
   onAddUnit,
@@ -80,31 +88,40 @@ export function UnitSelector({
     return sum + unit.data.cost;
   }, 0);
 
-  // Filter units by selected faction
-  const availableSquads = useMemo(() => squads.filter(s => s.faction === selectedFaction), [squads, selectedFaction]);
-  // Mercenaries have access to ALL machines from all factions
-  const availableMachines = useMemo(() => {
-    if (selectedFaction === 'mercenaries') {
-      return machines; // Show all machines for mercenaries
-    }
-    return machines.filter(m => m.faction === selectedFaction);
-  }, [machines, selectedFaction]);
+  // A unit (squad or machine) is available when it belongs to the selected
+  // faction OR to an allied faction. Mercenaries (`allies:["*"]`) are allied
+  // with every faction, and every faction is allied with them, so they flow
+  // through this same rule — no hardcoded `mercenaries` special-case.
+  const isAvailable = useCallback(
+    (faction: FactionID) => faction === selectedFaction || alliedFactionIds.has(faction),
+    [selectedFaction, alliedFactionIds],
+  );
 
-  // All mercenaries squads - available to all factions
-  const allMercenaries = useMemo(() => squads.filter(s => s.faction === 'mercenaries'), [squads]);
+  const availableSquads = useMemo(
+    () => squads.filter((s) => isAvailable(s.faction)),
+    [squads, isAvailable],
+  );
+  const availableMachines = useMemo(
+    () => machines.filter((m) => isAvailable(m.faction)),
+    [machines, isAvailable],
+  );
 
-  // Combine all available units (including mercenaries for non-mercenaries factions)
-  const availableUnits: UnitDisplay[] = useMemo(() => {
-    const units: UnitDisplay[] = [
-      ...availableSquads.map(s => ({ type: 'squad' as const, data: s })),
-      ...availableMachines.map(m => ({ type: 'machine' as const, data: m })),
-    ];
-    // Add mercenaries if not playing as mercenaries faction (they're already included above)
-    if (selectedFaction !== 'mercenaries') {
-      units.push(...allMercenaries.map(s => ({ type: 'squad' as const, data: s })));
-    }
-    return units;
-  }, [availableSquads, availableMachines, allMercenaries, selectedFaction]);
+  // Mercenary squads within the available set — surfaced via the 'mercenary'
+  // filter tab. Computed from availableSquads so the count tracks the alliance
+  // model (a non-merc faction sees its allied merc squads; the merc faction
+  // itself sees its own merc squads here, other factions' squads under 'all').
+  const availableMercenarySquads = useMemo(
+    () => availableSquads.filter((s) => s.faction === 'mercenaries'),
+    [availableSquads],
+  );
+
+  const availableUnits: UnitDisplay[] = useMemo(
+    () => [
+      ...availableSquads.map((s) => ({ type: 'squad' as const, data: s })),
+      ...availableMachines.map((m) => ({ type: 'machine' as const, data: m })),
+    ],
+    [availableSquads, availableMachines],
+  );
 
   // Apply type filter to available units
   const filteredAvailableUnits = useMemo(() => {
@@ -138,6 +155,14 @@ export function UnitSelector({
 
   // Check if unit can be afforded
   const canAffordUnit = (cost: number) => cost <= (pointBudget - totalCost);
+
+  // Resolve the display name of an allied unit's faction, or undefined when the
+  // unit belongs to the player's own faction (or no faction is selected). Drives
+  // the "Союзник" pill shown next to the unit name in all three render paths.
+  const allyFactionNameFor = (unit: UnitDisplay): string | undefined => {
+    if (!selectedFaction || unit.data.faction === selectedFaction) return undefined;
+    return factionDisplayNames[unit.data.faction] ?? unit.data.faction;
+  };
 
   // Handle add unit with budget check
   const handleAddUnit = (unit: UnitDisplay) => {
@@ -219,7 +244,7 @@ export function UnitSelector({
         onFilterChange={setFilterType}
         squadCount={availableSquads.length}
         machineCount={availableMachines.length}
-        mercenaryCount={allMercenaries.length}
+        mercenaryCount={availableMercenarySquads.length}
         currentCost={totalCost}
         pointBudget={pointBudget}
         armyCount={army.length}
@@ -257,6 +282,7 @@ export function UnitSelector({
               const count = getInstanceCount(unit.data.id);
               const instance = getLatestInstance(unit.data.id);
               const isInArmy = count > 0;
+              const allyFactionName = allyFactionNameFor(unit);
 
               return (
                 <div key={unit.data.id} className={clsx('relative', isInArmy && 'ring-2 ring-offset-2 ring-offset-slate-900', isInArmy && getFactionColors(unit.type === 'squad' ? (unit.data as Squad).faction as FactionID : selectedFaction || '').ring)}>
@@ -268,6 +294,7 @@ export function UnitSelector({
                     factionId={unit.type === 'squad' ? (unit.data as Squad).faction as FactionID : selectedFaction || ''}
                     canAfford={affordable}
                     countInArmy={count}
+                    allyFactionName={allyFactionName}
                   />
 
                   {/* Count badge */}
@@ -304,6 +331,7 @@ export function UnitSelector({
               const isInArmy = count > 0;
               const unitFaction = unit.type === 'squad' ? (unit.data as Squad).faction as FactionID : selectedFaction || '';
               const colors = getFactionColors(unitFaction);
+              const allyFactionName = allyFactionNameFor(unit);
 
               // Render machines with MachineCard component
               if (unit.type === 'machine') {
@@ -317,6 +345,7 @@ export function UnitSelector({
                         setIsModalOpen(true);
                       }}
                       testId={`add-unit-${unit.data.id}`}
+                      allyFactionName={allyFactionName}
                     />
 
                     {/* Count badge */}
@@ -439,13 +468,21 @@ export function UnitSelector({
                     <div className="p-3 space-y-2">
                       {/* Name row */}
                       <div className="flex items-start gap-2">
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 flex items-center gap-1">
                           <h3 className={clsx(
-                            'font-bold text-sm font-mono tracking-wide truncate',
+                            'font-bold text-sm font-mono tracking-wide truncate flex-1 min-w-0',
                             affordable ? colors.text : 'text-slate-500'
                           )} title={squad.name}>
                             {squad.name.toUpperCase()}
                           </h3>
+                          {allyFactionName && (
+                            <span
+                              className="ml-1 px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wide bg-slate-700/70 text-slate-200 flex-shrink-0"
+                              title={`Союзник: ${allyFactionName}`}
+                            >
+                              {allyFactionName}
+                            </span>
+                          )}
                         </div>
                         {/* Cost badge - absolutely positioned top-right */}
                         <div className="flex-shrink-0">
