@@ -21,6 +21,10 @@ describe('encyclopedia-registry', () => {
         expect(f.name).toBeTruthy();
       }
     });
+    it('returns exactly the 4 known factions including rutenia', () => {
+      const factions = getFactions();
+      expect(factions.map((f) => f.id).sort()).toEqual(['mercenaries', 'polaris', 'protectorate', 'rutenia']);
+    });
   });
 
   describe('getEncyclopediaFaction', () => {
