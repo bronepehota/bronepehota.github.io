@@ -79,7 +79,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;opa
 .s-num{font-family:'Black Ops One';font-size:20px;color:var(--ru2);text-align:center;height:38px;display:grid;place-items:center;background:#0b0d10;border:1px solid var(--border2);border-radius:3px}
 .s-photo{position:relative;cursor:grab}
 .s-photo:active{cursor:grabbing}
-.s-photo img{width:116px;height:155px;object-fit:contain;background:#0b0d10;border:1px solid var(--border2);border-radius:3px;cursor:zoom-in;display:block}
+.s-photo img{width:116px;height:155px;object-fit:cover;object-position:center;background:#0b0d10;border:1px solid var(--border2);border-radius:3px;cursor:zoom-in;display:block}
 .soldier.conflict .s-photo img{border-color:var(--red)}
 .dup{position:absolute;top:2px;left:2px;background:var(--red);color:#fff;font-family:'JetBrains Mono';font-size:9px;padding:1px 4px;border-radius:2px;font-weight:700}
 .cell input,.cell select{background:#0b0d10;border:1px solid var(--border2);color:var(--bone);font-family:'JetBrains Mono';font-weight:600;font-size:18px;padding:8px 4px;border-radius:3px;width:100%;text-align:center}
