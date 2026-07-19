@@ -14,9 +14,10 @@ import { MissionSelector } from './missions/MissionSelector';
 import { getMission, isFreePlay, missionHasParticipantsForFaction } from '@/lib/missions-registry';
 import { buildMissionArmy } from '@/lib/mission-army';
 import { getEncyclopediaFaction } from '@/lib/encyclopedia-registry';
+import { getAlliedFactions } from '@/lib/faction-allies';
 import { BattlePreparationScreen } from './preparation';
 import { LOCAL_STORAGE_KEYS } from '@/lib/constants';
-import type { SourceID } from '@/lib/types';
+import type { SourceID, FactionID } from '@/lib/types';
 
 interface ArmyBuilderProps {
   army: Army;
@@ -128,11 +129,19 @@ export default function ArmyBuilder({
         description: encyclopediaFaction.description || '',
         homeWorld: encyclopediaFaction.homeWorld || '',
         motto: encyclopediaFaction.motto || '',
+        allies: encyclopediaFaction.allies ?? [],
       };
     })
     .filter((f): f is NonNullable<typeof f> => f !== null);
   const typedSquads = sourceData?.squads || [];
   const typedMachines = sourceData?.machines || [];
+
+  // Compute the set of factions allied with the selected faction (symmetric +
+  // wildcard; mercenaries' allies:["*"] makes them allied with everyone). Passed
+  // to UnitSelector so the filter is driven by data instead of hardcoded checks.
+  const alliedFactionIds = army.faction
+    ? getAlliedFactions(army.faction, availableFactions)
+    : new Set<FactionID>();
 
   // Warn if source data is not found (shouldn't happen with fallback)
   useEffect(() => {
@@ -361,6 +370,7 @@ export default function ArmyBuilder({
             squads={typedSquads}
             machines={typedMachines}
             selectedFaction={army.faction}
+            alliedFactionIds={alliedFactionIds}
             pointBudget={army.pointBudget}
             army={army.units}
             onAddUnit={(squad) => {

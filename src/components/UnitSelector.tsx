@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { GitHubPagesImage as Image } from './GitHubPagesImage';
 import type { Faction, Squad, Machine, ArmyUnit, FactionID, FilterType, SourceID } from '@/lib/types';
 import { Plus, Users, Shield, BookOpen, X, Sword } from 'lucide-react';
@@ -18,6 +18,13 @@ interface UnitSelectorProps {
   squads: Squad[];
   machines?: Machine[];
   selectedFaction?: FactionID; // Optional to handle case where no faction is selected yet
+  /**
+   * Set of faction ids allied with `selectedFaction` (symmetric + wildcard;
+   * computed by ArmyBuilder via getAlliedFactions). A unit is available when its
+   * faction matches `selectedFaction` OR is in this set. Replaces the former
+   * hardcoded `selectedFaction === 'mercenaries'` special-cases.
+   */
+  alliedFactionIds: Set<FactionID>;
   pointBudget: number;
   army: ArmyUnit[];
   onAddUnit: (squad: Squad) => void;
@@ -54,6 +61,7 @@ export function UnitSelector({
   squads,
   machines = [],
   selectedFaction,
+  alliedFactionIds,
   pointBudget,
   army,
   onAddUnit,
@@ -80,31 +88,40 @@ export function UnitSelector({
     return sum + unit.data.cost;
   }, 0);
 
-  // Filter units by selected faction
-  const availableSquads = useMemo(() => squads.filter(s => s.faction === selectedFaction), [squads, selectedFaction]);
-  // Mercenaries have access to ALL machines from all factions
-  const availableMachines = useMemo(() => {
-    if (selectedFaction === 'mercenaries') {
-      return machines; // Show all machines for mercenaries
-    }
-    return machines.filter(m => m.faction === selectedFaction);
-  }, [machines, selectedFaction]);
+  // A unit (squad or machine) is available when it belongs to the selected
+  // faction OR to an allied faction. Mercenaries (`allies:["*"]`) are allied
+  // with every faction, and every faction is allied with them, so they flow
+  // through this same rule — no hardcoded `mercenaries` special-case.
+  const isAvailable = useCallback(
+    (faction: FactionID) => faction === selectedFaction || alliedFactionIds.has(faction),
+    [selectedFaction, alliedFactionIds],
+  );
 
-  // All mercenaries squads - available to all factions
-  const allMercenaries = useMemo(() => squads.filter(s => s.faction === 'mercenaries'), [squads]);
+  const availableSquads = useMemo(
+    () => squads.filter((s) => isAvailable(s.faction)),
+    [squads, isAvailable],
+  );
+  const availableMachines = useMemo(
+    () => machines.filter((m) => isAvailable(m.faction)),
+    [machines, isAvailable],
+  );
 
-  // Combine all available units (including mercenaries for non-mercenaries factions)
-  const availableUnits: UnitDisplay[] = useMemo(() => {
-    const units: UnitDisplay[] = [
-      ...availableSquads.map(s => ({ type: 'squad' as const, data: s })),
-      ...availableMachines.map(m => ({ type: 'machine' as const, data: m })),
-    ];
-    // Add mercenaries if not playing as mercenaries faction (they're already included above)
-    if (selectedFaction !== 'mercenaries') {
-      units.push(...allMercenaries.map(s => ({ type: 'squad' as const, data: s })));
-    }
-    return units;
-  }, [availableSquads, availableMachines, allMercenaries, selectedFaction]);
+  // Mercenary squads within the available set — surfaced via the 'mercenary'
+  // filter tab. Computed from availableSquads so the count tracks the alliance
+  // model (a non-merc faction sees its allied merc squads; the merc faction
+  // itself sees its own merc squads here, other factions' squads under 'all').
+  const availableMercenarySquads = useMemo(
+    () => availableSquads.filter((s) => s.faction === 'mercenaries'),
+    [availableSquads],
+  );
+
+  const availableUnits: UnitDisplay[] = useMemo(
+    () => [
+      ...availableSquads.map((s) => ({ type: 'squad' as const, data: s })),
+      ...availableMachines.map((m) => ({ type: 'machine' as const, data: m })),
+    ],
+    [availableSquads, availableMachines],
+  );
 
   // Apply type filter to available units
   const filteredAvailableUnits = useMemo(() => {
@@ -219,7 +236,7 @@ export function UnitSelector({
         onFilterChange={setFilterType}
         squadCount={availableSquads.length}
         machineCount={availableMachines.length}
-        mercenaryCount={allMercenaries.length}
+        mercenaryCount={availableMercenarySquads.length}
         currentCost={totalCost}
         pointBudget={pointBudget}
         armyCount={army.length}
