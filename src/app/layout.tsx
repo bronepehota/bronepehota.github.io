@@ -40,7 +40,7 @@ const oswald = Oswald({
 
 const SITE_NAME = 'Бронепехота';
 // Fully-absolute default social card — a 1200×630 screenshot of the landing hero
-// (regenerate via /tmp/shot-hero.mjs + /tmp/crop-og.py when the landing changes).
+// (regenerate via tools/regen-og-image.mjs + tools/regen-og-crop.py when the landing changes).
 const OG_IMAGE = absoluteUrl('/og-image.png');
 
 export const metadata: Metadata = {
