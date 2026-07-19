@@ -1,93 +1,133 @@
-import { test, expect } from '@playwright/test';
-import { clearStorage, setupToArmyBuilder } from './helpers/setup';
+import { test, expect, Page } from '@playwright/test';
+import { expandFirstUnit, clearStorage } from './helpers/setup';
 
-test.describe('Machine Fire Rate Limit', () => {
+/**
+ * Machine fire-rate — real coverage (replaces a former false-pass spec).
+ *
+ * Background: issue #187 alleged machine fire buttons were missing in battle.
+ * Investigation showed the app is fine — ranged weapons render as
+ * `<div role="button" aria-label="Выстрел: <weapon>">` rows (not `<button>ВЫСТРЕЛ</button>`),
+ * and the fire_rate limit disables them once shots are exhausted. The old spec
+ * never reached battle and used a wrong selector plus a no-assert fallback.
+ *
+ * These tests seed a machine directly into battle and assert the real behavior:
+ *   1. weapon fire rows render, are enabled, and open the combat modal on tap;
+ *   2. fire_rate limit disables every ranged row once shotsUsed >= fire_rate.
+ */
+
+interface SeedOpts {
+  /** shots already used this turn (to test the fire_rate limit). */
+  machineShotsUsed?: number;
+}
+
+function seedMachineArmy(machineShotsUsed = 0) {
+  return function setup(page: Page, opts: SeedOpts = {}) {
+    const shotsUsed = opts.machineShotsUsed ?? machineShotsUsed;
+    return page.addInitScript((used: number) => {
+      const army = {
+        name: 'Machine Fire-Rate Army',
+        faction: 'polaris',
+        sourceId: 'star_system',
+        units: [
+          {
+            instanceId: 'machine-fire-1',
+            type: 'machine',
+            data: {
+              id: 'polaris_demolisher',
+              name: 'Демолишер',
+              shortName: 'Демолишер',
+              faction: 'polaris',
+              cost: 200,
+              rank: 2,
+              fire_rate: 2,
+              ammo_max: 20,
+              durability_max: 16,
+              durability: 16,
+              ammo: 20,
+              image: '/images/machines/polaris/legkiy_shturmovoy_ekranoplan/1.png',
+              speed_sectors: [
+                { min_durability: 9, max_durability: 16, speed: 2 },
+                { min_durability: 1, max_durability: 8, speed: 1 },
+              ],
+              // Two ranged weapons (the fire rows) + one ББ (melee).
+              weapons: [
+                { name: 'Шестиствольная пушка', range: 'D12', power: '3D20', special: '' },
+                { name: 'Спаренная установка', range: 'D12', power: '2D20', special: '' },
+                { name: 'Кулак-манипулятор', range: 'ББ', power: '2', special: '' },
+              ],
+            },
+            instanceNumber: 1,
+            currentSoldiers: [],
+            deadSoldiers: [],
+            actionsUsed: [],
+            durability: 16,
+            currentDurability: 16,
+            ammo: 20,
+            currentAmmo: 20,
+            machineShotsUsed: used,
+            // Alive pilot keeps the card fully interactive (mirrors machine-melee-ram spec).
+            pilotInfo: {
+              squadInstanceId: 'squad-pilot-source',
+              soldierIndex: 0,
+              pilotArmor: 3,
+              alive: true,
+            },
+          },
+        ],
+        totalCost: 200,
+        currentStep: 'battle',
+        isInBattle: true,
+        currentTurn: 1,
+      };
+      localStorage.clear();
+      localStorage.setItem('bronepehota_army', JSON.stringify(army));
+      localStorage.setItem('bronepehota_view', 'game');
+      localStorage.setItem('bronepehota_display_mode', 'detailed');
+    }, shotsUsed);
+  };
+}
+
+const FIRE_ROWS = '[role="button"][aria-label^="Выстрел:"]';
+const DISABLED_ROWS = '[role="button"][aria-label="Оружие недоступно"]';
+
+test.describe('Machine fire-rate (#187 follow-up)', () => {
   test.beforeEach(async ({ page }) => {
     await clearStorage(page);
-    await page.goto('/app');
   });
 
-  test('machine fire buttons should be visible in battle', async ({ page }) => {
-    await setupToArmyBuilder(page, { faction: 'polaris', budget: 500 });
+  test('ranged weapon fire rows render, are enabled, and open combat on tap', async ({ page }) => {
+    await seedMachineArmy(0)(page);
+    await page.goto('/app');
+    await page.waitForLoadState('networkidle');
+    await expect(page.getByTestId('game-session').first()).toBeVisible({ timeout: 10000 });
 
-    // Switch to machines tab
-    await page.click('button:has-text("Машины")');
+    await expandFirstUnit(page);
 
-    // Add "Демолишер" machine
-    const demolisherUnit = page.locator('h3:has-text("ДЕМОЛИШЕР")');
-    await expect(demolisherUnit).toBeVisible({ timeout: 5000 });
-    await demolisherUnit.scrollIntoViewIfNeeded();
+    // Two ranged weapons render as tappable fire rows.
+    const fireRows = page.locator(FIRE_ROWS);
+    await expect(fireRows).toHaveCount(2, { timeout: 3000 });
+    const labels = await fireRows.evaluateAll((els) => els.map((e) => e.getAttribute('aria-label')));
+    expect(labels).toEqual(['Выстрел: Шестиствольная пушка', 'Выстрел: Спаренная установка']);
 
-    const demolisherCard = page.locator('[data-testid^="unit-card-"]').filter({ hasText: 'ДЕМОЛИШЕР' });
-    await demolisherCard.locator('button:has-text("В АРМИЮ")').click();
-    await page.waitForTimeout(500);
+    // Under the fire_rate limit (0/2 used) → none are disabled.
+    await expect(page.locator(DISABLED_ROWS)).toHaveCount(0);
 
-    // Verify machine is in army (check for count badge)
-    expect(await page.locator('text=×1').isVisible()).toBe(true);
+    // Tapping a fire row opens the combat modal (real fire entry point).
+    await fireRows.first().click({ force: true });
+    await expect(page.getByTestId('bottom-sheet-combat-modal')).toBeVisible({ timeout: 3000 });
+  });
 
-    // Switch to game session
-    await page.click('[data-testid="to-battle-button"]');
+  test('fire_rate limit disables ranged rows once shots are exhausted', async ({ page }) => {
+    // fire_rate is 2; seed with 2 shots already used → all ranged rows disabled.
+    await seedMachineArmy(2)(page);
+    await page.goto('/app');
+    await page.waitForLoadState('networkidle');
+    await expect(page.getByTestId('game-session').first()).toBeVisible({ timeout: 10000 });
 
-    // Start battle
-    const confirmButton = page.locator('[data-testid="confirm-initiative-button"]');
-    if (await confirmButton.isVisible({ timeout: 3000 })) {
-      await confirmButton.click();
-      await page.waitForSelector('[data-testid="initiative-modal"]', { state: 'hidden', timeout: 5000 }).catch(() => {});
-    }
-    await page.waitForTimeout(500);
+    await expandFirstUnit(page);
 
-    // Debug: screenshot before clicking
-    await page.screenshot({ path: 'test-results/before-machine-click.png' });
-
-    // Open machine card
-    await page.locator('text=ДЕМОЛИШЕР').first().click({ force: true });
-    await page.waitForTimeout(1000);
-
-    // Debug: screenshot after clicking
-    await page.screenshot({ path: 'test-results/after-machine-click.png' });
-
-    // Debug: check what buttons are actually present
-    const allButtons = await page.locator('button').allTextContents();
-    console.log('All button texts:', allButtons.filter(t => t.includes('ВЫСТРЕЛ') || t.includes('ГОТОВ') || t.includes('НЕИСПРАВЕН')));
-
-    // Check if card is open by looking for machine name in detail view
-    const machineNameVisible = await page.locator('text=ДЕМОЛИШЕР').count();
-    console.log(`Machine name elements found: ${machineNameVisible}`);
-
-    // The main assertion - fire buttons should be visible after the fix
-    // Note: This test verifies the fix for showing weapons in all rules versions
-    const fireButton = page.locator('button:has-text("ВЫСТРЕЛ")').first();
-    const fireButtonCount = await fireButton.count();
-    console.log(`Fire buttons found: ${fireButtonCount}`);
-
-    if (fireButtonCount === 0) {
-      // Check if we're in battle mode
-      const inBattle = await page.evaluate(() => {
-        const army = JSON.parse(localStorage.getItem('bronepehota_army') || '{}');
-        return army.isInBattle;
-      });
-      console.log(`In battle mode: ${inBattle}`);
-
-      // Check rules version
-      const rulesVersion = await page.evaluate(() => {
-        return localStorage.getItem('bronepehota_rules_version');
-      });
-      console.log(`Rules version: ${rulesVersion}`);
-
-      // Take full page screenshot for debugging
-      await page.screenshot({ path: 'test-results/no-fire-buttons-debug.png', fullPage: true });
-    }
-
-    // At minimum, the card should be open and show something
-    expect(machineNameVisible).toBeGreaterThan(0);
-
-    // If fire buttons are found, verify they work
-    if (fireButtonCount > 0) {
-      console.log('✅ Fire buttons visible - fix is working!');
-      const isEnabled = await fireButton.isEnabled();
-      expect(isEnabled).toBe(true);
-    } else {
-      console.log('⚠️ Fire buttons not found, but card is open. This might be expected in some states.');
-    }
+    // Both ranged weapons are now locked (shotsUsed 2 >= fire_rate 2).
+    await expect(page.locator(FIRE_ROWS)).toHaveCount(0, { timeout: 3000 });
+    await expect(page.locator(DISABLED_ROWS)).toHaveCount(2);
   });
 });
