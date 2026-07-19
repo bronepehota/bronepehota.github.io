@@ -156,12 +156,14 @@ export function UnitSelector({
   // Check if unit can be afforded
   const canAffordUnit = (cost: number) => cost <= (pointBudget - totalCost);
 
-  // Resolve the display name of an allied unit's faction, or undefined when the
-  // unit belongs to the player's own faction (or no faction is selected). Drives
-  // the "Союзник" pill shown next to the unit name in all three render paths.
-  const allyFactionNameFor = (unit: UnitDisplay): string | undefined => {
+  // Resolve the faction id of an allied unit, or undefined when the unit
+  // belongs to the player's own faction (or no faction is selected). Drives the
+  // colored "Союзник" pill shown next to the unit name in all three render
+  // paths — the badge derives its label and color from this id (see
+  // CompactUnitCard / MachineCard).
+  const allyFactionIdFor = (unit: UnitDisplay): FactionID | undefined => {
     if (!selectedFaction || unit.data.faction === selectedFaction) return undefined;
-    return factionDisplayNames[unit.data.faction] ?? unit.data.faction;
+    return unit.data.faction as FactionID;
   };
 
   // Handle add unit with budget check
@@ -282,19 +284,24 @@ export function UnitSelector({
               const count = getInstanceCount(unit.data.id);
               const instance = getLatestInstance(unit.data.id);
               const isInArmy = count > 0;
-              const allyFactionName = allyFactionNameFor(unit);
+              const allyFactionId = allyFactionIdFor(unit);
+              // Always use the unit's own faction for the card frame/ring — for
+              // an ALLIED machine this means the ally's color (matches the ally
+              // badge) instead of the selected faction's color. For own-faction
+              // units, data.faction === selectedFaction so nothing changes.
+              const unitFaction = unit.data.faction as FactionID;
 
               return (
-                <div key={unit.data.id} className={clsx('relative', isInArmy && 'ring-2 ring-offset-2 ring-offset-slate-900', isInArmy && getFactionColors(unit.type === 'squad' ? (unit.data as Squad).faction as FactionID : selectedFaction || '').ring)}>
+                <div key={unit.data.id} className={clsx('relative', isInArmy && 'ring-2 ring-offset-2 ring-offset-slate-900', isInArmy && getFactionColors(unitFaction).ring)}>
                   <CompactUnitCard
                     unit={unit.data}
                     type={unit.type}
                     onAdd={() => handleAddUnit(unit)}
                     onClick={() => handleUnitClick(unit)}
-                    factionId={unit.type === 'squad' ? (unit.data as Squad).faction as FactionID : selectedFaction || ''}
+                    factionId={unitFaction}
                     canAfford={affordable}
                     countInArmy={count}
-                    allyFactionName={allyFactionName}
+                    allyFactionId={allyFactionId}
                   />
 
                   {/* Count badge */}
@@ -329,9 +336,13 @@ export function UnitSelector({
               const count = getInstanceCount(unit.data.id);
               const instance = getLatestInstance(unit.data.id);
               const isInArmy = count > 0;
-              const unitFaction = unit.type === 'squad' ? (unit.data as Squad).faction as FactionID : selectedFaction || '';
+              // Always use the unit's own faction for the card frame/ring — for
+              // an ALLIED machine this means the ally's color (matches the ally
+              // badge) instead of the selected faction's color. For own-faction
+              // units, data.faction === selectedFaction so nothing changes.
+              const unitFaction = unit.data.faction as FactionID;
               const colors = getFactionColors(unitFaction);
-              const allyFactionName = allyFactionNameFor(unit);
+              const allyFactionId = allyFactionIdFor(unit);
 
               // Render machines with MachineCard component
               if (unit.type === 'machine') {
@@ -345,7 +356,7 @@ export function UnitSelector({
                         setIsModalOpen(true);
                       }}
                       testId={`add-unit-${unit.data.id}`}
-                      allyFactionName={allyFactionName}
+                      allyFactionId={allyFactionId}
                     />
 
                     {/* Count badge */}
@@ -475,14 +486,22 @@ export function UnitSelector({
                           )} title={squad.name}>
                             {squad.name.toUpperCase()}
                           </h3>
-                          {allyFactionName && (
-                            <span
-                              className="ml-1 px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wide bg-slate-700/70 text-slate-200 flex-shrink-0"
-                              title={`Союзник: ${allyFactionName}`}
-                            >
-                              {allyFactionName}
-                            </span>
-                          )}
+                          {allyFactionId && (() => {
+                            const allyColors = getFactionColors(allyFactionId);
+                            const allyName = factionDisplayNames[allyFactionId] ?? allyFactionId;
+                            return (
+                              <span
+                                className={clsx(
+                                  'ml-1 px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wide flex-shrink-0',
+                                  allyColors.text,
+                                  allyColors.bg,
+                                )}
+                                title={`Союзник: ${allyName}`}
+                              >
+                                {allyName}
+                              </span>
+                            );
+                          })()}
                         </div>
                         {/* Cost badge - absolutely positioned top-right */}
                         <div className="flex-shrink-0">

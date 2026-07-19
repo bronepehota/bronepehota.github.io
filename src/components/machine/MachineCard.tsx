@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { Shield, Zap, Plus, BookOpen } from 'lucide-react';
 import { clsx } from 'clsx';
-import type { Machine } from '@/lib/types';
+import type { Machine, FactionID } from '@/lib/types';
 import SafeImage from '@/components/SafeImage';
+import { getFactionColors, factionDisplayNames } from '@/lib/faction-colors';
 
 interface MachineCardProps {
   machine: Machine;
@@ -12,15 +13,16 @@ interface MachineCardProps {
   onViewDetails: (machine: Machine) => void;
   testId?: string;
   /**
-   * Display name of an allied faction. When provided, renders a small "ally"
-   * pill next to the machine name (set by UnitSelector for machines whose
-   * faction differs from the player's selected faction). Omitted/undefined for
-   * the player's own-faction machines → no badge.
+   * ID of an allied faction. When provided, renders a small colored "ally" pill
+   * next to the machine name (set by UnitSelector for machines whose faction
+   * differs from the player's selected faction). The pill's label and color are
+   * derived from this id via factionDisplayNames + getFactionColors.
+   * Omitted/undefined for the player's own-faction machines → no badge.
    */
-  allyFactionName?: string;
+  allyFactionId?: FactionID;
 }
 
-export default function MachineCard({ machine, onAdd, onViewDetails, testId, allyFactionName }: MachineCardProps) {
+export default function MachineCard({ machine, onAdd, onViewDetails, testId, allyFactionId }: MachineCardProps) {
   const [imageError, setImageError] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
 
@@ -136,14 +138,22 @@ export default function MachineCard({ machine, onAdd, onViewDetails, testId, all
                 {machine.class?.toUpperCase()}
               </p>
             </div>
-            {allyFactionName && (
-              <span
-                className="ml-1 px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wide bg-slate-700/70 text-slate-200 flex-shrink-0"
-                title={`Союзник: ${allyFactionName}`}
-              >
-                {allyFactionName}
-              </span>
-            )}
+            {allyFactionId && (() => {
+              const allyColors = getFactionColors(allyFactionId);
+              const allyName = factionDisplayNames[allyFactionId] ?? allyFactionId;
+              return (
+                <span
+                  className={clsx(
+                    'ml-1 px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wide flex-shrink-0',
+                    allyColors.text,
+                    allyColors.bg,
+                  )}
+                  title={`Союзник: ${allyName}`}
+                >
+                  {allyName}
+                </span>
+              );
+            })()}
           </div>
           {/* Cost badge */}
           <div className="flex-shrink-0">

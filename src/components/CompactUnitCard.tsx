@@ -6,7 +6,7 @@ import { GitHubPagesImage as Image } from './GitHubPagesImage';
 import { ImageModal } from './modals/ImageModal';
 import type { Squad, Machine, FactionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { getFactionColors } from '@/lib/faction-colors';
+import { getFactionColors, factionDisplayNames } from '@/lib/faction-colors';
 
 interface CompactUnitCardProps {
   unit: Squad | Machine;
@@ -17,12 +17,13 @@ interface CompactUnitCardProps {
   canAfford: boolean;
   countInArmy?: number;
   /**
-   * Display name of an allied faction. When provided, renders a small "ally"
-   * pill next to the unit name (set by UnitSelector for units whose faction
-   * differs from the player's selected faction). Omitted/undefined for the
-   * player's own-faction units → no badge.
+   * ID of an allied faction. When provided, renders a small colored "ally" pill
+   * next to the unit name (set by UnitSelector for units whose faction differs
+   * from the player's selected faction). The pill's label and color are derived
+   * from this id via factionDisplayNames + getFactionColors. Omitted/undefined
+   * for the player's own-faction units → no badge.
    */
-  allyFactionName?: string;
+  allyFactionId?: FactionID;
 }
 
 export function CompactUnitCard({
@@ -33,7 +34,7 @@ export function CompactUnitCard({
   factionId,
   canAfford,
   countInArmy = 0,
-  allyFactionName
+  allyFactionId
 }: CompactUnitCardProps) {
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [modalImageSrc, setModalImageSrc] = useState('');
@@ -153,14 +154,22 @@ export function CompactUnitCard({
               )} title={unit.name}>
                 {unit.name}
               </h4>
-              {allyFactionName && (
-                <span
-                  className="ml-1 px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wide bg-slate-700/70 text-slate-200 flex-shrink-0"
-                  title={`Союзник: ${allyFactionName}`}
-                >
-                  {allyFactionName}
-                </span>
-              )}
+              {allyFactionId && (() => {
+                const allyColors = getFactionColors(allyFactionId);
+                const allyName = factionDisplayNames[allyFactionId] ?? allyFactionId;
+                return (
+                  <span
+                    className={cn(
+                      'ml-1 px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wide flex-shrink-0',
+                      allyColors.text,
+                      allyColors.bg,
+                    )}
+                    title={`Союзник: ${allyName}`}
+                  >
+                    {allyName}
+                  </span>
+                );
+              })()}
               {countInArmy > 0 && (
                 <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-green-600/80 text-white">
                   {countInArmy}
