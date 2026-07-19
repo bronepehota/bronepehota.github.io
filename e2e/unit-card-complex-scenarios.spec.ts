@@ -29,7 +29,7 @@ test.describe('UnitCard Complex Scenarios', () => {
     const lightAssaultUnit = page.locator('h3:has-text("ЛЁГКАЯ ШТУРМОВАЯ КЛОН-ПЕХОТА")');
     await expect(lightAssaultUnit).toBeVisible();
 
-    const unitCard = lightAssaultUnit.locator('..').locator('..').locator('..');
+    const unitCard = page.locator('[data-testid^="unit-card-"]').filter({ hasText: 'ЛЁГКАЯ ШТУРМОВАЯ КЛОН-ПЕХОТА' });
     const addButton = unitCard.locator('button:has-text("В АРМИЮ")');
     await addButton.click();
 
@@ -60,7 +60,7 @@ test.describe('UnitCard Complex Scenarios', () => {
     await helixUnit.scrollIntoViewIfNeeded();
     await page.waitForTimeout(300);
 
-    const helixCard = helixUnit.locator('..').locator('..').locator('..');
+    const helixCard = page.locator('[data-testid^="unit-card-"]').filter({ hasText: 'Хеликс' });
     const addButton = helixCard.locator('button:has-text("В АРМИЮ")');
     await addButton.click();
 

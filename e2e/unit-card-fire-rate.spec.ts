@@ -37,7 +37,7 @@ test.describe('Machine Fire Rate Limit', () => {
     await expect(demolisherUnit).toBeVisible({ timeout: 5000 });
     await demolisherUnit.scrollIntoViewIfNeeded();
 
-    const demolisherCard = demolisherUnit.locator('..').locator('..').locator('..');
+    const demolisherCard = page.locator('[data-testid^="unit-card-"]').filter({ hasText: 'ДЕМОЛИШЕР' });
     await demolisherCard.locator('button:has-text("В АРМИЮ")').click();
     await page.waitForTimeout(500);
 

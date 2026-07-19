@@ -52,6 +52,7 @@ export default function MachineCard({ machine, onAdd, onViewDetails, testId, all
 
   return (
     <div
+      data-testid={`unit-card-${machine.id}`}
       className={clsx(
         'relative group transition-all duration-300',
         'border bg-slate-800/80 backdrop-blur-sm overflow-hidden',

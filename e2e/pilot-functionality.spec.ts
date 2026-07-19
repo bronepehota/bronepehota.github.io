@@ -56,7 +56,7 @@ test.describe('Pilot Functionality', () => {
 
     // Add a squad (clone squad has soldiers)
     const lightAssaultUnit = page.locator('h3:has-text("ЛЁГКАЯ ШТУРМОВАЯ КЛОН-ПЕХОТА")');
-    const lightAssaultCard = lightAssaultUnit.locator('..').locator('..').locator('..');
+    const lightAssaultCard = page.locator('[data-testid^="unit-card-"]').filter({ hasText: 'ЛЁГКАЯ ШТУРМОВАЯ КЛОН-ПЕХОТА' });
     await lightAssaultCard.locator('button:has-text("В АРМИЮ")').click();
     await page.waitForTimeout(500);
 
@@ -64,7 +64,7 @@ test.describe('Pilot Functionality', () => {
     const machineUnit = page.locator('h3:has-text("Хеликс")');
     await machineUnit.scrollIntoViewIfNeeded();
     await page.waitForTimeout(200);
-    const machineCardForAdd = machineUnit.locator('..').locator('..').locator('..');
+    const machineCardForAdd = page.locator('[data-testid^="unit-card-"]').filter({ hasText: 'Хеликс' });
     await machineCardForAdd.locator('button:has-text("В АРМИЮ")').click();
     await page.waitForTimeout(1000);
 
