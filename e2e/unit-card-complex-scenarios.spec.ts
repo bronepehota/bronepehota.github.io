@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { clearStorage } from './helpers/setup';
+import { clearStorage, setupToArmyBuilder } from './helpers/setup';
 
 test.describe('UnitCard Complex Scenarios', () => {
   test.beforeEach(async ({ page }) => {
@@ -9,20 +9,7 @@ test.describe('UnitCard Complex Scenarios', () => {
   });
 
   test('complete flow: add squad and verify in army', async ({ page }) => {
-    await page.click('[data-testid="rules-confirm-button"]');
-    await page.waitForTimeout(500);
-    await page.click('[data-testid="source-confirm-button"]');
-    await page.waitForTimeout(500);
-    await page.click('[data-testid="faction-card-polaris"]');
-    await page.waitForTimeout(300);
-    await page.click('[data-testid="faction-continue-button"]');
-    await page.waitForTimeout(500);
-    await page.click('[data-testid="mission-confirm-button"]');
-    await page.waitForTimeout(500);
-    await page.click('button:has-text("350")');
-    await page.waitForTimeout(300);
-    await page.click('[data-testid="budget-next-button"]');
-    await page.waitForTimeout(500);
+    await setupToArmyBuilder(page, { faction: 'polaris', budget: 350 });
 
     expect(await page.locator('text=Соберите свою армию').isVisible()).toBe(true);
 
@@ -37,20 +24,7 @@ test.describe('UnitCard Complex Scenarios', () => {
   });
 
   test('machine unit: add machine and switch to army view', async ({ page }) => {
-    await page.click('[data-testid="rules-confirm-button"]');
-    await page.waitForTimeout(500);
-    await page.click('[data-testid="source-confirm-button"]');
-    await page.waitForTimeout(500);
-    await page.click('[data-testid="faction-card-polaris"]');
-    await page.waitForTimeout(300);
-    await page.click('[data-testid="faction-continue-button"]');
-    await page.waitForTimeout(500);
-    await page.click('[data-testid="mission-confirm-button"]');
-    await page.waitForTimeout(500);
-    await page.click('button:has-text("350")');
-    await page.waitForTimeout(300);
-    await page.click('[data-testid="budget-next-button"]');
-    await page.waitForTimeout(500);
+    await setupToArmyBuilder(page, { faction: 'polaris', budget: 350 });
 
     await page.click('button:has-text("Машины")');
     await page.waitForTimeout(500);
@@ -68,20 +42,7 @@ test.describe('UnitCard Complex Scenarios', () => {
   });
 
   test('navigate through unit selector filters', async ({ page }) => {
-    await page.click('[data-testid="rules-confirm-button"]');
-    await page.waitForTimeout(500);
-    await page.click('[data-testid="source-confirm-button"]');
-    await page.waitForTimeout(500);
-    await page.click('[data-testid="faction-card-polaris"]');
-    await page.waitForTimeout(300);
-    await page.click('[data-testid="faction-continue-button"]');
-    await page.waitForTimeout(500);
-    await page.click('[data-testid="mission-confirm-button"]');
-    await page.waitForTimeout(500);
-    await page.click('button:has-text("350")');
-    await page.waitForTimeout(300);
-    await page.click('[data-testid="budget-next-button"]');
-    await page.waitForTimeout(500);
+    await setupToArmyBuilder(page, { faction: 'polaris', budget: 350 });
 
     expect(await page.locator('button:has-text("Отряды")').isVisible()).toBe(true);
 
