@@ -11,9 +11,16 @@ interface MachineCardProps {
   onAdd: (machine: Machine) => void;
   onViewDetails: (machine: Machine) => void;
   testId?: string;
+  /**
+   * Display name of an allied faction. When provided, renders a small "ally"
+   * pill next to the machine name (set by UnitSelector for machines whose
+   * faction differs from the player's selected faction). Omitted/undefined for
+   * the player's own-faction machines → no badge.
+   */
+  allyFactionName?: string;
 }
 
-export default function MachineCard({ machine, onAdd, onViewDetails, testId }: MachineCardProps) {
+export default function MachineCard({ machine, onAdd, onViewDetails, testId, allyFactionName }: MachineCardProps) {
   const [imageError, setImageError] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
 
@@ -117,16 +124,26 @@ export default function MachineCard({ machine, onAdd, onViewDetails, testId }: M
       <div className="p-3 space-y-2">
         {/* Name row */}
         <div className="flex items-start gap-2">
-          <div className="flex-1 min-w-0">
-            <h3 className={clsx(
-              'font-bold text-sm font-mono tracking-wide truncate',
-              colors.accent
-            )}>
-              {machine.shortName || machine.name.toUpperCase()}
-            </h3>
-            <p className="text-[10px] text-slate-500 truncate font-mono">
-              {machine.class?.toUpperCase()}
-            </p>
+          <div className="flex-1 min-w-0 flex items-center gap-1">
+            <div className="flex-1 min-w-0">
+              <h3 className={clsx(
+                'font-bold text-sm font-mono tracking-wide truncate',
+                colors.accent
+              )}>
+                {machine.shortName || machine.name.toUpperCase()}
+              </h3>
+              <p className="text-[10px] text-slate-500 truncate font-mono">
+                {machine.class?.toUpperCase()}
+              </p>
+            </div>
+            {allyFactionName && (
+              <span
+                className="ml-1 px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wide bg-slate-700/70 text-slate-200 flex-shrink-0"
+                title={`Союзник: ${allyFactionName}`}
+              >
+                {allyFactionName}
+              </span>
+            )}
           </div>
           {/* Cost badge */}
           <div className="flex-shrink-0">

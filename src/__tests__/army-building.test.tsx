@@ -469,4 +469,95 @@ describe('UnitSelector', () => {
       );
     }
   });
+
+  describe('ally-faction badge', () => {
+    // A mercenary squad — allied with every faction via the wildcard rule.
+    const mercSquad: Squad = {
+      id: 'mercenaries_guns_for_hire',
+      name: 'Наемники',
+      faction: 'mercenaries' as FactionID,
+      cost: 80,
+      soldiers: [],
+      image: '/images/mercenaries.jpg',
+    };
+
+    it('shows the ally badge on allied-faction units but not on own-faction units (detailed view)', () => {
+      render(
+        <UnitSelector
+          factions={mockFactions}
+          squads={[...mockSquads, mercSquad]}
+          selectedFaction="polaris"
+          alliedFactionIds={new Set<FactionID>(['mercenaries'])}
+          pointBudget={500}
+          army={mockArmy}
+          onAddUnit={mockAdd}
+          onRemoveUnit={mockRemove}
+          onToBattle={mockToBattle}
+          displayMode="detailed"
+          onDisplayModeChange={mockDisplayModeChange}
+          sourceId="star_system"
+        />
+      );
+
+      // Own-faction squad name renders without an ally pill in its row.
+      const polarisName = screen.getByText('ЛЕГКИЙ ШТУРМ');
+      expect(polarisName.parentElement?.textContent).not.toContain('Наёмники');
+
+      // Allied mercenary squad renders with the ally pill — query by the
+      // tooltip (the filter tab also shows "Наёмники" as plain text, so a
+      // text query would be ambiguous).
+      const allyBadge = document.querySelector('[title="Союзник: Наёмники"]');
+      expect(allyBadge).not.toBeNull();
+      expect(allyBadge?.textContent).toContain('Наёмники');
+    });
+
+    it('shows the ally badge in compact view too', () => {
+      render(
+        <UnitSelector
+          factions={mockFactions}
+          squads={[...mockSquads, mercSquad]}
+          selectedFaction="polaris"
+          alliedFactionIds={new Set<FactionID>(['mercenaries'])}
+          pointBudget={500}
+          army={mockArmy}
+          onAddUnit={mockAdd}
+          onRemoveUnit={mockRemove}
+          onToBattle={mockToBattle}
+          displayMode="compact"
+          onDisplayModeChange={mockDisplayModeChange}
+          sourceId="star_system"
+        />
+      );
+
+      // Compact card shows the mercenary unit name with the ally pill next to it.
+      const allyBadge = document.querySelector('[title="Союзник: Наёмники"]');
+      expect(allyBadge).not.toBeNull();
+      expect(allyBadge?.textContent).toContain('Наёмники');
+    });
+
+    it('renders no ally badge when all units belong to the selected faction', () => {
+      render(
+        <UnitSelector
+          factions={mockFactions}
+          squads={mockSquads}
+          selectedFaction="polaris"
+          alliedFactionIds={new Set<FactionID>()}
+          pointBudget={500}
+          army={mockArmy}
+          onAddUnit={mockAdd}
+          onRemoveUnit={mockRemove}
+          onToBattle={mockToBattle}
+          displayMode="detailed"
+          onDisplayModeChange={mockDisplayModeChange}
+          sourceId="star_system"
+        />
+      );
+
+      // No ally pill should be present anywhere — query by the tooltip prefix
+      // the badge carries, so this stays precise even if a faction name shows
+      // up elsewhere in the panel.
+      const allyBadges = document.querySelectorAll('[title^="Союзник:"]');
+      expect(allyBadges).toHaveLength(0);
+    });
+  });
 });

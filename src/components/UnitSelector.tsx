@@ -10,7 +10,7 @@ import { ArmyControlPanel } from './ArmyControlPanel';
 import { CompactUnitCard } from './CompactUnitCard';
 import { FloatingContinueButton } from './controls/FloatingContinueButton';
 import { clsx } from 'clsx';
-import { getFactionColors } from '@/lib/faction-colors';
+import { getFactionColors, factionDisplayNames } from '@/lib/faction-colors';
 
 
 interface UnitSelectorProps {
@@ -156,6 +156,14 @@ export function UnitSelector({
   // Check if unit can be afforded
   const canAffordUnit = (cost: number) => cost <= (pointBudget - totalCost);
 
+  // Resolve the display name of an allied unit's faction, or undefined when the
+  // unit belongs to the player's own faction (or no faction is selected). Drives
+  // the "Союзник" pill shown next to the unit name in all three render paths.
+  const allyFactionNameFor = (unit: UnitDisplay): string | undefined => {
+    if (!selectedFaction || unit.data.faction === selectedFaction) return undefined;
+    return factionDisplayNames[unit.data.faction] ?? unit.data.faction;
+  };
+
   // Handle add unit with budget check
   const handleAddUnit = (unit: UnitDisplay) => {
     if (!canAffordUnit(unit.data.cost)) {
@@ -274,6 +282,7 @@ export function UnitSelector({
               const count = getInstanceCount(unit.data.id);
               const instance = getLatestInstance(unit.data.id);
               const isInArmy = count > 0;
+              const allyFactionName = allyFactionNameFor(unit);
 
               return (
                 <div key={unit.data.id} className={clsx('relative', isInArmy && 'ring-2 ring-offset-2 ring-offset-slate-900', isInArmy && getFactionColors(unit.type === 'squad' ? (unit.data as Squad).faction as FactionID : selectedFaction || '').ring)}>
@@ -285,6 +294,7 @@ export function UnitSelector({
                     factionId={unit.type === 'squad' ? (unit.data as Squad).faction as FactionID : selectedFaction || ''}
                     canAfford={affordable}
                     countInArmy={count}
+                    allyFactionName={allyFactionName}
                   />
 
                   {/* Count badge */}
@@ -321,6 +331,7 @@ export function UnitSelector({
               const isInArmy = count > 0;
               const unitFaction = unit.type === 'squad' ? (unit.data as Squad).faction as FactionID : selectedFaction || '';
               const colors = getFactionColors(unitFaction);
+              const allyFactionName = allyFactionNameFor(unit);
 
               // Render machines with MachineCard component
               if (unit.type === 'machine') {
@@ -334,6 +345,7 @@ export function UnitSelector({
                         setIsModalOpen(true);
                       }}
                       testId={`add-unit-${unit.data.id}`}
+                      allyFactionName={allyFactionName}
                     />
 
                     {/* Count badge */}
@@ -456,13 +468,21 @@ export function UnitSelector({
                     <div className="p-3 space-y-2">
                       {/* Name row */}
                       <div className="flex items-start gap-2">
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 flex items-center gap-1">
                           <h3 className={clsx(
-                            'font-bold text-sm font-mono tracking-wide truncate',
+                            'font-bold text-sm font-mono tracking-wide truncate flex-1 min-w-0',
                             affordable ? colors.text : 'text-slate-500'
                           )} title={squad.name}>
                             {squad.name.toUpperCase()}
                           </h3>
+                          {allyFactionName && (
+                            <span
+                              className="ml-1 px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wide bg-slate-700/70 text-slate-200 flex-shrink-0"
+                              title={`Союзник: ${allyFactionName}`}
+                            >
+                              {allyFactionName}
+                            </span>
+                          )}
                         </div>
                         {/* Cost badge - absolutely positioned top-right */}
                         <div className="flex-shrink-0">
