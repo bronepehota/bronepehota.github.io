@@ -32,18 +32,21 @@ interface SoldierStatsProps {
   hideSpeed?: boolean;
 }
 
-function StatBadge({ icon: Icon, value, color, bonus, disabled }: {
+function StatBadge({ icon: Icon, value, color, bonus, disabled, statKey }: {
   icon: React.ElementType;
   value: string | React.ReactNode;
   color: string;
   bonus?: string;
   disabled?: boolean;
+  statKey?: string;
 }) {
   const isDebuff = bonus?.startsWith('-');
   const isActive = !!bonus;
 
   return (
-    <div className={cn(
+    <div
+      data-testid={statKey ? `stat-badge-${statKey}` : undefined}
+      className={cn(
       'relative flex flex-row items-center justify-center gap-0.5 rounded-lg bg-slate-800/60 min-h-[40px] min-w-[44px] flex-1 px-1 transition-colors',
       isActive
         ? isDebuff
@@ -117,12 +120,14 @@ export function SoldierStats({
             value={soldier.armor.toString()}
             color="text-yellow-400"
             bonus={formatBonus(statBonuses?.armorBonus)}
+            statKey="armor"
           />
           <StatBadge
             icon={Footprints}
             value={distanceInputUnit === 'cm' ? `${soldier.speed * stepToCmFactor}см` : soldier.speed.toString()}
             color="text-cyan-400"
             bonus={formatMultiplier(statBonuses?.speedMultiplier)}
+            statKey="speed"
           />
           <ModifierIndicator
             buffCount={buffCount ?? 0}
@@ -142,6 +147,7 @@ export function SoldierStats({
         color="text-amber-400"
         disabled={noRange}
         bonus={noRange ? undefined : formatBonus(statBonuses?.rangeBonus)}
+        statKey="range"
       />
       <StatBadge
         icon={Flame}
@@ -149,12 +155,14 @@ export function SoldierStats({
         color="text-red-400"
         disabled={noPower}
         bonus={noPower ? undefined : formatBonus(statBonuses?.powerBonus)}
+        statKey="power"
       />
       <StatBadge
         icon={Sword}
         value={soldier.melee.toString()}
         color="text-red-400"
         bonus={formatBonus(statBonuses?.meleeBonus)}
+        statKey="melee"
       />
 
       {/* Effects panel below stats — only when armor/speed are hidden */}

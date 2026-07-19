@@ -302,6 +302,7 @@ export function SoldierEffectsModal({
 
   return (
     <div
+      data-testid="effects-modal"
       className="fixed inset-0 z-[60] md:flex md:items-center md:justify-center bg-black/70 backdrop-blur-sm animate-fadeIn"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
       role="dialog"
@@ -465,6 +466,7 @@ export function SoldierEffectsModal({
         <div className="flex-shrink-0 px-3 py-3 border-t border-slate-700/40 bg-slate-900/90">
           <div className="flex gap-3">
             <button
+              data-testid="effects-tab-buffs"
               onClick={() => setCatalogMode(catalogMode === 'buffs' ? null : 'buffs')}
               className={cn(
                 'flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg border min-h-[44px] font-semibold text-xs uppercase tracking-wider transition-all',
@@ -482,6 +484,7 @@ export function SoldierEffectsModal({
               )}
             </button>
             <button
+              data-testid="effects-tab-debuffs"
               onClick={() => setCatalogMode(catalogMode === 'debuffs' ? null : 'debuffs')}
               className={cn(
                 'flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg border min-h-[44px] font-semibold text-xs uppercase tracking-wider transition-all',

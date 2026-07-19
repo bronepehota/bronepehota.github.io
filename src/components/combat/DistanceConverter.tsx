@@ -94,6 +94,7 @@ export function DistanceConverter({
           size="sm"
           disabled={disabled}
           className="flex-1"
+          label="Дистанция"
         />
 
         {/* Secondary value hint */}

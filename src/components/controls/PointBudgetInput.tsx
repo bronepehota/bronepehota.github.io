@@ -112,6 +112,7 @@ export function PointBudgetInput({
         {presets.map((preset) => (
           <button
             key={preset}
+            data-testid={`budget-option-${preset}`}
             role="button"
             aria-pressed={isPresetSelected(preset)}
             aria-label={`${preset} очков`}
