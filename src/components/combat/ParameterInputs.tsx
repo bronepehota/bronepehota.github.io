@@ -476,6 +476,7 @@ export function ParameterInputs({
                 step={1}
                 size="sm"
                 className="flex-1"
+                label="Броня цели"
               />
               {effectiveTargetIsVehicle && rulesVersion === 'community_star_system' && actionType === 'shot' && (
                 <div className="text-[9px] md:text-[10px] font-mono text-cyan-400/70 leading-tight">

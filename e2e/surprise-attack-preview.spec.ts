@@ -13,11 +13,9 @@ test.describe('Surprise-attack preview (#174)', () => {
   async function openShotModal(page: Page) {
     const unitCard = page.getByTestId('unit-nav-surprise-unit-1');
     await unitCard.first().click({ force: true, timeout: 5000 });
-    await page.waitForTimeout(400);
     const actionButton = page.getByRole('button', { name: 'Выберите действие' }).first();
     await expect(actionButton).toBeVisible({ timeout: 5000 });
     await actionButton.click({ force: true });
-    await page.waitForTimeout(400);
     const shotButton = page.getByRole('button', { name: /выстрел/i }).first();
     await expect(shotButton).toBeVisible({ timeout: 3000 });
     await shotButton.click();

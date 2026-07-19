@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { clearStorage } from './helpers/setup';
+import { clearStorage, setupToArmyBuilder } from './helpers/setup';
 
 test.describe('UnitCard Complex Scenarios', () => {
   test.beforeEach(async ({ page }) => {
@@ -9,27 +9,14 @@ test.describe('UnitCard Complex Scenarios', () => {
   });
 
   test('complete flow: add squad and verify in army', async ({ page }) => {
-    await page.click('[data-testid="rules-confirm-button"]');
-    await page.waitForTimeout(500);
-    await page.click('[data-testid="source-confirm-button"]');
-    await page.waitForTimeout(500);
-    await page.click('[data-testid="faction-card-polaris"]');
-    await page.waitForTimeout(300);
-    await page.click('[data-testid="faction-continue-button"]');
-    await page.waitForTimeout(500);
-    await page.click('[data-testid="mission-confirm-button"]');
-    await page.waitForTimeout(500);
-    await page.click('button:has-text("350")');
-    await page.waitForTimeout(300);
-    await page.click('[data-testid="budget-next-button"]');
-    await page.waitForTimeout(500);
+    await setupToArmyBuilder(page, { faction: 'polaris', budget: 350 });
 
     expect(await page.locator('text=Соберите свою армию').isVisible()).toBe(true);
 
     const lightAssaultUnit = page.locator('h3:has-text("ЛЁГКАЯ ШТУРМОВАЯ КЛОН-ПЕХОТА")');
     await expect(lightAssaultUnit).toBeVisible();
 
-    const unitCard = lightAssaultUnit.locator('..').locator('..').locator('..');
+    const unitCard = page.locator('[data-testid^="unit-card-"]').filter({ hasText: 'ЛЁГКАЯ ШТУРМОВАЯ КЛОН-ПЕХОТА' });
     const addButton = unitCard.locator('button:has-text("В АРМИЮ")');
     await addButton.click();
 
@@ -37,30 +24,15 @@ test.describe('UnitCard Complex Scenarios', () => {
   });
 
   test('machine unit: add machine and switch to army view', async ({ page }) => {
-    await page.click('[data-testid="rules-confirm-button"]');
-    await page.waitForTimeout(500);
-    await page.click('[data-testid="source-confirm-button"]');
-    await page.waitForTimeout(500);
-    await page.click('[data-testid="faction-card-polaris"]');
-    await page.waitForTimeout(300);
-    await page.click('[data-testid="faction-continue-button"]');
-    await page.waitForTimeout(500);
-    await page.click('[data-testid="mission-confirm-button"]');
-    await page.waitForTimeout(500);
-    await page.click('button:has-text("350")');
-    await page.waitForTimeout(300);
-    await page.click('[data-testid="budget-next-button"]');
-    await page.waitForTimeout(500);
+    await setupToArmyBuilder(page, { faction: 'polaris', budget: 350 });
 
     await page.click('button:has-text("Машины")');
-    await page.waitForTimeout(500);
 
     const helixUnit = page.locator('h3:has-text("Хеликс")');
     await expect(helixUnit).toBeVisible();
     await helixUnit.scrollIntoViewIfNeeded();
-    await page.waitForTimeout(300);
 
-    const helixCard = helixUnit.locator('..').locator('..').locator('..');
+    const helixCard = page.locator('[data-testid^="unit-card-"]').filter({ hasText: 'Хеликс' });
     const addButton = helixCard.locator('button:has-text("В АРМИЮ")');
     await addButton.click();
 
@@ -68,20 +40,7 @@ test.describe('UnitCard Complex Scenarios', () => {
   });
 
   test('navigate through unit selector filters', async ({ page }) => {
-    await page.click('[data-testid="rules-confirm-button"]');
-    await page.waitForTimeout(500);
-    await page.click('[data-testid="source-confirm-button"]');
-    await page.waitForTimeout(500);
-    await page.click('[data-testid="faction-card-polaris"]');
-    await page.waitForTimeout(300);
-    await page.click('[data-testid="faction-continue-button"]');
-    await page.waitForTimeout(500);
-    await page.click('[data-testid="mission-confirm-button"]');
-    await page.waitForTimeout(500);
-    await page.click('button:has-text("350")');
-    await page.waitForTimeout(300);
-    await page.click('[data-testid="budget-next-button"]');
-    await page.waitForTimeout(500);
+    await setupToArmyBuilder(page, { faction: 'polaris', budget: 350 });
 
     expect(await page.locator('button:has-text("Отряды")').isVisible()).toBe(true);
 

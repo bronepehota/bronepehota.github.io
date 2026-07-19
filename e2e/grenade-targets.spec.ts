@@ -20,25 +20,21 @@ test.describe('Grenade target list (#165)', () => {
     // Expand unit card to see action button
     const unitCard = page.getByTestId('unit-nav-grenade-unit-1');
     await unitCard.first().click({ force: true, timeout: 5000 });
-    await page.waitForTimeout(500);
 
     // Open combat modal via action button
     const actionButton = page.getByRole('button', { name: 'Выберите действие' }).first();
     await expect(actionButton).toBeVisible({ timeout: 5000 });
     await actionButton.click({ force: true });
-    await page.waitForTimeout(500);
 
     // Select grenade action
     const grenadeButton = page.getByRole('button', { name: /граната/i });
     await expect(grenadeButton).toBeVisible({ timeout: 3000 });
     await grenadeButton.click();
-    await page.waitForTimeout(300);
 
     // PARAMETERS phase: throw grenade (distance roll)
     const throwButton = page.getByRole('button', { name: /бросить/i });
     await expect(throwButton).toBeVisible({ timeout: 3000 });
     await throwButton.click();
-    await page.waitForTimeout(500);
 
     // Arming panel (sticky target-check section) visible
     const section = page.getByTestId('grenade-target-check-section');

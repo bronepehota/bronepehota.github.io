@@ -130,7 +130,6 @@ test.describe('Soldier State Management', () => {
 
     const firstKillButton = killButtons.nth(0);
     await firstKillButton.click({ force: true, timeout: 5000 });
-    await page.waitForTimeout(300);
 
     const fourthKillButton = killButtons.nth(3);
     await fourthKillButton.click({ force: true, timeout: 5000 });

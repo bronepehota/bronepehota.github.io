@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { setupToArmyBuilder } from './helpers/setup';
+import { clearStorage, setupToArmyBuilder } from './helpers/setup';
 
 /**
  * Army Creation E2E tests
@@ -8,12 +8,8 @@ import { setupToArmyBuilder } from './helpers/setup';
 test.describe('Army Creation', () => {
   test('should display faction selector on first load', async ({ page }) => {
     // Clear localStorage to simulate fresh start
+    await clearStorage(page);
     await page.goto('/app');
-    await page.evaluate(() => {
-      localStorage.clear();
-    });
-
-    await page.reload();
     await page.waitForLoadState('networkidle');
 
     // Should see faction selection
@@ -133,7 +129,6 @@ test.describe('Army Creation', () => {
     // Tap the first squad card (corner click avoids the add/remove buttons)
     const firstCard = page.locator('[data-testid^="unit-card-"]').first();
     await firstCard.click({ position: { x: 10, y: 10 } });
-    await page.waitForTimeout(250);
 
     const sheet = page.getByTestId('unit-detail-sheet');
     await expect(sheet).toBeVisible();

@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { clearStorage } from './helpers/setup';
 
 /**
  * Source Selection E2E tests
@@ -7,11 +8,8 @@ import { test, expect } from '@playwright/test';
 test.describe('Source Selection', () => {
   test.beforeEach(async ({ page }) => {
     // Clear localStorage before each test
+    await clearStorage(page);
     await page.goto('/app');
-    await page.evaluate(() => {
-      localStorage.clear();
-    });
-    await page.reload();
     await page.waitForLoadState('networkidle');
   });
 
@@ -31,7 +29,6 @@ test.describe('Source Selection', () => {
   test('should select star_system source and continue to faction', async ({ page }) => {
     // Navigate to source selection
     await page.click('[data-testid="rules-confirm-button"]');
-    await page.waitForTimeout(500);
 
     // Star System should be selected by default
     const starSystemCard = page.getByTestId('source-card-star_system');
@@ -50,7 +47,6 @@ test.describe('Source Selection', () => {
   test('should persist source selection in localStorage', async ({ page }) => {
     // Navigate to source selection
     await page.click('[data-testid="rules-confirm-button"]');
-    await page.waitForTimeout(500);
 
     // Click on star_system source (should already be selected)
     await page.click('[data-testid="source-card-star_system"]');
@@ -67,7 +63,6 @@ test.describe('Source Selection', () => {
   test('should have tehnolog source enabled and selectable', async ({ page }) => {
     // Navigate to source selection
     await page.click('[data-testid="rules-confirm-button"]');
-    await page.waitForTimeout(500);
 
     // Tehnolog source card is visible
     const tehnologCard = page.getByTestId('source-card-tehnolog');
@@ -107,7 +102,6 @@ test.describe('Source Selection', () => {
   test('should allow going back to rules from source selection', async ({ page }) => {
     // Navigate to source selection
     await page.click('[data-testid="rules-confirm-button"]');
-    await page.waitForTimeout(500);
 
     // Click on Step 1 (Правила) in the progress indicator to go back
     await page.click('button[aria-label*="Шаг 1"]');
@@ -119,7 +113,6 @@ test.describe('Source Selection', () => {
   test('should load default source on first visit', async ({ page }) => {
     // On first visit (after rules), should display star_system as default option
     await page.click('[data-testid="rules-confirm-button"]');
-    await page.waitForTimeout(500);
 
     // Star system card should be visible and selected by default
     const starSystemCard = page.getByTestId('source-card-star_system');
@@ -141,7 +134,6 @@ test.describe('Source Selection', () => {
   test('should expand source card details on click', async ({ page }) => {
     // Navigate to source selection
     await page.click('[data-testid="rules-confirm-button"]');
-    await page.waitForTimeout(500);
 
     // Click on star_system card
     await page.click('[data-testid="source-card-star_system"]');
@@ -162,19 +154,15 @@ test.describe('Source Selection', () => {
     // Step 2: Source selection (star_system should be pre-selected)
     await expect(page.getByTestId('source-card-star_system')).toBeVisible();
     await page.click('[data-testid="source-confirm-button"]');
-    await page.waitForTimeout(500);
 
     // Step 3: Faction selection
     await page.click('[data-testid="faction-card-polaris"]');
-    await page.waitForTimeout(300);
     await page.click('[data-testid="faction-continue-button"]');
-    await page.waitForTimeout(500);
     await page.click('[data-testid="mission-confirm-button"]');
 
     // Step 4: Budget selection
     await expect(page.getByText('350')).toBeVisible();
-    await page.click('button:has-text("350")');
-    await page.waitForTimeout(300);
+    await page.getByTestId('budget-option-350').click();
     await page.click('[data-testid="budget-next-button"]');
 
     // Should be on unit selection screen

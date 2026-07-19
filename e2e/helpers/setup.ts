@@ -34,12 +34,10 @@ export async function confirmRulesAndSource(page: Page) {
   const rulesConfirm = page.getByTestId('rules-confirm-button');
   await expect(rulesConfirm).toBeVisible({ timeout: TIMEOUTS.load });
   await rulesConfirm.click();
-  await page.waitForTimeout(TIMEOUTS.long);
 
   const sourceConfirm = page.getByTestId('source-confirm-button');
   await expect(sourceConfirm).toBeVisible();
   await sourceConfirm.click();
-  await page.waitForTimeout(TIMEOUTS.long);
 }
 
 /** Select a faction and continue. Defaults to 'polaris'. */
@@ -47,12 +45,10 @@ export async function selectFaction(page: Page, factionId = 'polaris') {
   const factionCard = page.getByTestId(`faction-card-${factionId}`);
   await expect(factionCard).toBeVisible();
   await factionCard.click();
-  await page.waitForTimeout(TIMEOUTS.medium);
 
   const continueButton = page.getByTestId('faction-continue-button');
   await expect(continueButton).toBeVisible();
   await continueButton.click();
-  await page.waitForTimeout(TIMEOUTS.medium);
 }
 
 /** Select a budget and proceed. Defaults to 350. */
@@ -60,12 +56,10 @@ export async function selectBudget(page: Page, budget = 350) {
   const budgetButton = page.getByRole('button', { name: String(budget) });
   await expect(budgetButton).toBeVisible();
   await budgetButton.click();
-  await page.waitForTimeout(TIMEOUTS.medium);
 
   const nextButton = page.getByTestId('budget-next-button');
   await expect(nextButton).toBeVisible();
   await nextButton.click();
-  await page.waitForTimeout(TIMEOUTS.long);
 }
 
 /**
@@ -80,14 +74,25 @@ export async function selectMission(page: Page, missionId?: string) {
     const card = page.getByTestId(`mission-card-${missionId}`);
     await expect(card).toBeVisible();
     await card.click();
-    await page.waitForTimeout(TIMEOUTS.medium);
   }
 
   await confirmButton.click();
-  await page.waitForTimeout(TIMEOUTS.long);
+  if (missionId) {
+    // For a specific mission: wait until it's persisted to localStorage.
+    // The auto-fill (buildMissionArmy) is an async React effect that fires
+    // AFTER the step transition renders — budget-next-button alone doesn't
+    // guarantee the army write completed.
+    await page.waitForFunction((mid: string) => {
+      try {
+        const raw = localStorage.getItem('bronepehota_army');
+        return !!raw && JSON.parse(raw).army?.missionId === mid;
+      } catch { return false; }
+    }, missionId, { timeout: TIMEOUTS.load });
+  } else {
+    // Free play: wait for the budget step to render.
+    await expect(page.getByTestId('budget-next-button')).toBeVisible({ timeout: TIMEOUTS.load });
+  }
 }
-
-/** Full setup to army builder (unit selection step) */
 export async function setupToArmyBuilder(page: Page, opts?: { faction?: string; budget?: number }) {
   await clearStorage(page);
   await confirmRulesAndSource(page);
@@ -101,7 +106,6 @@ export async function addFirstUnit(page: Page) {
   const addButton = page.getByRole('button', { name: /добавить/i }).first();
   await expect(addButton).toBeVisible({ timeout: TIMEOUTS.load });
   await addButton.click();
-  await page.waitForTimeout(TIMEOUTS.medium);
 }
 
 /** Navigate to battle preparation screen */
@@ -109,14 +113,12 @@ export async function goToPreparation(page: Page) {
   const toBattleButton = page.getByTestId('to-battle-button');
   await expect(toBattleButton).toBeVisible();
   await toBattleButton.click();
-  await page.waitForTimeout(TIMEOUTS.long);
 }
 
 /** Full setup: army builder → add unit → preparation screen */
 export async function setupToPreparation(page: Page, opts?: { faction?: string; budget?: number }) {
   await setupToArmyBuilder(page, opts);
   await addFirstUnit(page);
-  await page.waitForTimeout(TIMEOUTS.medium);
   await goToPreparation(page);
 }
 
@@ -249,5 +251,4 @@ export async function expandFirstUnit(page: Page) {
   const unitCard = page.getByTestId(/^unit-nav-/).first();
   await expect(unitCard).toBeVisible();
   await unitCard.click({ force: true, timeout: TIMEOUTS.load });
-  await page.waitForTimeout(TIMEOUTS.long);
 }

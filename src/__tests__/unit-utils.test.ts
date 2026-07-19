@@ -30,7 +30,7 @@ const mockArmyUnit = (instanceId: string, data: Squad): ArmyUnit => ({
 
 describe('Unit Utilities', () => {
   describe('Assign Unit Numbers', () => {
-    test('should assign sequential numbers to multiple units', () => {
+    it('should assign sequential numbers to multiple units', () => {
       const units: ArmyUnit[] = [
         {
           instanceId: 'unit-1',
@@ -79,7 +79,7 @@ describe('Unit Utilities', () => {
   });
 
   describe('Filter Units by Type', () => {
-    test('should separate squads and machines', () => {
+    it('should separate squads and machines', () => {
       const units: ArmyUnit[] = [
         {
           instanceId: 'squad-1',

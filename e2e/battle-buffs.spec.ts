@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { clearStorage } from './helpers/setup';
 
 /**
  * E2E tests for bonuses branch changes:
@@ -13,7 +14,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Editor promo link on source selection', () => {
   test.beforeEach(async ({ page }) => {
-    await page.addInitScript(() => localStorage.clear());
+    await clearStorage(page);
     await page.goto('/app');
     await page.waitForLoadState('networkidle');
 
@@ -135,10 +136,9 @@ test.describe('Battle buffs availability', () => {
       '[role="button"][aria-label*="баффов"]'
     ).first();
     await indicator.click();
-    await page.waitForTimeout(500);
 
     // Modal should open
-    const modal = page.locator('[role="dialog"][aria-modal="true"]');
+    const modal = page.getByTestId('effects-modal');
     await expect(modal).toBeVisible();
 
     // Should have title with soldier name (e.g. "#1")
@@ -153,14 +153,13 @@ test.describe('Battle buffs availability', () => {
       '[role="button"][aria-label*="баффов"]'
     ).first();
     await indicator.click();
-    await page.waitForTimeout(500);
 
-    const modal = page.locator('[role="dialog"][aria-modal="true"]');
+    const modal = page.getByTestId('effects-modal');
     await expect(modal).toBeVisible();
 
     // Should show two always-visible action buttons: Баф and Дебаф
-    const buffsBtn = modal.locator('button').filter({ hasText: /^Баф/ }).first();
-    const debuffsBtn = modal.locator('button').filter({ hasText: /Дебаф/ }).first();
+    const buffsBtn = page.getByTestId('effects-tab-buffs');
+    const debuffsBtn = page.getByTestId('effects-tab-debuffs');
     await expect(buffsBtn).toBeVisible();
     await expect(debuffsBtn).toBeVisible();
   });
@@ -173,13 +172,12 @@ test.describe('Battle buffs availability', () => {
       '[role="button"][aria-label*="баффов"]'
     ).first();
     await indicator.click();
-    await page.waitForTimeout(500);
 
-    const modal = page.locator('[role="dialog"][aria-modal="true"]');
+    const modal = page.getByTestId('effects-modal');
     await expect(modal).toBeVisible();
 
     // Click Баф button to open buff catalog
-    const buffsBtn = modal.locator('button').filter({ hasText: /^Баф/ }).first();
+    const buffsBtn = page.getByTestId('effects-tab-buffs');
     await buffsBtn.click();
 
     // Squad "Линейная клон-пехота" has NO buffs assigned in editor
@@ -195,15 +193,13 @@ test.describe('Battle buffs availability', () => {
       '[role="button"][aria-label*="баффов"]'
     ).first();
     await indicator.click();
-    await page.waitForTimeout(500);
 
-    const modal = page.locator('[role="dialog"][aria-modal="true"]');
+    const modal = page.getByTestId('effects-modal');
     await expect(modal).toBeVisible();
 
     // Click Дебаф button to open debuff catalog
-    const debuffsBtn = modal.locator('button').filter({ hasText: /Дебаф/ }).first();
+    const debuffsBtn = page.getByTestId('effects-tab-debuffs');
     await debuffsBtn.click();
-    await page.waitForTimeout(300);
 
     // Debuffs from catalog should be listed (at least one debuff exists)
     const debuffItems = modal.locator('[aria-label^="Применить"]');
@@ -218,9 +214,8 @@ test.describe('Battle buffs availability', () => {
       '[role="button"][aria-label*="баффов"]'
     ).first();
     await indicator.click();
-    await page.waitForTimeout(500);
 
-    const modal = page.locator('[role="dialog"][aria-modal="true"]');
+    const modal = page.getByTestId('effects-modal');
     await expect(modal).toBeVisible();
 
     // Click close
@@ -237,7 +232,7 @@ test.describe('Battle buffs availability', () => {
 
 test.describe('Full flow regression with editor link', () => {
   test('should complete full flow to army builder with editor link visible', async ({ page }) => {
-    await page.addInitScript(() => localStorage.clear());
+    await clearStorage(page);
     await page.goto('/app');
     await page.waitForLoadState('networkidle');
 
@@ -247,19 +242,14 @@ test.describe('Full flow regression with editor link', () => {
     // Step 2: Source — editor link visible
     await expect(page.locator('a[href="/editor"]').first()).toBeVisible();
     await page.getByTestId('source-confirm-button').click();
-    await page.waitForTimeout(500);
 
     // Step 3: Faction
     await page.getByTestId('faction-card-polaris').click();
-    await page.waitForTimeout(300);
     await page.getByTestId('faction-continue-button').click();
-    await page.waitForTimeout(500);
     await page.getByTestId('mission-confirm-button').click();
-    await page.waitForTimeout(500);
 
     // Step 4: Budget
     await page.getByRole('button', { name: '350' }).click();
-    await page.waitForTimeout(300);
     await page.getByTestId('budget-next-button').click();
 
     // Should be on unit selection screen

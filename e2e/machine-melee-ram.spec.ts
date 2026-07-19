@@ -108,7 +108,6 @@ test.describe('Machine melee + ram (#125)', () => {
     const meleeButton = page.getByRole('button', { name: /ближний бой/i }).first();
     await expect(meleeButton).toBeVisible({ timeout: 3000 });
     await meleeButton.click({ force: true });
-    await page.waitForTimeout(200);
 
     // Combat modal opens in PARAMETERS phase.
     const modal = page.getByTestId('bottom-sheet-combat-modal');
@@ -154,7 +153,6 @@ test.describe('Machine melee + ram (#125)', () => {
 
     // Tap «Таран».
     await ramButton.click({ force: true });
-    await page.waitForTimeout(200);
 
     // Combat modal opens in PARAMETERS phase.
     const modal = page.getByTestId('bottom-sheet-combat-modal');

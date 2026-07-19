@@ -1,10 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { clearStorage } from './helpers/setup';
 
 test.describe('Энциклопедия', () => {
   test.beforeEach(async ({ page }) => {
-    await page.addInitScript(() => {
-      localStorage.clear();
-    });
+    await clearStorage(page);
   });
 
   test('отображает список всех отрядов', async ({ page }) => {

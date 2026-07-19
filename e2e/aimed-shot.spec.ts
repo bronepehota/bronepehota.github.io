@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { clearStorage } from './helpers/setup';
 
 /**
  * Aimed Shot E2E tests
@@ -235,9 +236,7 @@ async function navigateToRulesScreen(page: import('@playwright/test').Page) {
 test.describe('Optional Rules Toggles', () => {
   test.beforeEach(async ({ page }) => {
     // Clear localStorage
-    await page.addInitScript(() => {
-      localStorage.clear();
-    });
+    await clearStorage(page);
     await page.goto('/app');
     await page.waitForLoadState('networkidle');
   });
@@ -325,7 +324,6 @@ test.describe('Optional Rules Toggles', () => {
     const aimedShotContainer = page.getByTestId('aimed-shot-toggle');
     const aimedShotButton = aimedShotContainer.locator('button[aria-pressed]');
     await aimedShotButton.click();
-    await page.waitForTimeout(200);
 
     // Find surprise attack toggle and click the button inside
     const surpriseAttackContainer = page.getByTestId('surprise-attack-toggle');

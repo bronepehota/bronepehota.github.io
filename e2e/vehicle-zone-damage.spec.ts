@@ -30,7 +30,7 @@ test.describe('Vehicle zone damage (#162)', () => {
     await actionButton.click({ force: true });
     await page.getByRole('button', { name: /выстрел/i }).first().click();
     // Wait for parameters phase to render (distance label is always present for shots)
-    await expect(page.getByText('Дистанция')).toBeVisible({ timeout: 3000 });
+    await expect(page.getByText('Дистанция').first()).toBeVisible({ timeout: 3000 });
   }
 
   test('«цель — техника» toggle shows «макс зоны» and yields vehicle damage', async ({ page }) => {
@@ -50,10 +50,9 @@ test.describe('Vehicle zone damage (#162)', () => {
     await expect(page.getByText('макс зоны')).toBeVisible({ timeout: 2000 });
 
     // Set distance to minimum (1) so the first soldier (range D6) always hits
-    // NumberStepper has no label prop, so aria-label is "Decrease value".
-    // There are multiple steppers on screen; target the distance one by the preceding label.
-    const distanceSection = page.getByText('Дистанция').first();
-    const distDecrease = distanceSection.locator('..').getByRole('button', { name: 'Decrease value' }).first();
+    // NumberStepper now exposes label="Дистанция", so its decrease button has a
+    // unique accessible name ("Decrease Дистанция") distinguishing it from other steppers.
+    const distDecrease = page.getByRole('button', { name: 'Decrease Дистанция' });
     for (let i = 0; i < 4; i++) {
       if (await distDecrease.isEnabled({ timeout: 500 })) {
         await distDecrease.click();

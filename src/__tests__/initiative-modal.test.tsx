@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
 import InitiativeModal from '@/components/modals/InitiativeModal';
 
 describe('InitiativeModal', () => {
@@ -130,9 +130,7 @@ describe('InitiativeModal', () => {
     );
 
     // Wait for animation to complete
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 700));
-    });
+    await waitFor(() => expect(screen.getByTestId('confirm-initiative-button')).not.toBeDisabled());
 
     const confirmButton = screen.getByTestId('confirm-initiative-button');
     fireEvent.click(confirmButton);
@@ -160,9 +158,7 @@ describe('InitiativeModal', () => {
     expect(mockOnConfirm).not.toHaveBeenCalled();
 
     // Wait for animation to complete
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 700));
-    });
+    await waitFor(() => expect(screen.getByTestId('confirm-initiative-button')).not.toBeDisabled());
 
     // Now button should be enabled
     expect(confirmButton).not.toBeDisabled();
@@ -180,9 +176,7 @@ describe('InitiativeModal', () => {
     );
 
     // Wait for initial roll
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 700));
-    });
+    await waitFor(() => expect(screen.getByTestId('confirm-initiative-button')).not.toBeDisabled());
 
     const _diceBefore = screen.getByTestId('initiative-dice').textContent;
 
@@ -256,9 +250,7 @@ describe('InitiativeModal', () => {
     );
 
     // Wait for roll animation
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 700));
-    });
+    await waitFor(() => expect(screen.getByTestId('confirm-initiative-button')).not.toBeDisabled());
 
     const dice = screen.getByTestId('initiative-dice');
     const value = parseInt(dice.textContent || '0');
@@ -282,9 +274,7 @@ describe('InitiativeModal', () => {
     expect(rerollButton).toBeDisabled();
 
     // Wait for animation to complete
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 700));
-    });
+    await waitFor(() => expect(screen.getByTestId('confirm-initiative-button')).not.toBeDisabled());
 
     // Should be enabled after animation
     expect(rerollButton).not.toBeDisabled();
