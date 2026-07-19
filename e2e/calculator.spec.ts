@@ -43,7 +43,6 @@ test.describe('Standalone Calculator', () => {
         break;
       }
     }
-    await page.waitForTimeout(500);
 
     // Switch to melee — use nth button with this text (tab comes before card)
     await page.getByRole('button', { name: 'БЛИЖНИЙ БОЙ' }).first().click();
@@ -66,7 +65,6 @@ test.describe('Standalone Calculator', () => {
         break;
       }
     }
-    await page.waitForTimeout(500);
 
     // Open modifiers
     await page.locator('button[aria-label="Модификаторы"]').click();
@@ -79,11 +77,9 @@ test.describe('Standalone Calculator', () => {
 
     // Switch to debuffs tab
     await page.getByRole('button', { name: /Дебаффы/ }).click();
-    await page.waitForTimeout(200);
 
     // Switch to manual tab
     await page.getByRole('button', { name: 'Ручной' }).click();
-    await page.waitForTimeout(200);
 
     // Close panel by clicking backdrop
     await page.locator('.fixed.inset-0.z-40 > .bg-transparent').click();

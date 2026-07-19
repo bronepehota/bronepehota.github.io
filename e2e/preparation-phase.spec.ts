@@ -19,7 +19,6 @@ test.describe('Preparation Phase', () => {
   test('should navigate to preparation step from unit selector', async ({ page }) => {
     await setupToArmyBuilder(page);
     await addFirstUnit(page);
-    await page.waitForTimeout(300);
     await goToPreparation(page);
 
     const prepScreen = page.getByTestId('battle-preparation-screen');

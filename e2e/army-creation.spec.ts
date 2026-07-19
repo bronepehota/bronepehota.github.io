@@ -129,7 +129,6 @@ test.describe('Army Creation', () => {
     // Tap the first squad card (corner click avoids the add/remove buttons)
     const firstCard = page.locator('[data-testid^="unit-card-"]').first();
     await firstCard.click({ position: { x: 10, y: 10 } });
-    await page.waitForTimeout(250);
 
     const sheet = page.getByTestId('unit-detail-sheet');
     await expect(sheet).toBeVisible();

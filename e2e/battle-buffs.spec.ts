@@ -136,7 +136,6 @@ test.describe('Battle buffs availability', () => {
       '[role="button"][aria-label*="баффов"]'
     ).first();
     await indicator.click();
-    await page.waitForTimeout(500);
 
     // Modal should open
     const modal = page.getByTestId('effects-modal');
@@ -154,7 +153,6 @@ test.describe('Battle buffs availability', () => {
       '[role="button"][aria-label*="баффов"]'
     ).first();
     await indicator.click();
-    await page.waitForTimeout(500);
 
     const modal = page.getByTestId('effects-modal');
     await expect(modal).toBeVisible();
@@ -174,7 +172,6 @@ test.describe('Battle buffs availability', () => {
       '[role="button"][aria-label*="баффов"]'
     ).first();
     await indicator.click();
-    await page.waitForTimeout(500);
 
     const modal = page.getByTestId('effects-modal');
     await expect(modal).toBeVisible();
@@ -196,7 +193,6 @@ test.describe('Battle buffs availability', () => {
       '[role="button"][aria-label*="баффов"]'
     ).first();
     await indicator.click();
-    await page.waitForTimeout(500);
 
     const modal = page.getByTestId('effects-modal');
     await expect(modal).toBeVisible();
@@ -204,7 +200,6 @@ test.describe('Battle buffs availability', () => {
     // Click Дебаф button to open debuff catalog
     const debuffsBtn = page.getByTestId('effects-tab-debuffs');
     await debuffsBtn.click();
-    await page.waitForTimeout(300);
 
     // Debuffs from catalog should be listed (at least one debuff exists)
     const debuffItems = modal.locator('[aria-label^="Применить"]');
@@ -219,7 +214,6 @@ test.describe('Battle buffs availability', () => {
       '[role="button"][aria-label*="баффов"]'
     ).first();
     await indicator.click();
-    await page.waitForTimeout(500);
 
     const modal = page.getByTestId('effects-modal');
     await expect(modal).toBeVisible();
@@ -248,19 +242,14 @@ test.describe('Full flow regression with editor link', () => {
     // Step 2: Source — editor link visible
     await expect(page.locator('a[href="/editor"]').first()).toBeVisible();
     await page.getByTestId('source-confirm-button').click();
-    await page.waitForTimeout(500);
 
     // Step 3: Faction
     await page.getByTestId('faction-card-polaris').click();
-    await page.waitForTimeout(300);
     await page.getByTestId('faction-continue-button').click();
-    await page.waitForTimeout(500);
     await page.getByTestId('mission-confirm-button').click();
-    await page.waitForTimeout(500);
 
     // Step 4: Budget
     await page.getByRole('button', { name: '350' }).click();
-    await page.waitForTimeout(300);
     await page.getByTestId('budget-next-button').click();
 
     // Should be on unit selection screen

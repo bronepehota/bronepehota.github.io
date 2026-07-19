@@ -27,23 +27,17 @@ test.describe('Pilot Functionality', () => {
   async function navigateToGameSession(page: any) {
     // First: Rules confirmation
     await page.click('[data-testid="rules-confirm-button"]');
-    await page.waitForTimeout(500);
 
     // Second: Source selection
     await page.click('[data-testid="source-confirm-button"]');
-    await page.waitForTimeout(500);
 
     // Third: Select faction
     await page.click('[data-testid="faction-card-polaris"]');
-    await page.waitForTimeout(300);
     await page.click('[data-testid="faction-continue-button"]');
-    await page.waitForTimeout(500);
     await page.click('[data-testid="mission-confirm-button"]');
-    await page.waitForTimeout(500);
 
     // Fourth: Select budget
     await page.click('button:has-text("350")');
-    await page.waitForTimeout(300);
     await page.click('[data-testid="budget-next-button"]');
 
     // Verify we're on unit selector screen (Army Builder)
@@ -67,23 +61,16 @@ test.describe('Pilot Functionality', () => {
     await machineCardForAdd.locator('button:has-text("В АРМИЮ")').click();
     await page.waitForTimeout(1000);
 
-    // FloatingContinueButton appears directly when units are in army
-    await page.waitForTimeout(500);
-
     // Click "НА БОЙ" to go to battle preparation
     await page.click('[data-testid="to-battle-button"]');
-    await page.waitForTimeout(500);
 
     // Start battle
     await page.click('[data-testid="start-battle-button"]');
-    await page.waitForTimeout(500);
 
     // Wait for initiative modal, then confirm
     const confirmButton = page.locator('[data-testid="confirm-initiative-button"]');
     if (await confirmButton.isVisible({ timeout: 2000 })) {
-      await page.waitForTimeout(1000);
       await confirmButton.click();
-      await page.waitForTimeout(2000);
     }
 
     // Verify we're in game session
@@ -97,27 +84,22 @@ test.describe('Pilot Functionality', () => {
 
     // Click pilot assignment button
     await page.locator('[data-testid="assign-pilot-button"]').click();
-    await page.waitForTimeout(500);
 
     // Select squad from modal (Линейная клон-пехота)
     const squadOption = page.locator('text=/клон.*пехота/i').first();
     await expect(squadOption).toBeVisible({ timeout: 3000 });
     await squadOption.click();
-    await page.waitForTimeout(300);
 
     // Select first soldier - modal shows "Боец #1", "Боец #2", etc.
     const soldierOption = page.locator('text=/Боец.*#1/i').first();
     await expect(soldierOption).toBeVisible({ timeout: 3000 });
     await soldierOption.click();
-    await page.waitForTimeout(300);
 
     // Confirm assignment
     await page.click('[data-testid="confirm-pilot-assignment"]');
-    await page.waitForTimeout(500);
 
     // Navigate back to squad to see pilot indicators
     await page.locator('button[data-testid^="unit-nav-"]').nth(0).click();
-    await page.waitForTimeout(500);
 
     // Check for pilot badge on first soldier
     const pilotBadge = page.locator('.relative.w-16.md\\:w-20').first()

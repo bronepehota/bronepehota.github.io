@@ -170,19 +170,16 @@ test.describe('Machine capture (#168)', () => {
     const squadNav = page.getByTestId('unit-nav-capture-squad-1').first();
     await expect(squadNav).toBeVisible({ timeout: 5000 });
     await squadNav.click({ force: true, timeout: 5000 });
-    await page.waitForTimeout(400);
 
     // Open the combat modal via the first soldier's action button.
     const actionButton = page.getByRole('button', { name: 'Выберите действие' }).first();
     await expect(actionButton).toBeVisible({ timeout: 5000 });
     await actionButton.click({ force: true });
-    await page.waitForTimeout(300);
 
     // Select the «ЗАХВАТ» action.
     const captureAction = page.getByRole('button', { name: /захват/i }).first();
     await expect(captureAction).toBeVisible({ timeout: 3000 });
     await captureAction.click();
-    await page.waitForTimeout(300);
 
     // CaptureModal opens. Header is visible.
     const captureModal = page.locator('h2:has-text("Захват техники")');
@@ -193,13 +190,11 @@ test.describe('Machine capture (#168)', () => {
     const firstOption = page.getByRole('option').first();
     await expect(firstOption).toBeVisible({ timeout: 3000 });
     await firstOption.click();
-    await page.waitForTimeout(300);
 
     // Confirm — defaults durability/ammo are seeded to the candidate max.
     const confirmButton = page.getByTestId('confirm-capture');
     await expect(confirmButton).toBeVisible({ timeout: 3000 });
     await confirmButton.click();
-    await page.waitForTimeout(500);
 
     // A new machine unit appears in the navigator (squad + existing machine +
     // the captured machine = 3 units). The captured machine instanceId is
@@ -210,7 +205,6 @@ test.describe('Machine capture (#168)', () => {
     // Re-open the squad card and verify the first soldier now carries the
     // «ПИЛОТ» pilot badge.
     await squadNav.click({ force: true, timeout: 5000 });
-    await page.waitForTimeout(300);
     await expect(page.getByText('ПИЛОТ').first()).toBeVisible({ timeout: 3000 });
   });
 
@@ -227,7 +221,6 @@ test.describe('Machine capture (#168)', () => {
     const machineNav = page.getByTestId('unit-nav-mark-machine-1').first();
     await expect(machineNav).toBeVisible({ timeout: 5000 });
     await machineNav.click({ force: true, timeout: 5000 });
-    await page.waitForTimeout(400);
 
     // BEFORE capture: the banner is absent.
     await expect(page.getByText('ЗАХВАЧЕНА ПРОТИВНИКОМ')).toHaveCount(0);
@@ -243,7 +236,6 @@ test.describe('Machine capture (#168)', () => {
 
     // Tap «Отметить захваченной».
     await markButton.click({ force: true });
-    await page.waitForTimeout(300);
 
     // The captured banner appears.
     await expect(page.getByText('ЗАХВАЧЕНА ПРОТИВНИКОМ')).toBeVisible({ timeout: 3000 });
@@ -258,7 +250,6 @@ test.describe('Machine capture (#168)', () => {
 
     // Tap recapture.
     await recaptureButton.click({ force: true });
-    await page.waitForTimeout(300);
 
     // Banner gone, combat re-enabled.
     await expect(page.getByText('ЗАХВАЧЕНА ПРОТИВНИКОМ')).toHaveCount(0);

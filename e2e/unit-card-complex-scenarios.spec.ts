@@ -27,12 +27,10 @@ test.describe('UnitCard Complex Scenarios', () => {
     await setupToArmyBuilder(page, { faction: 'polaris', budget: 350 });
 
     await page.click('button:has-text("Машины")');
-    await page.waitForTimeout(500);
 
     const helixUnit = page.locator('h3:has-text("Хеликс")');
     await expect(helixUnit).toBeVisible();
     await helixUnit.scrollIntoViewIfNeeded();
-    await page.waitForTimeout(300);
 
     const helixCard = page.locator('[data-testid^="unit-card-"]').filter({ hasText: 'Хеликс' });
     const addButton = helixCard.locator('button:has-text("В АРМИЮ")');

@@ -12,7 +12,6 @@ test.describe('Machine Fire Rate Limit', () => {
 
     // Switch to machines tab
     await page.click('button:has-text("Машины")');
-    await page.waitForTimeout(500);
 
     // Add "Демолишер" machine
     const demolisherUnit = page.locator('h3:has-text("ДЕМОЛИШЕР")');
@@ -28,7 +27,6 @@ test.describe('Machine Fire Rate Limit', () => {
 
     // Switch to game session
     await page.click('[data-testid="to-battle-button"]');
-    await page.waitForTimeout(500);
 
     // Start battle
     const confirmButton = page.locator('[data-testid="confirm-initiative-button"]');

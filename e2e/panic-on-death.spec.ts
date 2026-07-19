@@ -58,7 +58,6 @@ test.describe('Panic on death (#166)', () => {
     await enableCommunityPanic(page);
 
     await page.locator('[data-testid="soldier-kill-button"][data-soldier-index="1"]').click({ force: true });
-    await page.waitForTimeout(300);
     await expect(page.getByTestId('panic-modal-title')).toHaveCount(0); // 2 dead, still < 3
   });
 });

@@ -146,9 +146,7 @@ test.describe('Миссии', () => {
 
     // Open dock menu, then click "Новый тур" to trigger the confirmation popup
     await page.getByTestId('dock-menu-toggle').click();
-    await page.waitForTimeout(200);
     await page.getByTestId('new-turn-button').click();
-    await page.waitForTimeout(200);
 
     // Popup should show "ИЗ 6" (zahvat_tochek has turnCount=6)
     const popup = page.getByTestId('turn-count-popup');

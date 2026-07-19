@@ -18,11 +18,9 @@ test.describe('Height bonus (#164)', () => {
   async function openShotModal(page: Page) {
     const unitCard = page.getByTestId('unit-nav-height-unit-1');
     await unitCard.first().click({ force: true, timeout: 5000 });
-    await page.waitForTimeout(400);
     const actionButton = page.getByRole('button', { name: 'Выберите действие' }).first();
     await expect(actionButton).toBeVisible({ timeout: 5000 });
     await actionButton.click({ force: true });
-    await page.waitForTimeout(400);
     const shotButton = page.getByRole('button', { name: /выстрел/i }).first();
     await expect(shotButton).toBeVisible({ timeout: 3000 });
     await shotButton.click();
@@ -75,7 +73,6 @@ test.describe('Height bonus (#164)', () => {
 
     // Execute → combat resolves
     await fireButton.click();
-    await page.waitForTimeout(500);
   });
 
   test('gate persists across reload', async ({ page }) => {

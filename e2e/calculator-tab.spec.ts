@@ -22,15 +22,12 @@ test.describe('Calculator Tab', () => {
     await nameInput.click();
     await nameInput.pressSequentially('TestCalc', { delay: 20 });
     await page.getByRole('button', { name: 'Создать', exact: true }).first().click();
-    await page.waitForTimeout(500);
 
     // Source should be auto-selected; create a faction
     await page.getByTitle('Создать фракцию').first().click();
-    await page.waitForTimeout(300);
 
     // Select the new faction ("Новая фракция")
     await page.getByText('Новая фракция').first().click();
-    await page.waitForTimeout(300);
 
     // Create a squad
     await page.getByTitle('Создать отряд').first().click();
@@ -134,11 +131,8 @@ test.describe('Calculator Tab', () => {
     await page.waitForTimeout(300);
     await page.getByTestId('source-name-input').fill('TestCalc');
     await page.getByRole('button', { name: 'Создать', exact: true }).first().click();
-    await page.waitForTimeout(500);
     await page.getByTitle('Создать фракцию').first().click();
-    await page.waitForTimeout(300);
     await page.getByText('Новая фракция').first().click();
-    await page.waitForTimeout(300);
     await page.getByTitle('Создать отряд').first().click();
     await page.waitForTimeout(500);
 
@@ -151,15 +145,12 @@ test.describe('Calculator Tab', () => {
     // Save the squad
     await page.getByRole('textbox', { name: 'Введите название' }).fill('Test Squad');
     await page.getByRole('button', { name: 'Сохранить', exact: true }).click();
-    await page.waitForTimeout(500);
 
     // Click the saved squad to edit it
     await page.getByText('Test Squad').first().click();
-    await page.waitForTimeout(500);
 
     // Switch to calculator — should have 4 rows (1 original + 3 added)
     await page.getByTestId('calculator-tab').click();
-    await page.waitForTimeout(200);
 
     await expect(page.getByTestId('calculator-row-0')).toBeVisible();
     await expect(page.getByTestId('calculator-row-1')).toBeVisible();
@@ -180,7 +171,6 @@ test.describe('Calculator Tab', () => {
     const row0 = page.getByTestId('calculator-row-0');
     const propertySelect = row0.locator('select').nth(5);
     await propertySelect.selectOption('jump_boost_5');
-    await page.waitForTimeout(200);
 
     // Apply — switches back to manual tab
     await page.getByTestId('calculator-apply').click();

@@ -324,7 +324,6 @@ test.describe('Optional Rules Toggles', () => {
     const aimedShotContainer = page.getByTestId('aimed-shot-toggle');
     const aimedShotButton = aimedShotContainer.locator('button[aria-pressed]');
     await aimedShotButton.click();
-    await page.waitForTimeout(200);
 
     // Find surprise attack toggle and click the button inside
     const surpriseAttackContainer = page.getByTestId('surprise-attack-toggle');

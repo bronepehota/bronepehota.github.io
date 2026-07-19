@@ -35,17 +35,14 @@ test.describe('Combat Mechanics', () => {
 
     const menuButton = page.locator('.ml-auto button:has(svg.lucide-more-vertical)').last();
     await menuButton.click({ force: true });
-    await page.waitForTimeout(300);
 
     const initiativeButton = page.getByTestId('new-turn-button');
     await expect(initiativeButton).toBeVisible({ timeout: 5000 });
     await initiativeButton.click({ force: true });
-    await page.waitForTimeout(500);
 
     const turnConfirm = page.locator('text=ЗАВЕРШИТЬ ТУР').first();
     if (await turnConfirm.isVisible({ timeout: 2000 }).catch(() => false)) {
       await page.locator('button:has-text("ЗАВЕРШИТЬ")').last().click({ force: true });
-      await page.waitForTimeout(500);
     }
 
     const initiativeModal = page.getByTestId('initiative-modal');
@@ -60,13 +57,11 @@ test.describe('Combat Mechanics', () => {
     // Expand unit card
     const unitCard = page.getByTestId('unit-nav-combat-unit-1');
     await unitCard.first().click({ force: true, timeout: 5000 });
-    await page.waitForTimeout(500);
 
     // Click action button to open combat modal
     const actionButton = page.getByRole('button', { name: 'Выберите действие' }).first();
     await expect(actionButton).toBeVisible({ timeout: 5000 });
     await actionButton.click({ force: true });
-    await page.waitForTimeout(500);
 
     // Select shot action
     const shotButton = page.getByRole('button', { name: /выстрел/i });
@@ -83,7 +78,6 @@ test.describe('Combat Mechanics', () => {
     const fireButton = page.getByRole('button', { name: /выстрелить/i });
     await expect(fireButton).toBeVisible({ timeout: 3000 });
     await fireButton.click();
-    await page.waitForTimeout(500);
   });
 
   test('should execute melee action flow', async ({ page }) => {
@@ -94,13 +88,11 @@ test.describe('Combat Mechanics', () => {
     // Expand unit card
     const unitCard = page.getByTestId('unit-nav-combat-unit-1');
     await unitCard.first().click({ force: true, timeout: 5000 });
-    await page.waitForTimeout(500);
 
     // Click action button to open combat modal
     const actionButton = page.getByRole('button', { name: 'Выберите действие' }).first();
     await expect(actionButton).toBeVisible({ timeout: 5000 });
     await actionButton.click({ force: true });
-    await page.waitForTimeout(500);
 
     // Select melee action (БЛИЖНИЙ БОЙ)
     const meleeButton = page.getByRole('button', { name: /ближний бой|бб/i });
@@ -114,7 +106,6 @@ test.describe('Combat Mechanics', () => {
     const executeButton = page.getByRole('button', { name: /выполнить|в бой|расчёт/i }).first();
     if (await executeButton.isVisible({ timeout: 2000 }).catch(() => false)) {
       await executeButton.click();
-      await page.waitForTimeout(500);
     }
   });
 });

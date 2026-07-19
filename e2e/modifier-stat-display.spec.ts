@@ -246,14 +246,12 @@ test.describe('Modifier stat display and expiry', () => {
     const endTurnButton = page.locator('button[aria-label*="тур"], button[aria-label*="Тур"]').first();
     if (await endTurnButton.isVisible()) {
       await endTurnButton.click();
-      await page.waitForTimeout(500);
     } else {
       // Alternative: use the turn control in the header or dock
       // Try clicking the turn indicator to open initiative modal
       const turnControl = page.locator('[data-testid="game-session"] button').filter({ hasText: /тур|Тур|ТУР/ }).first();
       if (await turnControl.isVisible()) {
         await turnControl.click();
-        await page.waitForTimeout(500);
       }
     }
   });

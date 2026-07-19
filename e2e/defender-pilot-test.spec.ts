@@ -101,7 +101,6 @@ test.describe('Defender pilot test (#163)', () => {
     } else {
       await damageButton.click({ force: true });
     }
-    await page.waitForTimeout(300);
 
     // AFTER damage: alert bar appears (amber, urgent)
     const alertBar = page.getByTestId('pilot-survival-test-button');
