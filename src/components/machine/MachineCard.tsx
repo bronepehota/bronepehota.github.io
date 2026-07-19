@@ -6,6 +6,7 @@ import { clsx } from 'clsx';
 import type { Machine, FactionID } from '@/lib/types';
 import SafeImage from '@/components/SafeImage';
 import { getFactionColors, factionDisplayNames } from '@/lib/faction-colors';
+import { FactionLogo } from '@/components/FactionLogo';
 
 interface MachineCardProps {
   machine: Machine;
@@ -138,22 +139,15 @@ export default function MachineCard({ machine, onAdd, onViewDetails, testId, all
                 {machine.class?.toUpperCase()}
               </p>
             </div>
-            {allyFactionId && (() => {
-              const allyColors = getFactionColors(allyFactionId);
-              const allyName = factionDisplayNames[allyFactionId] ?? allyFactionId;
-              return (
-                <span
-                  className={clsx(
-                    'ml-1 px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wide flex-shrink-0',
-                    allyColors.text,
-                    allyColors.bg,
-                  )}
-                  title={`Союзник: ${allyName}`}
-                >
-                  {allyName}
-                </span>
-              );
-            })()}
+            {allyFactionId && (
+              <span
+                className="ml-1 inline-flex items-center justify-center w-5 h-5 rounded flex-shrink-0"
+                style={{ backgroundColor: getFactionColors(allyFactionId).primary + '33' }}
+                title={`Союзник: ${factionDisplayNames[allyFactionId] ?? allyFactionId}`}
+              >
+                <FactionLogo faction={allyFactionId} className="w-4 h-4" />
+              </span>
+            )}
           </div>
           {/* Cost badge */}
           <div className="flex-shrink-0">

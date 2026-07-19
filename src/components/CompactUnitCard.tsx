@@ -7,6 +7,7 @@ import { ImageModal } from './modals/ImageModal';
 import type { Squad, Machine, FactionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { getFactionColors, factionDisplayNames } from '@/lib/faction-colors';
+import { FactionLogo } from '@/components/FactionLogo';
 
 interface CompactUnitCardProps {
   unit: Squad | Machine;
@@ -154,22 +155,15 @@ export function CompactUnitCard({
               )} title={unit.name}>
                 {unit.name}
               </h4>
-              {allyFactionId && (() => {
-                const allyColors = getFactionColors(allyFactionId);
-                const allyName = factionDisplayNames[allyFactionId] ?? allyFactionId;
-                return (
-                  <span
-                    className={cn(
-                      'ml-1 px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wide flex-shrink-0',
-                      allyColors.text,
-                      allyColors.bg,
-                    )}
-                    title={`Союзник: ${allyName}`}
-                  >
-                    {allyName}
-                  </span>
-                );
-              })()}
+              {allyFactionId && (
+                <span
+                  className="ml-1 inline-flex items-center justify-center w-5 h-5 rounded flex-shrink-0"
+                  style={{ backgroundColor: getFactionColors(allyFactionId).primary + '33' }}
+                  title={`Союзник: ${factionDisplayNames[allyFactionId] ?? allyFactionId}`}
+                >
+                  <FactionLogo faction={allyFactionId} className="w-4 h-4" />
+                </span>
+              )}
               {countInArmy > 0 && (
                 <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-green-600/80 text-white">
                   {countInArmy}

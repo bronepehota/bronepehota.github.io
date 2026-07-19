@@ -508,7 +508,7 @@ describe('UnitSelector', () => {
       // text query would be ambiguous).
       const allyBadge = document.querySelector('[title="Союзник: Наёмники"]');
       expect(allyBadge).not.toBeNull();
-      expect(allyBadge?.textContent).toContain('Наёмники');
+      expect(allyBadge?.getAttribute('title')).toContain('Наёмники');
     });
 
     it('shows the ally badge in compact view too', () => {
@@ -532,7 +532,7 @@ describe('UnitSelector', () => {
       // Compact card shows the mercenary unit name with the ally pill next to it.
       const allyBadge = document.querySelector('[title="Союзник: Наёмники"]');
       expect(allyBadge).not.toBeNull();
-      expect(allyBadge?.textContent).toContain('Наёмники');
+      expect(allyBadge?.getAttribute('title')).toContain('Наёмники');
     });
 
     it('renders no ally badge when all units belong to the selected faction', () => {
