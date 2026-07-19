@@ -5,6 +5,19 @@ import type { FactionID } from './types';
 // NEXT_PUBLIC_GITHUB_PAGES is set in deploy.yml and available in client code
 export const BASE_PATH = process.env.NEXT_PUBLIC_GITHUB_PAGES === 'true' ? '/bronepehota' : '';
 
+// Canonical site origin INCLUDING basePath — used for absolute URLs in
+// sitemap.xml, canonical links, Open Graph / Twitter images.
+// Override with NEXT_PUBLIC_SITE_URL when moving to a custom domain
+// (e.g. https://bronepehota.ru — no basePath). Defaults to the GitHub Pages URL.
+export const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.NEXT_PUBLIC_GITHUB_PAGES === 'true'
+    ? 'https://luxor.github.io/bronepehota'
+    : 'http://localhost:3000');
+
+// Yandex.Metrica counter id (numeric string). Optional — component no-ops without it.
+export const YANDEX_METRICA_ID = process.env.NEXT_PUBLIC_YANDEX_METRICA_ID;
+
 export const LOCAL_STORAGE_KEYS = {
   ARMY: 'bronepehota_army',
   RULES_VERSION: 'bronepehota_rules_version',

@@ -2,6 +2,8 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getEnrichedUnit, getAllUnits, EnrichedUnit } from '@/lib/encyclopedia-utils';
 import UnitDetailPage from '@/components/encyclopedia/UnitDetailPage';
+import JsonLd from '@/components/JsonLd';
+import { absoluteUrl, breadcrumbJsonLd } from '@/lib/seo';
 
 interface PageProps {
   params: { id: string };
@@ -24,8 +26,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: `${unit.name} — Энциклопедия Бронепехота`,
     description: unit.encyclopedia?.lore || `Отряд ${unit.name} фракции ${unit.faction}`,
+    alternates: {
+      canonical: absoluteUrl(`/encyclopedia/unit/${unit.id}`),
+    },
     openGraph: {
-      images: unit.image ? [unit.image] : [],
+      images: unit.image ? [absoluteUrl(unit.image)] : [],
     },
   };
 }
@@ -49,7 +54,16 @@ export default async function Page({ params }: PageProps) {
   const sourceOrder = sourceIds.filter(sid => bySource[sid]);
 
   return (
-    <UnitDetailPage unit={unit} bySource={bySource} sourceOrder={sourceOrder} />
+    <>
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: 'Энциклопедия', path: '/encyclopedia' },
+          { name: 'Фракции', path: '/encyclopedia/factions' },
+          { name: unit.name, path: `/encyclopedia/unit/${unit.id}` },
+        ])}
+      />
+      <UnitDetailPage unit={unit} bySource={bySource} sourceOrder={sourceOrder} />
+    </>
   );
 }
 
