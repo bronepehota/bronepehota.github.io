@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { clearStorage } from './helpers/setup';
 
 /**
  * Source Selection E2E tests
@@ -7,11 +8,8 @@ import { test, expect } from '@playwright/test';
 test.describe('Source Selection', () => {
   test.beforeEach(async ({ page }) => {
     // Clear localStorage before each test
+    await clearStorage(page);
     await page.goto('/app');
-    await page.evaluate(() => {
-      localStorage.clear();
-    });
-    await page.reload();
     await page.waitForLoadState('networkidle');
   });
 

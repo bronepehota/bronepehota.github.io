@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { clearStorage } from './helpers/setup';
 
 /**
  * Calculator tab E2E tests
@@ -7,9 +8,8 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Calculator Tab', () => {
   test.beforeEach(async ({ page }) => {
+    await clearStorage(page);
     await page.goto('/editor');
-    await page.evaluate(() => localStorage.clear());
-    await page.reload();
     await page.waitForLoadState('networkidle');
   });
 

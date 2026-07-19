@@ -1,10 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { clearStorage } from './helpers/setup';
 
 test.describe('Хроники войн', () => {
   test.beforeEach(async ({ page }) => {
-    await page.addInitScript(() => {
-      localStorage.clear();
-    });
+    await clearStorage(page);
   });
 
   test('список кампаний открывается и ведёт на страницу кампании', async ({ page }) => {

@@ -1,11 +1,9 @@
 import { test, expect } from '@playwright/test';
-import { setupToArmyBuilder } from './helpers/setup';
+import { clearStorage, setupToArmyBuilder } from './helpers/setup';
 
 test.describe('Machine Fire Rate Limit', () => {
   test.beforeEach(async ({ page }) => {
-    await page.addInitScript(() => {
-      localStorage.clear();
-    });
+    await clearStorage(page);
     await page.goto('/app');
   });
 

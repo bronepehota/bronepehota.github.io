@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { clearStorage } from './helpers/setup';
 
 /**
  * E2E tests for bonuses branch changes:
@@ -13,7 +14,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Editor promo link on source selection', () => {
   test.beforeEach(async ({ page }) => {
-    await page.addInitScript(() => localStorage.clear());
+    await clearStorage(page);
     await page.goto('/app');
     await page.waitForLoadState('networkidle');
 
@@ -237,7 +238,7 @@ test.describe('Battle buffs availability', () => {
 
 test.describe('Full flow regression with editor link', () => {
   test('should complete full flow to army builder with editor link visible', async ({ page }) => {
-    await page.addInitScript(() => localStorage.clear());
+    await clearStorage(page);
     await page.goto('/app');
     await page.waitForLoadState('networkidle');
 

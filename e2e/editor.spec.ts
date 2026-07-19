@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { clearStorage } from './helpers/setup';
 
 /**
  * Editor E2E tests
@@ -8,11 +9,8 @@ import { test, expect } from '@playwright/test';
 test.describe('Editor', () => {
   test.beforeEach(async ({ page }) => {
     // Clear localStorage before each test
+    await clearStorage(page);
     await page.goto('/editor');
-    await page.evaluate(() => {
-      localStorage.clear();
-    });
-    await page.reload();
     await page.waitForLoadState('networkidle');
   });
 

@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { clearStorage } from './helpers/setup';
 
 /**
  * E2E tests for pilot functionality
@@ -12,9 +13,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Pilot Functionality', () => {
   test.beforeEach(async ({ page }) => {
     // Clear localStorage before each test
-    await page.addInitScript(() => {
-      localStorage.clear();
-    });
+    await clearStorage(page);
 
     // Navigate to app and wait for load
     await page.goto('/app');

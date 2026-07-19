@@ -1,11 +1,12 @@
 import { test, expect } from '@playwright/test';
+import { clearStorage } from './helpers/setup';
 
 /**
  * E2E tests for modifier display in soldier stats and expiry on turn end.
  */
 test.describe('Modifier stat display and expiry', () => {
   test.beforeEach(async ({ page }) => {
-    await page.addInitScript(() => localStorage.clear());
+    await clearStorage(page);
   });
 
   test('should show armor bonus when soldierModifier is active', async ({ page }) => {
