@@ -151,7 +151,7 @@ test.describe('Миссии', () => {
     await page.waitForTimeout(200);
 
     // Popup should show "ИЗ 6" (zahvat_tochek has turnCount=6)
-    const popup = page.locator('.fixed.inset-0.z-\\[100\\]');
+    const popup = page.getByTestId('turn-count-popup');
     await expect(popup).toBeVisible();
     await expect(popup).toContainText('ИЗ 6');
   });

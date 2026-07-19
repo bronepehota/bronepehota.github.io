@@ -138,7 +138,7 @@ test.describe('Battle buffs availability', () => {
     await page.waitForTimeout(500);
 
     // Modal should open
-    const modal = page.locator('[role="dialog"][aria-modal="true"]');
+    const modal = page.getByTestId('effects-modal');
     await expect(modal).toBeVisible();
 
     // Should have title with soldier name (e.g. "#1")
@@ -155,12 +155,12 @@ test.describe('Battle buffs availability', () => {
     await indicator.click();
     await page.waitForTimeout(500);
 
-    const modal = page.locator('[role="dialog"][aria-modal="true"]');
+    const modal = page.getByTestId('effects-modal');
     await expect(modal).toBeVisible();
 
     // Should show two always-visible action buttons: Баф and Дебаф
-    const buffsBtn = modal.locator('button').filter({ hasText: /^Баф/ }).first();
-    const debuffsBtn = modal.locator('button').filter({ hasText: /Дебаф/ }).first();
+    const buffsBtn = page.getByTestId('effects-tab-buffs');
+    const debuffsBtn = page.getByTestId('effects-tab-debuffs');
     await expect(buffsBtn).toBeVisible();
     await expect(debuffsBtn).toBeVisible();
   });
@@ -175,11 +175,11 @@ test.describe('Battle buffs availability', () => {
     await indicator.click();
     await page.waitForTimeout(500);
 
-    const modal = page.locator('[role="dialog"][aria-modal="true"]');
+    const modal = page.getByTestId('effects-modal');
     await expect(modal).toBeVisible();
 
     // Click Баф button to open buff catalog
-    const buffsBtn = modal.locator('button').filter({ hasText: /^Баф/ }).first();
+    const buffsBtn = page.getByTestId('effects-tab-buffs');
     await buffsBtn.click();
 
     // Squad "Линейная клон-пехота" has NO buffs assigned in editor
@@ -197,11 +197,11 @@ test.describe('Battle buffs availability', () => {
     await indicator.click();
     await page.waitForTimeout(500);
 
-    const modal = page.locator('[role="dialog"][aria-modal="true"]');
+    const modal = page.getByTestId('effects-modal');
     await expect(modal).toBeVisible();
 
     // Click Дебаф button to open debuff catalog
-    const debuffsBtn = modal.locator('button').filter({ hasText: /Дебаф/ }).first();
+    const debuffsBtn = page.getByTestId('effects-tab-debuffs');
     await debuffsBtn.click();
     await page.waitForTimeout(300);
 
@@ -220,7 +220,7 @@ test.describe('Battle buffs availability', () => {
     await indicator.click();
     await page.waitForTimeout(500);
 
-    const modal = page.locator('[role="dialog"][aria-modal="true"]');
+    const modal = page.getByTestId('effects-modal');
     await expect(modal).toBeVisible();
 
     // Click close

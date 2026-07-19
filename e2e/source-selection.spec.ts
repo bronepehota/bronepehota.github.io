@@ -173,7 +173,7 @@ test.describe('Source Selection', () => {
 
     // Step 4: Budget selection
     await expect(page.getByText('350')).toBeVisible();
-    await page.click('button:has-text("350")');
+    await page.getByTestId('budget-option-350').click();
     await page.waitForTimeout(300);
     await page.click('[data-testid="budget-next-button"]');
 
