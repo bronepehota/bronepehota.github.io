@@ -178,23 +178,6 @@ test.describe('Энциклопедия', () => {
     await expect(page.locator('a[href*="tehnolog.ru"]').first()).toBeVisible();
   });
 
-  test('фильтр по источнику оставляет только юнитов Star System', async ({ page }) => {
-    await page.goto('/encyclopedia');
-    await page.waitForLoadState('networkidle');
-    await page.waitForSelector('[data-testid^="unit-card-"]');
-
-    const cards = () => page.locator('[href*="/encyclopedia/unit/"]');
-    const before = await cards().count();
-
-    // Выбрать источник Star System (сообщество).
-    await page.getByTestId('source-filter-star_system').click();
-    await page.waitForTimeout(200);
-
-    const after = await cards().count();
-    expect(after).toBeGreaterThan(0);          // рутенийские юниты есть
-    expect(after).toBeLessThan(before);        // их меньше, чем всего
-  });
-
   test('непокрашенный отряд показывает источник изображений Star System', async ({ page }) => {
     // polaris_rezhimnaya_klon_pehota не в SQUAD_PHOTO_SOURCE → непокрашенный.
     await page.goto('/encyclopedia/unit/polaris_rezhimnaya_klon_pehota');
@@ -212,7 +195,7 @@ test.describe('Энциклопедия', () => {
     await page.goto('/encyclopedia/unit/rutenia_komandnoe_otdelenie');
     await page.waitForLoadState('networkidle');
 
-    await expect(page.getByTestId('painter-chip').getByText('ЛИСИЦИН')).toBeVisible();
+    await expect(page.getByTestId('painter-chip').getByText('МИНИАТЮРЫ ЛИСИЦИНА')).toBeVisible();
     // Star System fallback для изображений не должен срабатывать для покрашенных.
     await expect(page.getByTestId('image-source-chip')).toHaveCount(0);
   });

@@ -220,7 +220,7 @@ Captured for honesty — the code is the source of truth.
 - **`originOnly` prop** on `ProvenanceRow` — renders just the origin chip for lore-less units (loreAuthor is moot without lore text).
 - **`data-testid`s** `provenance-row` / `painter-chip` / `contribute-link` / `source-filter-*` for stable E2E.
 
-## Encyclopedia source filter (added after spec)
+## Encyclopedia source filter — REVERTED
 
-A third filter dimension on the units grid (`EncyclopediaPage.tsx`): **Все / Технолог / Star System**, filtering by `resolveUnitProvenance(unit).origin`. Chip style mirrors the faction filter (colored dot + tone fill when active). Composes with the existing faction + type + search filters. Units-only (factions/missions not filtered). E2E: `фильтр по источнику оставляет только юнитов Star System`.
+A «Все / Технолог / Star System» filter on the units grid (`EncyclopediaPage.tsx`) filtering by `resolveUnitProvenance(unit).origin` was added, then **reverted per maintainer** (decided it was unnecessary). The data model (`provenance.ts`) still supports such a filter if it's wanted later; only the UI + its E2E test were removed.
 
