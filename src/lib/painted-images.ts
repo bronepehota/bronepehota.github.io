@@ -24,7 +24,7 @@ export const CREDITS = {
   shnayder: { url: 'https://vk.com/shnayder_brush', logo: '/images/credits/shnayder_brush.jpg', name: 'Покрасы Шнайдера' },
   star_system: { url: 'https://vk.com/bp_bnp', logo: '/images/credits/star_system.jpg', name: 'Star System' },
   tehnolog: { url: 'https://www.tehnolog.ru', logo: '/images/credits/tehnolog.png', name: 'Технолог' },
-  lisitsin: { url: '', logo: '/images/credits/lisitsin.jpg', name: 'Лисицин' },
+  lisitsin: { url: 'https://vk.ru/fredfoxminiatures', logo: '/images/credits/lisitsin.jpg', name: 'Лисицин' },
   // TODO(аттрибуция): ждём лого + ссылку + список отрядов Сергея Переверзева.
   pereverzev: { url: '', logo: '/images/credits/pereverzev.jpg', name: 'Сергей Переверзев' },
 } as const;
