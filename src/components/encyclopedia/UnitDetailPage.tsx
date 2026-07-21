@@ -10,8 +10,10 @@ import { ModifierIcon } from '@/components/editor/ModifierIcons';
 import { SoldierImages } from './UnitDetail/SoldierImages';
 import { MachineImages } from './UnitDetail/MachineImages';
 import { SQUAD_GROUP_IMAGE, getPhotoCredit } from '@/lib/painted-images';
+import { resolveUnitProvenance } from '@/lib/provenance';
 import { UnitLore } from './UnitDetail/UnitLore';
 import { SourceAvailability } from './SourceAvailability';
+import { PainterChip, ProvenanceRow, ImageSourceChip } from './AttributionLabel';
 import { FactionLogo } from '@/components/FactionLogo';
 import { getFactionColors, factionLogos } from '@/lib/faction-colors';
 import { UnitStatTable } from './UnitDetail/UnitStatTable';
@@ -64,6 +66,17 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
   const FactionIcon = faction.icon;
   // Wide group photo shown as a hero banner at the top (only some squads have one)
   const groupPhoto = SQUAD_GROUP_IMAGE[unit.id];
+  // Painter credit — shown whenever the squad is attributed (painted), independent
+  // of whether a wide group photo exists.
+  const photoCredit = getPhotoCredit(unit.id);
+  // Whether this unit has a lore block rendered by <UnitLore>. When it doesn't,
+  // we still attribute the concept origin in the header (loreAuthor is moot).
+  const enc = unit.encyclopedia;
+  const hasLore = !!(
+    enc?.lore || enc?.history || enc?.traditions ||
+    (enc?.keyBattles && enc.keyBattles.length > 0) ||
+    (enc?.locations && enc.locations.length > 0)
+  );
 
   useEffect(() => {
     setIsLoaded(true);
@@ -258,28 +271,32 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
                     </div>
                   )}
 
-                  {/* Photo credit — per-squad source, only for units with a group photo */}
-                  {groupPhoto && (() => {
-                    const c = getPhotoCredit(unit.id);
-                    return (
-                      <div className="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2">
-                        <span className="font-ibm-mono text-[10px] text-military-steel/60 uppercase tracking-wider">
-                          Источник фото:
-                        </span>
-                        <a
-                          href={c.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 rounded-sm border border-military-steel/20 bg-military-charcoal/40 px-2 py-1 hover:border-military-amber/50 transition-colors"
-                        >
-                          <GitHubPagesImage src={c.logo} alt={c.name} width={28} height={28} className="rounded-sm" />
-                          <span className="font-ibm-mono text-[10px] text-military-sand uppercase tracking-wide">
-                            {c.name}
-                          </span>
-                        </a>
-                      </div>
-                    );
-                  })()}
+                  {/* Image attribution: painter chip for painted squads, else Star System
+                      (unpainted card-art/renders — rule per maintainer; Lisitsin's squads
+                      are painted, so they show Lisitsin, never the Star System fallback). */}
+                  <div className="mb-6">
+                    {photoCredit ? (
+                      <PainterChip
+                        name={photoCredit.name}
+                        logo={photoCredit.logo}
+                        url={photoCredit.url}
+                        withContribute={!hasLore}
+                      />
+                    ) : (
+                      <ImageSourceChip />
+                    )}
+                  </div>
+
+                  {/* Concept-origin attribution for units with NO lore block (loreAuthor is moot then). */}
+                  {!hasLore && (
+                    <div className="mb-6">
+                      <ProvenanceRow
+                        provenance={resolveUnitProvenance(unit)}
+                        originOnly
+                        withHeader={false}
+                      />
+                    </div>
+                  )}
 
                   {/* Divider */}
                   <div className="military-divider max-w-xs mb-6" />

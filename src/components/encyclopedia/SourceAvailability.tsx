@@ -1,6 +1,7 @@
 import type { ElementType } from 'react';
-import { Shield, Star } from 'lucide-react';
+import { Layers } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { GitHubPagesImage } from '@/components/GitHubPagesImage';
 import { EncyclopediaUnit } from '@/lib/encyclopedia-registry';
 
 interface SourceAvailabilityProps {
@@ -13,18 +14,18 @@ interface SourceAvailabilityProps {
   onSourceChange?: (id: string) => void;
 }
 
-const sourceConfig: Record<string, { name: string; short: string; icon: any; color: string; bgColor: string }> = {
+const sourceConfig: Record<string, { name: string; short: string; logo: string; color: string; bgColor: string }> = {
   star_system: {
     name: 'Star System',
     short: 'SS',
-    icon: Star,
+    logo: '/images/credits/star_system.jpg',
     color: '#f59e0b',
     bgColor: 'from-amber-500/20 to-amber-600/20',
   },
   tehnolog: {
     name: 'Технолог',
     short: 'ТЕХ',
-    icon: Shield,
+    logo: '/images/credits/tehnolog.png',
     color: '#06b6d4',
     bgColor: 'from-cyan-500/20 to-cyan-600/20',
   },
@@ -38,24 +39,31 @@ export function SourceAvailability({
   onSourceChange,
 }: SourceAvailabilityProps) {
   if (variant === 'card') {
+    // Compact badges on the grid card — source logo + cost.
     return (
       <div className="flex items-center gap-1 mt-1">
         {unit.sources.map((source) => {
           const config = sourceConfig[source.id];
           if (!config) return null;
-
           return (
             <div
               key={source.id}
               className={cn(
-                "px-1.5 py-0.5 rounded-[2px] border backdrop-blur-sm",
-                "bg-gradient-to-br " + config.bgColor,
+                'inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[2px] border backdrop-blur-sm',
+                'bg-gradient-to-br ' + config.bgColor,
               )}
               style={{ borderColor: `${config.color}80` }}
               title={`${config.name}: ${source.cost} очков`}
             >
-              <span className="text-[8px] font-bold" style={{ color: config.color }}>
-                {config.short}
+              <GitHubPagesImage
+                src={config.logo}
+                alt={config.name}
+                width={10}
+                height={10}
+                className="rounded-[1px]"
+              />
+              <span className="text-[8px] font-bold font-ibm-mono tabular-nums" style={{ color: config.color }}>
+                {source.cost}
               </span>
             </div>
           );
@@ -82,7 +90,6 @@ export function SourceAvailability({
           const config = sourceConfig[source.id];
           if (!config) return null;
 
-          const IconComponent = config.icon;
           const isActive = interactive && source.id === activeSource;
           const Tag: ElementType = interactive ? 'button' : 'div';
 
@@ -93,36 +100,46 @@ export function SourceAvailability({
               onClick={interactive ? () => onSourceChange!(source.id) : undefined}
               aria-pressed={interactive ? isActive : undefined}
               className={cn(
-                'relative group flex items-center gap-3 text-left',
-                'px-4 py-3 rounded-sm border-2 backdrop-blur-sm w-full',
+                'relative group flex items-center gap-3.5 text-left w-full',
+                'px-4 py-3.5 rounded-sm border-2 backdrop-blur-sm overflow-hidden',
                 'bg-gradient-to-br ' + config.bgColor,
                 'transition-all duration-200',
                 interactive
                   ? 'cursor-pointer hover:scale-[1.01] active:scale-[0.99]'
-                  : 'hover:scale-105',
-                interactive && !isActive && 'opacity-55 hover:opacity-95',
+                  : 'hover:scale-[1.02]',
+                interactive && !isActive && 'opacity-60 hover:opacity-95',
               )}
-              style={{ borderColor: isActive ? config.color : 'rgba(120,113,108,0.25)' }}
+              style={{
+                borderColor: isActive ? config.color : 'rgba(120,113,108,0.25)',
+                boxShadow: isActive ? `0 0 24px -8px ${config.color}` : undefined,
+              }}
             >
-              {/* Source icon */}
+              {/* Source logo in a framed, scan-lined tinted tile */}
               <div
-                className="p-2 rounded-sm transition-colors duration-300"
-                style={{ backgroundColor: `${config.color}33` }}
+                className="relative shrink-0 rounded-sm p-1.5 transition-colors duration-300"
+                style={{ backgroundColor: `${config.color}26`, border: `1px solid ${config.color}55` }}
               >
-                <IconComponent className="w-4 h-4" style={{ color: config.color }} />
+                <GitHubPagesImage
+                  src={config.logo}
+                  alt={config.name}
+                  width={28}
+                  height={28}
+                  className="rounded-[2px]"
+                />
+                <div className="absolute inset-0 rounded-sm bg-[linear-gradient(transparent_50%,rgba(255,255,255,0.05)_50%)] bg-[length:100%_3px] pointer-events-none" />
               </div>
 
               {/* Source info */}
               <div className="flex-1 min-w-0">
-                <div className="font-russo text-sm font-bold text-white mb-1">
+                <div className="font-russo text-sm font-bold text-white mb-0.5">
                   {config.name}
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="font-ibm-mono text-xs text-military-sand">
+                  <span className="font-ibm-mono text-xs text-military-sand tabular-nums">
                     {source.cost} очков
                   </span>
                   <span className="text-military-steel/40">•</span>
-                  <span className="font-ibm-mono text-xs text-military-steel/60 uppercase truncate">
+                  <span className="font-ibm-mono text-[10px] text-military-steel/60 uppercase tracking-wide truncate">
                     {unit.encyclopedia?.class || (unit.type === 'squad' ? 'Пехота' : 'Техника')}
                   </span>
                 </div>
@@ -131,10 +148,11 @@ export function SourceAvailability({
               {/* Active marker */}
               {isActive && (
                 <span
-                  className="absolute top-1 right-2 font-ibm-mono text-[8px] uppercase tracking-wider"
+                  className="absolute top-1.5 right-2 inline-flex items-center gap-1 font-ibm-mono text-[8px] uppercase tracking-wider"
                   style={{ color: config.color }}
                 >
-                  ● активен
+                  <span className="inline-block w-1 h-1 rounded-full" style={{ backgroundColor: config.color }} />
+                  активен
                 </span>
               )}
 
@@ -149,7 +167,7 @@ export function SourceAvailability({
       {unit.sources.length > 1 && (
         <div className="mt-3 p-3 bg-military-charcoal/50 rounded border border-military-rust/20">
           <div className="flex items-start gap-2">
-            <Shield className="w-4 h-4 text-military-amber/70 flex-shrink-0 mt-0.5" />
+            <Layers className="w-4 h-4 text-military-amber/70 flex-shrink-0 mt-0.5" />
             <p className="text-xs text-military-taupe leading-relaxed">
               Юнит доступен в нескольких армейских списках с различной стоимостью и характеристиками.
               {' '}

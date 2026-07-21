@@ -49,6 +49,7 @@
     "allies": ["protectorate"],
     "sources": [
       "star_system"
-    ]
+    ],
+    "provenance": { "origin": "star_system", "loreAuthor": "star_system" }
   }
 ]

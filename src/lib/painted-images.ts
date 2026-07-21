@@ -22,28 +22,43 @@ export const SQUAD_GROUP_IMAGE: Record<string, string> = {
 /** Photo credit per painter/photographer source. */
 export const CREDITS = {
   shnayder: { url: 'https://vk.com/shnayder_brush', logo: '/images/credits/shnayder_brush.jpg', name: 'Покрасы Шнайдера' },
-  star_system: { url: 'https://vk.com/bp_bnp', logo: '/images/credits/bp_bnp.jpg', name: 'Star System' },
+  star_system: { url: 'https://vk.com/bp_bnp', logo: '/images/credits/star_system.jpg', name: 'Star System' },
+  tehnolog: { url: 'https://www.tehnolog.ru', logo: '/images/credits/tehnolog.png', name: 'Технолог' },
+  lisitsin: { url: 'https://vk.ru/fredfoxminiatures', logo: '/images/credits/lisitsin.jpg', name: 'Миниатюры Лисицина' },
+  // TODO(аттрибуция): ждём лого + ссылку + список отрядов Сергея Переверзева.
+  pereverzev: { url: '', logo: '/images/credits/pereverzev.jpg', name: 'Сергей Переверзев' },
 } as const;
 export type PhotoSource = keyof typeof CREDITS;
 
 /**
- * Per-squad photo source — who painted/photographed each squad's images.
- * Rule (per user): the new painted squads are Покрасы Шнайдера; flip an entry to
- * 'star_system' if a squad's photos actually come from Star System (bp_bnp).
+ * Per-squad photo source — who painted each squad's images. ONLY squads listed
+ * here are considered "painted" (and thus show a painter chip on the detail page);
+ * any squad absent from this map has no painter attribution (generic/card art).
  */
 export const SQUAD_PHOTO_SOURCE: Record<string, PhotoSource> = {
+  // Покрасы Шнайдера:
   polaris_tyazhyolaya_klon_pehota: 'shnayder',
   polaris_lyogkaya_shturmovaya_klon_pehota: 'shnayder',
   polaris_lineynaya_klon_pehota: 'shnayder',
   polaris_lyogkiy_shturmovoy_desant: 'shnayder',
   polaris_tribunatory_starye: 'shnayder',
   protectorate_kiberpehota: 'shnayder',
-  rutenia_voyska_planety_ruteniya: 'shnayder',
+  protectorate_lyogkaya_kiberpehota: 'shnayder',
   protectorate_shturmovoy_spetsnaz_starye: 'shnayder',
   mercenaries_mutanty: 'shnayder',
+  // Технолог (официальные миниатюры):
+  rutenia_voyska_planety_ruteniya: 'tehnolog',
+  rutenia_ruteniyskaya_gvardiya: 'tehnolog',
+  // Лисицин (покрас):
+  rutenia_komandnoe_otdelenie: 'lisitsin',
+  rutenia_otryad_podderzhki: 'lisitsin',
+  rutenia_staraya_gvardiya: 'lisitsin',
+  rutenia_pervoprohodtsy: 'lisitsin',
+  protectorate_peschanie_sokoly: 'lisitsin',
 };
 
-/** Photo credit for a unit (defaults to Shnaider for painted squads). */
-export function getPhotoCredit(unitId: string) {
-  return CREDITS[SQUAD_PHOTO_SOURCE[unitId] ?? 'shnayder'];
+/** Painter credit for a unit, or `undefined` when the squad has no attribution. */
+export function getPhotoCredit(unitId: string): typeof CREDITS[PhotoSource] | undefined {
+  const source = SQUAD_PHOTO_SOURCE[unitId];
+  return source ? CREDITS[source] : undefined;
 }

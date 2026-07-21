@@ -142,4 +142,83 @@ test.describe('Энциклопедия', () => {
     const polarisBtn = page.getByRole('button', { name: 'ПОЛЯРИС' });
     await expect(polarisBtn).toHaveCSS('background-color', 'rgb(239, 68, 68)');
   });
+
+  // --- Attribution labels (происхождение контента) ---
+
+  test('карточка фракции Рутения помечена источником Star System', async ({ page }) => {
+    await page.goto('/encyclopedia/factions');
+    await page.waitForLoadState('networkidle');
+
+    const card = page.getByTestId('encyclopedia-faction-card-rutenia');
+    await expect(card).toBeVisible();
+    // Рутения — сообщество Star System (свёрнутый чип).
+    await expect(card.getByTestId('provenance-row')).toBeVisible();
+    await expect(card.getByTestId('provenance-row').getByText('STAR SYSTEM')).toBeVisible();
+  });
+
+  test('страница отряда показывает происхождение (оригинал + лор) и покрас', async ({ page }) => {
+    await page.goto('/encyclopedia/unit/polaris_lineynaya_klon_pehota');
+    await page.waitForLoadState('networkidle');
+
+    // У этого отряда есть лор → origin tehnolog, loreAuthor star_system (два чипа).
+    const row = page.getByTestId('provenance-row').first();
+    await expect(row).toBeVisible();
+    await expect(row.getByText('ТЕХНОЛОГ')).toBeVisible();
+    await expect(row.getByText('STAR SYSTEM')).toBeVisible();
+    // Покрас — Шнайдер (отряд в SQUAD_PHOTO_SOURCE).
+    await expect(page.getByTestId('painter-chip').getByText('ПОКРАСЫ ШНАЙДЕРА')).toBeVisible();
+  });
+
+  test('страница миссии помечает официальный сценарий и ведёт на первоисточник', async ({ page }) => {
+    await page.goto('/encyclopedia/mission/osvobozhdenie');
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.getByTestId('provenance-row').getByText('ТЕХНОЛОГ')).toBeVisible();
+    // Чип миссии ссылается на tehnolog.ru.
+    await expect(page.locator('a[href*="tehnolog.ru"]').first()).toBeVisible();
+  });
+
+  test('непокрашенный отряд показывает источник изображений Star System', async ({ page }) => {
+    // polaris_rezhimnaya_klon_pehota не в SQUAD_PHOTO_SOURCE → непокрашенный.
+    await page.goto('/encyclopedia/unit/polaris_rezhimnaya_klon_pehota');
+    await page.waitForLoadState('networkidle');
+
+    const chip = page.getByTestId('image-source-chip');
+    await expect(chip).toBeVisible();
+    await expect(chip.getByText('STAR SYSTEM')).toBeVisible();
+    // Покраса-чипа у непокрашенного нет.
+    await expect(page.getByTestId('painter-chip')).toHaveCount(0);
+  });
+
+  test('отряд Лисицина показывает покрас (а не Star System fallback)', async ({ page }) => {
+    // rutenia_komandnoe_otdelenie — покрас Лисицина; правило «кроме лисицинских».
+    await page.goto('/encyclopedia/unit/rutenia_komandnoe_otdelenie');
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.getByTestId('painter-chip').getByText('МИНИАТЮРЫ ЛИСИЦИНА')).toBeVisible();
+    // Star System fallback для изображений не должен срабатывать для покрашенных.
+    await expect(page.getByTestId('image-source-chip')).toHaveCount(0);
+  });
+
+  test('баннер об источниках показывается и закрывается', async ({ page }) => {
+    await page.goto('/encyclopedia');
+    await page.waitForLoadState('networkidle');
+
+    const banner = page.getByTestId('encyclopedia-sources-banner');
+    await expect(banner).toBeVisible();
+    await expect(banner.getByText('с миру по нитке')).toBeVisible();
+    // кнопка закрытия прячет баннер
+    await page.getByTestId('encyclopedia-sources-banner-dismiss').click();
+    await expect(banner).toHaveCount(0);
+  });
+
+  test('чин происхождения кликабелен и ведёт на сайт источника', async ({ page }) => {
+    await page.goto('/encyclopedia/unit/polaris_lineynaya_klon_pehota');
+    await page.waitForLoadState('networkidle');
+
+    const row = page.getByTestId('provenance-row').first();
+    // split: origin=tehnolog, loreAuthor=star_system — оба теперь ссылки
+    await expect(row.locator('a[href*="tehnolog.ru"]')).toBeVisible();
+    await expect(row.locator('a[href*="vk.com/bp_bnp"]')).toBeVisible();
+  });
 });

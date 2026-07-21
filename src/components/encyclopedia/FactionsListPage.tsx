@@ -7,7 +7,9 @@ import type { EncyclopediaFaction } from '@/lib/encyclopedia-registry';
 import { getUnitsForFaction } from '@/lib/encyclopedia-registry';
 import { FactionLogo } from '@/components/FactionLogo';
 import { getFactionColors, factionDisplayNames } from '@/lib/faction-colors';
+import { resolveFactionProvenance } from '@/lib/provenance';
 import { EncyclopediaTabs } from './EncyclopediaTabs';
+import { ProvenanceRow } from './AttributionLabel';
 import { cn } from '@/lib/utils';
 
 interface FactionsListPageProps {
@@ -165,7 +167,7 @@ export default function FactionsListPage({ factions }: FactionsListPageProps) {
                       )}
 
                       {/* Meta chips */}
-                      <div className="flex flex-wrap gap-2 mb-3">
+                      <div className="flex flex-wrap items-center gap-2 mb-3">
                         {faction.homeWorld && (
                           <span className="inline-flex items-center gap-1.5 font-ibm-mono text-[11px] px-2.5 py-1 rounded bg-military-charcoal/70 border border-military-steel/40 text-military-taupe uppercase tracking-wider">
                             <Globe className="w-3 h-3 text-military-rust" />
@@ -176,6 +178,11 @@ export default function FactionsListPage({ factions }: FactionsListPageProps) {
                           <Users className="w-3 h-3 text-military-amber" />
                           {unitCount} {unitCount === 1 ? 'юнит' : 'юнитов'}
                         </span>
+                        <ProvenanceRow
+                          provenance={resolveFactionProvenance(faction)}
+                          compact
+                          withHeader={false}
+                        />
                       </div>
 
                       {faction.description && (

@@ -236,6 +236,17 @@ Every unit also has a lore entry at `src/data/encyclopedia/units/{faction}/squad
 - **Faction books** in `~/Downloads/` — `EmpPolaris.docx`, `Protektorat.pdf`. Community posts on the Star System VK group (`vk.com/bp_bnp`) carry bonus-squad lore + faction-status canon (e.g. Рутения = Buffer Zone «Ржавый Осколок»).
 - Use real dates from canon; never invent eras. (Polaris: 4300–4451; Protectorate: 4478 fall of Гелиония → 4531/4537 Рутенийские конфликты.)
 
+### Provenance & painter attribution (источник)
+
+Every lore entry is auto-attributed by `src/lib/provenance.ts` — `origin` = who invented the concept, `loreAuthor` = who wrote the lore text. **Most units need no field** (defaults: non-rutenia → `origin:'tehnolog'`, `loreAuthor:'star_system'`; rutenia → both `star_system`). Add an explicit `provenance` only for **exceptions** (sibling to `encyclopedia`; `Partial` — override one axis or both):
+
+```json
+"provenance": { "origin": "star_system" }      // community-invented unit
+"provenance": { "loreAuthor": "tehnolog" }     // lore is verbatim official
+```
+
+**Painter** of a squad's photos → add the squad id to `SQUAD_PHOTO_SOURCE` in `src/lib/painted-images.ts` (`'shnayder' | 'star_system' | 'lisitsin' | 'pereverzev'`); for a new painter, also add a `CREDITS` entry (128×128 logo in `public/images/credits/` + VK url). A squad NOT in `SQUAD_PHOTO_SOURCE` shows no painter chip.
+
 ### ⚠ Build-breaking gotcha
 
 `getEnrichedUnit(id)` looks up the squad **in the source by `id`**. A lore entry with no matching source squad → `soldiers` undefined → detail page crashes the **production static build** at prerender (`Cannot read properties of undefined (reading 'map')` on `/encyclopedia/unit/<id>`). Unit tests won't catch it. **Commit the source squad (+ images) with the lore entry**, and verify with `NEXT_PUBLIC_GITHUB_PAGES=true npm run build`.

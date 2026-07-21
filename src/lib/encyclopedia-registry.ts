@@ -10,6 +10,9 @@
 import factionsJson from '@/data/encyclopedia/factions.json';
 // Import units from faction/type structure
 import type { Location } from '@/lib/types';
+// Type-only: Provenance type lives in ./provenance, which type-only-imports back
+// from this module — type-only on both sides, no runtime cycle.
+import type { Provenance } from '@/lib/provenance';
 import polarisSquads from '@/data/encyclopedia/units/polaris/squads.json';
 import polarisMachines from '@/data/encyclopedia/units/polaris/machines.json';
 import protectorateSquads from '@/data/encyclopedia/units/protectorate/squads.json';
@@ -54,6 +57,9 @@ export interface EncyclopediaUnit {
   encyclopedia?: EncyclopediaLore;
   /** Optional disclaimer shown on the detail page (e.g. provisional stats). */
   statsNote?: string;
+  /** Lore provenance override (origin / loreAuthor). Unset axes fall back to the
+   * faction-aware default — see `resolveUnitProvenance` in `@/lib/provenance`. */
+  provenance?: Partial<Provenance>;
 }
 
 export interface EncyclopediaFaction {
@@ -68,6 +74,9 @@ export interface EncyclopediaFaction {
   banner?: string;
   sources: string[];
   allies?: string[];
+  /** Lore provenance override (origin / loreAuthor). Unset axes fall back to the
+   * faction-aware default — see `resolveFactionProvenance` in `@/lib/provenance`. */
+  provenance?: Partial<Provenance>;
 }
 
 // Type assertion for JSON imports

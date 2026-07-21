@@ -9,6 +9,7 @@ import { FACTIONS } from '@/lib/constants';
 import { factionDisplayNames, getFactionColors } from '@/lib/faction-colors';
 import { UnitCard } from './UnitCard';
 import { EncyclopediaTabs } from './EncyclopediaTabs';
+import { EncyclopediaAttributionBanner } from './EncyclopediaAttributionBanner';
 import { SQUAD_GROUP_IMAGE } from '@/lib/painted-images';
 import { cn } from '@/lib/utils';
 
@@ -249,6 +250,9 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
         {/* Units grid */}
         <main className="px-4 py-4 pb-20">
           <div className="mx-auto max-w-7xl">
+            <div className="mb-4">
+              <EncyclopediaAttributionBanner />
+            </div>
             {filteredUnits.length === 0 ? (
               <div className="py-20 text-center">
                 <div className="mb-3 text-5xl opacity-20">∅</div>

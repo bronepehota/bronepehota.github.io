@@ -8,6 +8,9 @@
  * Convention follows combat-types.ts / modifier-types.ts (a dedicated type file).
  */
 import type { FactionID } from './types';
+// Type-only: Provenance type lives in ./provenance, which type-only-imports back
+// from this module — type-only on both sides, no runtime cycle.
+import type { Provenance } from './provenance';
 
 /** A single faction's objective for a mission. Missions are asymmetric. */
 export interface MissionObjective {
@@ -86,6 +89,9 @@ export interface Mission {
   participants?: Record<string, MissionParticipant[]>;
   /** Canonical source URL. */
   sourceUrl?: string;
+  /** Lore provenance override (origin / loreAuthor). Unset axes default to Tehnolog
+   * for both — see `resolveMissionProvenance` in `@/lib/provenance`. */
+  provenance?: Partial<Provenance>;
 }
 
 /** A campaign groups missions that share a universe / intro paragraph. */
