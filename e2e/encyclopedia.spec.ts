@@ -142,4 +142,78 @@ test.describe('Энциклопедия', () => {
     const polarisBtn = page.getByRole('button', { name: 'ПОЛЯРИС' });
     await expect(polarisBtn).toHaveCSS('background-color', 'rgb(239, 68, 68)');
   });
+
+  // --- Attribution labels (происхождение контента) ---
+
+  test('карточка фракции Рутения помечена источником Star System', async ({ page }) => {
+    await page.goto('/encyclopedia/factions');
+    await page.waitForLoadState('networkidle');
+
+    const card = page.getByTestId('encyclopedia-faction-card-rutenia');
+    await expect(card).toBeVisible();
+    // Рутения — сообщество Star System (свёрнутый чип).
+    await expect(card.getByTestId('provenance-row')).toBeVisible();
+    await expect(card.getByTestId('provenance-row').getByText('STAR SYSTEM')).toBeVisible();
+  });
+
+  test('страница отряда показывает происхождение (оригинал + лор) и покрас', async ({ page }) => {
+    await page.goto('/encyclopedia/unit/polaris_lineynaya_klon_pehota');
+    await page.waitForLoadState('networkidle');
+
+    // У этого отряда есть лор → origin tehnolog, loreAuthor star_system (два чипа).
+    const row = page.getByTestId('provenance-row').first();
+    await expect(row).toBeVisible();
+    await expect(row.getByText('ТЕХНОЛОГ')).toBeVisible();
+    await expect(row.getByText('STAR SYSTEM')).toBeVisible();
+    // Покрас — Шнайдер (отряд в SQUAD_PHOTO_SOURCE).
+    await expect(page.getByTestId('painter-chip').getByText('ПОКРАСЫ ШНАЙДЕРА')).toBeVisible();
+  });
+
+  test('страница миссии помечает официальный сценарий и ведёт на первоисточник', async ({ page }) => {
+    await page.goto('/encyclopedia/mission/osvobozhdenie');
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.getByTestId('provenance-row').getByText('ТЕХНОЛОГ')).toBeVisible();
+    // Чип миссии ссылается на tehnolog.ru.
+    await expect(page.locator('a[href*="tehnolog.ru"]').first()).toBeVisible();
+  });
+
+  test('фильтр по источнику оставляет только юнитов Star System', async ({ page }) => {
+    await page.goto('/encyclopedia');
+    await page.waitForLoadState('networkidle');
+    await page.waitForSelector('[data-testid^="unit-card-"]');
+
+    const cards = () => page.locator('[href*="/encyclopedia/unit/"]');
+    const before = await cards().count();
+
+    // Выбрать источник Star System (сообщество).
+    await page.getByTestId('source-filter-star_system').click();
+    await page.waitForTimeout(200);
+
+    const after = await cards().count();
+    expect(after).toBeGreaterThan(0);          // рутенийские юниты есть
+    expect(after).toBeLessThan(before);        // их меньше, чем всего
+  });
+
+  test('непокрашенный отряд показывает источник изображений Star System', async ({ page }) => {
+    // polaris_rezhimnaya_klon_pehota не в SQUAD_PHOTO_SOURCE → непокрашенный.
+    await page.goto('/encyclopedia/unit/polaris_rezhimnaya_klon_pehota');
+    await page.waitForLoadState('networkidle');
+
+    const chip = page.getByTestId('image-source-chip');
+    await expect(chip).toBeVisible();
+    await expect(chip.getByText('STAR SYSTEM')).toBeVisible();
+    // Покраса-чипа у непокрашенного нет.
+    await expect(page.getByTestId('painter-chip')).toHaveCount(0);
+  });
+
+  test('отряд Лисицина показывает покрас (а не Star System fallback)', async ({ page }) => {
+    // rutenia_komandnoe_otdelenie — покрас Лисицина; правило «кроме лисицинских».
+    await page.goto('/encyclopedia/unit/rutenia_komandnoe_otdelenie');
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.getByTestId('painter-chip').getByText('ЛИСИЦИН')).toBeVisible();
+    // Star System fallback для изображений не должен срабатывать для покрашенных.
+    await expect(page.getByTestId('image-source-chip')).toHaveCount(0);
+  });
 });

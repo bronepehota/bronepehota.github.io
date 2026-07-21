@@ -8,6 +8,8 @@ import { factionDisplayNames, getFactionColors } from '@/lib/faction-colors';
 import type { Mission, Campaign } from '@/lib/mission-types';
 import type { FactionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { resolveMissionProvenance } from '@/lib/provenance';
+import { ProvenanceRow } from '../encyclopedia/AttributionLabel';
 import {
   ArrowLeft,
   Target,
@@ -120,6 +122,14 @@ export default function MissionDetailPage({ mission, campaign }: MissionDetailPa
                 {mission.parameters.rulesVariant && (
                   <ParamChip icon={Crosshair} label={mission.parameters.rulesVariant} />
                 )}
+              </div>
+
+              {/* Provenance — official scenario source (links to sourceUrl when available). */}
+              <div className="mt-4">
+                <ProvenanceRow
+                  provenance={resolveMissionProvenance(mission)}
+                  linkUrl={mission.sourceUrl}
+                />
               </div>
 
               <div className="military-divider max-w-xs mt-4" />

@@ -10,6 +10,7 @@ import { factionDisplayNames, getFactionColors } from '@/lib/faction-colors';
 import { UnitCard } from './UnitCard';
 import { EncyclopediaTabs } from './EncyclopediaTabs';
 import { SQUAD_GROUP_IMAGE } from '@/lib/painted-images';
+import { resolveUnitProvenance, type LoreSource } from '@/lib/provenance';
 import { cn } from '@/lib/utils';
 
 interface EncyclopediaPageProps {
@@ -28,11 +29,21 @@ const types: { value: TypeFilter; label: string; icon: string }[] = [
   { value: 'орудие', label: 'ОРУДИЯ', icon: '⬢' },
 ];
 
+type SourceFilter = 'all' | LoreSource;
+
+// Provenance filter — «откуда юнит»: официальный канон Технолога vs сообщество Star System.
+const sources: { value: SourceFilter; label: string; tone: string }[] = [
+  { value: 'all', label: 'ВСЕ', tone: '#A8A29E' },
+  { value: 'tehnolog', label: 'ТЕХНОЛОГ', tone: '#06b6d4' },
+  { value: 'star_system', label: 'STAR SYSTEM', tone: '#f59e0b' },
+];
+
 export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps) {
   const [units] = useState<EncyclopediaUnit[]>(initialUnits);
   const [filteredUnits, setFilteredUnits] = useState<EncyclopediaUnit[]>(initialUnits);
   const [selectedFaction, setSelectedFaction] = useState<FactionID | 'all'>('all');
   const [selectedType, setSelectedType] = useState<TypeFilter>('all');
+  const [selectedSource, setSelectedSource] = useState<SourceFilter>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -68,6 +79,7 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
   useEffect(() => {
     const filtered = units.filter(unit => {
       if (selectedFaction !== 'all' && unit.faction !== selectedFaction) return false;
+      if (selectedSource !== 'all' && resolveUnitProvenance(unit).origin !== selectedSource) return false;
       if (selectedType !== 'all') {
         if (selectedType === 'hero') {
           // Герои — отряды с пометкой о предварительных статах
@@ -89,10 +101,13 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
       return true;
     });
     setFilteredUnits(filtered);
-  }, [units, selectedFaction, selectedType, searchQuery]);
+  }, [units, selectedFaction, selectedSource, selectedType, searchQuery]);
 
   const activeFilterCount =
-    (selectedFaction !== 'all' ? 1 : 0) + (selectedType !== 'all' ? 1 : 0) + (searchQuery ? 1 : 0);
+    (selectedFaction !== 'all' ? 1 : 0) +
+    (selectedSource !== 'all' ? 1 : 0) +
+    (selectedType !== 'all' ? 1 : 0) +
+    (searchQuery ? 1 : 0);
 
   return (
     <div className="min-h-screen bg-military-dark relative overflow-hidden">
@@ -193,8 +208,8 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
               </div>
             </div>
 
-            {/* Faction + type chips: stacked on mobile, side-by-side on desktop */}
-            <div className="grid gap-2 md:grid-cols-2">
+            {/* Faction + source + type chips: stacked on mobile, 3-up on desktop */}
+            <div className="grid gap-2 md:grid-cols-3">
               {/* Faction chips */}
               <div className="flex gap-1.5 overflow-x-auto scrollbar-hide md:flex-wrap md:overflow-visible">
                 {factions.map(faction => {
@@ -216,6 +231,34 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
                         style={{ backgroundColor: active ? 'rgba(255,255,255,0.85)' : faction.color }}
                       />
                       {faction.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Source / provenance chips (источник: Технолог vs Star System) */}
+              <div className="flex gap-1.5 overflow-x-auto scrollbar-hide md:flex-wrap md:overflow-visible">
+                {sources.map(source => {
+                  const active = selectedSource === source.value;
+                  return (
+                    <button
+                      key={source.value}
+                      data-testid={`source-filter-${source.value}`}
+                      aria-pressed={active}
+                      onClick={() => setSelectedSource(source.value)}
+                      className={cn(
+                        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 font-ibm-mono text-[10px] tracking-wide whitespace-nowrap transition-all md:px-3.5 md:py-2 md:text-xs',
+                        active
+                          ? 'text-white'
+                          : 'border-military-steel/30 text-military-sand/55 hover:text-military-sand hover:border-military-steel/60'
+                      )}
+                      style={active && source.value !== 'all' ? { backgroundColor: source.tone, borderColor: source.tone } : undefined}
+                    >
+                      <span
+                        className="h-1.5 w-1.5 rounded-full md:h-2 md:w-2"
+                        style={{ backgroundColor: active ? 'rgba(255,255,255,0.85)' : source.tone }}
+                      />
+                      {source.label}
                     </button>
                   );
                 })}

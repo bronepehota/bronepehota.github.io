@@ -93,6 +93,7 @@ npm run test:e2e            # All E2E tests pass
 - **Dev server auto-starts** on `http://localhost:3001` before tests
 - **Dev server port cleanup**: multiple `npm run dev` instances pile up on ports 3000-3003. Before restarting: `pkill -9 -f next` + `rm -rf .next`. After a clean start, `/app` takes ~30s to compile on first access (Next.js dev on-demand compilation).
 - **Background dev server**: run `npm run dev` as its own background command. Don't chain it behind `pkill`/`rm` in the same backgrounded call — that compound form has failed with empty output (exit 1). Do the cleanup in a separate foreground call first.
+- **`output: export` dev-mode 404 noise**: the existing "несуществующий ID → 404" test logs a scary `[WebServer] Error … missing param … non_existent_id` stack under dev — expected, not a failure (the test passes).
 - **Headed mode**: `npm run test:e2e:headed` (visible browser)
 - **Debug mode**: `npm run test:e2e:debug` (Playwright Inspector)
 - **Shared setup helpers**: `e2e/helpers/setup.ts` — use `setupToArmyBuilder`, `setupGameSessionWithSquad`, `setupToPreparation` etc. to reduce setup duplication
@@ -171,6 +172,13 @@ src/data/encyclopedia/
 **Key Pattern**: Game data (cost, soldiers, weapons) lives in `sources/`. Lore data (descriptions, history, tactics) lives in `encyclopedia/`. `encyclopedia-utils.ts` merges them for display.
 
 **`EncyclopediaUnit` carries LORE only** — no gameplay stats (`rank`, `weapons`, `durability_max`, `ammo_max` are undefined). To resolve real Machine data: `resolveMachineFromSource(id)` from `src/lib/machine-resolver.ts` — looks up `getSource(id).machines` via the encyclopedia's `sources` list.
+
+**Content sources — several distinct "source" dimensions per unit** (don't conflate them):
+- **Stats source** = army list (`unit.sources[]`: star_system/tehnolog) — which stats; switchable via `SourceAvailability.tsx`.
+- **Lore provenance** (`src/lib/provenance.ts`, optional `provenance` field): `origin` (who invented the concept) + `loreAuthor` (who wrote the text) — tehnolog/star_system.
+- **Painter** (`src/lib/painted-images.ts`): `CREDITS` (logo+url+name) + `SQUAD_PHOTO_SOURCE` (per-squad); `getPhotoCredit(id)` returns `undefined` for unattributed squads (no default).
+- **Image source**: painted squad ⇒ its painter; otherwise Star System (unpainted card-art/renders — Lisitsin's squads are painted, so never the fallback).
+- Attribution UI: `src/components/encyclopedia/AttributionLabel.tsx` (`ProvenanceRow` `// ИСТОЧНИК`, `PainterChip` `// ПОКРАС`, `ImageSourceChip` `// ИЗОБРАЖЕНИЯ`, `SourceChip`, `ContributeButton`→vk.com/bp_bnp). Logos 128×128 in `public/images/credits/`.
 
 **Source-based JSON storage** in `src/data/sources/`:
 ```
@@ -435,6 +443,7 @@ Edit `squads.json` or `machines.json` in `src/data/sources/{source_id}/{faction}
 - **Touch-friendly targets**: Minimum 44x44px tap targets (WCAG 2.5.5)
 - **Responsive patterns**: Bottom sheets for mobile modals, centered cards for desktop, hide labels on mobile (`hidden md:inline`)
 - **Path alias**: `@/*` maps to `src/*` (configured in `tsconfig.json`)
+- **Dossier `// LABEL` text in JSX**: wrap in braces — `{'// ИСТОЧНИК'}` — or `react/jsx-no-comment-textnodes` errors (bare `//` parses as a comment).
 
 ### GitHub Pages Deployment
 

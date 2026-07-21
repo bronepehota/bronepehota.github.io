@@ -1,6 +1,8 @@
 import { EncyclopediaUnit } from '@/lib/encyclopedia-registry';
 import { BookOpen } from 'lucide-react';
 import { getLocationIcon } from '@/lib/lore-utils';
+import { resolveUnitProvenance } from '@/lib/provenance';
+import { ProvenanceRow } from '../AttributionLabel';
 
 interface UnitLoreProps {
   unit: EncyclopediaUnit;
@@ -16,10 +18,14 @@ export function UnitLore({ unit }: UnitLoreProps) {
 
   return (
     <div className="folded-paper military-corners p-6">
-      <h2 className="font-oswald text-lg text-military-sand mb-4 flex items-center gap-2">
+      <h2 className="font-oswald text-lg text-military-sand mb-3 flex items-center gap-2">
         <BookOpen className="w-5 h-5 text-military-rust" />
         Лор и история
       </h2>
+
+      <div className="mb-4">
+        <ProvenanceRow provenance={resolveUnitProvenance(unit)} />
+      </div>
 
       {unit.encyclopedia?.lore && (
         <div className="mb-4">
