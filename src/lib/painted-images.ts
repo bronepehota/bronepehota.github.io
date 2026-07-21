@@ -23,6 +23,7 @@ export const SQUAD_GROUP_IMAGE: Record<string, string> = {
 export const CREDITS = {
   shnayder: { url: 'https://vk.com/shnayder_brush', logo: '/images/credits/shnayder_brush.jpg', name: 'Покрасы Шнайдера' },
   star_system: { url: 'https://vk.com/bp_bnp', logo: '/images/credits/star_system.jpg', name: 'Star System' },
+  tehnolog: { url: 'https://www.tehnolog.ru', logo: '/images/credits/tehnolog.png', name: 'Технолог' },
   lisitsin: { url: '', logo: '/images/credits/lisitsin.jpg', name: 'Лисицин' },
   // TODO(аттрибуция): ждём лого + ссылку + список отрядов Сергея Переверзева.
   pereverzev: { url: '', logo: '/images/credits/pereverzev.jpg', name: 'Сергей Переверзев' },
@@ -44,8 +45,10 @@ export const SQUAD_PHOTO_SOURCE: Record<string, PhotoSource> = {
   protectorate_kiberpehota: 'shnayder',
   protectorate_lyogkaya_kiberpehota: 'shnayder',
   protectorate_shturmovoy_spetsnaz_starye: 'shnayder',
-  rutenia_voyska_planety_ruteniya: 'shnayder',
   mercenaries_mutanty: 'shnayder',
+  // Технолог (официальные миниатюры):
+  rutenia_voyska_planety_ruteniya: 'tehnolog',
+  rutenia_ruteniyskaya_gvardiya: 'tehnolog',
   // Лисицин (покрас):
   rutenia_komandnoe_otdelenie: 'lisitsin',
   rutenia_otryad_podderzhki: 'lisitsin',
