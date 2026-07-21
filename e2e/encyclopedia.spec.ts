@@ -199,4 +199,27 @@ test.describe('Энциклопедия', () => {
     // Star System fallback для изображений не должен срабатывать для покрашенных.
     await expect(page.getByTestId('image-source-chip')).toHaveCount(0);
   });
+
+  test('баннер об источниках показывается, ведёт на VK и закрывается', async ({ page }) => {
+    await page.goto('/encyclopedia');
+    await page.waitForLoadState('networkidle');
+
+    const banner = page.getByTestId('encyclopedia-sources-banner');
+    await expect(banner).toBeVisible();
+    // «Дополнить» в баннере ведёт на VK-канал приёма правок
+    await expect(banner.locator('a[href*="lastbpcoder"]')).toBeVisible();
+    // кнопка закрытия прячет баннер
+    await page.getByTestId('encyclopedia-sources-banner-dismiss').click();
+    await expect(banner).toHaveCount(0);
+  });
+
+  test('чин происхождения кликабелен и ведёт на сайт источника', async ({ page }) => {
+    await page.goto('/encyclopedia/unit/polaris_lineynaya_klon_pehota');
+    await page.waitForLoadState('networkidle');
+
+    const row = page.getByTestId('provenance-row').first();
+    // split: origin=tehnolog, loreAuthor=star_system — оба теперь ссылки
+    await expect(row.locator('a[href*="tehnolog.ru"]')).toBeVisible();
+    await expect(row.locator('a[href*="vk.com/bp_bnp"]')).toBeVisible();
+  });
 });

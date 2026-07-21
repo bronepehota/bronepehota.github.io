@@ -9,22 +9,35 @@
  * Also renders a subtle «дополнить данные» affordance linking to the VK community,
  * so anyone can contribute missing lore / painters / provenance info.
  */
+import { useState } from 'react';
 import type { LucideIcon } from 'lucide-react';
-import { Shield, Star, Megaphone, ExternalLink } from 'lucide-react';
+import { Shield, Star, Megaphone, ExternalLink, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { GitHubPagesImage } from '@/components/GitHubPagesImage';
 import { isProvenanceUniform, type LoreSource, type Provenance } from '@/lib/provenance';
 
-/** VK community for data contributions (lore, painters, provenance). */
-export const CONTRIBUTION_VK_URL = 'https://vk.com/bp_bnp';
+/** VK channel for data contributions / error reports (lore, painters, provenance). */
+export const CONTRIBUTION_VK_URL = 'https://vk.ru/lastbpcoder';
+
+/** Prefilled message template copied to the clipboard when «Дополнить» is pressed,
+ *  so the user can paste it straight into VK (VK has no prefilled-message URL). */
+export function contributionTemplate(subject?: string): string {
+  return [
+    'Здравствуйте! Сообщение по энциклопедии «Бронепехота».',
+    `Раздел: ${subject ?? '___'}`,
+    'Где (отряд / миссия / фракция): ___',
+    'Что заметил (ошибка / неточность): ___',
+    'Предлагаю (исправить / дополнить): ___',
+  ].join('\n');
+}
 
 /** Display metadata for each lore source bucket. */
 const LORE_SOURCE_META: Record<
   LoreSource,
-  { name: string; short: string; icon: LucideIcon; tone: string; logo: string }
+  { name: string; short: string; icon: LucideIcon; tone: string; logo: string; url: string }
 > = {
-  tehnolog: { name: 'Технолог', short: 'ТЕХНОЛОГ', icon: Shield, tone: '#06b6d4', logo: '/images/credits/tehnolog.png' },
-  star_system: { name: 'Star System', short: 'STAR SYSTEM', icon: Star, tone: '#f59e0b', logo: '/images/credits/star_system.jpg' },
+  tehnolog: { name: 'Технолог', short: 'ТЕХНОЛОГ', icon: Shield, tone: '#06b6d4', logo: '/images/credits/tehnolog.png', url: 'https://www.tehnolog.ru' },
+  star_system: { name: 'Star System', short: 'STAR SYSTEM', icon: Star, tone: '#f59e0b', logo: '/images/credits/star_system.jpg', url: 'https://vk.com/bp_bnp' },
 };
 
 /* -------------------------------------------------------------------------- */
@@ -114,30 +127,50 @@ export function SourceChip({ name, role, icon, logo, url, tone, compact }: Sourc
 
 interface ContributeButtonProps {
   compact?: boolean;
-  /** Override the target (defaults to the VK community). */
+  /** Override the target (defaults to the VK contribution channel). */
   url?: string;
+  /** Inserted into the copied message template (e.g. the unit / section name). */
+  subject?: string;
 }
 
-export function ContributeButton({ compact, url = CONTRIBUTION_VK_URL }: ContributeButtonProps) {
-  const title = 'Помочь с данными: сообщить или дополнить лор, покрас, источник — через VK-сообщество';
+export function ContributeButton({ compact, url = CONTRIBUTION_VK_URL, subject }: ContributeButtonProps) {
+  const [copied, setCopied] = useState(false);
+  const title = 'Сообщить об ошибке или дополнить данные — скопируется шаблон сообщения и откроется VK';
+  const handleClick = () => {
+    try {
+      navigator.clipboard?.writeText(contributionTemplate(subject));
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* clipboard unavailable — the link still opens */
+    }
+  };
   return (
     <a
       href={url}
       target="_blank"
       rel="noopener noreferrer"
+      onClick={handleClick}
       title={title}
       aria-label={title}
       data-testid="contribute-link"
       className={cn(
-        'inline-flex items-center gap-1 rounded-sm border border-military-steel/30',
-        'bg-transparent text-military-steel/60 transition-colors',
-        'hover:text-military-amber hover:border-military-amber/50',
+        'inline-flex items-center gap-1 rounded-sm border transition-colors',
+        copied
+          ? 'border-military-amber/60 text-military-amber'
+          : 'border-military-steel/30 text-military-steel/60 hover:text-military-amber hover:border-military-amber/50',
         compact ? 'px-1.5 py-0.5' : 'px-2 py-1',
       )}
     >
-      <Megaphone className={compact ? 'w-2.5 h-2.5' : 'w-3 h-3'} aria-hidden />
+      {copied ? (
+        <Check className={compact ? 'w-2.5 h-2.5' : 'w-3 h-3'} aria-hidden />
+      ) : (
+        <Megaphone className={compact ? 'w-2.5 h-2.5' : 'w-3 h-3'} aria-hidden />
+      )}
       {!compact && (
-        <span className="font-ibm-mono text-[9px] uppercase tracking-wider">Дополнить</span>
+        <span className="font-ibm-mono text-[9px] uppercase tracking-wider">
+          {copied ? 'Шаблон скопирован' : 'Дополнить'}
+        </span>
       )}
     </a>
   );
@@ -181,7 +214,7 @@ export function ProvenanceRow({
       logo={metaOf(s).logo}
       icon={metaOf(s).icon}
       tone={metaOf(s).tone}
-      url={url}
+      url={url ?? metaOf(s).url}
       compact={compact}
     />
   );
@@ -265,7 +298,7 @@ export function ImageSourceChip({ withHeader = true, compact }: ImageSourceChipP
           {'// ИЗОБРАЖЕНИЯ'}
         </span>
       )}
-      <SourceChip name={meta.short} logo={meta.logo} icon={meta.icon} tone={meta.tone} compact={compact} />
+      <SourceChip name={meta.short} logo={meta.logo} icon={meta.icon} tone={meta.tone} url={meta.url} compact={compact} />
       <ContributeButton compact={compact} />
     </div>
   );
