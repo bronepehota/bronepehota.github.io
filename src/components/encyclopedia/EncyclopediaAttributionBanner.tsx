@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { Info, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { ContributeButton } from './AttributionLabel';
 
 /** localStorage flag — once dismissed, the banner never returns. */
 const DISMISS_KEY = 'bronepehota_encyclopedia_sources_banner_dismissed';
@@ -59,15 +58,11 @@ export function EncyclopediaAttributionBanner() {
             {'// О ИСТОЧНИКАХ ДАННЫХ'}
           </h2>
           <p className="mt-1.5 text-sm leading-relaxed text-military-sand/80">
-            Энциклопедия собрана из разнородных источников: официального лора Технолога немного,
-            значительная часть — фанатские работы сообщества Star System. Нашли ошибку или есть
-            чем дополнить — нажмите{' '}
-            <span className="font-oswald text-military-amber">«Дополнить»</span>: скопируем
-            шаблон сообщения и откроем VK, останется вставить и отправить.
+            Энциклопедия собрана с миру по нитке — из официальных правил и книг, статей
+            сообщества и фанатских работ. Заметили ошибку или есть чем дополнить? Нажмите{' '}
+            <span className="font-oswald text-military-amber">«Дополнить»</span> на странице
+            отряда: скопируется шаблон сообщения и откроется VK — останется заполнить и отправить.
           </p>
-          <div className="mt-3">
-            <ContributeButton subject="Энциклопедия" />
-          </div>
         </div>
 
         {/* dismiss */}

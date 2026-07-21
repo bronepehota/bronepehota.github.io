@@ -200,14 +200,13 @@ test.describe('Энциклопедия', () => {
     await expect(page.getByTestId('image-source-chip')).toHaveCount(0);
   });
 
-  test('баннер об источниках показывается, ведёт на VK и закрывается', async ({ page }) => {
+  test('баннер об источниках показывается и закрывается', async ({ page }) => {
     await page.goto('/encyclopedia');
     await page.waitForLoadState('networkidle');
 
     const banner = page.getByTestId('encyclopedia-sources-banner');
     await expect(banner).toBeVisible();
-    // «Дополнить» в баннере ведёт на VK-канал приёма правок
-    await expect(banner.locator('a[href*="lastbpcoder"]')).toBeVisible();
+    await expect(banner.getByText('с миру по нитке')).toBeVisible();
     // кнопка закрытия прячет баннер
     await page.getByTestId('encyclopedia-sources-banner-dismiss').click();
     await expect(banner).toHaveCount(0);
