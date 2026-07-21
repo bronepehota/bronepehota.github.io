@@ -93,7 +93,6 @@ npm run test:e2e            # All E2E tests pass
 - **Dev server auto-starts** on `http://localhost:3001` before tests
 - **Dev server port cleanup**: multiple `npm run dev` instances pile up on ports 3000-3003. Before restarting: `pkill -9 -f next` + `rm -rf .next`. After a clean start, `/app` takes ~30s to compile on first access (Next.js dev on-demand compilation).
 - **Background dev server**: run `npm run dev` as its own background command. Don't chain it behind `pkill`/`rm` in the same backgrounded call — that compound form has failed with empty output (exit 1). Do the cleanup in a separate foreground call first.
-- **`output: export` dev-mode 404 noise**: the existing "несуществующий ID → 404" test logs a scary `[WebServer] Error … missing param … non_existent_id` stack under dev — expected, not a failure (the test passes).
 - **Headed mode**: `npm run test:e2e:headed` (visible browser)
 - **Debug mode**: `npm run test:e2e:debug` (Playwright Inspector)
 - **Shared setup helpers**: `e2e/helpers/setup.ts` — use `setupToArmyBuilder`, `setupGameSessionWithSquad`, `setupToPreparation` etc. to reduce setup duplication
@@ -480,6 +479,18 @@ NEXT_PUBLIC_GITHUB_PAGES=true npm run build
 # Manifest will have paths with /bronepehota prefix
 # This is automatically set in .github/workflows/deploy.yml
 ```
+
+### SEO / Discoverability
+
+Static-export SEO generated at build time (`output: 'export'`):
+
+- **`app/sitemap.ts`** — every route (landing, encyclopedia, all units/missions/campaigns, calculator). **`app/robots.ts`** — allow-all + sitemap link. Both emit to `out/`.
+- **`SITE_URL`** (`src/lib/constants.ts`) — canonical origin INCLUDING basePath; defaults to the GitHub Pages URL, override via `NEXT_PUBLIC_SITE_URL` when adding a custom domain. `src/lib/seo.ts` exposes `absoluteUrl()` (sitemap/canonical/OG) + JSON-LD builders.
+- **Structured data** — `src/lib/seo.ts` + `src/components/JsonLd.tsx`: `WebApplication`+`Organization` on landing, `BreadcrumbList` on unit/mission detail pages.
+- **Analytics/verification env vars** (all optional; components no-op without id): `NEXT_PUBLIC_GA_MEASUREMENT_ID`, `NEXT_PUBLIC_YANDEX_METRICA_ID`, `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION`, `NEXT_PUBLIC_YANDEX_VERIFICATION`.
+- **OG image** — `public/og-image.png` is a 1200×630 Playwright screenshot of the landing hero. Regenerate from repo root (dev server on :3000): `node tools/regen-og-image.mjs && python3 tools/regen-og-crop.py`. (Run from repo root — Node ESM resolves `node_modules` relative to the script file, not cwd.)
+- **basePath & metadata**: Next does NOT auto-prefix `metadata.icons`/`manifest` with basePath — `BASE_PATH` is applied manually. `metadataBase` = `SITE_URL` (incl. basePath) is safe; icons stay single-prefixed.
+- **⚠️ Subpath caveat**: on `*.github.io/bronepehota` crawlers only honor `/robots.txt` + `/sitemap.xml` at the domain ROOT (owned by GitHub) → auto-ignored. Submit sitemap manually in Search Console / Yandex.Webmaster; a custom domain fixes auto-discovery.
 
 ### Testing
 
