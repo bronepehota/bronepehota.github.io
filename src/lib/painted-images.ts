@@ -47,8 +47,8 @@ export const SQUAD_PHOTO_SOURCE: Record<string, PhotoSource> = {
   protectorate_shturmovoy_spetsnaz_starye: 'shnayder',
   mercenaries_mutanty: 'shnayder',
   // Технолог (официальные миниатюры):
-  rutenia_voyska_planety_ruteniya: 'tehnolog',
-  rutenia_ruteniyskaya_gvardiya: 'tehnolog',
+  rutenia_voyska_planety_ruteniya: 'shnayder',
+  rutenia_ruteniyskaya_gvardiya: 'shnayder',
   // Лисицин (покрас):
   rutenia_komandnoe_otdelenie: 'lisitsin',
   rutenia_otryad_podderzhki: 'lisitsin',
