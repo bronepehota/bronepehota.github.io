@@ -478,7 +478,8 @@
       "origin": "star_system"
     },
     "image": "/images/squads/protectorate/kiberpehota_fox3/3.png",
-    "imageSource": "lisitsin"
+    "imageSource": "lisitsin",
+    "miniatureSource": "lisitsin"
   },
   {
     "id": "protectorate_lineynaya_kiberpehota",
@@ -503,7 +504,8 @@
       "origin": "star_system"
     },
     "image": "/images/squads/protectorate/lineynaya_kiberpehota/1.png",
-    "imageSource": "lisitsin"
+    "imageSource": "lisitsin",
+    "miniatureSource": "lisitsin"
   },
   {
     "id": "protectorate_opolchenie_velian_fox5",
@@ -528,6 +530,7 @@
       "origin": "star_system"
     },
     "image": "/images/squads/protectorate/opolchenie_velian_fox5/1.png",
-    "imageSource": "lisitsin"
+    "imageSource": "lisitsin",
+    "miniatureSource": "lisitsin"
   }
 ]

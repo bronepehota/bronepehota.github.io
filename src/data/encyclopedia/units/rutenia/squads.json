@@ -156,6 +156,7 @@
       "origin": "star_system"
     },
     "image": "/images/squads/rutenia/oprichniki/5.png",
-    "imageSource": "lisitsin"
+    "imageSource": "lisitsin",
+    "miniatureSource": "lisitsin"
   }
 ]

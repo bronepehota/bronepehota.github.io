@@ -13,7 +13,7 @@ import { SQUAD_GROUP_IMAGE, getPhotoCredit, getCredit } from '@/lib/painted-imag
 import { resolveUnitProvenance } from '@/lib/provenance';
 import { UnitLore } from './UnitDetail/UnitLore';
 import { SourceAvailability } from './SourceAvailability';
-import { PainterChip, ProvenanceRow, ImageSourceChip } from './AttributionLabel';
+import { PainterChip, ProvenanceRow, ImageSourceChip, MiniatureChip } from './AttributionLabel';
 import { FactionLogo } from '@/components/FactionLogo';
 import { getFactionColors, factionLogos } from '@/lib/faction-colors';
 import { UnitStatTable } from './UnitDetail/UnitStatTable';
@@ -71,6 +71,9 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
   const photoCredit = getPhotoCredit(unit.id);
   // Render/model artist for unpainted card-art (from `unit.imageSource`).
   const miniature = unit.imageSource ? getCredit(unit.imageSource) : undefined;
+  // Physical miniature / sculpt maker — shown when it differs from the image creator.
+  const miniatureSourceCredit = unit.miniatureSource ? getCredit(unit.miniatureSource) : undefined;
+  const showMiniature = !!miniatureSourceCredit && unit.miniatureSource !== unit.imageSource;
   // Whether this unit has a lore block rendered by <UnitLore>. When it doesn't,
   // we still attribute the concept origin in the header (loreAuthor is moot).
   const enc = unit.encyclopedia;
@@ -288,6 +291,17 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
                       <ImageSourceChip source={miniature} />
                     )}
                   </div>
+
+                  {/* Miniature source — shown when it differs from the image creator */}
+                  {showMiniature && miniatureSourceCredit && (
+                    <div className="mb-6">
+                      <MiniatureChip
+                        name={miniatureSourceCredit.name}
+                        logo={miniatureSourceCredit.logo}
+                        url={miniatureSourceCredit.url}
+                      />
+                    </div>
+                  )}
 
                   {/* Concept-origin attribution for units with NO lore block (loreAuthor is moot then). */}
                   {!hasLore && (

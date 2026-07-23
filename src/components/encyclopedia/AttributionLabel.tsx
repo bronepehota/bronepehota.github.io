@@ -313,3 +313,30 @@ export function ImageSourceChip({ withHeader = true, compact, source }: ImageSou
     </div>
   );
 }
+
+/* -------------------------------------------------------------------------- */
+/* Miniature source — who made the physical sculpt (≠ image creator)          */
+/* -------------------------------------------------------------------------- */
+
+interface MiniatureChipProps {
+  name: string;
+  logo: string;
+  url: string;
+  compact?: boolean;
+  withHeader?: boolean;
+}
+
+/** Who made the PHYSICAL miniature / sculpt. Shown when it differs from the
+ *  image creator (e.g. Lisitsin rendered a Tehnolog-original model). */
+export function MiniatureChip({ name, logo, url, compact, withHeader = true }: MiniatureChipProps) {
+  return (
+    <div data-testid="miniature-chip" className="flex flex-wrap items-center gap-2">
+      {withHeader && (
+        <span className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider">
+          {'// МИНИАТЮРЫ'}
+        </span>
+      )}
+      <SourceChip name={name} role="модель" logo={logo} url={url} compact={compact} />
+    </div>
+  );
+}

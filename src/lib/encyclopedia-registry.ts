@@ -64,6 +64,10 @@ export interface EncyclopediaUnit {
    *  from `CREDITS` (e.g. 'lisitsin'). Shown on the detail page; absent = generic
    *  card-art (→ Star System image-source fallback). */
   imageSource?: string;
+  /** Who made the PHYSICAL miniature / sculpt — a credit id from `CREDITS`.
+   *  Can differ from `imageSource` (e.g. Lisitsin rendered a Tehnolog-original model).
+   *  Shown as // МИНИАТЮРЫ chip when it differs from the image creator. */
+  miniatureSource?: string;
 }
 
 export interface EncyclopediaFaction {
