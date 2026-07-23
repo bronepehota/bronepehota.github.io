@@ -71,10 +71,8 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
   const photoCredit = getPhotoCredit(unit.id);
   // Render/model artist for unpainted card-art (from `unit.imageSource`).
   const imageSourceCredit = unit.imageSource ? getCredit(unit.imageSource) : undefined;
-  // Physical miniature / sculpt maker — shown when it differs from the image creator.
+  // Physical miniature / sculpt maker — always shown when set (even if same as image creator).
   const miniatureSourceCredit = unit.miniatureSource ? getCredit(unit.miniatureSource) : undefined;
-  const imageCreatorName = photoCredit?.name ?? imageSourceCredit?.name;
-  const showMiniature = !!miniatureSourceCredit && miniatureSourceCredit.name !== imageCreatorName;
   // Whether this unit has a lore block rendered by <UnitLore>. When it doesn't,
   // we still attribute the concept origin in the header (loreAuthor is moot).
   const enc = unit.encyclopedia;
@@ -293,8 +291,8 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
                     )}
                   </div>
 
-                  {/* Miniature source — shown when it differs from the image creator */}
-                  {showMiniature && miniatureSourceCredit && (
+                  {/* Miniature source (who made the physical sculpt) */}
+                  {miniatureSourceCredit && (
                     <div className="mb-6">
                       <MiniatureChip
                         name={miniatureSourceCredit.name}
