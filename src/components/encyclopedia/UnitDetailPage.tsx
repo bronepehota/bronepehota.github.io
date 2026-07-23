@@ -71,8 +71,11 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
   const photoCredit = getPhotoCredit(unit.id);
   // Render/model artist for unpainted card-art (from `unit.imageSource`).
   const imageSourceCredit = unit.imageSource ? getCredit(unit.imageSource) : undefined;
-  // Physical miniature / sculpt maker — always shown when set (even if same as image creator).
+  // Physical miniature / sculpt maker.
   const miniatureSourceCredit = unit.miniatureSource ? getCredit(unit.miniatureSource) : undefined;
+  const imageCredit = photoCredit ?? imageSourceCredit;
+  const sameCreator = !!miniatureSourceCredit && !!imageCredit && miniatureSourceCredit.name === imageCredit.name;
+  const mergedHeader = photoCredit ? '// ПОКРАС И МИНИАТЮРЫ' : '// ИЗОБРАЖЕНИЯ И МИНИАТЮРЫ';
   // Whether this unit has a lore block rendered by <UnitLore>. When it doesn't,
   // we still attribute the concept origin in the header (loreAuthor is moot).
   const enc = unit.encyclopedia;
@@ -275,31 +278,41 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
                     </div>
                   )}
 
-                  {/* Image attribution: painter chip for painted squads, else Star System
-                      (unpainted card-art/renders — rule per maintainer; Lisitsin's squads
-                      are painted, so they show Lisitsin, never the Star System fallback). */}
-                  <div className="mb-6">
-                    {photoCredit ? (
-                      <PainterChip
-                        name={photoCredit.name}
-                        logo={photoCredit.logo}
-                        url={photoCredit.url}
-                        withContribute={!hasLore}
-                      />
-                    ) : (
-                      <ImageSourceChip source={imageSourceCredit} />
-                    )}
-                  </div>
-
-                  {/* Miniature source (who made the physical sculpt) */}
-                  {miniatureSourceCredit && (
+                  {/* Attribution: merge into one chip when same creator for images + miniatures */}
+                  {sameCreator && miniatureSourceCredit ? (
                     <div className="mb-6">
                       <MiniatureChip
                         name={miniatureSourceCredit.name}
                         logo={miniatureSourceCredit.logo}
                         url={miniatureSourceCredit.url}
+                        headerText={mergedHeader}
+                        role=""
                       />
                     </div>
+                  ) : (
+                    <>
+                      <div className="mb-6">
+                        {photoCredit ? (
+                          <PainterChip
+                            name={photoCredit.name}
+                            logo={photoCredit.logo}
+                            url={photoCredit.url}
+                            withContribute={!hasLore}
+                          />
+                        ) : (
+                          <ImageSourceChip source={imageSourceCredit} />
+                        )}
+                      </div>
+                      {miniatureSourceCredit && (
+                        <div className="mb-6">
+                          <MiniatureChip
+                            name={miniatureSourceCredit.name}
+                            logo={miniatureSourceCredit.logo}
+                            url={miniatureSourceCredit.url}
+                          />
+                        </div>
+                      )}
+                    </>
                   )}
 
                   {/* Concept-origin attribution for units with NO lore block (loreAuthor is moot then). */}

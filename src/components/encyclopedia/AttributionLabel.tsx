@@ -324,19 +324,21 @@ interface MiniatureChipProps {
   url: string;
   compact?: boolean;
   withHeader?: boolean;
+  headerText?: string;
+  role?: string;
 }
 
-/** Who made the PHYSICAL miniature / sculpt. Shown when it differs from the
- *  image creator (e.g. Lisitsin rendered a Tehnolog-original model). */
-export function MiniatureChip({ name, logo, url, compact, withHeader = true }: MiniatureChipProps) {
+/** Who made the PHYSICAL miniature / sculpt. When the same creator also made the
+ *  images/paint, pass a combined headerText (e.g. '// ИЗОБРАЖЕНИЯ И МИНИАТЮРЫ'). */
+export function MiniatureChip({ name, logo, url, compact, withHeader = true, headerText = '// МИНИАТЮРЫ', role = 'модель' }: MiniatureChipProps) {
   return (
     <div data-testid="miniature-chip" className="flex flex-wrap items-center gap-2">
       {withHeader && (
         <span className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider">
-          {'// МИНИАТЮРЫ'}
+          {headerText}
         </span>
       )}
-      <SourceChip name={name} role="модель" logo={logo} url={url} compact={compact} />
+      <SourceChip name={name} role={role || undefined} logo={logo} url={url} compact={compact} />
     </div>
   );
 }
