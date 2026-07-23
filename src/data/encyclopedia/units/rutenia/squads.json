@@ -18,7 +18,8 @@
       "tactics": "Усиляет и цементирует строй рутенийской пехоты: поднимает боевой дух знаменем и удерживает отряд единым целым под огнём.",
       "shortDescription": "Командный взвод рутенийской армии — знамя и комбат на поле боя."
     },
-    "image": "/images/squads/rutenia/komandnoe_otdelenie/1.png"
+    "image": "/images/squads/rutenia/komandnoe_otdelenie/1.png",
+    "miniatureSource": "lisitsin"
   },
   {
     "id": "rutenia_otryad_podderzhki",
@@ -39,7 +40,8 @@
       "tactics": "Специализированное обеспечение: ремонт и поддержку техники, разминирование и разграждение, медицинскую помощь раненым бойцам.",
       "shortDescription": "Сапёры, инженеры и медики рутенийской армии."
     },
-    "image": "/images/squads/rutenia/otryad_podderzhki/1.png"
+    "image": "/images/squads/rutenia/otryad_podderzhki/1.png",
+    "miniatureSource": "lisitsin"
   },
   {
     "id": "rutenia_staraya_gvardiya",
@@ -60,7 +62,8 @@
       "tactics": "Стойкая и опытная пехота: уверенно держится даже без тяжёлой брони, опираясь на огневую мощь и накопленный боевой опыт.",
       "shortDescription": "Ветераны и партизаны Ржавого Осколка."
     },
-    "image": "/images/squads/rutenia/staraya_gvardiya/1.png"
+    "image": "/images/squads/rutenia/staraya_gvardiya/1.png",
+    "miniatureSource": "lisitsin"
   },
   {
     "id": "rutenia_pervoprohodtsy",
@@ -81,7 +84,8 @@
       "tactics": "Универсальные и бесстрашные штурмовики-разведчики: идут в лобовую атаку и прорывают оборону противника одним натиском.",
       "shortDescription": "Всепогодная разведка и штурмовая пехота Рутении под началом Генерала Крюкова."
     },
-    "image": "/images/squads/rutenia/pervoprohodtsy/1.png"
+    "image": "/images/squads/rutenia/pervoprohodtsy/1.png",
+    "miniatureSource": "lisitsin"
   },
   {
     "id": "rutenia_ruteniyskaya_gvardiya",

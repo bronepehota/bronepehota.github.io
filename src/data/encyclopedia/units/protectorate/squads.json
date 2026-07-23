@@ -321,7 +321,8 @@
       "tactics": "Скоростная аэромобильная пехота на прыжковых ускорителях: плотный огонь в упор и дерзкий ближний бой, плюс снайпер. Бейте с флангов и сверху — но не ввязывайтесь в перестрелку на дистанции: брони мало.",
       "shortDescription": "Аэромобильная пехота Альдебарана: скоростные прыжковые штурмовики для ударов сверху."
     },
-    "image": "/images/squads/protectorate/peschanie_sokoly/1.png"
+    "image": "/images/squads/protectorate/peschanie_sokoly/1.png",
+    "miniatureSource": "lisitsin"
   },
   {
     "id": "protectorate_prizrak",

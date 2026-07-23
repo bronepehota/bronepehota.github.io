@@ -56,7 +56,7 @@ export const SQUAD_PHOTO_SOURCE: Record<string, PhotoSource> = {
   rutenia_pervoprohodtsy: 'lisitsin',
   protectorate_peschanie_sokoly: 'lisitsin',
   // NB: «линейка Fox» (рендеры Лисицына для армлистов) — НЕ покрашена → без чипа покраса
-  // (показывается // ИЗОБРАЖЕНИЯ → Star System как непокрашенный кард-арт). Скульптор = Лисицын (в нейминге Fox.N).
+  // (показывается // ИЗОБРАЖЕНИЯ → imageSource field (Lisitsin for Fox squads), else Star System fallback). Скульптор = Лисицын (в нейминге Fox.N).
 };
 
 /** Painter credit for a unit, or `undefined` when the squad has no attribution. */

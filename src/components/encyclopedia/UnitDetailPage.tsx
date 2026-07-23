@@ -70,10 +70,11 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
   // of whether a wide group photo exists.
   const photoCredit = getPhotoCredit(unit.id);
   // Render/model artist for unpainted card-art (from `unit.imageSource`).
-  const miniature = unit.imageSource ? getCredit(unit.imageSource) : undefined;
+  const imageSourceCredit = unit.imageSource ? getCredit(unit.imageSource) : undefined;
   // Physical miniature / sculpt maker — shown when it differs from the image creator.
   const miniatureSourceCredit = unit.miniatureSource ? getCredit(unit.miniatureSource) : undefined;
-  const showMiniature = !!miniatureSourceCredit && unit.miniatureSource !== unit.imageSource;
+  const imageCreatorName = photoCredit?.name ?? imageSourceCredit?.name;
+  const showMiniature = !!miniatureSourceCredit && miniatureSourceCredit.name !== imageCreatorName;
   // Whether this unit has a lore block rendered by <UnitLore>. When it doesn't,
   // we still attribute the concept origin in the header (loreAuthor is moot).
   const enc = unit.encyclopedia;
@@ -288,7 +289,7 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
                         withContribute={!hasLore}
                       />
                     ) : (
-                      <ImageSourceChip source={miniature} />
+                      <ImageSourceChip source={imageSourceCredit} />
                     )}
                   </div>
 
