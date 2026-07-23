@@ -63,7 +63,7 @@ export interface EncyclopediaUnit {
   /** Who made the 3D model / card-art render of this squad's images — a credit id
    *  from `CREDITS` (e.g. 'lisitsin'). Shown on the detail page; absent = generic
    *  card-art (→ Star System image-source fallback). */
-  miniatureSource?: string;
+  imageSource?: string;
 }
 
 export interface EncyclopediaFaction {

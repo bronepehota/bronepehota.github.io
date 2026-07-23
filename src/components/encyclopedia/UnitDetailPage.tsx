@@ -69,8 +69,8 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
   // Painter credit — shown whenever the squad is attributed (painted), independent
   // of whether a wide group photo exists.
   const photoCredit = getPhotoCredit(unit.id);
-  // Render/model artist for unpainted card-art (from `unit.miniatureSource`).
-  const miniature = unit.miniatureSource ? getCredit(unit.miniatureSource) : undefined;
+  // Render/model artist for unpainted card-art (from `unit.imageSource`).
+  const miniature = unit.imageSource ? getCredit(unit.imageSource) : undefined;
   // Whether this unit has a lore block rendered by <UnitLore>. When it doesn't,
   // we still attribute the concept origin in the header (loreAuthor is moot).
   const enc = unit.encyclopedia;
