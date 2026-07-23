@@ -69,10 +69,10 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
   // Painter credit — shown whenever the squad is attributed (painted), independent
   // of whether a wide group photo exists.
   const photoCredit = getPhotoCredit(unit.id);
-  // Render/model artist for unpainted card-art (from `unit.imageSource`).
-  const imageSourceCredit = unit.imageSource ? getCredit(unit.imageSource) : undefined;
-  // Physical miniature / sculpt maker.
-  const miniatureSourceCredit = unit.miniatureSource ? getCredit(unit.miniatureSource) : undefined;
+  // Render/model artist for unpainted card-art (from `unit.imageSource`, default Tehnolog).
+  const imageSourceCredit = unit.imageSource ? getCredit(unit.imageSource) : getCredit('tehnolog');
+  // Physical miniature / sculpt maker (from `unit.miniatureSource`, default Tehnolog).
+  const miniatureSourceCredit = unit.miniatureSource ? getCredit(unit.miniatureSource) : getCredit('tehnolog');
   const imageCredit = photoCredit ?? imageSourceCredit;
   const sameCreator = !!miniatureSourceCredit && !!imageCredit && miniatureSourceCredit.name === imageCredit.name;
   const mergedHeader = photoCredit ? '// ПОКРАС И МИНИАТЮРЫ' : '// ИЗОБРАЖЕНИЯ И МИНИАТЮРЫ';
