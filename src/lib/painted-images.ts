@@ -47,18 +47,29 @@ export const SQUAD_PHOTO_SOURCE: Record<string, PhotoSource> = {
   protectorate_shturmovoy_spetsnaz_starye: 'shnayder',
   mercenaries_mutanty: 'shnayder',
   // Технолог (официальные миниатюры):
-  rutenia_voyska_planety_ruteniya: 'tehnolog',
-  rutenia_ruteniyskaya_gvardiya: 'tehnolog',
+  rutenia_voyska_planety_ruteniya: 'shnayder',
+  rutenia_ruteniyskaya_gvardiya: 'shnayder',
   // Лисицин (покрас):
   rutenia_komandnoe_otdelenie: 'lisitsin',
   rutenia_otryad_podderzhki: 'lisitsin',
   rutenia_staraya_gvardiya: 'lisitsin',
   rutenia_pervoprohodtsy: 'lisitsin',
   protectorate_peschanie_sokoly: 'lisitsin',
+  // NB: «линейка Fox» (рендеры Лисицына для армлистов) — НЕ покрашена → без чипа покраса
+  // (показывается // ИЗОБРАЖЕНИЯ → imageSource field (Lisitsin for Fox squads), else Star System fallback). Скульптор = Лисицын (в нейминге Fox.N).
 };
 
 /** Painter credit for a unit, or `undefined` when the squad has no attribution. */
 export function getPhotoCredit(unitId: string): typeof CREDITS[PhotoSource] | undefined {
   const source = SQUAD_PHOTO_SOURCE[unitId];
   return source ? CREDITS[source] : undefined;
+}
+
+/**
+ * Per-squad RENDER source — who made the 3D model / card-art render for UNPAINTED
+ * squads. Lives as a `miniatureSource` FIELD on the encyclopedia unit (data-driven,
+ * like `provenance`), holding a credit id from `CREDITS`. Resolve it via `getCredit`.
+ */
+export function getCredit(id: string): typeof CREDITS[PhotoSource] | undefined {
+  return (CREDITS as Record<string, typeof CREDITS[PhotoSource]>)[id];
 }

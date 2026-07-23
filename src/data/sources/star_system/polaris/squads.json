@@ -818,5 +818,321 @@
       }
     ],
     "image": "/images/squads/polaris/dolgorukiy/1.png"
+  },
+  {
+    "id": "polaris_lineynaya_klon_pehota_fox1",
+    "name": "Линейная клон-пехота Fox.1",
+    "shortName": "Линейная клон-пехота Fox.1",
+    "faction": "polaris",
+    "cost": 55,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 2,
+        "speed": 5,
+        "range": "D6",
+        "power": "D12",
+        "melee": 3,
+        "armor": 2,
+        "image": "/images/squads/polaris/lineynaya_klon_pehota_fox1/6.png"
+      },
+      {
+        "num": 2,
+        "rank": 2,
+        "speed": 5,
+        "range": "D6",
+        "power": "D12",
+        "melee": 3,
+        "armor": 2,
+        "image": "/images/squads/polaris/lineynaya_klon_pehota_fox1/3.png"
+      },
+      {
+        "num": 3,
+        "rank": 2,
+        "speed": 5,
+        "range": "D6",
+        "power": "D12",
+        "melee": 3,
+        "armor": 2,
+        "image": "/images/squads/polaris/lineynaya_klon_pehota_fox1/5.png"
+      },
+      {
+        "num": 4,
+        "rank": 2,
+        "speed": 5,
+        "range": "D6",
+        "power": "D12",
+        "melee": 3,
+        "armor": 2,
+        "image": "/images/squads/polaris/lineynaya_klon_pehota_fox1/2.png"
+      },
+      {
+        "num": 5,
+        "rank": 2,
+        "speed": 5,
+        "range": "D6",
+        "power": "D12",
+        "melee": 3,
+        "armor": 2,
+        "image": "/images/squads/polaris/lineynaya_klon_pehota_fox1/4.png"
+      },
+      {
+        "num": 6,
+        "rank": 2,
+        "speed": 5,
+        "range": "D6",
+        "power": "D12",
+        "melee": 3,
+        "armor": 2,
+        "image": "/images/squads/polaris/lineynaya_klon_pehota_fox1/1.png"
+      }
+    ],
+    "image": "/images/squads/polaris/lineynaya_klon_pehota_fox1/1.png"
+  },
+  {
+    "id": "polaris_lineynaya_klon_pehota_fox2",
+    "name": "Линейная клон-пехота Fox.2",
+    "shortName": "Линейная клон-пехота Fox.2",
+    "faction": "polaris",
+    "cost": 55,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 2,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 3,
+        "armor": 2,
+        "image": "/images/squads/polaris/lineynaya_klon_pehota_fox2/4.png"
+      },
+      {
+        "num": 2,
+        "rank": 2,
+        "speed": 5,
+        "range": "D6",
+        "power": "2D6",
+        "melee": 3,
+        "armor": 2,
+        "image": "/images/squads/polaris/lineynaya_klon_pehota_fox2/1.png"
+      },
+      {
+        "num": 3,
+        "rank": 2,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 3,
+        "armor": 2,
+        "image": "/images/squads/polaris/lineynaya_klon_pehota_fox2/5.png"
+      },
+      {
+        "num": 4,
+        "rank": 2,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 3,
+        "armor": 2,
+        "image": "/images/squads/polaris/lineynaya_klon_pehota_fox2/3.png"
+      },
+      {
+        "num": 5,
+        "rank": 2,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 3,
+        "armor": 2,
+        "image": "/images/squads/polaris/lineynaya_klon_pehota_fox2/6.png"
+      },
+      {
+        "num": 6,
+        "rank": 2,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 4,
+        "armor": 2,
+        "image": "/images/squads/polaris/lineynaya_klon_pehota_fox2/2.png"
+      }
+    ],
+    "image": "/images/squads/polaris/lineynaya_klon_pehota_fox2/1.png"
+  },
+  {
+    "id": "polaris_lyogkiy_shturmovoy_desant_fox4",
+    "name": "Лёгкий штурмовой десант Fox.4",
+    "shortName": "Лёгкий штурмовой десант Fox.4",
+    "faction": "polaris",
+    "cost": 105,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 3,
+        "speed": 5,
+        "range": "D6",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 3,
+        "image": "/images/squads/polaris/lyogkiy_shturmovoy_desant_fox4/2.png",
+        "modifiers": [
+          "mechanic"
+        ]
+      },
+      {
+        "num": 2,
+        "rank": 3,
+        "speed": 5,
+        "range": "D12",
+        "power": "D20",
+        "melee": 0,
+        "armor": 3,
+        "image": "/images/squads/polaris/lyogkiy_shturmovoy_desant_fox4/4.png",
+        "modifiers": [
+          "mechanic"
+        ]
+      },
+      {
+        "num": 3,
+        "rank": 3,
+        "speed": 5,
+        "range": "D12+2",
+        "power": "D12",
+        "melee": 2,
+        "armor": 3,
+        "image": "/images/squads/polaris/lyogkiy_shturmovoy_desant_fox4/3.png",
+        "modifiers": [
+          "mechanic"
+        ]
+      },
+      {
+        "num": 4,
+        "rank": 3,
+        "speed": 5,
+        "range": "D6",
+        "power": "D6",
+        "melee": 5,
+        "armor": 3,
+        "image": "/images/squads/polaris/lyogkiy_shturmovoy_desant_fox4/5.png",
+        "modifiers": [
+          "mechanic"
+        ]
+      },
+      {
+        "num": 5,
+        "rank": 3,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D12",
+        "melee": 0,
+        "armor": 3,
+        "image": "/images/squads/polaris/lyogkiy_shturmovoy_desant_fox4/1.png",
+        "modifiers": [
+          "mechanic"
+        ]
+      },
+      {
+        "num": 6,
+        "rank": 3,
+        "speed": 5,
+        "range": "D6",
+        "power": "2D6",
+        "melee": 4,
+        "armor": 3,
+        "image": "/images/squads/polaris/lyogkiy_shturmovoy_desant_fox4/6.png",
+        "modifiers": [
+          "mechanic"
+        ]
+      }
+    ],
+    "image": "/images/squads/polaris/lyogkiy_shturmovoy_desant_fox4/1.png"
+  },
+  {
+    "id": "polaris_mobilnyy_shturmovoy_desant",
+    "name": "Мобильный штурмовой десант",
+    "shortName": "Мобильный штурмовой десант",
+    "faction": "polaris",
+    "cost": 115,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 3,
+        "speed": 5,
+        "range": "D6",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 3,
+        "image": "/images/squads/polaris/mobilnyy_shturmovoy_desant/6.png",
+        "modifiers": [
+          "jump_boost_5"
+        ]
+      },
+      {
+        "num": 2,
+        "rank": 3,
+        "speed": 5,
+        "range": "D6",
+        "power": "D6",
+        "melee": 5,
+        "armor": 3,
+        "image": "/images/squads/polaris/mobilnyy_shturmovoy_desant/4.png",
+        "modifiers": [
+          "jump_boost_5"
+        ]
+      },
+      {
+        "num": 3,
+        "rank": 3,
+        "speed": 5,
+        "range": "D12+2",
+        "power": "D12",
+        "melee": 2,
+        "armor": 3,
+        "image": "/images/squads/polaris/mobilnyy_shturmovoy_desant/1.png",
+        "modifiers": [
+          "jump_boost_5"
+        ]
+      },
+      {
+        "num": 4,
+        "rank": 3,
+        "speed": 5,
+        "range": "D6",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 3,
+        "image": "/images/squads/polaris/mobilnyy_shturmovoy_desant/3.png",
+        "modifiers": [
+          "jump_boost_5"
+        ]
+      },
+      {
+        "num": 5,
+        "rank": 3,
+        "speed": 5,
+        "range": "D12+2",
+        "power": "D12",
+        "melee": 2,
+        "armor": 3,
+        "image": "/images/squads/polaris/mobilnyy_shturmovoy_desant/5.png",
+        "modifiers": [
+          "jump_boost_5"
+        ]
+      },
+      {
+        "num": 6,
+        "rank": 3,
+        "speed": 5,
+        "range": "D6",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 3,
+        "image": "/images/squads/polaris/mobilnyy_shturmovoy_desant/2.png",
+        "modifiers": [
+          "jump_boost_5"
+        ]
+      }
+    ],
+    "image": "/images/squads/polaris/mobilnyy_shturmovoy_desant/1.png"
   }
 ]

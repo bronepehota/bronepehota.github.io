@@ -1119,5 +1119,251 @@
       }
     ],
     "image": "/images/squads/protectorate/zheleznyy_general/1.png"
+  },
+  {
+    "id": "protectorate_kiberpehota_fox3",
+    "name": "Кибер-пехота Fox.3",
+    "shortName": "Кибер-пехота Fox.3",
+    "faction": "protectorate",
+    "cost": 115,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 2,
+        "speed": 4,
+        "range": "",
+        "power": "",
+        "melee": 5,
+        "armor": 4,
+        "image": "/images/squads/protectorate/kiberpehota_fox3/3.png",
+        "modifiers": [
+          "mechanic"
+        ]
+      },
+      {
+        "num": 2,
+        "rank": 2,
+        "speed": 4,
+        "range": "2D6",
+        "power": "1D6+1",
+        "melee": 5,
+        "armor": 4,
+        "image": "/images/squads/protectorate/kiberpehota_fox3/6.png",
+        "modifiers": [
+          "mechanic"
+        ]
+      },
+      {
+        "num": 3,
+        "rank": 2,
+        "speed": 4,
+        "range": "2D6",
+        "power": "1D6+1",
+        "melee": 5,
+        "armor": 4,
+        "image": "/images/squads/protectorate/kiberpehota_fox3/4.png",
+        "modifiers": [
+          "mechanic"
+        ]
+      },
+      {
+        "num": 4,
+        "rank": 2,
+        "speed": 4,
+        "range": "2D6",
+        "power": "1D6+1",
+        "melee": 5,
+        "armor": 4,
+        "image": "/images/squads/protectorate/kiberpehota_fox3/2.png",
+        "modifiers": [
+          "mechanic"
+        ]
+      },
+      {
+        "num": 5,
+        "rank": 2,
+        "speed": 4,
+        "range": "2D6",
+        "power": "1D6+1",
+        "melee": 5,
+        "armor": 4,
+        "image": "/images/squads/protectorate/kiberpehota_fox3/1.png",
+        "modifiers": [
+          "mechanic"
+        ]
+      },
+      {
+        "num": 6,
+        "rank": 2,
+        "speed": 4,
+        "range": "",
+        "power": "",
+        "melee": 5,
+        "armor": 4,
+        "image": "/images/squads/protectorate/kiberpehota_fox3/5.png",
+        "modifiers": [
+          "mechanic"
+        ]
+      }
+    ],
+    "image": "/images/squads/protectorate/kiberpehota_fox3/1.png"
+  },
+  {
+    "id": "protectorate_lineynaya_kiberpehota",
+    "name": "Линейная кибер-пехота",
+    "shortName": "Линейная кибер-пехота",
+    "faction": "protectorate",
+    "cost": 125,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 2,
+        "speed": 4,
+        "range": "2D12",
+        "power": "1D6+1",
+        "melee": 2,
+        "armor": 4,
+        "image": "/images/squads/protectorate/lineynaya_kiberpehota/1.png",
+        "modifiers": [
+          "mechanic"
+        ]
+      },
+      {
+        "num": 2,
+        "rank": 2,
+        "speed": 4,
+        "range": "2D12",
+        "power": "1D6+1",
+        "melee": 2,
+        "armor": 4,
+        "image": "/images/squads/protectorate/lineynaya_kiberpehota/6.png",
+        "modifiers": [
+          "mechanic"
+        ]
+      },
+      {
+        "num": 3,
+        "rank": 2,
+        "speed": 4,
+        "range": "2D12",
+        "power": "1D6+1",
+        "melee": 2,
+        "armor": 4,
+        "image": "/images/squads/protectorate/lineynaya_kiberpehota/2.png",
+        "modifiers": [
+          "mechanic"
+        ]
+      },
+      {
+        "num": 4,
+        "rank": 2,
+        "speed": 4,
+        "range": "2D12",
+        "power": "1D6+1",
+        "melee": 2,
+        "armor": 4,
+        "image": "/images/squads/protectorate/lineynaya_kiberpehota/4.png",
+        "modifiers": [
+          "mechanic"
+        ]
+      },
+      {
+        "num": 5,
+        "rank": 2,
+        "speed": 4,
+        "range": "2D12",
+        "power": "1D6+1",
+        "melee": 2,
+        "armor": 4,
+        "image": "/images/squads/protectorate/lineynaya_kiberpehota/5.png",
+        "modifiers": [
+          "mechanic"
+        ]
+      },
+      {
+        "num": 6,
+        "rank": 2,
+        "speed": 4,
+        "range": "2D12",
+        "power": "1D6+1",
+        "melee": 2,
+        "armor": 4,
+        "image": "/images/squads/protectorate/lineynaya_kiberpehota/3.png",
+        "modifiers": [
+          "mechanic"
+        ]
+      }
+    ],
+    "image": "/images/squads/protectorate/lineynaya_kiberpehota/1.png"
+  },
+  {
+    "id": "protectorate_opolchenie_velian_fox5",
+    "name": "Ополченцы Велиан Fox.5",
+    "shortName": "Ополченцы Велиан Fox.5",
+    "faction": "protectorate",
+    "cost": 75,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 1,
+        "speed": 5,
+        "range": "D6",
+        "power": "2D6",
+        "melee": 4,
+        "armor": 3,
+        "image": "/images/squads/protectorate/opolchenie_velian_fox5/1.png"
+      },
+      {
+        "num": 2,
+        "rank": 1,
+        "speed": 5,
+        "range": "D6",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 3,
+        "image": "/images/squads/protectorate/opolchenie_velian_fox5/2.png"
+      },
+      {
+        "num": 3,
+        "rank": 1,
+        "speed": 5,
+        "range": "D6",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 3,
+        "image": "/images/squads/protectorate/opolchenie_velian_fox5/3.png"
+      },
+      {
+        "num": 4,
+        "rank": 1,
+        "speed": 5,
+        "range": "D6",
+        "power": "2D6",
+        "melee": 4,
+        "armor": 3,
+        "image": "/images/squads/protectorate/opolchenie_velian_fox5/4.png"
+      },
+      {
+        "num": 5,
+        "rank": 1,
+        "speed": 5,
+        "range": "D6",
+        "power": "2D6",
+        "melee": 4,
+        "armor": 3,
+        "image": "/images/squads/protectorate/opolchenie_velian_fox5/5.png"
+      },
+      {
+        "num": 6,
+        "rank": 1,
+        "speed": 5,
+        "range": "D6",
+        "power": "2D6",
+        "melee": 4,
+        "armor": 3,
+        "image": "/images/squads/protectorate/opolchenie_velian_fox5/6.png"
+      }
+    ],
+    "image": "/images/squads/protectorate/opolchenie_velian_fox5/1.png"
   }
 ]

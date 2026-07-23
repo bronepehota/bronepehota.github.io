@@ -18,7 +18,8 @@
       "tactics": "Усиляет и цементирует строй рутенийской пехоты: поднимает боевой дух знаменем и удерживает отряд единым целым под огнём.",
       "shortDescription": "Командный взвод рутенийской армии — знамя и комбат на поле боя."
     },
-    "image": "/images/squads/rutenia/komandnoe_otdelenie/1.png"
+    "image": "/images/squads/rutenia/komandnoe_otdelenie/1.png",
+    "miniatureSource": "lisitsin"
   },
   {
     "id": "rutenia_otryad_podderzhki",
@@ -39,7 +40,8 @@
       "tactics": "Специализированное обеспечение: ремонт и поддержку техники, разминирование и разграждение, медицинскую помощь раненым бойцам.",
       "shortDescription": "Сапёры, инженеры и медики рутенийской армии."
     },
-    "image": "/images/squads/rutenia/otryad_podderzhki/1.png"
+    "image": "/images/squads/rutenia/otryad_podderzhki/1.png",
+    "miniatureSource": "lisitsin"
   },
   {
     "id": "rutenia_staraya_gvardiya",
@@ -60,7 +62,8 @@
       "tactics": "Стойкая и опытная пехота: уверенно держится даже без тяжёлой брони, опираясь на огневую мощь и накопленный боевой опыт.",
       "shortDescription": "Ветераны и партизаны Ржавого Осколка."
     },
-    "image": "/images/squads/rutenia/staraya_gvardiya/1.png"
+    "image": "/images/squads/rutenia/staraya_gvardiya/1.png",
+    "miniatureSource": "lisitsin"
   },
   {
     "id": "rutenia_pervoprohodtsy",
@@ -81,7 +84,8 @@
       "tactics": "Универсальные и бесстрашные штурмовики-разведчики: идут в лобовую атаку и прорывают оборону противника одним натиском.",
       "shortDescription": "Всепогодная разведка и штурмовая пехота Рутении под началом Генерала Крюкова."
     },
-    "image": "/images/squads/rutenia/pervoprohodtsy/1.png"
+    "image": "/images/squads/rutenia/pervoprohodtsy/1.png",
+    "miniatureSource": "lisitsin"
   },
   {
     "id": "rutenia_ruteniyskaya_gvardiya",
@@ -132,5 +136,31 @@
       "shortDescription": "Войска Рутении: огневая поддержка с дистанции при слабой броне."
     },
     "image": "/images/squads/rutenia/voyska_planety_ruteniya/1.png"
+  },
+  {
+    "id": "rutenia_oprichniki",
+    "name": "Опричники",
+    "shortName": "Опричники",
+    "faction": "rutenia",
+    "type": "squad",
+    "sources": [
+      {
+        "id": "star_system",
+        "cost": 120
+      }
+    ],
+    "encyclopedia": {
+      "class": "Тяжёлая пехота",
+      "lore": "Опричники — элитное тяжёловооружённое подразделение Рутении. Из армлистов сообщества «Звёздные системы» (модели Лисицына).",
+      "history": "Добавлены в армейские списки сообществом «Звёздные системы».",
+      "tactics": "Тяжёлая бронированная пехота: прорыв обороны и удержание позиций в ближнем бою.",
+      "shortDescription": "Опричники — элитная тяжёлая пехота Рутении из армлистов сообщества «Звёздные системы»."
+    },
+    "provenance": {
+      "origin": "star_system"
+    },
+    "image": "/images/squads/rutenia/oprichniki/5.png",
+    "imageSource": "lisitsin",
+    "miniatureSource": "lisitsin"
   }
 ]

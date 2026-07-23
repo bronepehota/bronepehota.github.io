@@ -9,11 +9,11 @@ import { cn } from '@/lib/utils';
 import { ModifierIcon } from '@/components/editor/ModifierIcons';
 import { SoldierImages } from './UnitDetail/SoldierImages';
 import { MachineImages } from './UnitDetail/MachineImages';
-import { SQUAD_GROUP_IMAGE, getPhotoCredit } from '@/lib/painted-images';
+import { SQUAD_GROUP_IMAGE, getPhotoCredit, getCredit } from '@/lib/painted-images';
 import { resolveUnitProvenance } from '@/lib/provenance';
 import { UnitLore } from './UnitDetail/UnitLore';
 import { SourceAvailability } from './SourceAvailability';
-import { PainterChip, ProvenanceRow, ImageSourceChip } from './AttributionLabel';
+import { PainterChip, ProvenanceRow, ImageSourceChip, MiniatureChip } from './AttributionLabel';
 import { FactionLogo } from '@/components/FactionLogo';
 import { getFactionColors, factionLogos } from '@/lib/faction-colors';
 import { UnitStatTable } from './UnitDetail/UnitStatTable';
@@ -69,6 +69,21 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
   // Painter credit — shown whenever the squad is attributed (painted), independent
   // of whether a wide group photo exists.
   const photoCredit = getPhotoCredit(unit.id);
+  // Render artist for unpainted card-art (from `unit.imageSource`). Absent → Star System,
+  // since every unpainted squad render in the app is community Star System art.
+  const imageSourceCredit = unit.imageSource ? getCredit(unit.imageSource) : getCredit('star_system');
+  // Physical miniature / sculpt maker (from `unit.miniatureSource`, default Tehnolog).
+  const miniatureSourceCredit = unit.miniatureSource ? getCredit(unit.miniatureSource) : getCredit('tehnolog');
+  const imageCredit = photoCredit ?? imageSourceCredit;
+  // Show the sculptor as its OWN chip only when it differs from whoever made the
+  // image/paint — otherwise it's redundant (e.g. Lisitsin both rendered & sculpted).
+  const sculptorDiffers = !!miniatureSourceCredit && !!imageCredit && miniatureSourceCredit.name !== imageCredit.name;
+  // One shared header for the whole attribution strip — painted squads otherwise
+  // rendered two stacked `// ПОКРАС` / `// МИНИАТЮРЫ` blocks that looked broken
+  // under a wide group photo.
+  const attributionHeader = photoCredit
+    ? '// ПОКРАС'
+    : (sculptorDiffers ? '// ИЗОБРАЖЕНИЯ' : '// ИЗОБРАЖЕНИЯ И МИНИАТЮРЫ');
   // Whether this unit has a lore block rendered by <UnitLore>. When it doesn't,
   // we still attribute the concept origin in the header (loreAuthor is moot).
   const enc = unit.encyclopedia;
@@ -271,19 +286,55 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
                     </div>
                   )}
 
-                  {/* Image attribution: painter chip for painted squads, else Star System
-                      (unpainted card-art/renders — rule per maintainer; Lisitsin's squads
-                      are painted, so they show Lisitsin, never the Star System fallback). */}
-                  <div className="mb-6">
+                  {/* Attribution: ONE metadata strip (shared header + chips in a single
+                      flex-wrap row), mirroring the ProvenanceRow idiom. Painted squads
+                      with a separate painter + sculptor previously stacked two
+                      double-header blocks — which looked broken under a wide group photo. */}
+                  <div className="mb-6 flex flex-wrap items-center gap-x-3 gap-y-2">
+                    <span className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider">
+                      {attributionHeader}
+                    </span>
                     {photoCredit ? (
+                      // PAINTED squad → the painter is the salient attribution.
                       <PainterChip
                         name={photoCredit.name}
                         logo={photoCredit.logo}
                         url={photoCredit.url}
+                        withHeader={false}
                         withContribute={!hasLore}
                       />
+                    ) : sculptorDiffers ? (
+                      // UNPAINTED, distinct render + sculpt artists.
+                      <ImageSourceChip source={imageSourceCredit} withHeader={false} />
                     ) : (
-                      <ImageSourceChip />
+                      // UNPAINTED, single creator for both render & sculpt → one merged chip.
+                      miniatureSourceCredit && (
+                        <MiniatureChip
+                          name={miniatureSourceCredit.name}
+                          logo={miniatureSourceCredit.logo}
+                          url={miniatureSourceCredit.url}
+                          withHeader={false}
+                          role=""
+                        />
+                      )
+                    )}
+                    {/* Sculptor — only when it differs from the image/paint creator. Gets its own
+                        `// МИНИАТЮРЫ` prefix so it reads as the physical-sculpt credit, NOT part
+                        of the paint/image line (otherwise "· модель" was lost under `// ПОКРАС`).
+                        Label + chip grouped so they don't split when the strip wraps on mobile. */}
+                    {sculptorDiffers && miniatureSourceCredit && (
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider">
+                          {'// МИНИАТЮРЫ'}
+                        </span>
+                        <MiniatureChip
+                          name={miniatureSourceCredit.name}
+                          logo={miniatureSourceCredit.logo}
+                          url={miniatureSourceCredit.url}
+                          withHeader={false}
+                          role=""
+                        />
+                      </span>
                     )}
                   </div>
 

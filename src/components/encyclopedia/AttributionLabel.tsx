@@ -273,7 +273,10 @@ export function PainterChip({ name, logo, url, compact, withHeader = true, withC
           {'// ПОКРАС'}
         </span>
       )}
-      <SourceChip name={name} role="миниатюра" logo={logo} url={url} compact={compact} />
+      {/* No `role` here: the name already says what this is ("Покрасы Шнайдера" /
+          "Миниатюры Лисицина"), and a "· миниатюра" tag would collide with the
+          separate sculptor chip's "· модель" in the same row. */}
+      <SourceChip name={name} logo={logo} url={url} compact={compact} />
       {withContribute && <ContributeButton compact={compact} />}
     </div>
   );
@@ -282,14 +285,16 @@ export function PainterChip({ name, logo, url, compact, withHeader = true, withC
 interface ImageSourceChipProps {
   withHeader?: boolean;
   compact?: boolean;
+  /** The render/card-art artist (resolved from `unit.imageSource`, defaulting to Star System). */
+  source?: { name: string; logo: string; url: string };
 }
 
 /**
- * Image-source fallback for UNPAINTED squads: their card-art / render images come
- * from the Star System community (rule per maintainer). Painted squads instead
- * show a <PainterChip>. So every unit has exactly one image-attribution element.
+ * Image-source for UNPAINTED squads (painted squads instead show a <PainterChip>).
+ * `source` is the card-art render artist — normally passed in from `unit.imageSource`,
+ * which defaults to Star System (every unpainted squad render is community Star System art).
  */
-export function ImageSourceChip({ withHeader = true, compact }: ImageSourceChipProps) {
+export function ImageSourceChip({ withHeader = true, compact, source }: ImageSourceChipProps) {
   const meta = LORE_SOURCE_META['star_system'];
   return (
     <div data-testid="image-source-chip" className="flex flex-wrap items-center gap-2">
@@ -298,8 +303,44 @@ export function ImageSourceChip({ withHeader = true, compact }: ImageSourceChipP
           {'// ИЗОБРАЖЕНИЯ'}
         </span>
       )}
-      <SourceChip name={meta.short} logo={meta.logo} icon={meta.icon} tone={meta.tone} url={meta.url} compact={compact} />
+      <SourceChip
+        name={source ? source.name : meta.short}
+        logo={source ? source.logo : meta.logo}
+        icon={!source ? meta.icon : undefined}
+        tone={!source ? meta.tone : undefined}
+        url={source ? source.url : meta.url}
+        compact={compact}
+      />
       <ContributeButton compact={compact} />
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Miniature source — who made the physical sculpt (≠ image creator)          */
+/* -------------------------------------------------------------------------- */
+
+interface MiniatureChipProps {
+  name: string;
+  logo: string;
+  url: string;
+  compact?: boolean;
+  withHeader?: boolean;
+  headerText?: string;
+  role?: string;
+}
+
+/** Who made the PHYSICAL miniature / sculpt. When the same creator also made the
+ *  images/paint, pass a combined headerText (e.g. '// ИЗОБРАЖЕНИЯ И МИНИАТЮРЫ'). */
+export function MiniatureChip({ name, logo, url, compact, withHeader = true, headerText = '// МИНИАТЮРЫ', role = 'модель' }: MiniatureChipProps) {
+  return (
+    <div data-testid="miniature-chip" className="flex flex-wrap items-center gap-2">
+      {withHeader && (
+        <span className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider">
+          {headerText}
+        </span>
+      )}
+      <SourceChip name={name} role={role || undefined} logo={logo} url={url} compact={compact} />
     </div>
   );
 }
