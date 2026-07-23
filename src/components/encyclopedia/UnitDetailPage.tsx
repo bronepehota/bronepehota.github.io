@@ -69,13 +69,21 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
   // Painter credit — shown whenever the squad is attributed (painted), independent
   // of whether a wide group photo exists.
   const photoCredit = getPhotoCredit(unit.id);
-  // Render/model artist for unpainted card-art (from `unit.imageSource`, default Tehnolog).
-  const imageSourceCredit = unit.imageSource ? getCredit(unit.imageSource) : getCredit('tehnolog');
+  // Render artist for unpainted card-art (from `unit.imageSource`). Absent → Star System,
+  // since every unpainted squad render in the app is community Star System art.
+  const imageSourceCredit = unit.imageSource ? getCredit(unit.imageSource) : getCredit('star_system');
   // Physical miniature / sculpt maker (from `unit.miniatureSource`, default Tehnolog).
   const miniatureSourceCredit = unit.miniatureSource ? getCredit(unit.miniatureSource) : getCredit('tehnolog');
   const imageCredit = photoCredit ?? imageSourceCredit;
-  const sameCreator = !!miniatureSourceCredit && !!imageCredit && miniatureSourceCredit.name === imageCredit.name;
-  const mergedHeader = photoCredit ? '// ПОКРАС И МИНИАТЮРЫ' : '// ИЗОБРАЖЕНИЯ И МИНИАТЮРЫ';
+  // Show the sculptor as its OWN chip only when it differs from whoever made the
+  // image/paint — otherwise it's redundant (e.g. Lisitsin both rendered & sculpted).
+  const sculptorDiffers = !!miniatureSourceCredit && !!imageCredit && miniatureSourceCredit.name !== imageCredit.name;
+  // One shared header for the whole attribution strip — painted squads otherwise
+  // rendered two stacked `// ПОКРАС` / `// МИНИАТЮРЫ` blocks that looked broken
+  // under a wide group photo.
+  const attributionHeader = photoCredit
+    ? '// ПОКРАС'
+    : (sculptorDiffers ? '// ИЗОБРАЖЕНИЯ' : '// ИЗОБРАЖЕНИЯ И МИНИАТЮРЫ');
   // Whether this unit has a lore block rendered by <UnitLore>. When it doesn't,
   // we still attribute the concept origin in the header (loreAuthor is moot).
   const enc = unit.encyclopedia;
@@ -278,42 +286,57 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
                     </div>
                   )}
 
-                  {/* Attribution: merge into one chip when same creator for images + miniatures */}
-                  {sameCreator && miniatureSourceCredit ? (
-                    <div className="mb-6">
-                      <MiniatureChip
-                        name={miniatureSourceCredit.name}
-                        logo={miniatureSourceCredit.logo}
-                        url={miniatureSourceCredit.url}
-                        headerText={mergedHeader}
-                        role=""
+                  {/* Attribution: ONE metadata strip (shared header + chips in a single
+                      flex-wrap row), mirroring the ProvenanceRow idiom. Painted squads
+                      with a separate painter + sculptor previously stacked two
+                      double-header blocks — which looked broken under a wide group photo. */}
+                  <div className="mb-6 flex flex-wrap items-center gap-x-3 gap-y-2">
+                    <span className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider">
+                      {attributionHeader}
+                    </span>
+                    {photoCredit ? (
+                      // PAINTED squad → the painter is the salient attribution.
+                      <PainterChip
+                        name={photoCredit.name}
+                        logo={photoCredit.logo}
+                        url={photoCredit.url}
+                        withHeader={false}
+                        withContribute={!hasLore}
                       />
-                    </div>
-                  ) : (
-                    <>
-                      <div className="mb-6">
-                        {photoCredit ? (
-                          <PainterChip
-                            name={photoCredit.name}
-                            logo={photoCredit.logo}
-                            url={photoCredit.url}
-                            withContribute={!hasLore}
-                          />
-                        ) : (
-                          <ImageSourceChip source={imageSourceCredit} />
-                        )}
-                      </div>
-                      {miniatureSourceCredit && (
-                        <div className="mb-6">
-                          <MiniatureChip
-                            name={miniatureSourceCredit.name}
-                            logo={miniatureSourceCredit.logo}
-                            url={miniatureSourceCredit.url}
-                          />
-                        </div>
-                      )}
-                    </>
-                  )}
+                    ) : sculptorDiffers ? (
+                      // UNPAINTED, distinct render + sculpt artists.
+                      <ImageSourceChip source={imageSourceCredit} withHeader={false} />
+                    ) : (
+                      // UNPAINTED, single creator for both render & sculpt → one merged chip.
+                      miniatureSourceCredit && (
+                        <MiniatureChip
+                          name={miniatureSourceCredit.name}
+                          logo={miniatureSourceCredit.logo}
+                          url={miniatureSourceCredit.url}
+                          withHeader={false}
+                          role=""
+                        />
+                      )
+                    )}
+                    {/* Sculptor — only when it differs from the image/paint creator. Gets its own
+                        `// МИНИАТЮРЫ` prefix so it reads as the physical-sculpt credit, NOT part
+                        of the paint/image line (otherwise "· модель" was lost under `// ПОКРАС`).
+                        Label + chip grouped so they don't split when the strip wraps on mobile. */}
+                    {sculptorDiffers && miniatureSourceCredit && (
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider">
+                          {'// МИНИАТЮРЫ'}
+                        </span>
+                        <MiniatureChip
+                          name={miniatureSourceCredit.name}
+                          logo={miniatureSourceCredit.logo}
+                          url={miniatureSourceCredit.url}
+                          withHeader={false}
+                          role=""
+                        />
+                      </span>
+                    )}
+                  </div>
 
                   {/* Concept-origin attribution for units with NO lore block (loreAuthor is moot then). */}
                   {!hasLore && (
