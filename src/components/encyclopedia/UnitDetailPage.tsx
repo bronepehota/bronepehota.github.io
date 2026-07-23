@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 import { ModifierIcon } from '@/components/editor/ModifierIcons';
 import { SoldierImages } from './UnitDetail/SoldierImages';
 import { MachineImages } from './UnitDetail/MachineImages';
-import { SQUAD_GROUP_IMAGE, getPhotoCredit } from '@/lib/painted-images';
+import { SQUAD_GROUP_IMAGE, getPhotoCredit, getCredit } from '@/lib/painted-images';
 import { resolveUnitProvenance } from '@/lib/provenance';
 import { UnitLore } from './UnitDetail/UnitLore';
 import { SourceAvailability } from './SourceAvailability';
@@ -69,6 +69,8 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
   // Painter credit — shown whenever the squad is attributed (painted), independent
   // of whether a wide group photo exists.
   const photoCredit = getPhotoCredit(unit.id);
+  // Render/model artist for unpainted card-art (from `unit.miniatureSource`).
+  const miniature = unit.miniatureSource ? getCredit(unit.miniatureSource) : undefined;
   // Whether this unit has a lore block rendered by <UnitLore>. When it doesn't,
   // we still attribute the concept origin in the header (loreAuthor is moot).
   const enc = unit.encyclopedia;
@@ -283,7 +285,7 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
                         withContribute={!hasLore}
                       />
                     ) : (
-                      <ImageSourceChip />
+                      <ImageSourceChip source={miniature} />
                     )}
                   </div>
 

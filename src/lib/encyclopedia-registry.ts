@@ -60,6 +60,10 @@ export interface EncyclopediaUnit {
   /** Lore provenance override (origin / loreAuthor). Unset axes fall back to the
    * faction-aware default — see `resolveUnitProvenance` in `@/lib/provenance`. */
   provenance?: Partial<Provenance>;
+  /** Who made the 3D model / card-art render of this squad's images — a credit id
+   *  from `CREDITS` (e.g. 'lisitsin'). Shown on the detail page; absent = generic
+   *  card-art (→ Star System image-source fallback). */
+  miniatureSource?: string;
 }
 
 export interface EncyclopediaFaction {

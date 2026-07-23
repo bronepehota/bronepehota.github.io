@@ -378,7 +378,8 @@
     "provenance": {
       "origin": "star_system"
     },
-    "image": "/images/squads/polaris/lineynaya_klon_pehota_fox1/6.png"
+    "image": "/images/squads/polaris/lineynaya_klon_pehota_fox1/6.png",
+    "miniatureSource": "lisitsin"
   },
   {
     "id": "polaris_lineynaya_klon_pehota_fox2",
@@ -402,7 +403,8 @@
     "provenance": {
       "origin": "star_system"
     },
-    "image": "/images/squads/polaris/lineynaya_klon_pehota_fox2/4.png"
+    "image": "/images/squads/polaris/lineynaya_klon_pehota_fox2/4.png",
+    "miniatureSource": "lisitsin"
   },
   {
     "id": "polaris_lyogkiy_shturmovoy_desant_fox4",
@@ -426,7 +428,8 @@
     "provenance": {
       "origin": "star_system"
     },
-    "image": "/images/squads/polaris/lyogkiy_shturmovoy_desant_fox4/2.png"
+    "image": "/images/squads/polaris/lyogkiy_shturmovoy_desant_fox4/2.png",
+    "miniatureSource": "lisitsin"
   },
   {
     "id": "polaris_mobilnyy_shturmovoy_desant",
@@ -450,6 +453,7 @@
     "provenance": {
       "origin": "star_system"
     },
-    "image": "/images/squads/polaris/mobilnyy_shturmovoy_desant/6.png"
+    "image": "/images/squads/polaris/mobilnyy_shturmovoy_desant/6.png",
+    "miniatureSource": "lisitsin"
   }
 ]

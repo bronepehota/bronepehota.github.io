@@ -155,6 +155,7 @@
     "provenance": {
       "origin": "star_system"
     },
-    "image": "/images/squads/rutenia/oprichniki/5.png"
+    "image": "/images/squads/rutenia/oprichniki/5.png",
+    "miniatureSource": "lisitsin"
   }
 ]

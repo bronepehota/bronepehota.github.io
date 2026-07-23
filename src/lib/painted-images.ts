@@ -64,3 +64,12 @@ export function getPhotoCredit(unitId: string): typeof CREDITS[PhotoSource] | un
   const source = SQUAD_PHOTO_SOURCE[unitId];
   return source ? CREDITS[source] : undefined;
 }
+
+/**
+ * Per-squad RENDER source — who made the 3D model / card-art render for UNPAINTED
+ * squads. Lives as a `miniatureSource` FIELD on the encyclopedia unit (data-driven,
+ * like `provenance`), holding a credit id from `CREDITS`. Resolve it via `getCredit`.
+ */
+export function getCredit(id: string): typeof CREDITS[PhotoSource] | undefined {
+  return (CREDITS as Record<string, typeof CREDITS[PhotoSource]>)[id];
+}

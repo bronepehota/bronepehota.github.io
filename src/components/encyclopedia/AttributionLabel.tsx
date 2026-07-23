@@ -282,14 +282,17 @@ export function PainterChip({ name, logo, url, compact, withHeader = true, withC
 interface ImageSourceChipProps {
   withHeader?: boolean;
   compact?: boolean;
+  /** Override the image source — e.g. the render/model artist (from `unit.miniatureSource`).
+   *  Absent → Star System (generic unpainted card-art). */
+  source?: { name: string; logo: string; url: string };
 }
 
 /**
- * Image-source fallback for UNPAINTED squads: their card-art / render images come
- * from the Star System community (rule per maintainer). Painted squads instead
- * show a <PainterChip>. So every unit has exactly one image-attribution element.
+ * Image-source for UNPAINTED squads. Painted squads instead show a <PainterChip>.
+ * If the squad's images are unpainted renders by a known creator (`unit.miniatureSource`),
+ * pass `source` to show that creator; otherwise it falls back to Star System.
  */
-export function ImageSourceChip({ withHeader = true, compact }: ImageSourceChipProps) {
+export function ImageSourceChip({ withHeader = true, compact, source }: ImageSourceChipProps) {
   const meta = LORE_SOURCE_META['star_system'];
   return (
     <div data-testid="image-source-chip" className="flex flex-wrap items-center gap-2">
@@ -298,7 +301,14 @@ export function ImageSourceChip({ withHeader = true, compact }: ImageSourceChipP
           {'// ИЗОБРАЖЕНИЯ'}
         </span>
       )}
-      <SourceChip name={meta.short} logo={meta.logo} icon={meta.icon} tone={meta.tone} url={meta.url} compact={compact} />
+      <SourceChip
+        name={source ? source.name : meta.short}
+        logo={source ? source.logo : meta.logo}
+        icon={!source ? meta.icon : undefined}
+        tone={!source ? meta.tone : undefined}
+        url={source ? source.url : meta.url}
+        compact={compact}
+      />
       <ContributeButton compact={compact} />
     </div>
   );
