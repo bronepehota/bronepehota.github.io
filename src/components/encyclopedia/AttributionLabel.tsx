@@ -290,10 +290,11 @@ interface ImageSourceChipProps {
 /**
  * Image-source for UNPAINTED squads. Painted squads instead show a <PainterChip>.
  * If the squad's images are unpainted renders by a known creator (`unit.miniatureSource`),
- * pass `source` to show that creator; otherwise it falls back to Star System.
+ * pass `source` to show that creator; otherwise defaults to Tehnolog (the original
+ * game publisher — most existing squads are Tehnolog-original card art).
  */
 export function ImageSourceChip({ withHeader = true, compact, source }: ImageSourceChipProps) {
-  const meta = LORE_SOURCE_META['star_system'];
+  const meta = LORE_SOURCE_META['tehnolog'];
   return (
     <div data-testid="image-source-chip" className="flex flex-wrap items-center gap-2">
       {withHeader && (
