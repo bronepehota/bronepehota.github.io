@@ -132,5 +132,29 @@
       "shortDescription": "Войска Рутении: огневая поддержка с дистанции при слабой броне."
     },
     "image": "/images/squads/rutenia/voyska_planety_ruteniya/1.png"
+  },
+  {
+    "id": "rutenia_oprichniki",
+    "name": "Опричники",
+    "shortName": "Опричники",
+    "faction": "rutenia",
+    "type": "squad",
+    "sources": [
+      {
+        "id": "star_system",
+        "cost": 120
+      }
+    ],
+    "encyclopedia": {
+      "class": "Тяжёлая пехота",
+      "lore": "Опричники — элитное тяжёловооружённое подразделение Рутении. Из армлистов сообщества «Звёздные системы» (модели Лисицына).",
+      "history": "Добавлены в армейские списки сообществом «Звёздные системы».",
+      "tactics": "Тяжёлая бронированная пехота: прорыв обороны и удержание позиций в ближнем бою.",
+      "shortDescription": "Опричники — элитная тяжёлая пехота Рутении из армлистов сообщества «Звёздные системы»."
+    },
+    "provenance": {
+      "origin": "star_system"
+    },
+    "image": "/images/squads/rutenia/oprichniki/5.png"
   }
 ]
