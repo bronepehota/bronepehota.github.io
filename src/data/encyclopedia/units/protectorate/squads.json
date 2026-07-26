@@ -344,6 +344,7 @@
       "shortDescription": "Таинственный невидимый советник с оружием невиданной силы — эмиссар Старой Земли."
     },
     "image": "/images/squads/protectorate/prizrak/1.png",
+    "imageSource": "shnayder",
     "statsNote": "Предварительные статы, не являются каноном. Можно изменить в редакторе."
   },
   {
@@ -366,6 +367,7 @@
       "shortDescription": "Старейший советник-наставник, непревзойдённый мастер клинка."
     },
     "image": "/images/squads/protectorate/mark_chang/1.png",
+    "imageSource": "shnayder",
     "statsNote": "Предварительные статы, не являются каноном. Можно изменить в редакторе."
   },
   {
@@ -388,6 +390,7 @@
       "shortDescription": "Беглый легионер Империи, ставшая советницей-дуэлянтом Протектората."
     },
     "image": "/images/squads/protectorate/piriel/1.png",
+    "imageSource": "shnayder",
     "statsNote": "Предварительные статы, не являются каноном. Можно изменить в редакторе."
   },
   {
@@ -410,6 +413,7 @@
       "shortDescription": "Гелионский дворянин-советник, мастер восстаний и рейдов по тылам."
     },
     "image": "/images/squads/protectorate/elveret/1.png",
+    "imageSource": "shnayder",
     "statsNote": "Предварительные статы, не являются каноном. Можно изменить в редакторе."
   },
   {
@@ -432,6 +436,7 @@
       "shortDescription": "Сын погибшей Мидгаарда, командир мобильных сил и налётчик."
     },
     "image": "/images/squads/protectorate/olgerd/1.png",
+    "imageSource": "shnayder",
     "statsNote": "Предварительные статы, не являются каноном. Можно изменить в редакторе."
   },
   {
@@ -454,6 +459,7 @@
       "shortDescription": "Разумный боевой компьютер Протектората в теле, безжалостный полководец."
     },
     "image": "/images/squads/protectorate/zheleznyy_general/1.png",
+    "imageSource": "shnayder",
     "statsNote": "Предварительные статы, не являются каноном. Можно изменить в редакторе."
   },
   {
