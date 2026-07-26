@@ -25,6 +25,9 @@ export const CREDITS = {
   star_system: { url: 'https://vk.com/bp_bnp', logo: '/images/credits/star_system.jpg', name: 'Star System' },
   tehnolog: { url: 'https://www.tehnolog.ru', logo: '/images/credits/tehnolog.png', name: 'Технолог' },
   lisitsin: { url: 'https://vk.ru/fredfoxminiatures', logo: '/images/credits/lisitsin.jpg', name: 'Миниатюры Лисицина' },
+  // Андрей Суков — покрас лёгкой киберпехоты (vk.ru/sukov85). Лого ожидается от автора;
+  // пока `logo: ''` ⇒ chip рендерится без картинки (имя + ссылка), без битого <img>.
+  sukov: { url: 'https://vk.ru/sukov85', logo: '', name: 'Андрей Суков' },
   // TODO(аттрибуция): ждём лого + ссылку + список отрядов Сергея Переверзева.
   pereverzev: { url: '', logo: '/images/credits/pereverzev.jpg', name: 'Сергей Переверзев' },
 } as const;
@@ -43,12 +46,13 @@ export const SQUAD_PHOTO_SOURCE: Record<string, PhotoSource> = {
   polaris_lyogkiy_shturmovoy_desant: 'shnayder',
   polaris_tribunatory_starye: 'shnayder',
   protectorate_kiberpehota: 'shnayder',
-  protectorate_lyogkaya_kiberpehota: 'shnayder',
   protectorate_shturmovoy_spetsnaz_starye: 'shnayder',
   mercenaries_mutanty: 'shnayder',
   // Технолог (официальные миниатюры):
   rutenia_voyska_planety_ruteniya: 'shnayder',
   rutenia_ruteniyskaya_gvardiya: 'shnayder',
+  // Андрей Суков (покрас лёгкой киберпехоты — ранее ошибочно приписан Шнайдеру):
+  protectorate_lyogkaya_kiberpehota: 'sukov',
   // Лисицин (покрас):
   rutenia_komandnoe_otdelenie: 'lisitsin',
   rutenia_otryad_podderzhki: 'lisitsin',
