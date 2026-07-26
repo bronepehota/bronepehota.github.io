@@ -32,6 +32,8 @@ jobs:
         run: npm run build
         env:
           NEXT_PUBLIC_GITHUB_PAGES: 'true'
+          # Публичный токен Google Search Console (виден в HTML <head> — секретом не является).
+          NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION: '2_S0uEntiUGS4zUOB24ag97gE6cJJioHuHD7YsrgZVs'
           NEXT_PUBLIC_GA_MEASUREMENT_ID: ${{ secrets.GA_MEASUREMENT_ID }}
           NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
 
