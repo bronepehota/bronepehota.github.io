@@ -135,6 +135,13 @@ export function FactionSelector({
               accent: 'text-orange-400',
               glow: 'shadow-orange-500/20',
               corner: 'border-orange-500'
+            },
+            dead_fleet: {
+              border: 'border-rose-500/50 hover:border-rose-500',
+              bg: 'hover:bg-rose-500/10',
+              accent: 'text-rose-400',
+              glow: 'shadow-rose-500/20',
+              corner: 'border-rose-500'
             }
           };
 

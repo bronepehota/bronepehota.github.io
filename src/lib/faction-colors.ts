@@ -11,6 +11,7 @@ const FACTION_STYLES: Record<string, FactionStyle> = {
   protectorate: { text: 'text-cyan-400',    border: 'border-cyan-500/50',    bg: 'bg-cyan-500/10',    glow: 'shadow-cyan-500/20',    primary: '#06b6d4', borderSolid: 'border-cyan-500',    bgSolid: 'bg-cyan-500',    progress: 'bg-cyan-500',    accent: 'border-cyan-500',    ring: 'ring-cyan-500' },
   mercenaries:  { text: 'text-yellow-400',  border: 'border-yellow-500/50',  bg: 'bg-yellow-500/10',  glow: 'shadow-yellow-500/20',  primary: '#eab308', borderSolid: 'border-yellow-500',  bgSolid: 'bg-yellow-500',  progress: 'bg-yellow-500',  accent: 'border-yellow-500',  ring: 'ring-yellow-500' },
   rutenia:      { text: 'text-orange-400',  border: 'border-orange-500/50',  bg: 'bg-orange-500/10',  glow: 'shadow-orange-500/20',  primary: '#ea580c', borderSolid: 'border-orange-500',  bgSolid: 'bg-orange-500',  progress: 'bg-orange-500',  accent: 'border-orange-500',  ring: 'ring-orange-500' },
+  dead_fleet:   { text: 'text-rose-400',    border: 'border-rose-500/50',    bg: 'bg-rose-500/10',    glow: 'shadow-rose-500/20',    primary: '#e11d48', borderSolid: 'border-rose-500',    bgSolid: 'bg-rose-500',    progress: 'bg-rose-500',    accent: 'border-rose-500',    ring: 'ring-rose-500' },
 };
 
 export const getFactionColors = (faction: FactionID) => {
@@ -23,6 +24,7 @@ export const factionDisplayNames: Record<FactionID, string> = {
   protectorate: 'Протекторат',
   mercenaries: 'Наёмники',
   rutenia: 'Рутения',
+  dead_fleet: 'Мёртвый Флот',
 };
 
 /** Faction logo images (PNG with transparency). Mercenaries has no logo (text fallback). */
@@ -31,4 +33,5 @@ export const factionLogos: Partial<Record<FactionID, string>> = {
   protectorate: '/images/factions/protectorate.png',
   rutenia: '/images/factions/rutenia.png',
   mercenaries: '/images/factions/mercenaries.png',
+  dead_fleet: '/images/factions/dead_fleet.png',
 };

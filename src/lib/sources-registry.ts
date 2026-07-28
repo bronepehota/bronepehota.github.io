@@ -8,6 +8,8 @@ import starSystemMercenariesSquads from '@/data/sources/star_system/mercenaries/
 import starSystemMercenariesMachines from '@/data/sources/star_system/mercenaries/machines.json';
 import starSystemRuteniaSquads from '@/data/sources/star_system/rutenia/squads.json';
 import starSystemRuteniaMachines from '@/data/sources/star_system/rutenia/machines.json';
+import starSystemDeadFleetSquads from '@/data/sources/star_system/dead_fleet/squads.json';
+import starSystemDeadFleetMachines from '@/data/sources/star_system/dead_fleet/machines.json';
 import tehnologFactions from '@/data/sources/tehnolog/factions.json';
 import tehnologPolarisSquads from '@/data/sources/tehnolog/polaris/squads.json';
 import tehnologPolarisMachines from '@/data/sources/tehnolog/polaris/machines.json';
@@ -25,13 +27,15 @@ const typedStarSystemSquads = [
   ...starSystemPolarisSquads,
   ...starSystemProtectorateSquads,
   ...starSystemMercenariesSquads,
-  ...starSystemRuteniaSquads
+  ...starSystemRuteniaSquads,
+  ...starSystemDeadFleetSquads
 ] as Squad[];
 const typedStarSystemMachines = [
   ...starSystemPolarisMachines,
   ...starSystemProtectorateMachines,
   ...starSystemMercenariesMachines,
-  ...starSystemRuteniaMachines
+  ...starSystemRuteniaMachines,
+  ...starSystemDeadFleetMachines
 ] as Machine[];
 const typedTehnologFactions = tehnologFactions as Faction[];
 const typedTehnologSquads = [

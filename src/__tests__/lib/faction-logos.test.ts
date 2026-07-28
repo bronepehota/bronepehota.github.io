@@ -8,9 +8,9 @@ import { factionLogos } from '@/lib/faction-colors';
  * every core faction has a logo path that points under /images/factions/.
  */
 describe('factionLogos', () => {
-  const EXPECTED_FACTIONS = ['mercenaries', 'polaris', 'protectorate', 'rutenia'] as const;
+  const EXPECTED_FACTIONS = ['dead_fleet', 'mercenaries', 'polaris', 'protectorate', 'rutenia'] as const;
 
-  it('has all 4 faction keys', () => {
+  it('has all 5 faction keys', () => {
     const keys = Object.keys(factionLogos).sort();
     expect(keys).toEqual([...EXPECTED_FACTIONS].sort());
   });

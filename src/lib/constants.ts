@@ -38,7 +38,7 @@ export const LOCAL_STORAGE_KEYS = {
 
 export const DEFAULT_POINT_BUDGETS = [250, 350, 500, 1000];
 
-export const FACTIONS: FactionID[] = ['polaris', 'protectorate', 'mercenaries', 'rutenia'];
+export const FACTIONS: FactionID[] = ['polaris', 'protectorate', 'mercenaries', 'rutenia', 'dead_fleet'];
 
 export const MAX_SOLDIERS_PER_SQUAD = 6;
 export const MAX_WEAPONS_PER_MACHINE = 4;

@@ -38,6 +38,8 @@ const LORE_SOURCE_META: Record<
 > = {
   tehnolog: { name: 'Технолог', short: 'ТЕХНОЛОГ', icon: Shield, tone: '#06b6d4', logo: '/images/credits/tehnolog.png', url: 'https://www.tehnolog.ru' },
   star_system: { name: 'Star System', short: 'STAR SYSTEM', icon: Star, tone: '#f59e0b', logo: '/images/credits/star_system.jpg', url: 'https://vk.com/bp_bnp' },
+  // Звёздные Системы (vk.ru/universestarsys) — сообщество-создатель Мёртвого Флота.
+  universestarsys: { name: 'Звёздные Системы', short: 'ЗВЁЗДНЫЕ СИСТЕМЫ', icon: Star, tone: '#e11d48', logo: '/images/credits/universestarsys.jpg', url: 'https://vk.ru/universestarsys' },
 };
 
 /* -------------------------------------------------------------------------- */
