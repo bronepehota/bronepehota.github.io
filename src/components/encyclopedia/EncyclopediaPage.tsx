@@ -57,14 +57,31 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
     setIsLoaded(true);
   }, []);
 
-  // Optional deep-link: /encyclopedia?faction=polaris pre-selects that faction filter.
+  // Restore filter on mount: a URL deep-link (?faction=&type=&q=) takes priority,
+  // otherwise fall back to sessionStorage — so the filter survives a
+  // unit → «назад» round-trip (the page remounts on return).
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const f = new URLSearchParams(window.location.search).get('faction');
-    if (f && units.some((u) => u.faction === f)) {
-      setSelectedFaction(f);
-    }
+    const params = new URLSearchParams(window.location.search);
+    let saved: { faction?: string; type?: string; search?: string } = {};
+    try { saved = JSON.parse(sessionStorage.getItem('enc_filter') || '{}'); } catch {}
+    const fac = params.get('faction') ?? saved.faction;
+    const typ = params.get('type') ?? saved.type;
+    const q = params.get('q') ?? saved.search;
+    if (fac && fac !== 'all' && units.some((u) => u.faction === fac)) setSelectedFaction(fac as FactionID);
+    if (typ && typ !== 'all') setSelectedType(typ as TypeFilter);
+    if (q) setSearchQuery(q);
   }, []);
+
+  // Persist the active filter so returning from a unit page restores it.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      sessionStorage.setItem('enc_filter', JSON.stringify({
+        faction: selectedFaction, type: selectedType, search: searchQuery,
+      }));
+    } catch { /* sessionStorage unavailable (private mode) — deep-link still works */ }
+  }, [selectedFaction, selectedType, searchQuery]);
 
   useEffect(() => {
     const filtered = units.filter(unit => {
