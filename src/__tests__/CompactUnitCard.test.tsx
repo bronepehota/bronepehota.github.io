@@ -55,7 +55,6 @@ describe('CompactUnitCard', () => {
     );
 
     expect(screen.getByText('Линейная клон-пехота')).toBeInTheDocument();
-    expect(screen.getByText('ОТРЯД')).toBeInTheDocument();
     expect(screen.getByText('50')).toBeInTheDocument();
     expect(screen.getByText(/R2/)).toBeInTheDocument();
     expect(screen.getByText(/6 бойцов/)).toBeInTheDocument();
@@ -73,7 +72,6 @@ describe('CompactUnitCard', () => {
     );
 
     expect(screen.getByText('Лёгкая штурмовая "Грин-болтер"')).toBeInTheDocument();
-    expect(screen.getByText('МАШИНА')).toBeInTheDocument();
     expect(screen.getByText('150')).toBeInTheDocument();
     expect(screen.getByText(/R2/)).toBeInTheDocument();
     expect(screen.getByText(/Прч16/)).toBeInTheDocument();

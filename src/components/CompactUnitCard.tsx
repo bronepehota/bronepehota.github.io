@@ -53,7 +53,6 @@ export function CompactUnitCard({
 
   const isMachine = type === 'machine';
   const Icon = isMachine ? Zap : User;
-  const typeLabel = isMachine ? 'МАШИНА' : 'ОТРЯД';
 
   // Get quick stats based on unit type
   const getQuickStats = () => {
@@ -182,9 +181,6 @@ export function CompactUnitCard({
               )}
             </div>
             <div className="flex items-center gap-2 mt-0.5">
-              <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">
-                {typeLabel}
-              </span>
               <span className="text-[10px] font-mono text-slate-600">
                 {quickStats}
               </span>
@@ -202,7 +198,7 @@ export function CompactUnitCard({
       </div>
 
       {/* Add button zone */}
-      <div className="w-14 flex items-center justify-center flex-shrink-0">
+      <div className="w-12 flex items-center justify-center flex-shrink-0">
         <button
           onClick={(e) => {
             e.stopPropagation();
