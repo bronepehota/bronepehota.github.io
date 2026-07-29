@@ -44,83 +44,43 @@ const mockMachine: Machine = {
 
 describe('CompactUnitCard', () => {
   it('renders squad card with correct info', () => {
-    const handleAdd = jest.fn();
-    const handleClick = jest.fn();
-
     render(
       <CompactUnitCard
         unit={mockSquad}
         type="squad"
-        onAdd={handleAdd}
-        onClick={handleClick}
+        onAdd={jest.fn()}
+        onClick={jest.fn()}
         factionId="polaris"
         canAfford={true}
       />
     );
 
     expect(screen.getByText('Линейная клон-пехота')).toBeInTheDocument();
-    expect(screen.getByText('ОТРЯД')).toBeInTheDocument();
     expect(screen.getByText('50')).toBeInTheDocument();
     expect(screen.getByText(/R2/)).toBeInTheDocument();
     expect(screen.getByText(/6 бойцов/)).toBeInTheDocument();
   });
 
   it('renders machine card with correct info', () => {
-    const handleAdd = jest.fn();
-    const handleClick = jest.fn();
-
     render(
       <CompactUnitCard
         unit={mockMachine}
         type="machine"
-        onAdd={handleAdd}
-        onClick={handleClick}
+        onAdd={jest.fn()}
+        onClick={jest.fn()}
         factionId="polaris"
         canAfford={true}
       />
     );
 
     expect(screen.getByText('Лёгкая штурмовая "Грин-болтер"')).toBeInTheDocument();
-    expect(screen.getByText('МАШИНА')).toBeInTheDocument();
     expect(screen.getByText('150')).toBeInTheDocument();
     expect(screen.getByText(/R2/)).toBeInTheDocument();
     expect(screen.getByText(/Прч16/)).toBeInTheDocument();
     expect(screen.getByText(/Ск2/)).toBeInTheDocument();
   });
 
-  it('shows count badge when units in army', () => {
-    render(
-      <CompactUnitCard
-        unit={mockSquad}
-        type="squad"
-        onAdd={() => {}}
-        onClick={() => {}}
-        factionId="polaris"
-        canAfford={true}
-        countInArmy={2}
-      />
-    );
-
-    expect(screen.getByText('2')).toBeInTheDocument();
-  });
-
-  it('does not show count badge when zero in army', () => {
-    render(
-      <CompactUnitCard
-        unit={mockSquad}
-        type="squad"
-        onAdd={() => {}}
-        onClick={() => {}}
-        factionId="polaris"
-        canAfford={true}
-        countInArmy={0}
-      />
-    );
-
-    expect(screen.queryByText('0')).not.toBeInTheDocument();
-  });
-
-  it('calls onClick when info button clicked and can afford', async () => {
+  it('calls onClick when the unit name is clicked and can afford', async () => {
     const handleClick = jest.fn();
     const user = userEvent.setup();
 
@@ -135,14 +95,13 @@ describe('CompactUnitCard', () => {
       />
     );
 
-    // Find the info button (has aria-label="Подробнее")
-    const infoButton = screen.getByLabelText('Подробнее');
-    await user.click(infoButton);
+    // The name is the trigger for the in-app stats modal (no navigation).
+    await user.click(screen.getByText('Линейная клон-пехота'));
 
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
 
-  it('does not call onClick when info button clicked and cannot afford', async () => {
+  it('does not call onClick when the unit name is clicked and cannot afford', async () => {
     const handleClick = jest.fn();
     const user = userEvent.setup();
 
@@ -157,9 +116,7 @@ describe('CompactUnitCard', () => {
       />
     );
 
-    // Find the info button (has aria-label="Подробнее")
-    const infoButton = screen.getByLabelText('Подробнее');
-    await user.click(infoButton);
+    await user.click(screen.getByText('Линейная клон-пехота'));
 
     expect(handleClick).not.toHaveBeenCalled();
   });

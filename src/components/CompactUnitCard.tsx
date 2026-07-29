@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { User, Zap, Plus, BookOpen } from 'lucide-react';
+import { User, Zap, Plus } from 'lucide-react';
 import { GitHubPagesImage as Image } from './GitHubPagesImage';
 import { ImageModal } from './modals/ImageModal';
 import type { Squad, Machine, FactionID } from '@/lib/types';
@@ -20,11 +20,17 @@ interface CompactUnitCardProps {
   /**
    * ID of an allied faction. When provided, renders a small colored "ally" pill
    * next to the unit name (set by UnitSelector for units whose faction differs
-   * from the player's selected faction). The pill's label and color are derived
-   * from this id via factionDisplayNames + getFactionColors. Omitted/undefined
-   * for the player's own-faction units → no badge.
+   * from the player's selected faction). The pill's color is derived from this
+   * id via getFactionColors. Omitted/undefined for the player's own-faction
+   * units → no badge.
    */
   allyFactionId?: FactionID;
+  /**
+   * Relationship label shown inside the ally pill: 'Подфракция' | 'Основная' |
+   * 'Союзник' (default). Computed by UnitSelector from `relationTo(...)` so the
+   * badge reflects how the unit's faction relates to the selected faction.
+   */
+  allyLabel?: string;
 }
 
 export function CompactUnitCard({
@@ -34,8 +40,8 @@ export function CompactUnitCard({
   onClick,
   factionId,
   canAfford,
-  countInArmy = 0,
-  allyFactionId
+  allyFactionId,
+  allyLabel
 }: CompactUnitCardProps) {
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [modalImageSrc, setModalImageSrc] = useState('');
@@ -47,7 +53,6 @@ export function CompactUnitCard({
 
   const isMachine = type === 'machine';
   const Icon = isMachine ? Zap : User;
-  const typeLabel = isMachine ? 'МАШИНА' : 'ОТРЯД';
 
   // Get quick stats based on unit type
   const getQuickStats = () => {
@@ -91,7 +96,7 @@ export function CompactUnitCard({
       data-testid={`compact-unit-card-${unit.id}`}
     >
       {/* Type icon zone - with image fallback */}
-      <div className="w-14 flex items-center justify-center flex-shrink-0 bg-slate-900/50">
+      <div className="relative w-14 flex items-center justify-center flex-shrink-0 bg-slate-900/50">
         {unit.image ? (
           /* Unit has image - show it in circle */
           (() => {
@@ -142,6 +147,15 @@ export function CompactUnitCard({
             <Icon className={cn('w-5 h-5', accentColor.replace('bg-', 'text-'))} />
           </div>
         )}
+        {allyFactionId && (
+          <span
+            className="absolute top-0 left-0 inline-flex items-center justify-center w-5 h-5 rounded-full border bg-slate-900/90 backdrop-blur-sm z-10"
+            style={{ borderColor: getFactionColors(allyFactionId).primary + '88' }}
+            title={`${allyLabel ?? 'Союзник'}: ${factionDisplayNames[allyFactionId] ?? allyFactionId}`}
+          >
+            <FactionLogo faction={allyFactionId} className="w-3.5 h-3.5" />
+          </span>
+        )}
       </div>
 
       {/* Content zone */}
@@ -149,31 +163,20 @@ export function CompactUnitCard({
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h4 className={cn(
-                'font-mono font-bold text-sm truncate leading-tight',
-                canAfford ? 'text-slate-100' : 'text-slate-500'
-              )} title={unit.name}>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); if (canAfford) onClick(); }}
+                aria-label={`Подробнее: ${unit.name}`}
+                title={canAfford ? `Подробнее: ${unit.name}` : unit.name}
+                className={cn(
+                  'font-mono font-bold text-sm truncate leading-tight text-left max-w-full',
+                  canAfford ? 'text-slate-100 hover:underline cursor-pointer' : 'text-slate-500'
+                )}
+              >
                 {unit.name}
-              </h4>
-              {allyFactionId && (
-                <span
-                  className="ml-1 inline-flex items-center justify-center w-5 h-5 rounded flex-shrink-0"
-                  style={{ backgroundColor: getFactionColors(allyFactionId).primary + '33' }}
-                  title={`Союзник: ${factionDisplayNames[allyFactionId] ?? allyFactionId}`}
-                >
-                  <FactionLogo faction={allyFactionId} className="w-4 h-4" />
-                </span>
-              )}
-              {countInArmy > 0 && (
-                <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-green-600/80 text-white">
-                  {countInArmy}
-                </span>
-              )}
+              </button>
             </div>
             <div className="flex items-center gap-2 mt-0.5">
-              <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">
-                {typeLabel}
-              </span>
               <span className="text-[10px] font-mono text-slate-600">
                 {quickStats}
               </span>
@@ -190,31 +193,8 @@ export function CompactUnitCard({
         </div>
       </div>
 
-      {/* Info button zone */}
-      <div className="w-10 flex items-center justify-center flex-shrink-0">
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            if (canAfford) {
-              onClick();
-            }
-          }}
-          disabled={!canAfford}
-          aria-label="Подробнее"
-          className={cn(
-            'w-9 h-9 rounded-full flex items-center justify-center',
-            'transition-all duration-200 active:scale-95 touch-manipulation',
-            canAfford
-              ? 'bg-slate-700/30 hover:bg-slate-700 border border-slate-600/50'
-              : 'bg-slate-800/50 cursor-not-allowed opacity-50'
-          )}
-        >
-          <BookOpen className={cn('w-4 h-4', canAfford ? 'text-slate-400' : 'text-slate-600')} />
-        </button>
-      </div>
-
       {/* Add button zone */}
-      <div className="w-14 flex items-center justify-center flex-shrink-0">
+      <div className="w-12 flex items-center justify-center flex-shrink-0">
         <button
           onClick={(e) => {
             e.stopPropagation();

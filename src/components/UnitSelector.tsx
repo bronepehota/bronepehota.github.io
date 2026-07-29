@@ -12,6 +12,7 @@ import { FloatingContinueButton } from './controls/FloatingContinueButton';
 import { clsx } from 'clsx';
 import { getFactionColors, factionDisplayNames } from '@/lib/faction-colors';
 import { FactionLogo } from '@/components/FactionLogo';
+import { relationTo } from '@/lib/faction-hierarchy';
 
 
 interface UnitSelectorProps {
@@ -58,7 +59,7 @@ type UnitDisplay = {
  * - Images: 120px minimum width
  */
 export function UnitSelector({
-  factions: _factions, // factions prop kept for backward compatibility, no longer needed after WeaponSelectorModal removal
+  factions, // carries `parent` (set by ArmyBuilder) — drives the relation-aware ally badge label below
   squads,
   machines = [],
   selectedFaction,
@@ -166,14 +167,22 @@ export function UnitSelector({
   // Check if unit can be afforded
   const canAffordUnit = (cost: number) => cost <= (pointBudget - totalCost);
 
-  // Resolve the faction id of an allied unit, or undefined when the unit
-  // belongs to the player's own faction (or no faction is selected). Drives the
-  // colored "Союзник" pill shown next to the unit name in all three render
-  // paths — the badge derives its label and color from this id (see
-  // CompactUnitCard / MachineCard).
-  const allyFactionIdFor = (unit: UnitDisplay): FactionID | undefined => {
-    if (!selectedFaction || unit.data.faction === selectedFaction) return undefined;
-    return unit.data.faction as FactionID;
+  // Relationship of an available unit's faction to the player's selected
+  // faction: drives both whether the ally pill shows (own → none) and its label.
+  //   subfaction → «Подфракция» (unit's faction is a child of the selected one)
+  //   parent     → «Основная»   (unit's faction is the parent of the selected one)
+  //   ally       → «Союзник»     (anything else, incl. wildcard allies like mercs)
+  const RELATION_LABEL: Record<string, string> = {
+    subfaction: 'Подфракция',
+    parent: 'Основная',
+    ally: 'Союзник',
+  };
+  const allyBadgeFor = (unit: UnitDisplay): { id: FactionID; label: string } | null => {
+    if (!selectedFaction || unit.data.faction === selectedFaction) return null;
+    const id = unit.data.faction as FactionID;
+    const rel = relationTo(id, selectedFaction, factions);
+    if (rel === 'own') return null;
+    return { id, label: RELATION_LABEL[rel] ?? 'Союзник' };
   };
 
   // Handle add unit with budget check
@@ -294,7 +303,9 @@ export function UnitSelector({
               const count = getInstanceCount(unit.data.id);
               const instance = getLatestInstance(unit.data.id);
               const isInArmy = count > 0;
-              const allyFactionId = allyFactionIdFor(unit);
+              const allyBadge = allyBadgeFor(unit);
+              const allyFactionId = allyBadge?.id;
+              const allyLabel = allyBadge?.label;
               // Always use the unit's own faction for the card frame/ring — for
               // an ALLIED machine this means the ally's color (matches the ally
               // badge) instead of the selected faction's color. For own-faction
@@ -312,6 +323,7 @@ export function UnitSelector({
                     canAfford={affordable}
                     countInArmy={count}
                     allyFactionId={allyFactionId}
+                    allyLabel={allyLabel}
                   />
 
                   {/* Count badge */}
@@ -352,7 +364,9 @@ export function UnitSelector({
               // units, data.faction === selectedFaction so nothing changes.
               const unitFaction = unit.data.faction as FactionID;
               const colors = getFactionColors(unitFaction);
-              const allyFactionId = allyFactionIdFor(unit);
+              const allyBadge = allyBadgeFor(unit);
+              const allyFactionId = allyBadge?.id;
+              const allyLabel = allyBadge?.label;
 
               // Render machines with MachineCard component
               if (unit.type === 'machine') {
@@ -367,6 +381,7 @@ export function UnitSelector({
                       }}
                       testId={`add-unit-${unit.data.id}`}
                       allyFactionId={allyFactionId}
+                      allyLabel={allyLabel}
                     />
 
                     {/* Count badge */}
@@ -497,9 +512,12 @@ export function UnitSelector({
                           </h3>
                           {allyFactionId && (
                             <span
-                              className="inline-flex items-center justify-center w-5 h-5 rounded flex-shrink-0"
-                              style={{ backgroundColor: getFactionColors(allyFactionId).primary + '33' }}
-                              title={`Союзник: ${factionDisplayNames[allyFactionId] ?? allyFactionId}`}
+                              className="inline-flex items-center p-0.5 rounded-sm flex-shrink-0 border"
+                              style={{
+                                backgroundColor: getFactionColors(allyFactionId).primary + '22',
+                                borderColor: getFactionColors(allyFactionId).primary + '55',
+                              }}
+                              title={`${allyLabel ?? 'Союзник'}: ${factionDisplayNames[allyFactionId] ?? allyFactionId}`}
                             >
                               <FactionLogo faction={allyFactionId} className="w-4 h-4" />
                             </span>

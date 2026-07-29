@@ -16,14 +16,19 @@ interface MachineCardProps {
   /**
    * ID of an allied faction. When provided, renders a small colored "ally" pill
    * next to the machine name (set by UnitSelector for machines whose faction
-   * differs from the player's selected faction). The pill's label and color are
-   * derived from this id via factionDisplayNames + getFactionColors.
-   * Omitted/undefined for the player's own-faction machines → no badge.
+   * differs from the player's selected faction). The pill's color is derived
+   * from this id via getFactionColors. Omitted/undefined for the player's
+   * own-faction machines → no badge.
    */
   allyFactionId?: FactionID;
+  /**
+   * Relationship label shown inside the ally pill: 'Подфракция' | 'Основная' |
+   * 'Союзник' (default). Computed by UnitSelector from `relationTo(...)`.
+   */
+  allyLabel?: string;
 }
 
-export default function MachineCard({ machine, onAdd, onViewDetails, testId, allyFactionId }: MachineCardProps) {
+export default function MachineCard({ machine, onAdd, onViewDetails, testId, allyFactionId, allyLabel }: MachineCardProps) {
   const [imageError, setImageError] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
 
@@ -141,11 +146,16 @@ export default function MachineCard({ machine, onAdd, onViewDetails, testId, all
           </div>
           {allyFactionId && (
             <span
-              className="inline-flex items-center justify-center w-5 h-5 rounded flex-shrink-0"
-              style={{ backgroundColor: getFactionColors(allyFactionId).primary + '33' }}
-              title={`Союзник: ${factionDisplayNames[allyFactionId] ?? allyFactionId}`}
+              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm font-mono text-[9px] font-semibold uppercase tracking-wider flex-shrink-0 border self-center"
+              style={{
+                backgroundColor: getFactionColors(allyFactionId).primary + '22',
+                color: getFactionColors(allyFactionId).primary,
+                borderColor: getFactionColors(allyFactionId).primary + '55',
+              }}
+              title={`${allyLabel ?? 'Союзник'}: ${factionDisplayNames[allyFactionId] ?? allyFactionId}`}
             >
-              <FactionLogo faction={allyFactionId} className="w-4 h-4" />
+              <FactionLogo faction={allyFactionId} className="w-3 h-3" />
+              {allyLabel ?? 'Союзник'}
             </span>
           )}
           {/* Cost badge */}

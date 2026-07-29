@@ -2,7 +2,9 @@
 
 import { Shield, Zap, Skull, Star, Anchor } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { getEncyclopediaFaction } from '@/lib/encyclopedia-registry';
+import { getFactions } from '@/lib/encyclopedia-registry';
+import { orderedFactions, getParent } from '@/lib/faction-hierarchy';
+import { factionDisplayNames } from '@/lib/faction-colors';
 
 interface FactionsSectionProps {
   className?: string;
@@ -16,7 +18,7 @@ const iconMap = {
   Anchor,
 } as const;
 
-const factionIds = ['polaris', 'protectorate', 'mercenaries', 'rutenia', 'dead_fleet'] as const;
+const allFactions = orderedFactions(getFactions());
 
 export default function FactionsSection({ className }: FactionsSectionProps) {
   return (
@@ -39,10 +41,7 @@ export default function FactionsSection({ className }: FactionsSectionProps) {
 
       {/* Factions grid */}
       <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 md:gap-8">
-        {factionIds.map((factionId, index) => {
-          const faction = getEncyclopediaFaction(factionId);
-          if (!faction) return null;
-
+        {allFactions.map((faction, index) => {
           const IconComponent = iconMap[faction.symbol as keyof typeof iconMap];
 
           return (
@@ -71,6 +70,14 @@ export default function FactionsSection({ className }: FactionsSectionProps) {
                   >
                     {faction.name}
                   </h3>
+                  {faction.parent && (
+                    <div
+                      className="font-ibm-mono text-[10px] uppercase tracking-wider mt-1"
+                      style={{ color: getParent(faction.id, allFactions)?.color ?? faction.color }}
+                    >
+                      Подфракция «{factionDisplayNames[getParent(faction.id, allFactions)?.id ?? ''] ?? ''}»
+                    </div>
+                  )}
                 </div>
                 <div
                   className={cn(

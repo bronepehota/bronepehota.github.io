@@ -19,6 +19,10 @@ export interface Faction {
   homeWorld: string;
   motto: string;
   allies?: FactionID[]; // faction ids allied with this one (symmetric); "*" = ally of all
+  /** Parent faction id — when set, this faction is a *sub-faction* of `parent`
+   *  for display purposes (nesting, «Подфракция» tags). Does NOT affect unit
+   *  availability, which is governed by `allies`. */
+  parent?: FactionID;
 }
 
 export interface KeyBattle {
