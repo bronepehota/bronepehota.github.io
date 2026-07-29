@@ -4,7 +4,7 @@
     "name": "Грифон",
     "shortName": "Грифон",
     "faction": "protectorate",
-    "cost": 1000,
+    "cost": 305,
     "image": "/images/machines/griffin.jpg",
     "weapons": [
       {
