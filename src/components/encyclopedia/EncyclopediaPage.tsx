@@ -3,9 +3,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { Search } from 'lucide-react';
-import { EncyclopediaUnit } from '@/lib/encyclopedia-registry';
+import { EncyclopediaUnit, getFactions } from '@/lib/encyclopedia-registry';
 import { FactionID } from '@/lib/types';
-import { FACTIONS } from '@/lib/constants';
+import { orderedFactions } from '@/lib/faction-hierarchy';
 import { factionDisplayNames, getFactionColors } from '@/lib/faction-colors';
 import { UnitCard } from './UnitCard';
 import { EncyclopediaTabs } from './EncyclopediaTabs';
@@ -40,15 +40,18 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
   // Derive the faction filter from the units data — a new faction appears here
   // automatically once it has units (no hardcoded faction list to maintain).
   const factions = useMemo(() => {
+    // Data-driven order: sub-factions nest right after their parent. Pulls
+    // `parent` from the registry so the {id,parent} shape carries hierarchy.
     const present = new Set(units.map((u) => u.faction));
-    const ordered = FACTIONS.filter((f) => present.has(f));            // canonical order
-    present.forEach((f) => { if (!FACTIONS.includes(f)) ordered.push(f); }); // custom factions last
+    const ordered = orderedFactions(
+      getFactions().filter((f) => present.has(f.id)).map((f) => ({ id: f.id, parent: f.parent })),
+    );
     return [
       { value: 'all' as const, label: 'ВСЕ', color: '#A8A29E' },
       ...ordered.map((f) => ({
-        value: f,
-        label: (factionDisplayNames[f] ?? f).toUpperCase(),
-        color: getFactionColors(f).primary,
+        value: f.id,
+        label: (factionDisplayNames[f.id] ?? f.id).toUpperCase(),
+        color: getFactionColors(f.id).primary,
       })),
     ];
   }, [units]);
