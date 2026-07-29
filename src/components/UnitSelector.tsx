@@ -318,6 +318,7 @@ export function UnitSelector({
                     unit={unit.data}
                     type={unit.type}
                     onAdd={() => handleAddUnit(unit)}
+                    onClick={() => handleUnitClick(unit)}
                     factionId={unitFaction}
                     canAfford={affordable}
                     countInArmy={count}

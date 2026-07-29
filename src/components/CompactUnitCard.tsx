@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
-import { User, Zap, Plus } from 'lucide-react';
+import { User, Zap, Plus, BookOpen } from 'lucide-react';
 import { GitHubPagesImage as Image } from './GitHubPagesImage';
 import { ImageModal } from './modals/ImageModal';
 import type { Squad, Machine, FactionID } from '@/lib/types';
@@ -14,6 +13,7 @@ interface CompactUnitCardProps {
   unit: Squad | Machine;
   type: 'squad' | 'machine';
   onAdd: () => void;
+  onClick: () => void;
   factionId: FactionID;
   canAfford: boolean;
   countInArmy?: number;
@@ -37,6 +37,7 @@ export function CompactUnitCard({
   unit,
   type,
   onAdd,
+  onClick,
   factionId,
   canAfford,
   countInArmy = 0,
@@ -163,17 +164,15 @@ export function CompactUnitCard({
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <Link
-                href={`/encyclopedia/unit/${unit.id}`}
-                onClick={(e) => e.stopPropagation()}
-                title={`Энциклопедия: ${unit.name}`}
+              <h4
                 className={cn(
-                  'font-mono font-bold text-sm truncate leading-tight hover:underline',
-                  canAfford ? colors.text : 'text-slate-500'
+                  'font-mono font-bold text-sm truncate leading-tight',
+                  canAfford ? 'text-slate-100' : 'text-slate-500'
                 )}
+                title={unit.name}
               >
                 {unit.name}
-              </Link>
+              </h4>
               {countInArmy > 0 && (
                 <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-green-600/80 text-white">
                   {countInArmy}
@@ -195,6 +194,29 @@ export function CompactUnitCard({
             </span>
           </div>
         </div>
+      </div>
+
+      {/* Info button zone — opens the in-app stats modal (no navigation, preserves the army selection) */}
+      <div className="w-10 flex items-center justify-center flex-shrink-0">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            if (canAfford) {
+              onClick();
+            }
+          }}
+          disabled={!canAfford}
+          aria-label="Подробнее"
+          className={cn(
+            'w-9 h-9 rounded-full flex items-center justify-center',
+            'transition-all duration-200 active:scale-95 touch-manipulation',
+            canAfford
+              ? 'bg-slate-700/30 hover:bg-slate-700 border border-slate-600/50'
+              : 'bg-slate-800/50 cursor-not-allowed opacity-50'
+          )}
+        >
+          <BookOpen className={cn('w-4 h-4', canAfford ? 'text-slate-400' : 'text-slate-600')} />
+        </button>
       </div>
 
       {/* Add button zone */}

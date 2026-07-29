@@ -49,6 +49,7 @@ describe('CompactUnitCard', () => {
         unit={mockSquad}
         type="squad"
         onAdd={jest.fn()}
+        onClick={jest.fn()}
         factionId="polaris"
         canAfford={true}
       />
@@ -66,6 +67,7 @@ describe('CompactUnitCard', () => {
         unit={mockMachine}
         type="machine"
         onAdd={jest.fn()}
+        onClick={jest.fn()}
         factionId="polaris"
         canAfford={true}
       />
@@ -84,6 +86,7 @@ describe('CompactUnitCard', () => {
         unit={mockSquad}
         type="squad"
         onAdd={() => {}}
+        onClick={() => {}}
         factionId="polaris"
         canAfford={true}
         countInArmy={2}
@@ -99,6 +102,7 @@ describe('CompactUnitCard', () => {
         unit={mockSquad}
         type="squad"
         onAdd={() => {}}
+        onClick={() => {}}
         factionId="polaris"
         canAfford={true}
         countInArmy={0}
@@ -108,19 +112,47 @@ describe('CompactUnitCard', () => {
     expect(screen.queryByText('0')).not.toBeInTheDocument();
   });
 
-  it('renders the unit name as a link to its encyclopedia page', () => {
+  it('calls onClick when info button clicked and can afford', async () => {
+    const handleClick = jest.fn();
+    const user = userEvent.setup();
+
     render(
       <CompactUnitCard
         unit={mockSquad}
         type="squad"
         onAdd={() => {}}
+        onClick={handleClick}
         factionId="polaris"
         canAfford={true}
       />
     );
 
-    const link = screen.getByRole('link', { name: 'Линейная клон-пехота' });
-    expect(link).toHaveAttribute('href', '/encyclopedia/unit/polaris_lineynaya_klon_pehota');
+    // The book button opens the in-app stats modal (no navigation).
+    const infoButton = screen.getByLabelText('Подробнее');
+    await user.click(infoButton);
+
+    expect(handleClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not call onClick when info button clicked and cannot afford', async () => {
+    const handleClick = jest.fn();
+    const user = userEvent.setup();
+
+    render(
+      <CompactUnitCard
+        unit={mockSquad}
+        type="squad"
+        onAdd={() => {}}
+        onClick={handleClick}
+        factionId="polaris"
+        canAfford={false}
+      />
+    );
+
+    const infoButton = screen.getByLabelText('Подробнее');
+    await user.click(infoButton);
+
+    expect(handleClick).not.toHaveBeenCalled();
   });
 
   it('calls onAdd when add button clicked', async () => {
@@ -132,6 +164,7 @@ describe('CompactUnitCard', () => {
         unit={mockSquad}
         type="squad"
         onAdd={handleAdd}
+        onClick={() => {}}
         factionId="polaris"
         canAfford={true}
       />
@@ -152,6 +185,7 @@ describe('CompactUnitCard', () => {
         unit={mockSquad}
         type="squad"
         onAdd={handleAdd}
+        onClick={() => {}}
         factionId="polaris"
         canAfford={false}
       />
@@ -169,6 +203,7 @@ describe('CompactUnitCard', () => {
         unit={mockSquad}
         type="squad"
         onAdd={() => {}}
+        onClick={() => {}}
         factionId="polaris"
         canAfford={true}
       />
@@ -182,6 +217,7 @@ describe('CompactUnitCard', () => {
         unit={mockSquad}
         type="squad"
         onAdd={() => {}}
+        onClick={() => {}}
         factionId="polaris"
         canAfford={false}
       />
