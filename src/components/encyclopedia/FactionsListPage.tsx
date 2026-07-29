@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Globe, Quote, Users, Shield, Zap, Skull, Flag, Star } from 'lucide-react';
+import { ArrowLeft, Globe, Quote, Users, Shield, Zap, Skull, Flag, Star, Anchor, ExternalLink } from 'lucide-react';
 import type { EncyclopediaFaction } from '@/lib/encyclopedia-registry';
 import { getUnitsForFaction } from '@/lib/encyclopedia-registry';
 import { FactionLogo } from '@/components/FactionLogo';
@@ -21,9 +21,9 @@ export default function FactionsListPage({ factions }: FactionsListPageProps) {
   useEffect(() => setIsLoaded(true), []);
 
   // Stable display order: polaris, protectorate, mercenaries, rutenia
-  const order = ['polaris', 'protectorate', 'mercenaries', 'rutenia'];
+  const order = ['polaris', 'protectorate', 'mercenaries', 'rutenia', 'dead_fleet'];
   // Fallback glyph when a faction has no logo image (e.g. mercenaries)
-  const symbolIcon: Record<string, typeof Shield> = { Shield, Zap, Skull, Flag, Star };
+  const symbolIcon: Record<string, typeof Shield> = { Shield, Zap, Skull, Flag, Star, Anchor };
   const sorted = [...factions].sort(
     (a, b) => order.indexOf(a.id) - order.indexOf(b.id),
   );
@@ -200,6 +200,17 @@ export default function FactionsListPage({ factions }: FactionsListPageProps) {
                           <span>Отряды фракции «{factionDisplayNames[faction.id] ?? faction.id}»</span>
                           <span>→</span>
                         </Link>
+                        {faction.siteUrl && (
+                          <a
+                            href={faction.siteUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-2 inline-flex items-center gap-1.5 font-ibm-mono text-[11px] uppercase tracking-wider text-military-taupe/70 transition-colors hover:text-military-amber"
+                            title={faction.siteUrl}
+                          >
+                            <ExternalLink className="w-3 h-3" /> Официальный сайт
+                          </a>
+                        )}
                       </div>
                     </div>
                   </div>

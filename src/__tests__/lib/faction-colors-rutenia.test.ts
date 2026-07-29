@@ -23,6 +23,6 @@ describe('faction-colors — rutenia', () => {
     // `factionLogos` is a Partial<Record<FactionID, string>>, so its keys reflect
     // exactly which factions ship a logo PNG. All four core factions must be present.
     const keys = Object.keys(factionLogos).sort();
-    expect(keys).toEqual(['mercenaries', 'polaris', 'protectorate', 'rutenia']);
+    expect(keys).toEqual(['dead_fleet', 'mercenaries', 'polaris', 'protectorate', 'rutenia']);
   });
 });
