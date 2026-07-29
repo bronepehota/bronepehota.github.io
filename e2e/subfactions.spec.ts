@@ -30,7 +30,8 @@ test.describe('Sub-faction hierarchy', () => {
   test('unit selector labels a sub-faction unit as «Подфракция»', async ({ page }) => {
     // Pick Протекторат (parent of Рутения) and reach the army builder.
     await setupToArmyBuilder(page, { faction: 'protectorate' });
-    // An allied Рутения unit shows the «Подфракция» badge label.
-    await expect(page.locator('text=Подфракция').first()).toBeVisible({ timeout: 20000 });
+    // An allied Рутения unit shows the sub-faction relationship. The badge is
+    // icon-only (logo), so the relationship lives in its tooltip (title).
+    await expect(page.locator('[title*="Подфракция"]').first()).toBeVisible({ timeout: 20000 });
   });
 });

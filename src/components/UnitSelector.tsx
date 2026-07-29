@@ -512,16 +512,14 @@ export function UnitSelector({
                           </h3>
                           {allyFactionId && (
                             <span
-                              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm font-mono text-[9px] font-semibold uppercase tracking-wider flex-shrink-0 border"
+                              className="inline-flex items-center p-0.5 rounded-sm flex-shrink-0 border"
                               style={{
                                 backgroundColor: getFactionColors(allyFactionId).primary + '22',
-                                color: getFactionColors(allyFactionId).primary,
                                 borderColor: getFactionColors(allyFactionId).primary + '55',
                               }}
                               title={`${allyLabel ?? 'Союзник'}: ${factionDisplayNames[allyFactionId] ?? allyFactionId}`}
                             >
-                              <FactionLogo faction={allyFactionId} className="w-3 h-3" />
-                              {allyLabel ?? 'Союзник'}
+                              <FactionLogo faction={allyFactionId} className="w-4 h-4" />
                             </span>
                           )}
                         {/* Cost badge - absolutely positioned top-right */}
