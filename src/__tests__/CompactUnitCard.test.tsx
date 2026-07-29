@@ -80,38 +80,6 @@ describe('CompactUnitCard', () => {
     expect(screen.getByText(/Ск2/)).toBeInTheDocument();
   });
 
-  it('shows count badge when units in army', () => {
-    render(
-      <CompactUnitCard
-        unit={mockSquad}
-        type="squad"
-        onAdd={() => {}}
-        onClick={() => {}}
-        factionId="polaris"
-        canAfford={true}
-        countInArmy={2}
-      />
-    );
-
-    expect(screen.getByText('2')).toBeInTheDocument();
-  });
-
-  it('does not show count badge when zero in army', () => {
-    render(
-      <CompactUnitCard
-        unit={mockSquad}
-        type="squad"
-        onAdd={() => {}}
-        onClick={() => {}}
-        factionId="polaris"
-        canAfford={true}
-        countInArmy={0}
-      />
-    );
-
-    expect(screen.queryByText('0')).not.toBeInTheDocument();
-  });
-
   it('calls onClick when the unit name is clicked and can afford', async () => {
     const handleClick = jest.fn();
     const user = userEvent.setup();

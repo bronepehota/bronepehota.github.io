@@ -40,7 +40,6 @@ export function CompactUnitCard({
   onClick,
   factionId,
   canAfford,
-  countInArmy = 0,
   allyFactionId,
   allyLabel
 }: CompactUnitCardProps) {
@@ -176,11 +175,6 @@ export function CompactUnitCard({
               >
                 {unit.name}
               </button>
-              {countInArmy > 0 && (
-                <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-green-600/80 text-white">
-                  {countInArmy}
-                </span>
-              )}
             </div>
             <div className="flex items-center gap-2 mt-0.5">
               <span className="text-[10px] font-mono text-slate-600">
