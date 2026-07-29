@@ -217,7 +217,7 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
             {/* Faction + type chips: stacked on mobile, side-by-side on desktop */}
             <div className="grid gap-2 md:grid-cols-2">
               {/* Faction chips */}
-              <div className="flex gap-1.5 overflow-x-auto scrollbar-hide md:flex-wrap md:overflow-visible">
+              <div className="flex flex-wrap gap-1.5">
                 {factions.map(faction => {
                   const active = selectedFaction === faction.value;
                   return (
@@ -243,7 +243,7 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
               </div>
 
               {/* Type chips */}
-              <div className="flex gap-1.5 overflow-x-auto scrollbar-hide md:flex-wrap md:overflow-visible">
+              <div className="flex flex-wrap gap-1.5">
                 {types.map(type => {
                   const active = selectedType === type.value;
                   return (
