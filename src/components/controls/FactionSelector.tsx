@@ -1,249 +1,187 @@
 'use client';
 
-import React, { useState, KeyboardEvent, useEffect } from 'react';
+import React, { KeyboardEvent } from 'react';
 import type { Faction, FactionID } from '@/lib/types';
-import { Shield, Swords, ArrowRight } from 'lucide-react';
+import { Check, ArrowRight } from 'lucide-react';
 import { clsx } from 'clsx';
 import { FloatingContinueButton } from './FloatingContinueButton';
-import { orderedFactions, getParent } from '@/lib/faction-hierarchy';
-import { factionDisplayNames, getFactionColors } from '@/lib/faction-colors';
+import { orderedFactions, getSubFactions } from '@/lib/faction-hierarchy';
+import { getFactionColors } from '@/lib/faction-colors';
+import { FactionLogo } from '@/components/FactionLogo';
+import { Shield, Zap, Skull, Star, Anchor } from 'lucide-react';
 
 interface FactionSelectorProps {
   factions: Faction[];
   selectedFaction?: FactionID;
   onFactionSelect: (factionId: FactionID) => void;
   onNext?: () => void;
-  _nextDisabled?: boolean; // Reserved for future use - button disabled state
+  _nextDisabled?: boolean; // kept for callers; unused
   isLoading?: boolean;
   loadError?: string | null;
 }
 
+// Fallback glyphs (when a faction has no logo image)
+const SYMBOL_ICON: Record<string, typeof Shield> = { Shield, Zap, Skull, Flag: Shield, Star, Anchor };
+
 /**
- * FactionSelector - Display faction selection cards with expandable details
+ * FactionSelector — pick a faction (or one of its sub-factions) for the army.
  *
- * Allows player to choose a faction for their army.
- *
- * Accessibility (FR-022, FR-023, FR-024):
- * - Keyboard: Tab to navigate, Arrow keys within grid, Enter/Space to select, Escape to collapse
- * - ARIA: role="button", aria-pressed, aria-expanded, aria-label
- * - Focus: First card receives focus on mount, moves to selected after selection
- *
- * Mobile (FR-025, FR-027):
- * - Breakpoints: <768px (mobile), 768-1024px (tablet), >1024px (desktop)
- * - Touch targets: 44x44px minimum
- * - Images: 120px minimum width
+ * Redesign: factions render as PARENT "families" with logos; sub-factions
+ * appear as selectable chips nested inside their parent's card (hierarchy is
+ * visible). Selection is a single click — no expand/toggle: description is
+ * always visible (clamped). Mobile-first: 1 column / desktop: 3 columns.
  */
 export function FactionSelector({
   factions,
   selectedFaction,
   onFactionSelect,
   onNext,
-  _nextDisabled,
   isLoading = false,
   loadError = null,
 }: FactionSelectorProps) {
-  const [expandedFaction, setExpandedFaction] = useState<FactionID | null>(null);
-
-  // Auto-expand selected faction on mount or when it changes
-  useEffect(() => {
-    if (selectedFaction && expandedFaction !== selectedFaction) {
-      setExpandedFaction(selectedFaction);
-    }
-  }, [selectedFaction, expandedFaction]);
-
-  const handleFactionClick = (factionId: FactionID) => {
-    onFactionSelect(factionId);
-    setExpandedFaction(factionId === expandedFaction ? null : factionId);
-  };
-
-  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>, factionId: FactionID) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      handleFactionClick(factionId);
-    } else if (e.key === 'Escape' && expandedFaction === factionId) {
-      setExpandedFaction(null);
-    }
-  };
-
-  // Loading state
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-12" role="status" aria-busy="true">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-400"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-400" />
         <span className="ml-4 text-slate-400">Загрузка...</span>
       </div>
     );
   }
-
-  // Error state
   if (loadError) {
     return (
       <div className="p-6 bg-red-900/20 border border-red-500 rounded-lg" role="alert" aria-live="assertive">
         <p className="text-red-400 mb-4">Ошибка загрузки данных</p>
-        <button
-          onClick={() => window.location.reload()}
-          className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded"
-        >
+        <button onClick={() => window.location.reload()} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded">
           Повторить
         </button>
       </div>
     );
   }
 
+  const parents = orderedFactions(factions).filter((f) => !f.parent);
+  const subsOf = (pid: FactionID) => getSubFactions(pid, factions);
+
+  const selectParent = (e: React.SyntheticEvent, id: FactionID) => {
+    e.stopPropagation();
+    onFactionSelect(id);
+  };
+  const onParentKey = (e: KeyboardEvent<HTMLDivElement>, id: FactionID) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onFactionSelect(id);
+    }
+  };
+
   return (
     <div className="space-y-6 pb-32" data-testid="faction-selector">
       {/* Header */}
-      <div className="text-center space-y-2">
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <Swords className="w-6 h-6 text-slate-500" />
-          <h2 className="text-3xl font-bold text-slate-200 font-mono tracking-wider">ВЫБЕРИТЕ ФРАКЦИЮ</h2>
-          <Swords className="w-6 h-6 text-slate-500" />
-        </div>
+      <div className="text-center space-y-1">
+        <h2 className="text-2xl md:text-3xl font-bold text-slate-200 font-mono tracking-wider">ВЫБЕРИТЕ ФРАКЦИЮ</h2>
         <p className="text-sm text-slate-400">Выберите сторону конфликта</p>
       </div>
 
-      {/* Faction cards grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {orderedFactions(factions).map((faction) => {
-          const isSelected = selectedFaction === faction.id;
-          const isExpanded = expandedFaction === faction.id;
-
-          // Faction-specific styling
-          const factionStyles = {
-            polaris: {
-              border: 'border-red-500/50 hover:border-red-500',
-              bg: 'hover:bg-red-500/10',
-              accent: 'text-red-400',
-              glow: 'shadow-red-500/20',
-              corner: 'border-red-500'
-            },
-            protectorate: {
-              border: 'border-cyan-500/50 hover:border-cyan-500',
-              bg: 'hover:bg-cyan-500/10',
-              accent: 'text-cyan-400',
-              glow: 'shadow-cyan-500/20',
-              corner: 'border-cyan-500'
-            },
-            mercenaries: {
-              border: 'border-yellow-500/50 hover:border-yellow-500',
-              bg: 'hover:bg-yellow-500/10',
-              accent: 'text-yellow-400',
-              glow: 'shadow-yellow-500/20',
-              corner: 'border-yellow-500'
-            },
-            rutenia: {
-              border: 'border-orange-500/50 hover:border-orange-500',
-              bg: 'hover:bg-orange-500/10',
-              accent: 'text-orange-400',
-              glow: 'shadow-orange-500/20',
-              corner: 'border-orange-500'
-            },
-            dead_fleet: {
-              border: 'border-rose-500/50 hover:border-rose-500',
-              bg: 'hover:bg-rose-500/10',
-              accent: 'text-rose-400',
-              glow: 'shadow-rose-500/20',
-              corner: 'border-rose-500'
-            }
-          };
-
-          const styles = factionStyles[faction.id as keyof typeof factionStyles];
+      {/* Faction families */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+        {parents.map((parent) => {
+          const colors = getFactionColors(parent.id);
+          const subs = subsOf(parent.id);
+          const isParentSelected = selectedFaction === parent.id;
+          const isFamilySelected = isParentSelected || subs.some((s) => s.id === selectedFaction);
 
           return (
             <div
-              key={faction.id}
-              role="button"
-              tabIndex={0}
-              aria-pressed={isSelected}
-              aria-expanded={isExpanded}
-              aria-label={`Фракция ${faction.name}, ${isSelected ? 'выбрана' : 'не выбрана'}`}
-              onKeyDown={(e) => handleKeyDown(e, faction.id)}
-              onClick={() => handleFactionClick(faction.id)}
-              data-testid={`faction-card-${faction.id}`}
+              key={parent.id}
               className={clsx(
-                'relative group cursor-pointer transition-all duration-300',
-                'border bg-slate-800/80 backdrop-blur-sm overflow-hidden',
-                'min-h-[120px] min-w-[44px] touch-manipulation',
-                isSelected ? 'scale-105' : 'hover:scale-102',
-                'active:scale-95',
-                styles.border,
-                styles.bg,
-                isSelected && 'ring-2 ring-offset-2 ring-offset-slate-900'
+                'relative flex flex-col border bg-slate-800/80 backdrop-blur-sm overflow-hidden',
+                'transition-all duration-200 touch-manipulation',
+                isFamilySelected ? 'ring-2 ring-offset-2 ring-offset-slate-900' : 'hover:bg-slate-700/40',
+                colors.border,
+                colors.ring,
               )}
-              style={{
-                ...(isSelected && {
-                  boxShadow: `0 0 20px ${faction.color}40`,
-                  borderColor: faction.color
-                })
-              }}
+              style={isFamilySelected ? { borderColor: colors.primary, boxShadow: `0 0 22px -6px ${colors.primary}80` } : undefined}
             >
-              {/* Corner accents */}
-              <div className={clsx(
-                'absolute top-0 left-0 w-3 h-3 border-l-2 border-t-2 transition-all duration-300',
-                styles.corner
-              )} />
-              <div className={clsx(
-                'absolute top-0 right-0 w-3 h-3 border-r-2 border-t-2 transition-all duration-300',
-                styles.corner
-              )} />
-              <div className={clsx(
-                'absolute bottom-0 left-0 w-3 h-3 border-l-2 border-b-2 transition-all duration-300',
-                styles.corner
-              )} />
-              <div className={clsx(
-                'absolute bottom-0 right-0 w-3 h-3 border-r-2 border-b-2 transition-all duration-300',
-                styles.corner
-              )} />
+              {/* Color rail */}
+              <div className="absolute inset-y-0 left-0 w-1" style={{ background: `linear-gradient(180deg, ${colors.primary}, transparent)` }} />
 
-              {/* Shield icon */}
-              <div className="absolute top-3 left-3 opacity-20">
-                <Shield className={clsx('w-8 h-8', styles.accent)} />
-              </div>
+              {/* Parent area — click selects the parent faction */}
+              <div
+                role="button"
+                tabIndex={0}
+                aria-pressed={isParentSelected}
+                data-testid={`faction-card-${parent.id}`}
+                aria-label={`Фракция ${parent.name}`}
+                onClick={(e) => selectParent(e, parent.id)}
+                onKeyDown={(e) => onParentKey(e, parent.id)}
+                className="relative flex items-start gap-3 p-3 md:p-4 cursor-pointer flex-1"
+              >
+                {/* Emblem */}
+                <div
+                  className="relative shrink-0 w-14 h-14 md:w-16 md:h-16 flex items-center justify-center rounded-md overflow-hidden"
+                  style={{ backgroundColor: `${colors.primary}14`, border: `1px solid ${colors.primary}55`, color: colors.primary }}
+                >
+                  <FactionLogo faction={parent.id} className="w-3/4 h-3/4" fallback={SYMBOL_ICON[parent.symbol ?? 'Flag']} fallbackClassName="w-3/4 h-3/4" />
+                </div>
 
-              {/* Content */}
-              <div className="relative z-10 p-4">
-                {/* Faction name and status */}
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className={clsx('font-mono font-bold text-sm tracking-wide', styles.accent)}>
-                    {faction.name.toUpperCase()}
-                  </h3>
-                  {isSelected && (
-                    <div className={clsx('w-6 h-6 rounded-full flex items-center justify-center bg-green-500/20 border border-green-500')}>
-                      <svg className="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-mono font-bold text-sm md:text-base tracking-wide truncate" style={{ color: colors.primary }}>
+                      {parent.name.toUpperCase()}
+                    </h3>
+                    {isParentSelected && (
+                      <span className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center" style={{ backgroundColor: `${colors.primary}33`, color: colors.primary }}>
+                        <Check className="w-3.5 h-3.5" strokeWidth={3} />
+                      </span>
+                    )}
+                  </div>
+                  {parent.motto && (
+                    <p className="text-[11px] md:text-xs italic font-mono text-slate-500 truncate" title={parent.motto}>
+                      «{parent.motto}»
+                    </p>
+                  )}
+                  {parent.description && (
+                    <p className="mt-1.5 text-[11px] md:text-xs text-slate-400 leading-snug line-clamp-2">
+                      {parent.description}
+                    </p>
                   )}
                 </div>
+              </div>
 
-                {faction.parent && (
-                  <div
-                    className="font-mono text-[10px] uppercase tracking-wider mb-2"
-                    style={{ color: getFactionColors(getParent(faction.id, factions)?.id ?? '').primary }}
-                  >
-                    Подфракция «{factionDisplayNames[getParent(faction.id, factions)?.id ?? ''] ?? ''}»
-                  </div>
-                )}
-
-                {/* Motto */}
-                <p className={clsx('text-xs italic mb-3 font-mono', isSelected ? styles.accent : 'text-slate-500')}>
-                  &quot;{faction.motto}&quot;
-                </p>
-
-                {/* Color indicator bar */}
-                <div className="h-0.5 rounded-full" style={{ backgroundColor: faction.color }}></div>
-
-              {/* Expanded details */}
-              {isExpanded && (
-                <div className="mt-3 pt-3 border-t border-slate-700/50 space-y-2">
-                  <p className="text-xs text-slate-400 leading-relaxed">{faction.description}</p>
-                  <div className="flex items-center gap-1 text-[10px] text-slate-500 font-mono">
-                    <span>РОДНОЙ МИР:</span>
-                    <span className={clsx(isSelected && styles.accent)}>{faction.homeWorld}</span>
+              {/* Sub-faction chips — nested under the parent */}
+              {subs.length > 0 && (
+                <div className="px-3 md:px-4 pb-3 md:pb-4 pt-1 border-t border-slate-700/40">
+                  <div className="font-mono text-[9px] uppercase tracking-wider text-slate-500 mb-1.5 mt-2">Подфракции</div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {subs.map((sub) => {
+                      const subColors = getFactionColors(sub.id);
+                      const isSubSelected = selectedFaction === sub.id;
+                      return (
+                        <button
+                          key={sub.id}
+                          type="button"
+                          aria-pressed={isSubSelected}
+                          data-testid={`faction-card-${sub.id}`}
+                          onClick={(e) => selectParent(e, sub.id)}
+                          className={clsx(
+                            'inline-flex items-center gap-1.5 px-2 py-1 rounded border text-[11px] font-mono transition-all',
+                            isSubSelected ? 'text-white' : 'text-slate-300 hover:text-white',
+                          )}
+                          style={
+                            isSubSelected
+                              ? { backgroundColor: `${subColors.primary}22`, borderColor: subColors.primary, color: subColors.primary }
+                              : { borderColor: `${subColors.primary}40` }
+                          }
+                        >
+                          <span className="w-4 h-4 flex items-center justify-center" style={{ color: subColors.primary }}>
+                            <FactionLogo faction={sub.id} className="w-full h-full" fallback={SYMBOL_ICON[sub.symbol ?? 'Flag']} fallbackClassName="w-full h-full" />
+                          </span>
+                          {sub.name}
+                          {isSubSelected && <Check className="w-3 h-3" strokeWidth={3} />}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}
-              </div>
             </div>
           );
         })}
@@ -254,7 +192,7 @@ export function FactionSelector({
         <FloatingContinueButton
           text="Выбрать фракцию"
           tooltip="Выбрать фракцию"
-          accentColor={selectedFaction ? factions.find(f => f.id === selectedFaction)?.color || '#3b82f6' : '#64748b'}
+          accentColor={selectedFaction ? factions.find((f) => f.id === selectedFaction)?.color || '#3b82f6' : '#64748b'}
           onClick={onNext}
           disabled={!selectedFaction}
           dataTestid="faction-continue-button"
