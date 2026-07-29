@@ -8,6 +8,7 @@ import { getUnitsForFaction } from '@/lib/encyclopedia-registry';
 import { FactionLogo } from '@/components/FactionLogo';
 import { getFactionColors, factionDisplayNames } from '@/lib/faction-colors';
 import { resolveFactionProvenance } from '@/lib/provenance';
+import { orderedFactions, getParent, getSubFactions } from '@/lib/faction-hierarchy';
 import { EncyclopediaTabs } from './EncyclopediaTabs';
 import { ProvenanceRow } from './AttributionLabel';
 import { cn } from '@/lib/utils';
@@ -20,13 +21,11 @@ export default function FactionsListPage({ factions }: FactionsListPageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   useEffect(() => setIsLoaded(true), []);
 
-  // Stable display order: polaris, protectorate, mercenaries, rutenia
-  const order = ['polaris', 'protectorate', 'mercenaries', 'rutenia', 'dead_fleet'];
   // Fallback glyph when a faction has no logo image (e.g. mercenaries)
   const symbolIcon: Record<string, typeof Shield> = { Shield, Zap, Skull, Flag, Star, Anchor };
-  const sorted = [...factions].sort(
-    (a, b) => order.indexOf(a.id) - order.indexOf(b.id),
-  );
+  // Data-driven order: each sub-faction nests right after its parent.
+  const sorted = orderedFactions(factions);
+  const subFactionParent = (id: string) => getParent(id, factions)?.name;
 
   return (
     <div className="min-h-screen bg-military-dark relative overflow-hidden">
@@ -153,6 +152,14 @@ export default function FactionsListPage({ factions }: FactionsListPageProps) {
                         <h2 className="font-russo font-black text-2xl md:text-3xl text-white">
                           {faction.name}
                         </h2>
+                        {faction.parent && subFactionParent(faction.id) && (
+                          <span
+                            className="font-ibm-mono text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-sm border"
+                            style={{ color: colors.primary, borderColor: `${colors.primary}55` }}
+                          >
+                            Подфракция «{subFactionParent(faction.id)}»
+                          </span>
+                        )}
                       </div>
 
                       {/* Motto */}
@@ -188,6 +195,23 @@ export default function FactionsListPage({ factions }: FactionsListPageProps) {
                       {faction.description && (
                         <p className="text-military-sand/75 leading-relaxed text-sm md:text-base">
                           {faction.description}
+                        </p>
+                      )}
+
+                      {getSubFactions(faction.id, factions).length > 0 && (
+                        <p className="mt-3 font-ibm-mono text-[11px] text-military-steel/70 uppercase tracking-wider">
+                          Включает: {getSubFactions(faction.id, factions).map((s, i) => (
+                            <span key={s.id}>
+                              {i > 0 && ', '}
+                              <Link
+                                href={`/encyclopedia?faction=${s.id}`}
+                                className="hover:text-military-amber transition-colors"
+                                style={{ color: colors.primary }}
+                              >
+                                {s.name}
+                              </Link>
+                            </span>
+                          ))}
                         </p>
                       )}
 
