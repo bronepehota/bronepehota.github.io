@@ -20,11 +20,17 @@ interface CompactUnitCardProps {
   /**
    * ID of an allied faction. When provided, renders a small colored "ally" pill
    * next to the unit name (set by UnitSelector for units whose faction differs
-   * from the player's selected faction). The pill's label and color are derived
-   * from this id via factionDisplayNames + getFactionColors. Omitted/undefined
-   * for the player's own-faction units → no badge.
+   * from the player's selected faction). The pill's color is derived from this
+   * id via getFactionColors. Omitted/undefined for the player's own-faction
+   * units → no badge.
    */
   allyFactionId?: FactionID;
+  /**
+   * Relationship label shown inside the ally pill: 'Подфракция' | 'Основная' |
+   * 'Союзник' (default). Computed by UnitSelector from `relationTo(...)` so the
+   * badge reflects how the unit's faction relates to the selected faction.
+   */
+  allyLabel?: string;
 }
 
 export function CompactUnitCard({
@@ -35,7 +41,8 @@ export function CompactUnitCard({
   factionId,
   canAfford,
   countInArmy = 0,
-  allyFactionId
+  allyFactionId,
+  allyLabel
 }: CompactUnitCardProps) {
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [modalImageSrc, setModalImageSrc] = useState('');
@@ -157,11 +164,16 @@ export function CompactUnitCard({
               </h4>
               {allyFactionId && (
                 <span
-                  className="ml-1 inline-flex items-center justify-center w-5 h-5 rounded flex-shrink-0"
-                  style={{ backgroundColor: getFactionColors(allyFactionId).primary + '33' }}
-                  title={`Союзник: ${factionDisplayNames[allyFactionId] ?? allyFactionId}`}
+                  className="ml-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm font-mono text-[9px] font-semibold uppercase tracking-wider flex-shrink-0 border"
+                  style={{
+                    backgroundColor: getFactionColors(allyFactionId).primary + '22',
+                    color: getFactionColors(allyFactionId).primary,
+                    borderColor: getFactionColors(allyFactionId).primary + '55',
+                  }}
+                  title={`${allyLabel ?? 'Союзник'}: ${factionDisplayNames[allyFactionId] ?? allyFactionId}`}
                 >
-                  <FactionLogo faction={allyFactionId} className="w-4 h-4" />
+                  <FactionLogo faction={allyFactionId} className="w-3 h-3" />
+                  {allyLabel ?? 'Союзник'}
                 </span>
               )}
               {countInArmy > 0 && (
