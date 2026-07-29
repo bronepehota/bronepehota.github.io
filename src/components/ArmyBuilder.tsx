@@ -133,6 +133,7 @@ export default function ArmyBuilder({
           homeWorld: encyclopediaFaction.homeWorld || '',
           motto: encyclopediaFaction.motto || '',
           allies: encyclopediaFaction.allies ?? [],
+          parent: encyclopediaFaction.parent,
         };
       })
       .filter((f): f is NonNullable<typeof f> => f !== null),
