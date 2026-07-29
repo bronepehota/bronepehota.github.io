@@ -47,6 +47,7 @@
     "homeWorld": "Рутения (Ржавый Осколок)",
     "motto": "Рутенийский сапог втопчет любую угрозу",
     "allies": ["protectorate"],
+    "parent": "protectorate",
     "sources": [
       "star_system"
     ],
@@ -61,6 +62,7 @@
     "homeWorld": "Флагман Эркхарда",
     "motto": "Во имя мёртвого Императора",
     "allies": ["polaris"],
+    "parent": "polaris",
     "sources": [
       "star_system"
     ],

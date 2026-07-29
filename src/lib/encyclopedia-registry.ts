@@ -84,6 +84,8 @@ export interface EncyclopediaFaction {
   banner?: string;
   sources: string[];
   allies?: string[];
+  /** Parent faction id — display-only sub-faction grouping (see `Faction.parent`). */
+  parent?: string;
   /** Lore provenance override (origin / loreAuthor). Unset axes fall back to the
    * faction-aware default — see `resolveFactionProvenance` in `@/lib/provenance`. */
   provenance?: Partial<Provenance>;
