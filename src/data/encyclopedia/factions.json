@@ -51,5 +51,20 @@
       "star_system"
     ],
     "provenance": { "origin": "star_system", "loreAuthor": "star_system" }
+  },
+  {
+    "id": "dead_fleet",
+    "name": "Мёртвый Флот",
+    "color": "#e11d48",
+    "symbol": "Anchor",
+    "description": "Личная армия имперского лорда Эркхарда, преданная культу мёртвого Императора — последнего, по мнению Эркхарда и его сторонников, легитимного правителя Империи Полярис. Действует на стороне Империи как её самое фанатичное подразделение. Первая из новых подфракций сообщества «Звёздные Системы».",
+    "homeWorld": "Флагман Эркхарда",
+    "motto": "Во имя мёртвого Императора",
+    "allies": ["polaris"],
+    "sources": [
+      "star_system"
+    ],
+    "provenance": { "origin": "universestarsys", "loreAuthor": "universestarsys" },
+    "siteUrl": "https://vk.ru/dead_fleet"
   }
 ]

@@ -17,12 +17,21 @@ export const SQUAD_GROUP_IMAGE: Record<string, string> = {
   protectorate_shturmovoy_spetsnaz_starye: '/images/squads/protectorate/shturmovoy_spetsnaz_starye/group.jpg',
   mercenaries_mutanty: '/images/squads/mercenaries/mutanty/group.jpg',
   protectorate_lyogkaya_kiberpehota: '/images/squads/protectorate/lyogkaya_kiberpehota/group.jpg',
+  // Мёртвый Флот (сборные фото отрядов):
+  dead_fleet_marodery_erharda: '/images/squads/dead_fleet/marodery_erharda/group.jpg',
+  dead_fleet_terrokond: '/images/squads/dead_fleet/terrokond/group.jpg',
+  dead_fleet_aboardazhniki_erharda: '/images/squads/dead_fleet/aboardazhniki_erharda/group.jpg',
+  dead_fleet_ohotniki_erharda: '/images/squads/dead_fleet/ohotniki_erharda/group.jpg',
+  dead_fleet_shturmovye_marodery: '/images/squads/dead_fleet/shturmovye_marodery/group.jpg',
 };
 
 /** Photo credit per painter/photographer source. */
 export const CREDITS = {
   shnayder: { url: 'https://vk.com/shnayder_brush', logo: '/images/credits/shnayder_brush.jpg', name: 'Покрасы Шнайдера' },
   star_system: { url: 'https://vk.com/bp_bnp', logo: '/images/credits/star_system.jpg', name: 'Star System' },
+  // Звёздные Системы (vk.ru/universestarsys) — сообщество-создатель миниатюр
+  // Мёртвого Флота. Отличается от группы Star System (bp_bnp).
+  universestarsys: { url: 'https://vk.ru/universestarsys', logo: '/images/credits/universestarsys.jpg', name: 'Звёздные Системы' },
   tehnolog: { url: 'https://www.tehnolog.ru', logo: '/images/credits/tehnolog.png', name: 'Технолог' },
   lisitsin: { url: 'https://vk.ru/fredfoxminiatures', logo: '/images/credits/lisitsin.jpg', name: 'Миниатюры Лисицина' },
   // Андрей Суков — покрас лёгкой киберпехоты (vk.ru/sukov85). Лого ожидается от автора;
@@ -51,6 +60,13 @@ export const SQUAD_PHOTO_SOURCE: Record<string, PhotoSource> = {
   // Технолог (официальные миниатюры):
   rutenia_voyska_planety_ruteniya: 'shnayder',
   rutenia_ruteniyskaya_gvardiya: 'shnayder',
+  // Мёртвый Флот (покрасы Шнайдера, миниатюры — Звёздные Системы):
+  dead_fleet_marodery_erharda: 'shnayder',
+  dead_fleet_terrokond: 'shnayder',
+  dead_fleet_aboardazhniki_erharda: 'shnayder',
+  dead_fleet_ohotniki_erharda: 'shnayder',
+  dead_fleet_shturmovye_marodery: 'shnayder',
+  dead_fleet_mark_ballard: 'shnayder',
   // Андрей Суков (покрас лёгкой киберпехоты — ранее ошибочно приписан Шнайдеру):
   protectorate_lyogkaya_kiberpehota: 'sukov',
   // Лисицин (покрас):

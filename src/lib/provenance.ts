@@ -20,7 +20,7 @@ import type { EncyclopediaUnit, EncyclopediaFaction } from './encyclopedia-regis
 import type { Mission } from './mission-types';
 
 /** Who a piece of lore comes from. */
-export type LoreSource = 'tehnolog' | 'star_system';
+export type LoreSource = 'tehnolog' | 'star_system' | 'universestarsys';
 
 /** Resolved provenance — both axes always present after resolution. */
 export interface Provenance {
@@ -32,10 +32,13 @@ export interface Provenance {
 
 /** Faction-aware default for factions and units (they share the same rule). */
 function defaultFactionOrUnit(factionId: string | undefined): Provenance {
-  // Рутения is a community (Star System) creation, concept and lore alike.
-  const origin: LoreSource = factionId === 'rutenia' ? 'star_system' : 'tehnolog';
-  // Lore text is overwhelmingly community-written, even for Tehnolog-original units.
-  return { origin, loreAuthor: 'star_system' };
+  // Community creations — concept and lore alike (not Технолог canon):
+  //   Рутения      → Star System community (vk.com/bp_bnp)
+  //   Мёртвый Флот → Звёздные Системы   (vk.ru/universestarsys)
+  if (factionId === 'rutenia') return { origin: 'star_system', loreAuthor: 'star_system' };
+  if (factionId === 'dead_fleet') return { origin: 'universestarsys', loreAuthor: 'universestarsys' };
+  // Default: Tehnolog-original concept, community-written lore.
+  return { origin: 'tehnolog', loreAuthor: 'star_system' };
 }
 
 /** Apply a per-axis `Partial` override on top of a base default. */
@@ -49,7 +52,13 @@ function merge(base: Provenance, override?: Partial<Provenance>): Provenance {
 
 /** Provenance for a unit (defaults from its faction; override via `unit.provenance`). */
 export function resolveUnitProvenance(unit: EncyclopediaUnit): Provenance {
-  return merge(defaultFactionOrUnit(unit.faction), unit.provenance);
+  // Machines (техника) and орудия are official Технолог products — both the concept
+  // and the lore text are Технолог's, regardless of faction. A community-made machine
+  // (e.g. Dead Fleet's, by Звёздные Системы) overrides this via `unit.provenance`.
+  const base: Provenance = (unit.type === 'machine' || unit.type === 'орудие')
+    ? { origin: 'tehnolog', loreAuthor: 'tehnolog' }
+    : defaultFactionOrUnit(unit.faction);
+  return merge(base, unit.provenance);
 }
 
 /** Provenance for a faction (defaults from its id; override via `faction.provenance`). */

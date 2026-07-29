@@ -1,0 +1,411 @@
+[
+  {
+    "id": "dead_fleet_ohotniki_erharda",
+    "name": "Охотники Эрхарда",
+    "shortName": "Охотники Эрхарда",
+    "faction": "dead_fleet",
+    "cost": 90,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 4,
+        "speed": 5,
+        "range": "D12+2",
+        "power": "D12",
+        "melee": 4,
+        "armor": 2,
+        "image": "/images/squads/dead_fleet/ohotniki_erharda/1.png"
+      },
+      {
+        "num": 2,
+        "rank": 4,
+        "speed": 5,
+        "range": "D12+2",
+        "power": "D12",
+        "melee": 4,
+        "armor": 2,
+        "image": "/images/squads/dead_fleet/ohotniki_erharda/3.png"
+      },
+      {
+        "num": 3,
+        "rank": 4,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 4,
+        "armor": 2,
+        "image": "/images/squads/dead_fleet/ohotniki_erharda/4.png"
+      },
+      {
+        "num": 4,
+        "rank": 4,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 4,
+        "armor": 2,
+        "image": "/images/squads/dead_fleet/ohotniki_erharda/2.png"
+      },
+      {
+        "num": 5,
+        "rank": 4,
+        "speed": 5,
+        "range": "D12+2",
+        "power": "D12",
+        "melee": 4,
+        "armor": 2,
+        "image": "/images/squads/dead_fleet/ohotniki_erharda/6.png"
+      },
+      {
+        "num": 6,
+        "rank": 4,
+        "speed": 5,
+        "range": "D12+2",
+        "power": "D12",
+        "melee": 4,
+        "armor": 2,
+        "image": "/images/squads/dead_fleet/ohotniki_erharda/5.png"
+      }
+    ],
+    "image": "/images/squads/dead_fleet/ohotniki_erharda/1.png"
+  },
+  {
+    "id": "dead_fleet_terrokond",
+    "name": "Терроконд",
+    "shortName": "Терроконд",
+    "faction": "dead_fleet",
+    "cost": 170,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 4,
+        "speed": 3,
+        "range": "D6",
+        "power": "2D6+3",
+        "melee": 3,
+        "armor": 6,
+        "image": "/images/squads/dead_fleet/terrokond/1.png"
+      },
+      {
+        "num": 2,
+        "rank": 4,
+        "speed": 3,
+        "range": "D12",
+        "power": "3D6+3",
+        "melee": 3,
+        "armor": 6,
+        "image": "/images/squads/dead_fleet/terrokond/6.png"
+      },
+      {
+        "num": 3,
+        "rank": 4,
+        "speed": 3,
+        "range": "D12",
+        "power": "D12+2",
+        "melee": 3,
+        "armor": 6,
+        "image": "/images/squads/dead_fleet/terrokond/2.png"
+      },
+      {
+        "num": 4,
+        "rank": 4,
+        "speed": 3,
+        "range": "D6",
+        "power": "2D6+3",
+        "melee": 5,
+        "armor": 6,
+        "image": "/images/squads/dead_fleet/terrokond/4.png"
+      },
+      {
+        "num": 5,
+        "rank": 4,
+        "speed": 3,
+        "range": "D12",
+        "power": "3D6+3",
+        "melee": 3,
+        "armor": 6,
+        "image": "/images/squads/dead_fleet/terrokond/3.png"
+      },
+      {
+        "num": 6,
+        "rank": 4,
+        "speed": 3,
+        "range": "D12",
+        "power": "3D6+3",
+        "melee": 4,
+        "armor": 6,
+        "image": "/images/squads/dead_fleet/terrokond/5.png"
+      }
+    ],
+    "image": "/images/squads/dead_fleet/terrokond/1.png"
+  },
+  {
+    "id": "dead_fleet_aboardazhniki_erharda",
+    "name": "Абордажники Эрхарда",
+    "shortName": "Абордажники Эрхарда",
+    "faction": "dead_fleet",
+    "cost": 80,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 3,
+        "speed": 5,
+        "range": "D6",
+        "power": "3D6",
+        "melee": 2,
+        "armor": 3,
+        "image": "/images/squads/dead_fleet/aboardazhniki_erharda/4.png"
+      },
+      {
+        "num": 2,
+        "rank": 3,
+        "speed": 5,
+        "range": "D6",
+        "power": "3D6",
+        "melee": 2,
+        "armor": 3,
+        "image": "/images/squads/dead_fleet/aboardazhniki_erharda/3.png"
+      },
+      {
+        "num": 3,
+        "rank": 3,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 3,
+        "image": "/images/squads/dead_fleet/aboardazhniki_erharda/2.png"
+      },
+      {
+        "num": 4,
+        "rank": 3,
+        "speed": 5,
+        "range": "D6",
+        "power": "D6",
+        "melee": 3,
+        "armor": 3,
+        "image": "/images/squads/dead_fleet/aboardazhniki_erharda/1.png"
+      },
+      {
+        "num": 5,
+        "rank": 3,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 3,
+        "image": "/images/squads/dead_fleet/aboardazhniki_erharda/5.png"
+      },
+      {
+        "num": 6,
+        "rank": 3,
+        "speed": 5,
+        "range": "D6",
+        "power": "D6",
+        "melee": 3,
+        "armor": 3,
+        "image": "/images/squads/dead_fleet/aboardazhniki_erharda/6.png"
+      }
+    ],
+    "image": "/images/squads/dead_fleet/aboardazhniki_erharda/1.png"
+  },
+  {
+    "id": "dead_fleet_shturmovye_marodery",
+    "name": "Штурмовые Мародёры",
+    "shortName": "Штурмовые Мародёры",
+    "faction": "dead_fleet",
+    "cost": 130,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 3,
+        "speed": 4,
+        "range": "D6",
+        "power": "D6+3",
+        "melee": 4,
+        "armor": 5,
+        "image": "/images/squads/dead_fleet/shturmovye_marodery/3.png",
+        "modifiers": [
+          "jump_boost_3"
+        ]
+      },
+      {
+        "num": 2,
+        "rank": 3,
+        "speed": 4,
+        "range": "D12",
+        "power": "2D12",
+        "melee": 2,
+        "armor": 5,
+        "image": "/images/squads/dead_fleet/shturmovye_marodery/2.png",
+        "modifiers": [
+          "jump_boost_3"
+        ]
+      },
+      {
+        "num": 3,
+        "rank": 3,
+        "speed": 4,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 5,
+        "image": "/images/squads/dead_fleet/shturmovye_marodery/4.png",
+        "modifiers": [
+          "jump_boost_3"
+        ]
+      },
+      {
+        "num": 4,
+        "rank": 3,
+        "speed": 4,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 5,
+        "image": "/images/squads/dead_fleet/shturmovye_marodery/5.png",
+        "modifiers": [
+          "jump_boost_3"
+        ]
+      },
+      {
+        "num": 5,
+        "rank": 3,
+        "speed": 4,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 5,
+        "image": "/images/squads/dead_fleet/shturmovye_marodery/1.png",
+        "modifiers": [
+          "jump_boost_3"
+        ]
+      },
+      {
+        "num": 6,
+        "rank": 3,
+        "speed": 4,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 5,
+        "image": "/images/squads/dead_fleet/shturmovye_marodery/6.png",
+        "modifiers": [
+          "jump_boost_3"
+        ]
+      }
+    ],
+    "image": "/images/squads/dead_fleet/shturmovye_marodery/1.png"
+  },
+  {
+    "id": "dead_fleet_marodery_erharda",
+    "name": "Мародёры Эрхарда",
+    "shortName": "Мародёры Эрхарда",
+    "faction": "dead_fleet",
+    "cost": 145,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 3,
+        "speed": 4,
+        "range": "D6",
+        "power": "D6+3",
+        "melee": 4,
+        "armor": 5,
+        "image": "/images/squads/dead_fleet/marodery_erharda/6.png",
+        "modifiers": [
+          "jump_boost_4"
+        ]
+      },
+      {
+        "num": 2,
+        "rank": 3,
+        "speed": 4,
+        "range": "D12",
+        "power": "2D12",
+        "melee": 0,
+        "armor": 5,
+        "image": "/images/squads/dead_fleet/marodery_erharda/2.png",
+        "modifiers": [
+          "jump_boost_4"
+        ]
+      },
+      {
+        "num": 3,
+        "rank": 3,
+        "speed": 4,
+        "range": "D12+2",
+        "power": "D12",
+        "melee": 2,
+        "armor": 5,
+        "image": "/images/squads/dead_fleet/marodery_erharda/1.png",
+        "modifiers": [
+          "jump_boost_4"
+        ]
+      },
+      {
+        "num": 4,
+        "rank": 3,
+        "speed": 4,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 5,
+        "image": "/images/squads/dead_fleet/marodery_erharda/4.png",
+        "modifiers": [
+          "jump_boost_4"
+        ]
+      },
+      {
+        "num": 5,
+        "rank": 3,
+        "speed": 4,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 5,
+        "image": "/images/squads/dead_fleet/marodery_erharda/3.png",
+        "modifiers": [
+          "jump_boost_4"
+        ]
+      },
+      {
+        "num": 6,
+        "rank": 3,
+        "speed": 4,
+        "range": "D12",
+        "power": "D20",
+        "melee": 0,
+        "armor": 5,
+        "image": "/images/squads/dead_fleet/marodery_erharda/5.png",
+        "modifiers": [
+          "jump_boost_4"
+        ]
+      }
+    ],
+    "image": "/images/squads/dead_fleet/marodery_erharda/1.png"
+  },
+  {
+    "id": "dead_fleet_mark_ballard",
+    "name": "Марк Баллард",
+    "shortName": "Марк Баллард",
+    "faction": "dead_fleet",
+    "cost": 95,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 5,
+        "speed": 5,
+        "range": "D12+2",
+        "power": "2D12",
+        "melee": 6,
+        "armor": 7,
+        "image": "/images/squads/dead_fleet/mark_ballard/1.png",
+        "modifiers": [
+          "jump_boost_4"
+        ]
+      }
+    ],
+    "image": "/images/squads/dead_fleet/mark_ballard/1.png"
+  }
+]

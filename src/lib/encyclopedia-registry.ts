@@ -21,6 +21,8 @@ import mercenariesSquads from '@/data/encyclopedia/units/mercenaries/squads.json
 import mercenariesMachines from '@/data/encyclopedia/units/mercenaries/machines.json';
 import ruteniaSquads from '@/data/encyclopedia/units/rutenia/squads.json';
 import ruteniaMachines from '@/data/encyclopedia/units/rutenia/machines.json';
+import deadFleetSquads from '@/data/encyclopedia/units/dead_fleet/squads.json';
+import deadFleetMachines from '@/data/encyclopedia/units/dead_fleet/machines.json';
 
 // Type definitions
 export interface UnitSource {
@@ -85,6 +87,8 @@ export interface EncyclopediaFaction {
   /** Lore provenance override (origin / loreAuthor). Unset axes fall back to the
    * faction-aware default — see `resolveFactionProvenance` in `@/lib/provenance`. */
   provenance?: Partial<Provenance>;
+  /** Optional link to the faction's official / community page (for more details). */
+  siteUrl?: string;
 }
 
 // Type assertion for JSON imports
@@ -98,6 +102,8 @@ const encyclopediaUnits: EncyclopediaUnit[] = [
   ...(mercenariesMachines as EncyclopediaUnit[]),
   ...(ruteniaSquads as EncyclopediaUnit[]),
   ...(ruteniaMachines as EncyclopediaUnit[]),
+  ...(deadFleetSquads as EncyclopediaUnit[]),
+  ...(deadFleetMachines as EncyclopediaUnit[]),
 ];
 const encyclopediaFactions: EncyclopediaFaction[] = factionsJson as EncyclopediaFaction[];
 

@@ -114,7 +114,7 @@ export async function getUnitById(id: string): Promise<EncyclopediaUnit | null> 
  */
 export async function getAllFactions(): Promise<EncyclopediaFaction[]> {
   const factions: EncyclopediaFaction[] = [];
-  const factionIds = ['polaris', 'protectorate', 'mercenaries', 'rutenia'];
+  const factionIds = ['polaris', 'protectorate', 'mercenaries', 'rutenia', 'dead_fleet'];
 
   for (const id of factionIds) {
     const faction = getEncyclopediaFaction(id);

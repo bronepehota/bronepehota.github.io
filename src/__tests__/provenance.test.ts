@@ -59,6 +59,21 @@ describe('provenance resolver', () => {
         loreAuthor: 'tehnolog',
       });
     });
+
+    test('machine: both tehnolog (official техника, regardless of faction)', () => {
+      const m = { faction: 'polaris', type: 'machine' } as unknown as EncyclopediaUnit;
+      expect(resolveUnitProvenance(m)).toEqual({ origin: 'tehnolog', loreAuthor: 'tehnolog' });
+    });
+
+    test('орудие is treated like a machine (tehnolog)', () => {
+      const o = { faction: 'polaris', type: 'орудие' } as unknown as EncyclopediaUnit;
+      expect(resolveUnitProvenance(o)).toEqual({ origin: 'tehnolog', loreAuthor: 'tehnolog' });
+    });
+
+    test('machine explicit provenance overrides the tehnolog default per-axis', () => {
+      const m = { faction: 'polaris', type: 'machine', provenance: { loreAuthor: 'star_system' } } as unknown as EncyclopediaUnit;
+      expect(resolveUnitProvenance(m)).toEqual({ origin: 'tehnolog', loreAuthor: 'star_system' });
+    });
   });
 
   describe('resolveFactionProvenance', () => {
@@ -73,6 +88,13 @@ describe('provenance resolver', () => {
       expect(resolveFactionProvenance(faction('rutenia'))).toEqual({
         origin: 'star_system',
         loreAuthor: 'star_system',
+      });
+    });
+
+    test('dead_fleet faction: both universestarsys (Звёздные Системы creation)', () => {
+      expect(resolveFactionProvenance(faction('dead_fleet'))).toEqual({
+        origin: 'universestarsys',
+        loreAuthor: 'universestarsys',
       });
     });
 
