@@ -44,15 +44,11 @@ const mockMachine: Machine = {
 
 describe('CompactUnitCard', () => {
   it('renders squad card with correct info', () => {
-    const handleAdd = jest.fn();
-    const handleClick = jest.fn();
-
     render(
       <CompactUnitCard
         unit={mockSquad}
         type="squad"
-        onAdd={handleAdd}
-        onClick={handleClick}
+        onAdd={jest.fn()}
         factionId="polaris"
         canAfford={true}
       />
@@ -66,15 +62,11 @@ describe('CompactUnitCard', () => {
   });
 
   it('renders machine card with correct info', () => {
-    const handleAdd = jest.fn();
-    const handleClick = jest.fn();
-
     render(
       <CompactUnitCard
         unit={mockMachine}
         type="machine"
-        onAdd={handleAdd}
-        onClick={handleClick}
+        onAdd={jest.fn()}
         factionId="polaris"
         canAfford={true}
       />
@@ -94,7 +86,6 @@ describe('CompactUnitCard', () => {
         unit={mockSquad}
         type="squad"
         onAdd={() => {}}
-        onClick={() => {}}
         factionId="polaris"
         canAfford={true}
         countInArmy={2}
@@ -110,7 +101,6 @@ describe('CompactUnitCard', () => {
         unit={mockSquad}
         type="squad"
         onAdd={() => {}}
-        onClick={() => {}}
         factionId="polaris"
         canAfford={true}
         countInArmy={0}
@@ -120,48 +110,19 @@ describe('CompactUnitCard', () => {
     expect(screen.queryByText('0')).not.toBeInTheDocument();
   });
 
-  it('calls onClick when info button clicked and can afford', async () => {
-    const handleClick = jest.fn();
-    const user = userEvent.setup();
-
+  it('renders the unit name as a link to its encyclopedia page', () => {
     render(
       <CompactUnitCard
         unit={mockSquad}
         type="squad"
         onAdd={() => {}}
-        onClick={handleClick}
         factionId="polaris"
         canAfford={true}
       />
     );
 
-    // Find the info button (has aria-label="Подробнее")
-    const infoButton = screen.getByLabelText('Подробнее');
-    await user.click(infoButton);
-
-    expect(handleClick).toHaveBeenCalledTimes(1);
-  });
-
-  it('does not call onClick when info button clicked and cannot afford', async () => {
-    const handleClick = jest.fn();
-    const user = userEvent.setup();
-
-    render(
-      <CompactUnitCard
-        unit={mockSquad}
-        type="squad"
-        onAdd={() => {}}
-        onClick={handleClick}
-        factionId="polaris"
-        canAfford={false}
-      />
-    );
-
-    // Find the info button (has aria-label="Подробнее")
-    const infoButton = screen.getByLabelText('Подробнее');
-    await user.click(infoButton);
-
-    expect(handleClick).not.toHaveBeenCalled();
+    const link = screen.getByRole('link', { name: 'Линейная клон-пехота' });
+    expect(link).toHaveAttribute('href', '/encyclopedia/unit/polaris_lineynaya_klon_pehota');
   });
 
   it('calls onAdd when add button clicked', async () => {
@@ -173,7 +134,6 @@ describe('CompactUnitCard', () => {
         unit={mockSquad}
         type="squad"
         onAdd={handleAdd}
-        onClick={() => {}}
         factionId="polaris"
         canAfford={true}
       />
@@ -194,7 +154,6 @@ describe('CompactUnitCard', () => {
         unit={mockSquad}
         type="squad"
         onAdd={handleAdd}
-        onClick={() => {}}
         factionId="polaris"
         canAfford={false}
       />
@@ -212,7 +171,6 @@ describe('CompactUnitCard', () => {
         unit={mockSquad}
         type="squad"
         onAdd={() => {}}
-        onClick={() => {}}
         factionId="polaris"
         canAfford={true}
       />
@@ -226,7 +184,6 @@ describe('CompactUnitCard', () => {
         unit={mockSquad}
         type="squad"
         onAdd={() => {}}
-        onClick={() => {}}
         factionId="polaris"
         canAfford={false}
       />

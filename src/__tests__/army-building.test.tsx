@@ -123,20 +123,15 @@ describe('FactionSelector', () => {
     expect(polarisCard).toHaveAttribute('aria-pressed', 'true');
   });
 
-  it('expands faction details on click', () => {
-    const mockSelect = jest.fn();
+  it('shows faction description without needing to expand', () => {
     render(
       <FactionSelector
         factions={mockFactions}
-        onFactionSelect={mockSelect}
+        onFactionSelect={jest.fn()}
       />
     );
 
-    // Initially details are hidden
-    expect(screen.queryByText(/Элитные кибер-солдаты/)).not.toBeInTheDocument();
-
-    // Click to expand
-    fireEvent.click(screen.getByText('POLARIS'));
+    // Description is always visible (no expand step in the redesigned selector).
     expect(screen.getByText(/Элитные кибер-солдаты/)).toBeInTheDocument();
   });
 });
