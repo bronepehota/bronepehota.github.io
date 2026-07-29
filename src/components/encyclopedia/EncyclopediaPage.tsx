@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { Search } from 'lucide-react';
+import { Search, ChevronDown } from 'lucide-react';
 import { EncyclopediaUnit, getFactions } from '@/lib/encyclopedia-registry';
 import { FactionID } from '@/lib/types';
 import { orderedFactions } from '@/lib/faction-hierarchy';
@@ -214,54 +214,44 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
               </div>
             </div>
 
-            {/* Faction + type chips: stacked on mobile, side-by-side on desktop */}
-            <div className="grid gap-2 md:grid-cols-2">
-              {/* Faction chips */}
-              <div className="flex flex-wrap gap-1.5">
-                {factions.map(faction => {
-                  const active = selectedFaction === faction.value;
-                  return (
-                    <button
-                      key={faction.value}
-                      onClick={() => setSelectedFaction(faction.value)}
-                      className={cn(
-                        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 font-ibm-mono text-[10px] tracking-wide whitespace-nowrap transition-all md:px-3.5 md:py-2 md:text-xs',
-                        active
-                          ? 'text-white'
-                          : 'border-military-steel/30 text-military-sand/55 hover:text-military-sand hover:border-military-steel/60'
-                      )}
-                      style={active ? { backgroundColor: faction.color, borderColor: faction.color } : undefined}
-                    >
-                      <span
-                        className="h-1.5 w-1.5 rounded-full md:h-2 md:w-2"
-                        style={{ backgroundColor: active ? 'rgba(255,255,255,0.85)' : faction.color }}
-                      />
-                      {faction.label}
-                    </button>
-                  );
-                })}
+            {/* Faction + type selectors — compact on mobile */}
+            <div className="flex gap-2">
+              {/* Faction selector (color dot = selected faction) */}
+              <div className="relative flex-1 min-w-0">
+                <span
+                  className="pointer-events-none absolute left-2.5 top-1/2 z-10 h-2 w-2 -translate-y-1/2 rounded-full"
+                  style={{ backgroundColor: factions.find(f => f.value === selectedFaction)?.color ?? '#A8A29E' }}
+                />
+                <select
+                  aria-label="Фракция"
+                  value={selectedFaction}
+                  onChange={e => setSelectedFaction(e.target.value as FactionID | 'all')}
+                  className="w-full appearance-none rounded-full border border-military-steel/30 bg-military-charcoal/70 py-1.5 pl-7 pr-7 font-ibm-mono text-[10px] tracking-wide text-white focus:border-military-amber/50 focus:outline-none md:text-xs"
+                >
+                  {factions.map(f => (
+                    <option key={f.value} value={f.value} className="bg-military-charcoal text-white">
+                      {f.value === 'all' ? 'ВСЕ ФРАКЦИИ' : f.label}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-military-rust/60" />
               </div>
 
-              {/* Type chips */}
-              <div className="flex flex-wrap gap-1.5">
-                {types.map(type => {
-                  const active = selectedType === type.value;
-                  return (
-                    <button
-                      key={type.value}
-                      onClick={() => setSelectedType(type.value)}
-                      className={cn(
-                        'inline-flex items-center gap-1 rounded-full border px-2.5 py-1.5 font-ibm-mono text-[10px] tracking-wide whitespace-nowrap transition-all md:px-3.5 md:py-2 md:text-xs',
-                        active
-                          ? 'border-military-amber/60 bg-military-amber/15 text-military-amber'
-                          : 'border-military-steel/30 text-military-sand/55 hover:text-military-sand hover:border-military-steel/60'
-                      )}
-                    >
-                      <span className="text-[9px] leading-none md:text-[10px]">{type.icon}</span>
-                      {type.label}
-                    </button>
-                  );
-                })}
+              {/* Type selector */}
+              <div className="relative w-28 shrink-0 md:w-36">
+                <select
+                  aria-label="Тип"
+                  value={selectedType}
+                  onChange={e => setSelectedType(e.target.value as TypeFilter)}
+                  className="w-full appearance-none rounded-full border border-military-steel/30 bg-military-charcoal/70 py-1.5 pl-3 pr-7 font-ibm-mono text-[10px] tracking-wide text-white focus:border-military-amber/50 focus:outline-none md:text-xs"
+                >
+                  {types.map(t => (
+                    <option key={t.value} value={t.value} className="bg-military-charcoal text-white">
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-military-rust/60" />
               </div>
             </div>
           </div>
