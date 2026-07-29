@@ -98,7 +98,7 @@ export function CompactUnitCard({
       data-testid={`compact-unit-card-${unit.id}`}
     >
       {/* Type icon zone - with image fallback */}
-      <div className="w-14 flex items-center justify-center flex-shrink-0 bg-slate-900/50">
+      <div className="relative w-14 flex items-center justify-center flex-shrink-0 bg-slate-900/50">
         {unit.image ? (
           /* Unit has image - show it in circle */
           (() => {
@@ -149,6 +149,15 @@ export function CompactUnitCard({
             <Icon className={cn('w-5 h-5', accentColor.replace('bg-', 'text-'))} />
           </div>
         )}
+        {allyFactionId && (
+          <span
+            className="absolute top-0 left-0 inline-flex items-center justify-center w-5 h-5 rounded-full border bg-slate-900/90 backdrop-blur-sm z-10"
+            style={{ borderColor: getFactionColors(allyFactionId).primary + '88' }}
+            title={`${allyLabel ?? 'Союзник'}: ${factionDisplayNames[allyFactionId] ?? allyFactionId}`}
+          >
+            <FactionLogo faction={allyFactionId} className="w-3.5 h-3.5" />
+          </span>
+        )}
       </div>
 
       {/* Content zone */}
@@ -162,18 +171,6 @@ export function CompactUnitCard({
               )} title={unit.name}>
                 {unit.name}
               </h4>
-              {allyFactionId && (
-               <span
-                  className="ml-1 inline-flex items-center p-0.5 rounded-sm flex-shrink-0 border"
-                  style={{
-                    backgroundColor: getFactionColors(allyFactionId).primary + '22',
-                    borderColor: getFactionColors(allyFactionId).primary + '55',
-                  }}
-                  title={`${allyLabel ?? 'Союзник'}: ${factionDisplayNames[allyFactionId] ?? allyFactionId}`}
-                >
-                  <FactionLogo faction={allyFactionId} className="w-4 h-4" />
-                </span>
-              )}
               {countInArmy > 0 && (
                 <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-green-600/80 text-white">
                   {countInArmy}
