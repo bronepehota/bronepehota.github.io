@@ -116,7 +116,7 @@ export function FactionSelector({
               >
                 {/* Emblem */}
                 <div
-                  className="relative shrink-0 w-14 h-14 md:w-16 md:h-16 flex items-center justify-center rounded-md overflow-hidden"
+                  className="relative shrink-0 w-16 h-16 md:w-20 md:h-20 flex items-center justify-center rounded-md overflow-hidden"
                   style={{ backgroundColor: `${colors.primary}14`, border: `1px solid ${colors.primary}55`, color: colors.primary }}
                 >
                   <FactionLogo faction={parent.id} className="w-3/4 h-3/4" fallback={SYMBOL_ICON[parent.symbol ?? 'Flag']} fallbackClassName="w-3/4 h-3/4" />
@@ -124,7 +124,7 @@ export function FactionSelector({
 
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <h3 className="font-mono font-bold text-sm md:text-base tracking-wide truncate" style={{ color: colors.primary }}>
+                    <h3 className="font-mono font-bold text-base md:text-lg tracking-wide truncate" style={{ color: colors.primary }}>
                       {parent.name.toUpperCase()}
                     </h3>
                     {isParentSelected && (
@@ -134,12 +134,12 @@ export function FactionSelector({
                     )}
                   </div>
                   {parent.motto && (
-                    <p className="text-[11px] md:text-xs italic font-mono text-slate-500 truncate" title={parent.motto}>
+                    <p className="text-xs md:text-sm italic font-mono text-slate-500 truncate" title={parent.motto}>
                       «{parent.motto}»
                     </p>
                   )}
                   {parent.description && (
-                    <p className="mt-1.5 text-[11px] md:text-xs text-slate-400 leading-snug line-clamp-2">
+                    <p className="mt-1.5 text-xs md:text-sm text-slate-400 leading-snug line-clamp-2">
                       {parent.description}
                     </p>
                   )}
@@ -162,7 +162,7 @@ export function FactionSelector({
                           data-testid={`faction-card-${sub.id}`}
                           onClick={(e) => selectParent(e, sub.id)}
                           className={clsx(
-                            'inline-flex items-center gap-1.5 px-2 py-1 rounded border text-[11px] font-mono transition-all',
+                            'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded border text-xs font-mono transition-all',
                             isSubSelected ? 'text-white' : 'text-slate-300 hover:text-white',
                           )}
                           style={
