@@ -5,6 +5,8 @@ import type { Faction, FactionID } from '@/lib/types';
 import { Shield, Swords, ArrowRight } from 'lucide-react';
 import { clsx } from 'clsx';
 import { FloatingContinueButton } from './FloatingContinueButton';
+import { orderedFactions, getParent } from '@/lib/faction-hierarchy';
+import { factionDisplayNames, getFactionColors } from '@/lib/faction-colors';
 
 interface FactionSelectorProps {
   factions: Faction[];
@@ -102,7 +104,7 @@ export function FactionSelector({
 
       {/* Faction cards grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {factions.map((faction) => {
+        {orderedFactions(factions).map((faction) => {
           const isSelected = selectedFaction === faction.id;
           const isExpanded = expandedFaction === faction.id;
 
@@ -213,6 +215,15 @@ export function FactionSelector({
                     </div>
                   )}
                 </div>
+
+                {faction.parent && (
+                  <div
+                    className="font-mono text-[10px] uppercase tracking-wider mb-2"
+                    style={{ color: getFactionColors(getParent(faction.id, factions)?.id ?? '').primary }}
+                  >
+                    Подфракция «{factionDisplayNames[getParent(faction.id, factions)?.id ?? ''] ?? ''}»
+                  </div>
+                )}
 
                 {/* Motto */}
                 <p className={clsx('text-xs italic mb-3 font-mono', isSelected ? styles.accent : 'text-slate-500')}>
