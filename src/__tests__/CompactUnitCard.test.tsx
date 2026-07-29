@@ -112,7 +112,7 @@ describe('CompactUnitCard', () => {
     expect(screen.queryByText('0')).not.toBeInTheDocument();
   });
 
-  it('calls onClick when info button clicked and can afford', async () => {
+  it('calls onClick when the unit name is clicked and can afford', async () => {
     const handleClick = jest.fn();
     const user = userEvent.setup();
 
@@ -127,14 +127,13 @@ describe('CompactUnitCard', () => {
       />
     );
 
-    // The book button opens the in-app stats modal (no navigation).
-    const infoButton = screen.getByLabelText('Подробнее');
-    await user.click(infoButton);
+    // The name is the trigger for the in-app stats modal (no navigation).
+    await user.click(screen.getByText('Линейная клон-пехота'));
 
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
 
-  it('does not call onClick when info button clicked and cannot afford', async () => {
+  it('does not call onClick when the unit name is clicked and cannot afford', async () => {
     const handleClick = jest.fn();
     const user = userEvent.setup();
 
@@ -149,8 +148,7 @@ describe('CompactUnitCard', () => {
       />
     );
 
-    const infoButton = screen.getByLabelText('Подробнее');
-    await user.click(infoButton);
+    await user.click(screen.getByText('Линейная клон-пехота'));
 
     expect(handleClick).not.toHaveBeenCalled();
   });
