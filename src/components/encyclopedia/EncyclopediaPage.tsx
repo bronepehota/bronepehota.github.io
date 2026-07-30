@@ -47,11 +47,12 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
       getFactions().filter((f) => present.has(f.id)).map((f) => ({ id: f.id, parent: f.parent })),
     );
     return [
-      { value: 'all' as const, label: 'ВСЕ', color: '#A8A29E' },
+      { value: 'all' as const, label: 'ВСЕ', color: '#A8A29E', parent: undefined },
       ...ordered.map((f) => ({
         value: f.id,
         label: (factionDisplayNames[f.id] ?? f.id).toUpperCase(),
         color: getFactionColors(f.id).primary,
+        parent: f.parent,
       })),
     ];
   }, [units]);
@@ -230,7 +231,7 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
                 >
                   {factions.map(f => (
                     <option key={f.value} value={f.value} className="bg-military-charcoal text-white">
-                      {f.value === 'all' ? 'ВСЕ ФРАКЦИИ' : f.label}
+                      {f.parent ? '  ' : ''}{f.value === 'all' ? 'ВСЕ ФРАКЦИИ' : f.label}
                     </option>
                   ))}
                 </select>
