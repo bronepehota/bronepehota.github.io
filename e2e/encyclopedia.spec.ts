@@ -23,7 +23,7 @@ test.describe('Энциклопедия', () => {
     await page.waitForLoadState('networkidle');
 
     // Выбрать фильтр "ПОЛЯРИС"
-    await page.click('button:has-text("ПОЛЯРИС")');
+    await page.locator('select[aria-label="Фракция"]').selectOption('polaris');
     await page.waitForTimeout(200);
 
     // Проверить что карточки отображаются
@@ -37,7 +37,7 @@ test.describe('Энциклопедия', () => {
     await page.waitForLoadState('networkidle');
 
     // Выбрать фильтр "ПЕХОТА"
-    await page.click('button:has-text("ПЕХОТА")');
+    await page.locator('select[aria-label="Тип"]').selectOption('squad');
     await page.waitForTimeout(200);
 
     // Проверить что карточки отображаются
@@ -138,9 +138,9 @@ test.describe('Энциклопедия', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForSelector('[data-testid^="unit-card-"]');
 
-    // The polaris filter button lights up once the deep-link is applied (auto-waits).
-    const polarisBtn = page.getByRole('button', { name: 'ПОЛЯРИС' });
-    await expect(polarisBtn).toHaveCSS('background-color', 'rgb(239, 68, 68)');
+    // The faction <select> reflects the deep-link (?faction=polaris).
+    const facSel = page.locator('select[aria-label="Фракция"]');
+    await expect(facSel).toHaveValue('polaris');
   });
 
   // --- Attribution labels (происхождение контента) ---
