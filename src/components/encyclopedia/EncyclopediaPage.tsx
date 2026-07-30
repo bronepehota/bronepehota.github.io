@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { Search, ChevronDown } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { EncyclopediaUnit, getFactions } from '@/lib/encyclopedia-registry';
 import { FactionID } from '@/lib/types';
 import { orderedFactions } from '@/lib/faction-hierarchy';
@@ -227,7 +227,7 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
                   aria-label="Фракция"
                   value={selectedFaction}
                   onChange={e => setSelectedFaction(e.target.value as FactionID | 'all')}
-                  className="w-full appearance-none rounded-full border border-military-steel/30 bg-military-charcoal/70 py-1.5 pl-7 pr-7 font-ibm-mono text-[10px] tracking-wide text-white focus:border-military-amber/50 focus:outline-none md:text-xs"
+                  className="w-full rounded-full border border-military-steel/30 bg-military-charcoal/70 py-1.5 pl-7 pr-3 font-ibm-mono text-[10px] tracking-wide text-white focus:border-military-amber/50 focus:outline-none md:text-xs"
                 >
                   {factions.map(f => (
                     <option key={f.value} value={f.value} className="bg-military-charcoal text-white">
@@ -235,7 +235,6 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-military-rust/60" />
               </div>
 
               {/* Type selector */}
@@ -244,7 +243,7 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
                   aria-label="Тип"
                   value={selectedType}
                   onChange={e => setSelectedType(e.target.value as TypeFilter)}
-                  className="w-full appearance-none rounded-full border border-military-steel/30 bg-military-charcoal/70 py-1.5 pl-3 pr-7 font-ibm-mono text-[10px] tracking-wide text-white focus:border-military-amber/50 focus:outline-none md:text-xs"
+                  className="w-full rounded-full border border-military-steel/30 bg-military-charcoal/70 py-1.5 pl-3 pr-3 font-ibm-mono text-[10px] tracking-wide text-white focus:border-military-amber/50 focus:outline-none md:text-xs"
                 >
                   {types.map(t => (
                     <option key={t.value} value={t.value} className="bg-military-charcoal text-white">
@@ -252,7 +251,6 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-military-rust/60" />
               </div>
             </div>
           </div>
