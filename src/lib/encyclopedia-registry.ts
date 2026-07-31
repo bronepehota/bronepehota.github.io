@@ -13,6 +13,8 @@ import type { Location } from '@/lib/types';
 // Type-only: Provenance type lives in ./provenance, which type-only-imports back
 // from this module — type-only on both sides, no runtime cycle.
 import type { Provenance } from '@/lib/provenance';
+import { getSourceUnitCost } from './sources-registry';
+import type { SourceID } from './types';
 import polarisSquads from '@/data/encyclopedia/units/polaris/squads.json';
 import polarisMachines from '@/data/encyclopedia/units/polaris/machines.json';
 import protectorateSquads from '@/data/encyclopedia/units/protectorate/squads.json';
@@ -27,7 +29,6 @@ import deadFleetMachines from '@/data/encyclopedia/units/dead_fleet/machines.jso
 // Type definitions
 export interface UnitSource {
   id: string;
-  cost: number;
 }
 
 export interface EncyclopediaLore {
@@ -155,8 +156,9 @@ export function getAllUnits(): EncyclopediaUnit[] {
 }
 
 /**
- * Get unit's source availability with costs
- * Useful for displaying "Available in: Star System (50 pts), Tehnolog (55 pts)"
+ * Get unit's source availability — an id-only index of which army-list sources
+ * contain this unit. For a source's cost, use `getUnitCostForSource` (cost is
+ * read from the source army list, the single source of truth).
  */
 export function getUnitSources(unitId: string): UnitSource[] {
   const unit = getEncyclopediaUnit(unitId);
@@ -172,13 +174,11 @@ export function isUnitInSource(unitId: string, sourceId: string): boolean {
 }
 
 /**
- * Get unit cost for a specific source
- * Returns undefined if unit not available in that source
+ * Get unit cost for a specific source — read directly from the source army list
+ * (single source of truth). Returns undefined if the unit isn't in that source.
  */
 export function getUnitCostForSource(unitId: string, sourceId: string): number | undefined {
-  const sources = getUnitSources(unitId);
-  const source = sources.find((s) => s.id === sourceId);
-  return source?.cost;
+  return getSourceUnitCost(sourceId as SourceID, unitId);
 }
 
 /**

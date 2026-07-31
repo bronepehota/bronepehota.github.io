@@ -10,6 +10,7 @@ import type { BuffDefinition } from './modifier-types';
 import {
   getEncyclopediaUnit,
   getEncyclopediaFaction,
+  getUnitCostForSource,
   getAllUnits as getAllEncyclopediaUnits,
   EncyclopediaUnit,
   EncyclopediaFaction,
@@ -61,8 +62,9 @@ export async function getEnrichedUnit(id: string, sourceId?: string): Promise<En
 
   // Determine which source to use for game data and cost
   const targetSourceId = sourceId || encyclopediaUnit.sources[0]?.id;
-  const costEntry = encyclopediaUnit.sources.find(s => s.id === targetSourceId) || encyclopediaUnit.sources[0];
-  const cost = costEntry?.cost || 0;
+  // Cost is read from the source army list (single source of truth), not from
+  // a duplicated field on the encyclopedia record.
+  const cost = (targetSourceId && getUnitCostForSource(id, targetSourceId)) || 0;
 
   if (!targetSourceId) {
     return { ...encyclopediaUnit, cost } as EnrichedUnit;
@@ -156,7 +158,7 @@ export function filterUnits(units: EncyclopediaUnit[], options: FilterOptions): 
 
     // Source filter - check if unit is available in source
     if (options.sourceId) {
-      const inSource = unit.sources.some((s: { id: string; cost: number }) => s.id === options.sourceId);
+      const inSource = unit.sources.some((s) => s.id === options.sourceId);
       if (!inSource) {
         return false;
       }

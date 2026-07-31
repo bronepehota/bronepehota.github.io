@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { GitHubPagesImage } from '@/components/GitHubPagesImage';
-import { EncyclopediaUnit } from '@/lib/encyclopedia-registry';
+import { EncyclopediaUnit, getUnitCostForSource } from '@/lib/encyclopedia-registry';
 import { getFactionColors, factionLogos } from '@/lib/faction-colors';
 import { SQUAD_GROUP_IMAGE } from '@/lib/painted-images';
 
@@ -26,8 +26,10 @@ export function UnitCard({ unit }: UnitCardProps) {
     }) + ', 0.3)',
   };
 
-  // Get cost from first source (or default to 0)
-  const cost = unit.sources[0]?.cost || 0;
+  // Get cost from the unit's first source (single source of truth = the source
+  // army list, read via the registry — not a duplicated field on the encyclopedia record)
+  const firstSource = unit.sources[0];
+  const cost = (firstSource && getUnitCostForSource(unit.id, firstSource.id)) || 0;
 
   // Get display image: prefer the wide "squad assembled" group photo when available,
   // else fall back to the per-soldier card art (first soldier).

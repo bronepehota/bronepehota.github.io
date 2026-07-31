@@ -6,7 +6,7 @@
     "faction": "dead_fleet",
     "type": "squad",
     "sources": [
-      { "id": "star_system", "cost": 145 }
+      { "id": "star_system" }
     ],
     "encyclopedia": {
       "class": "Универсальная пехота",
@@ -25,7 +25,7 @@
     "faction": "dead_fleet",
     "type": "squad",
     "sources": [
-      { "id": "star_system", "cost": 170 }
+      { "id": "star_system" }
     ],
     "encyclopedia": {
       "class": "Тяжёлая штурмовая пехота",
@@ -44,7 +44,7 @@
     "faction": "dead_fleet",
     "type": "squad",
     "sources": [
-      { "id": "star_system", "cost": 80 }
+      { "id": "star_system" }
     ],
     "encyclopedia": {
       "class": "Лёгкая мобильная пехота",
@@ -63,7 +63,7 @@
     "faction": "dead_fleet",
     "type": "squad",
     "sources": [
-      { "id": "star_system", "cost": 90 }
+      { "id": "star_system" }
     ],
     "encyclopedia": {
       "class": "Дальнобойная пехота",
@@ -82,7 +82,7 @@
     "faction": "dead_fleet",
     "type": "squad",
     "sources": [
-      { "id": "star_system", "cost": 130 }
+      { "id": "star_system" }
     ],
     "encyclopedia": {
       "class": "Штурмовая пехота",
@@ -101,7 +101,7 @@
     "faction": "dead_fleet",
     "type": "squad",
     "sources": [
-      { "id": "star_system", "cost": 95 }
+      { "id": "star_system" }
     ],
     "encyclopedia": {
       "class": "Герой",

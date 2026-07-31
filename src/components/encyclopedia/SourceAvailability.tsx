@@ -2,7 +2,7 @@ import type { ElementType } from 'react';
 import { Layers } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { GitHubPagesImage } from '@/components/GitHubPagesImage';
-import { EncyclopediaUnit } from '@/lib/encyclopedia-registry';
+import { EncyclopediaUnit, getUnitCostForSource } from '@/lib/encyclopedia-registry';
 
 interface SourceAvailabilityProps {
   unit: EncyclopediaUnit;
@@ -45,6 +45,7 @@ export function SourceAvailability({
         {unit.sources.map((source) => {
           const config = sourceConfig[source.id];
           if (!config) return null;
+          const cost = getUnitCostForSource(unit.id, source.id);
           return (
             <div
               key={source.id}
@@ -53,7 +54,7 @@ export function SourceAvailability({
                 'bg-gradient-to-br ' + config.bgColor,
               )}
               style={{ borderColor: `${config.color}80` }}
-              title={`${config.name}: ${source.cost} очков`}
+              title={`${config.name}: ${cost ?? '?'} очков`}
             >
               <GitHubPagesImage
                 src={config.logo}
@@ -63,7 +64,7 @@ export function SourceAvailability({
                 className="rounded-[1px]"
               />
               <span className="text-[8px] font-bold font-ibm-mono tabular-nums" style={{ color: config.color }}>
-                {source.cost}
+                {cost ?? '?'}
               </span>
             </div>
           );
@@ -89,6 +90,7 @@ export function SourceAvailability({
         {unit.sources.map((source) => {
           const config = sourceConfig[source.id];
           if (!config) return null;
+          const cost = getUnitCostForSource(unit.id, source.id);
 
           const isActive = interactive && source.id === activeSource;
           const Tag: ElementType = interactive ? 'button' : 'div';
@@ -136,7 +138,7 @@ export function SourceAvailability({
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="font-ibm-mono text-xs text-military-sand tabular-nums">
-                    {source.cost} очков
+                    {cost ?? '?'} очков
                   </span>
                   <span className="text-military-steel/40">•</span>
                   <span className="font-ibm-mono text-[10px] text-military-steel/60 uppercase tracking-wide truncate">

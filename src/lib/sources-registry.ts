@@ -202,3 +202,19 @@ export function getAllSourcesWithCustom(): ArmyListSource[] {
 
   return [...builtIn, ...custom];
 }
+
+/**
+ * Read a unit's cost directly from its source army list — the single source of
+ * truth for cost (the inline `cost` on the squad/machine record). Returns
+ * undefined if the unit isn't in the given source. Used by the encyclopedia so
+ * cost is never duplicated between the source JSON and encyclopedia lore JSON.
+ */
+export function getSourceUnitCost(sourceId: SourceID, unitId: string): number | undefined {
+  // Strict lookup — never fall back to the default source (cost is source-specific;
+  // a missing/invalid source or a unit not in it must return undefined).
+  if (!isValidSourceWithCustom(sourceId)) return undefined;
+  const source = getSourceWithCustom(sourceId);
+  if (!source) return undefined;
+  const unit = [...source.squads, ...source.machines].find((u) => u.id === unitId);
+  return unit?.cost;
+}

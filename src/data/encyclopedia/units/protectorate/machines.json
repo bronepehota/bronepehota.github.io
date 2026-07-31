@@ -7,12 +7,10 @@
     "type": "machine",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 190
+        "id": "star_system"
       },
       {
-        "id": "tehnolog",
-        "cost": 60
+        "id": "tehnolog"
       }
     ],
     "image": "/images/machines/bronekhod.jpg",
@@ -38,8 +36,7 @@
     "type": "machine",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 295
+        "id": "star_system"
       }
     ],
     "image": "/images/machines/carnivore.jpg",
@@ -65,12 +62,10 @@
     "type": "machine",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 665
+        "id": "star_system"
       },
       {
-        "id": "tehnolog",
-        "cost": 100
+        "id": "tehnolog"
       }
     ],
     "image": "/images/machines/condor.jpg",
@@ -96,12 +91,10 @@
     "type": "machine",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 305
+        "id": "star_system"
       },
       {
-        "id": "tehnolog",
-        "cost": 70
+        "id": "tehnolog"
       }
     ],
     "image": "/images/machines/griffin.jpg",
@@ -127,12 +120,10 @@
     "type": "machine",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 390
+        "id": "star_system"
       },
       {
-        "id": "tehnolog",
-        "cost": 130
+        "id": "tehnolog"
       }
     ],
     "image": "/images/machines/hurricane.jpg",
@@ -158,12 +149,10 @@
     "type": "machine",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 575
+        "id": "star_system"
       },
       {
-        "id": "tehnolog",
-        "cost": 80
+        "id": "tehnolog"
       }
     ],
     "image": "/images/machines/octopus.jpg",
@@ -189,8 +178,7 @@
     "type": "machine",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 415
+        "id": "star_system"
       }
     ],
     "image": "/images/machines/predator.jpg",
@@ -216,12 +204,10 @@
     "type": "machine",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 200
+        "id": "star_system"
       },
       {
-        "id": "tehnolog",
-        "cost": 60
+        "id": "tehnolog"
       }
     ],
     "image": "/images/machines/puma.jpg",
@@ -247,12 +233,10 @@
     "type": "machine",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 160
+        "id": "star_system"
       },
       {
-        "id": "tehnolog",
-        "cost": 40
+        "id": "tehnolog"
       }
     ],
     "image": "/images/machines/salamander.jpg",
@@ -278,8 +262,7 @@
     "type": "machine",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 310
+        "id": "star_system"
       }
     ],
     "image": "/images/machines/tornado.jpg",
@@ -305,12 +288,10 @@
     "type": "machine",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 320
+        "id": "star_system"
       },
       {
-        "id": "tehnolog",
-        "cost": 100
+        "id": "tehnolog"
       }
     ],
     "image": "/images/machines/trex.jpg",
@@ -336,12 +317,10 @@
     "type": "machine",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 250
+        "id": "star_system"
       },
       {
-        "id": "tehnolog",
-        "cost": 90
+        "id": "tehnolog"
       }
     ],
     "image": "/images/machines/varan.jpg",
@@ -367,12 +346,10 @@
     "type": "machine",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 200
+        "id": "star_system"
       },
       {
-        "id": "tehnolog",
-        "cost": 50
+        "id": "tehnolog"
       }
     ],
     "image": "/images/machines/viper.jpg",
@@ -398,12 +375,10 @@
     "type": "machine",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 250
+        "id": "star_system"
       },
       {
-        "id": "tehnolog",
-        "cost": 150
+        "id": "tehnolog"
       }
     ],
     "image": "/images/machines/werewolf.jpg",
@@ -429,8 +404,7 @@
     "type": "орудие",
     "sources": [
       {
-        "id": "tehnolog",
-        "cost": 45
+        "id": "tehnolog"
       }
     ],
     "image": "/images/machines/sparennaya_pushka.jpg",
@@ -451,8 +425,7 @@
     "type": "орудие",
     "sources": [
       {
-        "id": "tehnolog",
-        "cost": 100
+        "id": "tehnolog"
       }
     ],
     "image": "/images/machines/mdb_15.jpg",
@@ -473,8 +446,7 @@
     "type": "machine",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 330
+        "id": "star_system"
       }
     ],
     "image": "/images/machines/t1000.jpg",
