@@ -156,8 +156,9 @@ export function getAllUnits(): EncyclopediaUnit[] {
 }
 
 /**
- * Get unit's source availability with costs
- * Useful for displaying "Available in: Star System (50 pts), Tehnolog (55 pts)"
+ * Get unit's source availability — an id-only index of which army-list sources
+ * contain this unit. For a source's cost, use `getUnitCostForSource` (cost is
+ * read from the source army list, the single source of truth).
  */
 export function getUnitSources(unitId: string): UnitSource[] {
   const unit = getEncyclopediaUnit(unitId);
