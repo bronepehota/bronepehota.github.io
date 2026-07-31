@@ -7,8 +7,7 @@
     "type": "орудие",
     "sources": [
       {
-        "id": "tehnolog",
-        "cost": 30
+        "id": "tehnolog"
       }
     ],
     "image": "/images/machines/buldog.jpg",
@@ -29,8 +28,7 @@
     "type": "орудие",
     "sources": [
       {
-        "id": "tehnolog",
-        "cost": 30
+        "id": "tehnolog"
       }
     ],
     "image": "/images/machines/executor.jpg",
@@ -50,8 +48,7 @@
     "type": "орудие",
     "sources": [
       {
-        "id": "tehnolog",
-        "cost": 30
+        "id": "tehnolog"
       }
     ],
     "image": "/images/machines/grinder.jpg",
@@ -71,8 +68,7 @@
     "type": "machine",
     "sources": [
       {
-        "id": "tehnolog",
-        "cost": 100
+        "id": "tehnolog"
       }
     ],
     "image": "/images/machines/kibertank.jpg",
@@ -92,8 +88,7 @@
     "type": "орудие",
     "sources": [
       {
-        "id": "tehnolog",
-        "cost": 20
+        "id": "tehnolog"
       }
     ],
     "image": "/images/machines/minomet.jpg",
@@ -114,8 +109,7 @@
     "type": "machine",
     "sources": [
       {
-        "id": "tehnolog",
-        "cost": 100
+        "id": "tehnolog"
       }
     ],
     "image": "/images/machines/mz_st.jpg",
@@ -135,8 +129,7 @@
     "type": "орудие",
     "sources": [
       {
-        "id": "tehnolog",
-        "cost": 30
+        "id": "tehnolog"
       }
     ],
     "image": "/images/machines/stilet.jpg",

@@ -10,6 +10,8 @@ import {
   getUnitCostForSource,
   isFactionInSource,
 } from '@/lib/encyclopedia-registry';
+import { getSourceUnitCost } from '@/lib/sources-registry';
+import type { SourceID } from '@/lib/types';
 
 describe('encyclopedia-registry', () => {
   describe('getFactions', () => {
@@ -109,7 +111,9 @@ describe('encyclopedia-registry', () => {
       const sources = getUnitSources(unitWithSources!.id);
       expect(sources.length).toBeGreaterThan(0);
       expect(sources[0].id).toBeTruthy();
-      expect(typeof sources[0].cost).toBe('number');
+      // sources[] is an availability index of source ids; cost is read from the
+      // source army list via getUnitCostForSource (single source of truth).
+      expect(typeof getUnitCostForSource(unitWithSources!.id, sources[0].id)).toBe('number');
     });
 
     it('returns empty array for unknown unit', () => {
@@ -145,7 +149,9 @@ describe('encyclopedia-registry', () => {
       expect(unitWithSources).toBeDefined();
       const source = unitWithSources!.sources[0];
       const cost = getUnitCostForSource(unitWithSources!.id, source.id);
-      expect(cost).toBe(source.cost);
+      // Cost now comes from the source army list, not a field on the encyclopedia record.
+      expect(typeof cost).toBe('number');
+      expect(cost).toBe(getSourceUnitCost(source.id as SourceID, unitWithSources!.id));
     });
 
     it('returns undefined for wrong source', () => {

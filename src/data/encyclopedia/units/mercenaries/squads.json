@@ -7,12 +7,10 @@
     "type": "squad",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 20
+        "id": "star_system"
       },
       {
-        "id": "tehnolog",
-        "cost": 40
+        "id": "tehnolog"
       }
     ],
     "encyclopedia": {
@@ -32,12 +30,10 @@
     "type": "squad",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 75
+        "id": "star_system"
       },
       {
-        "id": "tehnolog",
-        "cost": 60
+        "id": "tehnolog"
       }
     ],
     "encyclopedia": {
@@ -57,8 +53,7 @@
     "type": "squad",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 50
+        "id": "star_system"
       }
     ],
     "encyclopedia": {
@@ -78,12 +73,10 @@
     "type": "squad",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 95
+        "id": "star_system"
       },
       {
-        "id": "tehnolog",
-        "cost": 90
+        "id": "tehnolog"
       }
     ],
     "encyclopedia": {
@@ -103,12 +96,10 @@
     "type": "squad",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 50
+        "id": "star_system"
       },
       {
-        "id": "tehnolog",
-        "cost": 50
+        "id": "tehnolog"
       }
     ],
     "encyclopedia": {
@@ -128,12 +119,10 @@
     "type": "squad",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 80
+        "id": "star_system"
       },
       {
-        "id": "tehnolog",
-        "cost": 70
+        "id": "tehnolog"
       }
     ],
     "encyclopedia": {
@@ -153,12 +142,10 @@
     "type": "squad",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 65
+        "id": "star_system"
       },
       {
-        "id": "tehnolog",
-        "cost": 40
+        "id": "tehnolog"
       }
     ],
     "encyclopedia": {
@@ -178,12 +165,10 @@
     "type": "squad",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 50
+        "id": "star_system"
       },
       {
-        "id": "tehnolog",
-        "cost": 70
+        "id": "tehnolog"
       }
     ],
     "encyclopedia": {

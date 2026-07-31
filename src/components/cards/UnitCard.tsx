@@ -671,7 +671,7 @@ export default function UnitCard({
           unit={enrichedUnit || ({
             ...data,
             type: unit.type,
-            sources: [{ id: 'star_system', cost: data.cost }],
+            sources: [{ id: 'star_system' }],
             encyclopedia: undefined,
           } as EnrichedUnit)}
           isOpen={showDetailsModal}

@@ -7,8 +7,7 @@
     "type": "squad",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 65
+        "id": "star_system"
       }
     ],
     "encyclopedia": {
@@ -29,8 +28,7 @@
     "type": "squad",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 50
+        "id": "star_system"
       }
     ],
     "encyclopedia": {
@@ -51,8 +49,7 @@
     "type": "squad",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 80
+        "id": "star_system"
       }
     ],
     "encyclopedia": {
@@ -73,8 +70,7 @@
     "type": "squad",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 105
+        "id": "star_system"
       }
     ],
     "encyclopedia": {
@@ -95,12 +91,10 @@
     "type": "squad",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 100
+        "id": "star_system"
       },
       {
-        "id": "tehnolog",
-        "cost": 70
+        "id": "tehnolog"
       }
     ],
     "encyclopedia": {
@@ -120,12 +114,10 @@
     "type": "squad",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 60
+        "id": "star_system"
       },
       {
-        "id": "tehnolog",
-        "cost": 60
+        "id": "tehnolog"
       }
     ],
     "encyclopedia": {
@@ -145,8 +137,7 @@
     "type": "squad",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 120
+        "id": "star_system"
       }
     ],
     "encyclopedia": {

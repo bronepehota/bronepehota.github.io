@@ -7,12 +7,10 @@
     "type": "machine",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 400
+        "id": "star_system"
       },
       {
-        "id": "tehnolog",
-        "cost": 160
+        "id": "tehnolog"
       }
     ],
     "image": "/images/machines/demolisher.jpg",
@@ -38,8 +36,7 @@
     "type": "machine",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 455
+        "id": "star_system"
       }
     ],
     "image": "/images/machines/devastator.jpg",
@@ -65,8 +62,7 @@
     "type": "machine",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 375
+        "id": "star_system"
       }
     ],
     "image": "/images/machines/eraser.jpg",
@@ -92,12 +88,10 @@
     "type": "machine",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 220
+        "id": "star_system"
       },
       {
-        "id": "tehnolog",
-        "cost": 90
+        "id": "tehnolog"
       }
     ],
     "image": "/images/machines/helix.jpg",
@@ -123,12 +117,10 @@
     "type": "machine",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 555
+        "id": "star_system"
       },
       {
-        "id": "tehnolog",
-        "cost": 140
+        "id": "tehnolog"
       }
     ],
     "image": "/images/machines/hornet.jpg",
@@ -154,12 +146,10 @@
     "type": "machine",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 200
+        "id": "star_system"
       },
       {
-        "id": "tehnolog",
-        "cost": 60
+        "id": "tehnolog"
       }
     ],
     "image": "/images/machines/hunter.jpg",
@@ -185,12 +175,10 @@
     "type": "machine",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 255
+        "id": "star_system"
       },
       {
-        "id": "tehnolog",
-        "cost": 90
+        "id": "tehnolog"
       }
     ],
     "image": "/images/machines/locust.jpg",
@@ -216,12 +204,10 @@
     "type": "machine",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 340
+        "id": "star_system"
       },
       {
-        "id": "tehnolog",
-        "cost": 150
+        "id": "tehnolog"
       }
     ],
     "image": "/images/machines/madbull.jpg",
@@ -247,12 +233,10 @@
     "type": "machine",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 190
+        "id": "star_system"
       },
       {
-        "id": "tehnolog",
-        "cost": 60
+        "id": "tehnolog"
       }
     ],
     "image": "/images/machines/raptor.jpg",
@@ -278,8 +262,7 @@
     "type": "machine",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 450
+        "id": "star_system"
       }
     ],
     "image": "/images/machines/ravingbeast.jpg",
@@ -305,12 +288,10 @@
     "type": "machine",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 240
+        "id": "star_system"
       },
       {
-        "id": "tehnolog",
-        "cost": 80
+        "id": "tehnolog"
       }
     ],
     "image": "/images/machines/spider.jpg",
@@ -336,8 +317,7 @@
     "type": "machine",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 220
+        "id": "star_system"
       }
     ],
     "image": "/images/machines/superlocust.jpg",
@@ -363,12 +343,10 @@
     "type": "machine",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 620
+        "id": "star_system"
       },
       {
-        "id": "tehnolog",
-        "cost": 80
+        "id": "tehnolog"
       }
     ],
     "image": "/images/machines/thunder.jpg",
@@ -394,8 +372,7 @@
     "type": "machine",
     "sources": [
       {
-        "id": "star_system",
-        "cost": 455
+        "id": "star_system"
       }
     ],
     "image": "/images/machines/wildbear.jpg",
@@ -421,8 +398,7 @@
     "type": "machine",
     "sources": [
       {
-        "id": "tehnolog",
-        "cost": 160
+        "id": "tehnolog"
       }
     ],
     "image": "/images/machines/t_600.jpg",
