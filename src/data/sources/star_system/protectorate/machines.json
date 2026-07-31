@@ -449,7 +449,8 @@
     "name": "Спрут",
     "shortName": "Спрут",
     "faction": "protectorate",
-    "cost": 1000,
+    "flying": true,
+    "cost": 575,
     "image": "/images/machines/octopus.jpg",
     "weapons": [
       {
@@ -473,27 +474,28 @@
     ],
     "speed_sectors": [
       {
-        "min_durability": 9,
-        "max_durability": 13,
+        "min_durability": 6,
+        "max_durability": 10,
         "speed": 6
       },
       {
         "min_durability": 1,
-        "max_durability": 8,
+        "max_durability": 5,
         "speed": 5
       }
     ],
     "rank": 4,
     "fire_rate": 2,
     "ammo_max": 16,
-    "durability_max": 13
+    "durability_max": 10
   },
   {
     "id": "condor",
     "name": "Кондор",
     "shortName": "Кондор",
     "faction": "protectorate",
-    "cost": 800,
+    "flying": true,
+    "cost": 665,
     "image": "/images/machines/condor.jpg",
     "weapons": [
       {
@@ -511,20 +513,20 @@
     ],
     "speed_sectors": [
       {
-        "min_durability": 8,
-        "max_durability": 12,
+        "min_durability": 10,
+        "max_durability": 14,
         "speed": 6
       },
       {
         "min_durability": 1,
-        "max_durability": 7,
+        "max_durability": 9,
         "speed": 5
       }
     ],
     "rank": 4,
     "fire_rate": 2,
     "ammo_max": 14,
-    "durability_max": 12
+    "durability_max": 14
   },
   {
     "id": "puma",

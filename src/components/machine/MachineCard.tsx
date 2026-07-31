@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Shield, Zap, Plus, BookOpen } from 'lucide-react';
+import { Shield, Zap, Plus, BookOpen, Plane } from 'lucide-react';
 import { clsx } from 'clsx';
 import type { Machine, FactionID } from '@/lib/types';
 import SafeImage from '@/components/SafeImage';
@@ -174,6 +174,15 @@ export default function MachineCard({ machine, onAdd, onViewDetails, testId, all
         {/* Quick stats */}
         <div className="flex items-center gap-2 text-[10px] text-slate-500 font-mono">
           <span className="px-1.5 py-0.5 rounded bg-slate-700/30">ТЕХНИКА</span>
+          {machine.flying && (
+            <span
+              className={clsx('inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider', colors.accent, 'bg-slate-900/60 border', colors.border)}
+              title="Летающая техника: 2 перемещения за ход, без ближнего боя, иммунитет к гранатам"
+            >
+              <Plane className="w-3 h-3" />
+              <span>ЛЕТАЕТ</span>
+            </span>
+          )}
           <div className="flex items-center gap-1">
             <Shield className="w-3 h-3" />
             <span>Прч {machine.durability_max}</span>

@@ -314,7 +314,8 @@
     "name": "Тандер",
     "shortName": "Тандер",
     "faction": "polaris",
-    "cost": 500,
+    "flying": true,
+    "cost": 620,
     "image": "/images/machines/thunder.jpg",
     "weapons": [
       {
@@ -338,20 +339,20 @@
     ],
     "speed_sectors": [
       {
-        "min_durability": 9,
-        "max_durability": 13,
+        "min_durability": 6,
+        "max_durability": 10,
         "speed": 6
       },
       {
         "min_durability": 1,
-        "max_durability": 8,
+        "max_durability": 5,
         "speed": 5
       }
     ],
     "rank": 2,
     "fire_rate": 2,
     "ammo_max": 16,
-    "durability_max": 13
+    "durability_max": 10
   },
   {
     "id": "eraser",
@@ -548,7 +549,8 @@
     "name": "Хорнет",
     "shortName": "Хорнет",
     "faction": "polaris",
-    "cost": 1000,
+    "flying": true,
+    "cost": 555,
     "image": "/images/machines/hornet.jpg",
     "weapons": [
       {
@@ -572,19 +574,19 @@
     ],
     "speed_sectors": [
       {
-        "min_durability": 9,
-        "max_durability": 13,
+        "min_durability": 10,
+        "max_durability": 14,
         "speed": 6
       },
       {
         "min_durability": 1,
-        "max_durability": 8,
+        "max_durability": 9,
         "speed": 5
       }
     ],
     "rank": 2,
     "fire_rate": 2,
     "ammo_max": 16,
-    "durability_max": 13
+    "durability_max": 14
   }
 ]
