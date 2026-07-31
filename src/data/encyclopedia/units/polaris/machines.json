@@ -124,7 +124,7 @@
     "sources": [
       {
         "id": "star_system",
-        "cost": 1000
+        "cost": 555
       },
       {
         "id": "tehnolog",
@@ -364,7 +364,7 @@
     "sources": [
       {
         "id": "star_system",
-        "cost": 500
+        "cost": 620
       },
       {
         "id": "tehnolog",

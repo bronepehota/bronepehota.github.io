@@ -1,6 +1,6 @@
 'use client';
 
-import { Skull, AlertTriangle, Check, Loader2 } from 'lucide-react';
+import { Skull, AlertTriangle, Check, Loader2, Plane } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DurabilityZone, PilotInfo, FactionID } from '@/lib/types';
 import { getFactionColors } from '@/lib/faction-colors';
@@ -27,6 +27,7 @@ interface MachineStatusHeaderProps {
   onImageClick: () => void;
   distanceInputUnit: 'steps' | 'cm';
   stepToCmFactor: number;
+  flying?: boolean;
 }
 
 const getZoneColor = (color: 'green' | 'yellow' | 'red') => {
@@ -57,7 +58,8 @@ export function MachineStatusHeader({
   onOpenPilot,
   onImageClick,
   distanceInputUnit,
-  stepToCmFactor
+  stepToCmFactor,
+  flying
 }: MachineStatusHeaderProps) {
   const colors = getFactionColors(faction);
   const zoneColor = getZoneColor(zone.color);
@@ -85,6 +87,16 @@ export function MachineStatusHeader({
           {isDestroyed && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/50">
               <Skull className="w-8 h-8 text-red-500" strokeWidth={2.5} />
+            </div>
+          )}
+          {flying && (
+            <div
+              className="absolute top-1 right-1 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-sm bg-slate-900/90 border text-[9px] font-mono font-bold uppercase tracking-wider"
+              style={{ borderColor: `${colors.primary}80`, color: colors.primary }}
+              title="Летающая техника: 2 перемещения за ход, без ближнего боя, иммунитет к гранатам"
+            >
+              <Plane className="w-3 h-3" />
+              <span>ЛЕТАЕТ</span>
             </div>
           )}
         </button>

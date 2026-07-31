@@ -1,7 +1,7 @@
 'use client';
 
 import { CombatActionType } from '@/lib/combat-types';
-import { ArmyUnit, Squad } from '@/lib/types';
+import { ArmyUnit, Squad, Machine } from '@/lib/types';
 import { Target, Sword, Bomb, Flag } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getCaptureCandidates } from '@/lib/capture-catalog';
@@ -74,12 +74,18 @@ const canSoldierShoot = (unit?: ArmyUnit, soldierIndex?: number | null): boolean
 };
 
 // Check if soldier has melee capability
-const canSoldierMelee = (unit?: ArmyUnit, soldierIndex?: number | null): boolean => {
+export const canSoldierMelee = (unit?: ArmyUnit, soldierIndex?: number | null): boolean => {
+  // Machines: летающая техника (гравилеты) не может вступать в ближний бой (правила Star System).
+  // Checked first — machines have no soldierIndex (null), which the early-return below
+  // would otherwise treat as "always allow".
+  if (unit && unit.type === 'machine') {
+    return !(unit.data as Machine).flying;
+  }
   if (!unit || soldierIndex === null || soldierIndex === undefined) {
-    return true; // For machines, always allow
+    return true; // Calculator mode (no unit)
   }
   if (unit.type !== 'squad') {
-    return true; // For machines, always allow
+    return true;
   }
 
   // Squads can always melee - melee stat is just a bonus

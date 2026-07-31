@@ -123,6 +123,7 @@ export function MachineView({
           onImageClick={onShowImage || (() => {})}
           distanceInputUnit={distanceInputUnit}
           stepToCmFactor={stepToCmFactor}
+          flying={machine.flying}
         />
       ) : (
         /* Fallback: Original layout if no image */
