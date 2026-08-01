@@ -10,8 +10,8 @@ const STORAGE_KEY = 'bronepehota_sources_legend_expanded';
 /**
  * Collapsible legend explaining the provenance badges on unit cards.
  * Collapsed: compact row with credit logos + «Дополнить» button.
- * Expanded: detailed explanation of official vs fan content, how data is collected,
- *   what the card badges mean. State persisted in localStorage.
+ * Expanded: detailed explanation of official vs fan content, what the card badges mean.
+ * State persisted in localStorage.
  */
 export function EncyclopediaAttributionBanner() {
   const [expanded, setExpanded] = useState(false);
@@ -37,17 +37,14 @@ export function EncyclopediaAttributionBanner() {
   return (
     <aside
       data-testid="encyclopedia-sources-banner"
-      className={cn(
-        'rounded border border-military-steel/30 bg-military-charcoal/40 overflow-hidden',
-        'transition-all duration-300',
-      )}
+      className="rounded border border-military-steel/30 bg-military-charcoal/40 overflow-hidden"
     >
       {/* Compact header — always visible */}
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-3 py-2">
         {/* Tehnolog — official */}
         <div className="flex items-center gap-1.5">
-          <div className="h-5 w-5 overflow-hidden rounded-sm shrink-0 border border-cyan-500/30">
-            <GitHubPagesImage src="/images/credits/tehnolog.png" alt="" fill className="object-contain" />
+          <div className="relative h-5 w-5 overflow-hidden rounded-sm shrink-0 border border-cyan-500/30">
+            <GitHubPagesImage src="/images/credits/tehnolog.png" alt="Технолог" fill className="object-contain" />
           </div>
           <span className="font-ibm-mono text-[10px] text-military-sand/70">
             Официальный канон (Технолог)
@@ -56,8 +53,8 @@ export function EncyclopediaAttributionBanner() {
 
         {/* Star System — community */}
         <div className="flex items-center gap-1.5">
-          <div className="h-5 w-5 overflow-hidden rounded-sm shrink-0 border border-amber-500/30">
-            <GitHubPagesImage src="/images/credits/star_system.jpg" alt="" fill className="object-contain" />
+          <div className="relative h-5 w-5 overflow-hidden rounded-sm shrink-0 border border-amber-500/30">
+            <GitHubPagesImage src="/images/credits/star_system.jpg" alt="Star System" fill className="object-contain" />
           </div>
           <span className="font-ibm-mono text-[10px] text-military-sand/70">
             Фанатские материалы (различные сообщества)
@@ -88,56 +85,49 @@ export function EncyclopediaAttributionBanner() {
         </a>
       </div>
 
-      {/* Expandable details */}
-      <div
-        className={cn(
-          'grid transition-all duration-300 ease-in-out',
-          expanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0',
-        )}
-      >
-        <div className="overflow-hidden">
-          <div className="border-t border-military-steel/20 px-3 py-3 space-y-2.5">
-            {/* Official */}
-            <div className="flex items-start gap-2">
-              <div className="mt-0.5 h-4 w-4 shrink-0 overflow-hidden rounded-sm border border-cyan-500/30">
-                <GitHubPagesImage src="/images/credits/tehnolog.png" alt="" fill className="object-contain" />
-              </div>
-              <div>
-                <p className="font-ibm-mono text-[10px] uppercase tracking-wider text-cyan-400/80 mb-0.5">
-                  Официальный канон
-                </p>
-                <p className="text-[11px] leading-relaxed text-military-taupe/70">
-                  Материалы от компании «Технолог» — официальные правила, книги, карточки отрядов.
-                  Это исходный канон вселенной Бронепехоты.
-                </p>
-              </div>
+      {/* Expandable details — conditional render for reliability */}
+      {expanded && (
+        <div className="border-t border-military-steel/20 px-3 py-3 space-y-2.5">
+          {/* Official */}
+          <div className="flex items-start gap-2">
+            <div className="relative mt-0.5 h-4 w-4 shrink-0 overflow-hidden rounded-sm border border-cyan-500/30">
+              <GitHubPagesImage src="/images/credits/tehnolog.png" alt="Технолог" fill className="object-contain" />
             </div>
-
-            {/* Community */}
-            <div className="flex items-start gap-2">
-              <div className="mt-0.5 h-4 w-4 shrink-0 overflow-hidden rounded-sm border border-amber-500/30">
-                <GitHubPagesImage src="/images/credits/star_system.jpg" alt="" fill className="object-contain" />
-              </div>
-              <div>
-                <p className="font-ibm-mono text-[10px] uppercase tracking-wider text-amber-500/80 mb-0.5">
-                  Фанатские материалы
-                </p>
-                <p className="text-[11px] leading-relaxed text-military-taupe/70">
-                  Отряды, лор и миниатюры, созданные сообществом — «Звёздные Системы» и другими
-                  авторами. Не являются официальными материалами Технолог. Отмечены знаком{' '}
-                  <span className="text-amber-500">⭐</span> на карточках отрядов.
-                </p>
-              </div>
+            <div>
+              <p className="font-ibm-mono text-[10px] uppercase tracking-wider text-cyan-400/80 mb-0.5">
+                Официальный канон
+              </p>
+              <p className="text-[11px] leading-relaxed text-military-taupe/70">
+                Материалы от компании «Технолог» — официальные правила, книги, карточки отрядов.
+                Это исходный канон вселенной Бронепехоты.
+              </p>
             </div>
-
-            {/* Card badges explanation */}
-            <p className="text-[11px] leading-relaxed text-military-steel/50 border-t border-military-steel/15 pt-2">
-              На каждой карточке отряда в углу — значок: <span className="inline-flex items-center gap-0.5 text-cyan-400">🛡</span> для официального,
-              {' '}<span className="text-amber-500">⭐</span> для фанатского. На странице отряда — подробные метки источников.
-            </p>
           </div>
+
+          {/* Community */}
+          <div className="flex items-start gap-2">
+            <div className="relative mt-0.5 h-4 w-4 shrink-0 overflow-hidden rounded-sm border border-amber-500/30">
+              <GitHubPagesImage src="/images/credits/star_system.jpg" alt="Star System" fill className="object-contain" />
+            </div>
+            <div>
+              <p className="font-ibm-mono text-[10px] uppercase tracking-wider text-amber-500/80 mb-0.5">
+                Фанатские материалы
+              </p>
+              <p className="text-[11px] leading-relaxed text-military-taupe/70">
+                Отряды, лор и миниатюры, созданные сообществом — «Звёздные Системы» и другими
+                авторами. Не являются официальными материалами Технолог. Отмечены знаком{' '}
+                <span className="text-amber-500">⭐</span> на карточках отрядов.
+              </p>
+            </div>
+          </div>
+
+          {/* Card badges explanation */}
+          <p className="text-[11px] leading-relaxed text-military-steel/50 border-t border-military-steel/15 pt-2">
+            На каждой карточке отряда в углу — значок: <span className="text-cyan-400">🛡</span> для официального,
+            {' '}<span className="text-amber-500">⭐</span> для фанатского. На странице отряда — подробные метки источников.
+          </p>
         </div>
-      </div>
+      )}
     </aside>
   );
 }
