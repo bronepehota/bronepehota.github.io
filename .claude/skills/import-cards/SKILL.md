@@ -14,6 +14,7 @@ Game stats live in `src/data/sources/{source}/{faction}/`; lore lives in `src/da
 - **Single card image** → Step 2 → Step 4 → Step 8.
 - **VK album** → Step 1 (cookies) → 2 → 3 → 4 → 8.
 - **Yandex Disk folder** → Step 1 (API) → 2 → 3 → 4 → 8.
+- **STL 3D models (no images)** → Step 1 (STL render) → 2 → 3 → 4 → 8.
 - **Local batch (10+)** → Step 2a → 3 → 4 → 8.
 
 > Machines (техника) follow the same path; card/schema/matcher deltas in [Machines](#machines-техника).
@@ -99,6 +100,31 @@ Folders often contain per-soldier renders (`1.png…6.png`, transparent bg) + `.
 
 Copy to `tmp/<batch>/` — renders in `<slug>/N.png`, card as `<slug>/card.jpg`.
 
+### STL 3D models → render to images
+
+When the source ships **`.stl` files** (3D sculpts) instead of card images, render them to PNG first. Use **Blender headless (Cycles)** — the numpy/software renderer (`render_stl.py`) produces flat silhouettes with no form/depth; **unusable for card art**. (STLs carry geometry only — no color/texture — so quality comes entirely from lighting.)
+
+Reusable tools in `tools/` (Blender is invoked in-place; no install/sudo):
+
+| Tool | Use |
+|---|---|
+| `blender_render.py` | one STL → shaded PNG. `blender --background --python tools/blender_render.py -- <in.stl> <out.png> [up=auto] [azim=-55] [elev=6] [turn=0]`. Exposes `render_figure()` for other scripts. |
+| `render_folder.py` | all STLs in a **Yandex** folder (download + render + standardize + contact sheet) |
+| `render_local.py` | all STLs in a **local dir** (e.g. extracted from a zip) |
+| `render_sweep.py` | yaw sweep (−75°…75°, step 15°) for the matcher's live slider (Step 3) |
+| `render_stl.py` | numpy z-buffer fallback — **orientation checks only**, not final art |
+
+**Blender install (no sudo):** download the portable Linux tarball, extract, run in place:
+```bash
+curl -o ~/blender.tar.xz https://download.blender.org/release/Blender4.4/blender-4.4.3-linux-x64.tar.xz
+tar -xf ~/blender.tar.xz     # → ~/blender-4.4.3-linux-x64/blender
+```
+pip where needed (no venv/sudo, PEP668 enforced): `python3 get-pip.py --user --break-system-packages` then `pip install --user --break-system-packages numpy-stl matplotlib` — **only** for the software fallback; Blender needs nothing extra.
+
+**Auto-orientation:** sculpts default to BACK-view at `azim=-55` → the renderer applies a **180° front-flip** + a `turn`° yaw. Longest bbox axis → +Z (up); Z-up is preferred when Z ≥ 60% of max extent (avoids picking a marginally-longer X on wide poses). **Mixed-facing batches** aren't all fixed by the 180° flip — render a contact sheet, and for back-facing figures re-render with `turn=180` (or use the matcher slider, Step 3).
+
+**Output:** 300×400 white, figure fit at ~88% (leaves a bottom margin so feet aren't flush). Render in a **finite background batch** (`nohup bash -c '...' &`, `run_in_background`) — works fine. ⚠ A **persistent render SERVER does not work** in this harness (non-terminating background procs are killed, exit 144) → for live angle tuning use the pre-rendered **sweep**, not a server.
+
 ---
 
 ## Step 2: Vision-extract stats
@@ -139,6 +165,8 @@ python3 tools/card_matcher_gen.py tmp/<batch>/extracted_stats.json tmp/<batch>/v
 **UX** (built for wide monitors — the card pane takes ~half the width and fills it): the army-list card stays in a sticky left pane with a zoom slider + header-offset slider. **Hover a soldier row → the card auto-scrolls to that soldier's miniature** with a cursor line — compare it directly against the render in the row. Stats are one line in **card order** (А·Ск·Дальн·Мощн·ББ·Св·Бр), large. **Drag a soldier's photo onto another soldier to swap their photos** (clean permutation, no conflicts); `↺ сброс фото` restores the natural order. Unrecognized stats (vision `null`) pulse red — fill them from the card. A lore field (URL/text) sits under the card. Conflict detection (same render twice → red), `✓ 1→3·2→1·…` status, verified flag, localStorage, clipboard + file export.
 
 **Export** emits `imgIndex` per soldier (which render file that soldier uses). This is what Step 4 applies.
+
+**Live yaw slider (STL renders):** for rendered figures, pre-render a yaw sweep, then a **per-figure slider (−75°…+75°, step 15°)** under each photo switches between the cached frames — instant, no server. To enable: (1) `blender --background --python tools/render_sweep.py -- <stl_dir> tmp/<batch>/sweeps` → `sweeps/{N}/a{angle}.png`; (2) add `"sweepDir": "sweeps"` to the manifest; (3) regenerate the matcher. Slider appears under each figure; **export includes `turn` per soldier** → re-render the finals at those turns. Slider sits outside the draggable photo zone (no drag conflict).
 
 > The matcher is **manifest-driven** — any faction/source/count. It replaces the old unit-namer + hand-built verifiers.
 
@@ -299,3 +327,8 @@ Not in the table? Ask the user and check `src/data/modifiers/standard-modifiers.
 - **Lore entry without source squad** → production build crashes at prerender. Commit both together; verify with the GitHub-Pages build.
 - **VK download "succeeded" but is HTML** — validate `FF D8 FF` magic bytes; anonymous curl gets a login shell.
 - **Lore garbage / fabricated dates** — regenerate from canon; the lore test rejects CJK/latin-bleed, and invented eras contradict the universe.
+- **STL renders look like flat silhouettes** — you used the numpy `render_stl.py` (flat Lambertian, no form). Use **Blender Cycles** (`blender_render.py`); STLs have no color, so quality comes from lighting + materials.
+- **Render server killed (exit 144)** — the harness kills non-terminating background processes. Render via **finite** batches (`nohup … &`); for live matcher tuning use the pre-rendered **sweep**, not a render server.
+- **Yandex download 404 / "Resource not found"** — use the **root public key + full path** (`/Folder/file.stl`); a subfolder's own share key only *lists*, downloads 404.
+- **Big Yandex batch** — ask the user for the **zip** (local > API: no Cyrillic-path listing failures, faster, includes the army-list cards).
+- **Renders' feet flush at the bottom** — full-height fit leaves no margin; standardize to ~88% of the frame.
