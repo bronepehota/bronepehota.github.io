@@ -1,34 +1,45 @@
-import { Shield, Star } from 'lucide-react';
+'use client';
+
+import { GitHubPagesImage } from '@/components/GitHubPagesImage';
 import { cn } from '@/lib/utils';
 
 /**
  * Always-visible legend explaining the provenance badges on unit cards.
- * Replaces the old dismissible "с миру по нитке" banner that users couldn't find.
+ * Uses the actual Tehnolog + Star System credit logos.
  */
 export function EncyclopediaAttributionBanner() {
   return (
     <aside
       data-testid="encyclopedia-sources-banner"
       className={cn(
-        'flex flex-wrap items-center gap-x-4 gap-y-1',
+        'flex flex-wrap items-center gap-x-3 gap-y-2',
         'rounded border border-military-steel/30 bg-military-charcoal/40 px-3 py-2',
       )}
     >
       <div className="flex items-center gap-1.5">
-        <Shield className="h-3.5 w-3.5 shrink-0" style={{ color: '#22d3ee' }} />
+        <div className="h-5 w-5 overflow-hidden rounded-sm shrink-0">
+          <GitHubPagesImage src="/images/credits/tehnolog.png" alt="" fill className="object-contain" />
+        </div>
         <span className="font-ibm-mono text-[10px] text-military-sand/70">
-          Официальный канон (Технолог)
+          Официальный (Технолог)
         </span>
       </div>
       <div className="flex items-center gap-1.5">
-        <Star className="h-3.5 w-3.5 shrink-0" style={{ color: '#f59e0b' }} />
+        <div className="h-5 w-5 overflow-hidden rounded-sm shrink-0">
+          <GitHubPagesImage src="/images/credits/star_system.jpg" alt="" fill className="object-contain" />
+        </div>
         <span className="font-ibm-mono text-[10px] text-military-sand/70">
-          Фанатские материалы (различные сообщества)
+          Сообщество (различные)
         </span>
       </div>
-      <span className="font-ibm-mono text-[10px] text-military-steel/50 w-full sm:w-auto sm:ml-auto sm:text-right">
-        Заметили неточность? «Дополнить» на странице отряда
-      </span>
+      <a
+        href="https://vk.ru/lastbpcoder"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="ml-auto inline-flex items-center gap-1 rounded-sm border border-military-amber/40 bg-military-amber/10 px-2 py-0.5 font-ibm-mono text-[10px] text-military-amber transition-colors hover:bg-military-amber/20"
+      >
+        ✎ Дополнить
+      </a>
     </aside>
   );
 }
