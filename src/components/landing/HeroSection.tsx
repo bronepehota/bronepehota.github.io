@@ -110,7 +110,7 @@ export default function HeroSection({ className }: HeroSectionProps) {
 
         {/* Tehnolog credit — logo + link to official site */}
         <a
-          href="https://www.tehnolog.ru"
+          href="http://www.tehnolog.ru/product/bp.php"
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1.5 mb-2 transition-opacity hover:opacity-80"
