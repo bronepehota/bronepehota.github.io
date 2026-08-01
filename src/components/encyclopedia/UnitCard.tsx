@@ -2,7 +2,8 @@ import Link from 'next/link';
 import { GitHubPagesImage } from '@/components/GitHubPagesImage';
 import { EncyclopediaUnit, getUnitCostForSource } from '@/lib/encyclopedia-registry';
 import { getFactionColors, factionLogos } from '@/lib/faction-colors';
-import { SQUAD_GROUP_IMAGE } from '@/lib/painted-images';
+import { SQUAD_GROUP_IMAGE, getCredit } from '@/lib/painted-images';
+import { resolveUnitProvenance } from '@/lib/provenance';
 
 interface UnitCardProps {
   unit: EncyclopediaUnit;
@@ -38,6 +39,15 @@ export function UnitCard({ unit }: UnitCardProps) {
 
   // Faction logo (if available); mercenaries falls back to a text badge
   const logo = factionLogos[unit.faction];
+  const provenance = resolveUnitProvenance(unit);
+  const isOfficial = provenance.origin === 'tehnolog';
+
+  // Provenance badge: official → Tehnolog logo; fan → specific community logo
+  // (from miniatureSource/imageSource), fallback to Star System.
+  const sourceCreditId = isOfficial ? 'tehnolog' : (unit.miniatureSource || unit.imageSource || 'star_system');
+  const sourceCredit = getCredit(sourceCreditId);
+  const badgeLogo = sourceCredit?.logo || '/images/credits/star_system.jpg';
+  const badgeName = sourceCredit?.name || (isOfficial ? 'Технолог' : 'Звёздные Системы');
 
   return (
     <Link
@@ -83,6 +93,24 @@ export function UnitCard({ unit }: UnitCardProps) {
                   {factionBadges[unit.faction]}
                 </span>
               )}
+            </div>
+          </div>
+
+          {/* Provenance badge — official (Технолог) / fan (specific community logo) */}
+          <div className="absolute top-2 right-2" title={isOfficial ? `Официальный (${badgeName})` : `Фанатское (${badgeName})`}>
+            <div
+              className="relative h-6 w-6 overflow-hidden rounded-sm backdrop-blur-md border"
+              style={{
+                backgroundColor: isOfficial ? 'rgba(6, 182, 212, 0.2)' : 'rgba(245, 158, 11, 0.2)',
+                borderColor: isOfficial ? 'rgba(6, 182, 212, 0.5)' : 'rgba(245, 158, 11, 0.5)',
+              }}
+            >
+              <GitHubPagesImage
+                src={badgeLogo}
+                alt={badgeName}
+                fill
+                className="object-contain p-0.5"
+              />
             </div>
           </div>
 

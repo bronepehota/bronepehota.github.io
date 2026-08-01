@@ -200,16 +200,17 @@ test.describe('Энциклопедия', () => {
     await expect(page.getByTestId('image-source-chip')).toHaveCount(0);
   });
 
-  test('баннер об источниках показывается и закрывается', async ({ page }) => {
+  test('легенда об источниках показывается и разворачивается', async ({ page }) => {
     await page.goto('/encyclopedia');
     await page.waitForLoadState('networkidle');
 
     const banner = page.getByTestId('encyclopedia-sources-banner');
     await expect(banner).toBeVisible();
-    await expect(banner.getByText('с миру по нитке')).toBeVisible();
-    // кнопка закрытия прячет баннер
-    await page.getByTestId('encyclopedia-sources-banner-dismiss').click();
-    await expect(banner).toHaveCount(0);
+    // Compact mode: logos + labels visible
+    await expect(banner.getByText('Официальный канон')).toBeVisible();
+    await expect(banner.getByText('Фанатские материалы')).toBeVisible();
+    // «Дополнить» CTA is a link
+    await expect(banner.getByRole('link', { name: /дополнить/i })).toBeVisible();
   });
 
   test('чин происхождения кликабелен и ведёт на сайт источника', async ({ page }) => {

@@ -174,7 +174,7 @@ src/data/encyclopedia/
 
 **Content sources — several distinct "source" dimensions per unit** (don't conflate them):
 - **Stats source** = army list (`unit.sources[]`: star_system/tehnolog) — which stats; switchable via `SourceAvailability.tsx`.
-- **Lore provenance** (`src/lib/provenance.ts`, optional `provenance` field): `origin` (who invented the concept) + `loreAuthor` (who wrote the text) — tehnolog/star_system.
+- **Lore provenance** (`src/lib/provenance.ts`, optional `provenance` field): `origin` (who invented the concept) + `loreAuthor` (who wrote the text) — org-level: `tehnolog` | `star_system` | `universestarsys`. Individual creators are separate: `miniatureSource`/`imageSource` = credit IDs from `CREDITS` in `painted-images.ts` (e.g. `lisitsin`, `shnayder`). Don't conflate — "concept by Lisitsin" = `provenance.origin: 'star_system'` (org) + `miniatureSource: 'lisitsin'` (person).
 - **Painter** (`src/lib/painted-images.ts`): `CREDITS` (logo+url+name) + `SQUAD_PHOTO_SOURCE` (per-squad); `getPhotoCredit(id)` returns `undefined` for unattributed squads (no default).
 - **Image source**: painted squad ⇒ its painter; otherwise Star System (unpainted card-art/renders — Lisitsin's squads are painted, so never the fallback).
 - Attribution UI: `src/components/encyclopedia/AttributionLabel.tsx` (`ProvenanceRow` `// ИСТОЧНИК`, `PainterChip` `// ПОКРАС`, `ImageSourceChip` `// ИЗОБРАЖЕНИЯ`, `SourceChip`, `ContributeButton`→vk.com/bp_bnp). Logos 128×128 in `public/images/credits/`.
@@ -273,6 +273,14 @@ Army         // Player's army with units, totalCost, faction, sourceId, currentT
 
 **Faction alliances**: `UnitSelector` shows own + allied units via `faction === selected || alliedFactionIds.has(faction)`, where `alliedFactionIds = getAlliedFactions(...)` (`src/lib/faction-allies.ts` — symmetric + `"*"` wildcard). Factions declare `allies` in `encyclopedia/factions.json` (`mercenaries: ["*"]` = ally of all; `rutenia: ["protectorate"]`). Do NOT re-add hardcoded `selectedFaction === 'mercenaries'` — mercs flow through `allies:["*"]`.
 3. Add `squads.json` and `machines.json` files
+
+### Sub-faction hierarchy
+
+**`parent?: FactionID`** on factions — display-only; unit availability stays on `allies`.
+Pure helpers in `src/lib/faction-hierarchy.ts`: `orderedFactions()` (parent→children nesting),
+`getParent()`, `getSubFactions()`, `relationTo()` (own/subfaction/parent/ally for unit badges).
+rutenia→protectorate, dead_fleet→polaris. The encyclopedia faction `<select>` indents sub-factions
+with em-spaces (U+2003).
 
 ### Game Logic (`src/lib/game-logic.ts`)
 
@@ -443,6 +451,7 @@ Edit `squads.json` or `machines.json` in `src/data/sources/{source_id}/{faction}
 - **Responsive patterns**: Bottom sheets for mobile modals, centered cards for desktop, hide labels on mobile (`hidden md:inline`)
 - **Path alias**: `@/*` maps to `src/*` (configured in `tsconfig.json`)
 - **Dossier `// LABEL` text in JSX**: wrap in braces — `{'// ИСТОЧНИК'}` — or `react/jsx-no-comment-textnodes` errors (bare `//` parses as a comment).
+- **Avoid `appearance-none` on `<select>`** — breaks the dropdown on some mobile browsers (invisible/non-interactive). Use native select styling with custom bg/border.
 
 ### GitHub Pages Deployment
 
@@ -509,6 +518,12 @@ Rules → Source → Faction → Budget → Army Builder → Battle Preparation
 Use `data-testid` selectors: `rules-confirm-button`, `source-confirm-button`, `faction-continue-button`, `budget-next-button`, `to-battle-button`, `start-battle-button`.
 
 **Toggle selectors**: `data-testid` on wrapper, `aria-pressed` on inner button — use `container.locator('button[aria-pressed]')`.
+
+**Promo assets** (`docs/promo/`) are NOT committed to git — local-only for VK posts.
+
+**Yandex Disk Cyrillic subfolders**: the listing API (`/v1/disk/public/resources?path=Индейцы`) returns 0 items for Cyrillic-named subfolders, but the download API with an explicit path (`/download?path=/Индейцы/1.png`) works. Don't trust the listing — try downloading by pattern (`/1.png`…`/6.png`) directly.
+
+**Always branch for imports** — even "quick" single-squad imports go through `feat/<branch>` → PR → merge. Never commit directly to `main`.
 
 ## Active Technologies
 
