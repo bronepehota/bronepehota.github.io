@@ -126,7 +126,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;opa
 const RAW_DATA = __RAW__;
 let DATA = JSON.parse(JSON.stringify(RAW_DATA));
 let idx = 0;
-const LS = 'card_matcher_v3';
+const LS = 'card_matcher_v4';
 const MODS = [['','—'],['jump_boost_3','Пр3'],['jump_boost_4','Пр4'],['jump_boost_5','Пр5'],['mechanic','Рм']];
 let zoom = 1, header = 0.16;
 function restore(){
