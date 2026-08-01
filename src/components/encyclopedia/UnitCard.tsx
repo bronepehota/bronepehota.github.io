@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { GitHubPagesImage } from '@/components/GitHubPagesImage';
 import { EncyclopediaUnit, getUnitCostForSource } from '@/lib/encyclopedia-registry';
 import { getFactionColors, factionLogos } from '@/lib/faction-colors';
-import { SQUAD_GROUP_IMAGE } from '@/lib/painted-images';
+import { SQUAD_GROUP_IMAGE, getCredit } from '@/lib/painted-images';
 import { resolveUnitProvenance } from '@/lib/provenance';
 
 interface UnitCardProps {
@@ -41,6 +41,13 @@ export function UnitCard({ unit }: UnitCardProps) {
   const logo = factionLogos[unit.faction];
   const provenance = resolveUnitProvenance(unit);
   const isOfficial = provenance.origin === 'tehnolog';
+
+  // Provenance badge: official → Tehnolog logo; fan → specific community logo
+  // (from miniatureSource/imageSource), fallback to Star System.
+  const sourceCreditId = isOfficial ? 'tehnolog' : (unit.miniatureSource || unit.imageSource || 'star_system');
+  const sourceCredit = getCredit(sourceCreditId);
+  const badgeLogo = sourceCredit?.logo || '/images/credits/star_system.jpg';
+  const badgeName = sourceCredit?.name || (isOfficial ? 'Технолог' : 'Звёздные Системы');
 
   return (
     <Link
@@ -89,8 +96,8 @@ export function UnitCard({ unit }: UnitCardProps) {
             </div>
           </div>
 
-          {/* Provenance badge — official (Технолог logo) / fan (Star System logo) */}
-          <div className="absolute top-2 right-2" title={isOfficial ? 'Официальный канон (Технолог)' : 'Фанатские материалы (различные сообщества)'}>
+          {/* Provenance badge — official (Технолог) / fan (specific community logo) */}
+          <div className="absolute top-2 right-2" title={isOfficial ? `Официальный (${badgeName})` : `Фанатское (${badgeName})`}>
             <div
               className="relative h-6 w-6 overflow-hidden rounded-sm backdrop-blur-md border"
               style={{
@@ -99,8 +106,8 @@ export function UnitCard({ unit }: UnitCardProps) {
               }}
             >
               <GitHubPagesImage
-                src={isOfficial ? '/images/credits/tehnolog.png' : '/images/credits/star_system.jpg'}
-                alt={isOfficial ? 'Технолог' : 'Фанатское'}
+                src={badgeLogo}
+                alt={badgeName}
                 fill
                 className="object-contain p-0.5"
               />
