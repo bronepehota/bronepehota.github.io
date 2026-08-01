@@ -108,6 +108,23 @@ export default function HeroSection({ className }: HeroSectionProps) {
           Неофициальный проект по настольному варгейму «Бронепехота» (© Технолог)
         </p>
 
+        {/* Tehnolog credit — logo + link to official site */}
+        <a
+          href="https://www.tehnolog.ru"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 mb-2 transition-opacity hover:opacity-80"
+        >
+          <img
+            src={`${BASE_PATH}/images/credits/tehnolog.png`}
+            alt="Технолог"
+            className="h-4 w-4 rounded-sm"
+          />
+          <span className="font-ibm-mono text-[8px] sm:text-[9px] text-military-steel/50 tracking-wide">
+            Игра: tehnolog.ru
+          </span>
+        </a>
+
         {/* Lore description */}
         <div
           className={cn(
