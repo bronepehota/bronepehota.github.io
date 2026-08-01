@@ -1134,5 +1134,145 @@
       }
     ],
     "image": "/images/squads/polaris/mobilnyy_shturmovoy_desant/1.png"
+  },
+  {
+    "id": "polaris_gvardiya_shindju",
+    "name": "Гвардия Шинджу",
+    "shortName": "Гвардия Шинджу",
+    "faction": "polaris",
+    "cost": 120,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 4,
+        "speed": 4,
+        "range": "D6",
+        "power": "D12",
+        "melee": 3,
+        "armor": 4,
+        "image": "/images/squads/polaris/gvardiya_shindju/1.png"
+      },
+      {
+        "num": 2,
+        "rank": 4,
+        "speed": 4,
+        "range": "D12+2",
+        "power": "D12",
+        "melee": 3,
+        "armor": 4,
+        "image": "/images/squads/polaris/gvardiya_shindju/2.png"
+      },
+      {
+        "num": 3,
+        "rank": 4,
+        "speed": 4,
+        "range": "D6",
+        "power": "D12",
+        "melee": 3,
+        "armor": 4,
+        "image": "/images/squads/polaris/gvardiya_shindju/3.png"
+      },
+      {
+        "num": 4,
+        "rank": 4,
+        "speed": 4,
+        "range": "D12",
+        "power": "2D12",
+        "melee": 0,
+        "armor": 4,
+        "image": "/images/squads/polaris/gvardiya_shindju/4.png"
+      },
+      {
+        "num": 5,
+        "rank": 4,
+        "speed": 4,
+        "range": "D12",
+        "power": "D20",
+        "melee": 0,
+        "armor": 4,
+        "image": "/images/squads/polaris/gvardiya_shindju/5.png"
+      },
+      {
+        "num": 6,
+        "rank": 4,
+        "speed": 4,
+        "range": "D6",
+        "power": "D12",
+        "melee": 3,
+        "armor": 4,
+        "image": "/images/squads/polaris/gvardiya_shindju/6.png"
+      }
+    ],
+    "image": "/images/squads/polaris/gvardiya_shindju/1.png"
+  },
+  {
+    "id": "polaris_indeytsy",
+    "name": "Индейцы",
+    "shortName": "Индейцы",
+    "faction": "polaris",
+    "cost": 55,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 1,
+        "speed": 5,
+        "range": "2D12",
+        "power": "D6+1",
+        "melee": 4,
+        "armor": 1,
+        "image": "/images/squads/polaris/indeytsy/2.png"
+      },
+      {
+        "num": 2,
+        "rank": 1,
+        "speed": 5,
+        "range": "D6",
+        "power": "D20",
+        "melee": 4,
+        "armor": 1,
+        "image": "/images/squads/polaris/indeytsy/3.png"
+      },
+      {
+        "num": 3,
+        "rank": 1,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 5,
+        "armor": 2,
+        "image": "/images/squads/polaris/indeytsy/5.png"
+      },
+      {
+        "num": 4,
+        "rank": 1,
+        "speed": 5,
+        "range": "D6",
+        "power": "D6",
+        "melee": 4,
+        "armor": 1,
+        "image": "/images/squads/polaris/indeytsy/6.png"
+      },
+      {
+        "num": 5,
+        "rank": 1,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 4,
+        "armor": 2,
+        "image": "/images/squads/polaris/indeytsy/1.png"
+      },
+      {
+        "num": 6,
+        "rank": 1,
+        "speed": 5,
+        "range": "2D12",
+        "power": "D20",
+        "melee": 0,
+        "armor": 1,
+        "image": "/images/squads/polaris/indeytsy/4.png"
+      }
+    ],
+    "image": "/images/squads/polaris/indeytsy/1.png"
   }
 ]

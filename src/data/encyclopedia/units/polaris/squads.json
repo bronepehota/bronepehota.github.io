@@ -437,5 +437,59 @@
     "image": "/images/squads/polaris/mobilnyy_shturmovoy_desant/6.png",
     "imageSource": "lisitsin",
     "miniatureSource": "lisitsin"
+  },
+  {
+    "id": "polaris_gvardiya_shindju",
+    "name": "Гвардия Шинджу",
+    "shortName": "Гвардия Шинджу",
+    "faction": "polaris",
+    "type": "squad",
+    "sources": [
+      {
+        "id": "star_system",
+        "cost": 120
+      }
+    ],
+    "encyclopedia": {
+      "class": "Элитная гвардия",
+      "lore": "Гвардия Шинджу — сошедшие с обложек журналов, эти «самураи» быстрее сделают вам «секир-бошка», чем допустят возможность сделать себе сепуку. Встреча с ними — тяжкое испытание.",
+      "history": "Элитное подразделение Империи Полярис, вдохновлённое самурайскими традициями. Закалённые ветераны с тяжёлым вооружением.",
+      "tactics": "Универсальный элитный отряд: силён на дистанции и в ближнем бою. Тяжёлое оружие держит противника на расстоянии.",
+      "shortDescription": "Элитная гвардия Империи Полярис — самураи с тяжёлым вооружением."
+    },
+    "image": "/images/squads/polaris/gvardiya_shindju/1.png",
+    "miniatureSource": "lisitsin",
+    "imageSource": "lisitsin",
+    "provenance": {
+      "origin": "star_system",
+      "loreAuthor": "star_system"
+    }
+  },
+  {
+    "id": "polaris_indeytsy",
+    "name": "Индейцы",
+    "shortName": "Индейцы",
+    "faction": "polaris",
+    "type": "squad",
+    "sources": [
+      {
+        "id": "star_system",
+        "cost": 55
+      }
+    ],
+    "encyclopedia": {
+      "class": "Лёгкая пехота",
+      "lore": "Охотники «Двух красных молний» — коренные жители Нью-Родезии. С радостью настучат в бубен любителям сафари из Протектората, особенно когда однолицые братья и их вожди щедро снабдили их оружием.",
+      "history": "Коренной народ планеты Нью-Родезия, вступивший в союз с Империей Полярис. Лёгкие, быстрые, смертоносные на короткой дистанции.",
+      "tactics": "Скорость и напор: молниеносно сближаются, сильны в ближнем бою. Некоторые бойцы — без стрелкового оружия, чистые рукопашники.",
+      "shortDescription": "Лёгкая пехота коренных жителей Нью-Родезии, союзников Полярис."
+    },
+    "image": "/images/squads/polaris/indeytsy/1.png",
+    "miniatureSource": "lisitsin",
+    "imageSource": "lisitsin",
+    "provenance": {
+      "origin": "star_system",
+      "loreAuthor": "star_system"
+    }
   }
 ]

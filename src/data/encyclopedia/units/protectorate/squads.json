@@ -505,5 +505,32 @@
     "image": "/images/squads/protectorate/opolchenie_velian_fox5/1.png",
     "imageSource": "lisitsin",
     "miniatureSource": "lisitsin"
+  },
+  {
+    "id": "protectorate_shturmovaya_kiber_pehota",
+    "name": "Штурмовая кибер-пехота",
+    "shortName": "Шт. кибер-пехота",
+    "faction": "protectorate",
+    "type": "squad",
+    "sources": [
+      {
+        "id": "star_system",
+        "cost": 145
+      }
+    ],
+    "encyclopedia": {
+      "class": "Штурмовая кибер-пехота",
+      "lore": "Меньше человечности, больше эффективности. Именно такой и должна быть кибер-пехота.",
+      "history": "Кибернетически усиленные штурмовики Протектората — тяжёлая броня и мощное вооружение при минимальной живой составляющей.",
+      "tactics": "Тяжёлый штурм: подавляет огнём на любой дистанции, продавливает оборону. Боец с тяжёлым оружием в ближнем бою — отдельная угроза.",
+      "shortDescription": "Тяжёлая кибер-усиленная штурмовая пехота Протектората."
+    },
+    "image": "/images/squads/protectorate/shturmovaya_kiber_pehota/1.png",
+    "miniatureSource": "lisitsin",
+    "imageSource": "lisitsin",
+    "provenance": {
+      "origin": "star_system",
+      "loreAuthor": "star_system"
+    }
   }
 ]
