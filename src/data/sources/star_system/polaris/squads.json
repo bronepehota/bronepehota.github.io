@@ -1274,5 +1274,75 @@
       }
     ],
     "image": "/images/squads/polaris/indeytsy/1.png"
+  },
+  {
+    "id": "polaris_imperskie_kommandos",
+    "name": "Имперские коммандос",
+    "shortName": "Имперские коммандос",
+    "faction": "polaris",
+    "cost": 90,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 4,
+        "speed": 5,
+        "range": "D6",
+        "power": "D6",
+        "melee": 6,
+        "armor": 3,
+        "image": "/images/squads/polaris/imperskie_kommandos/4.png"
+      },
+      {
+        "num": 2,
+        "rank": 4,
+        "speed": 5,
+        "range": "D6",
+        "power": "2D6",
+        "melee": 5,
+        "armor": 3,
+        "image": "/images/squads/polaris/imperskie_kommandos/6.png"
+      },
+      {
+        "num": 3,
+        "rank": 4,
+        "speed": 5,
+        "range": "D6",
+        "power": "2D6",
+        "melee": 5,
+        "armor": 3,
+        "image": "/images/squads/polaris/imperskie_kommandos/2.png"
+      },
+      {
+        "num": 4,
+        "rank": 4,
+        "speed": 5,
+        "range": "D6",
+        "power": "2D6",
+        "melee": 4,
+        "armor": 3,
+        "image": "/images/squads/polaris/imperskie_kommandos/3.png"
+      },
+      {
+        "num": 5,
+        "rank": 4,
+        "speed": 5,
+        "range": "D6",
+        "power": "2D6",
+        "melee": 5,
+        "armor": 3,
+        "image": "/images/squads/polaris/imperskie_kommandos/1.png"
+      },
+      {
+        "num": 6,
+        "rank": 4,
+        "speed": 5,
+        "range": "D6",
+        "power": "2D6",
+        "melee": 5,
+        "armor": 3,
+        "image": "/images/squads/polaris/imperskie_kommandos/5.png"
+      }
+    ],
+    "image": "/images/squads/polaris/imperskie_kommandos/1.png"
   }
 ]
