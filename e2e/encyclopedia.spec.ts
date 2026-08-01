@@ -91,9 +91,9 @@ test.describe('Энциклопедия', () => {
     // Юнит в двух армлистах → компактный переключатель статов над таблицей
     const switcher = page.getByTestId('source-switcher');
     await expect(switcher).toBeVisible();
-    // Оба источника представлены пилюлями
-    await expect(switcher.getByText('SS')).toBeVisible();
-    await expect(switcher.getByText('ТЕХ')).toBeVisible();
+    // Оба источника представлены пилюлями (полные названия)
+    await expect(switcher.getByText('Star System')).toBeVisible();
+    await expect(switcher.getByText('Технолог')).toBeVisible();
   });
 
   test('несуществующий ID возвращает 404', async ({ page }) => {

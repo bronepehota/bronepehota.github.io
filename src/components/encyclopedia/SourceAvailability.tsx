@@ -94,7 +94,7 @@ export function SourceAvailability({
             aria-pressed={onSourceChange ? isActive : undefined}
             title={`${config.name}: ${cost ?? '?'} очков`}
             className={cn(
-              'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm border text-xs transition-all',
+              'inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border transition-all',
               onSourceChange && 'cursor-pointer hover:scale-[1.03] active:scale-[0.98]',
               !isActive && 'opacity-55 hover:opacity-100',
             )}
@@ -103,11 +103,13 @@ export function SourceAvailability({
               backgroundColor: isActive ? `${config.color}1f` : 'transparent',
             }}
           >
-            <GitHubPagesImage src={config.logo} alt={config.name} width={14} height={14} className="rounded-[1px]" />
-            <span className="font-ibm-mono font-bold tabular-nums" style={{ color: isActive ? config.color : '#a8a29e' }}>
-              {config.short}
+            <GitHubPagesImage src={config.logo} alt={config.name} width={22} height={22} className="rounded-[2px]" />
+            <span className="font-russo text-sm font-bold" style={{ color: isActive ? config.color : '#a8a29e' }}>
+              {config.name}
             </span>
-            <span className="font-ibm-mono text-[10px] text-military-steel/70 tabular-nums">{cost ?? '?'}</span>
+            <span className="ml-auto inline-flex items-center gap-0.5 font-ibm-mono text-base font-bold text-military-amber tabular-nums">
+              <span aria-hidden>⬡</span>{cost ?? '?'}
+            </span>
           </Tag>
         );
       })}
