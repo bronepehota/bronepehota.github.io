@@ -360,28 +360,6 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
         {/* Content sections */}
         <main className="px-4 pb-20">
           <div className="max-w-6xl mx-auto space-y-8">
-            {/* Source Availability section — only when the unit is in more than one
-                army list (the cards are the stat switcher). For a single-source unit
-                the source / cost / class are already shown above; the card would be
-                pure дубляж. */}
-            {unit.sources.length > 1 && (
-              <section
-                className={cn(
-                  'folded-paper military-corners p-6',
-                  'fade-in-up opacity-0',
-                  isLoaded && 'opacity-100'
-                )}
-                style={{ animationFillMode: 'forwards', animationDelay: '0.4s' }}
-              >
-                <SourceAvailability
-                  unit={unit}
-                  variant="detail"
-                  activeSource={activeSource}
-                  onSourceChange={setActiveSource}
-                />
-              </section>
-            )}
-
             {/* Provisional-stats disclaimer (heroes): stats are approximate, not canon */}
             {unit.statsNote && (
               <section
@@ -402,6 +380,18 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
                   </div>
                 </div>
               </section>
+            )}
+
+            {/* Compact army-list stat switcher — only when the unit is in 2+ lists.
+                The big «Доступность в источниках» block was дубляж; a small toggle
+                right above the stats is enough to pick which source's stats to view. */}
+            {unit.sources.length > 1 && (
+              <SourceAvailability
+                unit={unit}
+                variant="detail"
+                activeSource={activeSource}
+                onSourceChange={setActiveSource}
+              />
             )}
 
             {/* Stats table — soldiers or machine loadout, follows the active source */}

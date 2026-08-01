@@ -88,8 +88,12 @@ test.describe('Энциклопедия', () => {
     // Проверить наличие заголовка
     await expect(page.locator('h1')).toContainText('Линейная клон-пехота');
 
-    // Проверить наличие секции с источниками
-    await expect(page.locator('text=ДОСТУПНОСТЬ В ИСТОЧНИКАХ')).toBeVisible();
+    // Юнит в двух армлистах → компактный переключатель статов над таблицей
+    const switcher = page.getByTestId('source-switcher');
+    await expect(switcher).toBeVisible();
+    // Оба источника представлены пилюлями
+    await expect(switcher.getByText('SS')).toBeVisible();
+    await expect(switcher.getByText('ТЕХ')).toBeVisible();
   });
 
   test('несуществующий ID возвращает 404', async ({ page }) => {
