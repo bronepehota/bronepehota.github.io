@@ -33,13 +33,10 @@ export function SoldierImages({ unit }: SoldierImagesProps) {
     return null;
   }
 
-  // Full stats live in the UnitStatTable above; here each card shows just a compact
-  // combat footer (weapon stats for shooters, melee+armor for melee troops) — no
-  // expand panel, so it stays clean and readable on small mobile screens.
+  // Personnel portraits only — full stats live in the Боевой расчёт table (no dup).
   const soldiersWithImages = squad.soldiers.map((soldier) => ({
     ...soldier,
     displayImage: soldier.image || firstSoldierImage,
-    isShooter: Boolean(soldier.range && soldier.power),
   }));
 
   return (
@@ -90,40 +87,6 @@ export function SoldierImages({ unit }: SoldierImagesProps) {
                 <span className="font-ibm-mono text-xs font-bold text-white">
                   #{soldier.num}
                 </span>
-              </div>
-            </div>
-
-            {/* Top HUD - Rank badge */}
-            <div className="absolute top-2 right-2">
-              <div className="px-2 py-1 backdrop-blur-md bg-military-amber/20 border border-military-amber/50 rounded-sm">
-                <span className="font-ibm-mono text-xs font-bold text-military-amber">
-                  Р{soldier.rank}
-                </span>
-              </div>
-            </div>
-
-            {/* Compact combat footer — weapon stats (shooters) or melee+armor */}
-            <div className="absolute bottom-0 left-0 right-0 px-2 pt-6 pb-1.5 bg-gradient-to-t from-military-dark via-military-dark/90 to-transparent">
-              <div className="flex items-center justify-center gap-2.5 font-ibm-mono text-[11px] font-bold">
-                {soldier.isShooter ? (
-                  <>
-                    <span className="text-cyan-400" title="Дальность">
-                      <span className="text-military-steel/60 font-normal">Д </span>{soldier.range}
-                    </span>
-                    <span className="text-red-400" title="Мощность">
-                      <span className="text-military-steel/60 font-normal">М </span>{soldier.power}
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <span className="text-orange-400" title="Ближний бой">
-                      <span className="text-military-steel/60 font-normal">ББ </span>{soldier.melee}
-                    </span>
-                    <span className="text-blue-400" title="Броня">
-                      <span className="text-military-steel/60 font-normal">Бр </span>{soldier.armor}
-                    </span>
-                  </>
-                )}
               </div>
             </div>
 

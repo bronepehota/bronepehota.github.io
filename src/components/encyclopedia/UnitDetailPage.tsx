@@ -382,19 +382,20 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
               </section>
             )}
 
-            {/* Compact army-list stat switcher — only when the unit is in 2+ lists.
-                The big «Доступность в источниках» block was дубляж; a small toggle
-                right above the stats is enough to pick which source's stats to view. */}
-            {unit.sources.length > 1 && (
-              <SourceAvailability
-                unit={unit}
-                variant="detail"
-                activeSource={activeSource}
-                onSourceChange={setActiveSource}
-              />
-            )}
+            {/* Common army-list switcher — always shows the source list (a single
+                pill for one-source units; clickable pills when 2+). Controls BOTH
+                the personnel and the combat stats below it. */}
+            <SourceAvailability
+              unit={unit}
+              variant="detail"
+              activeSource={activeSource}
+              onSourceChange={unit.sources.length > 1 ? setActiveSource : undefined}
+            />
 
-            {/* Stats table — soldiers or machine loadout, follows the active source */}
+            {/* Личный состав — personnel portraits, follows the active source */}
+            <SoldierImages unit={activeUnit} />
+
+            {/* Боевой расчёт — full stat table, follows the active source */}
             <UnitStatTable unit={activeUnit as unknown as Squad | Machine} type={unit.type} />
 
             {/* Tactics */}
@@ -451,17 +452,6 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
                 </div>
               </section>
             )}
-
-            {/* Soldier Images section */}
-            <section
-              className={cn(
-                'fade-in-up opacity-0',
-                isLoaded && 'opacity-100'
-              )}
-              style={{ animationFillMode: 'forwards', animationDelay: '0.8s' }}
-            >
-              <SoldierImages unit={unit} />
-            </section>
 
             {/* Machine Images section */}
             <section
