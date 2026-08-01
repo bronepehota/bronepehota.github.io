@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { Shield, Star } from 'lucide-react';
 import { GitHubPagesImage } from '@/components/GitHubPagesImage';
 import { EncyclopediaUnit, getUnitCostForSource } from '@/lib/encyclopedia-registry';
 import { getFactionColors, factionLogos } from '@/lib/faction-colors';
@@ -90,17 +89,21 @@ export function UnitCard({ unit }: UnitCardProps) {
             </div>
           </div>
 
-          {/* Provenance badge — official (Shield) / fan (Star) */}
+          {/* Provenance badge — official (Технолог logo) / fan (Star System logo) */}
           <div className="absolute top-2 right-2" title={isOfficial ? 'Официальный канон (Технолог)' : 'Фанатские материалы (различные сообщества)'}>
             <div
-              className="flex h-6 w-6 items-center justify-center rounded-sm backdrop-blur-md border"
+              className="relative h-6 w-6 overflow-hidden rounded-sm backdrop-blur-md border"
               style={{
                 backgroundColor: isOfficial ? 'rgba(6, 182, 212, 0.2)' : 'rgba(245, 158, 11, 0.2)',
                 borderColor: isOfficial ? 'rgba(6, 182, 212, 0.5)' : 'rgba(245, 158, 11, 0.5)',
-                color: isOfficial ? '#22d3ee' : '#f59e0b',
               }}
             >
-              {isOfficial ? <Shield className="h-3.5 w-3.5" /> : <Star className="h-3.5 w-3.5" />}
+              <GitHubPagesImage
+                src={isOfficial ? '/images/credits/tehnolog.png' : '/images/credits/star_system.jpg'}
+                alt={isOfficial ? 'Технолог' : 'Фанатское'}
+                fill
+                className="object-contain p-0.5"
+              />
             </div>
           </div>
 
