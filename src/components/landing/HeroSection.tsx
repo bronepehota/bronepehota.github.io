@@ -105,7 +105,7 @@ export default function HeroSection({ className }: HeroSectionProps) {
             showText ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
           )}
         >
-          Тактический помощник для варгейма
+          Неофициальный проект по настольному варгейму «Бронепехота» (© Технолог)
         </p>
 
         {/* Lore description */}
