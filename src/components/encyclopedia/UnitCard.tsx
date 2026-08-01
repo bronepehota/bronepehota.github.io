@@ -1,8 +1,10 @@
 import Link from 'next/link';
+import { Shield, Star } from 'lucide-react';
 import { GitHubPagesImage } from '@/components/GitHubPagesImage';
 import { EncyclopediaUnit, getUnitCostForSource } from '@/lib/encyclopedia-registry';
 import { getFactionColors, factionLogos } from '@/lib/faction-colors';
 import { SQUAD_GROUP_IMAGE } from '@/lib/painted-images';
+import { resolveUnitProvenance } from '@/lib/provenance';
 
 interface UnitCardProps {
   unit: EncyclopediaUnit;
@@ -38,6 +40,8 @@ export function UnitCard({ unit }: UnitCardProps) {
 
   // Faction logo (if available); mercenaries falls back to a text badge
   const logo = factionLogos[unit.faction];
+  const provenance = resolveUnitProvenance(unit);
+  const isOfficial = provenance.origin === 'tehnolog';
 
   return (
     <Link
@@ -83,6 +87,20 @@ export function UnitCard({ unit }: UnitCardProps) {
                   {factionBadges[unit.faction]}
                 </span>
               )}
+            </div>
+          </div>
+
+          {/* Provenance badge — official (Shield) / fan (Star) */}
+          <div className="absolute top-2 right-2" title={isOfficial ? 'Официальный канон (Технолог)' : 'Материалы сообщества (Звёздные Системы)'}>
+            <div
+              className="flex h-6 w-6 items-center justify-center rounded-sm backdrop-blur-md border"
+              style={{
+                backgroundColor: isOfficial ? 'rgba(6, 182, 212, 0.2)' : 'rgba(245, 158, 11, 0.2)',
+                borderColor: isOfficial ? 'rgba(6, 182, 212, 0.5)' : 'rgba(245, 158, 11, 0.5)',
+                color: isOfficial ? '#22d3ee' : '#f59e0b',
+              }}
+            >
+              {isOfficial ? <Shield className="h-3.5 w-3.5" /> : <Star className="h-3.5 w-3.5" />}
             </div>
           </div>
 

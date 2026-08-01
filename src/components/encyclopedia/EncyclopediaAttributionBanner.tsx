@@ -1,80 +1,30 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import { Info, X } from 'lucide-react';
+import { Shield, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-/** localStorage flag — once dismissed, the banner never returns. */
-const DISMISS_KEY = 'bronepehota_encyclopedia_sources_banner_dismissed';
-
 /**
- * First-visit "field memo" explaining the encyclopedia mixes official Tehnolog
- * canon with community (Star System) material, with a one-tap «Дополнить» that
- * copies a message template and opens VK. Dossier aesthetic to match the app.
+ * Always-visible legend explaining the provenance badges on unit cards.
+ * Replaces the old dismissible "с миру по нитке" banner that users couldn't find.
  */
 export function EncyclopediaAttributionBanner() {
-  // Start hidden so static-export prerender + first client render agree (no flash);
-  // reveal after mount unless previously dismissed.
-  const [show, setShow] = useState(false);
-  useEffect(() => {
-    try {
-      if (localStorage.getItem(DISMISS_KEY) !== '1') setShow(true);
-    } catch {
-      setShow(true); // localStorage blocked — just show it
-    }
-  }, []);
-
-  const dismiss = () => {
-    setShow(false);
-    try {
-      localStorage.setItem(DISMISS_KEY, '1');
-    } catch {
-      /* ignore */
-    }
-  };
-
-  if (!show) return null;
-
   return (
     <aside
       data-testid="encyclopedia-sources-banner"
       className={cn(
-        'relative folded-paper military-corners overflow-hidden',
-        'border border-military-amber/25 bg-military-charcoal/50',
-        'fade-in-up',
+        'flex flex-wrap items-center gap-x-4 gap-y-1',
+        'rounded border border-military-steel/30 bg-military-charcoal/40 px-3 py-2',
       )}
     >
-      {/* amber side rail */}
-      <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-military-amber/70 via-military-rust/40 to-transparent" />
-      <div className="relative flex items-start gap-3 p-4 md:gap-4 md:p-5">
-        {/* icon */}
-        <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-sm border border-military-amber/40 bg-military-amber/10">
-          <Info className="h-4 w-4 text-military-amber" aria-hidden />
-        </div>
-
-        {/* body */}
-        <div className="min-w-0 flex-1">
-          <h2 className="font-ibm-mono text-[10px] uppercase tracking-wider text-military-rust/80">
-            {'// О ИСТОЧНИКАХ ДАННЫХ'}
-          </h2>
-          <p className="mt-1.5 text-sm leading-relaxed text-military-sand/80">
-            Энциклопедия собрана с миру по нитке — из официальных правил и книг, статей
-            сообщества и фанатских работ. Заметили ошибку или есть чем дополнить? Нажмите{' '}
-            <span className="font-oswald text-military-amber">«Дополнить»</span> на странице
-            отряда: скопируется шаблон сообщения и откроется VK — останется заполнить и отправить.
-          </p>
-        </div>
-
-        {/* dismiss */}
-        <button
-          type="button"
-          onClick={dismiss}
-          data-testid="encyclopedia-sources-banner-dismiss"
-          aria-label="Закрыть сообщение"
-          className="shrink-0 rounded-sm p-1 text-military-steel/60 transition-colors hover:text-military-amber"
-        >
-          <X className="h-4 w-4" aria-hidden />
-        </button>
+      <div className="flex items-center gap-1.5">
+        <Shield className="h-3.5 w-3.5 shrink-0" style={{ color: '#22d3ee' }} />
+        <span className="font-ibm-mono text-[10px] text-military-sand/70">
+          Официальный канон (Технолог)
+        </span>
+      </div>
+      <div className="flex items-center gap-1.5">
+        <Star className="h-3.5 w-3.5 shrink-0" style={{ color: '#f59e0b' }} />
+        <span className="font-ibm-mono text-[10px] text-military-sand/70">
+          Материалы сообщества (Звёздные Системы)
+        </span>
       </div>
     </aside>
   );

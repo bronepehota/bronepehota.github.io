@@ -21,6 +21,14 @@ export default function Home() {
       {/* Rest of the content below - partially visible to hint at scroll */}
       <LoreSection />
       <FactionsSection />
+
+      {/* Disclaimer: official + fan content */}
+      <div className="mx-auto max-w-2xl px-4 py-6 text-center">
+        <p className="font-ibm-mono text-[11px] text-military-steel/60 leading-relaxed">
+          Энциклопедия содержит официальный лор «Технолог» и фанатские материалы сообщества «Звёздные Системы». Метки источников указаны на странице каждого отряда.
+        </p>
+      </div>
+
       <FinalCTA />
 
       {/* Help the project section */}
