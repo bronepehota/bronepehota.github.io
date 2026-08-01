@@ -20,7 +20,7 @@ import type { EncyclopediaUnit, EncyclopediaFaction } from './encyclopedia-regis
 import type { Mission } from './mission-types';
 
 /** Who a piece of lore comes from. */
-export type LoreSource = 'tehnolog' | 'star_system' | 'universestarsys';
+export type LoreSource = 'tehnolog' | 'star_system' | 'universestarsys' | 'ai';
 
 /** Resolved provenance — both axes always present after resolution. */
 export interface Provenance {
