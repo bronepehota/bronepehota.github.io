@@ -160,15 +160,14 @@ test.describe('Энциклопедия', () => {
     await expect(card.getByTestId('provenance-row').getByText('STAR SYSTEM')).toBeVisible();
   });
 
-  test('страница отряда показывает происхождение (оригинал + лор) и покрас', async ({ page }) => {
+  test('страница отряда показывает происхождение (канон Технолога) и покрас', async ({ page }) => {
     await page.goto('/encyclopedia/unit/polaris_lineynaya_klon_pehota');
     await page.waitForLoadState('networkidle');
 
-    // У этого отряда есть лор → origin tehnolog, loreAuthor star_system (два чипа).
+    // Официальный отряд (в армлисте Технолога) → origin + loreAuthor = tehnolog (единый чип).
     const row = page.getByTestId('provenance-row').first();
     await expect(row).toBeVisible();
     await expect(row.getByText('ТЕХНОЛОГ')).toBeVisible();
-    await expect(row.getByText('STAR SYSTEM')).toBeVisible();
     // Покрас — Шнайдер (отряд в SQUAD_PHOTO_SOURCE).
     await expect(page.getByTestId('painter-chip').getByText('ПОКРАСЫ ШНАЙДЕРА')).toBeVisible();
   });
@@ -222,8 +221,7 @@ test.describe('Энциклопедия', () => {
     await page.waitForLoadState('networkidle');
 
     const row = page.getByTestId('provenance-row').first();
-    // split: origin=tehnolog, loreAuthor=star_system — оба теперь ссылки
+    // официальный отряд → единый чип Технолога, ссылается на tehnolog.ru
     await expect(row.locator('a[href*="tehnolog.ru"]')).toBeVisible();
-    await expect(row.locator('a[href*="vk.com/bp_bnp"]')).toBeVisible();
   });
 });
