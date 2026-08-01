@@ -91,7 +91,7 @@ export function UnitCard({ unit }: UnitCardProps) {
           </div>
 
           {/* Provenance badge — official (Shield) / fan (Star) */}
-          <div className="absolute top-2 right-2" title={isOfficial ? 'Официальный канон (Технолог)' : 'Материалы сообщества (Звёздные Системы)'}>
+          <div className="absolute top-2 right-2" title={isOfficial ? 'Официальный канон (Технолог)' : 'Фанатские материалы (различные сообщества)'}>
             <div
               className="flex h-6 w-6 items-center justify-center rounded-sm backdrop-blur-md border"
               style={{

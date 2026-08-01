@@ -23,9 +23,12 @@ export function EncyclopediaAttributionBanner() {
       <div className="flex items-center gap-1.5">
         <Star className="h-3.5 w-3.5 shrink-0" style={{ color: '#f59e0b' }} />
         <span className="font-ibm-mono text-[10px] text-military-sand/70">
-          Материалы сообщества (Звёздные Системы)
+          Фанатские материалы (различные сообщества)
         </span>
       </div>
+      <span className="font-ibm-mono text-[10px] text-military-steel/50 w-full sm:w-auto sm:ml-auto sm:text-right">
+        Заметили неточность? «Дополнить» на странице отряда
+      </span>
     </aside>
   );
 }
