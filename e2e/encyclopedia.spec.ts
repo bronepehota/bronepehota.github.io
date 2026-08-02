@@ -46,6 +46,39 @@ test.describe('Энциклопедия', () => {
     expect(count).toBeGreaterThan(0);
   });
 
+  test('фильтрация по источнику миниатюр работает', async ({ page }) => {
+    await page.goto('/encyclopedia');
+    await page.waitForLoadState('networkidle');
+    await page.waitForSelector('[data-testid^="unit-card-"]');
+
+    const cards = page.locator('[href*="/encyclopedia/unit/"]');
+    const initialCount = await cards.count();
+    expect(initialCount).toBeGreaterThan(1);
+
+    // Выбрать фильтр «Миниатюры Лисицына» (sculptor = lisitsin).
+    const sculptorSelect = page.locator('select[aria-label="Источник миниатюр"]');
+    await sculptorSelect.selectOption('lisitsin');
+
+    // Сетка обновляется: остаются только отряды Лисицына (< исходного кол-ва, > 0).
+    await expect(cards).not.toHaveCount(initialCount);
+    const filteredCount = await cards.count();
+    expect(filteredCount).toBeGreaterThan(0);
+    expect(filteredCount).toBeLessThan(initialCount);
+
+    // Сам <select> отражает выбранное значение.
+    await expect(sculptorSelect).toHaveValue('lisitsin');
+  });
+
+  test('deep-link ?sculptor=lisitsin предфильтрует юнитов', async ({ page }) => {
+    await page.goto('/encyclopedia?sculptor=lisitsin');
+    await page.waitForLoadState('networkidle');
+    await page.waitForSelector('[data-testid^="unit-card-"]');
+
+    // The sculptor <select> reflects the deep-link (?sculptor=lisitsin).
+    const sculptorSelect = page.locator('select[aria-label="Источник миниатюр"]');
+    await expect(sculptorSelect).toHaveValue('lisitsin');
+  });
+
   test('поиск по названию работает', async ({ page }) => {
     await page.goto('/encyclopedia');
     await page.waitForLoadState('networkidle');

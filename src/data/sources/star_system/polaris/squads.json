@@ -1207,8 +1207,8 @@
   },
   {
     "id": "polaris_indeytsy",
-    "name": "Индейцы",
-    "shortName": "Индейцы",
+    "name": "Охотники «Двух красных молний»",
+    "shortName": "Охотники Молний",
     "faction": "polaris",
     "cost": 55,
     "soldiers": [
@@ -1344,5 +1344,218 @@
       }
     ],
     "image": "/images/squads/polaris/imperskie_kommandos/1.png"
+  },
+  {
+    "id": "polaris_regulyarnaya_pehota_dolgorukogo",
+    "name": "Регулярная пехота Долгорукого",
+    "shortName": "Регулярная пехота",
+    "faction": "polaris",
+    "cost": 90,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 2,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 3,
+        "image": "/images/squads/polaris/regulyarnaya_pehota_dolgorukogo/1.png"
+      },
+      {
+        "num": 2,
+        "rank": 2,
+        "speed": 5,
+        "range": "D12",
+        "power": "1D20",
+        "melee": 0,
+        "armor": 3,
+        "image": "/images/squads/polaris/regulyarnaya_pehota_dolgorukogo/2.png"
+      },
+      {
+        "num": 3,
+        "rank": 2,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 3,
+        "image": "/images/squads/polaris/regulyarnaya_pehota_dolgorukogo/3.png"
+      },
+      {
+        "num": 4,
+        "rank": 2,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 3,
+        "image": "/images/squads/polaris/regulyarnaya_pehota_dolgorukogo/4.png"
+      },
+      {
+        "num": 5,
+        "rank": 2,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 3,
+        "image": "/images/squads/polaris/regulyarnaya_pehota_dolgorukogo/5.png"
+      },
+      {
+        "num": 6,
+        "rank": 2,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 3,
+        "image": "/images/squads/polaris/regulyarnaya_pehota_dolgorukogo/6.png"
+      }
+    ],
+    "image": "/images/squads/polaris/regulyarnaya_pehota_dolgorukogo/1.png"
+  },
+  {
+    "id": "polaris_shturmovaya_pehota_dolgorukogo",
+    "name": "Штурмовая пехота Долгорукого",
+    "shortName": "Штурмовая пехота",
+    "faction": "polaris",
+    "cost": 95,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 2,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 3,
+        "image": "/images/squads/polaris/shturmovaya_pehota_dolgorukogo/1.png"
+      },
+      {
+        "num": 2,
+        "rank": 2,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 0,
+        "armor": 3,
+        "image": "/images/squads/polaris/shturmovaya_pehota_dolgorukogo/2.png"
+      },
+      {
+        "num": 3,
+        "rank": 2,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 3,
+        "image": "/images/squads/polaris/shturmovaya_pehota_dolgorukogo/3.png"
+      },
+      {
+        "num": 4,
+        "rank": 2,
+        "speed": 5,
+        "range": "D12",
+        "power": "1D20",
+        "melee": 0,
+        "armor": 3,
+        "image": "/images/squads/polaris/shturmovaya_pehota_dolgorukogo/4.png"
+      },
+      {
+        "num": 5,
+        "rank": 2,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 3,
+        "image": "/images/squads/polaris/shturmovaya_pehota_dolgorukogo/5.png"
+      },
+      {
+        "num": 6,
+        "rank": 2,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 3,
+        "image": "/images/squads/polaris/shturmovaya_pehota_dolgorukogo/6.png"
+      }
+    ],
+    "image": "/images/squads/polaris/shturmovaya_pehota_dolgorukogo/1.png"
+  },
+  {
+    "id": "polaris_inzhenernyy_otryad_dolgorukogo",
+    "name": "Инженерный отряд Долгорукого",
+    "shortName": "Инженерный отряд",
+    "faction": "polaris",
+    "cost": 95,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 2,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 3,
+        "image": "/images/squads/polaris/inzhenernyy_otryad_dolgorukogo/1.png"
+      },
+      {
+        "num": 2,
+        "rank": 2,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D12",
+        "melee": 0,
+        "armor": 3,
+        "image": "/images/squads/polaris/inzhenernyy_otryad_dolgorukogo/2.png"
+      },
+      {
+        "num": 3,
+        "rank": 2,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 3,
+        "armor": 3,
+        "image": "/images/squads/polaris/inzhenernyy_otryad_dolgorukogo/3.png",
+        "modifiers": [
+          "mechanic"
+        ]
+      },
+      {
+        "num": 4,
+        "rank": 2,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 3,
+        "image": "/images/squads/polaris/inzhenernyy_otryad_dolgorukogo/4.png"
+      },
+      {
+        "num": 5,
+        "rank": 2,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 3,
+        "image": "/images/squads/polaris/inzhenernyy_otryad_dolgorukogo/5.png"
+      },
+      {
+        "num": 6,
+        "rank": 2,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 3,
+        "image": "/images/squads/polaris/inzhenernyy_otryad_dolgorukogo/6.png"
+      }
+    ],
+    "image": "/images/squads/polaris/inzhenernyy_otryad_dolgorukogo/1.png"
   }
 ]

@@ -1435,5 +1435,145 @@
       }
     ],
     "image": "/images/squads/protectorate/shturmovaya_kiber_pehota/1.png"
+  },
+  {
+    "id": "protectorate_ekspeditsionnyy_otryad_nyu_rodezii",
+    "name": "Экспедиционный отряд Нью-Родезии",
+    "shortName": "Экспедиционный отряд",
+    "faction": "protectorate",
+    "cost": 60,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 3,
+        "speed": 5,
+        "range": "D6",
+        "power": "D6+3",
+        "melee": 5,
+        "armor": 1,
+        "image": "/images/squads/protectorate/ekspeditsionnyy_otryad_nyu_rodezii/1.png"
+      },
+      {
+        "num": 2,
+        "rank": 3,
+        "speed": 5,
+        "range": "D6",
+        "power": "D12",
+        "melee": 2,
+        "armor": 1,
+        "image": "/images/squads/protectorate/ekspeditsionnyy_otryad_nyu_rodezii/2.png"
+      },
+      {
+        "num": 3,
+        "rank": 3,
+        "speed": 5,
+        "range": "D6",
+        "power": "D12",
+        "melee": 2,
+        "armor": 1,
+        "image": "/images/squads/protectorate/ekspeditsionnyy_otryad_nyu_rodezii/3.png"
+      },
+      {
+        "num": 4,
+        "rank": 3,
+        "speed": 5,
+        "range": "D6",
+        "power": "D12",
+        "melee": 2,
+        "armor": 1,
+        "image": "/images/squads/protectorate/ekspeditsionnyy_otryad_nyu_rodezii/4.png"
+      },
+      {
+        "num": 5,
+        "rank": 3,
+        "speed": 5,
+        "range": "D6",
+        "power": "D12",
+        "melee": 2,
+        "armor": 1,
+        "image": "/images/squads/protectorate/ekspeditsionnyy_otryad_nyu_rodezii/5.png"
+      },
+      {
+        "num": 6,
+        "rank": 3,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D12",
+        "melee": 0,
+        "armor": 1,
+        "image": "/images/squads/protectorate/ekspeditsionnyy_otryad_nyu_rodezii/6.png"
+      }
+    ],
+    "image": "/images/squads/protectorate/ekspeditsionnyy_otryad_nyu_rodezii/1.png"
+  },
+  {
+    "id": "protectorate_nyu_stirling_opolchentsy",
+    "name": "Нью-Стирлингские ополченцы",
+    "shortName": "Нью-Стирлингские ополченцы",
+    "faction": "protectorate",
+    "cost": 60,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 1,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 4,
+        "armor": 2,
+        "image": "/images/squads/protectorate/nyu_stirling_opolchentsy/1.png"
+      },
+      {
+        "num": 2,
+        "rank": 1,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 1,
+        "armor": 2,
+        "image": "/images/squads/protectorate/nyu_stirling_opolchentsy/2.png"
+      },
+      {
+        "num": 3,
+        "rank": 1,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 2,
+        "image": "/images/squads/protectorate/nyu_stirling_opolchentsy/3.png"
+      },
+      {
+        "num": 4,
+        "rank": 1,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 2,
+        "image": "/images/squads/protectorate/nyu_stirling_opolchentsy/4.png"
+      },
+      {
+        "num": 5,
+        "rank": 1,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 2,
+        "image": "/images/squads/protectorate/nyu_stirling_opolchentsy/5.png"
+      },
+      {
+        "num": 6,
+        "rank": 1,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 2,
+        "image": "/images/squads/protectorate/nyu_stirling_opolchentsy/6.png"
+      }
+    ],
+    "image": "/images/squads/protectorate/nyu_stirling_opolchentsy/1.png"
   }
 ]
