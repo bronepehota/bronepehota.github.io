@@ -10,7 +10,7 @@ import { factionDisplayNames, getFactionColors } from '@/lib/faction-colors';
 import { UnitCard } from './UnitCard';
 import { EncyclopediaTabs } from './EncyclopediaTabs';
 import { EncyclopediaAttributionBanner } from './EncyclopediaAttributionBanner';
-import { SQUAD_GROUP_IMAGE } from '@/lib/painted-images';
+import { SQUAD_GROUP_IMAGE, getCredit } from '@/lib/painted-images';
 import { cn } from '@/lib/utils';
 
 interface EncyclopediaPageProps {
@@ -34,6 +34,10 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
   const [filteredUnits, setFilteredUnits] = useState<EncyclopediaUnit[]>(initialUnits);
   const [selectedFaction, setSelectedFaction] = useState<FactionID | 'all'>('all');
   const [selectedType, setSelectedType] = useState<TypeFilter>('all');
+  // Sculptor (miniature source) filter. Технолог is the IMPLICIT default — units
+  // without a `miniatureSource` field are sculpted by Технолог, so we resolve a
+  // unit's sculptor as `unit.miniatureSource ?? 'tehnolog'`.
+  const [selectedSculptor, setSelectedSculptor] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -57,23 +61,46 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
     ];
   }, [units]);
 
+  // Derive the sculptor (miniature source) filter from the units data — same
+  // data-driven pattern as the faction filter. Технолог is the implicit default
+  // (no `miniatureSource` field ⇒ 'tehnolog'); only sculptors actually present
+  // in the data appear as options. Labels resolve via `getCredit` (CREDITS map).
+  const sculptors = useMemo(() => {
+    const present = new Set(units.map((u) => u.miniatureSource ?? 'tehnolog'));
+    // Stable display order: Технолог first (the canon/implicit default), then the
+    // other known credit ids in their CREDITS declaration order, then any
+    // unknown ids alphabetically (future-proofs new sculptors).
+    const preferred = ['tehnolog', 'lisitsin', 'universestarsys', 'shnayder', 'sukov', 'pereverzev', 'star_system'];
+    const ordered = Array.from(present).sort((a, b) => {
+      const ia = preferred.indexOf(a);
+      const ib = preferred.indexOf(b);
+      return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib) || a.localeCompare(b);
+    });
+    return [
+      { value: 'all' as const, label: 'ВСЕ' },
+      ...ordered.map((id) => ({ value: id, label: (getCredit(id)?.name ?? id).toUpperCase() })),
+    ];
+  }, [units]);
+
   useEffect(() => {
     setIsLoaded(true);
   }, []);
 
-  // Restore filter on mount: a URL deep-link (?faction=&type=&q=) takes priority,
-  // otherwise fall back to sessionStorage — so the filter survives a
+  // Restore filter on mount: a URL deep-link (?faction=&type=&sculptor=&q=) takes
+  // priority, otherwise fall back to sessionStorage — so the filter survives a
   // unit → «назад» round-trip (the page remounts on return).
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const params = new URLSearchParams(window.location.search);
-    let saved: { faction?: string; type?: string; search?: string } = {};
+    let saved: { faction?: string; type?: string; sculptor?: string; search?: string } = {};
     try { saved = JSON.parse(sessionStorage.getItem('enc_filter') || '{}'); } catch {}
     const fac = params.get('faction') ?? saved.faction;
     const typ = params.get('type') ?? saved.type;
+    const sc = params.get('sculptor') ?? saved.sculptor;
     const q = params.get('q') ?? saved.search;
     if (fac && fac !== 'all' && units.some((u) => u.faction === fac)) setSelectedFaction(fac as FactionID);
     if (typ && typ !== 'all') setSelectedType(typ as TypeFilter);
+    if (sc && sc !== 'all' && units.some((u) => (u.miniatureSource ?? 'tehnolog') === sc)) setSelectedSculptor(sc);
     if (q) setSearchQuery(q);
   }, []);
 
@@ -82,14 +109,15 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
     if (typeof window === 'undefined') return;
     try {
       sessionStorage.setItem('enc_filter', JSON.stringify({
-        faction: selectedFaction, type: selectedType, search: searchQuery,
+        faction: selectedFaction, type: selectedType, sculptor: selectedSculptor, search: searchQuery,
       }));
     } catch { /* sessionStorage unavailable (private mode) — deep-link still works */ }
-  }, [selectedFaction, selectedType, searchQuery]);
+  }, [selectedFaction, selectedType, selectedSculptor, searchQuery]);
 
   useEffect(() => {
     const filtered = units.filter(unit => {
       if (selectedFaction !== 'all' && unit.faction !== selectedFaction) return false;
+      if (selectedSculptor !== 'all' && (unit.miniatureSource ?? 'tehnolog') !== selectedSculptor) return false;
       if (selectedType !== 'all') {
         if (selectedType === 'hero') {
           // Герои — отряды с пометкой о предварительных статах
@@ -111,10 +139,13 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
       return true;
     });
     setFilteredUnits(filtered);
-  }, [units, selectedFaction, selectedType, searchQuery]);
+  }, [units, selectedFaction, selectedSculptor, selectedType, searchQuery]);
 
   const activeFilterCount =
-    (selectedFaction !== 'all' ? 1 : 0) + (selectedType !== 'all' ? 1 : 0) + (searchQuery ? 1 : 0);
+    (selectedFaction !== 'all' ? 1 : 0) +
+    (selectedType !== 'all' ? 1 : 0) +
+    (selectedSculptor !== 'all' ? 1 : 0) +
+    (searchQuery ? 1 : 0);
 
   return (
     <div className="min-h-screen bg-military-dark relative overflow-hidden">
@@ -248,6 +279,24 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
                   {types.map(t => (
                     <option key={t.value} value={t.value} className="bg-military-charcoal text-white">
                       {t.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Sculptor (miniature source) selector — data-driven, mirrors faction filter */}
+            <div className="flex gap-2">
+              <div className="relative flex-1 min-w-0">
+                <select
+                  aria-label="Источник миниатюр"
+                  value={selectedSculptor}
+                  onChange={e => setSelectedSculptor(e.target.value)}
+                  className="w-full rounded-full border border-military-steel/30 bg-military-charcoal/70 py-1.5 pl-3 pr-3 font-ibm-mono text-[10px] tracking-wide text-white focus:border-military-amber/50 focus:outline-none md:text-xs"
+                >
+                  {sculptors.map(s => (
+                    <option key={s.value} value={s.value} className="bg-military-charcoal text-white">
+                      {s.value === 'all' ? 'ВСЕ ИСТОЧНИКИ' : s.label}
                     </option>
                   ))}
                 </select>
