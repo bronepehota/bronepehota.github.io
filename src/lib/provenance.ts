@@ -20,7 +20,7 @@ import type { EncyclopediaUnit, EncyclopediaFaction } from './encyclopedia-regis
 import type { Mission } from './mission-types';
 
 /** Who a piece of lore comes from. */
-export type LoreSource = 'tehnolog' | 'star_system' | 'universestarsys';
+export type LoreSource = 'tehnolog' | 'star_system' | 'universestarsys' | 'ai';
 
 /** Resolved provenance — both axes always present after resolution. */
 export interface Provenance {
@@ -50,14 +50,27 @@ function merge(base: Provenance, override?: Partial<Provenance>): Provenance {
   };
 }
 
-/** Provenance for a unit (defaults from its faction; override via `unit.provenance`). */
+/** Provenance for a unit (defaults from its faction + army-list presence; override via `unit.provenance`). */
 export function resolveUnitProvenance(unit: EncyclopediaUnit): Provenance {
   // Machines (техника) and орудия are official Технолог products — both the concept
   // and the lore text are Технолог's, regardless of faction. A community-made machine
   // (e.g. Dead Fleet's, by Звёздные Системы) overrides this via `unit.provenance`.
-  const base: Provenance = (unit.type === 'machine' || unit.type === 'орудие')
+  if (unit.type === 'machine' || unit.type === 'орудие') {
+    return merge({ origin: 'tehnolog', loreAuthor: 'tehnolog' }, unit.provenance);
+  }
+  // Faction-specific community creations.
+  if (unit.faction === 'rutenia') {
+    return merge({ origin: 'star_system', loreAuthor: 'star_system' }, unit.provenance);
+  }
+  if (unit.faction === 'dead_fleet') {
+    return merge({ origin: 'universestarsys', loreAuthor: 'universestarsys' }, unit.provenance);
+  }
+  // Official canon unit (present in the Tehnolog army list) → Tehnolog concept + lore.
+  // Community-only unit (star_system list) → community concept + lore.
+  const official = (unit.sources ?? []).some((s) => s.id === 'tehnolog');
+  const base: Provenance = official
     ? { origin: 'tehnolog', loreAuthor: 'tehnolog' }
-    : defaultFactionOrUnit(unit.faction);
+    : { origin: 'star_system', loreAuthor: 'star_system' };
   return merge(base, unit.provenance);
 }
 

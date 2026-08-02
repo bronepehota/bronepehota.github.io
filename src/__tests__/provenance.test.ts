@@ -8,9 +8,18 @@ import type { EncyclopediaUnit, EncyclopediaFaction } from '../lib/encyclopedia-
 import type { Mission } from '../lib/mission-types';
 import type { Provenance } from '../lib/provenance';
 
-// Minimal factory helpers — the resolvers read only id / faction / provenance.
-const unit = (faction: string, provenance?: Partial<Provenance>): EncyclopediaUnit =>
-  ({ faction, provenance } as unknown as EncyclopediaUnit);
+// Minimal factory helpers — the resolvers read id / faction / sources / type / provenance.
+const unit = (
+  faction: string,
+  provenance?: Partial<Provenance>,
+  opts: { sources?: string[]; type?: string } = {},
+): EncyclopediaUnit =>
+  ({
+    faction,
+    provenance,
+    sources: (opts.sources ?? []).map((id) => ({ id })),
+    type: opts.type,
+  } as unknown as EncyclopediaUnit);
 const faction = (id: string, provenance?: Partial<Provenance>): EncyclopediaFaction =>
   ({ id, provenance } as unknown as EncyclopediaFaction);
 const mission = (provenance?: Partial<Provenance>): Mission =>
@@ -18,9 +27,16 @@ const mission = (provenance?: Partial<Provenance>): Mission =>
 
 describe('provenance resolver', () => {
   describe('resolveUnitProvenance', () => {
-    test('default non-rutenia unit: origin tehnolog, loreAuthor star_system', () => {
-      expect(resolveUnitProvenance(unit('polaris'))).toEqual({
+    test('official unit (in the tehnolog army list): both tehnolog', () => {
+      expect(resolveUnitProvenance(unit('polaris', undefined, { sources: ['tehnolog', 'star_system'] }))).toEqual({
         origin: 'tehnolog',
+        loreAuthor: 'tehnolog',
+      });
+    });
+
+    test('community unit (star_system list only): both star_system', () => {
+      expect(resolveUnitProvenance(unit('polaris', undefined, { sources: ['star_system'] }))).toEqual({
+        origin: 'star_system',
         loreAuthor: 'star_system',
       });
     });
@@ -32,23 +48,23 @@ describe('provenance resolver', () => {
       });
     });
 
-    test('explicit origin override only', () => {
-      expect(resolveUnitProvenance(unit('polaris', { origin: 'star_system' }))).toEqual({
+    test('explicit origin override on an official unit', () => {
+      expect(resolveUnitProvenance(unit('polaris', { origin: 'star_system' }, { sources: ['tehnolog'] }))).toEqual({
         origin: 'star_system',
-        loreAuthor: 'star_system',
+        loreAuthor: 'tehnolog',
       });
     });
 
-    test('explicit loreAuthor override only', () => {
-      expect(resolveUnitProvenance(unit('polaris', { loreAuthor: 'tehnolog' }))).toEqual({
-        origin: 'tehnolog',
+    test('explicit loreAuthor override on a community unit', () => {
+      expect(resolveUnitProvenance(unit('polaris', { loreAuthor: 'tehnolog' }, { sources: ['star_system'] }))).toEqual({
+        origin: 'star_system',
         loreAuthor: 'tehnolog',
       });
     });
 
     test('explicit override of both axes', () => {
       expect(
-        resolveUnitProvenance(unit('polaris', { origin: 'star_system', loreAuthor: 'tehnolog' })),
+        resolveUnitProvenance(unit('polaris', { origin: 'star_system', loreAuthor: 'tehnolog' }, { sources: ['tehnolog'] })),
       ).toEqual({ origin: 'star_system', loreAuthor: 'tehnolog' });
     });
 
@@ -61,17 +77,17 @@ describe('provenance resolver', () => {
     });
 
     test('machine: both tehnolog (official техника, regardless of faction)', () => {
-      const m = { faction: 'polaris', type: 'machine' } as unknown as EncyclopediaUnit;
+      const m = unit('polaris', undefined, { type: 'machine' });
       expect(resolveUnitProvenance(m)).toEqual({ origin: 'tehnolog', loreAuthor: 'tehnolog' });
     });
 
     test('орудие is treated like a machine (tehnolog)', () => {
-      const o = { faction: 'polaris', type: 'орудие' } as unknown as EncyclopediaUnit;
+      const o = unit('polaris', undefined, { type: 'орудие' });
       expect(resolveUnitProvenance(o)).toEqual({ origin: 'tehnolog', loreAuthor: 'tehnolog' });
     });
 
     test('machine explicit provenance overrides the tehnolog default per-axis', () => {
-      const m = { faction: 'polaris', type: 'machine', provenance: { loreAuthor: 'star_system' } } as unknown as EncyclopediaUnit;
+      const m = unit('polaris', { loreAuthor: 'star_system' }, { type: 'machine' });
       expect(resolveUnitProvenance(m)).toEqual({ origin: 'tehnolog', loreAuthor: 'star_system' });
     });
   });

@@ -77,9 +77,13 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;opa
 .soldier.dragging{opacity:.35}
 .soldier.drag-over{outline:2px dashed var(--ru2);outline-offset:-3px;background:rgba(234,88,12,.12)}
 .s-num{font-family:'Black Ops One';font-size:20px;color:var(--ru2);text-align:center;height:38px;display:grid;place-items:center;background:#0b0d10;border:1px solid var(--border2);border-radius:3px}
-.s-photo{position:relative;cursor:grab}
-.s-photo:active{cursor:grabbing}
+.s-photo{display:flex;flex-direction:column;align-items:center}
+.photo-drag{position:relative;cursor:grab}
+.photo-drag:active{cursor:grabbing}
 .s-photo img{width:116px;height:155px;object-fit:cover;object-position:center;background:#0b0d10;border:1px solid var(--border2);border-radius:3px;cursor:zoom-in;display:block}
+.turnwrap{display:flex;flex-direction:column;align-items:center;gap:0;margin-top:4px}
+.turnwrap input[type=range]{width:108px;accent-color:var(--ru);cursor:pointer;writing-mode:default}
+.turnlbl{font-family:'JetBrains Mono';font-size:10px;color:var(--ru2);letter-spacing:.5px}
 .soldier.conflict .s-photo img{border-color:var(--red)}
 .dup{position:absolute;top:2px;left:2px;background:var(--red);color:#fff;font-family:'JetBrains Mono';font-size:9px;padding:1px 4px;border-radius:2px;font-weight:700}
 .cell input,.cell select{background:#0b0d10;border:1px solid var(--border2);color:var(--bone);font-family:'JetBrains Mono';font-weight:600;font-size:18px;padding:8px 4px;border-radius:3px;width:100%;text-align:center}
@@ -122,7 +126,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;opa
 const RAW_DATA = __RAW__;
 let DATA = JSON.parse(JSON.stringify(RAW_DATA));
 let idx = 0;
-const LS = 'card_matcher_v2';
+const LS = 'card_matcher_v4';
 const MODS = [['','—'],['jump_boost_3','Пр3'],['jump_boost_4','Пр4'],['jump_boost_5','Пр5'],['mechanic','Рм']];
 let zoom = 1, header = 0.16;
 function restore(){
@@ -163,11 +167,14 @@ function render(){
   // wrap card click to zoom
   const rows=d.soldiers.map((s,i)=>{
     const n=imgN(s); const conflict=counts[n]>1;
-    const src=`${d.imgDir}/${d.imgPrefix||''}${n}.png`;
+    const fallback=`${d.imgDir}/${d.imgPrefix||''}${n}.png`;
+    const turn=s.turn||0;
+    const sweep=d.sweepDir?`${d.sweepDir}/${n}`:null;
+    const src=sweep?`${sweep}/a${turn}.png`:fallback;
     const modOpts=MODS.map(m=>`<option value="${m[0]}" ${s.modifier===m[0]?'selected':''}>${m[1]}</option>`).join('');
     return `<div class="row-grid soldier ${conflict?'conflict':''}" onmouseenter="activeN=${s.num};focusSoldier(${s.num});document.querySelectorAll('.soldier').forEach(e=>e.classList.remove('active'));this.classList.add('active')" ondragover="dragOver(event,${i})" ondrop="dropSwap(event,${i})">
       <div class="s-num">${s.num}</div>
-      <div class="s-photo" draggable="true" ondragstart="dragStart(${i})" ondragend="dragEnd()" title="Перетащи на другого бойца — фото поменяются местами"><img src="${src}" onclick="zoomImg('${src}','боец ${s.num} · фото ${n}')">${conflict?`<span class="dup">dup ${n}</span>`:''}</div>
+      <div class="s-photo"><div class="photo-drag" draggable="true" ondragstart="dragStart(${i})" ondragend="dragEnd()" title="Перетащи на другого бойца — фото поменяются местами"><img src="${src}" onerror="this.onerror=null;this.src='${fallback}'" onclick="zoomImg(this.src,'боец ${s.num} · фото ${n}')">${conflict?`<span class="dup">dup ${n}</span>`:''}</div>${sweep?`<div class="turnwrap"><input type="range" min="-75" max="75" step="15" value="${turn}" oninput="setTurn(${i},this.value)"><span class="turnlbl">${turn>0?'+':''}${turn}°</span></div>`:''}</div>
       <div class="cell"><input class="${s.rank==null?'empty':''}" value="${s.rank??''}" onchange="setSoldier(${i},'rank',this.value)"></div>
       <div class="cell"><input class="${s.speed==null?'empty':''}" value="${s.speed??''}" onchange="setSoldier(${i},'speed',this.value)"></div>
       <div class="cell"><input value="${s.range??''}" onchange="setSoldier(${i},'range',this.value)" title="пусто = нет стрелкового оружия"></div>
@@ -209,10 +216,11 @@ function dropSwap(e,i){e.preventDefault();if(dragSrcIdx==null||dragSrcIdx===i){d
 function dragEnd(){dragSrcIdx=null;clearDragMarks();}
 function clearDragMarks(){document.querySelectorAll('.soldier').forEach(el=>{el.classList.remove('dragging');el.classList.remove('drag-over');});}
 function setSoldier(i,k,v){const s=cur().soldiers[i];if(['rank','speed','melee','armor'].includes(k))s[k]=v===''?null:+v;else s[k]=v;saveCurrent();}
+function setTurn(i,v){const s=cur().soldiers[i];s.turn=+v;const cell=document.querySelectorAll('.s-photo')[i];if(!cell)return;const sw=cur().sweepDir;const n=imgN(s);if(sw){cell.querySelector('img').src=`${sw}/${n}/a${s.turn||0}.png`;}const lbl=cell.querySelector('.turnlbl');if(lbl)lbl.textContent=(s.turn>0?'+':'')+(s.turn||0)+'°';saveCurrent();}
 function saveCurrent(){cur().verified=document.getElementById('verified').checked;persist();}
 function nav(dir){saveCurrent();idx=(idx+dir+DATA.length)%DATA.length;activeN=1;render();}
 function zoomImg(src,cap){document.getElementById('zoomimg').src=src;document.getElementById('zoomcap').textContent=cap||'';document.getElementById('zoom').style.display='flex';}
-function cleanExport(){return DATA.map(d=>({name:d.name,slug:d.slug,faction:d.faction||'rutenia',source:d.source||'star_system',cost:d.cost,imgDir:d.imgDir,imgPrefix:d.imgPrefix||'',card:d.card,lore:d.lore||'',soldiers:d.soldiers.map(s=>({num:s.num,rank:s.rank,speed:s.speed,range:s.range||'',power:s.power||'',melee:s.melee,modifier:s.modifier||'',armor:s.armor,imgIndex:imgN(s)}))}));}
+function cleanExport(){return DATA.map(d=>({name:d.name,slug:d.slug,faction:d.faction||'rutenia',source:d.source||'star_system',cost:d.cost,imgDir:d.imgDir,imgPrefix:d.imgPrefix||'',sweepDir:d.sweepDir||'',card:d.card,lore:d.lore||'',soldiers:d.soldiers.map(s=>({num:s.num,rank:s.rank,speed:s.speed,range:s.range||'',power:s.power||'',melee:s.melee,modifier:s.modifier||'',armor:s.armor,imgIndex:imgN(s),turn:s.turn||0}))}));}
 function exportJSON(){const t=JSON.stringify(cleanExport(),null,2);navigator.clipboard.writeText(t).then(()=>flash('Скопировано ✓')).catch(()=>{const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();flash('Скопирово ✓');});}
 function downloadJSON(){const b=new Blob([JSON.stringify(cleanExport(),null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='verified.json';a.click();flash('Скачивается…');}
 function resetToRaw(){if(!confirm('Сбросить к исходным данным?'))return;DATA=JSON.parse(JSON.stringify(RAW_DATA));persist();render();}

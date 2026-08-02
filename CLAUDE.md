@@ -80,6 +80,10 @@ npm run test:e2e            # All E2E tests pass
 
 **LSP diagnostics can be stale**: type errors shown mid-edit often resolve in the final state. Trust `npm run type-check` (exit code) over LSP diagnostics.
 
+**Local `next build` + heavy e2e are flaky in this env** — intermittently killed (empty log, exit 1) or fail on `Cannot find module for page: /_document` (Next 14 App Router intermittency). Trust `npm run type-check` + `npm run test` (fast, reliable) over local builds; CI is the source of truth. Next is 14.2.35 (latest 14.x — no newer patch; 14→16 is a separate major upgrade).
+
+**No persistent background servers** — the harness kills non-terminating background procs (exit 144, empty log). Finite `nohup … &` batches work; for "live" render-on-demand pre-compute (e.g. `render_sweep.py` + matcher slider) instead of a server.
+
 ### E2E test conventions
 
 - **Selector priority**: `getByTestId()` > `getByRole()` > `getByText()` > CSS selectors
@@ -373,6 +377,8 @@ Edit `squads.json` or `machines.json` in `src/data/sources/{source_id}/{faction}
 **Machine**: `id`, `name`, `shortName`, `faction`, `cost`, `rank`, `fire_rate`, `ammo_max`, `durability_max`, `image`, `speed_sectors[]` (must cover 1 to durability_max), `weapons[]`.
 
 **Image Standards**: 300x400 px PNG, white background, centered with ~5% margins. Process with `tools/standardize_images.py`. Place in `public/images/squads/` or `public/images/machines/`. **Gotcha**: PIL `im.thumbnail()` is downscale-only — if the source render is smaller than the frame, use `im.resize(...)` to upscale (figures must fill ~90% width per the app standard).
+
+**STL (3D models) → card images**: when a source ships `.stl` (not images), render via Blender Cycles headless — `tools/blender_render.py` (auto up-axis + 180° front-flip + per-figure `turn` yaw), batched by `tools/render_folder.py`/`render_local.py`, angle-tuned via `tools/render_sweep.py` + the matcher's live slider. The numpy `render_stl.py` is flat/silhouette — orientation checks only. Full pipeline: `import-cards` skill Step 1 (STL).
 
 ### Custom Hooks (`src/hooks/`)
 

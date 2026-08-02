@@ -11,7 +11,7 @@
  */
 import { useState } from 'react';
 import type { LucideIcon } from 'lucide-react';
-import { Shield, Star, Megaphone, ExternalLink, Check } from 'lucide-react';
+import { Shield, Star, Megaphone, ExternalLink, Check, Bot } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { GitHubPagesImage } from '@/components/GitHubPagesImage';
 import { isProvenanceUniform, type LoreSource, type Provenance } from '@/lib/provenance';
@@ -40,6 +40,8 @@ const LORE_SOURCE_META: Record<
   star_system: { name: 'Star System', short: 'STAR SYSTEM', icon: Star, tone: '#f59e0b', logo: '/images/credits/star_system.jpg', url: 'https://vk.com/bp_bnp' },
   // Звёздные Системы (vk.ru/universestarsys) — сообщество-создатель Мёртвого Флота.
   universestarsys: { name: 'Звёздные Системы', short: 'ЗВЁЗДНЫЕ СИСТЕМЫ', icon: Star, tone: '#e11d48', logo: '/images/credits/universestarsys.jpg', url: 'https://vk.ru/universestarsys' },
+  // ИИ — лор сгенерирован нейросетью (Z.AI / GLM), не написан человеком.
+  ai: { name: 'ИИ', short: 'ИИ', icon: Bot, tone: '#8b5cf6', logo: '/images/credits/ai.svg', url: 'https://chatglm.cn' },
 };
 
 /* -------------------------------------------------------------------------- */

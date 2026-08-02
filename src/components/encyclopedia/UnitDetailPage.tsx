@@ -360,23 +360,6 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
         {/* Content sections */}
         <main className="px-4 pb-20">
           <div className="max-w-6xl mx-auto space-y-8">
-            {/* Source Availability section */}
-            <section
-              className={cn(
-                'folded-paper military-corners p-6',
-                'fade-in-up opacity-0',
-                isLoaded && 'opacity-100'
-              )}
-              style={{ animationFillMode: 'forwards', animationDelay: '0.4s' }}
-            >
-              <SourceAvailability
-                unit={unit}
-                variant="detail"
-                activeSource={activeSource}
-                onSourceChange={sourceOrder.length > 1 ? setActiveSource : undefined}
-              />
-            </section>
-
             {/* Provisional-stats disclaimer (heroes): stats are approximate, not canon */}
             {unit.statsNote && (
               <section
@@ -399,7 +382,20 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
               </section>
             )}
 
-            {/* Stats table — soldiers or machine loadout, follows the active source */}
+            {/* Common army-list switcher — always shows the source list (a single
+                pill for one-source units; clickable pills when 2+). Controls BOTH
+                the personnel and the combat stats below it. */}
+            <SourceAvailability
+              unit={unit}
+              variant="detail"
+              activeSource={activeSource}
+              onSourceChange={unit.sources.length > 1 ? setActiveSource : undefined}
+            />
+
+            {/* Личный состав — personnel portraits, follows the active source */}
+            <SoldierImages unit={activeUnit} />
+
+            {/* Боевой расчёт — full stat table, follows the active source */}
             <UnitStatTable unit={activeUnit as unknown as Squad | Machine} type={unit.type} />
 
             {/* Tactics */}
@@ -456,17 +452,6 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
                 </div>
               </section>
             )}
-
-            {/* Soldier Images section */}
-            <section
-              className={cn(
-                'fade-in-up opacity-0',
-                isLoaded && 'opacity-100'
-              )}
-              style={{ animationFillMode: 'forwards', animationDelay: '0.8s' }}
-            >
-              <SoldierImages unit={unit} />
-            </section>
 
             {/* Machine Images section */}
             <section
