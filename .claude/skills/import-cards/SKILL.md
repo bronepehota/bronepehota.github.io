@@ -125,6 +125,8 @@ pip where needed (no venv/sudo, PEP668 enforced): `python3 get-pip.py --user --b
 
 **Output:** 300×400 white, figure fit at ~88% (leaves a bottom margin so feet aren't flush). Render in a **finite background batch** (`nohup bash -c '...' &`, `run_in_background`) — works fine. ⚠ A **persistent render SERVER does not work** in this harness (non-terminating background procs are killed, exit 144) → for live angle tuning use the pre-rendered **sweep**, not a server.
 
+**Card-art quality (do NOT skip — this was a multi-iteration bug):** render at **600×800 samples=96** then **downscale to 300×400** (supersampling → crisp anti-aliased edges; renders done directly at 300×400 look jagged/noisy). **Background must be transparent** (`transparent=True`) — then standardize by compositing RGBA **on white** (`Image.alpha_composite(white, im)`), matching `render_folder.standardize`. ⚠ `transparent=False` produces a **murky gray background (~197/255)** that the figures blend into, even with `bg_color=white, bg_strength=1.0`; and a plain `.convert('RGB')` drops the alpha to black. The whole `render_figure` default (transparent=True, 600×800, samples=96) + `render_folder.standardize` (alpha on white, 88% fit) gives clean white-bg cards — copy that pipeline verbatim.
+
 ---
 
 ## Step 2: Vision-extract stats
@@ -332,3 +334,4 @@ Not in the table? Ask the user and check `src/data/modifiers/standard-modifiers.
 - **Yandex download 404 / "Resource not found"** — use the **root public key + full path** (`/Folder/file.stl`); a subfolder's own share key only *lists*, downloads 404.
 - **Big Yandex batch** — ask the user for the **zip** (local > API: no Cyrillic-path listing failures, faster, includes the army-list cards).
 - **Renders' feet flush at the bottom** — full-height fit leaves no margin; standardize to ~88% of the frame.
+- **Murky gray background / figures blend into bg** — you rendered `transparent=False` (or directly at 300×400). Fix: render **600×800 samples=96 `transparent=True`**, then standardize via **`alpha_composite` on white** + 88% fit (`render_folder.standardize`). `transparent=False` bakes a ~197-gray bg that swallows light-colored figures; `.convert('RGB')` on an RGBA render turns the bg black. Supersampling (600×800→300×400) is what gives the crisp, commandos-quality edges.
