@@ -1207,8 +1207,8 @@
   },
   {
     "id": "polaris_indeytsy",
-    "name": "Индейцы",
-    "shortName": "Индейцы",
+    "name": "Охотники «Двух красных молний»",
+    "shortName": "Охотники Молний",
     "faction": "polaris",
     "cost": 55,
     "soldiers": [
