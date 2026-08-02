@@ -80,7 +80,7 @@ npm run test:e2e            # All E2E tests pass
 
 **LSP diagnostics can be stale**: type errors shown mid-edit often resolve in the final state. Trust `npm run type-check` (exit code) over LSP diagnostics.
 
-**Local `next build` + heavy e2e are flaky in this env** — intermittently killed (empty log, exit 1) or fail on `Cannot find module for page: /_document` (Next 14 App Router intermittency). Trust `npm run type-check` + `npm run test` (fast, reliable) over local builds; CI is the source of truth. Next is 14.2.35 (latest 14.x — no newer patch; 14→16 is a separate major upgrade).
+**Local `next build` + heavy e2e are flaky in this env** — intermittently killed (empty log, exit 1) or fail on `Cannot find module for page: /_document` (Next 14 App Router intermittency). Trust `npm run type-check` + `npm run test` (fast, reliable) over local builds; CI is the source of truth. Next is 14.2.35 (latest 14.x — no newer patch; 14→16 is a separate major upgrade). **E2E is CI-only** — Playwright's `webServer` spawns `next dev` (non-terminating), which the harness kills → e2e exits 1 with an empty log; don't try to run it locally. The Bash tool's default `timeout` is 120s — set it higher (up to `600000`) for long foreground ops (multi-figure renders, etc.).
 
 **No persistent background servers** — the harness kills non-terminating background procs (exit 144, empty log). Finite `nohup … &` batches work; for "live" render-on-demand pre-compute (e.g. `render_sweep.py` + matcher slider) instead of a server.
 
@@ -173,6 +173,8 @@ src/data/encyclopedia/
 - `getUnitCostForSource(unitId, sourceId)` - Get cost for specific source
 
 **Key Pattern**: Game data (cost, soldiers, weapons) lives in `sources/`. Lore data (descriptions, history, tactics) lives in `encyclopedia/`. `encyclopedia-utils.ts` merges them for display.
+
+**Squad cost calculator**: `~/Downloads/Kalkulyator_armlistov_pekhoty_Alfa_v-1_03.xlsx` (sheet «АвтоРасчёт») — per-soldier price = Тип отряда + Оружие + ББ + Свойства + Броня/скорость + Раса; **squad cost = ceil5(Σ soldier prices / 10)**. Recalc via `soffice --headless --convert-to xlsx` then read with `openpyxl` (`data_only=True`). Parallel to `tools/machine_cost_model.py` (техника).
 
 **`EncyclopediaUnit` carries LORE only** — no gameplay stats (`rank`, `weapons`, `durability_max`, `ammo_max` are undefined). To resolve real Machine data: `resolveMachineFromSource(id)` from `src/lib/machine-resolver.ts` — looks up `getSource(id).machines` via the encyclopedia's `sources` list.
 
