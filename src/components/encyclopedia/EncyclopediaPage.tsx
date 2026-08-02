@@ -246,7 +246,7 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
               </div>
             </div>
 
-            {/* Faction + type selectors — compact on mobile */}
+            {/* Faction + type + sculptor selectors — one inline row */}
             <div className="flex gap-2">
               {/* Faction selector (color dot = selected faction) */}
               <div className="relative flex-1 min-w-0">
@@ -269,7 +269,7 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
               </div>
 
               {/* Type selector */}
-              <div className="relative w-28 shrink-0 md:w-36">
+              <div className="relative w-24 shrink-0 md:w-28">
                 <select
                   aria-label="Тип"
                   value={selectedType}
@@ -283,11 +283,9 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
                   ))}
                 </select>
               </div>
-            </div>
 
-            {/* Sculptor (miniature source) selector — data-driven, mirrors faction filter */}
-            <div className="flex gap-2">
-              <div className="relative flex-1 min-w-0">
+              {/* Sculptor (miniature source) selector — data-driven, mirrors faction filter */}
+              <div className="relative w-28 shrink-0 md:w-36">
                 <select
                   aria-label="Источник миниатюр"
                   value={selectedSculptor}
