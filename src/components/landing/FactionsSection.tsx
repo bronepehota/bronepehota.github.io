@@ -24,7 +24,7 @@ export default function FactionsSection({ className }: FactionsSectionProps) {
   return (
     <section
       className={cn(
-        'relative py-20 md:py-32 px-4 md:px-8 overflow-hidden',
+        'relative py-14 md:py-32 px-4 md:px-8 overflow-hidden',
         'bg-gradient-to-b from-military-dark to-military-charcoal',
         className
       )}
@@ -39,8 +39,10 @@ export default function FactionsSection({ className }: FactionsSectionProps) {
         </div>
       </div>
 
-      {/* Factions grid */}
-      <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 md:gap-8">
+      {/* Factions grid — single column on phones (cards are content-rich),
+          multi-column from small tablets up. Was grid-cols-2 which crammed
+          long lore + motto rows into 152px and overflowed on mobile. */}
+      <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 sm:gap-6 md:gap-8">
         {allFactions.map((faction, index) => {
           const IconComponent = iconMap[faction.symbol as keyof typeof iconMap];
 

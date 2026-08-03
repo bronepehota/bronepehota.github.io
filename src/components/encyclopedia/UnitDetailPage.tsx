@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Shield, Zap, Skull, Target, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Shield, Zap, Skull, Star, Anchor, Target, AlertTriangle } from 'lucide-react';
 import { GitHubPagesImage } from '@/components/GitHubPagesImage';
 import { EnrichedUnit } from '@/lib/encyclopedia-utils';
+import { getEncyclopediaFaction } from '@/lib/encyclopedia-registry';
 import { cn } from '@/lib/utils';
 import { ModifierIcon } from '@/components/editor/ModifierIcons';
 import { SoldierImages } from './UnitDetail/SoldierImages';
@@ -15,7 +16,7 @@ import { UnitLore } from './UnitDetail/UnitLore';
 import { SourceAvailability } from './SourceAvailability';
 import { PainterChip, ProvenanceRow, ImageSourceChip, MiniatureChip } from './AttributionLabel';
 import { FactionLogo } from '@/components/FactionLogo';
-import { getFactionColors, factionLogos } from '@/lib/faction-colors';
+import { getFactionColors, factionLogos, factionDisplayNames } from '@/lib/faction-colors';
 import { UnitStatTable } from './UnitDetail/UnitStatTable';
 import type { Squad, Machine } from '@/lib/types';
 
@@ -29,19 +30,21 @@ const factionIcons: Record<string, React.ComponentType<{ className?: string }>> 
   polaris: Shield,
   protectorate: Zap,
   mercenaries: Skull,
+  rutenia: Star,
+  dead_fleet: Anchor,
 };
 
 const factionBadges: Record<string, string> = {
   polaris: 'ИМП',
   protectorate: 'ПРОТ',
   mercenaries: 'НАЁМ',
+  rutenia: 'РУТ',
+  dead_fleet: 'ФЛОТ',
 };
 
-const factionNames: Record<string, string> = {
-  polaris: 'Империя Полярис',
-  protectorate: 'Торговый Протекторат',
-  mercenaries: 'Наёмники',
-};
+// Faction display name resolves from the faction DATA (canonical full name,
+// e.g. «Мёртвый Флот») — NOT a local copy that goes stale when factions are
+// added. `factionDisplayNames` is the short-name fallback.
 
 export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDetailPageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -58,7 +61,7 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
     return lo === hi ? String(lo) : `${lo}–${hi}`;
   })();
   const faction = {
-    name: factionNames[unit.faction] || unit.faction,
+    name: getEncyclopediaFaction(unit.faction)?.name ?? factionDisplayNames[unit.faction] ?? unit.faction,
     color: factionColors.primary,
     icon: factionIcons[unit.faction] || Shield,
     badge: factionBadges[unit.faction] || '',
@@ -110,7 +113,7 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
 
       <div className="relative z-10">
         {/* Header */}
-        <header className="relative py-8 md:py-12 px-4">
+        <header className="relative py-6 md:py-12 px-4">
           <div className="max-w-6xl mx-auto">
             {/* Back link */}
             <Link
@@ -118,7 +121,7 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
               className={cn(
                 'inline-flex items-center gap-2 font-ibm-mono text-xs md:text-sm',
                 'text-military-rust/60 hover:text-military-amber transition-colors',
-                'tracking-widest uppercase mb-8',
+                'tracking-widest uppercase mb-5 md:mb-8',
                 'fade-in-up opacity-0',
                 isLoaded && 'opacity-100'
               )}
@@ -229,7 +232,7 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
                   style={{ animationFillMode: 'forwards', animationDelay: '0.3s' }}
                 >
                   {/* Classification stamp */}
-                  <div className="mb-4 inline-block">
+                  <div className="mb-3 md:mb-4 inline-block">
                     <div className="border-2 border-military-rust/60 px-3 py-1 rotate-[-2deg]">
                       <span className="font-ibm-mono text-xs text-military-rust tracking-wider">
                         СЕКРЕТНО
@@ -238,12 +241,12 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
                   </div>
 
                   {/* Unit name */}
-                  <h1 className="font-russo font-black text-3xl md:text-4xl lg:text-5xl text-white mb-3 military-text-gradient">
+                  <h1 className="font-russo font-black text-3xl md:text-4xl lg:text-5xl text-white mb-2 md:mb-3 military-text-gradient">
                     {unit.name}
                   </h1>
 
                   {/* Faction */}
-                  <div className="flex items-center gap-3 mb-4">
+                  <div className="flex items-center gap-3 mb-3 md:mb-4">
                     <div
                       className="p-2 rounded-lg"
                       style={{ backgroundColor: `${faction.color}20` }}
@@ -262,7 +265,7 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
 
                   {/* Class + Rank */}
                   {(unit.encyclopedia?.class || rankLabel) && (
-                    <div className="mb-6 flex flex-wrap items-center gap-x-5 gap-y-1">
+                    <div className="mb-4 md:mb-6 flex flex-wrap items-center gap-x-5 gap-y-1">
                       {unit.encyclopedia?.class && (
                         <span>
                           <span className="font-ibm-mono text-xs text-military-steel/60 uppercase tracking-wider mr-2">
@@ -290,7 +293,7 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
                       flex-wrap row), mirroring the ProvenanceRow idiom. Painted squads
                       with a separate painter + sculptor previously stacked two
                       double-header blocks — which looked broken under a wide group photo. */}
-                  <div className="mb-6 flex flex-wrap items-center gap-x-3 gap-y-2">
+                  <div className="mb-4 md:mb-6 flex flex-wrap items-center gap-x-3 gap-y-2">
                     <span className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider">
                       {attributionHeader}
                     </span>
@@ -350,7 +353,7 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
                   )}
 
                   {/* Divider */}
-                  <div className="military-divider max-w-xs mb-6" />
+                  <div className="military-divider max-w-xs mb-4 md:mb-6" />
                 </div>
               </div>
             </div>
