@@ -10,8 +10,9 @@ import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { SoldierImages } from '@/components/encyclopedia/UnitDetail/SoldierImages';
 import { MachineImages } from '@/components/encyclopedia/UnitDetail/MachineImages';
 import Image from 'next/image';
-import { Shield, Zap, Skull } from 'lucide-react';
-import { getFactionColors } from '@/lib/faction-colors';
+import { Shield, Zap, Skull, Star, Anchor } from 'lucide-react';
+import { getFactionColors, factionDisplayNames } from '@/lib/faction-colors';
+import { getEncyclopediaFaction } from '@/lib/encyclopedia-registry';
 import { FactionLogo } from '@/components/FactionLogo';
 
 interface EncyclopediaModalProps {
@@ -25,19 +26,20 @@ const factionIcons: Record<string, React.ComponentType<{ className?: string }>> 
   polaris: Shield,
   protectorate: Zap,
   mercenaries: Skull,
+  rutenia: Star,
+  dead_fleet: Anchor,
 };
 
 const factionBadges: Record<string, string> = {
   polaris: 'ИМП',
   protectorate: 'ПРОТ',
   mercenaries: 'НАЁМ',
+  rutenia: 'РУТ',
+  dead_fleet: 'ФЛОТ',
 };
 
-const factionNames: Record<string, string> = {
-  polaris: 'Империя Полярис',
-  protectorate: 'Торговый Протекторат',
-  mercenaries: 'Наёмники',
-};
+// Faction display name resolves from the faction DATA (canonical full name)
+// — NOT a local copy that goes stale when factions are added.
 
 export function EncyclopediaModal({
   unit,
@@ -73,7 +75,7 @@ export function EncyclopediaModal({
 
   const colors = getFactionColors(unit.faction);
   const faction = {
-    name: factionNames[unit.faction] || unit.faction,
+    name: getEncyclopediaFaction(unit.faction)?.name ?? factionDisplayNames[unit.faction] ?? unit.faction,
     icon: factionIcons[unit.faction] || Shield,
     badge: factionBadges[unit.faction] || '',
   };

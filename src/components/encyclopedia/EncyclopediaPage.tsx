@@ -246,8 +246,11 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
               </div>
             </div>
 
-            {/* Faction + type + sculptor selectors — one inline row */}
-            <div className="flex gap-2">
+            {/* Faction + type + sculptor selectors — on phones the faction gets its
+                own full-width row (so long names like «МЁРТВЫЙ ФЛОТ» aren't clipped
+                beside two other selects), with type + sculptor sharing the row below.
+                One inline row from `sm` up. */}
+            <div className="flex flex-col gap-2 sm:flex-row">
               {/* Faction selector (color dot = selected faction) */}
               <div className="relative flex-1 min-w-0">
                 <span
@@ -268,36 +271,38 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
                 </select>
               </div>
 
-              {/* Type selector */}
-              <div className="relative w-24 shrink-0 md:w-28">
-                <select
-                  aria-label="Тип"
-                  value={selectedType}
-                  onChange={e => setSelectedType(e.target.value as TypeFilter)}
-                  className="w-full rounded-full border border-military-steel/30 bg-military-charcoal/70 py-1.5 pl-3 pr-3 font-ibm-mono text-[10px] tracking-wide text-white focus:border-military-amber/50 focus:outline-none md:text-xs"
-                >
-                  {types.map(t => (
-                    <option key={t.value} value={t.value} className="bg-military-charcoal text-white">
-                      {t.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <div className="flex gap-2">
+                {/* Type selector */}
+                <div className="relative flex-1 sm:w-28 sm:flex-none">
+                  <select
+                    aria-label="Тип"
+                    value={selectedType}
+                    onChange={e => setSelectedType(e.target.value as TypeFilter)}
+                    className="w-full rounded-full border border-military-steel/30 bg-military-charcoal/70 py-1.5 pl-3 pr-3 font-ibm-mono text-[10px] tracking-wide text-white focus:border-military-amber/50 focus:outline-none md:text-xs"
+                  >
+                    {types.map(t => (
+                      <option key={t.value} value={t.value} className="bg-military-charcoal text-white">
+                        {t.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-              {/* Sculptor (miniature source) selector — data-driven, mirrors faction filter */}
-              <div className="relative w-28 shrink-0 md:w-36">
-                <select
-                  aria-label="Источник миниатюр"
-                  value={selectedSculptor}
-                  onChange={e => setSelectedSculptor(e.target.value)}
-                  className="w-full rounded-full border border-military-steel/30 bg-military-charcoal/70 py-1.5 pl-3 pr-3 font-ibm-mono text-[10px] tracking-wide text-white focus:border-military-amber/50 focus:outline-none md:text-xs"
-                >
-                  {sculptors.map(s => (
-                    <option key={s.value} value={s.value} className="bg-military-charcoal text-white">
-                      {s.value === 'all' ? 'ВСЕ ИСТОЧНИКИ' : s.label}
-                    </option>
-                  ))}
-                </select>
+                {/* Sculptor (miniature source) selector — data-driven, mirrors faction filter */}
+                <div className="relative flex-1 sm:w-36 sm:flex-none">
+                  <select
+                    aria-label="Источник миниатюр"
+                    value={selectedSculptor}
+                    onChange={e => setSelectedSculptor(e.target.value)}
+                    className="w-full rounded-full border border-military-steel/30 bg-military-charcoal/70 py-1.5 pl-3 pr-3 font-ibm-mono text-[10px] tracking-wide text-white focus:border-military-amber/50 focus:outline-none md:text-xs"
+                  >
+                    {sculptors.map(s => (
+                      <option key={s.value} value={s.value} className="bg-military-charcoal text-white">
+                        {s.value === 'all' ? 'ВСЕ ИСТОЧНИКИ' : s.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
           </div>

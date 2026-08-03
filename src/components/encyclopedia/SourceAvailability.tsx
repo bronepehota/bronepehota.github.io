@@ -75,8 +75,11 @@ export function SourceAvailability({
   // Detail-page stat switcher — compact pills (the old big «Доступность в
   // источниках» cards were дубляж with the rest of the page; a small toggle
   // above the stats is enough to pick which army list's stats to view).
+  // Mobile-first: pills shrink (smaller logo / text / padding, no ⬡ glyph) so
+  // «Армлист:» + both pills stay on ONE row on phones instead of wrapping and
+  // shoving the stat table down. Desktop keeps the roomier sizing.
   return (
-    <div data-testid="source-switcher" className="flex items-center gap-2 flex-wrap">
+    <div data-testid="source-switcher" className="flex items-center gap-1.5 md:gap-2 flex-wrap">
       <span className="font-ibm-mono text-[10px] text-military-rust/60 uppercase tracking-wider">
         Армлист:
       </span>
@@ -94,7 +97,7 @@ export function SourceAvailability({
             aria-pressed={onSourceChange ? isActive : undefined}
             title={`${config.name}: ${cost ?? '?'} очков`}
             className={cn(
-              'inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border transition-all',
+              'inline-flex items-center gap-1 px-2 py-0.5 rounded-sm border transition-all md:gap-2 md:px-3 md:py-1.5',
               onSourceChange && 'cursor-pointer hover:scale-[1.03] active:scale-[0.98]',
               !isActive && 'opacity-55 hover:opacity-100',
             )}
@@ -103,12 +106,12 @@ export function SourceAvailability({
               backgroundColor: isActive ? `${config.color}1f` : 'transparent',
             }}
           >
-            <GitHubPagesImage src={config.logo} alt={config.name} width={22} height={22} className="rounded-[2px]" />
-            <span className="font-russo text-sm font-bold" style={{ color: isActive ? config.color : '#a8a29e' }}>
+            <GitHubPagesImage src={config.logo} alt={config.name} width={22} height={22} className="h-3.5 w-3.5 rounded-[2px] md:h-[22px] md:w-[22px]" />
+            <span className="font-russo text-xs md:text-sm font-bold" style={{ color: isActive ? config.color : '#a8a29e' }}>
               {config.name}
             </span>
-            <span className="ml-auto inline-flex items-center gap-0.5 font-ibm-mono text-base font-bold text-military-amber tabular-nums">
-              <span aria-hidden>⬡</span>{cost ?? '?'}
+            <span className="ml-auto inline-flex items-center gap-0.5 font-ibm-mono text-xs md:text-base font-bold text-military-amber tabular-nums">
+              <span aria-hidden className="hidden md:inline">⬡</span>{cost ?? '?'}
             </span>
           </Tag>
         );

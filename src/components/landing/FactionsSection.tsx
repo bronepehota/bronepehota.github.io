@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { getFactions } from '@/lib/encyclopedia-registry';
 import { orderedFactions, getParent } from '@/lib/faction-hierarchy';
 import { factionDisplayNames } from '@/lib/faction-colors';
+import { FactionLogo } from '@/components/FactionLogo';
 
 interface FactionsSectionProps {
   className?: string;
@@ -24,7 +25,7 @@ export default function FactionsSection({ className }: FactionsSectionProps) {
   return (
     <section
       className={cn(
-        'relative py-20 md:py-32 px-4 md:px-8 overflow-hidden',
+        'relative py-14 md:py-32 px-4 md:px-8 overflow-hidden',
         'bg-gradient-to-b from-military-dark to-military-charcoal',
         className
       )}
@@ -39,8 +40,10 @@ export default function FactionsSection({ className }: FactionsSectionProps) {
         </div>
       </div>
 
-      {/* Factions grid */}
-      <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 md:gap-8">
+      {/* Factions grid — single column on phones (cards are content-rich),
+          multi-column from small tablets up. Was grid-cols-2 which crammed
+          long lore + motto rows into 152px and overflowed on mobile. */}
+      <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 sm:gap-6 md:gap-8">
         {allFactions.map((faction, index) => {
           const IconComponent = iconMap[faction.symbol as keyof typeof iconMap];
 
@@ -81,17 +84,23 @@ export default function FactionsSection({ className }: FactionsSectionProps) {
                 </div>
                 <div
                   className={cn(
-                    'p-3 rounded-lg transition-all duration-300',
-                    'bg-opacity-10 group-hover:scale-110'
+                    'relative flex items-center justify-center rounded-lg overflow-hidden shrink-0',
+                    'w-12 h-12 md:w-14 md:h-14 group-hover:scale-110 transition-transform duration-300'
                   )}
-                  style={{ backgroundColor: `${faction.color}20` }}
+                  style={{
+                    backgroundColor: `${faction.color}1f`,
+                    border: `1px solid ${faction.color}55`,
+                    boxShadow: `0 0 22px -8px ${faction.color}80`,
+                  }}
                 >
-                  {IconComponent && (
-                    <IconComponent
-                      className="w-6 h-6 md:w-8 md:h-8"
-                      style={{ color: faction.color }}
-                    />
-                  )}
+                  <FactionLogo
+                    faction={faction.id}
+                    className="w-3/4 h-3/4"
+                    fallback={IconComponent ?? Shield}
+                    fallbackClassName="w-3/4 h-3/4"
+                  />
+                  {/* Scanline texture — HUD/military feel over the emblem */}
+                  <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(255,255,255,0.04)_50%)] bg-[length:100%_4px] pointer-events-none" />
                 </div>
               </div>
 
