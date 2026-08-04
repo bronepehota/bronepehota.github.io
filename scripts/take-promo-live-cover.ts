@@ -150,7 +150,7 @@ function renderSlide(slide: Slide): string {
     <div class="phone p1"><img src="${imgB64(slide.phone1)}" /></div>
     ${phone2Html}
   </div>
-  <div class="url">luxor.github.io/bronepehota</div>
+  <div class="url">bronepehota.github.io</div>
 </div>
 </body>
 </html>`;

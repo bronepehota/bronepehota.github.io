@@ -73,7 +73,7 @@ export default function Footer({ className }: FooterProps) {
 
             {/* GitHub link */}
             <a
-              href="https://github.com/Luxor/bronepehota"
+              href="https://github.com/bronepehota/bronepehota.github.io"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1 px-2 py-1.5 rounded-sm border border-hud-slate-light/30 hover:border-hud-green/50 transition-all duration-300 group touch-manipulation"

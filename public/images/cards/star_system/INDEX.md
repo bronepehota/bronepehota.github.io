@@ -2,7 +2,7 @@
 
 Reference images of the original army-list cards. Served as static assets.
 
-GitHub Pages: `https://luxor.github.io/bronehota/images/cards/star_system/<file>`
+GitHub Pages: `https://bronepehota.github.io/images/cards/star_system/<file>`
 
 | card | squad | faction | cost | app id | soldier images | lore source |
 |---|---|---|---|---|---|---|

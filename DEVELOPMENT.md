@@ -9,8 +9,8 @@
 
 1. Клонируйте репозиторий:
 ```bash
-git clone https://github.com/Luxor/bronepehota-2.git
-cd bronepehota-2
+git clone https://github.com/bronepehota/bronepehota.github.io.git
+cd bronepehota.github.io
 ```
 
 2. Установите зависимости:

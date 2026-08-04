@@ -59,7 +59,7 @@
 
 - **Открыть карточку юнита по имени/номеру** — путь в репозитории: `public/images/cards/tehnolog/photo_XX.jpg`
   (XX = поле `num` в таблице выше). Например «Спецназ планеты Фелиция» = `photo_20.jpg`.
-- **Внешний URL** (GitHub Pages): `https://luxor.github.io/bronepehota/images/cards/tehnolog/photo_XX.jpg`.
+- **Внешний URL** (GitHub Pages): `https://bronepehota.github.io/images/cards/tehnolog/photo_XX.jpg`.
   Карточки лежат в `public/` и раздаются как статика — используются и за пределами приложения.
   Относительные ссылки в таблицах выше (`photo_XX.jpg`) работают из этого же каталога.
 - **App ID** — это `id` отряда в JSON источника (`src/data/sources/tehnolog/{faction}/squads.json`),

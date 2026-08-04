@@ -43,7 +43,7 @@ export default function Home() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <a
-              href="https://github.com/Luxor/bronepehota"
+              href="https://github.com/bronepehota/bronepehota.github.io"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-sm border border-hud-green/40 hover:border-hud-green text-hud-green font-russo text-xs uppercase tracking-wider transition-all hover:bg-hud-green/10"

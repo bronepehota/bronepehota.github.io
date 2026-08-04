@@ -121,7 +121,7 @@ const html = `<!DOCTYPE html>
     <div class="phone p2"><img src="${imgB64('05-squad-card-battle.png')}" /></div>
     <div class="phone p3"><img src="${imgB64('07-calculator.png')}" /></div>
   </div>
-  <div class="url">luxor.github.io/bronepehota</div>
+  <div class="url">bronepehota.github.io</div>
   <div class="badge">Бесплатно · PWA · Open Source</div>
 </div>
 </body>

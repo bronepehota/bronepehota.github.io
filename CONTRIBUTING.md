@@ -168,7 +168,7 @@ cd bronepehota-2
 
 3. Добавьте upstream remote:
 ```bash
-git remote add upstream https://github.com/Luxor/bronepehota-2.git
+git remote add upstream https://github.com/bronepehota/bronepehota.github.io.git
 ```
 
 4. Установите зависимости:
