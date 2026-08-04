@@ -5,9 +5,25 @@ import withSerwistInit from "@serwist/next";
 // Set NEXT_PUBLIC_GITHUB_PAGES=true when building for GitHub Pages deployment
 const isGitHubPages = process.env.NEXT_PUBLIC_GITHUB_PAGES === 'true';
 
-// Base path for GitHub Pages deployment
-// Export for use in components (e.g., PWA manifest generation)
-const BASE_PATH = isGitHubPages ? '/bronepehota' : '';
+// Canonical public origin. Defaults to the Project Pages subpath
+// (luxor.github.io/bronepehota) for the legacy deployment; override with
+// NEXT_PUBLIC_SITE_URL for any root-served deployment — a custom domain
+// (https://bronepehota.ru) OR a User/Org Pages root (https://bronepehota.github.io).
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (isGitHubPages ? 'https://luxor.github.io/bronepehota' : 'http://localhost:3000');
+
+// basePath = the subpath the site is mounted at (SITE_URL's pathname).
+// '' when served from a domain/account ROOT (custom domain, or User/Org Pages
+// like bronepehota.github.io); '/bronepehota' only for the legacy Project Pages
+// subpath. A single env var (NEXT_PUBLIC_SITE_URL) controls origin + mount point.
+// Export for use in components (e.g., PWA manifest generation). Must match src/lib/constants.ts.
+let BASE_PATH = '';
+try {
+  BASE_PATH = new URL(SITE_URL).pathname.replace(/\/+$/, '');
+} catch {
+  BASE_PATH = '';
+}
 
 export { BASE_PATH };
 
