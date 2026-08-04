@@ -32,6 +32,10 @@ jobs:
         run: npm run build
         env:
           NEXT_PUBLIC_GITHUB_PAGES: 'true'
+          # Custom domain origin (no basePath). When set to a non-github.io URL
+          # the static export drops the /bronepehota prefix (served from domain
+          # root). Leave the secret unset to keep the legacy luxor.github.io/bronepehota URL.
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
           # Публичный токен Google Search Console (виден в HTML <head> — секретом не является).
           NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION: '2_S0uEntiUGS4zUOB24ag97gE6cJJioHuHD7YsrgZVs'
           NEXT_PUBLIC_GA_MEASUREMENT_ID: ${{ secrets.GA_MEASUREMENT_ID }}

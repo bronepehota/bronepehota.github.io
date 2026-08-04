@@ -1,10 +1,5 @@
 import type { FactionID } from './types';
 
-// Base path for GitHub Pages deployment
-// Must match next.config.mjs BASE_PATH value
-// NEXT_PUBLIC_GITHUB_PAGES is set in deploy.yml and available in client code
-export const BASE_PATH = process.env.NEXT_PUBLIC_GITHUB_PAGES === 'true' ? '/bronepehota' : '';
-
 // Canonical site origin INCLUDING basePath — used for absolute URLs in
 // sitemap.xml, canonical links, Open Graph / Twitter images.
 // Override with NEXT_PUBLIC_SITE_URL when moving to a custom domain
@@ -14,6 +9,20 @@ export const SITE_URL =
   (process.env.NEXT_PUBLIC_GITHUB_PAGES === 'true'
     ? 'https://luxor.github.io/bronepehota'
     : 'http://localhost:3000');
+
+// basePath = the subpath the site is mounted at, read from SITE_URL's pathname.
+// '' when served from a domain/account ROOT (custom domain like
+// https://bronepehota.ru, or a User/Org Pages root like https://bronepehota.github.io);
+// '/bronepehota' only for the legacy Project Pages subpath (luxor.github.io/bronepehota).
+// A single env var (NEXT_PUBLIC_SITE_URL) controls origin + mount point.
+// Must match next.config.mjs BASE_PATH value.
+let parsedBasePath = '';
+try {
+  parsedBasePath = new URL(SITE_URL).pathname.replace(/\/+$/, '');
+} catch {
+  parsedBasePath = '';
+}
+export const BASE_PATH = parsedBasePath;
 
 // Yandex.Metrica counter id (numeric string). Optional — component no-ops without it.
 export const YANDEX_METRICA_ID = process.env.NEXT_PUBLIC_YANDEX_METRICA_ID;

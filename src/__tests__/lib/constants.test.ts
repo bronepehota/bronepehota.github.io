@@ -29,6 +29,49 @@ describe('constants', () => {
       delete process.env.NEXT_PUBLIC_GITHUB_PAGES;
       jest.resetModules();
     });
+
+    it('should drop /bronepehota when a custom domain is set via NEXT_PUBLIC_SITE_URL', () => {
+      process.env.NEXT_PUBLIC_GITHUB_PAGES = 'true';
+      process.env.NEXT_PUBLIC_SITE_URL = 'https://bronepehota.ru';
+      jest.resetModules();
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { BASE_PATH, SITE_URL } = require('@/lib/constants');
+      // Custom domain → served from domain root, no subpath prefix
+      expect(BASE_PATH).toBe('');
+      expect(SITE_URL).toBe('https://bronepehota.ru');
+      // Clean up
+      delete process.env.NEXT_PUBLIC_GITHUB_PAGES;
+      delete process.env.NEXT_PUBLIC_SITE_URL;
+      jest.resetModules();
+    });
+
+    it('should keep /bronepehota when SITE_URL is still the github.io origin', () => {
+      process.env.NEXT_PUBLIC_GITHUB_PAGES = 'true';
+      process.env.NEXT_PUBLIC_SITE_URL = 'https://luxor.github.io/bronepehota';
+      jest.resetModules();
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { BASE_PATH } = require('@/lib/constants');
+      expect(BASE_PATH).toBe('/bronepehota');
+      // Clean up
+      delete process.env.NEXT_PUBLIC_GITHUB_PAGES;
+      delete process.env.NEXT_PUBLIC_SITE_URL;
+      jest.resetModules();
+    });
+
+    it('should drop basePath for a User/Org Pages root (bronepehota.github.io)', () => {
+      process.env.NEXT_PUBLIC_GITHUB_PAGES = 'true';
+      process.env.NEXT_PUBLIC_SITE_URL = 'https://bronepehota.github.io';
+      jest.resetModules();
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { BASE_PATH, SITE_URL } = require('@/lib/constants');
+      // Served from the account root — no subpath prefix
+      expect(BASE_PATH).toBe('');
+      expect(SITE_URL).toBe('https://bronepehota.github.io');
+      // Clean up
+      delete process.env.NEXT_PUBLIC_GITHUB_PAGES;
+      delete process.env.NEXT_PUBLIC_SITE_URL;
+      jest.resetModules();
+    });
   });
   describe('LOCAL_STORAGE_KEYS', () => {
     it('should have all required keys', () => {

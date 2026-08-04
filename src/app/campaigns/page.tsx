@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { getAllCampaigns } from '@/lib/campaigns';
+import { BASE_PATH } from '@/lib/constants';
 
-const BASE_PATH = process.env.NEXT_PUBLIC_GITHUB_PAGES === 'true' ? '/bronepehota' : '';
 const CHRONICLE_BG = `${BASE_PATH}/images/campaigns/chronicle-bg.jpg`;
 
 const FACTION_COLORS: Record<string, string> = {
