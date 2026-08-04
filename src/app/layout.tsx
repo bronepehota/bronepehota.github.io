@@ -112,6 +112,11 @@ export const metadata: Metadata = {
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
     yandex: process.env.NEXT_PUBLIC_YANDEX_VERIFICATION,
   },
+  // Modern PWA standalone hint (Chrome/Edge/Android). Keeps appleWebApp above
+  // for iOS Safari; this silences the deprecated `apple-mobile-web-app-capable` warning.
+  other: {
+    "mobile-web-app-capable": "yes",
+  },
 }
 
 export const viewport: Viewport = {
