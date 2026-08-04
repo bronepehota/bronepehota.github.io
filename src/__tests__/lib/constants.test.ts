@@ -72,6 +72,22 @@ describe('constants', () => {
       delete process.env.NEXT_PUBLIC_SITE_URL;
       jest.resetModules();
     });
+
+    it('should fall back to the default when NEXT_PUBLIC_SITE_URL is an empty string', () => {
+      // deploy.yml renders an ABSENT secret as '' — ?? would pass '' through and
+      // crash new URL(''); || treats '' as unset → falls back to the github.io default.
+      process.env.NEXT_PUBLIC_GITHUB_PAGES = 'true';
+      process.env.NEXT_PUBLIC_SITE_URL = '';
+      jest.resetModules();
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { BASE_PATH, SITE_URL } = require('@/lib/constants');
+      expect(SITE_URL).toBe('https://luxor.github.io/bronepehota');
+      expect(BASE_PATH).toBe('/bronepehota');
+      // Clean up
+      delete process.env.NEXT_PUBLIC_GITHUB_PAGES;
+      delete process.env.NEXT_PUBLIC_SITE_URL;
+      jest.resetModules();
+    });
   });
   describe('LOCAL_STORAGE_KEYS', () => {
     it('should have all required keys', () => {

@@ -4,8 +4,10 @@ import type { FactionID } from './types';
 // sitemap.xml, canonical links, Open Graph / Twitter images.
 // Override with NEXT_PUBLIC_SITE_URL when moving to a custom domain
 // (e.g. https://bronepehota.ru — no basePath). Defaults to the GitHub Pages URL.
+// NOTE: use || not ?? — deploy.yml renders an ABSENT secret as '' (empty string);
+// ?? passes '' through → new URL('') crashes the build. || treats '' as unset.
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ??
+  process.env.NEXT_PUBLIC_SITE_URL ||
   (process.env.NEXT_PUBLIC_GITHUB_PAGES === 'true'
     ? 'https://luxor.github.io/bronepehota'
     : 'http://localhost:3000');
