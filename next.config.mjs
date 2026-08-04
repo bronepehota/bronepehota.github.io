@@ -9,8 +9,10 @@ const isGitHubPages = process.env.NEXT_PUBLIC_GITHUB_PAGES === 'true';
 // (luxor.github.io/bronepehota) for the legacy deployment; override with
 // NEXT_PUBLIC_SITE_URL for any root-served deployment — a custom domain
 // (https://bronepehota.ru) OR a User/Org Pages root (https://bronepehota.github.io).
+// NOTE: use || not ?? — deploy.yml renders an ABSENT secret as '' (empty string);
+// ?? passes '' through → new URL('') crashes the build. || treats '' as unset.
 const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ??
+  process.env.NEXT_PUBLIC_SITE_URL ||
   (isGitHubPages ? 'https://luxor.github.io/bronepehota' : 'http://localhost:3000');
 
 // basePath = the subpath the site is mounted at (SITE_URL's pathname).
