@@ -463,38 +463,33 @@ Edit `squads.json` or `machines.json` in `src/data/sources/{source_id}/{faction}
 
 ### GitHub Pages Deployment
 
-**Important Notes**:
-- The app uses `basePath: '/bronepehota'` in production (configured in `next.config.mjs`)
-- The basePath is controlled by `NEXT_PUBLIC_GITHUB_PAGES` environment variable:
-  - **Local development**: `NEXT_PUBLIC_GITHUB_PAGES` unset → basePath is empty (`""`)
-  - **GitHub Pages**: `NEXT_PUBLIC_GITHUB_PAGES=true` → basePath is `/bronepehota`
-- Always use Next.js `<Link>` component for internal navigation (respects basePath automatically)
-- For `<Image>` components, use `unoptimized` prop when images don't display on GitHub Pages
-- Example: `<Link href="/encyclopedia">` not `<a href="/encyclopedia">`
+**Hosting**: User/Org Pages root at **`https://bronepehota.github.io`** (repo **`bronepehota/bronepehota.github.io`**). Served from the domain ROOT — **basePath is `''`**. The old `luxor.github.io/bronepehota` project page is now just a redirect stub (`Luxor/bronepehota` repo) that path-preserves → the new URL.
 
-**Image Loading for GitHub Pages:**
-- Use `GitHubPagesImage` component from `@/components/GitHubPagesImage` for most images
-- It automatically handles `BASE_PATH` prefixing for paths starting with `/images/`
-- Uses regular `<img>` tag instead of Next.js `<Image>` for reliable static export
-- For dynamic image components (like navigation cards), use:
+**basePath** (`next.config.mjs` + `src/lib/constants.ts`, must stay in sync): derived from `NEXT_PUBLIC_SITE_URL`'s pathname —
+- Root deployments — the current `bronepehota.github.io`, or any future custom domain set via `NEXT_PUBLIC_SITE_URL` → basePath `''`.
+- The legacy `/bronepehota` subpath only if `NEXT_PUBLIC_SITE_URL` explicitly points at the old `luxor.github.io/bronepehota` (abandoned).
+- `BASE_PATH` is exported from `@/lib/constants` — **import it; do NOT re-derive inline** (the campaigns pages had a stale inline copy that broke images — keep one source of truth).
+
+Always use Next.js `<Link>` for internal navigation (respects basePath automatically): `<Link href="/encyclopedia">`, not `<a href="/encyclopedia">`. For `<Image>`, use `unoptimized` (static export).
+
+**Image Loading**:
+- Use `GitHubPagesImage` from `@/components/GitHubPagesImage` for most images — auto-prefixes `BASE_PATH` for `/images/` paths, uses `<img>` for reliable static export.
+- For dynamic image components (navigation cards), import and use the constant:
   ```tsx
-  const BASE_PATH = process.env.NEXT_PUBLIC_GITHUB_PAGES === 'true' ? '/bronepehota' : '';
+  import { BASE_PATH } from '@/lib/constants';
   const finalSrc = imageUrl.startsWith('/images/') ? `${BASE_PATH}${imageUrl}` : imageUrl;
   <img src={finalSrc} ... />
   ```
 
-**Building for local testing**:
+**Building**:
 ```bash
-npm run build
-npx serve out -l 3000
-# Manifest will have paths without /bronepehota prefix
-```
+# Local (basePath '', localhost origin)
+npm run build && npx serve out -l 3000
 
-**Building for GitHub Pages**:
-```bash
-NEXT_PUBLIC_GITHUB_PAGES=true npm run build
-# Manifest will have paths with /bronepehota prefix
-# This is automatically set in .github/workflows/deploy.yml
+# GitHub Pages — set in .github/workflows/deploy.yml:
+#   NEXT_PUBLIC_GITHUB_PAGES=true  +  NEXT_PUBLIC_SITE_URL=https://bronepehota.github.io (repo secret)
+# basePath resolves to '' (root). The PWA manifest (public/manifest.json) is root-served —
+# start_url/scope/icons use '/...' and are guarded by src/__tests__/pwa/manifest.test.ts.
 ```
 
 ### SEO / Discoverability
@@ -502,12 +497,12 @@ NEXT_PUBLIC_GITHUB_PAGES=true npm run build
 Static-export SEO generated at build time (`output: 'export'`):
 
 - **`app/sitemap.ts`** — every route (landing, encyclopedia, all units/missions/campaigns, calculator). **`app/robots.ts`** — allow-all + sitemap link. Both emit to `out/`.
-- **`SITE_URL`** (`src/lib/constants.ts`) — canonical origin INCLUDING basePath; defaults to the GitHub Pages URL, override via `NEXT_PUBLIC_SITE_URL` when adding a custom domain. `src/lib/seo.ts` exposes `absoluteUrl()` (sitemap/canonical/OG) + JSON-LD builders.
+- **`SITE_URL`** (`src/lib/constants.ts`) — canonical origin; production sets it via the `NEXT_PUBLIC_SITE_URL` repo secret (= `https://bronepehota.github.io`). `src/lib/seo.ts` exposes `absoluteUrl()` (sitemap/canonical/OG) + JSON-LD builders. NOTE: read with `||` not `??` — deploy.yml renders an absent secret as `''`, and `??` would pass `''` through to `new URL('')` and crash the build.
 - **Structured data** — `src/lib/seo.ts` + `src/components/JsonLd.tsx`: `WebApplication`+`Organization` on landing, `BreadcrumbList` on unit/mission detail pages.
 - **Analytics/verification env vars** (all optional; components no-op without id): `NEXT_PUBLIC_GA_MEASUREMENT_ID`, `NEXT_PUBLIC_YANDEX_METRICA_ID`, `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION`, `NEXT_PUBLIC_YANDEX_VERIFICATION`.
 - **OG image** — `public/og-image.png` is a 1200×630 Playwright screenshot of the landing hero. Regenerate from repo root (dev server on :3000): `node tools/regen-og-image.mjs && python3 tools/regen-og-crop.py`. (Run from repo root — Node ESM resolves `node_modules` relative to the script file, not cwd.)
 - **basePath & metadata**: Next does NOT auto-prefix `metadata.icons`/`manifest` with basePath — `BASE_PATH` is applied manually. `metadataBase` = `SITE_URL` (incl. basePath) is safe; icons stay single-prefixed.
-- **⚠️ Subpath caveat**: on `*.github.io/bronepehota` crawlers only honor `/robots.txt` + `/sitemap.xml` at the domain ROOT (owned by GitHub) → auto-ignored. Submit sitemap manually in Search Console / Yandex.Webmaster; a custom domain fixes auto-discovery.
+- **Root-served (resolved)**: the site lives at a domain/account root, so `robots.txt` + `sitemap.xml` land at the domain root → crawlers auto-discover them. (The old `*.github.io/bronepehota` subpath had a crawler auto-discovery problem — now moot since the move to `bronepehota.github.io`.)
 
 ### Testing
 
