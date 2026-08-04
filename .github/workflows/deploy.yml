@@ -38,6 +38,8 @@ jobs:
           NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
           # Публичный токен Google Search Console (виден в HTML <head> — секретом не является).
           NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION: 'XFiHPCv4P95sVVtNkp4jyvcY86MjowpC7LYasMihFWQ'
+          # Публичный токен Яндекс.Вебмастера (виден в HTML <head> — секретом не является).
+          NEXT_PUBLIC_YANDEX_VERIFICATION: 'fb2a834347be38aa'
           NEXT_PUBLIC_GA_MEASUREMENT_ID: ${{ secrets.GA_MEASUREMENT_ID }}
           NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
 
