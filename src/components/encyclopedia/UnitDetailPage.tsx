@@ -14,7 +14,7 @@ import { SQUAD_GROUP_IMAGE, getPhotoCredit, getCredit } from '@/lib/painted-imag
 import { resolveUnitProvenance } from '@/lib/provenance';
 import { UnitLore } from './UnitDetail/UnitLore';
 import { SourceAvailability } from './SourceAvailability';
-import { PainterChip, ProvenanceRow, ImageSourceChip, MiniatureChip } from './AttributionLabel';
+import { PainterChip, ProvenanceRow, ImageSourceChip, MiniatureChip, SponsorChip } from './AttributionLabel';
 import { FactionLogo } from '@/components/FactionLogo';
 import { getFactionColors, factionLogos, factionDisplayNames } from '@/lib/faction-colors';
 import { UnitStatTable } from './UnitDetail/UnitStatTable';
@@ -337,6 +337,15 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
                           withHeader={false}
                           role=""
                         />
+                      </span>
+                    )}
+                    {/* Squad sponsor — who funded/commissioned the squad (miniatures/lore). */}
+                    {unit.sponsor && (
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider">
+                          {'// СПОНСОР'}
+                        </span>
+                        <SponsorChip name={unit.sponsor.name} url={unit.sponsor.url} withHeader={false} />
                       </span>
                     )}
                   </div>

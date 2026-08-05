@@ -3,6 +3,7 @@ import {
   resolveFactionProvenance,
   resolveMissionProvenance,
   isProvenanceUniform,
+  isAlternativeVersion,
 } from '../lib/provenance';
 import type { EncyclopediaUnit, EncyclopediaFaction } from '../lib/encyclopedia-registry';
 import type { Mission } from '../lib/mission-types';
@@ -147,6 +148,32 @@ describe('provenance resolver', () => {
     test('false when axes differ', () => {
       expect(isProvenanceUniform({ origin: 'tehnolog', loreAuthor: 'star_system' })).toBe(false);
       expect(isProvenanceUniform({ origin: 'star_system', loreAuthor: 'tehnolog' })).toBe(false);
+    });
+  });
+
+  describe('isAlternativeVersion', () => {
+    test('false when origin is tehnolog (official content)', () => {
+      expect(isAlternativeVersion({ origin: 'tehnolog', loreAuthor: 'tehnolog' })).toBe(false);
+      // Even community-written lore on an official concept is NOT «АВБ» — the minis/concept
+      // are still Технолог's; only the prose is community.
+      expect(isAlternativeVersion({ origin: 'tehnolog', loreAuthor: 'star_system' })).toBe(false);
+    });
+
+    test('true when origin is a community source (alternative concept/minis)', () => {
+      expect(isAlternativeVersion({ origin: 'star_system', loreAuthor: 'star_system' })).toBe(true);
+      expect(isAlternativeVersion({ origin: 'universestarsys', loreAuthor: 'universestarsys' })).toBe(true);
+      // Community concept regardless of who wrote the lore.
+      expect(isAlternativeVersion({ origin: 'star_system', loreAuthor: 'ai' })).toBe(true);
+      // «avb» — generic alternative-version content (no named community) is also alternative.
+      expect(isAlternativeVersion({ origin: 'avb', loreAuthor: 'avb' })).toBe(true);
+    });
+  });
+
+  describe('resolveUnitProvenance — avb override', () => {
+    test('explicit avb provenance on a star_system-list unit yields avb/avb', () => {
+      expect(
+        resolveUnitProvenance(unit('polaris', { origin: 'avb', loreAuthor: 'avb' }, { sources: ['star_system'] })),
+      ).toEqual({ origin: 'avb', loreAuthor: 'avb' });
     });
   });
 });

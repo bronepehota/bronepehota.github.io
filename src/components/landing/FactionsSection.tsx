@@ -6,6 +6,9 @@ import { getFactions } from '@/lib/encyclopedia-registry';
 import { orderedFactions, getParent } from '@/lib/faction-hierarchy';
 import { factionDisplayNames } from '@/lib/faction-colors';
 import { FactionLogo } from '@/components/FactionLogo';
+import { GitHubPagesImage } from '@/components/GitHubPagesImage';
+import { resolveFactionProvenance, isAlternativeVersion } from '@/lib/provenance';
+import { ALTERNATIVE_VERSION_HINT } from '@/components/encyclopedia/AttributionLabel';
 
 interface FactionsSectionProps {
   className?: string;
@@ -46,6 +49,8 @@ export default function FactionsSection({ className }: FactionsSectionProps) {
       <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 sm:gap-6 md:gap-8">
         {allFactions.map((faction, index) => {
           const IconComponent = iconMap[faction.symbol as keyof typeof iconMap];
+          // АВБ — marks community (non-Технолог) factions: Рутения, Мёртвый Флот.
+          const isAltVersion = isAlternativeVersion(resolveFactionProvenance(faction));
 
           return (
             <div
@@ -109,8 +114,9 @@ export default function FactionsSection({ className }: FactionsSectionProps) {
                 {faction.description}
               </p>
 
-              {/* Faction details */}
-              <div className="space-y-3 border-t border-military-steel/30 pt-4">
+              {/* Faction details — extra right padding on community factions so the
+                  bottom-right АВБ badge can't overlap the right-aligned motto/homeWorld. */}
+              <div className={cn('space-y-3 border-t border-military-steel/30 pt-4', isAltVersion && 'pr-10')}>
                 <div className="flex items-center justify-between">
                   <span className="font-ibm-mono text-xs text-military-steel/60 uppercase">
                     Родной мир
@@ -139,6 +145,25 @@ export default function FactionsSection({ className }: FactionsSectionProps) {
                   background: `linear-gradient(135deg, transparent 50%, ${faction.color}30 50%)`,
                 }}
               />
+
+              {/* АВБ mark — bottom-right corner, only for community (non-Технолог) factions */}
+              {isAltVersion && (
+                <div
+                  title={ALTERNATIVE_VERSION_HINT}
+                  className="absolute bottom-2 right-2 z-10 inline-flex items-center gap-1 rounded-sm border border-emerald-500/40 bg-military-dark/80 px-1.5 py-0.5 backdrop-blur-sm"
+                >
+                  <GitHubPagesImage
+                    src="/images/credits/avb.svg"
+                    alt=""
+                    width={12}
+                    height={12}
+                    className="shrink-0"
+                  />
+                  <span className="font-ibm-mono text-[9px] uppercase tracking-wider text-emerald-300">
+                    АВБ
+                  </span>
+                </div>
+              )}
             </div>
           );
         })}

@@ -51,13 +51,13 @@ export function EncyclopediaAttributionBanner() {
           </span>
         </div>
 
-        {/* Star System — community */}
+        {/* АВБ — alternative-version marking on all community content */}
         <div className="flex items-center gap-1.5">
-          <div className="relative h-5 w-5 overflow-hidden rounded-sm shrink-0 border border-amber-500/30">
-            <GitHubPagesImage src="/images/credits/star_system.jpg" alt="Star System" fill className="object-contain" />
+          <div className="relative h-5 w-5 overflow-hidden rounded-sm shrink-0 border border-emerald-500/30">
+            <GitHubPagesImage src="/images/credits/avb.svg" alt="АВБ" fill className="object-contain" />
           </div>
           <span className="font-ibm-mono text-[10px] text-military-sand/70">
-            Фанатские материалы (различные сообщества)
+            АВБ — альтернативная версия
           </span>
         </div>
 
@@ -104,27 +104,30 @@ export function EncyclopediaAttributionBanner() {
             </div>
           </div>
 
-          {/* Community */}
+          {/* АВБ — alternative-version marking */}
           <div className="flex items-start gap-2">
-            <div className="relative mt-0.5 h-4 w-4 shrink-0 overflow-hidden rounded-sm border border-amber-500/30">
-              <GitHubPagesImage src="/images/credits/star_system.jpg" alt="Star System" fill className="object-contain" />
+            <div className="relative mt-0.5 h-4 w-4 shrink-0 overflow-hidden rounded-sm border border-emerald-500/30">
+              <GitHubPagesImage src="/images/credits/avb.svg" alt="АВБ" fill className="object-contain" />
             </div>
             <div>
-              <p className="font-ibm-mono text-[10px] uppercase tracking-wider text-amber-500/80 mb-0.5">
-                Фанатские материалы
+              <p className="font-ibm-mono text-[10px] uppercase tracking-wider text-emerald-400/80 mb-0.5">
+                АВБ — Альтернативная Версия Бронепехоты
               </p>
               <p className="text-[11px] leading-relaxed text-military-taupe/70">
-                Отряды, лор и миниатюры, созданные сообществом — «Звёздные Системы», «Миниатюры Лисицина»,
-                «Мёртвый Флот» и другими авторами. Не являются официальными материалами Технолог.
+                Альтернативная Версия Бронепехоты — общая маркировка всех неофициальных материалов
+                (отряды, лор и миниатюры от «Звёздных Систем», «Миниатюр Лисицина», «Мёртвого Флота»
+                и других авторов). Она не является заменой оригинальным миниатюрам «Технолога», а даёт
+                возможность разнообразить игровой и коллекционный опыт и расширить вселенную «Бронепехоты».
+                Метка АВБ по умолчанию появляется рядом с источником любого фанатского контента.
               </p>
             </div>
           </div>
 
           {/* Card badges explanation */}
           <p className="text-[11px] leading-relaxed text-military-steel/50 border-t border-military-steel/15 pt-2">
-            В углу каждой карточки отряда — лого источника: Технолог для официального,
-            лого конкретного сообщества («Миниатюры Лисицина», «Звёздные Системы» и т.д.) для фанатского.
-            На странице отряда — подробные метки источников и авторов.
+            В углу каждой карточки отряда — лого источника: Технолог для официального контента,
+            лого конкретного сообщества («Миниатюры Лисицина», «Звёздные Системы» и т.д.) — для неофициального.
+            На странице отряда — подробные метки источников и авторов, а метка АВБ отмечает весь неофициальный контент.
           </p>
         </div>
       )}

@@ -11,13 +11,18 @@
  */
 import { useState } from 'react';
 import type { LucideIcon } from 'lucide-react';
-import { Shield, Star, Megaphone, ExternalLink, Check, Bot } from 'lucide-react';
+import { Shield, Star, Megaphone, ExternalLink, Check, Bot, Layers, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { GitHubPagesImage } from '@/components/GitHubPagesImage';
-import { isProvenanceUniform, type LoreSource, type Provenance } from '@/lib/provenance';
+import { isProvenanceUniform, isAlternativeVersion, type LoreSource, type Provenance } from '@/lib/provenance';
 
 /** VK channel for data contributions / error reports (lore, painters, provenance). */
 export const CONTRIBUTION_VK_URL = 'https://vk.ru/lastbpcoder';
+
+/** Tooltip for the «АВБ» badge — the disclaimer that this is alternative, not replacement,
+ *  lore/miniatures. Shown on every non-Технолог provenance row. */
+export const ALTERNATIVE_VERSION_HINT =
+  'АВБ — Альтернативная Версия Бронепехоты. Не является заменой оригинальным миниатюрам «Технолога», а расширяет игровой и коллекционный опыт вселенной «Бронепехота».';
 
 /** Prefilled message template copied to the clipboard when «Дополнить» is pressed,
  *  so the user can paste it straight into VK (VK has no prefilled-message URL). */
@@ -42,6 +47,9 @@ const LORE_SOURCE_META: Record<
   universestarsys: { name: 'Звёздные Системы', short: 'ЗВЁЗДНЫЕ СИСТЕМЫ', icon: Star, tone: '#e11d48', logo: '/images/credits/universestarsys.jpg', url: 'https://vk.ru/universestarsys' },
   // ИИ — лор сгенерирован нейросетью (Z.AI / GLM), не написан человеком.
   ai: { name: 'ИИ', short: 'ИИ', icon: Bot, tone: '#8b5cf6', logo: '/images/credits/ai.svg', url: 'https://chatglm.cn' },
+  // АВБ — generic alternative-version content with no single named community (user-authored fan lore).
+  // No external link (abstract lore, not a brand); the chip renders as a non-link span.
+  avb: { name: 'АВБ', short: 'АВБ', icon: Layers, tone: '#10b981', logo: '/images/credits/avb.svg', url: '' },
 };
 
 /* -------------------------------------------------------------------------- */
@@ -181,6 +189,51 @@ export function ContributeButton({ compact, url = CONTRIBUTION_VK_URL, subject }
 }
 
 /* -------------------------------------------------------------------------- */
+/* «АВБ» badge — marks every non-Технолог (community/alternative) entity      */
+/* -------------------------------------------------------------------------- */
+
+interface AlternativeVersionBadgeProps {
+  compact?: boolean;
+}
+
+/** «АВБ» marker — shown on provenance rows whose content is NOT official «Технолог»
+ *  (i.e. community concept/minis: Star System, Звёздные Системы, …). Carries the
+ *  disclaimer as a tooltip: alternative lore/miniatures that diversify the game, never
+ *  a replacement for Технолог originals. Rendered by `ProvenanceRow`; not a `LoreSource`
+ *  in its own right — it derives from `origin !== 'tehnolog'`. */
+export function AlternativeVersionBadge({ compact }: AlternativeVersionBadgeProps) {
+  const padX = compact ? 'px-1.5' : 'px-2';
+  const padY = compact ? 'py-0.5' : 'py-1';
+  return (
+    <span
+      title={ALTERNATIVE_VERSION_HINT}
+      data-testid="avb-badge"
+      className={cn(
+        'inline-flex items-center gap-1 rounded-sm border border-emerald-500/40 bg-emerald-500/10 transition-colors hover:border-emerald-400/70',
+        padX,
+        padY,
+      )}
+    >
+      <GitHubPagesImage
+        src="/images/credits/avb.svg"
+        alt=""
+        width={compact ? 12 : 16}
+        height={compact ? 12 : 16}
+        className="rounded-[2px]"
+      />
+      <span
+        className={cn(
+          compact ? 'font-ibm-mono text-[9px]' : 'font-ibm-mono text-[10px]',
+          'uppercase tracking-wider text-emerald-300',
+        )}
+      >
+        АВБ
+      </span>
+    </span>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
 /* Lore provenance row — // ИСТОЧНИК + origin/author chips + contribute       */
 /* -------------------------------------------------------------------------- */
 
@@ -249,6 +302,11 @@ export function ProvenanceRow({
         </span>
       )}
       {chips}
+      {/* АВБ badge — added on top of NAMED community sources (Star System, Звёздные Системы…).
+          Skipped when the source is already 'avb' (its chip already reads «АВБ» → no double mark). */}
+      {isAlternativeVersion(provenance) && provenance.origin !== 'avb' && (
+        <AlternativeVersionBadge compact={compact} />
+      )}
       {withContribute && <ContributeButton compact={compact} />}
     </div>
   );
@@ -345,6 +403,35 @@ export function MiniatureChip({ name, logo, url, compact, withHeader = true, hea
         </span>
       )}
       <SourceChip name={name} role={role || undefined} logo={logo} url={url} compact={compact} />
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Sponsor — who funded/commissioned the squad's miniatures or lore           */
+/* -------------------------------------------------------------------------- */
+
+interface SponsorChipProps {
+  /** Optional display name; falls back to a generic «Спонсор отряда» label. */
+  name?: string;
+  /** Sponsor's profile URL (VK, etc.). The chip is always a link. */
+  url: string;
+  withHeader?: boolean;
+  compact?: boolean;
+}
+
+/** Squad sponsor credit — a person who funded/commissioned the squad (miniatures
+ *  or lore). Visually unified with the other dossier chips; uses a Heart icon
+ *  (sponsorship = support) in rose, distinct from every lore-source tone. */
+export function SponsorChip({ name, url, withHeader = true, compact }: SponsorChipProps) {
+  return (
+    <div data-testid="sponsor-chip" className="flex flex-wrap items-center gap-2">
+      {withHeader && (
+        <span className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider">
+          {'// СПОНСОР'}
+        </span>
+      )}
+      <SourceChip name={name ?? 'Спонсор отряда'} icon={Heart} tone="#f43f5e" url={url} compact={compact} />
     </div>
   );
 }

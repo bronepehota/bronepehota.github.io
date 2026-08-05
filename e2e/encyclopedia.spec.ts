@@ -242,9 +242,9 @@ test.describe('Энциклопедия', () => {
 
     const banner = page.getByTestId('encyclopedia-sources-banner');
     await expect(banner).toBeVisible();
-    // Compact mode: logos + labels visible
+    // Compact mode: logos + labels visible — official canon + АВБ (alternative) umbrella mark
     await expect(banner.getByText('Официальный канон')).toBeVisible();
-    await expect(banner.getByText('Фанатские материалы')).toBeVisible();
+    await expect(banner.getByText('АВБ — альтернативная версия')).toBeVisible();
     // «Дополнить» CTA is a link
     await expect(banner.getByRole('link', { name: /дополнить/i })).toBeVisible();
   });
