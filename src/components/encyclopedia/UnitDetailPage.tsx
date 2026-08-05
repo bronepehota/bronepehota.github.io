@@ -14,7 +14,7 @@ import { SQUAD_GROUP_IMAGE, getPhotoCredit, getCredit } from '@/lib/painted-imag
 import { resolveUnitProvenance } from '@/lib/provenance';
 import { UnitLore } from './UnitDetail/UnitLore';
 import { SourceAvailability } from './SourceAvailability';
-import { PainterChip, ProvenanceRow, ImageSourceChip, MiniatureChip, SponsorChip } from './AttributionLabel';
+import { PainterChip, ProvenanceRow, ImageSourceChip, MiniatureChip, SponsorChip, ALTERNATIVE_VERSION_HINT } from './AttributionLabel';
 import { FactionLogo } from '@/components/FactionLogo';
 import { getFactionColors, factionLogos, factionDisplayNames } from '@/lib/faction-colors';
 import { UnitStatTable } from './UnitDetail/UnitStatTable';
@@ -69,6 +69,17 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
   const FactionIcon = faction.icon;
   // Wide group photo shown as a hero banner at the top (only some squads have one)
   const groupPhoto = SQUAD_GROUP_IMAGE[unit.id];
+  // АВБ — marks non-«Технолог» units on the hero image (top-left, under the faction badge).
+  const isOfficial = resolveUnitProvenance(unit).origin === 'tehnolog';
+  const avbStamp = !isOfficial ? (
+    <div
+      title={ALTERNATIVE_VERSION_HINT}
+      className="absolute top-16 left-3 z-10 inline-flex items-center gap-1 rounded border border-emerald-500/50 bg-military-dark/80 px-1.5 py-1 backdrop-blur-sm"
+    >
+      <GitHubPagesImage src="/images/credits/avb.svg" alt="АВБ" width={14} height={14} className="shrink-0 rounded-[1px]" />
+      <span className="font-ibm-mono text-[8px] font-bold tracking-wider text-emerald-300">АВБ</span>
+    </div>
+  ) : null;
   // Painter credit — shown whenever the squad is attributed (painted), independent
   // of whether a wide group photo exists.
   const photoCredit = getPhotoCredit(unit.id);
@@ -170,6 +181,7 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
                       )}
                     </div>
                   </div>
+                  {avbStamp}
                   <figcaption className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-military-dark/90 to-transparent">
                     <span className="font-ibm-mono text-[10px] text-military-amber/90 uppercase tracking-wider">
                       ◆ Отряд в сборе
@@ -218,7 +230,7 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
                       )}
                     </div>
                   </div>
-
+                  {avbStamp}
                 </div>
               )}
 

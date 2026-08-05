@@ -128,7 +128,7 @@ export function UnitCard({ unit }: UnitCardProps) {
           {/* Bottom-right: АВБ mark for non-official units (always visible);
               official units keep the decorative «СЕКРЕТНО» hover stamp. */}
           {!isOfficial ? (
-            <div className="absolute bottom-2 right-2" title={ALTERNATIVE_VERSION_HINT}>
+            <div className="absolute bottom-2 right-2 z-10" title={ALTERNATIVE_VERSION_HINT}>
               <div className="flex items-center gap-1 rounded border border-emerald-500/50 bg-military-dark/80 px-1.5 py-1 backdrop-blur-sm">
                 <GitHubPagesImage
                   src="/images/credits/avb.svg"
