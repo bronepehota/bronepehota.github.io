@@ -29,12 +29,33 @@ import type { Mission } from './mission-types';
  *                     badge like every other non-tehnolog source. */
 export type LoreSource = 'tehnolog' | 'star_system' | 'universestarsys' | 'ai' | 'avb';
 
+/** Named-author citation for a *specific written work* the lore was adapted from.
+ *
+ * Independent of the org-level `LoreSource` axes: official «Технолог» canon may be
+ * adapted from a named novel (e.g. Chertischev's «Битва за Велиан»), and this
+ * citation credits the human author + work *on top of* the org badge. The org
+ * axes drive the «Технолог / Star System / …» chip and the АВБ badge; `credit`
+ * drives a separate «автор лора» chip. Optional on every entity. */
+export interface LoreCredit {
+  /** Human author of the source work, e.g. "Chertischev". */
+  author?: string;
+  /** Title of the source work, e.g. "Битва за Велиан". */
+  work?: string;
+  /** Publication year of the source work. */
+  year?: number;
+  /** Optional link to the source work / author page. */
+  url?: string;
+}
+
 /** Resolved provenance — both axes always present after resolution. */
 export interface Provenance {
   /** Who invented the concept (the faction / unit / mission itself). */
   origin: LoreSource;
   /** Who wrote the descriptive lore text shown on the page. */
   loreAuthor: LoreSource;
+  /** Optional named-author citation (a specific book/novel the lore came from).
+   *  Orthogonal to the org-level axes — see `LoreCredit`. */
+  credit?: LoreCredit;
 }
 
 /** Faction-aware default for factions and units (they share the same rule). */
@@ -54,6 +75,7 @@ function merge(base: Provenance, override?: Partial<Provenance>): Provenance {
   return {
     origin: override.origin ?? base.origin,
     loreAuthor: override.loreAuthor ?? base.loreAuthor,
+    credit: override.credit ?? base.credit,
   };
 }
 

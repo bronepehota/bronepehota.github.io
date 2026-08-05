@@ -11,10 +11,10 @@
  */
 import { useState } from 'react';
 import type { LucideIcon } from 'lucide-react';
-import { Shield, Star, Megaphone, ExternalLink, Check, Bot, Layers, Heart } from 'lucide-react';
+import { Shield, Star, Megaphone, ExternalLink, Check, Bot, Layers, Heart, BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { GitHubPagesImage } from '@/components/GitHubPagesImage';
-import { isProvenanceUniform, isAlternativeVersion, type LoreSource, type Provenance } from '@/lib/provenance';
+import { isProvenanceUniform, isAlternativeVersion, type LoreSource, type Provenance, type LoreCredit } from '@/lib/provenance';
 
 /** VK channel for data contributions / error reports (lore, painters, provenance). */
 export const CONTRIBUTION_VK_URL = 'https://vk.ru/lastbpcoder';
@@ -237,6 +237,37 @@ export function AlternativeVersionBadge({ compact }: AlternativeVersionBadgeProp
 /* Lore provenance row — // ИСТОЧНИК + origin/author chips + contribute       */
 /* -------------------------------------------------------------------------- */
 
+/** Tone for the named-author («автор лора») chip — warm bronze, distinct from every
+ *  org-source tone: the citation credits a human author/work, not a faction source. */
+const LORE_CREDIT_TONE = '#c2924a';
+
+/** Renders a `LoreCredit` (a named author + work the lore was adapted from) as a
+ *  dossier chip, visually unified with the org-source chips but flagged by a BookOpen
+ *  icon. Orthogonal to the origin/loreAuthor chips — e.g. «Технолог» canon adapted
+ *  from Chertischev's «Битва за Велиан» shows both the org badge and this citation. */
+function loreCreditChip(credit: LoreCredit, compact?: boolean) {
+  const name = credit.author ?? credit.work ?? 'Источник лора';
+  // When the author is named, the work + year go to the role sub-label
+  // («Chertischev · Битва за Велиан, 2022»); with no author, the work is the name.
+  const role = credit.author
+    ? [credit.work, credit.year].filter(Boolean).join(', ')
+    : credit.year
+      ? String(credit.year)
+      : undefined;
+  return (
+    <span data-testid="lore-credit-chip">
+      <SourceChip
+        name={name}
+        role={role || undefined}
+        icon={BookOpen}
+        tone={LORE_CREDIT_TONE}
+        url={credit.url}
+        compact={compact}
+      />
+    </span>
+  );
+}
+
 interface ProvenanceRowProps {
   provenance: Provenance;
   /** Makes the (collapsed) chip a link — e.g. a mission's sourceUrl. */
@@ -302,6 +333,9 @@ export function ProvenanceRow({
         </span>
       )}
       {chips}
+      {/* Named-author citation (a specific book/novel the lore was adapted from) —
+          shown on top of the org chips when `provenance.credit` is set. */}
+      {provenance.credit && loreCreditChip(provenance.credit, compact)}
       {/* АВБ badge — added on top of NAMED community sources (Star System, Звёздные Системы…).
           Skipped when the source is already 'avb' (its chip already reads «АВБ» → no double mark). */}
       {isAlternativeVersion(provenance) && provenance.origin !== 'avb' && (

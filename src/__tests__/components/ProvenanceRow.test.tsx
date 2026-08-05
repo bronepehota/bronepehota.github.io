@@ -38,3 +38,27 @@ describe('ProvenanceRow — АВБ dedup contract', () => {
     expect(container.textContent).toContain('АВБ');
   });
 });
+
+describe('ProvenanceRow — named-author credit chip', () => {
+  const novel = { author: 'Chertischev', work: 'Битва за Велиан', year: 2022 };
+
+  it('renders the credit chip when provenance.credit is set', () => {
+    const { container } = renderRow({ origin: 'tehnolog', loreAuthor: 'tehnolog', credit: novel });
+    expect(screen.getByTestId('lore-credit-chip')).toBeInTheDocument();
+    // Author + work + year all render (the uppercase is CSS-only, so text keeps original case).
+    expect(container.textContent).toContain('Chertischev');
+    expect(container.textContent).toContain('Битва за Велиан');
+    expect(container.textContent).toContain('2022');
+  });
+
+  it('does not render a credit chip when no credit is set', () => {
+    renderRow({ origin: 'tehnolog', loreAuthor: 'tehnolog' });
+    expect(screen.queryByTestId('lore-credit-chip')).toBeNull();
+  });
+
+  it('credit is orthogonal to the АВБ badge — a tehnolog-origin novel stays non-АВБ', () => {
+    renderRow({ origin: 'tehnolog', loreAuthor: 'tehnolog', credit: novel });
+    expect(screen.queryByTestId('avb-badge')).toBeNull();
+    expect(screen.getByTestId('lore-credit-chip')).toBeInTheDocument();
+  });
+});

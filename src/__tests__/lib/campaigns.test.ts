@@ -37,4 +37,25 @@ describe('campaigns loader', () => {
     ).toBe(true);
     expect(sv.missions?.length).toBe(1);
   });
+
+  it('discovers the Штурм Велиана chronicle (Chertischev novel canon)', () => {
+    const sv = getAllCampaigns().find((c) => c.slug === 'shturm-velyana');
+    expect(sv).toBeDefined();
+    expect(sv!.title).toBe('Штурм Велиана');
+    expect(sv!.era).toBe('4527–4528');
+    // The battle pitted both superpowers against each other.
+    expect(sv!.factions).toEqual(expect.arrayContaining(['protectorate', 'polaris']));
+  });
+
+  it('Штурм Велиана rosters real machines and Велиан units', () => {
+    const sv = getAllCampaigns().find((c) => c.slug === 'shturm-velyana')!;
+    expect(sv.units?.length).toBeGreaterThan(0);
+    // Holder's «Предатор», the recon «Саламандра», and the dual-side «Раптор».
+    expect(sv.units?.some((u) => u.id === 'predator')).toBe(true);
+    expect(sv.units?.some((u) => u.id === 'salamander')).toBe(true);
+    expect(sv.units?.some((u) => u.id === 'raptor')).toBe(true);
+    // Советник Ольгерд and Велиан defenders.
+    expect(sv.units?.some((u) => u.id === 'protectorate_olgerd')).toBe(true);
+    expect(sv.units?.some((u) => u.id === 'protectorate_regulyary_planety_velian')).toBe(true);
+  });
 });

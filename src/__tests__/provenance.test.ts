@@ -176,4 +176,32 @@ describe('provenance resolver', () => {
       ).toEqual({ origin: 'avb', loreAuthor: 'avb' });
     });
   });
+
+  describe('named-author credit (LoreCredit) pass-through', () => {
+    const novel = { author: 'Chertischev', work: 'Битва за Велиан', year: 2022 };
+
+    test('unit: credit override is preserved alongside resolved org axes', () => {
+      const p = resolveUnitProvenance(unit('polaris', { credit: novel }, { sources: ['tehnolog'] }));
+      expect(p.origin).toBe('tehnolog');
+      expect(p.loreAuthor).toBe('tehnolog');
+      expect(p.credit).toEqual(novel);
+    });
+
+    test('faction: credit override is preserved', () => {
+      const p = resolveFactionProvenance(faction('protectorate', { credit: novel }));
+      expect(p.origin).toBe('tehnolog');
+      expect(p.loreAuthor).toBe('star_system');
+      expect(p.credit).toEqual(novel);
+    });
+
+    test('credit is undefined when not set (defaults carry no citation)', () => {
+      const p = resolveUnitProvenance(unit('polaris', undefined, { sources: ['tehnolog'] }));
+      expect(p.credit).toBeUndefined();
+    });
+
+    test('credit is orthogonal to the АВБ badge — a tehnolog-origin novel stays non-АВБ', () => {
+      const p = resolveUnitProvenance(unit('polaris', { credit: novel }, { sources: ['tehnolog'] }));
+      expect(isAlternativeVersion(p)).toBe(false);
+    });
+  });
 });
