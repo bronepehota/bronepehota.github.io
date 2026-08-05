@@ -320,7 +320,11 @@
     },
     "image": "/images/squads/protectorate/prizrak/1.png",
     "imageSource": "shnayder",
-    "statsNote": "Предварительные статы, не являются каноном. Можно изменить в редакторе."
+    "statsNote": "Предварительные статы, не являются каноном. Можно изменить в редакторе.",
+    "provenance": {
+      "origin": "tehnolog",
+      "loreAuthor": "tehnolog"
+    }
   },
   {
     "id": "protectorate_mark_chang",
@@ -342,7 +346,11 @@
     },
     "image": "/images/squads/protectorate/mark_chang/1.png",
     "imageSource": "shnayder",
-    "statsNote": "Предварительные статы, не являются каноном. Можно изменить в редакторе."
+    "statsNote": "Предварительные статы, не являются каноном. Можно изменить в редакторе.",
+    "provenance": {
+      "origin": "tehnolog",
+      "loreAuthor": "tehnolog"
+    }
   },
   {
     "id": "protectorate_piriel",
@@ -364,7 +372,11 @@
     },
     "image": "/images/squads/protectorate/piriel/1.png",
     "imageSource": "shnayder",
-    "statsNote": "Предварительные статы, не являются каноном. Можно изменить в редакторе."
+    "statsNote": "Предварительные статы, не являются каноном. Можно изменить в редакторе.",
+    "provenance": {
+      "origin": "tehnolog",
+      "loreAuthor": "tehnolog"
+    }
   },
   {
     "id": "protectorate_elveret",
@@ -386,7 +398,11 @@
     },
     "image": "/images/squads/protectorate/elveret/1.png",
     "imageSource": "shnayder",
-    "statsNote": "Предварительные статы, не являются каноном. Можно изменить в редакторе."
+    "statsNote": "Предварительные статы, не являются каноном. Можно изменить в редакторе.",
+    "provenance": {
+      "origin": "tehnolog",
+      "loreAuthor": "tehnolog"
+    }
   },
   {
     "id": "protectorate_olgerd",
@@ -408,7 +424,11 @@
     },
     "image": "/images/squads/protectorate/olgerd/1.png",
     "imageSource": "shnayder",
-    "statsNote": "Предварительные статы, не являются каноном. Можно изменить в редакторе."
+    "statsNote": "Предварительные статы, не являются каноном. Можно изменить в редакторе.",
+    "provenance": {
+      "origin": "tehnolog",
+      "loreAuthor": "tehnolog"
+    }
   },
   {
     "id": "protectorate_zheleznyy_general",
@@ -430,7 +450,11 @@
     },
     "image": "/images/squads/protectorate/zheleznyy_general/1.png",
     "imageSource": "shnayder",
-    "statsNote": "Предварительные статы, не являются каноном. Можно изменить в редакторе."
+    "statsNote": "Предварительные статы, не являются каноном. Можно изменить в редакторе.",
+    "provenance": {
+      "origin": "tehnolog",
+      "loreAuthor": "tehnolog"
+    }
   },
   {
     "id": "protectorate_kiberpehota_fox3",
