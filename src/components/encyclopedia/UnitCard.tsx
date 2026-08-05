@@ -4,6 +4,7 @@ import { EncyclopediaUnit, getUnitCostForSource } from '@/lib/encyclopedia-regis
 import { getFactionColors, factionLogos } from '@/lib/faction-colors';
 import { SQUAD_GROUP_IMAGE, getCredit } from '@/lib/painted-images';
 import { resolveUnitProvenance } from '@/lib/provenance';
+import { ALTERNATIVE_VERSION_HINT } from './AttributionLabel';
 
 interface UnitCardProps {
   unit: EncyclopediaUnit;
@@ -124,14 +125,32 @@ export function UnitCard({ unit }: UnitCardProps) {
             </div>
           </div>
 
-          {/* Classification stamp - bottom right (appears on hover) */}
-          <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div className="border-2 border-military-rust/60 px-2 py-1 rotate-[-12deg] backdrop-blur-sm">
-              <span className="font-ibm-mono text-[8px] text-military-rust tracking-wider">
-                СЕКРЕТНО
-              </span>
+          {/* Bottom-right: АВБ mark for non-official units (always visible);
+              official units keep the decorative «СЕКРЕТНО» hover stamp. */}
+          {!isOfficial ? (
+            <div className="absolute bottom-2 right-2 z-10" title={ALTERNATIVE_VERSION_HINT}>
+              <div className="flex items-center gap-1 rounded border border-emerald-500/50 bg-military-dark/80 px-1.5 py-1 backdrop-blur-sm">
+                <GitHubPagesImage
+                  src="/images/credits/avb.svg"
+                  alt="АВБ"
+                  width={14}
+                  height={14}
+                  className="shrink-0 rounded-[1px]"
+                />
+                <span className="font-ibm-mono text-[8px] font-bold tracking-wider text-emerald-300">
+                  АВБ
+                </span>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div className="border-2 border-military-rust/60 px-2 py-1 rotate-[-12deg] backdrop-blur-sm">
+                <span className="font-ibm-mono text-[8px] text-military-rust tracking-wider">
+                  СЕКРЕТНО
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Info section */}

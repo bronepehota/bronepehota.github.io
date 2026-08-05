@@ -71,6 +71,10 @@ export interface EncyclopediaUnit {
    *  Can differ from `imageSource` (e.g. Lisitsin rendered a Tehnolog-original model).
    *  Shown as // МИНИАТЮРЫ chip when it differs from the image creator. */
   miniatureSource?: string;
+  /** Squad sponsor — a person who funded/commissioned the squad's miniatures or lore.
+   *  Shown as a // СПОНСОР chip on the detail page. `name` is optional (defaults to a
+   *  generic «Спонсор отряда» label); `url` is the sponsor's profile (e.g. VK). */
+  sponsor?: { name?: string; url: string };
 }
 
 export interface EncyclopediaFaction {
