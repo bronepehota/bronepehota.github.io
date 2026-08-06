@@ -24,12 +24,16 @@ export function UnitLoreDetail({ doc }: { doc: UnitLoreDoc }) {
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        className="flex w-full items-center gap-2 font-oswald text-lg text-military-sand"
+        data-testid="unit-lore-toggle"
+        className="flex w-full items-center gap-2 rounded-sm border border-military-amber/40 bg-military-amber/5 px-4 py-3 font-oswald text-lg text-military-amber transition-colors hover:bg-military-amber/15"
       >
-        <BookOpen className="w-5 h-5 text-military-rust" />
+        <BookOpen className="w-5 h-5 shrink-0" aria-hidden />
         Полное описание
+        <span className="ml-1 font-ibm-mono text-[10px] font-normal uppercase tracking-wider text-military-steel/60">
+          {open ? 'свернуть' : 'первоисточник'}
+        </span>
         <ChevronDown
-          className={cn('w-4 h-4 ml-auto text-military-steel/60 transition-transform', open && 'rotate-180')}
+          className={cn('w-4 h-4 ml-auto transition-transform', open && 'rotate-180')}
           aria-hidden
         />
       </button>

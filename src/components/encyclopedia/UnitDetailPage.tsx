@@ -412,8 +412,9 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc }:
             )}
 
             {/* Common army-list switcher — always shows the source list (a single
-                pill for one-source units; clickable pills when 2+). Controls BOTH
-                the personnel and the combat stats below it. */}
+                pill for one-source units; clickable pills when 2+). Controls the
+                combat stats and personnel below. Grouped with the characteristics so
+                switching is adjacent to what it changes. */}
             <SourceAvailability
               unit={unit}
               variant="detail"
@@ -421,15 +422,15 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc }:
               onSourceChange={unit.sources.length > 1 ? setActiveSource : undefined}
             />
 
-            {/* Личный состав — personnel portraits, follows the active source */}
-            <SoldierImages unit={activeUnit} />
-
             {/* Характеристики — spec plate (ТТХ): physical specs (mass, crew, моноблок,
                 разработчик). Constants of the machine, so base `unit` (not source-switched). */}
             <UnitSpecs unit={unit} />
 
             {/* Боевой расчёт — full stat table, follows the active source */}
             <UnitStatTable unit={activeUnit as unknown as Squad | Machine} type={unit.type} />
+
+            {/* Личный состав — personnel portraits, follows the active source */}
+            <SoldierImages unit={activeUnit} />
 
             {/* Tactics */}
             {activeUnit.encyclopedia?.tactics && (
