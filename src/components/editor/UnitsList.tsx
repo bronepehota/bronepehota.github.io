@@ -320,6 +320,7 @@ export function UnitsList({
         </button>
         <button
           onClick={() => setTab('machine')}
+          data-testid="units-tab-machine"
           className={`
             flex-1 px-4 py-3 font-ui text-sm font-semibold transition-all relative
             ${tab === 'machine'

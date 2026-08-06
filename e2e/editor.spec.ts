@@ -244,6 +244,10 @@ test.describe('Editor', () => {
     // Save the machine — onSave navigates back to the units list.
     await page.getByRole('button', { name: /Сохранить/ }).click();
 
+    // The units list defaults to the Отряды tab; switch to Техника to see the
+    // saved machine (machines render under the 'machine' tab, not 'squad').
+    await page.getByTestId('units-tab-machine').click();
+
     // Round-trip assertion: the saved machine appears in the units list with the
     // weapons derived from calculatorParams (not the placeholder "Main Gun").
     await expect(page.getByText('Тест-машина')).toBeVisible();
