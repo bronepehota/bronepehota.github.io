@@ -42,7 +42,12 @@
 - **Куда переносится**:
   - ТТХ: `manufacturer/monoblock/mass/crew/type` (рендерятся `<UnitSpecs>`).
   - Названия вооружений + лор разработки → `lore`/`history`.
-- **Статус**: 🚧 в работе — обе фракции, все машины.
+- **Инструмент**: `tools/handbook_extract.py` (pdfplumber + декод CP1251; `--json`).
+- **Статус**: ✅ обе фракции, все машины из справочника (Протекторат: griffin,
+  predator, carnivore, hurricane, trex, tornado, octopus; Полярис: wildbear,
+  spider, locust, raptor, devastator, superlocust, eraser, helix, thunder).
+  salamander/varan — без заметного нового оружия, оставлены как есть.
+  hornet/hunter/madbull/ravingbeast/demolisher/t_600 в этом справочнике отсутствуют.
 
 ## Очередь (необработанное)
 - _Прочие книги/альманахи вселенной — добавлять сюда по мере поступления._
