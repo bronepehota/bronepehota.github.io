@@ -9,7 +9,6 @@ import { getEncyclopediaFaction } from '@/lib/encyclopedia-registry';
 import { cn } from '@/lib/utils';
 import { ModifierIcon } from '@/components/editor/ModifierIcons';
 import { SoldierImages } from './UnitDetail/SoldierImages';
-import { MachineImages } from './UnitDetail/MachineImages';
 import { SQUAD_GROUP_IMAGE, getPhotoCredit, getCredit } from '@/lib/painted-images';
 import { resolveUnitProvenance } from '@/lib/provenance';
 import { UnitLore } from './UnitDetail/UnitLore';
@@ -489,17 +488,6 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc }:
                 </div>
               </section>
             )}
-
-            {/* Machine Images section */}
-            <section
-              className={cn(
-                'fade-in-up opacity-0',
-                isLoaded && 'opacity-100'
-              )}
-              style={{ animationFillMode: 'forwards', animationDelay: '0.85s' }}
-            >
-              <MachineImages unit={unit} />
-            </section>
           </div>
         </main>
 
