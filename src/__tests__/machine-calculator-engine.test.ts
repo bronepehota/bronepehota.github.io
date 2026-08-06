@@ -1,4 +1,4 @@
-import { weaponCost, machineCost, parseDice } from '@/lib/machine-calculator-engine';
+import { weaponCost, machineCost, parseDice, deriveWeapons } from '@/lib/machine-calculator-engine';
 import { ARSENAL_PRESETS } from '@/data/calculator/machine-catalogs';
 import type { WeaponSlotConfig, MachineCalculatorParams } from '@/lib/editor/types';
 
@@ -110,5 +110,98 @@ describe('machineCost', () => {
     expect(r.speed).toBe(7);
     expect(r.flyerPremium).toBe(true);
     expect(r.total).toBe(365);
+  });
+});
+
+describe('deriveWeapons', () => {
+  test('Грифон-like params -> 5 weapons with correct name/range/power', () => {
+    // D=гарпун(73) E=драк.пламя(30) F=кулак ББ2(2) G=кулак ББ2(2) H=MG-546X2(18)
+    const p = params({
+      monoblock: 'УМ-1', chassis: 'Траккер',
+      slots: [
+        slot({ preset: 'garpun_pb1m',      range: 'D6+2', power: '2D20',  ammo: 4 }), // Гарпун
+        slot({ preset: 'drakone_plamya',   range: 'D12',  power: 'D20+3', ammo: 4 }), // Драк.пламя
+        slot({ preset: 'kulak_manipulator', range: 'ББ',  power: '2' }),              // Кулак ББ2
+        slot({ preset: 'kulak_manipulator', range: 'ББ',  power: '2' }),              // Кулак ББ2
+        slot({ preset: 'mg_546x2',         range: 'D12',  power: '2D6',  ammo: 6 }),  // MG-546X2
+      ],
+    });
+    const w = deriveWeapons(p);
+    expect(w).toHaveLength(5);
+    // Гарпун — preset name + full specs
+    expect(w[0]).toMatchObject({
+      name: 'Энергетический гарпун Power Bolt PB-1M',
+      range: 'D6+2', power: '2D20', ammo: 4,
+    });
+    expect(w[0].special).toBeUndefined();
+    // Драконье пламя
+    expect(w[1]).toMatchObject({
+      name: 'Плазменная пушка Драконье пламя',
+      range: 'D12', power: 'D20+3', ammo: 4,
+    });
+    // ББ slots: range 'ББ', power '2'; ammo/special omitted (0 / null)
+    expect(w[2]).toMatchObject({ range: 'ББ', power: '2' });
+    expect(w[2].ammo).toBeUndefined();
+    expect(w[2].special).toBeUndefined();
+    expect(w[3]).toMatchObject({ range: 'ББ', power: '2' });
+    // MG-546X2
+    expect(w[4]).toMatchObject({
+      name: 'Двуствольный лёгкий пулемёт MG-546X2',
+      range: 'D12', power: '2D6', ammo: 6,
+    });
+  });
+
+  test('all-empty slots -> []', () => {
+    const p = params({ slots: [slot({}), slot({}), slot({}), slot({}), slot({})] });
+    expect(deriveWeapons(p)).toEqual([]);
+  });
+
+  test('slot with property:blast2 -> weapon.special === "Взрыв: 2 шг −1Д20"', () => {
+    const p = params({
+      slots: [
+        slot({ preset: 'shtorm', range: 'D12', power: '2D20', ammo: 1, property: 'blast2' }),
+        slot({}), slot({}), slot({}), slot({}),
+      ],
+    });
+    const w = deriveWeapons(p);
+    expect(w).toHaveLength(1);
+    expect(w[0].name).toBe('Спаренная пусковая Шторм');
+    expect(w[0].special).toBe('Взрыв: 2 шг −1Д20');
+  });
+
+  test('slot with property:burst3 -> weapon.special === "3 выстрела в 3 направления"', () => {
+    const p = params({
+      slots: [
+        slot({ preset: 'triplet_mk56', range: 'D12', power: '2D6', ammo: 6, property: 'burst3' }),
+        slot({}), slot({}), slot({}), slot({}),
+      ],
+    });
+    const w = deriveWeapons(p);
+    expect(w).toHaveLength(1);
+    expect(w[0].special).toBe('3 выстрела в 3 направления');
+  });
+
+  test('custom preset (no arsenal match) -> name "Своё орудие"', () => {
+    const p = params({
+      slots: [
+        slot({ preset: 'custom', range: 'D20', power: 'D20', ammo: 3 }),
+        slot({}), slot({}), slot({}), slot({}),
+      ],
+    });
+    const w = deriveWeapons(p);
+    expect(w).toHaveLength(1);
+    expect(w[0].name).toBe('Своё орудие');
+  });
+
+  test('ammo:0 -> ammo field omitted', () => {
+    const p = params({
+      slots: [
+        slot({ preset: 'custom', range: 'D20', power: 'D20', ammo: 0 }),
+        slot({}), slot({}), slot({}), slot({}),
+      ],
+    });
+    const w = deriveWeapons(p);
+    expect(w).toHaveLength(1);
+    expect(w[0].ammo).toBeUndefined();
   });
 });

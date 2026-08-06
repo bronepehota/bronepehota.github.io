@@ -1,8 +1,8 @@
 import type {
   MachineCalculatorParams, WeaponSlotConfig, MonoblockId, ChassisId,
 } from '@/lib/editor/types';
-import type { CustomSpeedSector } from '@/lib/editor/types';
-import { MONOBLOCKS, CHASSIS, WEIGHT_SPEED_SECTORS } from '@/data/calculator/machine-catalogs';
+import type { CustomSpeedSector, CustomWeapon } from '@/lib/editor/types';
+import { MONOBLOCKS, CHASSIS, WEIGHT_SPEED_SECTORS, ARSENAL_PRESETS } from '@/data/calculator/machine-catalogs';
 
 const RANGE_BASE: Record<number, number> = { 6: 10, 12: 40, 20: 80 };
 const POWER_BASE: Record<number, number> = { 6: 20, 12: 80, 20: 160 };
@@ -108,4 +108,37 @@ export function deriveSpeedSectors(monoblock: MonoblockId, chassis: ChassisId, d
     { min_durability: third + 1, max_durability: durabilityMax - third, speed: speeds[1] },
     { min_durability: 1, max_durability: third, speed: speeds[2] },
   ];
+}
+
+/**
+ * Оружие `special` для свойств орудия (дескрипторы строкой — конвенция данных кодбазы).
+ * null → special опускается.
+ */
+function describeProperty(prop: WeaponSlotConfig['property']): string | undefined {
+  switch (prop) {
+    case 'burst3': return '3 выстрела в 3 направления';
+    case 'blast1': return 'Взрыв: 1 шг −1Д12';
+    case 'blast2': return 'Взрыв: 2 шг −1Д20';
+    default:       return undefined;
+  }
+}
+
+/**
+ * Derive the `weapons[]` array for CustomMachine from calculator params.
+ * Slots with empty range AND power are skipped. Returns [] when all slots empty.
+ * ББ slots (range/power 'ББ' or power like '2') pass through with range:'ББ', power:'2'.
+ */
+export function deriveWeapons(params: MachineCalculatorParams): CustomWeapon[] {
+  const weapons: CustomWeapon[] = [];
+  for (const s of params.slots) {
+    if (!s.range && !s.power) continue;            // empty slot
+    const preset = ARSENAL_PRESETS.find(p => p.id === s.preset);
+    const name = preset?.name ?? (s.preset === 'custom' ? 'Своё орудие' : 'Орудие');
+    const weapon: CustomWeapon = { name, range: s.range, power: s.power };
+    if (s.ammo) weapon.ammo = s.ammo;              // omit when 0
+    const special = describeProperty(s.property);
+    if (special) weapon.special = special;
+    weapons.push(weapon);
+  }
+  return weapons;
 }

@@ -236,7 +236,16 @@ test.describe('Editor', () => {
     const total = await page.getByTestId('mc-total').textContent();
     expect(parseInt(total!, 10)).toBeGreaterThan(0);
 
-    // Save the machine
+    // Fill the required name so handleSave doesn't bail out (Playwright auto-dismisses
+    // the alert, which previously made this test a false-positive green — no save
+    // happened, so C1 calculatorParams→weapons round-trip was never exercised).
+    await page.getByPlaceholder(/Введите название/).fill('Тест-машина');
+
+    // Save the machine — onSave navigates back to the units list.
     await page.getByRole('button', { name: /Сохранить/ }).click();
+
+    // Round-trip assertion: the saved machine appears in the units list with the
+    // weapons derived from calculatorParams (not the placeholder "Main Gun").
+    await expect(page.getByText('Тест-машина')).toBeVisible();
   });
 });

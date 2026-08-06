@@ -209,24 +209,26 @@ export function SoldiersCalculator({
                     </select>
                   </td>
 
-                  {/* Computed stats */}
+                  {/* Computed stats — every stat is always computed in the editor
+                      calculator (never missing); melee:0 is a valid value (heavy_ranged),
+                      so the "empty/unrecognized" red-pulse semantic doesn't apply. */}
                   <td className="px-1 py-1.5 text-center">
-                    <StatCell value={c.rank} empty={!c.rank} />
+                    <StatCell value={c.rank} />
                   </td>
                   <td className="px-1 py-1.5 text-center">
-                    <StatCell value={c.speed} empty={!c.speed} />
+                    <StatCell value={c.speed} />
                   </td>
                   <td className="px-1 py-1.5 text-center">
-                    <StatCell value={c.range} empty={!c.range} />
+                    <StatCell value={c.range} />
                   </td>
                   <td className="px-1 py-1.5 text-center">
-                    <StatCell value={c.power} empty={!c.power} />
+                    <StatCell value={c.power} />
                   </td>
                   <td className="px-1 py-1.5 text-center">
-                    <StatCell value={c.melee} empty={!c.melee} />
+                    <StatCell value={c.melee} />
                   </td>
                   <td className="px-1 py-1.5 text-center">
-                    <StatCell value={c.armor} empty={!c.armor} />
+                    <StatCell value={c.armor} />
                   </td>
 
                   {/* Delete */}

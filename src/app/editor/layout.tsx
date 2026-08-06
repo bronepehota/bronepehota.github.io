@@ -18,7 +18,7 @@ const blackOps = Black_Ops_One({
 });
 
 const jbMono = JetBrains_Mono({
-  subsets: ['latin', 'cyrillic-ext'],
+  subsets: ['latin', 'cyrillic'],
   variable: '--font-jbmono',
   display: 'swap',
 });

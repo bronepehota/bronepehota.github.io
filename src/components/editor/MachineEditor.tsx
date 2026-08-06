@@ -11,7 +11,7 @@ import { Save, X, Plus, Trash2, Eye, Target, Zap, Shield, Gauge } from 'lucide-r
 import { MachinePreview } from './MachinePreview';
 import { BuffSelector } from './BuffSelector';
 import { MachineCalculator } from './MachineCalculator';
-import { machineCost, deriveSpeedSectors } from '@/lib/machine-calculator-engine';
+import { machineCost, deriveSpeedSectors, deriveWeapons } from '@/lib/machine-calculator-engine';
 import type { BuffDefinition } from '@/lib/modifier-types';
 import type { MachineCalculatorParams, WeaponSlotConfig } from '@/lib/editor/types';
 
@@ -135,6 +135,11 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
     setRank(bd.derived.rank);
     setFireRate(bd.derived.fire_rate);
     setSpeedSectors(deriveSpeedSectors(calcParams.monoblock, calcParams.chassis, bd.derived.durability_max));
+    // Sync weapons[] from calculator slots so saved machines carry real arsenal specs
+    // (the runtime game reads `weapons[]`, not calculatorParams). Empty derivations
+    // keep the existing placeholder/manual weapons untouched.
+    const derived = deriveWeapons(calcParams);
+    if (derived.length > 0) setWeapons(derived);
   };
 
   const handleSave = () => {
