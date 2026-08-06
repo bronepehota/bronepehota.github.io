@@ -1,0 +1,48 @@
+/* Editor-only verifier aesthetic. Scoped to .editor-scope — does NOT affect the main app. */
+
+.editor-scope {
+  /* palette (from tools/card_matcher_gen.py :root) */
+  --bg: #0f1216;
+  --panel: #161a20;
+  --panel2: #1d222a;
+  --panel3: #252b34;
+  --border: #2a313a;
+  --border2: #3b434e;
+  --bone: #e8e3d6;
+  --muted: #8c949f;
+  --dim: #5b636f;
+  --ru: #ea580c;
+  --ru2: #fb923c;
+  --ru-dim: #7c2d12;
+  --green: #4ade80;
+  --red: #f43f5e;
+
+  background: var(--bg);
+  color: var(--bone);
+  font-family: var(--font-oswald), 'Oswald', sans-serif;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(900px circle at 12% -5%, rgba(234, 88, 12, .06), transparent 45%),
+    radial-gradient(700px circle at 95% 110%, rgba(56, 189, 248, .03), transparent 45%);
+}
+
+/* signature hazard stripe */
+.editor-hazard {
+  height: 5px;
+  background: repeating-linear-gradient(135deg, var(--ru) 0 13px, #0b0d10 13px 26px);
+  border-radius: 2px;
+  opacity: .85;
+}
+
+/* font helper classes (variables come from next/font in layout.tsx) */
+.font-display { font-family: var(--font-blackops), 'Black Ops One', cursive; }
+.font-ui { font-family: var(--font-oswald), 'Oswald', sans-serif; }
+.font-stat { font-family: var(--font-jbmono), 'JetBrains Mono', monospace; }
+
+/* panels */
+.ed-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 5px; }
+.ed-panel2 { background: var(--panel2); border: 1px solid var(--border2); border-radius: 4px; }
+
+/* status pills */
+.ed-ok { color: var(--green); background: rgba(74,222,128,.07); border: 1px solid rgba(74,222,128,.4); }
+.ed-bad { color: var(--red); background: rgba(244,63,94,.08); border: 1px solid rgba(244,63,94,.4); }

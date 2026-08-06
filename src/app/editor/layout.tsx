@@ -1,21 +1,31 @@
 /**
- * Editor layout - provides consistent structure for editor pages
+ * Editor layout — desktop only. Loads the verifier fonts and scopes the editor theme.
  */
-
 import type { Metadata } from 'next';
+import { Black_Ops_One, JetBrains_Mono } from 'next/font/google';
+import './editor-theme.css';
 
 export const metadata: Metadata = {
   title: 'Редактор армлистов | Бронепехота',
   description: 'Создание и редактирование пользовательских армейских листов',
 };
 
-export default function EditorLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+const blackOps = Black_Ops_One({
+  subsets: ['latin'],
+  weight: '400',
+  variable: '--font-blackops',
+  display: 'swap',
+});
+
+const jbMono = JetBrains_Mono({
+  subsets: ['latin', 'cyrillic-ext'],
+  variable: '--font-jbmono',
+  display: 'swap',
+});
+
+export default function EditorLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-slate-900 text-white">
+    <div className={`editor-scope ${blackOps.variable} ${jbMono.variable}`}>
       {children}
     </div>
   );
