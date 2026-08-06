@@ -1,7 +1,6 @@
 'use client';
 
 import { useMemo } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
 import { machineCost, weaponCost } from '@/lib/machine-calculator-engine';
 import { MONOBLOCKS, CHASSIS, ARSENAL_PRESETS } from '@/data/calculator/machine-catalogs';
 import type { MachineCalculatorParams, WeaponSlotConfig, ChassisId } from '@/lib/editor/types';
@@ -13,8 +12,6 @@ interface Props {
   onParamsChange: (p: MachineCalculatorParams) => void;
   onApply: (cost: number) => void;
 }
-
-const empty = (): WeaponSlotConfig => ({ preset: 'empty', range: '', power: '', ammo: 0, property: null });
 
 export function MachineCalculator({ params, onParamsChange, onApply }: Props) {
   const breakdown = useMemo(() => machineCost(params), [params]);
@@ -79,7 +76,7 @@ export function MachineCalculator({ params, onParamsChange, onApply }: Props) {
               {s.range === 'ББ' || /^[-+]?\d+$/.test(s.power) ? (
                 <label className="text-xs text-slate-400 flex items-center gap-1">ББ ранг
                   <input type="number" min={1} max={3} className="w-12 px-1 py-1 bg-slate-900 border border-slate-700 rounded text-xs"
-                    value={s.power} onChange={e => setSlot(i, { range: 'ББ', power: e.target.value })} />
+                    value={s.power} onChange={e => setSlot(i, { range: 'ББ', power: e.target.value, preset: 'custom' })} />
                 </label>
               ) : (
                 <>
