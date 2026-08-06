@@ -265,6 +265,7 @@ export function UnitsList({
             disabled={isMyUnitsView}
             className="p-2 rounded-lg border border-[var(--border2)] bg-[var(--panel2)] hover:bg-[var(--ru)] hover:text-white hover:border-[var(--ru)] transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
             title="Создать технику"
+            data-testid="create-machine-button"
           >
             <Truck className="w-4 h-4 text-[var(--ru2)] group-hover:text-white group-hover:scale-110 transition-transform" />
           </button>

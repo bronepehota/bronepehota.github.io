@@ -196,4 +196,47 @@ test.describe('Editor', () => {
     await expect(page.getByText('Базовый источник').first()).toBeVisible();
     await expect(page.getByText('Выберите источник').first()).toBeVisible();
   });
+
+  // Helper: create source + faction, then open the machine editor
+  async function setupMachineEditor(page: import('@playwright/test').Page) {
+    // Create source
+    await page.getByTitle('Создать источник').first().click();
+    await page.waitForTimeout(300);
+    const nameInput = page.getByTestId('source-name-input');
+    await nameInput.click();
+    await nameInput.pressSequentially('TestMachine', { delay: 20 });
+    await page.getByRole('button', { name: 'Создать', exact: true }).first().click();
+
+    // Source should be auto-selected; create a faction
+    await page.getByTitle('Создать фракцию').first().click();
+    await page.getByText('Новая фракция').first().click();
+
+    // Switch to the "Техника" tab in UnitsList and create a machine
+    await page.getByTestId('create-machine-button').click();
+    await page.waitForTimeout(500);
+  }
+
+  test('should compute machine cost via calculator', async ({ page }) => {
+    await setupMachineEditor(page);
+
+    // Switch to the calculator tab inside MachineEditor
+    await page.getByTestId('machine-calculator-tab').click();
+
+    // Configure: УМ-1 monoblock + Траккер chassis
+    await page.getByTestId('mc-monoblock').selectOption('УМ-1');
+    await page.getByTestId('mc-chassis').selectOption('Траккер');
+
+    // Slot 0 -> Гарпун Power Bolt PB-1M preset
+    await page.getByTestId('mc-slot-0-preset').selectOption('garpun_pb1m');
+
+    // Apply computed cost back to the editor's cost field
+    await page.getByTestId('mc-apply').click();
+
+    // Total breakdown must be a positive cost
+    const total = await page.getByTestId('mc-total').textContent();
+    expect(parseInt(total!, 10)).toBeGreaterThan(0);
+
+    // Save the machine
+    await page.getByRole('button', { name: /Сохранить/ }).click();
+  });
 });

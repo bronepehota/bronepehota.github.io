@@ -194,3 +194,19 @@ describe('CalculatorSoldierParams serialization', () => {
     expect(parsed.calculatorParams).toBeUndefined();
   });
 });
+
+describe('squad cost — verified 6-soldier squad (xlsx «Ударное подразделение»)', () => {
+  const s = (weapon: string, meleeWeapon: string) => ({
+    ...baseParams, squadType: 'shock', armor: 'heavy_infantry', weapon, meleeWeapon,
+  });
+  test('whole squad sums to 1350 -> squad cost 135', () => {
+    const soldiers = calculateSquadSoldiers([
+      s('sniper', 'unarmed'), s('plasma_pistol', 'saw_electro'),
+      s('atr', 'heavy_ranged'), s('lmg', 'heavy_ranged'),
+      s('assault_rifle', 'unarmed'), s('smg', 'unarmed'),
+    ]);
+    const sum = soldiers.reduce((a, c) => a + c.costBreakdown.total, 0);
+    expect(sum).toBe(1350);
+    expect(calculateSquadCost(soldiers.map(c => c.costBreakdown.total))).toBe(135);
+  });
+});
