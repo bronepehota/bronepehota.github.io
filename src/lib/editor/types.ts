@@ -91,6 +91,39 @@ export interface CustomMachine {
   weapons: CustomWeapon[];
   speed_sectors: CustomSpeedSector[];
   buffs?: BuffDefinition[];
+  /** Параметры калькулятора стоимости (когда цена считалась формулой) */
+  calculatorParams?: MachineCalculatorParams;
+}
+
+/** Идентификатор моноблока (шасси-основа техники) */
+export type MonoblockId = 'РМ-1П' | 'РМ-1' | 'РМ-2' | 'УМ-1' | 'УМ-2';
+
+/** Тип шасси; 'Стационарное' = орудие (неподвижная артиллерия) */
+export type ChassisId = 'Шагатель' | 'Траккер' | 'Гравилёт' | 'Стационарное';
+
+/** Свойство орудия (доп. цена) */
+export type WeaponProperty = 'burst3' | 'blast1' | 'blast2';
+
+/** Один слот вооружения техники (5 слотов: Верх×2, Манипулятор×2, Нижнее) */
+export interface WeaponSlotConfig {
+  /** id пресета из ARSENAL_PRESETS | 'custom' | 'empty' */
+  preset: string;
+  /** 'D12' | '2D20' | 'D6+2' | 'ББ' (дальность); 'ББ' = рукопашное орудие */
+  range: string;
+  /** '3D12' | 'D20+3' | '1'|'2'|'3' (ББ ранг); мощность */
+  power: string;
+  /** боезапас (кол-во выстрелов) */
+  ammo: number;
+  /** свойство орудия или null */
+  property: WeaponProperty | null;
+}
+
+/** Параметры калькулятора стоимости техники (round-trip на CustomMachine) */
+export interface MachineCalculatorParams {
+  monoblock: MonoblockId;
+  chassis: ChassisId;
+  /** ровно 5 слотов: [Верх, Верх, Манипулятор, Манипулятор, Нижнее] */
+  slots: WeaponSlotConfig[];
 }
 
 /**
