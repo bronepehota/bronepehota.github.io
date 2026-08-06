@@ -196,4 +196,60 @@ test.describe('Editor', () => {
     await expect(page.getByText('Базовый источник').first()).toBeVisible();
     await expect(page.getByText('Выберите источник').first()).toBeVisible();
   });
+
+  // Helper: create source + faction, then open the machine editor
+  async function setupMachineEditor(page: import('@playwright/test').Page) {
+    // Create source
+    await page.getByTitle('Создать источник').first().click();
+    await page.waitForTimeout(300);
+    const nameInput = page.getByTestId('source-name-input');
+    await nameInput.click();
+    await nameInput.pressSequentially('TestMachine', { delay: 20 });
+    await page.getByRole('button', { name: 'Создать', exact: true }).first().click();
+
+    // Source should be auto-selected; create a faction
+    await page.getByTitle('Создать фракцию').first().click();
+    await page.getByText('Новая фракция').first().click();
+
+    // Switch to the "Техника" tab in UnitsList and create a machine
+    await page.getByTestId('create-machine-button').click();
+    await page.waitForTimeout(500);
+  }
+
+  test('should compute machine cost via calculator', async ({ page }) => {
+    await setupMachineEditor(page);
+
+    // Switch to the calculator tab inside MachineEditor
+    await page.getByTestId('machine-calculator-tab').click();
+
+    // Configure: УМ-1 monoblock + Траккер chassis
+    await page.getByTestId('mc-monoblock').selectOption('УМ-1');
+    await page.getByTestId('mc-chassis').selectOption('Траккер');
+
+    // Slot 0 -> Гарпун Power Bolt PB-1M preset
+    await page.getByTestId('mc-slot-0-preset').selectOption('garpun_pb1m');
+
+    // Apply computed cost back to the editor's cost field
+    await page.getByTestId('mc-apply').click();
+
+    // Total breakdown must be a positive cost
+    const total = await page.getByTestId('mc-total').textContent();
+    expect(parseInt(total!, 10)).toBeGreaterThan(0);
+
+    // Fill the required name so handleSave doesn't bail out (Playwright auto-dismisses
+    // the alert, which previously made this test a false-positive green — no save
+    // happened, so C1 calculatorParams→weapons round-trip was never exercised).
+    await page.getByPlaceholder(/Введите название/).fill('Тест-машина');
+
+    // Save the machine — onSave navigates back to the units list.
+    await page.getByRole('button', { name: /Сохранить/ }).click();
+
+    // The units list defaults to the Отряды tab; switch to Техника to see the
+    // saved machine (machines render under the 'machine' tab, not 'squad').
+    await page.getByTestId('units-tab-machine').click();
+
+    // Round-trip assertion: the saved machine appears in the units list with the
+    // weapons derived from calculatorParams (not the placeholder "Main Gun").
+    await expect(page.getByText('Тест-машина')).toBeVisible();
+  });
 });

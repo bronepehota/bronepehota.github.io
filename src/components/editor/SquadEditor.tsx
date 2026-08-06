@@ -198,10 +198,10 @@ export function SquadEditor({ squad, source: _source, factionId, isOverride = fa
             {/* Sidebar: basic info */}
             <div className="w-[300px] shrink-0 space-y-4">
               {/* Basic info card */}
-              <div className="bg-slate-900/50 rounded-lg border border-slate-800/50 p-4 space-y-3">
-                <div className="flex items-center gap-2 pb-3 border-b border-slate-700/50">
+              <div className="ed-panel p-4 space-y-3">
+                <div className="flex items-center gap-2 pb-3 border-b border-[var(--border)]">
                   <div className="w-1 h-4 rounded-full" style={{ backgroundColor: colors.primary }} />
-                  <h3 className="text-xs font-semibold text-slate-300 uppercase tracking-wider">Основное</h3>
+                  <h3 className="text-xs font-semibold text-[var(--bone)] uppercase tracking-wider font-ui">Основное</h3>
                 </div>
 
                 <div>
@@ -283,12 +283,12 @@ export function SquadEditor({ squad, source: _source, factionId, isOverride = fa
               </div>
 
               {/* Buffs section */}
-              <div className="bg-slate-900/50 rounded-lg border border-slate-800/50 p-4 space-y-3">
-                <div className="flex items-center gap-2 pb-3 border-b border-slate-700/50">
-                  <div className="w-1 h-4 rounded-full bg-emerald-500" />
-                  <h3 className="text-xs font-semibold text-slate-300 uppercase tracking-wider">Бафы</h3>
+              <div className="ed-panel p-4 space-y-3">
+                <div className="flex items-center gap-2 pb-3 border-b border-[var(--border)]">
+                  <div className="w-1 h-4 rounded-full bg-[var(--ru)]" />
+                  <h3 className="text-xs font-semibold text-[var(--bone)] uppercase tracking-wider font-ui">Бафы</h3>
                   {buffs.length > 0 && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-medium">
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[var(--ru)]/20 text-[var(--ru2)] font-medium font-stat">
                       {buffs.length}
                     </span>
                   )}
@@ -299,15 +299,15 @@ export function SquadEditor({ squad, source: _source, factionId, isOverride = fa
 
             {/* Main content: soldiers - fluid width */}
             <div className={cn(
-              "flex-1 min-w-0 bg-slate-900/50 rounded-lg border border-slate-800/50 p-4",
+              "flex-1 min-w-0 ed-panel p-4",
               errors.soldiers && "border-red-500/50"
             )}>
               {/* Soldiers header */}
-              <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-700/50">
+              <div className="flex items-center justify-between mb-4 pb-3 border-b border-[var(--border)]">
                 <div className="flex items-center gap-2">
                   <Users className={cn("w-4 h-4", colors.text)} />
-                  <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
-                    Солдаты <span className="text-slate-500">({soldiers.length}/6)</span>
+                  <h3 className="text-sm font-semibold text-[var(--bone)] uppercase tracking-wider font-ui">
+                    Солдаты <span className="text-[var(--muted)]">({soldiers.length}/6)</span>
                   </h3>
                 </div>
                 <div className="flex items-center gap-2">
@@ -316,10 +316,10 @@ export function SquadEditor({ squad, source: _source, factionId, isOverride = fa
                     <button
                       onClick={() => setMode('manual')}
                       className={cn(
-                        "px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
+                        "px-3 py-1.5 rounded-lg text-xs font-medium transition-all font-ui",
                         mode === 'manual'
-                          ? "bg-emerald-600/20 text-emerald-400 border border-emerald-600/30"
-                          : "text-slate-500 hover:text-slate-400 border border-transparent"
+                          ? "bg-[var(--ru)]/20 text-[var(--ru2)] border border-[var(--ru)]/50"
+                          : "text-[var(--muted)] hover:text-[var(--bone)] border border-transparent"
                       )}
                       data-testid="manual-tab"
                     >
@@ -328,10 +328,10 @@ export function SquadEditor({ squad, source: _source, factionId, isOverride = fa
                     <button
                       onClick={() => setMode('calculator')}
                       className={cn(
-                        "px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
+                        "px-3 py-1.5 rounded-lg text-xs font-medium transition-all font-ui",
                         mode === 'calculator'
-                          ? "bg-emerald-600/20 text-emerald-400 border border-emerald-600/30"
-                          : "text-slate-500 hover:text-slate-400 border border-transparent"
+                          ? "bg-[var(--ru)]/20 text-[var(--ru2)] border border-[var(--ru)]/50"
+                          : "text-[var(--muted)] hover:text-[var(--bone)] border border-transparent"
                       )}
                       data-testid="calculator-tab"
                     >

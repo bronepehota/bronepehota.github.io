@@ -10,7 +10,10 @@ import { generateUnitId } from '@/lib/editor/id-generator';
 import { Save, X, Plus, Trash2, Eye, Target, Zap, Shield, Gauge } from 'lucide-react';
 import { MachinePreview } from './MachinePreview';
 import { BuffSelector } from './BuffSelector';
+import { MachineCalculator } from './MachineCalculator';
+import { machineCost, deriveSpeedSectors, deriveWeapons } from '@/lib/machine-calculator-engine';
 import type { BuffDefinition } from '@/lib/modifier-types';
+import type { MachineCalculatorParams, WeaponSlotConfig } from '@/lib/editor/types';
 
 interface MachineEditorProps {
   machine?: CustomMachine;
@@ -72,6 +75,16 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
   );
   const [buffs, setBuffs] = useState<BuffDefinition[]>(machine?.buffs || []);
   const [showPreview, setShowPreview] = useState(false);
+  const [mode, setMode] = useState<'calculator' | 'manual'>(
+    machine?.calculatorParams ? 'calculator' : 'manual'
+  );
+  const [calcParams, setCalcParams] = useState<MachineCalculatorParams>(
+    machine?.calculatorParams ?? {
+      monoblock: 'УМ-1',
+      chassis: 'Шагатель',
+      slots: Array.from({ length: 5 }, () => ({ preset: 'empty', range: '', power: '', ammo: 0, property: null })) as WeaponSlotConfig[],
+    }
+  );
 
   const factionStyle = getFactionStyle(factionId);
 
@@ -114,6 +127,21 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
     setSpeedSectors(speedSectors.map((s, i) => (i === index ? { ...s, ...updates } : s)));
   };
 
+  const handleApplyCost = (cost: number) => {
+    setCost(cost);
+    const bd = machineCost(calcParams);
+    setDurabilityMax(bd.derived.durability_max);
+    setAmmoMax(bd.derived.ammo_max);
+    setRank(bd.derived.rank);
+    setFireRate(bd.derived.fire_rate);
+    setSpeedSectors(deriveSpeedSectors(calcParams.monoblock, calcParams.chassis, bd.derived.durability_max));
+    // Sync weapons[] from calculator slots so saved machines carry real arsenal specs
+    // (the runtime game reads `weapons[]`, not calculatorParams). Empty derivations
+    // keep the existing placeholder/manual weapons untouched.
+    const derived = deriveWeapons(calcParams);
+    if (derived.length > 0) setWeapons(derived);
+  };
+
   const handleSave = () => {
     if (!name.trim()) {
       alert('Введите название техники');
@@ -134,22 +162,23 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
       weapons,
       speed_sectors: speedSectors,
       buffs: buffs.length > 0 ? buffs : undefined,
+      ...(mode === 'calculator' ? { calculatorParams: calcParams } : {}),
     };
 
     onSave(machineData);
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-950">
+    <div className="flex flex-col h-full">
       {/* Header with tech corners */}
-      <div className={`relative px-4 py-4 border-b-2 ${factionStyle.border} bg-slate-900/80 backdrop-blur-sm`}>
+      <div className={`relative px-4 py-4 border-b-2 ${factionStyle.border} bg-[var(--panel)]/80 backdrop-blur-sm`}>
         {/* Tech corners */}
         <div className="absolute top-0 left-0 w-3 h-3 border-l-2 border-t-2 -ml-px -mt-px pointer-events-none" style={{ borderColor: factionStyle.corner }} />
         <div className="absolute top-0 right-0 w-3 h-3 border-r-2 border-t-2 -mr-px -mt-px pointer-events-none" style={{ borderColor: factionStyle.corner }} />
 
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-bold text-white">
+            <h2 className="text-lg font-bold text-[var(--bone)] font-ui">
               {isOverride ? 'Переопределение техники' : (machine ? 'Редактирование техники' : 'Новая техника')}
             </h2>
             {isOverride && (
@@ -161,14 +190,14 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
           <div className="flex gap-2">
             <button
               onClick={onCancel}
-              className="p-2 rounded-lg bg-slate-700 hover:bg-slate-600 transition-all"
+              className="p-2 rounded-lg ed-panel2 hover:bg-[var(--panel3)] transition-all"
               title="Отмена"
             >
-              <X className="w-4 h-4 text-slate-400" />
+              <X className="w-4 h-4 text-[var(--muted)]" />
             </button>
             <button
               onClick={handleSave}
-              className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 transition-all font-semibold text-white shadow-lg shadow-emerald-900/20"
+              className="px-4 py-2 rounded-lg bg-[var(--ru)] hover:bg-[var(--ru2)] transition-all font-semibold text-white font-ui"
               title="Сохранить"
             >
               <Save className="w-4 h-4 mr-1" />
@@ -182,17 +211,17 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
       <div className="flex-1 overflow-hidden">
         <div className="flex h-full">
           {/* Left column: Basic info */}
-          <div className="w-80 border-r border-slate-800/50 p-4 overflow-y-auto space-y-6">
+          <div className="w-80 border-r border-[var(--border)] p-4 overflow-y-auto space-y-6">
             {/* Section: Basic Info */}
             <div className="space-y-4">
-              <div className="flex items-center gap-2 pb-2 border-b border-slate-700/50">
-                <Target className="w-4 h-4 text-slate-400" />
-                <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">Основное</h3>
+              <div className="flex items-center gap-2 pb-2 border-b border-[var(--border)]">
+                <Target className="w-4 h-4 text-[var(--muted)]" />
+                <h3 className="text-sm font-semibold text-[var(--bone)] uppercase tracking-wider font-ui">Основное</h3>
               </div>
 
               <div className="space-y-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">Название техники *</label>
+                  <label className="block text-xs font-medium text-[var(--muted)] mb-1.5">Название техники *</label>
                   <input
                     type="text"
                     value={name}
@@ -203,7 +232,7 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">Краткое название</label>
+                  <label className="block text-xs font-medium text-[var(--muted)] mb-1.5">Краткое название</label>
                   <input
                     type="text"
                     value={shortName}
@@ -214,7 +243,7 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">Стоимость (очков) *</label>
+                  <label className="block text-xs font-medium text-[var(--muted)] mb-1.5">Стоимость (очков) *</label>
                   <input
                     type="number"
                     value={cost}
@@ -225,7 +254,7 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">URL изображения техники</label>
+                  <label className="block text-xs font-medium text-[var(--muted)] mb-1.5">URL изображения техники</label>
                   <input
                     type="text"
                     value={image}
@@ -239,14 +268,14 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
 
             {/* Section: Combat Stats */}
             <div className="space-y-4">
-              <div className="flex items-center gap-2 pb-2 border-b border-slate-700/50">
-                <Shield className="w-4 h-4 text-slate-400" />
-                <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">Характеристики</h3>
+              <div className="flex items-center gap-2 pb-2 border-b border-[var(--border)]">
+                <Shield className="w-4 h-4 text-[var(--muted)]" />
+                <h3 className="text-sm font-semibold text-[var(--bone)] uppercase tracking-wider font-ui">Характеристики</h3>
               </div>
 
               <div className="space-y-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">Ранг *</label>
+                  <label className="block text-xs font-medium text-[var(--muted)] mb-1.5">Ранг *</label>
                   <input
                     type="number"
                     value={rank}
@@ -259,7 +288,7 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
 
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-1.5">Скорострельность</label>
+                    <label className="block text-xs font-medium text-[var(--muted)] mb-1.5">Скорострельность</label>
                     <input
                       type="number"
                       value={fireRate}
@@ -269,7 +298,7 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-1.5">Боезапас</label>
+                    <label className="block text-xs font-medium text-[var(--muted)] mb-1.5">Боезапас</label>
                     <input
                       type="number"
                       value={ammoMax}
@@ -281,7 +310,7 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">Прочность *</label>
+                  <label className="block text-xs font-medium text-[var(--muted)] mb-1.5">Прочность *</label>
                   <input
                     type="number"
                     value={durabilityMax}
@@ -289,7 +318,7 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
                     className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 transition-all"
                     min="1"
                   />
-                  <p className="text-[10px] text-slate-500 mt-1">
+                  <p className="text-[10px] text-[var(--muted)] mt-1">
                     Макс прочность. Обновите сектора скорости вручную при изменении.
                   </p>
                 </div>
@@ -298,32 +327,32 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
 
             {/* Section: Stats Summary */}
             <div className="space-y-4">
-              <div className="flex items-center gap-2 pb-2 border-b border-slate-700/50">
-                <Gauge className="w-4 h-4 text-slate-400" />
-                <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">Статистика</h3>
+              <div className="flex items-center gap-2 pb-2 border-b border-[var(--border)]">
+                <Gauge className="w-4 h-4 text-[var(--muted)]" />
+                <h3 className="text-sm font-semibold text-[var(--bone)] uppercase tracking-wider font-ui">Статистика</h3>
               </div>
 
               <div className="grid grid-cols-2 gap-2">
-                <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
-                  <div className="text-[10px] text-slate-500 uppercase mb-1">Оружие</div>
-                  <div className="text-2xl font-bold text-white">{weapons.length}</div>
-                  <div className="text-[10px] text-slate-600">макс 4</div>
+                <div className="ed-panel2 rounded-lg p-3">
+                  <div className="text-[10px] text-[var(--muted)] uppercase mb-1 font-ui">Оружие</div>
+                  <div className="text-2xl font-bold text-[var(--bone)] font-stat">{weapons.length}</div>
+                  <div className="text-[10px] text-[var(--dim)]">макс 4</div>
                 </div>
-                <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
-                  <div className="text-[10px] text-slate-500 uppercase mb-1">Стоимость</div>
-                  <div className="text-2xl font-bold text-emerald-400">{cost}</div>
-                  <div className="text-[10px] text-slate-600">очков</div>
+                <div className="ed-panel2 rounded-lg p-3">
+                  <div className="text-[10px] text-[var(--muted)] uppercase mb-1 font-ui">Стоимость</div>
+                  <div className="text-2xl font-bold text-[var(--ru2)] font-stat">{cost}</div>
+                  <div className="text-[10px] text-[var(--dim)]">очков</div>
                 </div>
               </div>
             </div>
 
             {/* Section: Buffs */}
             <div className="space-y-4">
-              <div className="flex items-center gap-2 pb-2 border-b border-slate-700/50">
-                <div className="w-1 h-4 rounded-full bg-emerald-500" />
-                <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">Бафы</h3>
+              <div className="flex items-center gap-2 pb-2 border-b border-[var(--border)]">
+                <div className="w-1 h-4 rounded-full bg-[var(--ru)]" />
+                <h3 className="text-sm font-semibold text-[var(--bone)] uppercase tracking-wider font-ui">Бафы</h3>
                 {buffs.length > 0 && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-medium">
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[var(--ru)]/20 text-[var(--ru2)] font-medium font-stat">
                     {buffs.length}
                   </span>
                 )}
@@ -334,37 +363,54 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
             {/* Preview button */}
             <button
               onClick={() => setShowPreview(true)}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-blue-600/20 hover:bg-blue-600/40 border border-blue-600/30 transition-all group"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg ed-panel2 hover:bg-[var(--ru)]/20 border border-[var(--border2)] hover:border-[var(--ru)]/50 transition-all group"
             >
-              <Eye className="w-4 h-4 text-blue-400 group-hover:scale-110 transition-transform" />
-              <span className="text-sm font-semibold text-blue-300">Предпросмотр</span>
+              <Eye className="w-4 h-4 text-[var(--ru2)] group-hover:scale-110 transition-transform" />
+              <span className="text-sm font-semibold text-[var(--bone)] font-ui">Предпросмотр</span>
             </button>
           </div>
 
           {/* Right column: Weapons and Speed sectors */}
           <div className="flex-1 overflow-y-auto p-4 space-y-6">
+            {/* Mode tabs */}
+            <div className="flex gap-2 border-b border-[var(--border)]">
+              <button onClick={() => setMode('calculator')}
+                className={`px-4 py-2 text-sm font-semibold border-b-2 font-ui ${mode === 'calculator' ? 'text-[var(--bone)] border-[var(--ru)]' : 'text-[var(--muted)] border-transparent'}`}
+                data-testid="machine-calculator-tab">Калькулятор</button>
+              <button onClick={() => setMode('manual')}
+                className={`px-4 py-2 text-sm font-semibold border-b-2 font-ui ${mode === 'manual' ? 'text-[var(--bone)] border-[var(--ru)]' : 'text-[var(--muted)] border-transparent'}`}
+                data-testid="machine-manual-tab">Вручную</button>
+              {mode === 'manual' && !machine?.calculatorParams && (
+                <span className="ml-auto self-center text-[10px] text-amber-400">ручная стоимость</span>
+              )}
+            </div>
+
+            {mode === 'calculator' ? (
+              <MachineCalculator params={calcParams} onParamsChange={setCalcParams} onApply={handleApplyCost} />
+            ) : (
+              <>
             {/* Weapons Section */}
             <div>
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <Target className="w-4 h-4 text-slate-400" />
-                  <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
-                    Оружие <span className="text-slate-500">({weapons.length}/4)</span>
+                  <Target className="w-4 h-4 text-[var(--muted)]" />
+                  <h3 className="text-sm font-semibold text-[var(--bone)] uppercase tracking-wider font-ui">
+                    Оружие <span className="text-[var(--muted)]">({weapons.length}/4)</span>
                   </h3>
                 </div>
                 <button
                   onClick={handleAddWeapon}
                   disabled={weapons.length >= 4}
-                  className="p-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/40 border border-emerald-600/30 transition-all disabled:opacity-50 group"
+                  className="p-2 rounded-lg bg-[var(--ru)]/20 hover:bg-[var(--ru)]/40 border border-[var(--ru)]/50 transition-all disabled:opacity-50 group"
                   title="Добавить оружие"
                 >
-                  <Plus className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+                  <Plus className="w-4 h-4 text-[var(--ru2)] group-hover:scale-110 transition-transform" />
                 </button>
               </div>
 
               <div className="space-y-3">
                 {weapons.map((weapon, index) => (
-                  <div key={index} className={`rounded-lg border-2 ${factionStyle.border} bg-slate-800/50 overflow-hidden relative`}>
+                  <div key={index} className={`rounded-lg border-2 ${factionStyle.border} bg-[var(--panel)]/60 overflow-hidden relative`}>
                     {/* Tech corners */}
                     <div className="absolute top-0 left-0 w-2 h-2 border-l border-t -ml-px -mt-px opacity-60" style={{ borderColor: factionStyle.corner }} />
                     <div className="absolute top-0 right-0 w-2 h-2 border-r border-t -mr-px -mt-px opacity-60" style={{ borderColor: factionStyle.corner }} />
@@ -392,7 +438,7 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
 
                       <div className="grid grid-cols-3 gap-2">
                         <div>
-                          <label className="block text-xs font-medium text-slate-400 mb-1">Дальность</label>
+                          <label className="block text-xs font-medium text-[var(--muted)] mb-1">Дальность</label>
                           <input
                             type="text"
                             value={weapon.range}
@@ -402,7 +448,7 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-slate-400 mb-1">Мощность</label>
+                          <label className="block text-xs font-medium text-[var(--muted)] mb-1">Мощность</label>
                           <input
                             type="text"
                             value={weapon.power}
@@ -412,7 +458,7 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-slate-400 mb-1">Боезапас</label>
+                          <label className="block text-xs font-medium text-[var(--muted)] mb-1">Боезапас</label>
                           <input
                             type="number"
                             value={weapon.ammo ?? 20}
@@ -425,7 +471,7 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
                       </div>
 
                       <div className="mt-2">
-                        <label className="block text-xs font-medium text-slate-400 mb-1">Особое (опционально)</label>
+                        <label className="block text-xs font-medium text-[var(--muted)] mb-1">Особое (опционально)</label>
                         <input
                           type="text"
                           value={
@@ -452,7 +498,7 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
                           className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 transition-all text-xs font-mono"
                           placeholder='Текст или {"type": "repair", "amount": 2}'
                         />
-                        <p className="text-[10px] text-slate-600 mt-1">
+                        <p className="text-[10px] text-[var(--dim)] mt-1">
                           Текст или JSON: {`{"type": "repair"|"aoe"|"burst", ...}`}
                         </p>
                       </div>
@@ -466,24 +512,24 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
             <div>
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-slate-400" />
-                  <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
-                    Сектора скорости <span className="text-slate-500">({speedSectors.length}/6)</span>
+                  <Zap className="w-4 h-4 text-[var(--muted)]" />
+                  <h3 className="text-sm font-semibold text-[var(--bone)] uppercase tracking-wider font-ui">
+                    Сектора скорости <span className="text-[var(--muted)]">({speedSectors.length}/6)</span>
                   </h3>
                 </div>
                 <button
                   onClick={handleAddSpeedSector}
                   disabled={speedSectors.length >= 6}
-                  className="p-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/40 border border-emerald-600/30 transition-all disabled:opacity-50 group"
+                  className="p-2 rounded-lg bg-[var(--ru)]/20 hover:bg-[var(--ru)]/40 border border-[var(--ru)]/50 transition-all disabled:opacity-50 group"
                   title="Добавить сектор"
                 >
-                  <Plus className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+                  <Plus className="w-4 h-4 text-[var(--ru2)] group-hover:scale-110 transition-transform" />
                 </button>
               </div>
 
               <div className="space-y-3">
                 {speedSectors.map((sector, index) => (
-                  <div key={index} className={`rounded-lg border-2 ${factionStyle.border} bg-slate-800/50 overflow-hidden relative`}>
+                  <div key={index} className={`rounded-lg border-2 ${factionStyle.border} bg-[var(--panel)]/60 overflow-hidden relative`}>
                     {/* Tech corners */}
                     <div className="absolute top-0 left-0 w-2 h-2 border-l border-t -ml-px -mt-px opacity-60" style={{ borderColor: factionStyle.corner }} />
                     <div className="absolute top-0 right-0 w-2 h-2 border-r border-t -mr-px -mt-px opacity-60" style={{ borderColor: factionStyle.corner }} />
@@ -492,7 +538,7 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
 
                     <div className="p-3">
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-xs font-semibold text-slate-400 uppercase">Сектор {index + 1}</span>
+                        <span className="text-xs font-semibold text-[var(--muted)] uppercase font-ui">Сектор {index + 1}</span>
                         <button
                           onClick={() => handleRemoveSpeedSector(index)}
                           disabled={speedSectors.length <= 1}
@@ -505,7 +551,7 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
 
                       <div className="grid grid-cols-3 gap-2">
                         <div>
-                          <label className="block text-xs font-medium text-slate-400 mb-1">Мин. прочность</label>
+                          <label className="block text-xs font-medium text-[var(--muted)] mb-1">Мин. прочность</label>
                           <input
                             type="number"
                             value={sector.min_durability}
@@ -515,7 +561,7 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-slate-400 mb-1">Макс. прочность</label>
+                          <label className="block text-xs font-medium text-[var(--muted)] mb-1">Макс. прочность</label>
                           <input
                             type="number"
                             value={sector.max_durability}
@@ -525,7 +571,7 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-slate-400 mb-1">Скорость</label>
+                          <label className="block text-xs font-medium text-[var(--muted)] mb-1">Скорость</label>
                           <input
                             type="number"
                             value={sector.speed}
@@ -544,8 +590,8 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
                 ))}
               </div>
 
-              <div className="mt-3 p-3 rounded-lg bg-slate-800/30 border border-slate-700/50">
-                <div className="flex items-center justify-between text-xs text-slate-500">
+              <div className="mt-3 p-3 rounded-lg ed-panel">
+                <div className="flex items-center justify-between text-xs text-[var(--muted)] font-ui">
                   <span>Макс. скорость: {Math.max(...speedSectors.map(s => s.speed))} шаг(а)</span>
                   <span>Диапазон: 1-{durabilityMax}</span>
                 </div>
@@ -556,6 +602,8 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
                 )}
               </div>
             </div>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -563,14 +611,14 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
       {/* Preview modal */}
       {showPreview && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 animate-in fade-in duration-200">
-          <div className="bg-slate-900 rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-auto">
-            <div className="sticky top-0 flex items-center justify-between px-4 py-3 bg-slate-800 border-b border-slate-700 z-10">
-              <h2 className="text-lg font-semibold text-white">Предпросмотр техники</h2>
+          <div className="ed-panel rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-auto">
+            <div className="sticky top-0 flex items-center justify-between px-4 py-3 ed-panel2 border-b border-[var(--border)] z-10">
+              <h2 className="text-lg font-semibold text-[var(--bone)] font-ui">Предпросмотр техники</h2>
               <button
                 onClick={() => setShowPreview(false)}
-                className="p-2 rounded-lg hover:bg-slate-700 transition-all"
+                className="p-2 rounded-lg hover:bg-[var(--panel3)] transition-all"
               >
-                <X className="w-5 h-5 text-slate-400" />
+                <X className="w-5 h-5 text-[var(--muted)]" />
               </button>
             </div>
             <div className="p-4">
