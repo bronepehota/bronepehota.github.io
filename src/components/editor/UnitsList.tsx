@@ -1,6 +1,6 @@
 /**
  * Units list component - shows squads and machines for a faction
- * Styled with battle card aesthetics
+ * Verifier chrome: hazard panels, font-display indices, faction colors preserved.
  */
 
 'use client';
@@ -11,6 +11,7 @@ import { getSource } from '@/lib/sources-registry';
 import { Users, Truck, Edit, Copy, Lock, Eye, EyeOff, RotateCw, Trash2, Undo } from 'lucide-react';
 import { LOCAL_STORAGE_KEYS } from '@/lib/constants';
 import { MY_UNITS_ID } from './FactionsList';
+import { EdPanel, StatusPill } from './ui/editor-primitives';
 
 interface UnitsListProps {
   source: CustomSource;
@@ -28,7 +29,7 @@ interface UnitsListProps {
 
 const STORAGE_KEY = LOCAL_STORAGE_KEYS.EDITOR_SHOW_BASE_UNITS;
 
-// Get faction styling
+// Get faction styling (faction-identity colors preserved)
 function getFactionStyle(factionId: string) {
   const styles: Record<string, { border: string; glow: string; bg: string; text: string; corner: string; badge: string }> = {
     polaris: {
@@ -244,41 +245,41 @@ export function UnitsList({
   };
 
   return (
-    <div className="flex flex-col h-full min-h-0 overflow-hidden bg-slate-900/50">
+    <div className="flex flex-col h-full min-h-0 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700/50 bg-slate-900/80 backdrop-blur-sm">
-        <h2 className="text-sm font-semibold text-slate-200 tracking-wide uppercase">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)] bg-[var(--panel)]/80 backdrop-blur-sm">
+        <h2 className="font-ui text-xs uppercase tracking-widest text-[var(--muted)]">
           {isMyUnitsView ? 'ИЗМЕНЕНИЯ' : 'Юниты'}
         </h2>
         <div className="flex items-center gap-2">
           <button
             onClick={onCreateSquad}
             disabled={isMyUnitsView}
-            className="p-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/40 border border-emerald-600/30 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-2 rounded-lg border border-[var(--border2)] bg-[var(--panel2)] hover:bg-[var(--ru)] hover:text-white hover:border-[var(--ru)] transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
             title="Создать отряд"
           >
-            <Users className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+            <Users className="w-4 h-4 text-[var(--ru2)] group-hover:text-white group-hover:scale-110 transition-transform" />
           </button>
           <button
             onClick={onCreateMachine}
             disabled={isMyUnitsView}
-            className="p-2 rounded-lg bg-blue-600/20 hover:bg-blue-600/40 border border-blue-600/30 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-2 rounded-lg border border-[var(--border2)] bg-[var(--panel2)] hover:bg-[var(--ru)] hover:text-white hover:border-[var(--ru)] transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
             title="Создать технику"
           >
-            <Truck className="w-4 h-4 text-blue-400 group-hover:scale-110 transition-transform" />
+            <Truck className="w-4 h-4 text-[var(--ru2)] group-hover:text-white group-hover:scale-110 transition-transform" />
           </button>
         </div>
       </div>
 
       {/* Show base units toggle - hide in MY_UNITS view */}
       {!isMyUnitsView && (hasBaseUnits || hasHiddenUnits) && (
-        <div className="flex items-center justify-between px-4 py-2 border-b border-slate-700/30 bg-slate-800/30">
-          <span className="text-xs text-slate-400">Юниты из базы</span>
+        <div className="flex items-center justify-between px-4 py-2 border-b border-[var(--border)] bg-[var(--panel2)]/40">
+          <span className="font-ui text-xs text-[var(--muted)]">Юниты из базы</span>
           <button
             onClick={() => setShowBaseUnits(!showBaseUnits)}
             className={`
-              flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all
-              ${showBaseUnits ? 'bg-slate-700 text-slate-300' : 'bg-slate-800 text-slate-500'}
+              flex items-center gap-1.5 px-3 py-1.5 rounded-md font-stat text-xs transition-all border
+              ${showBaseUnits ? 'bg-[var(--panel3)] text-[var(--bone)] border-[var(--border2)]' : 'bg-[var(--panel)] text-[var(--muted)] border-[var(--border)]'}
             `}
           >
             {showBaseUnits ? (
@@ -297,21 +298,21 @@ export function UnitsList({
       )}
 
       {/* Tabs */}
-      <div className="flex border-b border-slate-700/50">
+      <div className="flex border-b border-[var(--border)]">
         <button
           onClick={() => setTab('squad')}
           className={`
-            flex-1 px-4 py-3 text-sm font-semibold transition-all relative
+            flex-1 px-4 py-3 font-ui text-sm font-semibold transition-all relative
             ${tab === 'squad'
-              ? 'text-white border-b-2 border-emerald-500'
-              : 'text-slate-500 hover:text-slate-300'
+              ? 'text-[var(--bone)] border-b-2 border-[var(--ru)]'
+              : 'text-[var(--muted)] hover:text-[var(--bone)] border-b-2 border-transparent'
             }
           `}
         >
           <div className="flex items-center justify-center gap-2">
             <Users className="w-4 h-4" />
             <span>Отряды</span>
-            <span className={`text-xs px-2 py-0.5 rounded-full ${tab === 'squad' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-700 text-slate-500'}`}>
+            <span className={`font-stat text-xs px-2 py-0.5 rounded-full border ${tab === 'squad' ? 'bg-[var(--ru)]/15 text-[var(--ru2)] border-[var(--ru)]/30' : 'bg-[var(--panel3)] text-[var(--muted)] border-[var(--border2)]'}`}>
               {displaySquads.length}
             </span>
           </div>
@@ -319,17 +320,17 @@ export function UnitsList({
         <button
           onClick={() => setTab('machine')}
           className={`
-            flex-1 px-4 py-3 text-sm font-semibold transition-all relative
+            flex-1 px-4 py-3 font-ui text-sm font-semibold transition-all relative
             ${tab === 'machine'
-              ? 'text-white border-b-2 border-emerald-500'
-              : 'text-slate-500 hover:text-slate-300'
+              ? 'text-[var(--bone)] border-b-2 border-[var(--ru)]'
+              : 'text-[var(--muted)] hover:text-[var(--bone)] border-b-2 border-transparent'
             }
           `}
         >
           <div className="flex items-center justify-center gap-2">
             <Truck className="w-4 h-4" />
             <span>Техника</span>
-            <span className={`text-xs px-2 py-0.5 rounded-full ${tab === 'machine' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-700 text-slate-500'}`}>
+            <span className={`font-stat text-xs px-2 py-0.5 rounded-full border ${tab === 'machine' ? 'bg-[var(--ru)]/15 text-[var(--ru2)] border-[var(--ru)]/30' : 'bg-[var(--panel3)] text-[var(--muted)] border-[var(--border2)]'}`}>
               {displayMachines.length}
             </span>
           </div>
@@ -337,130 +338,134 @@ export function UnitsList({
       </div>
 
       {/* Units list */}
-      <div className="flex-1 min-h-0 overflow-y-auto p-3 space-y-2">
+      <div className="flex-1 min-h-0 overflow-y-auto p-3">
         {tab === 'squad' ? (
           displaySquads.length === 0 ? (
-            <div className="p-6 text-center">
-              <div className="text-slate-600 text-sm">
+            <div className="p-6 text-center font-ui">
+              <div className="text-[var(--dim)] text-sm">
                 {showBaseUnits ? 'Нет отрядов в этой фракции' : 'Нет собственных отрядов'}
               </div>
             </div>
           ) : (
-            <>
-              {/* Custom squads */}
-              {customSquads.map((squad) => (
-                <UnitCard
-                  key={squad.id}
-                  id={squad.id}
-                  name={squad.name}
-                  cost={squad.cost}
-                  isCustom={true}
-                  isOverride={overriddenSquadIds.has(squad.id)}
-                  isHidden={false}
-                  factionId={squad.faction}
-                  showFactionName={isMyUnitsView}
-                  factionName={factionNameMap.get(squad.faction)}
-                  onSelect={() => onSelectUnit(squad.id, 'squad')}
-                />
-              ))}
-              {/* Base squads */}
-              {showBaseUnits && baseSquads.map((squad) => (
-                <UnitCard
-                  key={squad.id}
-                  id={squad.id}
-                  name={squad.name}
-                  cost={squad.cost}
-                  isCustom={false}
-                  isOverride={false}
-                  isHidden={false}
-                  factionId={squad.faction}
-                  showFactionName={isMyUnitsView}
-                  factionName={factionNameMap.get(squad.faction)}
-                  onOverride={() => handleUnitClick(squad.id, 'squad')}
-                  onHide={() => onHideUnit(squad.id)}
-                  onClone={() => onCloneUnit(squad.id, 'squad')}
-                />
-              ))}
-              {/* Hidden squads */}
-              {showBaseUnits && hiddenSquads.map((squad) => (
-                <UnitCard
-                  key={squad.id}
-                  id={squad.id}
-                  name={squad.name}
-                  cost={squad.cost}
-                  isCustom={false}
-                  isOverride={false}
-                  isHidden={true}
-                  factionId={squad.faction}
-                  showFactionName={isMyUnitsView}
-                  factionName={factionNameMap.get(squad.faction)}
-                  onRestore={() => onRestoreUnit(squad.id)}
-                  onClone={() => onCloneUnit(squad.id, 'squad')}
-                />
-              ))}
-            </>
+            <EdPanel>
+              <div className="space-y-2">
+                {/* Custom squads */}
+                {customSquads.map((squad) => (
+                  <UnitCard
+                    key={squad.id}
+                    id={squad.id}
+                    name={squad.name}
+                    cost={squad.cost}
+                    isCustom={true}
+                    isOverride={overriddenSquadIds.has(squad.id)}
+                    isHidden={false}
+                    factionId={squad.faction}
+                    showFactionName={isMyUnitsView}
+                    factionName={factionNameMap.get(squad.faction)}
+                    onSelect={() => onSelectUnit(squad.id, 'squad')}
+                  />
+                ))}
+                {/* Base squads */}
+                {showBaseUnits && baseSquads.map((squad) => (
+                  <UnitCard
+                    key={squad.id}
+                    id={squad.id}
+                    name={squad.name}
+                    cost={squad.cost}
+                    isCustom={false}
+                    isOverride={false}
+                    isHidden={false}
+                    factionId={squad.faction}
+                    showFactionName={isMyUnitsView}
+                    factionName={factionNameMap.get(squad.faction)}
+                    onOverride={() => handleUnitClick(squad.id, 'squad')}
+                    onHide={() => onHideUnit(squad.id)}
+                    onClone={() => onCloneUnit(squad.id, 'squad')}
+                  />
+                ))}
+                {/* Hidden squads */}
+                {showBaseUnits && hiddenSquads.map((squad) => (
+                  <UnitCard
+                    key={squad.id}
+                    id={squad.id}
+                    name={squad.name}
+                    cost={squad.cost}
+                    isCustom={false}
+                    isOverride={false}
+                    isHidden={true}
+                    factionId={squad.faction}
+                    showFactionName={isMyUnitsView}
+                    factionName={factionNameMap.get(squad.faction)}
+                    onRestore={() => onRestoreUnit(squad.id)}
+                    onClone={() => onCloneUnit(squad.id, 'squad')}
+                  />
+                ))}
+              </div>
+            </EdPanel>
           )
         ) : (
           displayMachines.length === 0 ? (
-            <div className="p-6 text-center">
-              <div className="text-slate-600 text-sm">
+            <div className="p-6 text-center font-ui">
+              <div className="text-[var(--dim)] text-sm">
                 {showBaseUnits ? 'Нет техники в этой фракции' : 'Нет собственной техники'}
               </div>
             </div>
           ) : (
-            <>
-              {/* Custom machines */}
-              {customMachines.map((machine) => (
-                <UnitCard
-                  key={machine.id}
-                  id={machine.id}
-                  name={machine.name}
-                  cost={machine.cost}
-                  isCustom={true}
-                  isOverride={overriddenMachineIds.has(machine.id)}
-                  isHidden={false}
-                  factionId={machine.faction}
-                  showFactionName={isMyUnitsView}
-                  factionName={factionNameMap.get(machine.faction)}
-                  onSelect={() => onSelectUnit(machine.id, 'machine')}
-                />
-              ))}
-              {/* Base machines */}
-              {showBaseUnits && baseMachines.map((machine) => (
-                <UnitCard
-                  key={machine.id}
-                  id={machine.id}
-                  name={machine.name}
-                  cost={machine.cost}
-                  isCustom={false}
-                  isOverride={false}
-                  isHidden={false}
-                  factionId={machine.faction}
-                  showFactionName={isMyUnitsView}
-                  factionName={factionNameMap.get(machine.faction)}
-                  onOverride={() => handleUnitClick(machine.id, 'machine')}
-                  onHide={() => onHideUnit(machine.id)}
-                  onClone={() => onCloneUnit(machine.id, 'machine')}
-                />
-              ))}
-              {/* Hidden machines */}
-              {showBaseUnits && hiddenMachines.map((machine) => (
-                <UnitCard
-                  key={machine.id}
-                  id={machine.id}
-                  name={machine.name}
-                  cost={machine.cost}
-                  isCustom={false}
-                  isOverride={false}
-                  isHidden={true}
-                  factionId={machine.faction}
-                  showFactionName={isMyUnitsView}
-                  factionName={factionNameMap.get(machine.faction)}
-                  onRestore={() => onRestoreUnit(machine.id)}
-                  onClone={() => onCloneUnit(machine.id, 'machine')}
-                />
-              ))}
-            </>
+            <EdPanel>
+              <div className="space-y-2">
+                {/* Custom machines */}
+                {customMachines.map((machine) => (
+                  <UnitCard
+                    key={machine.id}
+                    id={machine.id}
+                    name={machine.name}
+                    cost={machine.cost}
+                    isCustom={true}
+                    isOverride={overriddenMachineIds.has(machine.id)}
+                    isHidden={false}
+                    factionId={machine.faction}
+                    showFactionName={isMyUnitsView}
+                    factionName={factionNameMap.get(machine.faction)}
+                    onSelect={() => onSelectUnit(machine.id, 'machine')}
+                  />
+                ))}
+                {/* Base machines */}
+                {showBaseUnits && baseMachines.map((machine) => (
+                  <UnitCard
+                    key={machine.id}
+                    id={machine.id}
+                    name={machine.name}
+                    cost={machine.cost}
+                    isCustom={false}
+                    isOverride={false}
+                    isHidden={false}
+                    factionId={machine.faction}
+                    showFactionName={isMyUnitsView}
+                    factionName={factionNameMap.get(machine.faction)}
+                    onOverride={() => handleUnitClick(machine.id, 'machine')}
+                    onHide={() => onHideUnit(machine.id)}
+                    onClone={() => onCloneUnit(machine.id, 'machine')}
+                  />
+                ))}
+                {/* Hidden machines */}
+                {showBaseUnits && hiddenMachines.map((machine) => (
+                  <UnitCard
+                    key={machine.id}
+                    id={machine.id}
+                    name={machine.name}
+                    cost={machine.cost}
+                    isCustom={false}
+                    isOverride={false}
+                    isHidden={true}
+                    factionId={machine.faction}
+                    showFactionName={isMyUnitsView}
+                    factionName={factionNameMap.get(machine.faction)}
+                    onRestore={() => onRestoreUnit(machine.id)}
+                    onClone={() => onCloneUnit(machine.id, 'machine')}
+                  />
+                ))}
+              </div>
+            </EdPanel>
           )
         )}
       </div>
@@ -505,14 +510,14 @@ function UnitCard({
   return (
     <div
       className={`
-        group relative rounded-lg border-2 p-3 transition-all duration-200
-        ${isCustom && onSelect && !isHidden ? 'cursor-pointer hover:scale-[1.02]' : ''}
+        group relative rounded-md border p-3 transition-all duration-200
+        ${isCustom && onSelect && !isHidden ? 'cursor-pointer hover:scale-[1.01]' : ''}
         ${isHidden ? 'opacity-40 line-through' : ''}
         ${isCustom && !isHidden
-          ? `${factionStyle.border} ${factionStyle.glow} bg-slate-800`
-          : 'bg-slate-800/40 border-slate-700/50'
+          ? `${factionStyle.border} bg-[var(--panel2)]`
+          : 'ed-panel2 border-transparent'
         }
-        ${isOverride && !isHidden ? 'border-orange-500/50 shadow-orange-900/20' : ''}
+        ${isOverride && !isHidden ? 'border-[var(--ru)]/50' : ''}
       `}
       onClick={isCustom && onSelect && !isHidden ? onSelect : undefined}
     >
@@ -524,55 +529,57 @@ function UnitCard({
 
       {/* Override indicator */}
       {isOverride && (
-        <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-orange-400 to-orange-600" />
+        <div className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--ru)]" />
       )}
 
       {/* Content */}
-      <div className="flex items-center justify-between relative z-10">
+      <div className="flex items-center justify-between relative z-10 pl-1">
         <div className="flex-1 min-w-0">
-          {/* Type badge */}
+          {/* Leading index + type badge */}
           <div className="flex items-center gap-2 mb-1.5">
+            <span className="font-display text-[var(--ru)] text-sm tracking-wider w-5 text-center">
+              {name.charAt(0).toUpperCase()}
+            </span>
             {isCustom ? (
-              <div className={`flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full ${isOverride ? 'bg-orange-950/50 border border-orange-600/30 text-orange-400' : factionStyle.bg + ' border ' + factionStyle.border + ' ' + factionStyle.text} font-medium`}>
+              <span className={`flex items-center gap-1 font-stat text-[10px] px-1.5 py-0.5 rounded border ${isOverride ? 'bg-[var(--ru)]/15 border-[var(--ru)]/40 text-[var(--ru2)]' : factionStyle.bg + ' border ' + factionStyle.border + ' ' + factionStyle.text}`}>
                 {isOverride ? (
                   <>
-                    <span className="w-2 h-2 rounded-full bg-orange-400" />
+                    <span className="w-2 h-2 rounded-full bg-[var(--ru2)]" />
                     <span className="uppercase tracking-wider">Переопределён</span>
                   </>
                 ) : (
-                  <>
-                    <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                    <span className="uppercase tracking-wider">Ваш</span>
-                  </>
+                  <StatusPill ok={true}>Ваш</StatusPill>
                 )}
-              </div>
+              </span>
             ) : isHidden ? (
-              <div className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-red-950/30 border border-red-600/20 text-red-400/50 font-medium">
-                <EyeOff className="w-3 h-3" />
-                <span className="uppercase tracking-wider">Скрыт</span>
-              </div>
+              <StatusPill ok={false}>
+                <span className="flex items-center gap-1">
+                  <EyeOff className="w-3 h-3" />
+                  Скрыт
+                </span>
+              </StatusPill>
             ) : (
-              <div className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-slate-700/50 border border-slate-600/30 text-slate-400 font-medium">
+              <span className="flex items-center gap-1 font-stat text-[10px] px-1.5 py-0.5 rounded border border-[var(--border2)] bg-[var(--panel3)] text-[var(--muted)]">
                 <Lock className="w-3 h-3" />
                 <span className="uppercase tracking-wider">База</span>
-              </div>
+              </span>
             )}
           </div>
 
           {/* Name */}
-          <div className={`font-bold text-sm ${isHidden ? 'text-slate-500 line-through' : 'text-slate-200'}`}>
+          <div className={`font-ui font-bold text-sm pl-1 ${isHidden ? 'text-[var(--dim)] line-through' : 'text-[var(--bone)]'}`}>
             {name}
           </div>
 
           {/* Faction name (shown in MY_UNITS view) */}
           {showFactionName && factionName && (
-            <div className={`text-[10px] ${isHidden ? 'text-slate-600' : 'text-slate-500'} uppercase tracking-wider`}>
+            <div className={`font-stat text-[10px] pl-1 ${isHidden ? 'text-[var(--dim)]' : 'text-[var(--muted)]'} uppercase tracking-wider`}>
               {factionName}
             </div>
           )}
 
           {/* Cost */}
-          <div className={`text-xs font-mono ${isHidden ? 'text-slate-600' : 'text-slate-500'}`}>
+          <div className={`font-stat text-xs pl-1 ${isHidden ? 'text-[var(--dim)]' : 'text-[var(--muted)]'}`}>
             {cost} очков
           </div>
         </div>
@@ -583,10 +590,10 @@ function UnitCard({
             <div className="opacity-0 group-hover:opacity-100 transition-opacity">
               <button
                 onClick={(e) => { e.stopPropagation(); onSelect(); }}
-                className="p-2 rounded-lg hover:bg-emerald-900/30"
+                className="p-2 rounded-lg hover:bg-[var(--green)]/20"
                 title="Редактировать"
               >
-                <Edit className="w-4 h-4 text-emerald-400" />
+                <Edit className="w-4 h-4 text-[var(--green)]" />
               </button>
             </div>
           ) : isHidden ? (
@@ -594,19 +601,19 @@ function UnitCard({
               {onRestore && (
                 <button
                   onClick={(e) => { e.stopPropagation(); onRestore(); }}
-                  className="p-2 rounded-lg hover:bg-green-900/30 transition-all"
+                  className="p-2 rounded-lg hover:bg-[var(--green)]/20 transition-all"
                   title="Восстановить"
                 >
-                  <Undo className="w-4 h-4 text-green-400" />
+                  <Undo className="w-4 h-4 text-[var(--green)]" />
                 </button>
               )}
               {onClone && (
                 <button
                   onClick={(e) => { e.stopPropagation(); onClone(); }}
-                  className="p-2 rounded-lg hover:bg-blue-900/30 transition-all"
+                  className="p-2 rounded-lg hover:bg-[var(--ru)]/20 transition-all"
                   title="Клонировать"
                 >
-                  <Copy className="w-4 h-4 text-blue-400" />
+                  <Copy className="w-4 h-4 text-[var(--ru2)]" />
                 </button>
               )}
             </>
@@ -615,41 +622,34 @@ function UnitCard({
               {onOverride && (
                 <button
                   onClick={(e) => { e.stopPropagation(); onOverride(); }}
-                  className="p-2 rounded-lg hover:bg-orange-900/30 transition-all"
+                  className="p-2 rounded-lg hover:bg-[var(--ru)]/20 transition-all"
                   title="Переопределить"
                 >
-                  <RotateCw className="w-4 h-4 text-orange-400" />
+                  <RotateCw className="w-4 h-4 text-[var(--ru2)]" />
                 </button>
               )}
               {onHide && (
                 <button
                   onClick={(e) => { e.stopPropagation(); onHide(); }}
-                  className="p-2 rounded-lg hover:bg-red-900/30 transition-all"
+                  className="p-2 rounded-lg hover:bg-[var(--red)]/20 transition-all"
                   title="Скрыть"
                 >
-                  <Trash2 className="w-4 h-4 text-red-400" />
+                  <Trash2 className="w-4 h-4 text-[var(--red)]" />
                 </button>
               )}
               {onClone && (
                 <button
                   onClick={(e) => { e.stopPropagation(); onClone(); }}
-                  className="p-2 rounded-lg hover:bg-blue-900/30 transition-all"
+                  className="p-2 rounded-lg hover:bg-[var(--ru)]/20 transition-all"
                   title="Клонировать"
                 >
-                  <Copy className="w-4 h-4 text-blue-400" />
+                  <Copy className="w-4 h-4 text-[var(--ru2)]" />
                 </button>
               )}
             </>
           )}
         </div>
       </div>
-
-      {/* Hover glow */}
-      {!isHidden && (
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-lg overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
-        </div>
-      )}
     </div>
   );
 }

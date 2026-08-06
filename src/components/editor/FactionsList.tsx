@@ -1,12 +1,13 @@
 /**
  * Factions list component - shows factions for a source
- * Styled like battle cards with tech corners and faction colors
+ * Verifier chrome: hazard panels, font-display indices, faction colors preserved.
  */
 
 'use client';
 
 import { CustomFaction } from '@/lib/editor/types';
 import { Plus, Lock, ChevronRight, GitCompare } from 'lucide-react';
+import { EdPanel, StatusPill } from './ui/editor-primitives';
 
 // Special ID for "CHANGES" view
 export const MY_UNITS_ID = '__CHANGES__';
@@ -20,7 +21,7 @@ interface FactionsListProps {
   myUnitsCount?: number;
 }
 
-// Get faction styling matching the main app
+// Get faction styling matching the main app (faction-identity colors preserved)
 function getFactionStyle(factionId: string) {
   const styles: Record<string, { border: string; glow: string; bg: string; text: string; corner: string }> = {
     polaris: {
@@ -59,80 +60,74 @@ export function FactionsList({
   const isMyUnitsSelected = selectedId === MY_UNITS_ID;
 
   return (
-    <div className="flex flex-col h-full bg-slate-900/50">
+    <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700/50 bg-slate-900/80 backdrop-blur-sm">
-        <h2 className="text-sm font-semibold text-slate-200 tracking-wide uppercase">Фракции</h2>
+      <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)] bg-[var(--panel)]/80 backdrop-blur-sm">
+        <h2 className="font-ui text-xs uppercase tracking-widest text-[var(--muted)]">Фракции</h2>
         {onCreateNew && (
           <button
             onClick={onCreateNew}
             disabled={disabled}
-            className="p-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/40 border border-emerald-600/30 transition-all disabled:opacity-50 group"
+            className="p-2 rounded-lg border border-[var(--border2)] bg-[var(--panel2)] hover:bg-[var(--ru)] hover:text-white hover:border-[var(--ru)] transition-all disabled:opacity-50 group"
             title="Создать фракцию"
           >
-            <Plus className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+            <Plus className="w-4 h-4 text-[var(--ru2)] group-hover:text-white group-hover:scale-110 transition-transform" />
           </button>
         )}
       </div>
 
       {/* Factions list */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-3">
+      <div className="flex-1 min-h-0 overflow-y-auto p-3 space-y-3">
         {/* CHANGES - Summary panel */}
         <button
           onClick={() => onSelect(MY_UNITS_ID)}
           disabled={disabled}
           className={`
-            relative w-full text-left p-0 rounded-xl transition-all duration-200
-            group overflow-hidden
+            relative w-full text-left p-0 rounded-md transition-all duration-200
+            group overflow-hidden border
             disabled:opacity-50 disabled:cursor-not-allowed
             ${isMyUnitsSelected
-              ? 'bg-violet-900/40 border-violet-500/50 shadow-violet-900/30'
-              : 'bg-slate-800/40 border-slate-700/50 hover:bg-slate-800/60 hover:border-slate-600'
+              ? 'ed-panel2 border-[var(--ru)]'
+              : 'ed-panel2 border-transparent hover:border-[var(--border2)]'
             }
           `}
         >
-          {/* Animated gradient border */}
-          <div className={`
-            absolute inset-0 rounded-xl p-[2px] opacity-0 transition-opacity duration-300
-            ${isMyUnitsSelected ? 'opacity-100' : 'group-hover:opacity-60'}
-          `}>
-            <div className="w-full h-full rounded-xl bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 animate-pulse" />
-          </div>
-
           {/* Inner content */}
-          <div className="relative z-10 bg-slate-900 rounded-xl p-3">
+          <div className="relative z-10 p-3">
             {/* Header */}
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <div className={`p-1.5 rounded-lg ${isMyUnitsSelected ? 'bg-violet-950/50' : 'bg-slate-800'} transition-all`}>
-                  <GitCompare className={`w-4 h-4 ${isMyUnitsSelected ? 'text-violet-400' : 'text-slate-500'} transition-all ${isMyUnitsSelected ? 'animate-pulse' : ''}`} />
+                <span className="font-display text-[var(--ru)] text-sm tracking-wider">Δ</span>
+                <div className={`p-1.5 rounded-lg ${isMyUnitsSelected ? 'bg-violet-950/50' : 'bg-[var(--panel3)]'} transition-all`}>
+                  <GitCompare className={`w-4 h-4 ${isMyUnitsSelected ? 'text-violet-400' : 'text-[var(--muted)]'} transition-all ${isMyUnitsSelected ? 'animate-pulse' : ''}`} />
                 </div>
-                <span className={`font-bold text-sm uppercase tracking-wider ${isMyUnitsSelected ? 'text-violet-300' : 'text-slate-400'}`}>
+                <span className={`font-ui font-bold text-sm uppercase tracking-wider ${isMyUnitsSelected ? 'text-violet-300' : 'text-[var(--muted)]'}`}>
                   Изменения
                 </span>
+                {isMyUnitsSelected && <StatusPill ok={true}>Выбрано</StatusPill>}
               </div>
-              <ChevronRight className={`w-4 h-4 transition-transform ${isMyUnitsSelected ? 'text-violet-400' : 'text-slate-600'} opacity-0 group-hover:opacity-100`} />
+              <ChevronRight className={`w-4 h-4 transition-transform ${isMyUnitsSelected ? 'text-violet-400' : 'text-[var(--dim)]'} opacity-0 group-hover:opacity-100`} />
             </div>
 
             {/* Stats row */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className={`text-xs ${isMyUnitsSelected ? 'text-slate-400' : 'text-slate-500'}`}>
+                <div className={`font-ui text-xs ${isMyUnitsSelected ? 'text-[var(--muted)]' : 'text-[var(--muted)]'}`}>
                   Всего изменено:
                 </div>
-                <div className={`text-lg font-bold font-mono ${isMyUnitsSelected ? 'text-violet-300' : 'text-slate-300'}`}>
+                <div className={`font-stat text-lg font-bold ${isMyUnitsSelected ? 'text-violet-300' : 'text-[var(--bone)]'}`}>
                   {myUnitsCount}
                 </div>
               </div>
-              <div className={`text-[10px] px-2 py-1 rounded-full ${isMyUnitsSelected ? 'bg-violet-950/50 text-violet-400 border border-violet-600/30' : 'bg-slate-800 text-slate-500'}`}>
+              <div className={`font-stat text-[10px] px-2 py-1 rounded border ${isMyUnitsSelected ? 'bg-violet-950/50 text-violet-400 border-violet-600/30' : 'bg-[var(--panel3)] text-[var(--muted)] border-[var(--border2)]'}`}>
                 {isMyUnitsSelected ? 'Выбрано' : 'Показать'}
               </div>
             </div>
 
             {/* Subtitle */}
             {myUnitsCount > 0 && (
-              <div className="mt-2 pt-2 border-t border-slate-700/50">
-                <div className={`text-[10px] ${isMyUnitsSelected ? 'text-slate-500' : 'text-slate-600'}`}>
+              <div className="mt-2 pt-2 border-t border-[var(--border)]">
+                <div className={`font-stat text-[10px] ${isMyUnitsSelected ? 'text-[var(--dim)]' : 'text-[var(--dim)]'}`}>
                   Созданные • Переопределённые • Скрытые
                 </div>
               </div>
@@ -142,88 +137,94 @@ export function FactionsList({
 
         {/* Divider */}
         <div className="flex items-center gap-3">
-          <div className="flex-1 h-px bg-slate-700/50"></div>
-          <span className="text-[10px] text-slate-600 uppercase tracking-wider">Фракции</span>
-          <div className="flex-1 h-px bg-slate-700/50"></div>
+          <div className="flex-1 h-px bg-[var(--border)]"></div>
+          <span className="font-stat text-[10px] text-[var(--dim)] uppercase tracking-wider">Фракции</span>
+          <div className="flex-1 h-px bg-[var(--border)]"></div>
         </div>
 
         {/* Regular factions */}
         {factions.length === 0 ? (
-          <div className="p-6 text-center">
-            <div className="text-slate-600 text-sm">{disabled ? 'Выберите источник' : 'Нет фракций'}</div>
+          <div className="p-6 text-center font-ui">
+            <div className="text-[var(--dim)] text-sm">{disabled ? 'Выберите источник' : 'Нет фракций'}</div>
           </div>
         ) : (
-          factions.map(faction => {
-            const style = getFactionStyle(faction.id);
-            const isSelected = selectedId === faction.id;
+          <EdPanel>
+            <div className="space-y-2">
+              {factions.map((faction) => {
+                const style = getFactionStyle(faction.id);
+                const isSelected = selectedId === faction.id;
 
-            return (
-              <button
-                key={faction.id}
-                onClick={() => onSelect(faction.id)}
-                disabled={disabled}
-                className={`
-                  relative w-full text-left p-3 rounded-lg border-2 transition-all duration-200
-                  group overflow-hidden
-                  disabled:opacity-50 disabled:cursor-not-allowed
-                  ${isSelected
-                    ? `${style.border} ${style.glow} bg-slate-800`
-                    : `${style.border} hover:${style.glow} bg-slate-800/30 hover:bg-slate-800/60`
-                  }
-                `}
-                style={isSelected ? {} : {}}
-              >
-                {/* Tech corners */}
-                <div className="absolute top-0 left-0 w-2 h-2 border-l border-t -ml-px -mt-px opacity-60" style={{ borderColor: style.corner }} />
-                <div className="absolute top-0 right-0 w-2 h-2 border-r border-t -mr-px -mt-px opacity-60" style={{ borderColor: style.corner }} />
-                <div className="absolute bottom-0 left-0 w-2 h-2 border-l border-b -ml-px -mb-px opacity-60" style={{ borderColor: style.corner }} />
-                <div className="absolute bottom-0 right-0 w-2 h-2 border-r border-b -mr-px -mb-px opacity-60" style={{ borderColor: style.corner }} />
+                return (
+                  <button
+                    key={faction.id}
+                    onClick={() => onSelect(faction.id)}
+                    disabled={disabled}
+                    className={`
+                      relative w-full text-left p-3 rounded-md border transition-all duration-200
+                      group overflow-hidden
+                      disabled:opacity-50 disabled:cursor-not-allowed
+                      ${isSelected
+                        ? `${style.border} bg-[var(--panel2)]`
+                        : `${style.border} bg-[var(--panel)] hover:bg-[var(--panel2)]`
+                      }
+                    `}
+                    style={isSelected ? {} : {}}
+                  >
+                    {/* Tech corners */}
+                    <div className="absolute top-0 left-0 w-2 h-2 border-l border-t -ml-px -mt-px opacity-60" style={{ borderColor: style.corner }} />
+                    <div className="absolute top-0 right-0 w-2 h-2 border-r border-t -mr-px -mt-px opacity-60" style={{ borderColor: style.corner }} />
+                    <div className="absolute bottom-0 left-0 w-2 h-2 border-l border-b -ml-px -mb-px opacity-60" style={{ borderColor: style.corner }} />
+                    <div className="absolute bottom-0 right-0 w-2 h-2 border-r border-b -mr-px -mb-px opacity-60" style={{ borderColor: style.corner }} />
 
-                {/* Selection indicator stripe */}
-                {isSelected && (
-                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-emerald-400 to-emerald-600" />
-                )}
+                    {/* Selection indicator stripe */}
+                    {isSelected && (
+                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--ru)]" />
+                    )}
 
-                {/* Content */}
-                <div className="flex items-center justify-between relative z-10">
-                  <div className="flex items-center gap-3">
-                    {/* Faction icon with glow */}
-                    <div className={`
-                      relative w-8 h-8 rounded-lg flex items-center justify-center
-                      ${style.bg} border ${style.border}
-                    `}>
-                      <div
-                        className="w-4 h-4 rounded-full shadow-lg"
-                        style={{ backgroundColor: faction.color, boxShadow: `0 0 12px ${faction.color}` }}
-                      />
-                    </div>
+                    {/* Content */}
+                    <div className="flex items-center justify-between relative z-10 pl-2">
+                      <div className="flex items-center gap-3">
+                        {/* Leading font-display letter */}
+                        <span className="font-display text-[var(--ru)] text-sm tracking-wider w-5 text-center">
+                          {(faction.name || faction.id).charAt(0).toUpperCase()}
+                        </span>
 
-                    {/* Faction name */}
-                    <div>
-                      <div className={`font-bold text-sm ${isSelected ? 'text-white' : 'text-slate-200'}`}>
-                        {faction.name}
-                      </div>
-                      {faction.isFromBase && (
-                        <div className="flex items-center gap-1 mt-0.5">
-                          <Lock className="w-3 h-3 text-slate-500" />
-                          <span className="text-[10px] text-slate-500 uppercase tracking-wider">База</span>
+                        {/* Faction icon with glow */}
+                        <div className={`
+                          relative w-8 h-8 rounded-lg flex items-center justify-center
+                          ${style.bg} border ${style.border}
+                        `}>
+                          <div
+                            className="w-4 h-4 rounded-full shadow-lg"
+                            style={{ backgroundColor: faction.color, boxShadow: `0 0 12px ${faction.color}` }}
+                          />
                         </div>
-                      )}
+
+                        {/* Faction name */}
+                        <div>
+                          <div className={`font-ui font-bold text-sm ${isSelected ? 'text-[var(--bone)]' : 'text-[var(--bone)]'}`}>
+                            {faction.name}
+                          </div>
+                          {faction.isFromBase && (
+                            <div className="flex items-center gap-1 mt-0.5">
+                              <Lock className="w-3 h-3 text-[var(--muted)]" />
+                              <span className="font-stat text-[10px] text-[var(--muted)] uppercase tracking-wider">База</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        {isSelected && <StatusPill ok={true}>Выбрана</StatusPill>}
+                        {/* Chevron */}
+                        <ChevronRight className={`w-4 h-4 transition-transform ${isSelected ? 'text-[var(--bone)]' : 'text-[var(--dim)]'} opacity-0 group-hover:opacity-100`} />
+                      </div>
                     </div>
-                  </div>
-
-                  {/* Chevron */}
-                  <ChevronRight className={`w-4 h-4 transition-transform ${isSelected ? 'text-white' : 'text-slate-600'} opacity-0 group-hover:opacity-100`} />
-                </div>
-
-                {/* Hover glow effect */}
-                <div className={`
-                  absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300
-                  bg-gradient-to-r from-transparent via-white/5 to-transparent
-                `} />
-              </button>
-            );
-          })
+                  </button>
+                );
+              })}
+            </div>
+          </EdPanel>
         )}
       </div>
     </div>

@@ -20,6 +20,7 @@ import { MachineEditor } from './MachineEditor';
 import { CreateSourceModal } from './CreateSourceModal';
 import { ModifiersEditor } from './ModifiersEditor';
 import { UnifiedSaveArea } from '@/components/editor/UnifiedSaveArea';
+import { HazardTopbar } from './ui/editor-primitives';
 
 type EditorView = 'list' | 'edit-squad' | 'edit-machine' | 'create-squad' | 'create-machine' | 'override-squad' | 'override-machine';
 
@@ -503,13 +504,13 @@ export function EditorLayout() {
       <div className="hidden md:flex flex-col flex-1 min-h-0" id="editor-desktop">
         {/* Desktop top tab bar */}
         {view === 'list' && (
-          <div className="flex items-center border-b border-slate-800/50 bg-slate-900/80 shrink-0 px-4">
+          <HazardTopbar brand={<>★ BRONEPEHOTA <span className="text-[var(--muted)] text-xs">/ editor</span></>}>
             <button
               onClick={() => setDesktopTab('units')}
               className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold transition-all border-b-2 ${
                 desktopTab === 'units'
-                  ? 'text-white border-emerald-500'
-                  : 'text-slate-500 hover:text-slate-300 border-transparent'
+                  ? 'text-[var(--bone)] border-[var(--ru)]'
+                  : 'text-[var(--muted)] hover:text-[var(--bone)] border-transparent'
               }`}
             >
               Юниты
@@ -518,18 +519,16 @@ export function EditorLayout() {
               onClick={() => setDesktopTab('modifiers')}
               className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold transition-all border-b-2 ${
                 desktopTab === 'modifiers'
-                  ? 'text-white border-violet-500'
-                  : 'text-slate-500 hover:text-slate-300 border-transparent'
+                  ? 'text-[var(--bone)] border-[var(--ru)]'
+                  : 'text-[var(--muted)] hover:text-[var(--bone)] border-transparent'
               }`}
             >
               <Zap className="w-4 h-4" />
               Модификаторы
             </button>
             {/* Save/load controls in toolbar */}
-            <div className="ml-auto">
-              <UnifiedSaveArea mode="full" variant="toolbar" onImportComplete={() => { const s = getCustomSourcesStorage(); setSources(s.getAll()); }} />
-            </div>
-          </div>
+            <UnifiedSaveArea mode="full" variant="toolbar" onImportComplete={() => { const s = getCustomSourcesStorage(); setSources(s.getAll()); }} />
+          </HazardTopbar>
         )}
 
         <div className="flex flex-1 min-h-0">
@@ -541,7 +540,7 @@ export function EditorLayout() {
           ) : (
           <div className="flex w-full h-full min-h-0">
             {/* Left column: Sources list */}
-            <div className="w-72 border-r border-slate-800/50 overflow-y-auto min-h-0">
+            <div className="w-72 border-r border-[var(--border)] overflow-y-auto min-h-0">
               <SourcesList
                 sources={sources}
                 selectedId={selectedSourceId}
@@ -552,7 +551,7 @@ export function EditorLayout() {
             </div>
 
             {/* Middle column: Factions list */}
-            <div className="w-80 border-r border-slate-800/50 overflow-y-auto min-h-0">
+            <div className="w-80 border-r border-[var(--border)] overflow-y-auto min-h-0">
               {selectedSource ? (
                 <FactionsList
                   factions={allFactions}
@@ -572,14 +571,14 @@ export function EditorLayout() {
                   myUnitsCount={selectedSource.squads.length + selectedSource.machines.length + (selectedSource.hiddenUnits?.length || 0)}
                 />
               ) : (
-                <div className="p-4 text-slate-500 text-center">
+                <div className="p-4 text-[var(--muted)] text-center font-ui">
                   Выберите источник для просмотра фракций
                 </div>
               )}
             </div>
 
             {/* Right column: Units list */}
-            <div className="flex-1 min-h-0 overflow-hidden bg-slate-900/30">
+            <div className="flex-1 min-h-0 overflow-hidden bg-[var(--panel2)]/30">
               {selectedFactionId && selectedSource ? (
                 <UnitsList
                   source={selectedSource}
@@ -595,7 +594,7 @@ export function EditorLayout() {
                   onCreateMachine={handleCreateMachine}
                 />
               ) : (
-                <div className="p-4 text-slate-500 text-center">
+                <div className="p-4 text-[var(--muted)] text-center font-ui">
                   Выберите фракцию для просмотра юнитов
                 </div>
               )}
@@ -606,20 +605,20 @@ export function EditorLayout() {
           /* Full-width editor */
           <div className="flex flex-col flex-1 overflow-hidden">
             {/* Breadcrumb bar */}
-            <div className="flex items-center gap-2 px-4 py-2 border-b border-slate-800/50 bg-slate-900/80 shrink-0">
+            <div className="flex items-center gap-2 px-4 py-2 border-b border-[var(--border)] bg-[var(--panel)]/80 shrink-0 font-ui">
               <button
                 onClick={handleBackToList}
-                className="flex items-center gap-1 text-sm text-slate-400 hover:text-white transition-colors"
+                className="flex items-center gap-1 text-sm text-[var(--muted)] hover:text-[var(--bone)] transition-colors"
               >
                 <ChevronLeft className="w-4 h-4" />
                 Назад
               </button>
-              <span className="text-slate-700">/</span>
-              <span className="text-sm text-slate-400">{selectedSource?.name}</span>
+              <span className="text-[var(--dim)]">/</span>
+              <span className="text-sm text-[var(--muted)]">{selectedSource?.name}</span>
               {factionName && (
                 <>
-                  <span className="text-slate-700">/</span>
-                  <span className="text-sm text-slate-400">{factionName}</span>
+                  <span className="text-[var(--dim)]">/</span>
+                  <span className="text-sm text-[var(--muted)]">{factionName}</span>
                 </>
               )}
             </div>
@@ -634,12 +633,12 @@ export function EditorLayout() {
       {/* Mobile notice — editor is desktop only */}
       <div className="md:hidden flex flex-col flex-1 min-h-0">
         <div className="flex-1 flex flex-col items-center justify-center gap-6 p-6 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-slate-800/80 border border-slate-700/50 flex items-center justify-center">
-            <Monitor className="w-8 h-8 text-slate-400" />
+          <div className="w-16 h-16 rounded-2xl bg-[var(--panel2)] border border-[var(--border2)] flex items-center justify-center">
+            <Monitor className="w-8 h-8 text-[var(--muted)]" />
           </div>
           <div className="space-y-2 max-w-xs">
-            <h2 className="text-lg font-bold text-white">Редактор доступен на десктопе</h2>
-            <p className="text-sm text-slate-400 leading-relaxed">
+            <h2 className="font-display text-lg text-[var(--bone)]">Редактор доступен на десктопе</h2>
+            <p className="font-ui text-sm text-[var(--muted)] leading-relaxed">
               Перейдите на компьютер для полного редактирования юнитов, фракций и модификаторов.
             </p>
           </div>
