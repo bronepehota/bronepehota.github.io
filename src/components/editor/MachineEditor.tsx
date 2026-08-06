@@ -10,7 +10,10 @@ import { generateUnitId } from '@/lib/editor/id-generator';
 import { Save, X, Plus, Trash2, Eye, Target, Zap, Shield, Gauge } from 'lucide-react';
 import { MachinePreview } from './MachinePreview';
 import { BuffSelector } from './BuffSelector';
+import { MachineCalculator } from './MachineCalculator';
+import { machineCost, deriveSpeedSectors } from '@/lib/machine-calculator-engine';
 import type { BuffDefinition } from '@/lib/modifier-types';
+import type { MachineCalculatorParams, WeaponSlotConfig } from '@/lib/editor/types';
 
 interface MachineEditorProps {
   machine?: CustomMachine;
@@ -72,6 +75,16 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
   );
   const [buffs, setBuffs] = useState<BuffDefinition[]>(machine?.buffs || []);
   const [showPreview, setShowPreview] = useState(false);
+  const [mode, setMode] = useState<'calculator' | 'manual'>(
+    machine?.calculatorParams ? 'calculator' : 'manual'
+  );
+  const [calcParams, setCalcParams] = useState<MachineCalculatorParams>(
+    machine?.calculatorParams ?? {
+      monoblock: 'УМ-1',
+      chassis: 'Шагатель',
+      slots: Array.from({ length: 5 }, () => ({ preset: 'empty', range: '', power: '', ammo: 0, property: null })) as WeaponSlotConfig[],
+    }
+  );
 
   const factionStyle = getFactionStyle(factionId);
 
@@ -114,6 +127,16 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
     setSpeedSectors(speedSectors.map((s, i) => (i === index ? { ...s, ...updates } : s)));
   };
 
+  const handleApplyCost = (cost: number) => {
+    setCost(cost);
+    const bd = machineCost(calcParams);
+    setDurabilityMax(bd.derived.durability_max);
+    setAmmoMax(bd.derived.ammo_max);
+    setRank(bd.derived.rank);
+    setFireRate(bd.derived.fire_rate);
+    setSpeedSectors(deriveSpeedSectors(calcParams.monoblock, calcParams.chassis, bd.derived.durability_max));
+  };
+
   const handleSave = () => {
     if (!name.trim()) {
       alert('Введите название техники');
@@ -134,6 +157,7 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
       weapons,
       speed_sectors: speedSectors,
       buffs: buffs.length > 0 ? buffs : undefined,
+      ...(mode === 'calculator' ? { calculatorParams: calcParams } : {}),
     };
 
     onSave(machineData);
@@ -343,6 +367,23 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
 
           {/* Right column: Weapons and Speed sectors */}
           <div className="flex-1 overflow-y-auto p-4 space-y-6">
+            {/* Mode tabs */}
+            <div className="flex gap-2 border-b border-slate-800">
+              <button onClick={() => setMode('calculator')}
+                className={`px-4 py-2 text-sm font-semibold border-b-2 ${mode === 'calculator' ? 'text-white border-emerald-500' : 'text-slate-500 border-transparent'}`}
+                data-testid="machine-calculator-tab">Калькулятор</button>
+              <button onClick={() => setMode('manual')}
+                className={`px-4 py-2 text-sm font-semibold border-b-2 ${mode === 'manual' ? 'text-white border-emerald-500' : 'text-slate-500 border-transparent'}`}
+                data-testid="machine-manual-tab">Вручную</button>
+              {mode === 'manual' && !machine?.calculatorParams && (
+                <span className="ml-auto self-center text-[10px] text-amber-400">ручная стоимость</span>
+              )}
+            </div>
+
+            {mode === 'calculator' ? (
+              <MachineCalculator params={calcParams} onParamsChange={setCalcParams} onApply={handleApplyCost} />
+            ) : (
+              <>
             {/* Weapons Section */}
             <div>
               <div className="flex items-center justify-between mb-4">
@@ -556,6 +597,8 @@ export function MachineEditor({ machine, source: _source, factionId, isOverride 
                 )}
               </div>
             </div>
+              </>
+            )}
           </div>
         </div>
       </div>
