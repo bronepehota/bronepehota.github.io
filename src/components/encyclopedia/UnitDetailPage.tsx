@@ -14,6 +14,8 @@ import { SQUAD_GROUP_IMAGE, getPhotoCredit, getCredit } from '@/lib/painted-imag
 import { resolveUnitProvenance } from '@/lib/provenance';
 import { UnitLore } from './UnitDetail/UnitLore';
 import { UnitSpecs } from './UnitDetail/UnitSpecs';
+import { UnitLoreDetail } from './UnitDetail/UnitLoreDetail';
+import type { UnitLoreDoc } from '@/lib/unit-lore';
 import { SourceAvailability } from './SourceAvailability';
 import { PainterChip, ProvenanceRow, ImageSourceChip, MiniatureChip, SponsorChip, ALTERNATIVE_VERSION_HINT } from './AttributionLabel';
 import { FactionLogo } from '@/components/FactionLogo';
@@ -25,6 +27,8 @@ interface UnitDetailPageProps {
   unit: EnrichedUnit;
   bySource: Record<string, EnrichedUnit>;
   sourceOrder: string[];
+  /** Optional long-form lore doc (rendered by <UnitLoreDetail>). Null when absent. */
+  loreDoc?: UnitLoreDoc | null;
 }
 
 const factionIcons: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -47,7 +51,7 @@ const factionBadges: Record<string, string> = {
 // e.g. «Мёртвый Флот») — NOT a local copy that goes stale when factions are
 // added. `factionDisplayNames` is the short-name fallback.
 
-export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDetailPageProps) {
+export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc }: UnitDetailPageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [activeSource, setActiveSource] = useState<string>(sourceOrder[0] ?? unit.sources[0]?.id ?? '');
   const activeUnit = bySource[activeSource] ?? unit;
@@ -441,6 +445,9 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
 
             {/* Lore, Traditions, Battles, Locations sections */}
             <UnitLore unit={unit} />
+
+            {/* Long-form lore («Читать подробнее») — only when a .md doc exists for this unit. */}
+            {loreDoc && <UnitLoreDetail doc={loreDoc} />}
 
             {/* Buffs section */}
             {unit.buffs && unit.buffs.length > 0 && (

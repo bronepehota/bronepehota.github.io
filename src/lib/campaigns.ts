@@ -61,7 +61,7 @@ export function getAllCampaigns(): CampaignMeta[] {
  * NB: if campaigns start using GFM tables/code/images, extend the schema passed to
  * `rehypeSanitize` (default schema drops `table`/`thead`/`td`/…).
  */
-async function renderMarkdownToSanitizedHtml(content: string): Promise<string> {
+export async function renderMarkdownToSanitizedHtml(content: string): Promise<string> {
   const { remark } = await import('remark');
   const { default: remarkGfm } = await import('remark-gfm');
   const { default: remarkRehype } = await import('remark-rehype');
