@@ -13,6 +13,7 @@ import { MachineImages } from './UnitDetail/MachineImages';
 import { SQUAD_GROUP_IMAGE, getPhotoCredit, getCredit } from '@/lib/painted-images';
 import { resolveUnitProvenance } from '@/lib/provenance';
 import { UnitLore } from './UnitDetail/UnitLore';
+import { UnitSpecs } from './UnitDetail/UnitSpecs';
 import { SourceAvailability } from './SourceAvailability';
 import { PainterChip, ProvenanceRow, ImageSourceChip, MiniatureChip, SponsorChip, ALTERNATIVE_VERSION_HINT } from './AttributionLabel';
 import { FactionLogo } from '@/components/FactionLogo';
@@ -418,6 +419,10 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
 
             {/* Личный состав — personnel portraits, follows the active source */}
             <SoldierImages unit={activeUnit} />
+
+            {/* Характеристики — spec plate (ТТХ): physical specs (mass, crew, моноблок,
+                разработчик). Constants of the machine, so base `unit` (not source-switched). */}
+            <UnitSpecs unit={unit} />
 
             {/* Боевой расчёт — full stat table, follows the active source */}
             <UnitStatTable unit={activeUnit as unknown as Squad | Machine} type={unit.type} />
