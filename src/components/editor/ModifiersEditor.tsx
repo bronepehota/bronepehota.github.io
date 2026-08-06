@@ -286,7 +286,7 @@ export function ModifiersEditor({ onRefresh }: ModifiersEditorProps) {
 
   const inputCls =
     'w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-sm text-slate-100 placeholder-slate-500';
-  const labelCls = 'block text-xs font-medium text-slate-400 mb-1';
+  const labelCls = 'block text-xs font-medium text-[var(--muted)] mb-1 font-ui';
   const selectCls =
     'w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-sm text-slate-100 appearance-none';
 
@@ -294,18 +294,18 @@ export function ModifiersEditor({ onRefresh }: ModifiersEditorProps) {
   const isBuffTab = tab === 'buffs';
 
   return (
-    <div className="flex flex-col h-full min-h-0 overflow-hidden bg-slate-950">
+    <div className="flex flex-col h-full min-h-0 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700/50 bg-slate-900/80 backdrop-blur-sm shrink-0">
-        <h2 className="text-sm font-semibold text-slate-200 tracking-wide uppercase">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)] bg-[var(--panel)]/80 backdrop-blur-sm shrink-0">
+        <h2 className="font-ui text-xs uppercase tracking-widest text-[var(--muted)]">
           Модификаторы
         </h2>
         <div className="flex items-center gap-2">
           <button
             onClick={handleStartCreate}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium
-                       bg-emerald-600/20 hover:bg-emerald-600/40 border border-emerald-600/30
-                       text-emerald-400 transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium font-ui
+                       bg-[var(--green)]/20 hover:bg-[var(--green)]/40 border border-[var(--green)]/40
+                       text-[var(--green)] transition-all"
           >
             <Plus className="w-3.5 h-3.5" />
             Создать
@@ -314,23 +314,23 @@ export function ModifiersEditor({ onRefresh }: ModifiersEditorProps) {
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-slate-700/50 shrink-0">
+      <div className="flex border-b border-[var(--border)] shrink-0">
         <button
           onClick={() => { setTab('buffs'); handleCancelEdit(); }}
-          className={`flex-1 px-4 py-3 text-sm font-semibold transition-all relative ${
+          className={`flex-1 px-4 py-3 text-sm font-semibold font-ui transition-all relative ${
             tab === 'buffs'
-              ? 'text-white border-b-2 border-emerald-500'
-              : 'text-slate-500 hover:text-slate-300'
+              ? 'text-[var(--bone)] border-b-2 border-[var(--green)]'
+              : 'text-[var(--muted)] hover:text-[var(--bone)] border-b-2 border-transparent'
           }`}
         >
           <div className="flex items-center justify-center gap-2">
             <Sparkles className="w-4 h-4" />
             <span>БАФЫ</span>
             <span
-              className={`text-xs px-2 py-0.5 rounded-full ${
+              className={`text-xs px-2 py-0.5 rounded-full font-stat ${
                 tab === 'buffs'
-                  ? 'bg-emerald-500/20 text-emerald-400'
-                  : 'bg-slate-700 text-slate-500'
+                  ? 'bg-[var(--green)]/20 text-[var(--green)]'
+                  : 'bg-[var(--panel3)] text-[var(--muted)]'
               }`}
             >
               {allBuffs.length}
@@ -339,20 +339,20 @@ export function ModifiersEditor({ onRefresh }: ModifiersEditorProps) {
         </button>
         <button
           onClick={() => { setTab('debuffs'); handleCancelEdit(); }}
-          className={`flex-1 px-4 py-3 text-sm font-semibold transition-all relative ${
+          className={`flex-1 px-4 py-3 text-sm font-semibold font-ui transition-all relative ${
             tab === 'debuffs'
-              ? 'text-white border-b-2 border-red-500'
-              : 'text-slate-500 hover:text-slate-300'
+              ? 'text-[var(--bone)] border-b-2 border-[var(--red)]'
+              : 'text-[var(--muted)] hover:text-[var(--bone)] border-b-2 border-transparent'
           }`}
         >
           <div className="flex items-center justify-center gap-2">
             <ShieldOff className="w-4 h-4" />
             <span>ДЕБАФЫ</span>
             <span
-              className={`text-xs px-2 py-0.5 rounded-full ${
+              className={`text-xs px-2 py-0.5 rounded-full font-stat ${
                 tab === 'debuffs'
-                  ? 'bg-red-500/20 text-red-400'
-                  : 'bg-slate-700 text-slate-500'
+                  ? 'bg-[var(--red)]/20 text-[var(--red)]'
+                  : 'bg-[var(--panel3)] text-[var(--muted)]'
               }`}
             >
               {allDebuffs.length}
@@ -365,8 +365,8 @@ export function ModifiersEditor({ onRefresh }: ModifiersEditorProps) {
       <div className="flex-1 min-h-0 overflow-y-auto">
         {/* Create / Edit form */}
         {(isCreating || editingId) && (
-          <div className="p-4 border-b border-slate-700/50 bg-slate-800/80">
-            <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
+          <div className="p-4 border-b border-[var(--border)] bg-[var(--panel2)]/80">
+            <div className="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider mb-3 font-ui">
               {isCreating
                 ? `Новый ${isBuffTab ? 'баф' : 'дебаф'}`
                 : `Редактирование: ${form.name}`}
@@ -384,7 +384,7 @@ export function ModifiersEditor({ onRefresh }: ModifiersEditorProps) {
                   onChange={e => updateForm({ name: e.target.value })}
                 />
                 {formErrors.name && (
-                  <div className="text-xs text-red-400 mt-1">{formErrors.name}</div>
+                  <div className="text-xs text-[var(--red)] mt-1 font-ui">{formErrors.name}</div>
                 )}
               </div>
 
@@ -414,7 +414,7 @@ export function ModifiersEditor({ onRefresh }: ModifiersEditorProps) {
                     </option>
                   ))}
                 </select>
-                <div className="text-[10px] text-slate-600 mt-1">Какая характеристика изменяется</div>
+                <div className="text-[10px] text-[var(--dim)] mt-1">Какая характеристика изменяется</div>
               </div>
 
               {/* Value */}
@@ -427,7 +427,7 @@ export function ModifiersEditor({ onRefresh }: ModifiersEditorProps) {
                   value={form.value}
                   onChange={e => updateForm({ value: parseFloat(e.target.value) || 0 })}
                 />
-                <div className="text-[10px] text-slate-600 mt-1">Плюс/минус для аддитивных, множитель для xN</div>
+                <div className="text-[10px] text-[var(--dim)] mt-1">Плюс/минус для аддитивных, множитель для xN</div>
               </div>
 
               {/* Phase */}
@@ -444,7 +444,7 @@ export function ModifiersEditor({ onRefresh }: ModifiersEditorProps) {
                     </option>
                   ))}
                 </select>
-                <div className="text-[10px] text-slate-600 mt-1">В какой фазе боя действует эффект</div>
+                <div className="text-[10px] text-[var(--dim)] mt-1">В какой фазе боя действует эффект</div>
               </div>
 
               {/* Apply To targets */}
@@ -464,10 +464,10 @@ export function ModifiersEditor({ onRefresh }: ModifiersEditorProps) {
                               : [...form.applyTo, opt.value],
                           });
                         }}
-                        className={`px-2.5 py-1 rounded-md text-xs font-medium border transition-all ${
+                        className={`px-2.5 py-1 rounded-md text-xs font-medium border transition-all font-ui ${
                           selected
-                            ? 'bg-emerald-600/20 border-emerald-600/40 text-emerald-400'
-                            : 'bg-slate-800 border-slate-700 text-slate-500 hover:text-slate-300 hover:border-slate-600'
+                            ? 'bg-[var(--green)]/20 border-[var(--green)]/40 text-[var(--green)]'
+                            : 'ed-panel2 border-[var(--border2)] text-[var(--muted)] hover:text-[var(--bone)] hover:border-[var(--border2)]'
                         }`}
                       >
                         {opt.label}
@@ -475,7 +475,7 @@ export function ModifiersEditor({ onRefresh }: ModifiersEditorProps) {
                     );
                   })}
                 </div>
-                <div className="text-[10px] text-slate-600 mt-1">К каким типам юнитов можно применить модификатор</div>
+                <div className="text-[10px] text-[var(--dim)] mt-1">К каким типам юнитов можно применить модификатор</div>
               </div>
 
               {/* Icon */}
@@ -507,13 +507,13 @@ export function ModifiersEditor({ onRefresh }: ModifiersEditorProps) {
                       value={form.icon}
                       onChange={e => updateForm({ icon: e.target.value })}
                     />
-                    <div className="shrink-0 w-8 h-8 rounded-md flex items-center justify-center bg-slate-700">
+                    <div className="shrink-0 w-8 h-8 rounded-md flex items-center justify-center bg-[var(--panel3)]">
                       <ModifierIcon name={form.icon} size={20} />
                     </div>
                   </div>
                 )}
                 {form.icon && !form.icon.startsWith('http') && (
-                  <div className="mt-2 flex items-center justify-center w-8 h-8 rounded-md bg-slate-700">
+                  <div className="mt-2 flex items-center justify-center w-8 h-8 rounded-md bg-[var(--panel3)]">
                     <ModifierIcon name={form.icon} size={20} />
                   </div>
                 )}
@@ -522,22 +522,22 @@ export function ModifiersEditor({ onRefresh }: ModifiersEditorProps) {
               {/* One-time use (buffs only) */}
               {isBuffTab && (
                 <div className="flex flex-col gap-1">
-                  <label className="flex items-center gap-2 cursor-pointer text-sm text-slate-300">
+                  <label className="flex items-center gap-2 cursor-pointer text-sm text-[var(--bone)] font-ui">
                     <input
                       type="checkbox"
                       checked={form.oneTimeUse}
                       onChange={e => updateForm({ oneTimeUse: e.target.checked })}
-                      className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-0"
+                      className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-[var(--green)] focus:ring-[var(--green)] focus:ring-offset-0"
                     />
                     Одноразовый
                   </label>
-                  <div className="text-[10px] text-slate-600">Истощается после первого использования за бой</div>
+                  <div className="text-[10px] text-[var(--dim)]">Истощается после первого использования за бой</div>
                 </div>
               )}
 
               {/* Temporary effect (for battle use) */}
               <div className="flex flex-col gap-1">
-                <label className="flex items-center gap-2 cursor-pointer text-sm text-slate-300">
+                <label className="flex items-center gap-2 cursor-pointer text-sm text-[var(--bone)] font-ui">
                   <input
                     type="checkbox"
                     checked={form.isTemporary}
@@ -552,14 +552,14 @@ export function ModifiersEditor({ onRefresh }: ModifiersEditorProps) {
                   />
                   Временный эффект (для применения в бою)
                 </label>
-                <div className="text-[10px] text-slate-600">Действует N ходов, затем автоматически снимается</div>
+                <div className="text-[10px] text-[var(--dim)]">Действует N ходов, затем автоматически снимается</div>
 
                 {/* Duration dropdown (shown when isTemporary is true) */}
                 {form.isTemporary && (
                   <select
                     value={form.duration || 1}
                     onChange={e => updateForm({ duration: Number(e.target.value) as ModifierDuration })}
-                    className="ml-6 px-2 py-1 rounded text-sm bg-slate-800 border border-slate-600 text-slate-200 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    className="ml-6 px-2 py-1 rounded text-sm ed-panel2 border border-[var(--border2)] text-[var(--bone)] focus:outline-none focus:ring-1 focus:ring-amber-500 font-ui"
                   >
                     {DURATION_OPTIONS.map(opt => (
                       <option key={opt.value} value={opt.value}>
@@ -575,16 +575,16 @@ export function ModifiersEditor({ onRefresh }: ModifiersEditorProps) {
             <div className="flex items-center justify-end gap-2 mt-4">
               <button
                 onClick={handleCancelEdit}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium
-                           bg-slate-700 hover:bg-slate-600 text-slate-300 transition-all"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium font-ui
+                           ed-panel2 hover:bg-[var(--panel3)] text-[var(--bone)] transition-all"
               >
                 <X className="w-3.5 h-3.5" />
                 Отмена
               </button>
               <button
                 onClick={handleSave}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium
-                           bg-emerald-600 hover:bg-emerald-500 text-white transition-all"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium font-ui
+                           bg-[var(--green)] hover:bg-[var(--green)]/80 text-white transition-all"
               >
                 <Save className="w-3.5 h-3.5" />
                 Сохранить
@@ -594,9 +594,9 @@ export function ModifiersEditor({ onRefresh }: ModifiersEditorProps) {
         )}
 
         {/* Items list */}
-        <div className="divide-y divide-slate-800/60">
+        <div className="divide-y divide-[var(--border)]">
           {items.length === 0 && !isCreating && (
-            <div className="p-8 text-center text-slate-500 text-sm">
+            <div className="p-8 text-center text-[var(--muted)] text-sm font-ui">
               Нет модификаторов. Нажмите &quot;Создать&quot; чтобы добавить.
             </div>
           )}
@@ -610,18 +610,18 @@ export function ModifiersEditor({ onRefresh }: ModifiersEditorProps) {
                 key={item.id}
                 className={`group flex items-start gap-3 px-4 py-3 transition-colors ${
                   isEditing
-                    ? 'bg-slate-800/90 border-l-2 border-emerald-500'
+                    ? 'bg-[var(--panel2)]/90 border-l-2 border-[var(--green)]'
                     : custom
-                      ? 'bg-slate-900/60 hover:bg-slate-800/50'
-                      : 'bg-slate-950/40'
+                      ? 'bg-[var(--panel)]/60 hover:bg-[var(--panel2)]/50'
+                      : 'bg-[var(--bg)]/40'
                 }`}
               >
                 {/* Icon */}
                 <div
                   className={`shrink-0 mt-0.5 w-8 h-8 rounded-lg flex items-center justify-center ${
                     isBuffTab
-                      ? 'bg-emerald-950/40 text-emerald-500'
-                      : 'bg-red-950/40 text-red-500'
+                      ? 'bg-[var(--green)]/14 text-[var(--green)]'
+                      : 'bg-[var(--red)]/14 text-[var(--red)]'
                   } ${!custom ? 'opacity-50' : ''}`}
                 >
                   <ModifierIcon
@@ -634,30 +634,30 @@ export function ModifiersEditor({ onRefresh }: ModifiersEditorProps) {
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-semibold text-sm text-slate-100">{item.name}</span>
+                    <span className="font-semibold text-sm text-[var(--bone)] font-ui">{item.name}</span>
                     {custom && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-950/50 border border-amber-600/30 text-amber-400 font-medium uppercase tracking-wider">
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-950/50 border border-amber-600/30 text-amber-400 font-medium uppercase tracking-wider font-ui">
                         МОЙ
                       </span>
                     )}
                     {'applyTo' in item && item.applyTo.map(t => (
                       <span
                         key={t}
-                        className="text-[10px] px-1.5 py-0.5 rounded-full font-medium bg-slate-800/80 border border-slate-600/30 text-slate-400"
+                        className="text-[10px] px-1.5 py-0.5 rounded-full font-medium ed-panel2 border border-[var(--border2)] text-[var(--muted)] font-ui"
                       >
                         {APPLY_TARGET_OPTIONS.find(o => o.value === t)?.label || t}
                       </span>
                     ))}
                   </div>
                   {item.description && (
-                    <div className="text-xs text-slate-500 mt-0.5 truncate">{item.description}</div>
+                    <div className="text-xs text-[var(--muted)] mt-0.5 truncate font-ui">{item.description}</div>
                   )}
                   <div className="flex items-center gap-3 mt-1">
-                    <span className="text-[11px] font-mono text-slate-500">
+                    <span className="text-[11px] font-stat text-[var(--muted)]">
                       {targetLabel(item.target, item.value)}
                     </span>
-                    <span className="text-slate-700 text-[11px]">/</span>
-                    <span className="text-[11px] text-slate-500">
+                    <span className="text-[var(--dim)] text-[11px]">/</span>
+                    <span className="text-[11px] text-[var(--muted)] font-ui">
                       {phaseLabel(item.phase)}
                     </span>
                   </div>
@@ -669,17 +669,17 @@ export function ModifiersEditor({ onRefresh }: ModifiersEditorProps) {
                     <>
                       <button
                         onClick={() => handleStartEdit(item)}
-                        className="p-1.5 rounded-md hover:bg-slate-700 transition-colors"
+                        className="p-1.5 rounded-md hover:bg-[var(--panel3)] transition-colors"
                         title="Редактировать"
                       >
-                        <Edit3 className="w-3.5 h-3.5 text-slate-400 hover:text-emerald-400" />
+                        <Edit3 className="w-3.5 h-3.5 text-[var(--muted)] hover:text-[var(--green)]" />
                       </button>
                       <button
                         onClick={() => handleDelete(item.id)}
-                        className="p-1.5 rounded-md hover:bg-red-950/50 transition-colors"
+                        className="p-1.5 rounded-md hover:bg-[var(--red)]/14 transition-colors"
                         title="Удалить"
                       >
-                        <Trash2 className="w-3.5 h-3.5 text-slate-400 hover:text-red-400" />
+                        <Trash2 className="w-3.5 h-3.5 text-[var(--muted)] hover:text-[var(--red)]" />
                       </button>
                     </>
                   ) : (
@@ -689,14 +689,14 @@ export function ModifiersEditor({ onRefresh }: ModifiersEditorProps) {
                         className="p-1.5 rounded-md opacity-30 cursor-not-allowed"
                         title="Стандартный модификатор — только чтение"
                       >
-                        <Edit3 className="w-3.5 h-3.5 text-slate-600" />
+                        <Edit3 className="w-3.5 h-3.5 text-[var(--dim)]" />
                       </button>
                       <button
                         disabled
                         className="p-1.5 rounded-md opacity-30 cursor-not-allowed"
                         title="Стандартный модификатор — только чтение"
                       >
-                        <Trash2 className="w-3.5 h-3.5 text-slate-600" />
+                        <Trash2 className="w-3.5 h-3.5 text-[var(--dim)]" />
                       </button>
                     </>
                   )}
