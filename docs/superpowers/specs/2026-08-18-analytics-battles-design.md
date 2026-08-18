@@ -66,7 +66,8 @@ trackEvent(name, params)   // GA: gtag('event', …) · YM: ym(id, 'reachGoal', 
 ### 3. SPA-просмотры — новый `src/components/RouteTracker.tsx`
 
 - `'use client'`; в корневом `layout.tsx` рядом с `GoogleAnalytics`/`YandexMetrica`.
-- `usePathname()`; на mount и каждое изменение пути → `trackPageView(pathname)`.
+- `usePathname()`; на каждое изменение пути → `trackPageView(pathname)` в обе системы.
+- **Первый (mount) просмотр**: в GA — шлём (у нас `send_page_view: false`, иначе первый просмотр потерян), в Метрике — **не шлём**: её init при загрузке страницы уже регистрирует визит сам, повторный `hit` дал бы двойной счёт лендинга.
 - ref-защита от повтора того же пути (StrictMode / двойной render).
 
 **Устранение двойного счёта в GA4:**
@@ -79,11 +80,11 @@ trackEvent(name, params)   // GA: gtag('event', …) · YM: ym(id, 'reachGoal', 
 
 | Событие | Точка | Параметры |
 |---|---|---|
-| `wizard_step` | клики confirm-кнопок визарда — якоря по testid: `rules-confirm-button` (`RulesSelector.tsx:300`), `source-confirm-button`, `faction-continue-button`, `budget-next-button`, `to-battle-button` | `step: rules\|source\|faction\|budget\|units\|preparation`, `faction`, `rules` |
+| `wizard_step` | клики confirm-кнопок визарда: `RulesSelector.tsx:300`, `SourceSelector.tsx:303`, `FactionSelector.tsx:198`, `PointBudgetInput.tsx:187`, `to-battle-button` — `UnitSelector.tsx:626` и `ArmySummaryView.tsx:146` | `step: rules\|source\|faction\|budget\|units\|preparation`, `faction`, `rules` |
 | `battle_start` | `ArmyBuilder.tsx:479` `onStartBattle` — фактический старт (после модалки инициативы, `currentStep: 'battle'`) | `faction`, `rules`, `units`, `cost` |
 | `battle_turn` | `GameSession.tsx:313` `confirmStartNewTurn` | `turn`, `faction` |
-| `battle_engaged` | там же, один раз при `turn === 2` | `faction` |
-| `editor_unit_saved` | запись кастомного юнита в источник (место записи `STORAGE_KEYS.CUSTOM_SOURCES` — точную функцию фиксирует план имплементации) | `kind: squad\|machine`, `sourceId` |
+| `battle_engaged` | там же, при `newTurn === 2` — срабатывает ровно один раз на бой без доп. флага: `currentTurn` монотонный, ход 2 наступает единожды | `faction` |
+| `editor_unit_saved` | действие «сохранить юнит» в редакторе; персистентный слой — `src/lib/editor/storage.ts:11` (`STORAGE_KEYS.CUSTOM_SOURCES`). Точную функцию-обработчик фиксирует план | `kind: squad\|machine`, `sourceId` |
 | `pwa_install` | слушатель `appinstalled` в `RouteTracker` | — |
 
 Счёт «реальных боёв» = `battle_engaged` (дошли до 2-го хода); все запуски = `battle_start`.
@@ -119,7 +120,7 @@ trackEvent(name, params)   // GA: gtag('event', …) · YM: ym(id, 'reachGoal', 
 
 ## Тестирование
 
-- **Jest** `src/__tests__/lib/analytics.test.ts`: буфер (постановка/флеш/кап 200 с вытеснением/офлайн-режим), fan-out в стабы `gtag`/`ym`, `battle_engaged` ровно один раз, отсутствие отправки без id.
+- **Jest** `src/__tests__/lib/analytics.test.ts`: буфер (постановка/флеш/кап 200 с вытеснением/офлайн-режим), fan-out в стабы `gtag`/`ym`, `battle_engaged` срабатывает на `newTurn=2` и не срабатывает на 1 и 3, отсутствие отправки без id.
 - **E2E** `e2e/analytics.spec.ts` (новый): `addInitScript` подменяет `gtag`/`ym` записывающими стабами; проверки: SPA-переход лендинг → `/app` даёт pageview; проход визарда до боя даёт `battle_start`; смена хода — `battle_turn` и (на 2-м ходу) `battle_engaged`. E2E — CI-only (см. CLAUDE.md).
 - **CLAUDE.md**: добавить `bronepehota_analytics_queue` в список ключей; конвенция «трекинг только через `analytics.ts`»; чек-лист ручных шагов GA4/Метрики.
 
