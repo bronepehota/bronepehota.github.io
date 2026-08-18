@@ -57,6 +57,8 @@ export function MachineCalculator({ params, onParamsChange, onApply }: Props) {
         <span className="ed-panel2 px-2 py-1">Броня <b className="text-[var(--ru2)]">{breakdown.armor}</b></span>
         {!isOrudie && <span className="ed-panel2 px-2 py-1">Скорость <b className="text-[var(--ru2)]">{breakdown.speed}</b></span>}
         <span className="ed-panel2 px-2 py-1">БК <b className="text-[var(--ru2)]">{breakdown.derived.ammo_max}</b></span>
+        <span className="ed-panel2 px-2 py-1" title="Константа моноблока — в стоимость не входит">Ранг <b className="text-[var(--muted)]">{breakdown.derived.rank}</b></span>
+        <span className="ed-panel2 px-2 py-1" title="Константа моноблока — в стоимость не входит">Скоростр. <b className="text-[var(--muted)]">{breakdown.derived.fire_rate}</b></span>
         {isOrudie && <span className="px-2 py-1 bg-orange-900/40 text-orange-300 rounded">⊕ орудие · неподвижно</span>}
         {breakdown.flyerPremium && <span className="px-2 py-1 bg-orange-900/40 text-orange-300 rounded">✈ полёт +40%</span>}
       </div>
