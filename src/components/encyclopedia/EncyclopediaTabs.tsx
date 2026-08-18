@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Shield, Target, Flag } from 'lucide-react';
+import { Shield, Target, Flag, ScrollText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface TabDef {
@@ -38,6 +38,14 @@ const TABS: TabDef[] = [
     label: 'Фракции',
     icon: Flag,
     isActive: (p) => p.startsWith('/encyclopedia/faction'),
+  },
+  {
+    id: 'history',
+    index: '04',
+    href: '/encyclopedia/history',
+    label: 'История',
+    icon: ScrollText,
+    isActive: (p) => p.startsWith('/encyclopedia/history'),
   },
 ];
 

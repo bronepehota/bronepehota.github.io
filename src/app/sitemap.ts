@@ -23,6 +23,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/encyclopedia', freq: 'weekly', priority: 0.9 },
     { path: '/encyclopedia/factions', freq: 'monthly', priority: 0.8 },
     { path: '/encyclopedia/missions', freq: 'monthly', priority: 0.8 },
+    { path: '/encyclopedia/history', freq: 'monthly', priority: 0.8 },
     { path: '/campaigns', freq: 'monthly', priority: 0.8 },
     { path: '/calculator', freq: 'monthly', priority: 0.6 },
   ];
