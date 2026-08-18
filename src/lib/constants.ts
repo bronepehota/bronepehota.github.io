@@ -29,6 +29,9 @@ export const BASE_PATH = parsedBasePath;
 // Yandex.Metrica counter id (numeric string). Optional — component no-ops without it.
 export const YANDEX_METRICA_ID = process.env.NEXT_PUBLIC_YANDEX_METRICA_ID;
 
+// Google Analytics 4 measurement id. Optional — component no-ops without it.
+export const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+
 export const LOCAL_STORAGE_KEYS = {
   ARMY: 'bronepehota_army',
   RULES_VERSION: 'bronepehota_rules_version',
@@ -45,6 +48,7 @@ export const LOCAL_STORAGE_KEYS = {
   EDITOR_SHOW_BASE_UNITS: 'bronepehota_editor_show_base_units',
   SETUP_STEP: 'bronepehota_setup_step',
   CUSTOM_MODIFIERS: 'bronepehota_custom_modifiers',
+  ANALYTICS_QUEUE: 'bronepehota_analytics_queue',
 } as const;
 
 export const DEFAULT_POINT_BUDGETS = [250, 350, 500, 1000];
