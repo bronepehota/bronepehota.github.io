@@ -21,9 +21,12 @@ test.beforeEach(async ({ page }) => {
         };
       },
     });
+    // Настоящий gtag делает dataLayer.push(arguments) — ОДИН аргумент-объект;
+    // разворачиваем его в плоский [cmd, id, opts], как читают ассерты.
     window.dataLayer = {
       push: (...args: unknown[]) => {
-        w.__gaLog.push(args);
+        const first = args[0] as ArrayLike<unknown> | null | undefined;
+        w.__gaLog.push(first && typeof first === 'object' && 'length' in first ? Array.from(first) : args);
         return 0;
       },
     } as unknown as unknown[];

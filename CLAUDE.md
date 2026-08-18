@@ -519,7 +519,8 @@ Static-export SEO generated at build time (`output: 'export'`):
 
 **Чек-лист после деплоя (руками, один раз)**: GA4 → Admin → Data streams → Enhanced measurement →
 выключить «Page views» (иначе дубли с RouteTracker); пометить `battle_start`/`battle_engaged`
-как Key events. Метрика → цели «JavaScript-событие» на `battle_start` и `battle_engaged`.
+как Key events. Затем Admin → Custom definitions: зарегистрировать event-scoped размеры для параметров `step`, `turn`, `faction`, `rules`, `pwa` — без этого параметры видны только в отладке, воронка в отчётах GA4 не собирается.
+Метрика → цели «JavaScript-событие» на `battle_start` и `battle_engaged`.
 Сверять события (не сессии): дельта GA ≤ Метрика для РФ — норма (блокировщики).
 
 **E2E**: `e2e/analytics.spec.ts` требует env- id `NEXT_PUBLIC_GA_MEASUREMENT_ID=G-TEST
