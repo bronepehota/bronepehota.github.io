@@ -17,6 +17,7 @@ import { getEncyclopediaFaction } from '@/lib/encyclopedia-registry';
 import { getAlliedFactions } from '@/lib/faction-allies';
 import { BattlePreparationScreen } from './preparation';
 import { LOCAL_STORAGE_KEYS } from '@/lib/constants';
+import { trackEvent } from '@/lib/analytics';
 import type { SourceID, FactionID } from '@/lib/types';
 
 interface ArmyBuilderProps {
@@ -253,6 +254,9 @@ export default function ArmyBuilder({
     setPendingBackStep(null);
   }, []);
 
+  const trackWizardStep = (step: string) =>
+    trackEvent('wizard_step', { step, faction: army.faction, rules: rulesVersion });
+
   // Validate currentStep - allow 'faction-select', 'unit-select', or 'preparation'
   const validStep = (army.currentStep === 'faction-select' || army.currentStep === 'unit-select' || army.currentStep === 'preparation')
     ? army.currentStep
@@ -294,7 +298,7 @@ export default function ArmyBuilder({
                 onStepToCmFactorChange={onStepToCmFactorChange}
                 autoCompleteEnabled={autoCompleteEnabled}
                 onAutoCompleteEnabledChange={onAutoCompleteEnabledChange}
-                onConfirm={() => setSetupStep('source')}
+                onConfirm={() => { trackWizardStep('rules'); setSetupStep('source'); }}
               />
             )}
 
@@ -304,7 +308,7 @@ export default function ArmyBuilder({
                 sources={getAllSourcesWithCustom()}
                 selectedSource={selectedSource}
                 onSourceChange={handleSourceChange}
-                onConfirm={() => setSetupStep('faction')}
+                onConfirm={() => { trackWizardStep('source'); setSetupStep('faction'); }}
               />
             )}
 
@@ -314,7 +318,7 @@ export default function ArmyBuilder({
                 factions={availableFactions}
                 selectedFaction={army.faction}
                 onFactionSelect={(factionId) => setArmy({ ...army, faction: factionId })}
-                onNext={() => setSetupStep('mission')}
+                onNext={() => { trackWizardStep('faction'); setSetupStep('mission'); }}
                 _nextDisabled={!army.faction}
               />
             )}
@@ -325,6 +329,7 @@ export default function ArmyBuilder({
                 selectedMissionId={army.missionId ?? null}
                 onSelect={(missionId) => setArmy({ ...army, missionId })}
                 onConfirm={() => {
+                  trackWizardStep('mission');
                   const missionId = army.missionId;
                   const faction = army.faction;
                   if (!isFreePlay(missionId) && missionId && faction) {
@@ -358,6 +363,7 @@ export default function ArmyBuilder({
                 value={army.pointBudget}
                 onChange={(budget) => setArmy({ ...army, pointBudget: budget })}
                 onNext={() => {
+                  trackWizardStep('budget');
                   setArmy({ ...army, currentStep: 'unit-select' });
                   setSetupStep('units');
                 }}
@@ -452,6 +458,7 @@ export default function ArmyBuilder({
               });
             }}
             onToBattle={() => {
+              trackWizardStep('preparation');
               setArmy({
                 ...army,
                 isInBattle: true,
@@ -477,6 +484,12 @@ export default function ArmyBuilder({
               army={army}
               setArmy={setArmy}
               onStartBattle={() => {
+                trackEvent('battle_start', {
+                  faction: army.faction,
+                  rules: rulesVersion,
+                  units: army.units.length,
+                  cost: army.totalCost,
+                });
                 setArmy({
                   ...army,
                   isInBattle: true,
