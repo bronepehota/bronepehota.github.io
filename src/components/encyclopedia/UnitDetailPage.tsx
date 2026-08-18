@@ -15,6 +15,7 @@ import { UnitLore } from './UnitDetail/UnitLore';
 import { UnitSpecs } from './UnitDetail/UnitSpecs';
 import { UnitArmament } from './UnitDetail/UnitArmament';
 import { UnitLoreDetail } from './UnitDetail/UnitLoreDetail';
+import { DesignationChip } from './UnitDetail/DesignationChip';
 import type { UnitLoreDoc } from '@/lib/unit-lore';
 import { SourceAvailability } from './SourceAvailability';
 import { PainterChip, ProvenanceRow, ImageSourceChip, MiniatureChip, SponsorChip, ALTERNATIVE_VERSION_HINT } from './AttributionLabel';
@@ -305,6 +306,11 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc }:
                       )}
                     </div>
                   )}
+
+                  {/* Машинный индекс по системе обозначений справочника («БМР-1Г»). */}
+                  <div className="mb-3 md:mb-4">
+                    <DesignationChip unit={unit} />
+                  </div>
 
                   {/* Attribution: ONE metadata strip (shared header + chips in a single
                       flex-wrap row), mirroring the ProvenanceRow idiom. Painted squads
