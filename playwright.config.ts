@@ -38,7 +38,9 @@ export default defineConfig({
   // On CI: server is started by the workflow, just reuse it
   // Locally: start dev server automatically
   webServer: {
-    command: process.env.CI ? 'echo "Server already started by CI workflow"' : 'npm run dev:e2e',
+    command: process.env.CI
+      ? 'echo "Server already started by CI workflow"'
+      : 'NEXT_PUBLIC_GA_MEASUREMENT_ID=G-TEST NEXT_PUBLIC_YANDEX_METRICA_ID=111302711 npm run dev:e2e',
     url: 'http://localhost:3001',
     reuseExistingServer: true, // Always reuse existing server
     timeout: 60 * 1000,

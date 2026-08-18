@@ -71,7 +71,7 @@ const serwist = new Serwist({
     },
     {
       matcher: ({ url }: { url: URL }) => {
-        const excludedHosts = ['accounts.google.com', 'www.googleapis.com', 'content.googleapis.com'];
+        const excludedHosts = ['accounts.google.com', 'www.googleapis.com', 'content.googleapis.com', 'mc.yandex.ru', 'www.googletagmanager.com', 'www.google-analytics.com'];
         if (excludedHosts.includes(url.hostname)) return false;
         return /^https?/i.test(url.href);
       },

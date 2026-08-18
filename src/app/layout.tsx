@@ -4,6 +4,7 @@ import { Russo_One, IBM_Plex_Mono, Oswald } from 'next/font/google'
 import './globals.css'
 import { SerwistRegister } from '@/components/SerwistRegister'
 import NavigationProgress from '@/components/NavigationProgress'
+import RouteTracker from '@/components/RouteTracker'
 import { BASE_PATH, SITE_URL } from '@/lib/constants'
 import { absoluteUrl } from '@/lib/seo'
 import GoogleAnalytics from '@/components/GoogleAnalytics'
@@ -139,6 +140,7 @@ export default function RootLayout({
         <YandexMetrica />
         <SerwistRegister />
         <NavigationProgress />
+        <RouteTracker />
         {children}
       </body>
     </html>

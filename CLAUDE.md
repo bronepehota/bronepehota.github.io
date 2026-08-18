@@ -78,7 +78,9 @@ npm run test:e2e            # All E2E tests pass
 
 `npm run validate` runs type-check + lint + unit tests but does NOT run E2E — run E2E separately.
 
-**LSP diagnostics can be stale**: type errors shown mid-edit often resolve in the final state. Trust `npm run type-check` (exit code) over LSP diagnostics.
+**LSP diagnostics can be stale**: type errors shown mid-edit often resolve in the final state. Trust `npm run type-check` (exit code) over LSP diagnostics. **`e2e/*.ts` в LSP показывают ложные ошибки** (анализ в изоляции: глобальные аугментации `Window` из `src/` вне проектной компиляции не видны; `npx tsc <file>` файловым режимом врёт) — верить только `npm run type-check`.
+
+**Jest-гоча с моками**: `jest.doMock` внутри `jest.isolateModules` проигрывает hoisted `jest.mock` вверху файла — переопределение моков на файл делается ОТДЕЛЬНЫМ тест-файлом со своим статическим `jest.mock` (пример: `src/__tests__/lib/analytics-no-ids.test.ts`).
 
 **Local `next build` + heavy e2e are flaky in this env** — intermittently killed (empty log, exit 1) or fail on `Cannot find module for page: /_document` (Next 14 App Router intermittency). Trust `npm run type-check` + `npm run test` (fast, reliable) over local builds; CI is the source of truth. Next is 14.2.35 (latest 14.x — no newer patch; 14→16 is a separate major upgrade). **E2E is CI-only** — Playwright's `webServer` spawns `next dev` (non-terminating), which the harness kills → e2e exits 1 with an empty log; don't try to run it locally. The Bash tool's default `timeout` is 120s — set it higher (up to `600000`) for long foreground ops (multi-figure renders, etc.).
 
@@ -106,6 +108,7 @@ npm run test:e2e            # All E2E tests pass
 
 | Area | Spec file | Tests |
 |------|-----------|-------|
+| Analytics | `analytics.spec.ts` | 4 |
 | Aimed shot | `aimed-shot.spec.ts` | 7 |
 | Army creation | `army-creation.spec.ts` | 5 |
 | Battle buffs | `battle-buffs.spec.ts` | 11 |
@@ -246,6 +249,7 @@ Both `.md` files are machine-converted from their PDFs; the PDF is authoritative
 - `bronepehota_setup_step` - Current setup wizard step
 - `bronepehota_editor_show_base_units` - Editor base unit visibility toggle
 - `bronepehota_weapon_selections` - Weapon selector modal selections
+- `bronepehota_analytics_queue` - Offline buffer for analytics events (battles at tables with poor connectivity); flushed on load/online
 
 The main app page (`src/app/app/page.tsx`) manages the `Army` state and passes it down to child components.
 
@@ -504,6 +508,28 @@ Static-export SEO generated at build time (`output: 'export'`):
 - **basePath & metadata**: Next does NOT auto-prefix `metadata.icons`/`manifest` with basePath — `BASE_PATH` is applied manually. `metadataBase` = `SITE_URL` (incl. basePath) is safe; icons stay single-prefixed.
 - **Root-served (resolved)**: the site lives at a domain/account root, so `robots.txt` + `sitemap.xml` land at the domain root → crawlers auto-discover them. (The old `*.github.io/bronepehota` subpath had a crawler auto-discovery problem — now moot since the move to `bronepehota.github.io`.)
 
+### Аналитика (GA4 + Яндекс.Метрика)
+
+**Один фасад — `src/lib/analytics.ts`.** Никаких прямых `window.gtag`/`window.ym` вне него:
+`trackPageView(path)` (SPA-переход, обе системы), `trackInitialPageView(path)` (первая загрузка,
+только GA — визит Метрики шлёт её init), `trackEvent(name, params)` (обе системы).
+Офлайн-буфер `bronepehota_analytics_queue` (кап 200, at-most-once флеш), метка `pwa` подмешивается
+автоматически. `RouteTracker` в root layout шлёт просмотры при смене маршрута + `pwa_install`.
+
+**События**: `wizard_step` (6 шагов), `battle_start`, `battle_turn` (turn), `battle_engaged`
+(ход 2 = «реальный бой»), `editor_unit_saved`, `pwa_install`. Спека+таксономия:
+`docs/superpowers/specs/2026-08-18-analytics-battles-design.md`.
+
+**Чек-лист после деплоя (руками, один раз)**: GA4 → Admin → Data streams → Enhanced measurement →
+выключить «Page views» (иначе дубли с RouteTracker); пометить `battle_start`/`battle_engaged`
+как Key events. Затем Admin → Custom definitions: зарегистрировать event-scoped размеры для параметров `step`, `turn`, `faction`, `rules`, `pwa` — без этого параметры видны только в отладке, воронка в отчётах GA4 не собирается.
+Метрика → цели «JavaScript-событие» на `battle_start` и `battle_engaged`.
+Сверять события (не сессии): дельта GA ≤ Метрика для РФ — норма (блокировщики).
+
+**E2E**: `e2e/analytics.spec.ts` требует env- id `NEXT_PUBLIC_GA_MEASUREMENT_ID=G-TEST
+NEXT_PUBLIC_YANDEX_METRICA_ID=111302711` (прописаны в playwright.config webServer + test.yml);
+перехват через `__ymLog`/`__gaLog` в `addInitScript`.
+
 ### Testing
 
 See **Testing Workflow** section above for full testing conventions. Key commands:
@@ -526,7 +552,9 @@ Use `data-testid` selectors: `rules-confirm-button`, `source-confirm-button`, `f
 
 **Yandex Disk Cyrillic subfolders**: the listing API (`/v1/disk/public/resources?path=Индейцы`) returns 0 items for Cyrillic-named subfolders, but the download API with an explicit path (`/download?path=/Индейцы/1.png`) works. Don't trust the listing — try downloading by pattern (`/1.png`…`/6.png`) directly.
 
-**Always branch for imports** — even "quick" single-squad imports go through `feat/<branch>` → PR → merge. Never commit directly to `main`.
+**Always branch for imports** — even "quick" single-squad imports go through `feat/<branch>` → PR → merge. Never commit directly to `main`. Локальный `main` часто отстаёт от `origin/main` — перед созданием ветки делай `git fetch origin main` и базируйся от `origin/main`.
+
+**git push** падает даже при авторизованном gh — использовать `git -c credential.helper='!gh auth git-credential' push …`.
 
 ## Active Technologies
 
