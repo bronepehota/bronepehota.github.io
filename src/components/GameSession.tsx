@@ -9,6 +9,7 @@ import { getSourceWithCustom } from '@/lib/sources-registry';
 import { getMission, isFreePlay } from '@/lib/missions-registry';
 import { SoldierEffectsModal } from './modals/SoldierEffectsModal';
 import { getFactionColors } from '@/lib/faction-colors';
+import { trackEvent } from '@/lib/analytics';
 import UnitCard from './cards/UnitCard';
 import { History, X, Bomb, Heart, Shield, Footprints, CheckCircle2, MoreVertical, BookOpen, RotateCcw, MessageCircle, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -315,6 +316,11 @@ export default function GameSession({
     clearAllMemory();
 
     const newTurn = (army.currentTurn || 1) + 1;
+
+    trackEvent('battle_turn', { turn: newTurn, faction: army.faction });
+    if (newTurn === 2) {
+      trackEvent('battle_engaged', { faction: army.faction });
+    }
 
     // Create army with new turn value first
     const armyWithNewTurn = {

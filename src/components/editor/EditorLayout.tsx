@@ -12,6 +12,7 @@ import { getCustomSourcesStorage } from '@/lib/editor/storage';
 import { generateSourceId, generateFactionId, generateUnitId } from '@/lib/editor/id-generator';
 import { getSource } from '@/lib/sources-registry';
 import { getEncyclopediaFaction } from '@/lib/encyclopedia-registry';
+import { diffCustomSourceUnits, trackEvent, type UnitLike } from '@/lib/analytics';
 import { SourcesList } from './SourcesList';
 import { FactionsList } from './FactionsList';
 import { UnitsList } from './UnitsList';
@@ -196,7 +197,16 @@ export function EditorLayout() {
 
   const handleUpdateSource = (updated: CustomSource) => {
     const storage = getCustomSourcesStorage();
+    const prev = storage.getById(updated.id);
     storage.save(updated);
+    if (prev) {
+      diffCustomSourceUnits(
+        { squads: prev.squads as unknown as UnitLike[], machines: prev.machines as unknown as UnitLike[] },
+        { squads: updated.squads as unknown as UnitLike[], machines: updated.machines as unknown as UnitLike[] }
+      ).forEach((u) =>
+        trackEvent('editor_unit_saved', { kind: u.kind, sourceId: updated.id })
+      );
+    }
     setSources(storage.getAll());
   };
 
