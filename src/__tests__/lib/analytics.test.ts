@@ -69,22 +69,6 @@ describe('trackEvent — fan-out в обе системы', () => {
     trackEvent('pwa_install');
     expect(window.gtag).toHaveBeenCalledWith('event', 'pwa_install', { pwa: true });
   });
-
-  test.skip('без id счётчиков ничего не отправляет и не буферизует — TODO: fix jest.isolateModules mocking', () => {
-    jest.clearAllMocks();
-    jest.isolateModules(() => {
-      stubTransports();
-      jest.doMock('@/lib/constants', () => {
-        const actual = jest.requireActual('@/lib/constants');
-        return { ...actual, GA_MEASUREMENT_ID: undefined, YANDEX_METRICA_ID: undefined };
-      });
-      const mod = require('@/lib/analytics');
-      mod.trackEvent('x');
-    });
-    expect(window.gtag).not.toHaveBeenCalled();
-    expect(window.ym).not.toHaveBeenCalled();
-    expect(localStorage.getItem(QUEUE_KEY)).toBeNull();
-  });
 });
 
 describe('офлайн-буфер', () => {
