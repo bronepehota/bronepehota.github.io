@@ -80,7 +80,7 @@ trackEvent(name, params)   // GA: gtag('event', …) · YM: ym(id, 'reachGoal', 
 
 | Событие | Точка | Параметры |
 |---|---|---|
-| `wizard_step` | клики confirm-кнопок визарда: `RulesSelector.tsx:300`, `SourceSelector.tsx:303`, `FactionSelector.tsx:198`, `PointBudgetInput.tsx:187`, `to-battle-button` — `UnitSelector.tsx:626` и `ArmySummaryView.tsx:146` | `step: rules\|source\|faction\|budget\|units\|preparation`, `faction`, `rules` |
+| `wizard_step` | обработчики всех переходов визарда централизованы в `ArmyBuilder.tsx` (уточнение при планировании): rules→`297`, source→`307`, faction→`317`, mission→`327`, budget→`360-362`, units→preparation (`onToBattle`)→`454`. Между faction и budget есть шаг `mission` — добавлен к enum. Кнопки-якоря: `RulesSelector.tsx:300`, `SourceSelector.tsx:303`, `FactionSelector.tsx:198`, `PointBudgetInput.tsx:187`, `UnitSelector.tsx:626`/`ArmySummaryView.tsx:146` | `step: rules\|source\|faction\|mission\|budget\|units\|preparation`, `faction`, `rules` |
 | `battle_start` | `ArmyBuilder.tsx:479` `onStartBattle` — фактический старт (после модалки инициативы, `currentStep: 'battle'`) | `faction`, `rules`, `units`, `cost` |
 | `battle_turn` | `GameSession.tsx:313` `confirmStartNewTurn` | `turn`, `faction` |
 | `battle_engaged` | там же, при `newTurn === 2` — срабатывает ровно один раз на бой без доп. флага: `currentTurn` монотонный, ход 2 наступает единожды | `faction` |
