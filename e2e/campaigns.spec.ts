@@ -43,4 +43,16 @@ test.describe('Хроники войн', () => {
 
     await expect(page.getByRole('heading', { name: 'Операция «Скрытый враг»' })).toBeVisible();
   });
+
+  test('в Хрониках видна «Имперские войны»', async ({ page }) => {
+    await page.goto('/campaigns');
+    await page.waitForLoadState('networkidle');
+
+    const card = page.locator('[data-testid="campaign-card"]', { hasText: 'Имперские войны' }).first();
+    await expect(card).toBeVisible();
+    await card.click();
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.getByRole('heading', { name: 'Имперские войны' })).toBeVisible();
+  });
 });

@@ -58,4 +58,18 @@ describe('campaigns loader', () => {
     expect(sv.units?.some((u) => u.id === 'protectorate_olgerd')).toBe(true);
     expect(sv.units?.some((u) => u.id === 'protectorate_regulyary_planety_velian')).toBe(true);
   });
+
+  it('включает кампанию «Имперские войны» — самая ранняя эра, order 4', () => {
+    const all = getAllCampaigns();
+    const c = all.find((x) => x.slug === 'imperatorskie-voyny');
+    expect(c).toBeDefined();
+    expect(c?.order).toBe(4);
+    expect(c?.factions).toContain('polaris');
+    // Newest era first: korporativnye (1), skrytyj (2), shturm-velyana (3) — this one is 4th.
+    expect(all[3]?.slug).toBe('imperatorskie-voyny');
+    // Roster carries the war's signature machines.
+    expect(c?.units?.some((u) => u.id === 'raptor')).toBe(true);
+    expect(c?.units?.some((u) => u.id === 'bronekhod')).toBe(true);
+    expect(c?.units?.some((u) => u.id === 'mercenaries_kosari')).toBe(true);
+  });
 });
