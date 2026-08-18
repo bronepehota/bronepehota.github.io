@@ -64,7 +64,7 @@ jobs:
       - name: Start dev server in background with logging
         run: |
           mkdir -p logs
-          nohup npm run dev:e2e > logs/server.log 2>&1 &
+          NEXT_PUBLIC_GA_MEASUREMENT_ID=G-TEST NEXT_PUBLIC_YANDEX_METRICA_ID=111302711 nohup npm run dev:e2e > logs/server.log 2>&1 &
           echo $! > logs/server.pid
           echo "Server started with PID: $(cat logs/server.pid)"
 
