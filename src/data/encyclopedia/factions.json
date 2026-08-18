@@ -10,7 +10,11 @@
     "allies": ["*"],
     "sources": [
       "star_system"
-    ]
+    ],
+    "provenance": {
+      "loreAuthor": "tehnolog",
+      "credit": { "author": "Chertischev", "work": "Косары" }
+    }
   },
   {
     "id": "polaris",
