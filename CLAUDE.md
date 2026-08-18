@@ -246,6 +246,7 @@ Both `.md` files are machine-converted from their PDFs; the PDF is authoritative
 - `bronepehota_setup_step` - Current setup wizard step
 - `bronepehota_editor_show_base_units` - Editor base unit visibility toggle
 - `bronepehota_weapon_selections` - Weapon selector modal selections
+- `bronepehota_analytics_queue` - Offline buffer for analytics events (battles at tables with poor connectivity); flushed on load/online
 
 The main app page (`src/app/app/page.tsx`) manages the `Army` state and passes it down to child components.
 
@@ -503,6 +504,27 @@ Static-export SEO generated at build time (`output: 'export'`):
 - **OG image** — `public/og-image.png` is a 1200×630 Playwright screenshot of the landing hero. Regenerate from repo root (dev server on :3000): `node tools/regen-og-image.mjs && python3 tools/regen-og-crop.py`. (Run from repo root — Node ESM resolves `node_modules` relative to the script file, not cwd.)
 - **basePath & metadata**: Next does NOT auto-prefix `metadata.icons`/`manifest` with basePath — `BASE_PATH` is applied manually. `metadataBase` = `SITE_URL` (incl. basePath) is safe; icons stay single-prefixed.
 - **Root-served (resolved)**: the site lives at a domain/account root, so `robots.txt` + `sitemap.xml` land at the domain root → crawlers auto-discover them. (The old `*.github.io/bronepehota` subpath had a crawler auto-discovery problem — now moot since the move to `bronepehota.github.io`.)
+
+### Аналитика (GA4 + Яндекс.Метрика)
+
+**Один фасад — `src/lib/analytics.ts`.** Никаких прямых `window.gtag`/`window.ym` вне него:
+`trackPageView(path)` (SPA-переход, обе системы), `trackInitialPageView(path)` (первая загрузка,
+только GA — визит Метрики шлёт её init), `trackEvent(name, params)` (обе системы).
+Офлайн-буфер `bronepehota_analytics_queue` (кап 200, at-most-once флеш), метка `pwa` подмешивается
+автоматически. `RouteTracker` в root layout шлёт просмотры при смене маршрута + `pwa_install`.
+
+**События**: `wizard_step` (6 шагов), `battle_start`, `battle_turn` (turn), `battle_engaged`
+(ход 2 = «реальный бой»), `editor_unit_saved`, `pwa_install`. Спека+таксономия:
+`docs/superpowers/specs/2026-08-18-analytics-battles-design.md`.
+
+**Чек-лист после деплоя (руками, один раз)**: GA4 → Admin → Data streams → Enhanced measurement →
+выключить «Page views» (иначе дубли с RouteTracker); пометить `battle_start`/`battle_engaged`
+как Key events. Метрика → цели «JavaScript-событие» на `battle_start` и `battle_engaged`.
+Сверять события (не сессии): дельта GA ≤ Метрика для РФ — норма (блокировщики).
+
+**E2E**: `e2e/analytics.spec.ts` требует env- id `NEXT_PUBLIC_GA_MEASUREMENT_ID=G-TEST
+NEXT_PUBLIC_YANDEX_METRICA_ID=111302711` (прописаны в playwright.config webServer + test.yml);
+перехват через `__ymLog`/`__gaLog` в `addInitScript`.
 
 ### Testing
 
