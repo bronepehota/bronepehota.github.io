@@ -257,4 +257,12 @@ test.describe('Энциклопедия', () => {
     // официальный отряд → единый чип Технолога, ссылается на tehnolog.ru
     await expect(row.locator('a[href*="tehnolog.ru"]')).toBeVisible();
   });
+
+  test('карточка машины показывает вооружение из справочника', async ({ page }) => {
+    await page.goto('/encyclopedia/unit/griffin');
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.getByTestId('unit-armament')).toBeVisible();
+    await expect(page.getByTestId('armament-entry').first()).toContainText('Световой меч');
+  });
 });
