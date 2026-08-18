@@ -1,7 +1,7 @@
 'use client';
 
 import Script from 'next/script';
-import { GA_MEASUREMENT_ID } from '@/lib/analytics';
+import { GA_MEASUREMENT_ID } from '@/lib/constants';
 
 export default function GoogleAnalytics() {
   if (!GA_MEASUREMENT_ID) return null;
@@ -17,7 +17,7 @@ export default function GoogleAnalytics() {
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
-          gtag('config', '${GA_MEASUREMENT_ID}', { send_page_view: true });
+          gtag('config', '${GA_MEASUREMENT_ID}', { send_page_view: false });
         `}
       </Script>
     </>
