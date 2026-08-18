@@ -31,6 +31,18 @@ export interface UnitSource {
   id: string;
 }
 
+/** Позиция вооружения из официального «Справочника техники» (лор-ТТХ, не игровые статы). */
+export interface ArmamentEntry {
+  /** Русское название + код модели, напр. «Лазерная пушка «Световой меч» (LG-25)». */
+  name: string;
+  /** «30 мм», «5,6 мм» — как в справочнике, строкой. */
+  caliber?: string;
+  /** Дальность/особенность эффектом — строкой, если указана. */
+  range?: string;
+  /** Производитель, монтаж, эффект — кратко. */
+  notes?: string;
+}
+
 export interface EncyclopediaLore {
   class?: string;
   type?: string;
@@ -46,6 +58,10 @@ export interface EncyclopediaLore {
   mass?: string;
   crew?: string;
   shortDescription?: string;
+  /** Машинный индекс по системе обозначений справочника: «БМР-1Г», «УМ-2Ш», «УМ6-2». */
+  designation?: string;
+  /** Таблица вооружений из «Справочника техники». */
+  armament?: ArmamentEntry[];
   [key: string]: any;
 }
 

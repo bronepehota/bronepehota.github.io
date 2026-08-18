@@ -13,6 +13,7 @@ import { SQUAD_GROUP_IMAGE, getPhotoCredit, getCredit } from '@/lib/painted-imag
 import { resolveUnitProvenance } from '@/lib/provenance';
 import { UnitLore } from './UnitDetail/UnitLore';
 import { UnitSpecs } from './UnitDetail/UnitSpecs';
+import { UnitArmament } from './UnitDetail/UnitArmament';
 import { UnitLoreDetail } from './UnitDetail/UnitLoreDetail';
 import type { UnitLoreDoc } from '@/lib/unit-lore';
 import { SourceAvailability } from './SourceAvailability';
@@ -424,6 +425,10 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc }:
             {/* Характеристики — spec plate (ТТХ): physical specs (mass, crew, моноблок,
                 разработчик). Constants of the machine, so base `unit` (not source-switched). */}
             <UnitSpecs unit={unit} />
+
+            {/* Вооружение — weapon manifest from the Справочник техники.
+                Constants of the machine, so base `unit` (not source-switched). */}
+            <UnitArmament unit={unit} />
 
             {/* Боевой расчёт — full stat table, follows the active source */}
             <UnitStatTable unit={activeUnit as unknown as Squad | Machine} type={unit.type} />
