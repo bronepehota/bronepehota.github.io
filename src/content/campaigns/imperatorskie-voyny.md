@@ -2,7 +2,7 @@
 slug: imperatorskie-voyny
 title: Имперские войны
 subtitle: Вторжение 4451 года и рождение Империи Полярис
-era: "4451–4460-е"
+era: "4451–4528"
 factions: [polaris, protectorate, mercenaries]
 order: 4
 units:
