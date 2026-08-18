@@ -121,7 +121,7 @@ export function flushAnalyticsQueue(): void {
   queue.forEach(deliver);
 }
 
-type UnitLike = { id: string } & Record<string, unknown>;
+export type UnitLike = { id: string } & Record<string, unknown>;
 
 /**
  * Diff юнитов кастомного источника до/после сохранения —
