@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
+import type { LoreCredit, LoreSource } from './provenance';
 import { renderMarkdownToSanitizedHtml } from './campaigns';
 
 export interface HistoryChapterMeta {
@@ -8,6 +9,11 @@ export interface HistoryChapterMeta {
   title: string;
   era?: string;
   order?: number;
+  /** Org-level author of the chapter text (frontmatter): «Летопись» chapters are
+   *  tehnolog; chapter VIII (from «Косары») is star_system → carries the АВБ mark. */
+  loreAuthor?: LoreSource;
+  /** Named citation — the specific book the chapter was adapted from (frontmatter). */
+  credit?: LoreCredit;
 }
 
 export interface HistoryChapter extends HistoryChapterMeta {

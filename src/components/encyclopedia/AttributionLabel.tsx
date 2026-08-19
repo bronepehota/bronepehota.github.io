@@ -241,11 +241,46 @@ export function AlternativeVersionBadge({ compact }: AlternativeVersionBadgeProp
  *  org-source tone: the citation credits a human author/work, not a faction source. */
 const LORE_CREDIT_TONE = '#c2924a';
 
+/** Mini АВБ mark for the named-author credit chip — icon-only sibling of the full
+ *  <AlternativeVersionBadge>. Flags that the *book* the lore was adapted from is a
+ *  non-Технолог work (a Chertischev novel etc.) WITHOUT claiming the whole entity
+ *  is alternative: official units keep their Технолог origin and get only this mark
+ *  on the source. Carries the same disclaimer tooltip as the full badge. */
+export function CreditAvbMark({ compact }: { compact?: boolean }) {
+  return (
+    <span
+      title={ALTERNATIVE_VERSION_HINT}
+      aria-label="АВБ"
+      data-testid="credit-avb-mark"
+      className={cn(
+        'inline-flex items-center justify-center rounded-sm border border-emerald-500/40 bg-emerald-500/10',
+        compact ? 'w-[18px] h-[18px]' : 'w-5 h-5',
+      )}
+    >
+      <GitHubPagesImage
+        src="/images/credits/avb.svg"
+        alt=""
+        width={compact ? 12 : 14}
+        height={compact ? 12 : 14}
+        className="rounded-[2px]"
+      />
+    </span>
+  );
+}
+
+interface LoreCreditChipOptions {
+  /** Org-level author of the adapted text — a non-tehnolog source adds the mini АВБ mark. */
+  loreAuthor?: LoreSource;
+  compact?: boolean;
+}
+
 /** Renders a `LoreCredit` (a named author + work the lore was adapted from) as a
  *  dossier chip, visually unified with the org-source chips but flagged by a BookOpen
  *  icon. Orthogonal to the origin/loreAuthor chips — e.g. «Технолог» canon adapted
- *  from Chertischev's «Битва за Велиан» shows both the org badge and this citation. */
-function loreCreditChip(credit: LoreCredit, compact?: boolean) {
+ *  from Chertischev's «Битва за Велиан» shows both the org badge and this citation.
+ *  When the book itself is non-Технолог (`loreAuthor ≠ tehnolog`), the chip carries
+ *  the mini АВБ mark right next to it. */
+function loreCreditChip(credit: LoreCredit, { loreAuthor, compact }: LoreCreditChipOptions = {}) {
   const name = credit.author ?? credit.work ?? 'Источник лора';
   // When the author is named, the work + year go to the role sub-label
   // («Chertischev · Битва за Велиан, 2022»); with no author, the work is the name.
@@ -255,7 +290,7 @@ function loreCreditChip(credit: LoreCredit, compact?: boolean) {
       ? String(credit.year)
       : undefined;
   return (
-    <span data-testid="lore-credit-chip">
+    <span data-testid="lore-credit-chip" className="inline-flex items-center gap-1">
       <SourceChip
         name={name}
         role={role || undefined}
@@ -264,6 +299,7 @@ function loreCreditChip(credit: LoreCredit, compact?: boolean) {
         url={credit.url}
         compact={compact}
       />
+      {loreAuthor && loreAuthor !== 'tehnolog' && <CreditAvbMark compact={compact} />}
     </span>
   );
 }
@@ -334,14 +370,68 @@ export function ProvenanceRow({
       )}
       {chips}
       {/* Named-author citation (a specific book/novel the lore was adapted from) —
-          shown on top of the org chips when `provenance.credit` is set. */}
-      {provenance.credit && loreCreditChip(provenance.credit, compact)}
+          shown on top of the org chips when `provenance.credit` is set. A non-Технолог
+          book additionally flags itself with the mini АВБ mark (`loreAuthor` axis). */}
+      {provenance.credit && loreCreditChip(provenance.credit, { loreAuthor: provenance.loreAuthor, compact })}
       {/* АВБ badge — added on top of NAMED community sources (Star System, Звёздные Системы…).
           Skipped when the source is already 'avb' (its chip already reads «АВБ» → no double mark). */}
       {isAlternativeVersion(provenance) && provenance.origin !== 'avb' && (
         <AlternativeVersionBadge compact={compact} />
       )}
       {withContribute && <ContributeButton compact={compact} />}
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Standalone lore-source row — campaigns / history chapters                  */
+/* -------------------------------------------------------------------------- */
+
+interface LoreSourceRowProps {
+  /** Org-level author of the text (frontmatter of the .md). Absent = tehnolog. */
+  loreAuthor?: LoreSource;
+  /** Named citation — the specific book/novel the text retells. */
+  credit?: LoreCredit;
+  /** Show the `// ИСТОЧНИК` section header. Default true. */
+  withHeader?: boolean;
+  /** Compact sizing for dense surfaces. */
+  compact?: boolean;
+  /** Extra className for the wrapper. */
+  className?: string;
+}
+
+/** Compact «// ИСТОЧНИК» row for Markdown-backed content (campaigns of the
+ *  «Хроники войн», chapters of the «История вселенной»). Same dossier idiom as
+ *  <ProvenanceRow>, but for pages that have no unit-style origin axis: the row
+ *  shows either the named-author chip (a novel the text retells — with the mini
+ *  АВБ mark when the book is non-Технолог) or an org chip («Издание «Технолог»»
+ *  for the official chronicle). Renders nothing without any attribution — content
+ *  with no established source must not show an invented one. */
+export function LoreSourceRow({ loreAuthor, credit, withHeader = true, compact, className }: LoreSourceRowProps) {
+  if (!loreAuthor && !credit) return null;
+  const author: LoreSource = loreAuthor ?? 'tehnolog';
+  const meta = LORE_SOURCE_META[author];
+  return (
+    <div data-testid="lore-source-row" className={cn('flex flex-wrap items-center gap-2', className)}>
+      {withHeader && (
+        <span className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider">
+          {'// ИСТОЧНИК'}
+        </span>
+      )}
+      {credit ? (
+        loreCreditChip(credit, { loreAuthor: author, compact })
+      ) : (
+        <>
+          <SourceChip
+            name={author === 'tehnolog' ? 'Издание «Технолог»' : meta.short}
+            icon={meta.icon}
+            tone={meta.tone}
+            url={meta.url}
+            compact={compact}
+          />
+          {author !== 'tehnolog' && <CreditAvbMark compact={compact} />}
+        </>
+      )}
     </div>
   );
 }

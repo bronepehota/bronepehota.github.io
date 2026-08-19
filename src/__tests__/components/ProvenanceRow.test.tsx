@@ -62,3 +62,31 @@ describe('ProvenanceRow — named-author credit chip', () => {
     expect(screen.getByTestId('lore-credit-chip')).toBeInTheDocument();
   });
 });
+
+describe('ProvenanceRow — мини-АВБ-марка на кредит-чипе (не-Технолог книга)', () => {
+  const kosari = { author: 'Chertischev', work: 'Косары' };
+
+  it('loreAuthor ≠ tehnolog → credit chip carries the mini АВБ mark', () => {
+    // Official unit, community-written novel lore: entity stays non-АВБ, the source flags it.
+    renderRow({ origin: 'tehnolog', loreAuthor: 'star_system', credit: kosari });
+    expect(screen.getByTestId('credit-avb-mark')).toBeInTheDocument();
+    // No entity-level badge — the mark on the source is the only АВБ signal.
+    expect(screen.queryByTestId('avb-badge')).toBeNull();
+  });
+
+  it('loreAuthor = tehnolog (Справочник/Летопись) → no mark on the credit chip', () => {
+    renderRow({ origin: 'tehnolog', loreAuthor: 'tehnolog', credit: { author: 'X', work: 'Справочник техники' } });
+    expect(screen.queryByTestId('credit-avb-mark')).toBeNull();
+  });
+
+  it('no credit → no mark, even when the lore author is a community', () => {
+    renderRow({ origin: 'tehnolog', loreAuthor: 'star_system' });
+    expect(screen.queryByTestId('credit-avb-mark')).toBeNull();
+    expect(screen.queryByTestId('lore-credit-chip')).toBeNull();
+  });
+
+  it('avb-authored credit still carries the mark (loreAuthor avb ≠ tehnolog)', () => {
+    renderRow({ origin: 'avb', loreAuthor: 'avb', credit: { work: 'Фан-лор' } });
+    expect(screen.getByTestId('credit-avb-mark')).toBeInTheDocument();
+  });
+});

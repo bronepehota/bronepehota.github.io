@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
+import type { LoreCredit, LoreSource } from './provenance';
 
 export interface CampaignUnit {
   id: string;
@@ -21,6 +22,11 @@ export interface CampaignMeta {
   units?: CampaignUnit[];
   missions?: CampaignMission[];
   order?: number;
+  /** Org-level author of the campaign text (frontmatter). A non-tehnolog source
+   *  (a Chertischev novel) flags the credit chip with the mini АВБ mark. */
+  loreAuthor?: LoreSource;
+  /** Named citation — the specific novel the campaign retells (frontmatter). */
+  credit?: LoreCredit;
 }
 
 export interface Campaign extends CampaignMeta {
