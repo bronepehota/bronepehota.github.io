@@ -15,43 +15,118 @@
   произведения (роман/книга). Ставится на сущность через
   `provenance: { credit: {...} }`.
 - Где живёт лор: фракции → `src/data/encyclopedia/factions.json`; кампании →
-  `src/content/campaigns/*.md`; машины/отряды →
-  `src/data/encyclopedia/units/<faction>/{machines,squads}.json` (объект
-  `encyclopedia`: `lore/history/tactics/class/type/manufacturer/monoblock/mass/crew/…`,
-  последние рендерятся карточкой `<UnitSpecs>`).
+  `src/content/campaigns/*.md`; главы истории → `src/content/history/*.md`;
+  машины/отряды → `src/data/encyclopedia/units/<faction>/{machines,squads}.json`
+  (объект `encyclopedia`: `lore/history/tactics/class/type/manufacturer/monoblock/
+  mass/crew/armament/designation/…`, последние рендерятся карточками
+  `<UnitSpecs>`/`<UnitArmament>`).
+
+## Политика атрибуции (решение пользователя, 2026-08-19)
+
+Два независимых признака, не путать:
+
+- **Полный АВБ-бейдж сущности** — от `provenance.origin` (чей концепт юнита).
+  Концепт не от «Технолога» ⇒ бейдж «альтернативная версия».
+- **Мини-АВБ-марка на кредит-чипе** — от `loreAuthor ≠ tehnolog` (кто написал
+  текст). Отражается на всех поверхностях: кредит-чипы кампаний и глав истории
+  несут мини-марку, если источник не «Технолог».
+
+Классификация источников:
+
+| Источник | Тип | loreAuthor | АВБ |
+|---|---|---|---|
+| «Справочник техники» (64 стр., безымянный) | официальный «Технолог» | `tehnolog` | нет |
+| «Летопись: Звёздные герои» (65 стр., автор не установлен) | официальный «Технолог» | `tehnolog` | нет |
+| «Битва за Велиан» (2022, 131 стр.) и др. книги В. Чернецова | независимый автор | `avb` | мини-марка на кредит-чипе |
+
+**В. Чернецов** (подпись в книгах V.Chertischev) — независимый автор, НЕ
+организация Star System и не «Технолог». Все его книги несут
+`loreAuthor: "avb"` + `credit: {author: "В. Чернецов", work: …}`. Ранние записи
+этого реестра со `star_system`/`tehnolog` у книг Чернецова устарели.
+Закреплено тестом `src/__tests__/lib/lore-credits-avb.test.ts`.
 
 ## Обработанные источники
 
-### 1. Роман «Битва за Велиан» — Chertischev, 2022
-- **Тип**: художественный роман. **Канон**: официальный (вселенная Star System /
-  Робогир, «Технолог»). **Файл**: `~/Documents/pict/Bitva_za_Velian.pdf` (131 стр.).
-- **Кредит**: `credit → {author:"Chertischev", work:"Битва за Велиан", year:2022}`
-  (`loreAuthor:"star_system"` — роман не «Технолог»: кредит-чип несёт мини-АВБ-марку;
-  классификация источников — решение пользователя 2026-08-19, см.
-  `src/__tests__/lib/lore-credits-avb.test.ts`).
+### 1. Роман «Битва за Велиан» — В. Чернецов, 2022
+- **Тип**: художественный роман. **Канон**: вселенная Star System / Робогир.
+  **Файл**: `~/Documents/pict/Bitva_za_Velian.pdf` (131 стр.).
+- **Кредит**: `credit → {author:"В. Чернецов", work:"Битва за Велиан", year:2022}`
+  (`loreAuthor:"avb"` — независимый автор, не «Технолог»: кредит-чип несёт
+  мини-АВБ-марку).
 - **Куда перенесено**:
   - Фракции: обогащены `description` у `protectorate` и `polaris`.
-  - Кампания: `src/content/campaigns/shturm-velyana.md` («Штурм Велиана»).
+  - Кампания: `src/content/campaigns/shturm-velyana.md` («Штурм Велиана»,
+    order 3) — строка источника с кредитом + мини-АВБ на странице кампании.
   - Машины: `history` у `predator`, `salamander`, `raptor` (+ `credit`).
-- **Статус**: ✅ готово (коммит `5e7feaf`). Сюжет — своя адаптация, не дословно
-  (текст романа защищён авторским правом).
+- **Статус**: ✅ (коммит `5e7feaf` + дофиксы). Сюжет — своя адаптация,
+  не дословно (текст романа защищён авторским правом).
 
 ### 2. Справочник техники «Робогир» — официальный, ~2020-е
 - **Тип**: справочник ТТХ бронетехники. **Канон**: официальный «Технолог».
   **Файл**: `~/Documents/pict/Spravochnik_tekhniki_robogir.pdf` (64 стр.).
 - **Кредит**: без `credit` (org-level `tehnolog/tehnolog` уже покрывает; автор не
   указан). Извлечённый текст: `pdftotext -raw` + декод CP1251→UTF-8.
-- **Куда переносится**:
+- **Куда перенесено**:
   - ТТХ: `manufacturer/monoblock/mass/crew/type` (рендерятся `<UnitSpecs>`).
+  - Таблицы вооружений: `armament` — **23 машины, 61 позиция** (Протекторат 11,
+    Полярис 12; рендерятся `<UnitArmament>`); индексы `designation` БМР/УМ
+    (18 машин); прозвища моноблоков в `monoblock` (18; РМ-1 «Осьминог»,
+    УМ-1 «Сундук», УМ-2 «Жук», РМ-2 «Зверь»).
   - Названия вооружений + лор разработки → `lore`/`history`.
-- **Инструмент**: `tools/handbook_extract.py` (pdfplumber + декод CP1251; `--json`).
-- **Статус**: ✅ обе фракции, все машины из справочника (Протекторат: griffin,
-  predator, carnivore, hurricane, trex, tornado, octopus; Полярис: wildbear,
-  spider, locust, raptor, devastator, superlocust, eraser, helix, thunder).
-  salamander/varan — без заметного нового оружия, оставлены как есть.
-  hornet/hunter/madbull/ravingbeast/demolisher/t_600 в этом справочнике отсутствуют.
+- **Инструменты**: `tools/handbook_extract.py` (pdfplumber + декод CP1251;
+  `--json`), `tools/handbook_armament.py` (таблицы вооружений/индексы/прозвища).
+- **Покрытие**: обе фракции, все машины справочника — включая
+  demolisher/madbull/ravingbeast/salamander/varan/bronekhod/werewolf.
+  В энциклопедии без справочника остались только `hornet`, `hunter`, `t_600`
+  (в справочнике отсутствуют) и `condor`/`puma`/`viper` (есть в справочнике,
+  но без оружейных блоков).
+- **Статус**: ✅ основная выгрузка + дополнение armament/designation/прозвища.
+
+### 3. «Имперские войны» — В. Чернецов
+- **Тип**: повесть-хроника. **Файл**:
+  `~/Documents/BP/Khroniki_Imperskikh_Voyn_v2_1-3.pdf` (62 стр.).
+- **Кредит**: `credit → {author:"В. Чернецов", work:"Имперские войны"}`
+  (`loreAuthor:"avb"`).
+- **Куда перенесено**: кампания `src/content/campaigns/imperatorskie-voyny.md`
+  (order 4, эра 4451–4528; строка источника + мини-АВБ на странице);
+  `description` фракций `polaris`/`protectorate`.
+- **Статус**: ✅ Пересказ, не дословно.
+
+### 4. «Косары» — В. Чернецов
+- **Тип**: книга о наёмниках. **Файл**: `~/Documents/BP/Kosary.pdf` (24 стр.).
+- **Кредит**: `credit → {author:"В. Чернецов", work:"Косары"}`
+  (`loreAuthor:"avb"`).
+- **Куда перенесено**: `description` фракции `mercenaries` (Зал Наёмников);
+  лор 4 отрядов (`kosari`, `piraty_markusa_novye`, `piraty_markusa_starye`,
+  `reydery_pylnoy_zony`); глава «Экипировка пехоты Доминиона» → глава 8
+  Истории (`src/content/history/ekipirovka-pehoty-dominiona.md`, источник с
+  мини-АВБ).
+- **Статус**: ✅
+
+### 5. «Штурмовики Протектората» — В. Чернецов (V.Chertischev)
+- **Тип**: книга об армейских структурах. **Файл**:
+  `~/Documents/BP/Shturmoviki_Protektorata.pdf` (19 стр.).
+- **Кредит**: `credit → {author:"В. Чернецов", work:"Штурмовики Протектората"}`
+  (`loreAuthor:"avb"`).
+- **Куда перенесено**: лор 5 штурмовых отрядов протектората; `description`
+  фракции `protectorate` (структура ВКС).
+- **Статус**: ✅
+
+### 6. «Летопись: Звёздные герои» — официальное издание
+- **Тип**: официальная хроника вселенной. **Файл**:
+  `~/Documents/BP/LETOPIS_-_ZVEZDNYE_GEROI.pdf` (65 стр., автор не установлен).
+- **Кредит**: главы 1–7 истории несут `credit → {work:"Летопись: Звёздные
+  герои"}` **без автора**; `loreAuthor:"tehnolog"` (без АВБ).
+- **Куда перенесено**: главы 1–7 «Истории вселенной» (`/encyclopedia/history`,
+  лоадер `src/lib/history.ts`, контент `src/content/history/*.md`).
+- **Статус**: ✅ Именной кредит не ставился (автор не установлен).
 
 ## Очередь (необработанное)
+
+- Именованные отряды из «Косарей» без отдельных юнитов (Снежные Волки, Чёрный
+  отряд Сфорцы и др.) — кандидаты на будущие итерации.
+- Биографии «выдающихся личностей» — вне скоупа (см. спеку
+  `docs/superpowers/specs/2026-08-18-encyclopedia-lore-expansion-design.md`).
 - _Прочие книги/альманахи вселенной — добавлять сюда по мере поступления._
 
 ## Как добавить следующий источник (шпаргалка)
@@ -60,4 +135,7 @@
 2. Вычленить фракции/машины/персонажей; сверить ID с энциклопедией (`getEncyclopediaUnit`).
 3. Разложить: фракции → `factions.json`; роман-сюжет → `campaigns/*.md`; ТТХ+лор →
    `units/<faction>/{machines,squads}.json`. Именного автора — в `provenance.credit`.
-4. Коммит в `feat/encyclopedia-novel-lore`; отметить статус здесь.
+4. Определить классификацию (официальный «Технолог» vs независимый автор) —
+   см. «Политику атрибуции» выше; закрепить в
+   `src/__tests__/lib/lore-credits-avb.test.ts`.
+5. Коммит в `feat/encyclopedia-novel-lore`; отметить статус здесь.
