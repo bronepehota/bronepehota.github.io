@@ -9,21 +9,28 @@ import { getEncyclopediaFaction } from '@/lib/encyclopedia-registry';
 import { cn } from '@/lib/utils';
 import { ModifierIcon } from '@/components/editor/ModifierIcons';
 import { SoldierImages } from './UnitDetail/SoldierImages';
-import { MachineImages } from './UnitDetail/MachineImages';
 import { SQUAD_GROUP_IMAGE, getPhotoCredit, getCredit } from '@/lib/painted-images';
 import { resolveUnitProvenance } from '@/lib/provenance';
 import { UnitLore } from './UnitDetail/UnitLore';
+import { UnitSpecs } from './UnitDetail/UnitSpecs';
+import { UnitArmament } from './UnitDetail/UnitArmament';
+import { UnitLoreDetail } from './UnitDetail/UnitLoreDetail';
+import { DesignationChip } from './UnitDetail/DesignationChip';
+import type { UnitLoreDoc } from '@/lib/unit-lore';
 import { SourceAvailability } from './SourceAvailability';
 import { PainterChip, ProvenanceRow, ImageSourceChip, MiniatureChip, SponsorChip, ALTERNATIVE_VERSION_HINT } from './AttributionLabel';
 import { FactionLogo } from '@/components/FactionLogo';
 import { getFactionColors, factionLogos, factionDisplayNames } from '@/lib/faction-colors';
 import { UnitStatTable } from './UnitDetail/UnitStatTable';
+import { UnitSectionNav } from './UnitDetail/UnitSectionNav';
 import type { Squad, Machine } from '@/lib/types';
 
 interface UnitDetailPageProps {
   unit: EnrichedUnit;
   bySource: Record<string, EnrichedUnit>;
   sourceOrder: string[];
+  /** Optional long-form lore doc (rendered by <UnitLoreDetail>). Null when absent. */
+  loreDoc?: UnitLoreDoc | null;
 }
 
 const factionIcons: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -46,7 +53,7 @@ const factionBadges: Record<string, string> = {
 // e.g. «Мёртвый Флот») — NOT a local copy that goes stale when factions are
 // added. `factionDisplayNames` is the short-name fallback.
 
-export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDetailPageProps) {
+export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc }: UnitDetailPageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [activeSource, setActiveSource] = useState<string>(sourceOrder[0] ?? unit.sources[0]?.id ?? '');
   const activeUnit = bySource[activeSource] ?? unit;
@@ -301,6 +308,13 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
                     </div>
                   )}
 
+                  {/* Машинный индекс по системе обозначений справочника («БМР-1Г»). */}
+                  {unit.encyclopedia?.designation && (
+                    <div className="mb-3 md:mb-4">
+                      <DesignationChip unit={unit} />
+                    </div>
+                  )}
+
                   {/* Attribution: ONE metadata strip (shared header + chips in a single
                       flex-wrap row), mirroring the ProvenanceRow idiom. Painted squads
                       with a separate painter + sculptor previously stacked two
@@ -407,8 +421,9 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
             )}
 
             {/* Common army-list switcher — always shows the source list (a single
-                pill for one-source units; clickable pills when 2+). Controls BOTH
-                the personnel and the combat stats below it. */}
+                pill for one-source units; clickable pills when 2+). Controls the
+                combat stats and personnel below. Grouped with the characteristics so
+                switching is adjacent to what it changes. */}
             <SourceAvailability
               unit={unit}
               variant="detail"
@@ -416,15 +431,27 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
               onSourceChange={unit.sources.length > 1 ? setActiveSource : undefined}
             />
 
-            {/* Личный состав — personnel portraits, follows the active source */}
-            <SoldierImages unit={activeUnit} />
+            {/* Anchor chips — jump to the sections below (only the ones that
+                render for THIS unit; mirrors each section's null-condition). */}
+            <UnitSectionNav unit={unit} activeUnit={activeUnit} hasLoreDoc={!!loreDoc} />
+
+            {/* Характеристики — spec plate (ТТХ): physical specs (mass, crew, моноблок,
+                разработчик). Constants of the machine, so base `unit` (not source-switched). */}
+            <UnitSpecs unit={unit} />
+
+            {/* Вооружение — weapon manifest from the Справочник техники.
+                Constants of the machine, so base `unit` (not source-switched). */}
+            <UnitArmament unit={unit} />
 
             {/* Боевой расчёт — full stat table, follows the active source */}
             <UnitStatTable unit={activeUnit as unknown as Squad | Machine} type={unit.type} />
 
+            {/* Личный состав — personnel portraits, follows the active source */}
+            <SoldierImages unit={activeUnit} />
+
             {/* Tactics */}
             {activeUnit.encyclopedia?.tactics && (
-              <section className="folded-paper military-corners p-6">
+              <section id="tactics" className="folded-paper military-corners p-6 scroll-mt-4">
                 <h2 className="font-oswald text-lg text-military-sand mb-3 flex items-center gap-2">
                   <Target className="w-5 h-5 text-military-rust" /> Тактика применения
                 </h2>
@@ -436,6 +463,9 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
 
             {/* Lore, Traditions, Battles, Locations sections */}
             <UnitLore unit={unit} />
+
+            {/* Long-form lore («Читать подробнее») — only when a .md doc exists for this unit. */}
+            {loreDoc && <UnitLoreDetail doc={loreDoc} />}
 
             {/* Buffs section */}
             {unit.buffs && unit.buffs.length > 0 && (
@@ -476,17 +506,6 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder }: UnitDeta
                 </div>
               </section>
             )}
-
-            {/* Machine Images section */}
-            <section
-              className={cn(
-                'fade-in-up opacity-0',
-                isLoaded && 'opacity-100'
-              )}
-              style={{ animationFillMode: 'forwards', animationDelay: '0.85s' }}
-            >
-              <MachineImages unit={unit} />
-            </section>
           </div>
         </main>
 

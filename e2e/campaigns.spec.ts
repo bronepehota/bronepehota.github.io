@@ -6,12 +6,15 @@ test.describe('Хроники войн', () => {
     await clearStorage(page);
   });
 
-  test('список кампаний открывается и ведёт на страницу кампании', async ({ page }) => {
-    await page.goto('/campaigns');
+  test('секция «Хроники войн» на странице истории ведёт на страницу кампании', async ({ page }) => {
+    await page.goto('/encyclopedia/history');
     await page.waitForLoadState('networkidle');
 
+    // Wars section is the closing block of the history page
     await expect(page.getByTestId('campaigns-title')).toHaveText('ХРОНИКИ ВОЙН');
-    const card = page.getByTestId('campaign-card').first();
+    const card = page
+      .locator('[data-testid="campaign-card"]', { hasText: 'Корпоративные войны' })
+      .first();
     await expect(card).toBeVisible();
     await card.click();
     await page.waitForLoadState('networkidle');
@@ -24,16 +27,25 @@ test.describe('Хроники войн', () => {
     await expect(page.getByText('Миссии')).toBeVisible();
   });
 
-  test('футер лендинга ведёт в Хроники', async ({ page }) => {
+  test('старый адрес /campaigns редиректит на историю вселенной', async ({ page }) => {
+    await page.goto('/campaigns');
+    await page.waitForLoadState('networkidle');
+
+    // Meta-refresh redirect (static export) lands on the history page
+    await expect(page).toHaveURL(/\/encyclopedia\/history/);
+    await expect(page.getByTestId('campaigns-title')).toBeVisible();
+  });
+
+  test('футер лендинга ведёт в Хроники (секция истории)', async ({ page }) => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
     await page.getByTestId('campaigns-link').click();
     await page.waitForLoadState('networkidle');
-    await expect(page).toHaveURL(/\/campaigns$/);
+    await expect(page).toHaveURL(/\/encyclopedia\/history$/);
   });
 
   test('в Хрониках видна операция «Скрытый враг»', async ({ page }) => {
-    await page.goto('/campaigns');
+    await page.goto('/encyclopedia/history');
     await page.waitForLoadState('networkidle');
 
     const card = page.locator('[data-testid="campaign-card"]', { hasText: 'Скрытый враг' }).first();
@@ -42,5 +54,37 @@ test.describe('Хроники войн', () => {
     await page.waitForLoadState('networkidle');
 
     await expect(page.getByRole('heading', { name: 'Операция «Скрытый враг»' })).toBeVisible();
+  });
+
+  test('в Хрониках видна «Имперские войны»', async ({ page }) => {
+    await page.goto('/encyclopedia/history');
+    await page.waitForLoadState('networkidle');
+
+    const card = page.locator('[data-testid="campaign-card"]', { hasText: 'Имперские войны' }).first();
+    await expect(card).toBeVisible();
+    await card.click();
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.getByRole('heading', { name: 'Имперские войны' })).toBeVisible();
+  });
+
+  test('«Имперские войны» — виден источник (роман V.Chertischev) с АВБ-маркой', async ({ page }) => {
+    await page.goto('/encyclopedia/history');
+    await page.waitForLoadState('networkidle');
+
+    const card = page.locator('[data-testid="campaign-card"]', { hasText: 'Имперские войны' }).first();
+    await card.click();
+    // Client-side <Link> navigation: networkidle resolves instantly on SPA
+    // transitions — wait for the URL state instead, or lore-source-row would
+    // multi-match the still-mounted history chapters (strict mode violation).
+    await expect(page).toHaveURL(/\/campaigns\/imperatorskie-voyny/);
+    await page.waitForLoadState('networkidle');
+
+    const source = page.getByTestId('lore-source-row');
+    await expect(source).toBeVisible();
+    await expect(source).toContainText('V.Chertischev');
+    await expect(source).toContainText('Имперские войны');
+    // The novel is non-Технолог → its credit chip carries the mini АВБ mark.
+    await expect(page.getByTestId('credit-avb-mark')).toBeVisible();
   });
 });

@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { Metadata } from 'next';
 import { getAllCampaigns, getCampaign } from '@/lib/campaigns';
+import { LoreSourceRow } from '@/components/encyclopedia/LoreSourceRow';
 import { BASE_PATH } from '@/lib/constants';
 
 const CHRONICLE_BG = `${BASE_PATH}/images/campaigns/chronicle-bg.jpg`;
@@ -19,6 +21,19 @@ const factionOf = (id: string) => id.split('_')[0];
 
 export function generateStaticParams() {
   return getAllCampaigns().map((c) => ({ slug: c.slug }));
+}
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const campaign = await getCampaign(params.slug);
+  if (!campaign) return { title: 'Кампания не найдена — Бронепехота' };
+  const description = campaign.subtitle
+    || `Хроника войны: ${campaign.title}${campaign.era ? ` (${campaign.era})` : ''}`;
+  return {
+    title: `${campaign.title} — Хроники войн | Бронепехота`,
+    description,
+    alternates: { canonical: `/campaigns/${campaign.slug}` },
+    openGraph: { title: campaign.title, description },
+  };
 }
 
 export default async function CampaignDetailPage({
@@ -52,7 +67,7 @@ export default async function CampaignDetailPage({
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-military-rust/60 to-transparent animate-pulse" />
           <div className="relative z-10 max-w-3xl mx-auto">
             <Link
-              href="/campaigns"
+              href="/encyclopedia/history#wars"
               className="fade-in-up inline-flex items-center gap-2 font-ibm-mono text-xs md:text-sm text-military-rust/60 hover:text-military-amber transition-colors tracking-widest uppercase mb-6"
               style={{ animationDelay: '0.1s', animationFillMode: 'both' }}
             >
@@ -101,6 +116,19 @@ export default async function CampaignDetailPage({
             dangerouslySetInnerHTML={{ __html: campaign.bodyHtml }}
           />
         </section>
+
+        {/* Source attribution — the novel / official edition the chronicle retells.
+            Rendered only when the frontmatter carries one (no invented sources). */}
+        {(campaign.loreAuthor || campaign.credit) && (
+          <section className="px-4 pb-8">
+            <div
+              className="fade-in-up max-w-3xl mx-auto"
+              style={{ animationDelay: '0.35s', animationFillMode: 'both' }}
+            >
+              <LoreSourceRow loreAuthor={campaign.loreAuthor} credit={campaign.credit} />
+            </div>
+          </section>
+        )}
 
         {/* Participants — link out to encyclopedia unit pages */}
         {campaign.units && campaign.units.length > 0 && (

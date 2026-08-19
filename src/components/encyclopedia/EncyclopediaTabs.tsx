@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Shield, Target, Flag } from 'lucide-react';
+import { Shield, Target, Flag, ScrollText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface TabDef {
@@ -39,21 +39,36 @@ const TABS: TabDef[] = [
     icon: Flag,
     isActive: (p) => p.startsWith('/encyclopedia/faction'),
   },
+  {
+    id: 'history',
+    index: '04',
+    href: '/encyclopedia/history',
+    label: 'История',
+    icon: ScrollText,
+    isActive: (p) => p.startsWith('/encyclopedia/history'),
+  },
 ];
 
 /**
  * Encyclopedia mode selector — a prominent tactical segmented switch between
- * Units / Missions / Factions. Rendered in the header of every encyclopedia
- * list page so the three sections are equally discoverable.
+ * Units / Missions / Factions / History. Rendered in the header of every
+ * encyclopedia list page so the four sections are equally discoverable.
+ *
+ * `dense` trims the segment padding for the sticky console on /encyclopedia,
+ * where the bar shares the screen with search + filters while scrolling.
  */
-export function EncyclopediaTabs({ className }: { className?: string }) {
+export function EncyclopediaTabs({ className, dense = false }: { className?: string; dense?: boolean }) {
   const pathname = usePathname();
 
   return (
     <div className={cn('flex justify-center', className)}>
       <div
         className={cn(
-          'relative inline-flex items-stretch w-full max-w-md',
+          // md: (≥768px) cell min-content grows to ~600px (icons + index + px-4 +
+          // text-sm) — cap the bar at 2xl (672px) so the 4th segment is never
+          // clipped by the container's overflow-hidden. Below md the 448px cap
+          // keeps the mobile fit (icons hidden <400px) intact.
+          'relative inline-flex items-stretch w-full max-w-md md:max-w-2xl',
           'rounded-xl overflow-hidden',
           'border border-military-steel/40 bg-military-charcoal/70 backdrop-blur-md',
           'shadow-[0_8px_30px_-12px_rgba(0,0,0,0.8)]',
@@ -82,7 +97,7 @@ export function EncyclopediaTabs({ className }: { className?: string }) {
               data-testid={`encyclopedia-tab-${tab.id}`}
               className={cn(
                 'group relative flex-1 flex items-center justify-center gap-2',
-                'py-3 px-2 md:py-3.5 md:px-4',
+                dense ? 'py-2 px-2 md:py-2.5 md:px-4' : 'py-3 px-2 md:py-3.5 md:px-4',
                 'font-russo uppercase tracking-wider text-xs md:text-sm',
                 'transition-all duration-300',
                 active
@@ -113,8 +128,13 @@ export function EncyclopediaTabs({ className }: { className?: string }) {
                 >
                   {tab.index}
                 </span>
+                {/* Icon hidden below 400px: 4 segments don't fit with icons on
+                    narrow phones — labels take priority (scrollWidth check). */}
                 <Icon
-                  className={cn('w-4 h-4 md:w-5 md:h-5 transition-transform duration-300', active ? 'text-military-amber' : 'group-hover:scale-110')}
+                  className={cn(
+                    'hidden min-[400px]:block w-4 h-4 md:w-5 md:h-5 transition-transform duration-300',
+                    active ? 'text-military-amber' : 'group-hover:scale-110',
+                  )}
                   strokeWidth={active ? 2.4 : 2}
                 />
                 <span>{tab.label}</span>

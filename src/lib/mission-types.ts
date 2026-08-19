@@ -90,8 +90,11 @@ export interface Mission {
   /** Canonical source URL. */
   sourceUrl?: string;
   /** Lore provenance override (origin / loreAuthor). Unset axes default to Tehnolog
-   * for both — see `resolveMissionProvenance` in `@/lib/provenance`. */
-  provenance?: Partial<Provenance>;
+   * for both — see `resolveMissionProvenance` in `@/lib/provenance`.
+   *
+   * An EXPLICIT `null` means «source not established»: the mission page renders
+   * no attribution row at all (no invented «Технолог» default). */
+  provenance?: Partial<Provenance> | null;
 }
 
 /** A campaign groups missions that share a universe / intro paragraph. */

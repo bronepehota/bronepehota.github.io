@@ -19,7 +19,7 @@ interface EncyclopediaModalProps {
   unit: EnrichedUnit;
   isOpen: boolean;
   onClose: () => void;
-  scrollTarget?: 'soldier-images' | 'machine-images';
+  scrollTarget?: 'personnel' | 'machine-images';
 }
 
 const factionIcons: Record<string, React.ComponentType<{ className?: string }>> = {

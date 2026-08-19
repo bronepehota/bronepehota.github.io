@@ -35,6 +35,9 @@ export default function MissionDetailPage({ mission, campaign }: MissionDetailPa
   useEffect(() => setIsLoaded(true), []);
 
   const factionEntries = Object.entries(mission.objectives) as [FactionID, Mission['objectives'][string]][];
+  // Explicit `provenance: null` = «source not established» → NO source row at all
+  // (never invent a «Технолог» default — same honesty rule as source-less campaigns).
+  const provenance = resolveMissionProvenance(mission);
 
   return (
     <div className="min-h-screen bg-military-dark relative overflow-hidden">
@@ -124,13 +127,13 @@ export default function MissionDetailPage({ mission, campaign }: MissionDetailPa
                 )}
               </div>
 
-              {/* Provenance — official scenario source (links to sourceUrl when available). */}
-              <div className="mt-4">
-                <ProvenanceRow
-                  provenance={resolveMissionProvenance(mission)}
-                  linkUrl={mission.sourceUrl}
-                />
-              </div>
+              {/* Provenance — official scenario source (links to sourceUrl when available).
+                  Rendered only when attribution is established (`provenance: null` = no row). */}
+              {provenance && (
+                <div className="mt-4">
+                  <ProvenanceRow provenance={provenance} linkUrl={mission.sourceUrl} />
+                </div>
+              )}
 
               <div className="military-divider max-w-xs mt-4" />
             </div>

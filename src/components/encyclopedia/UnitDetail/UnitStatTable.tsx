@@ -39,7 +39,7 @@ function isSpecial(s: Soldier): boolean {
 
 function SquadStats({ squad }: { squad: Squad }) {
   return (
-    <section className="folded-paper military-corners p-3" data-testid="unit-stat-table" aria-label="Боевой расчёт">
+    <section id="stats" className="folded-paper military-corners p-3 scroll-mt-4" data-testid="unit-stat-table" aria-label="Боевой расчёт">
       <div className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider mb-2">
         {'// БОЕВОЙ РАСЧЁТ'}
       </div>
@@ -103,7 +103,7 @@ function MachineStats({ machine }: { machine: Machine }) {
     { label: 'Скорость', value: speeds, cls: STAT_TEXT.speed },
   ];
   return (
-    <section className="folded-paper military-corners p-3" data-testid="unit-stat-table" aria-label="Боевой расчёт">
+    <section id="stats" className="folded-paper military-corners p-3 scroll-mt-4" data-testid="unit-stat-table" aria-label="Боевой расчёт">
       <div className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider mb-2">
         {'// БОЕВОЙ РАСЧЁТ'}
       </div>

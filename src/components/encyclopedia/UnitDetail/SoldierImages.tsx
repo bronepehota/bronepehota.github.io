@@ -40,7 +40,7 @@ export function SoldierImages({ unit }: SoldierImagesProps) {
   }));
 
   return (
-    <section id="soldier-images" className="folded-paper military-corners p-6">
+    <section id="personnel" className="folded-paper military-corners p-6 scroll-mt-4">
       <div className="flex items-center gap-2 mb-6">
         <Users className="w-4 h-4 text-military-rust/60" />
         <span className="font-ibm-mono text-[10px] text-military-rust/60 uppercase tracking-wider">

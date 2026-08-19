@@ -20,7 +20,13 @@ describe('campaigns loader', () => {
 
   it('sorts campaigns by order', () => {
     const all = getAllCampaigns();
-    expect(all[0].slug).toBe('korporativnye-voyny');
+    // Chronological (ascending era): the earliest war reads first.
+    expect(all.map((c) => c.slug)).toEqual([
+      'imperatorskie-voyny',
+      'shturm-velyana',
+      'skrytyj-vrag',
+      'korporativnye-voyny',
+    ]);
   });
 
   it('discovers the Скрытый враг chronicle', () => {
@@ -36,5 +42,65 @@ describe('campaigns loader', () => {
       sv.units?.some((u) => u.id === 'mercenaries_piraty_markusa_novye')
     ).toBe(true);
     expect(sv.missions?.length).toBe(1);
+  });
+
+  it('discovers the Штурм Велиана chronicle (роман V.Chertischev — не-Технолог канон)', () => {
+    const sv = getAllCampaigns().find((c) => c.slug === 'shturm-velyana');
+    expect(sv).toBeDefined();
+    expect(sv!.title).toBe('Штурм Велиана');
+    expect(sv!.era).toBe('4527–4528');
+    // The battle pitted both superpowers against each other.
+    expect(sv!.factions).toEqual(expect.arrayContaining(['protectorate', 'polaris']));
+  });
+
+  it('Штурм Велиана rosters real machines and Велиан units', () => {
+    const sv = getAllCampaigns().find((c) => c.slug === 'shturm-velyana')!;
+    expect(sv.units?.length).toBeGreaterThan(0);
+    // Holder's «Предатор», the recon «Саламандра», and the dual-side «Раптор».
+    expect(sv.units?.some((u) => u.id === 'predator')).toBe(true);
+    expect(sv.units?.some((u) => u.id === 'salamander')).toBe(true);
+    expect(sv.units?.some((u) => u.id === 'raptor')).toBe(true);
+    // Советник Ольгерд and Велиан defenders.
+    expect(sv.units?.some((u) => u.id === 'protectorate_olgerd')).toBe(true);
+    expect(sv.units?.some((u) => u.id === 'protectorate_regulyary_planety_velian')).toBe(true);
+  });
+
+  it('включает кампанию «Имперские войны» — самая ранняя эра, открывает хронику', () => {
+    const all = getAllCampaigns();
+    const c = all.find((x) => x.slug === 'imperatorskie-voyny');
+    expect(c).toBeDefined();
+    expect(c?.order).toBe(1);
+    expect(c?.factions).toContain('polaris');
+    // Chronological order: this 4451 campaign is first, before shturm-velyana (2),
+    // skrytyj (3) and korporativnye (4).
+    expect(all[0]?.slug).toBe('imperatorskie-voyny');
+    // Roster carries the war's signature machines.
+    expect(c?.units?.some((u) => u.id === 'raptor')).toBe(true);
+    expect(c?.units?.some((u) => u.id === 'bronekhod')).toBe(true);
+    expect(c?.units?.some((u) => u.id === 'mercenaries_kosari')).toBe(true);
+  });
+
+  it('Штурм Велиана несёт кредит романа V.Chertischev (независимый автор — avb)', () => {
+    const sv = getAllCampaigns().find((c) => c.slug === 'shturm-velyana')!;
+    expect(sv.loreAuthor).toBe('avb');
+    expect(sv.credit?.author).toBe('V.Chertischev');
+    expect(sv.credit?.work).toBe('Битва за Велиан');
+    expect(sv.credit?.year).toBe(2022);
+  });
+
+  it('Имперские войны несут кредит романа V.Chertischev — без года (не указан в издании)', () => {
+    const iv = getAllCampaigns().find((c) => c.slug === 'imperatorskie-voyny')!;
+    expect(iv.loreAuthor).toBe('avb');
+    expect(iv.credit?.author).toBe('V.Chertischev');
+    expect(iv.credit?.work).toBe('Имперские войны');
+    expect(iv.credit?.year).toBeUndefined();
+  });
+
+  it('кампании без установленного источника не выдумывают атрибуцию', () => {
+    for (const slug of ['korporativnye-voyny', 'skrytyj-vrag']) {
+      const c = getAllCampaigns().find((x) => x.slug === slug)!;
+      expect(c.loreAuthor).toBeUndefined();
+      expect(c.credit).toBeUndefined();
+    }
   });
 });

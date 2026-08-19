@@ -676,7 +676,7 @@ export default function UnitCard({
           } as EnrichedUnit)}
           isOpen={showDetailsModal}
           onClose={() => setShowDetailsModal(false)}
-          scrollTarget={isSquad ? 'soldier-images' : 'machine-images'}
+          scrollTarget={isSquad ? 'personnel' : 'machine-images'}
         />
       )}
 

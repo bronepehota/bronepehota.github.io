@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getEnrichedUnit, getAllUnits, EnrichedUnit } from '@/lib/encyclopedia-utils';
+import { getUnitLoreDoc } from '@/lib/unit-lore';
 import UnitDetailPage from '@/components/encyclopedia/UnitDetailPage';
 import JsonLd from '@/components/JsonLd';
 import { absoluteUrl, breadcrumbJsonLd } from '@/lib/seo';
@@ -53,6 +54,9 @@ export default async function Page({ params }: PageProps) {
   }));
   const sourceOrder = sourceIds.filter(sid => bySource[sid]);
 
+  // Long-form lore doc (build-time render → lands in static HTML). Null when absent.
+  const loreDoc = await getUnitLoreDoc(params.id);
+
   return (
     <>
       <JsonLd
@@ -62,7 +66,7 @@ export default async function Page({ params }: PageProps) {
           { name: unit.name, path: `/encyclopedia/unit/${unit.id}` },
         ])}
       />
-      <UnitDetailPage unit={unit} bySource={bySource} sourceOrder={sourceOrder} />
+      <UnitDetailPage unit={unit} bySource={bySource} sourceOrder={sourceOrder} loreDoc={loreDoc} />
     </>
   );
 }

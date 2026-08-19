@@ -12,6 +12,7 @@ import {
   missionHasParticipantsForFaction,
   missionHasAnyParticipants,
 } from '@/lib/missions-registry';
+import { resolveMissionProvenance } from '@/lib/provenance';
 
 describe('missions-registry', () => {
   describe('getAllMissions', () => {
@@ -237,6 +238,20 @@ describe('missions-registry', () => {
 
     it('exposes the ruthenium campaign', () => {
       expect(getAllCampaigns().some((c) => c.id === 'ruthenium')).toBe(true);
+    });
+
+    it('carries provenance: null — источник сюжета не установлен, строка источника не рендерится', () => {
+      // Честность атрибуции: миссия написана in-app по кампании с неустановленным
+      // источником — резолвер обязан вернуть null (никакого дефолтного «Технолога»).
+      const m = getMission('skrytyj_vrag')!;
+      expect(m.provenance).toBeNull();
+      expect(resolveMissionProvenance(m)).toBeNull();
+    });
+
+    it('cerber-миссии без override остаются на дефолте tehnolog', () => {
+      const m = getMission('osvobozhdenie')!;
+      expect(m.provenance).toBeUndefined();
+      expect(resolveMissionProvenance(m)).toEqual({ origin: 'tehnolog', loreAuthor: 'tehnolog' });
     });
   });
 });

@@ -148,7 +148,11 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
     (searchQuery ? 1 : 0);
 
   return (
-    <div className="min-h-screen bg-military-dark relative overflow-hidden">
+    // NOTE: `overflow-hidden` here would break the sticky console below (an
+    // overflow ancestor becomes the sticky element's scrollport, which never
+    // scrolls). `overflow-x-clip` clips stray horizontal paint WITHOUT creating
+    // a scroll container — sticky keeps working.
+    <div className="min-h-screen bg-military-dark relative overflow-x-clip">
       {/* Background layers */}
       <div className="fixed inset-0 diagonal-stripes opacity-30 pointer-events-none" />
       <div className="fixed inset-0 film-grain-overlay pointer-events-none" />
@@ -189,7 +193,7 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
               </div>
 
               <Link
-                href="/campaigns"
+                href="/encyclopedia/history#wars"
                 data-testid="encyclopedia-campaigns-link"
                 className="inline-flex items-center gap-1.5 font-ibm-mono text-[11px] text-military-amber/70 hover:text-military-amber transition-colors tracking-widest uppercase whitespace-nowrap"
               >
@@ -198,30 +202,34 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
                 <span>→</span>
               </Link>
             </div>
-
-            {/* Tabs */}
-            <div
-              className={cn(
-                'mt-3 fade-in-up opacity-0',
-                isLoaded && 'opacity-100'
-              )}
-              style={{ animationFillMode: 'forwards', animationDelay: '0.12s' }}
-            >
-              <EncyclopediaTabs />
-            </div>
           </div>
         </header>
 
-        {/* Sticky compact filter console */}
+        {/* Sticky navigation console — tabs + search + filters stay reachable
+            from anywhere in the 20+ screen catalog. Sticky works because the
+            page root clips with `overflow-x-clip`, NOT `overflow-hidden`. */}
         <div
           className={cn(
-            'sticky top-0 z-30 border-y border-military-steel/20 bg-military-dark/95 backdrop-blur-md',
+            'sticky top-0 z-30 border-b border-military-steel/20 bg-military-dark/90 backdrop-blur-md',
             'fade-in-up opacity-0',
             isLoaded && 'opacity-100'
           )}
           style={{ animationFillMode: 'forwards', animationDelay: '0.18s' }}
         >
-          <div className="mx-auto max-w-7xl px-4 py-2 space-y-2">
+          <div className="mx-auto max-w-7xl px-4 py-1.5 space-y-1.5">
+            {/* Section tabs (Юниты/Миссии/Фракции/История) — moved INTO the
+                sticky console: the audit measured both tabs and search gone
+                after 3000px of scroll (returning to search cost ~10 screens). */}
+            <div
+              className={cn(
+                'flex justify-center fade-in-up opacity-0',
+                isLoaded && 'opacity-100'
+              )}
+              style={{ animationFillMode: 'forwards', animationDelay: '0.12s' }}
+            >
+              <EncyclopediaTabs dense />
+            </div>
+
             {/* Search + count */}
             <div className="flex items-center gap-3">
               <div className="relative flex-1">

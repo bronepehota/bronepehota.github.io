@@ -214,6 +214,30 @@ test.describe('Энциклопедия', () => {
     await expect(page.locator('a[href*="tehnolog.ru"]').first()).toBeVisible();
   });
 
+  test('миссия без установленного источника не показывает строку источника', async ({ page }) => {
+    // skrytyj_vrag: provenance null — источник сюжета не установлен, «Технолог» по умолчанию не выдумывается.
+    await page.goto('/encyclopedia/mission/skrytyj_vrag');
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.locator('h1')).toContainText('Скрытый враг');
+    await expect(page.getByTestId('provenance-row')).toHaveCount(0);
+  });
+
+  test('страница «Косарей» показывает кредит книги и мини-АВБ', async ({ page }) => {
+    await page.goto('/encyclopedia/unit/mercenaries_kosari');
+    await page.waitForLoadState('networkidle');
+
+    // Кредит-чип романа: автор + произведение на чипе.
+    const chip = page.getByTestId('lore-credit-chip');
+    await expect(chip).toBeVisible();
+    await expect(chip.getByText('V.Chertischev')).toBeVisible();
+    await expect(chip.getByText('Косары')).toBeVisible();
+    // Книга не от «Технолога» → мини-АВБ-марка рядом с кредитом.
+    await expect(chip.getByTestId('credit-avb-mark')).toBeVisible();
+    // Концепт отряда официальный (Технолог) → полного бейджа АВБ нет.
+    await expect(page.getByTestId('avb-badge')).toHaveCount(0);
+  });
+
   test('непокрашенный отряд показывает источник изображений Star System', async ({ page }) => {
     // polaris_rezhimnaya_klon_pehota не в SQUAD_PHOTO_SOURCE → непокрашенный.
     await page.goto('/encyclopedia/unit/polaris_rezhimnaya_klon_pehota');
@@ -256,5 +280,13 @@ test.describe('Энциклопедия', () => {
     const row = page.getByTestId('provenance-row').first();
     // официальный отряд → единый чип Технолога, ссылается на tehnolog.ru
     await expect(row.locator('a[href*="tehnolog.ru"]')).toBeVisible();
+  });
+
+  test('карточка машины показывает вооружение из справочника', async ({ page }) => {
+    await page.goto('/encyclopedia/unit/griffin');
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.getByTestId('unit-armament')).toBeVisible();
+    await expect(page.getByTestId('armament-entry').first()).toContainText('Световой меч');
   });
 });
