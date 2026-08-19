@@ -8,6 +8,7 @@ export const metadata = {
   title: 'История вселенной — Энциклопедия Бронепехоты',
   description:
     'Хроника человечества: от Тунгусского артефакта и первых прыжков к звёздам до Доминиона, двух сверхдержав и хроник войн 4451–4546 годов.',
+  alternates: { canonical: '/encyclopedia/history' },
 };
 
 export default async function HistoryPage() {

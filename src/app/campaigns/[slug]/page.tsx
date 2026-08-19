@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { Metadata } from 'next';
 import { getAllCampaigns, getCampaign } from '@/lib/campaigns';
 import { LoreSourceRow } from '@/components/encyclopedia/LoreSourceRow';
 import { BASE_PATH } from '@/lib/constants';
@@ -20,6 +21,19 @@ const factionOf = (id: string) => id.split('_')[0];
 
 export function generateStaticParams() {
   return getAllCampaigns().map((c) => ({ slug: c.slug }));
+}
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const campaign = await getCampaign(params.slug);
+  if (!campaign) return { title: 'Кампания не найдена — Бронепехота' };
+  const description = campaign.subtitle
+    || `Хроника войны: ${campaign.title}${campaign.era ? ` (${campaign.era})` : ''}`;
+  return {
+    title: `${campaign.title} — Хроники войн | Бронепехота`,
+    description,
+    alternates: { canonical: `/campaigns/${campaign.slug}` },
+    openGraph: { title: campaign.title, description },
+  };
 }
 
 export default async function CampaignDetailPage({
