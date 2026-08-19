@@ -1,8 +1,5 @@
 import { getAllHistoryChapters, getHistoryChapter } from '@/lib/history';
 import { EncyclopediaTabs } from '@/components/encyclopedia/EncyclopediaTabs';
-import { BASE_PATH } from '@/lib/constants';
-
-const HISTORY_BG = `${BASE_PATH}/images/campaigns/chronicle-bg.jpg`;
 
 export const metadata = {
   title: 'История вселенной — Энциклопедия Бронепехоты',

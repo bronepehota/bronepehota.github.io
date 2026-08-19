@@ -51,8 +51,8 @@ const TABS: TabDef[] = [
 
 /**
  * Encyclopedia mode selector — a prominent tactical segmented switch between
- * Units / Missions / Factions. Rendered in the header of every encyclopedia
- * list page so the three sections are equally discoverable.
+ * Units / Missions / Factions / History. Rendered in the header of every
+ * encyclopedia list page so the four sections are equally discoverable.
  */
 export function EncyclopediaTabs({ className }: { className?: string }) {
   const pathname = usePathname();
@@ -121,8 +121,13 @@ export function EncyclopediaTabs({ className }: { className?: string }) {
                 >
                   {tab.index}
                 </span>
+                {/* Icon hidden below 400px: 4 segments don't fit with icons on
+                    narrow phones — labels take priority (scrollWidth check). */}
                 <Icon
-                  className={cn('w-4 h-4 md:w-5 md:h-5 transition-transform duration-300', active ? 'text-military-amber' : 'group-hover:scale-110')}
+                  className={cn(
+                    'hidden min-[400px]:block w-4 h-4 md:w-5 md:h-5 transition-transform duration-300',
+                    active ? 'text-military-amber' : 'group-hover:scale-110',
+                  )}
                   strokeWidth={active ? 2.4 : 2}
                 />
                 <span>{tab.label}</span>
