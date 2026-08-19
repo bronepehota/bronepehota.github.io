@@ -360,6 +360,7 @@
       "shortDescription": "Очень успешная шагающая танкетка. Проста в управлении, надёжна и маневренна."
     },
     "provenance": {
+      "loreAuthor": "star_system",
       "credit": { "author": "Chertischev", "work": "Битва за Велиан", "year": 2022 }
     }
   },

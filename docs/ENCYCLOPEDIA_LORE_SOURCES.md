@@ -26,7 +26,9 @@
 - **Тип**: художественный роман. **Канон**: официальный (вселенная Star System /
   Робогир, «Технолог»). **Файл**: `~/Documents/pict/Bitva_za_Velian.pdf` (131 стр.).
 - **Кредит**: `credit → {author:"Chertischev", work:"Битва за Велиан", year:2022}`
-  (`loreAuthor:"tehnolog"`).
+  (`loreAuthor:"star_system"` — роман не «Технолог»: кредит-чип несёт мини-АВБ-марку;
+  классификация источников — решение пользователя 2026-08-19, см.
+  `src/__tests__/lib/lore-credits-avb.test.ts`).
 - **Куда перенесено**:
   - Фракции: обогащены `description` у `protectorate` и `polaris`.
   - Кампания: `src/content/campaigns/shturm-velyana.md` («Штурм Велиана»).
