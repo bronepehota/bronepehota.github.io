@@ -18,19 +18,19 @@ describe('history chapters', () => {
     for (const c of chapters) expect(c.title.length).toBeGreaterThan(3);
   });
 
-  it('главы 1–7 — «Летопись» (loreAuthor tehnolog, без именного кредита)', () => {
+  it('главы 1–7 — «Летопись» (loreAuthor tehnolog, кредит конкретного издания без автора)', () => {
     const letopis = chapters.filter((c) => (c.order ?? 99) <= 7);
     expect(letopis).toHaveLength(7);
     for (const c of letopis) {
       expect(`${c.slug}: ${c.loreAuthor}`).toBe(`${c.slug}: tehnolog`);
-      expect(c.credit).toBeUndefined();
+      expect(c.credit).toEqual({ work: 'Летопись: Звёздные герои' });
     }
   });
 
-  it('глава 8 (пехота Доминиона) — из «Косарей»: star_system + кредит Chertischev', () => {
+  it('глава 8 (пехота Доминиона) — из «Косарей»: avb + кредит В. Чернецова', () => {
     const ch8 = chapters.find((c) => c.slug === 'ekipirovka-pehoty-dominiona')!;
-    expect(ch8.loreAuthor).toBe('star_system');
-    expect(ch8.credit?.author).toBe('Chertischev');
+    expect(ch8.loreAuthor).toBe('avb');
+    expect(ch8.credit?.author).toBe('В. Чернецов');
     expect(ch8.credit?.work).toBe('Косары');
   });
 });

@@ -31,18 +31,18 @@ test.describe('История вселенной', () => {
 
     const source = chapter.getByTestId('lore-source-row');
     await expect(source).toBeVisible();
-    await expect(source).toContainText('Chertischev');
+    await expect(source).toContainText('В. Чернецов');
     await expect(source).toContainText('Косары');
     // The novel is non-Технолог → the credit chip carries the mini АВБ mark.
     await expect(chapter.getByTestId('credit-avb-mark')).toBeVisible();
   });
 
-  test('главы «Летописи» ссылаются на издание «Технолог» — без АВБ-марки', async ({ page }) => {
+  test('главы «Летописи» указывают издание «Летопись: Звёздные герои» — без АВБ-марки', async ({ page }) => {
     await page.goto('/encyclopedia/history');
     await page.waitForLoadState('networkidle');
 
     const first = page.getByTestId('history-chapter').first();
-    await expect(first.getByTestId('lore-source-row')).toContainText('Издание «Технолог»');
+    await expect(first.getByTestId('lore-source-row')).toContainText('Летопись');
     await expect(first.getByTestId('credit-avb-mark')).toHaveCount(0);
   });
 });

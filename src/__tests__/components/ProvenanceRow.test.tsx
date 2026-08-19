@@ -40,13 +40,13 @@ describe('ProvenanceRow — АВБ dedup contract', () => {
 });
 
 describe('ProvenanceRow — named-author credit chip', () => {
-  const novel = { author: 'Chertischev', work: 'Битва за Велиан', year: 2022 };
+  const novel = { author: 'В. Чернецов', work: 'Битва за Велиан', year: 2022 };
 
   it('renders the credit chip when provenance.credit is set', () => {
     const { container } = renderRow({ origin: 'tehnolog', loreAuthor: 'tehnolog', credit: novel });
     expect(screen.getByTestId('lore-credit-chip')).toBeInTheDocument();
     // Author + work + year all render (the uppercase is CSS-only, so text keeps original case).
-    expect(container.textContent).toContain('Chertischev');
+    expect(container.textContent).toContain('В. Чернецов');
     expect(container.textContent).toContain('Битва за Велиан');
     expect(container.textContent).toContain('2022');
   });
@@ -64,11 +64,11 @@ describe('ProvenanceRow — named-author credit chip', () => {
 });
 
 describe('ProvenanceRow — мини-АВБ-марка на кредит-чипе (не-Технолог книга)', () => {
-  const kosari = { author: 'Chertischev', work: 'Косары' };
+  const kosari = { author: 'В. Чернецов', work: 'Косары' };
 
   it('loreAuthor ≠ tehnolog → credit chip carries the mini АВБ mark', () => {
-    // Official unit, community-written novel lore: entity stays non-АВБ, the source flags it.
-    renderRow({ origin: 'tehnolog', loreAuthor: 'star_system', credit: kosari });
+    // Official unit, independent-author novel lore: entity stays non-АВБ, the source flags it.
+    renderRow({ origin: 'tehnolog', loreAuthor: 'avb', credit: kosari });
     expect(screen.getByTestId('credit-avb-mark')).toBeInTheDocument();
     // No entity-level badge — the mark on the source is the only АВБ signal.
     expect(screen.queryByTestId('avb-badge')).toBeNull();

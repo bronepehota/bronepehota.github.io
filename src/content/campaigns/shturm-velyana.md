@@ -5,9 +5,9 @@ subtitle: Третья волна вторжения и «Бдительный �
 era: "4527–4528"
 factions: [protectorate, polaris]
 order: 3
-loreAuthor: star_system
+loreAuthor: avb
 credit:
-  author: Chertischev
+  author: "В. Чернецов"
   work: Битва за Велиан
   year: 2022
 units:
@@ -43,4 +43,4 @@ units:
 
 ---
 
-*Кампания по мотивам романа **Chertischev** «Битва за Велиан» (2022), официальная вселенная Star System / Робогир компании «Технолог».*
+*Кампания по мотивам романа **В. Чернецова** «Битва за Велиан» (2022), официальная вселенная Star System / Робогир компании «Технолог».*

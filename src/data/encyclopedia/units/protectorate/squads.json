@@ -181,7 +181,7 @@
       "tactics": "Тяжёлый штурмовой отряд с кибернетикой и смешанным вооружением. Силён везде, особенно при штурме позиций.",
       "shortDescription": "Штурмовики ЦСО Протектората: тяжёлая кибер-пехота для прорыва."
     },
-    "provenance": { "loreAuthor": "star_system", "credit": { "author": "V.Chertischev", "work": "Штурмовики Протектората" } },
+    "provenance": { "loreAuthor": "avb", "credit": { "author": "В. Чернецов", "work": "Штурмовики Протектората" } },
     "image": "/images/squads/protectorate/shturmovoy_otryad_stervyatniki/1.png"
   },
   {
@@ -205,7 +205,7 @@
       "tactics": "Элитный штурмовой отряд нового образца с усиленным вооружением: сильнее в огневом бою, чем старая версия.",
       "shortDescription": "Штурмовой спецназ нового поколения: усиленная огневая элита."
     },
-    "provenance": { "loreAuthor": "star_system", "credit": { "author": "V.Chertischev", "work": "Штурмовики Протектората" } },
+    "provenance": { "loreAuthor": "avb", "credit": { "author": "В. Чернецов", "work": "Штурмовики Протектората" } },
     "image": "/images/squads/protectorate/shturmovoy_spetsnaz_novye/1.png"
   },
   {
@@ -229,7 +229,7 @@
       "tactics": "Элитный штурмовой отряд со смешанным вооружением и специалистом ближнего боя для критических ситуаций. Универсален в любых операциях.",
       "shortDescription": "Ветеранский штурмовой спецназ: проверенная элита со специалистом ББ 7."
     },
-    "provenance": { "loreAuthor": "star_system", "credit": { "author": "V.Chertischev", "work": "Штурмовики Протектората" } },
+    "provenance": { "loreAuthor": "avb", "credit": { "author": "В. Чернецов", "work": "Штурмовики Протектората" } },
     "image": "/images/squads/protectorate/shturmovoy_spetsnaz_starye/1.png"
   },
   {
@@ -276,7 +276,7 @@
       "tactics": "Тяжёлый штурмовой отряд в броне максимальной защиты со сбалансированным вооружением: малочислен, но почти непробиваем — для штурма укреплений.",
       "shortDescription": "Тяжёлые штурмовики Велиана: непробиваемая броня для уличных боёв."
     },
-    "provenance": { "loreAuthor": "star_system", "credit": { "author": "V.Chertischev", "work": "Штурмовики Протектората" } },
+    "provenance": { "loreAuthor": "avb", "credit": { "author": "В. Чернецов", "work": "Штурмовики Протектората" } },
     "image": "/images/squads/protectorate/tyazhyolaya_shturmovaya_pehota_veliana/1.png"
   },
   {
@@ -560,7 +560,7 @@
     "provenance": {
       "origin": "avb",
       "loreAuthor": "avb",
-      "credit": { "author": "V.Chertischev", "work": "Штурмовики Протектората" }
+      "credit": { "author": "В. Чернецов", "work": "Штурмовики Протектората" }
     },
     "sponsor": {
       "name": "Егорик Елеусизов",

@@ -38,7 +38,7 @@ describe('campaigns loader', () => {
     expect(sv.missions?.length).toBe(1);
   });
 
-  it('discovers the Штурм Велиана chronicle (Chertischev novel canon)', () => {
+  it('discovers the Штурм Велиана chronicle (роман В. Чернецова — не-Технолог канон)', () => {
     const sv = getAllCampaigns().find((c) => c.slug === 'shturm-velyana');
     expect(sv).toBeDefined();
     expect(sv!.title).toBe('Штурм Велиана');
@@ -73,18 +73,18 @@ describe('campaigns loader', () => {
     expect(c?.units?.some((u) => u.id === 'mercenaries_kosari')).toBe(true);
   });
 
-  it('Штурм Велиана несёт кредит романа Chertischev (не-Технолог источник)', () => {
+  it('Штурм Велиана несёт кредит романа В. Чернецова (независимый автор — avb)', () => {
     const sv = getAllCampaigns().find((c) => c.slug === 'shturm-velyana')!;
-    expect(sv.loreAuthor).toBe('star_system');
-    expect(sv.credit?.author).toBe('Chertischev');
+    expect(sv.loreAuthor).toBe('avb');
+    expect(sv.credit?.author).toBe('В. Чернецов');
     expect(sv.credit?.work).toBe('Битва за Велиан');
     expect(sv.credit?.year).toBe(2022);
   });
 
-  it('Имперские войны несут кредит романа — без года (не указан в издании)', () => {
+  it('Имперские войны несут кредит романа В. Чернецова — без года (не указан в издании)', () => {
     const iv = getAllCampaigns().find((c) => c.slug === 'imperatorskie-voyny')!;
-    expect(iv.loreAuthor).toBe('star_system');
-    expect(iv.credit?.author).toBe('Chertischev');
+    expect(iv.loreAuthor).toBe('avb');
+    expect(iv.credit?.author).toBe('В. Чернецов');
     expect(iv.credit?.work).toBe('Имперские войны');
     expect(iv.credit?.year).toBeUndefined();
   });

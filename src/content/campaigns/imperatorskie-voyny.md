@@ -5,9 +5,9 @@ subtitle: Вторжение 4451 года и рождение Империи П
 era: "4451–4528"
 factions: [polaris, protectorate, mercenaries]
 order: 4
-loreAuthor: star_system
+loreAuthor: avb
 credit:
-  author: Chertischev
+  author: "В. Чернецов"
   work: Имперские войны
 units:
   - { id: raptor, role: «Имперская линейная танкетка мехкорпусов» }
@@ -75,4 +75,4 @@ units:
 
 ---
 
-*Кампания по мотивам романа **Chertischev** «Хроники Имперских войн», официальная вселенная Star System / Робогир компании «Технолог».*
+*Кампания по мотивам романа **В. Чернецова** «Хроники Имперских войн», официальная вселенная Star System / Робогир компании «Технолог».*

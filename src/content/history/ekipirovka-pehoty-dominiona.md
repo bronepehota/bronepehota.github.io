@@ -2,9 +2,9 @@
 slug: ekipirovka-pehoty-dominiona
 title: Пехота Доминиона
 order: 8
-loreAuthor: star_system
+loreAuthor: avb
 credit:
-  author: Chertischev
+  author: "В. Чернецов"
   work: Косары
 ---
 

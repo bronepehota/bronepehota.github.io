@@ -243,7 +243,7 @@ const LORE_CREDIT_TONE = '#c2924a';
 
 /** Mini АВБ mark for the named-author credit chip — icon-only sibling of the full
  *  <AlternativeVersionBadge>. Flags that the *book* the lore was adapted from is a
- *  non-Технолог work (a Chertischev novel etc.) WITHOUT claiming the whole entity
+ *  non-Технолог work (a В. Чернецов novel etc.) WITHOUT claiming the whole entity
  *  is alternative: official units keep their Технолог origin and get only this mark
  *  on the source. Carries the same disclaimer tooltip as the full badge. */
 export function CreditAvbMark({ compact }: { compact?: boolean }) {
@@ -277,13 +277,13 @@ interface LoreCreditChipOptions {
 /** Renders a `LoreCredit` (a named author + work the lore was adapted from) as a
  *  dossier chip, visually unified with the org-source chips but flagged by a BookOpen
  *  icon. Orthogonal to the origin/loreAuthor chips — e.g. «Технолог» canon adapted
- *  from Chertischev's «Битва за Велиан» shows both the org badge and this citation.
+ *  from В. Чернецов's «Битва за Велиан» shows both the org badge and this citation.
  *  When the book itself is non-Технолог (`loreAuthor ≠ tehnolog`), the chip carries
  *  the mini АВБ mark right next to it. */
 function loreCreditChip(credit: LoreCredit, { loreAuthor, compact }: LoreCreditChipOptions = {}) {
   const name = credit.author ?? credit.work ?? 'Источник лора';
   // When the author is named, the work + year go to the role sub-label
-  // («Chertischev · Битва за Велиан, 2022»); with no author, the work is the name.
+  // («В. Чернецов · Битва за Велиан, 2022»); with no author, the work is the name.
   const role = credit.author
     ? [credit.work, credit.year].filter(Boolean).join(', ')
     : credit.year
@@ -404,7 +404,7 @@ interface LoreSourceRowProps {
  *  «Хроники войн», chapters of the «История вселенной»). Same dossier idiom as
  *  <ProvenanceRow>, but for pages that have no unit-style origin axis: the row
  *  shows either the named-author chip (a novel the text retells — with the mini
- *  АВБ mark when the book is non-Технолог) or an org chip («Издание «Технолог»»
+ *  АВБ mark when the book is non-Технолог) or an org chip («Издание „Технолог“»
  *  for the official chronicle). Renders nothing without any attribution — content
  *  with no established source must not show an invented one. */
 export function LoreSourceRow({ loreAuthor, credit, withHeader = true, compact, className }: LoreSourceRowProps) {
@@ -423,7 +423,7 @@ export function LoreSourceRow({ loreAuthor, credit, withHeader = true, compact, 
       ) : (
         <>
           <SourceChip
-            name={author === 'tehnolog' ? 'Издание «Технолог»' : meta.short}
+            name={author === 'tehnolog' ? 'Издание „Технолог“' : meta.short}
             icon={meta.icon}
             tone={meta.tone}
             url={meta.url}

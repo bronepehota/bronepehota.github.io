@@ -23,7 +23,7 @@ export interface CampaignMeta {
   missions?: CampaignMission[];
   order?: number;
   /** Org-level author of the campaign text (frontmatter). A non-tehnolog source
-   *  (a Chertischev novel) flags the credit chip with the mini АВБ mark. */
+   *  (a В. Чернецов novel) flags the credit chip with the mini АВБ mark. */
   loreAuthor?: LoreSource;
   /** Named citation — the specific novel the campaign retells (frontmatter). */
   credit?: LoreCredit;

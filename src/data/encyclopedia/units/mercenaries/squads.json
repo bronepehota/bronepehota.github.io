@@ -44,8 +44,8 @@
       "shortDescription": "Тяжёлые наёмники-рубаки «косари»: броня и ближний бой без стрелкового оружия."
     },
     "provenance": {
-      "loreAuthor": "star_system",
-      "credit": { "author": "Chertischev", "work": "Косары" }
+      "loreAuthor": "avb",
+      "credit": { "author": "В. Чернецов", "work": "Косары" }
     },
     "image": "/images/squads/mercenaries/kosari/1.png"
   },
@@ -114,8 +114,8 @@
       "shortDescription": "Корсары Маркуса Трёхглазого, новое поколение: налёты и абордаж с плотным огнём."
     },
     "provenance": {
-      "loreAuthor": "star_system",
-      "credit": { "author": "Chertischev", "work": "Косары" }
+      "loreAuthor": "avb",
+      "credit": { "author": "В. Чернецов", "work": "Косары" }
     },
     "image": "/images/squads/mercenaries/piraty_markusa_novye/1.png"
   },
@@ -141,8 +141,8 @@
       "shortDescription": "Ветераны-корсары Маркуса Трёхглазого: тяжёлая броня и опыт ближнего боя."
     },
     "provenance": {
-      "loreAuthor": "star_system",
-      "credit": { "author": "Chertischev", "work": "Косары" }
+      "loreAuthor": "avb",
+      "credit": { "author": "В. Чернецов", "work": "Косары" }
     },
     "image": "/images/squads/mercenaries/piraty_markusa_starye/1.png"
   },
@@ -191,8 +191,8 @@
       "shortDescription": "Рейдеры Пыльной Зоны: быстрые абордажники и мастера «коридорных войн»."
     },
     "provenance": {
-      "loreAuthor": "star_system",
-      "credit": { "author": "Chertischev", "work": "Косары" }
+      "loreAuthor": "avb",
+      "credit": { "author": "В. Чернецов", "work": "Косары" }
     },
     "image": "/images/squads/mercenaries/reydery_pylnoy_zony/1.png"
   }
