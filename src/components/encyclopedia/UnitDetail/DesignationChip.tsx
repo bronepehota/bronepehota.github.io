@@ -2,7 +2,7 @@ import type { EncyclopediaUnit } from '@/lib/encyclopedia-registry';
 
 /**
  * Машинный индекс из системы обозначений «Справочника техники» («БМР-1Г»,
- * «УМ-2Ш», «УМ6-2»). A stamped mono chip next to the unit's class — reads as
+ * «УМШ-2», «УМ6-2»). A stamped mono chip next to the unit's class — reads as
  * factory paperwork clipped to the dossier. Absent for squads and machines
  * outside the handbook.
  */
