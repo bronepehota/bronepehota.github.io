@@ -1,4 +1,4 @@
-import { EncyclopediaUnit } from '@/lib/encyclopedia-registry';
+import type { EncyclopediaUnit } from '@/lib/encyclopedia-registry';
 
 /**
  * Машинный индекс из системы обозначений «Справочника техники» («БМР-1Г»,

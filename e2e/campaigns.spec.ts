@@ -56,7 +56,7 @@ test.describe('Хроники войн', () => {
     await expect(page.getByRole('heading', { name: 'Имперские войны' })).toBeVisible();
   });
 
-  test('«Имперские войны» — виден источник (роман В. Чернецова) с АВБ-маркой', async ({ page }) => {
+  test('«Имперские войны» — виден источник (роман V.Chertischev) с АВБ-маркой', async ({ page }) => {
     await page.goto('/campaigns');
     await page.waitForLoadState('networkidle');
 
@@ -66,7 +66,7 @@ test.describe('Хроники войн', () => {
 
     const source = page.getByTestId('lore-source-row');
     await expect(source).toBeVisible();
-    await expect(source).toContainText('В. Чернецов');
+    await expect(source).toContainText('V.Chertischev');
     await expect(source).toContainText('Имперские войны');
     // The novel is non-Технолог → its credit chip carries the mini АВБ mark.
     await expect(page.getByTestId('credit-avb-mark')).toBeVisible();

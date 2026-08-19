@@ -31,7 +31,7 @@ test.describe('История вселенной', () => {
 
     const source = chapter.getByTestId('lore-source-row');
     await expect(source).toBeVisible();
-    await expect(source).toContainText('В. Чернецов');
+    await expect(source).toContainText('V.Chertischev');
     await expect(source).toContainText('Косары');
     // The novel is non-Технолог → the credit chip carries the mini АВБ mark.
     await expect(chapter.getByTestId('credit-avb-mark')).toBeVisible();

@@ -308,9 +308,11 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc }:
                   )}
 
                   {/* Машинный индекс по системе обозначений справочника («БМР-1Г»). */}
-                  <div className="mb-3 md:mb-4">
-                    <DesignationChip unit={unit} />
-                  </div>
+                  {unit.encyclopedia?.designation && (
+                    <div className="mb-3 md:mb-4">
+                      <DesignationChip unit={unit} />
+                    </div>
+                  )}
 
                   {/* Attribution: ONE metadata strip (shared header + chips in a single
                       flex-wrap row), mirroring the ProvenanceRow idiom. Painted squads
