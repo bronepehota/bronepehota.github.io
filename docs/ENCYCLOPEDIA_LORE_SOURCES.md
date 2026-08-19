@@ -13,7 +13,12 @@
 - **Именной автор** (`provenance.credit: LoreCredit = {author?, work?, year?, url?}`,
   ортогонален к org-level): чип «автор лора» в `ProvenanceRow` для конкретного
   произведения (роман/книга). Ставится на сущность через
-  `provenance: { credit: {...} }`.
+  `provenance: { credit: {...} }`. Если лор сущности собран из **нескольких**
+  произведений — `credit` задаётся массивом (`credit: [{…}, {…}]`, нормализация
+  через `creditList()` из `src/lib/provenance.ts`); UI рендерит по одному чипу
+  на книгу. Так несут `polaris` («Битва за Велиан» + «Имперские войны») и
+  `protectorate` («Битва за Велиан» + «Имперские войны» + «Штурмовики
+  Протектората»).
 - Где живёт лор: фракции → `src/data/encyclopedia/factions.json`; кампании →
   `src/content/campaigns/*.md`; главы истории → `src/content/history/*.md`;
   машины/отряды → `src/data/encyclopedia/units/<faction>/{machines,squads}.json`
@@ -97,10 +102,15 @@
 - **Кредит**: `credit → {author:"V.Chertischev", work:"Косары"}`
   (`loreAuthor:"avb"`).
 - **Куда перенесено**: `description` фракции `mercenaries` (Зал Наёмников);
-  лор 4 отрядов (`kosari`, `piraty_markusa_novye`, `piraty_markusa_starye`,
-  `reydery_pylnoy_zony`); глава «Экипировка пехоты Доминиона» → глава 8
-  Истории (`src/content/history/ekipirovka-pehoty-dominiona.md`, источник с
+  лор 6 отрядов (`kosari`, `piraty_markusa_novye`, `piraty_markusa_starye`,
+  `reydery_pylnoy_zony`, `piraty_tortugi`, `naytstalkery`); глава «Экипировка
+  пехоты Доминиона» → глава 8 Истории
+  (`src/content/history/ekipirovka-pehoty-dominiona.md`, источник с
   мини-АВБ).
+  - `piraty_tortugi` и `naytstalkery` (решение пользователя 2026-08-19, аудит
+    «Авторство» L-пункт): их лор пересказывает сюжетные факты «Косарей»
+    (Маркус Трёхглазый, вожаки Тортуги) — несут кредит книги, а не считаются
+    открыто-каноническими.
 - **Статус**: ✅
 
 ### 5. «Штурмовики Протектората» — V.Chertischev

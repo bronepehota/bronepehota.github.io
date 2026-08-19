@@ -10,7 +10,7 @@ export interface HistoryChapterMeta {
   era?: string;
   order?: number;
   /** Org-level author of the chapter text (frontmatter): «Летопись» chapters are
-   *  tehnolog; chapter VIII (from «Косары») is star_system → carries the АВБ mark. */
+   *  tehnolog; chapter VIII (from «Косары») is avb → carries the АВБ mark. */
   loreAuthor?: LoreSource;
   /** Named citation — the specific book the chapter was adapted from (frontmatter). */
   credit?: LoreCredit;

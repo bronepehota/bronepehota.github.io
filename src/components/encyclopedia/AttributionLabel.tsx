@@ -14,11 +14,17 @@
  * directly; it is re-exported here only for backward compatibility of existing
  * (client-graph) imports.
  */
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { Megaphone, Check, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { GitHubPagesImage } from '@/components/GitHubPagesImage';
-import { isProvenanceUniform, isAlternativeVersion, type LoreSource, type Provenance } from '@/lib/provenance';
+import {
+  isProvenanceUniform,
+  isAlternativeVersion,
+  creditList,
+  type LoreSource,
+  type Provenance,
+} from '@/lib/provenance';
 import {
   LORE_SOURCE_META,
   SourceChip,
@@ -213,10 +219,22 @@ export function ProvenanceRow({
         </span>
       )}
       {chips}
-      {/* Named-author citation (a specific book/novel the lore was adapted from) —
-          shown on top of the org chips when `provenance.credit` is set. A non-Технолог
-          book additionally flags itself with the mini АВБ mark (`loreAuthor` axis). */}
-      {provenance.credit && loreCreditChip(provenance.credit, { loreAuthor: provenance.loreAuthor, compact })}
+      {/* Named-author citations (a specific book/novel the lore was adapted from) —
+          shown on top of the org chips when `provenance.credit` is set. An entity
+          assembled from SEVERAL works carries an array → one chip per work
+          (`creditList`). A non-Технолог book flags itself with the mini АВБ mark
+          (`loreAuthor` axis) — except when the row's own org chip already reads
+          «АВБ» (`origin: 'avb'`, e.g. штурмовая киберпехота): dedup, symmetric to
+          the full-badge suppression below. */}
+      {creditList(provenance.credit).map((credit, i) => (
+        <Fragment key={i}>
+          {loreCreditChip(credit, {
+            loreAuthor: provenance.loreAuthor,
+            hideAvbMark: provenance.origin === 'avb',
+            compact,
+          })}
+        </Fragment>
+      ))}
       {/* АВБ badge — added on top of NAMED community sources (Star System, Звёздные Системы…).
           Skipped when the source is already 'avb' (its chip already reads «АВБ» → no double mark). */}
       {isAlternativeVersion(provenance) && provenance.origin !== 'avb' && (

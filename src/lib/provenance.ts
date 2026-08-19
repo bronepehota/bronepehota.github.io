@@ -56,8 +56,20 @@ export interface Provenance {
   /** Who wrote the descriptive lore text shown on the page. */
   loreAuthor: LoreSource;
   /** Optional named-author citation (a specific book/novel the lore came from).
-   *  Orthogonal to the org-level axes — see `LoreCredit`. */
-  credit?: LoreCredit;
+   *  Orthogonal to the org-level axes — see `LoreCredit`.
+   *
+   *  An ARRAY is used when the entity's lore was assembled from SEVERAL works —
+   *  e.g. a faction description enriched by two or three novels. The UI renders
+   *  one credit chip per entry (see `creditList`); a single object stays valid
+   *  for the common one-source case. */
+  credit?: LoreCredit | LoreCredit[];
+}
+
+/** Normalize `credit` (a single entry or an array) into a flat list — the shape
+ *  the UI renders: one chip per cited work. Empty list = no citation. */
+export function creditList(credit?: LoreCredit | LoreCredit[]): LoreCredit[] {
+  if (!credit) return [];
+  return Array.isArray(credit) ? credit : [credit];
 }
 
 /** Faction-aware default for factions and units (they share the same rule). */
@@ -111,9 +123,14 @@ export function resolveFactionProvenance(faction: EncyclopediaFaction): Provenan
 }
 
 /** Provenance for a mission — both axes default to Tehnolog (Cerber scenarios are
- * verbatim official material sourced from tehnolog.ru). Override via `mission.provenance`. */
-export function resolveMissionProvenance(mission: Mission): Provenance {
-  return merge({ origin: 'tehnolog', loreAuthor: 'tehnolog' }, mission.provenance);
+ * verbatim official material sourced from tehnolog.ru). Override via `mission.provenance`.
+ *
+ * An EXPLICIT `provenance: null` in the JSON opts the mission OUT of attribution:
+ * its source is not established, so the resolver returns `null` and the UI must
+ * render NO source row (never invent a «Технолог» default for it). */
+export function resolveMissionProvenance(mission: Mission): Provenance | null {
+  if (mission.provenance === null) return null;
+  return merge({ origin: 'tehnolog', loreAuthor: 'tehnolog' }, mission.provenance ?? undefined);
 }
 
 /** True when origin and lore author are the same source — the UI may collapse to a

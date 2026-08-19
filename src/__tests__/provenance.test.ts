@@ -4,6 +4,7 @@ import {
   resolveMissionProvenance,
   isProvenanceUniform,
   isAlternativeVersion,
+  creditList,
 } from '../lib/provenance';
 import type { EncyclopediaUnit, EncyclopediaFaction } from '../lib/encyclopedia-registry';
 import type { Mission } from '../lib/mission-types';
@@ -23,7 +24,7 @@ const unit = (
   } as unknown as EncyclopediaUnit);
 const faction = (id: string, provenance?: Partial<Provenance>): EncyclopediaFaction =>
   ({ id, provenance } as unknown as EncyclopediaFaction);
-const mission = (provenance?: Partial<Provenance>): Mission =>
+const mission = (provenance?: Partial<Provenance> | null): Mission =>
   ({ id: 'm', provenance } as unknown as Mission);
 
 describe('provenance resolver', () => {
@@ -137,6 +138,17 @@ describe('provenance resolver', () => {
         loreAuthor: 'tehnolog',
       });
     });
+
+    test('explicit provenance: null → resolves to null (source not established, no invented default)', () => {
+      expect(resolveMissionProvenance(mission(null))).toBeNull();
+    });
+
+    test('absent provenance (undefined) still defaults to tehnolog — null ≠ undefined', () => {
+      expect(resolveMissionProvenance(mission())).toEqual({
+        origin: 'tehnolog',
+        loreAuthor: 'tehnolog',
+      });
+    });
   });
 
   describe('isProvenanceUniform', () => {
@@ -202,6 +214,21 @@ describe('provenance resolver', () => {
     test('credit is orthogonal to the АВБ badge — a tehnolog-origin novel stays non-АВБ', () => {
       const p = resolveUnitProvenance(unit('polaris', { credit: novel }, { sources: ['tehnolog'] }));
       expect(isAlternativeVersion(p)).toBe(false);
+    });
+
+    test('credit may be an ARRAY (lore assembled from several works) and survives resolution', () => {
+      const works = [
+        { author: 'V.Chertischev', work: 'Битва за Велиан', year: 2022 },
+        { author: 'V.Chertischev', work: 'Имперские войны' },
+      ];
+      const p = resolveFactionProvenance(faction('polaris', { credit: works }));
+      expect(creditList(p.credit)).toEqual(works);
+    });
+
+    test('creditList normalizes single ↔ array and empty ↔ none', () => {
+      expect(creditList(undefined)).toEqual([]);
+      expect(creditList(novel)).toEqual([novel]);
+      expect(creditList([novel])).toEqual([novel]);
     });
   });
 });

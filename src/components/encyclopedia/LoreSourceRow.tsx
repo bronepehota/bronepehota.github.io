@@ -156,6 +156,11 @@ export function CreditAvbMark({ compact }: { compact?: boolean }) {
 interface LoreCreditChipOptions {
   /** Org-level author of the adapted text — a non-tehnolog source adds the mini АВБ mark. */
   loreAuthor?: LoreSource;
+  /** Dedup: suppress the mini АВБ mark when the SAME row already shows an org chip
+   *  that reads «АВБ» (e.g. <ProvenanceRow> with `origin: 'avb'` — the entity-level
+   *  chip already says АВБ, the mark would repeat it). Used only on rows that render
+   *  org chips alongside; <LoreSourceRow> never needs it (credit chip XOR org chip). */
+  hideAvbMark?: boolean;
   compact?: boolean;
 }
 
@@ -164,8 +169,12 @@ interface LoreCreditChipOptions {
  *  icon. Orthogonal to the origin/loreAuthor chips — e.g. «Технолог» canon adapted
  *  from V.Chertischev's «Битва за Велиан» shows both the org badge and this citation.
  *  When the book itself is non-Технолог (`loreAuthor ≠ tehnolog`), the chip carries
- *  the mini АВБ mark right next to it. */
-export function loreCreditChip(credit: LoreCredit, { loreAuthor, compact }: LoreCreditChipOptions = {}) {
+ *  the mini АВБ mark right next to it (unless suppressed via `hideAvbMark` — dedup
+ *  against an already-«АВБ»-reading org chip in the same row). */
+export function loreCreditChip(
+  credit: LoreCredit,
+  { loreAuthor, hideAvbMark, compact }: LoreCreditChipOptions = {},
+) {
   const name = credit.author ?? credit.work ?? 'Источник лора';
   // When the author is named, the work + year go to the role sub-label
   // («V.Chertischev · Битва за Велиан, 2022»); with no author, the work is the name.
@@ -184,7 +193,7 @@ export function loreCreditChip(credit: LoreCredit, { loreAuthor, compact }: Lore
         url={credit.url}
         compact={compact}
       />
-      {loreAuthor && loreAuthor !== 'tehnolog' && <CreditAvbMark compact={compact} />}
+      {loreAuthor && loreAuthor !== 'tehnolog' && !hideAvbMark && <CreditAvbMark compact={compact} />}
     </span>
   );
 }

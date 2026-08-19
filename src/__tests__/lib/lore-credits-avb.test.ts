@@ -13,13 +13,12 @@
  * (→ no mark). Checked across ALL encyclopedia units AND factions.
  */
 import { getAllUnits, getFactions } from '@/lib/encyclopedia-registry';
-import { resolveUnitProvenance, resolveFactionProvenance } from '@/lib/provenance';
+import { resolveUnitProvenance, resolveFactionProvenance, creditList } from '@/lib/provenance';
 import type { LoreSource } from '@/lib/provenance';
 
 const NON_TEHNOLOG_WORKS = ['Битва за Велиан', 'Имперские войны', 'Косары', 'Штурмовики Протектората'];
 
-/** Works expected to carry JSON credits (units + factions). «Имперские войны» lore
- *  lives on the campaign page (frontmatter, loader-tested) — no entity carries it. */
+/** Works expected to carry JSON credits (units + factions). */
 const JSON_BACKED_WORKS = ['Битва за Велиан', 'Косары', 'Штурмовики Протектората'];
 
 interface Credited {
@@ -28,17 +27,23 @@ interface Credited {
   loreAuthor: LoreSource;
 }
 
+// `credit` may be a single object OR an array (faction lore assembled from several
+// novels) — `creditList` flattens both into one (entity, work) pair per cited book.
 const credited: Credited[] = [
-  ...getAllUnits().map((u) => ({
-    id: u.id,
-    work: u.provenance?.credit?.work,
-    loreAuthor: resolveUnitProvenance(u).loreAuthor,
-  })),
-  ...getFactions().map((f) => ({
-    id: f.id,
-    work: f.provenance?.credit?.work,
-    loreAuthor: resolveFactionProvenance(f).loreAuthor,
-  })),
+  ...getAllUnits().flatMap((u) =>
+    creditList(u.provenance?.credit).map((cr) => ({
+      id: u.id,
+      work: cr.work,
+      loreAuthor: resolveUnitProvenance(u).loreAuthor,
+    })),
+  ),
+  ...getFactions().flatMap((f) =>
+    creditList(f.provenance?.credit).map((cr) => ({
+      id: f.id,
+      work: cr.work,
+      loreAuthor: resolveFactionProvenance(f).loreAuthor,
+    })),
+  ),
 ].filter((c): c is Credited => Boolean(c.work));
 
 describe('именные кредиты книг: мини-АВБ ровно на не-Технолог произведениях', () => {
@@ -63,5 +68,42 @@ describe('именные кредиты книг: мини-АВБ ровно н�
         expect(`${c.id}: loreAuthor=${c.loreAuthor}`).toBe(`${c.id}: loreAuthor=tehnolog`);
       }
     }
+  });
+});
+
+describe('фракции с массивом кредитов (лор собран из нескольких книг — M1)', () => {
+  const factionCredits = (fid: string) => {
+    const f = getFactions().find((x) => x.id === fid);
+    return f ? creditList(f.provenance?.credit) : [];
+  };
+
+  it('protectorate несёт 3 кредита: Велиан + Имперские войны + Штурмовики Протектората', () => {
+    expect(factionCredits('protectorate').map((c) => c.work)).toEqual([
+      'Битва за Велиан',
+      'Имперские войны',
+      'Штурмовики Протектората',
+    ]);
+  });
+
+  it('polaris несёт 2 кредита: Велиан + Имперские войны', () => {
+    expect(factionCredits('polaris').map((c) => c.work)).toEqual(['Битва за Велиан', 'Имперские войны']);
+  });
+
+  it('все кредиты фракций — V.Chertischev, год только у «Битвы за Велиан», loreAuthor всюду avb', () => {
+    for (const fid of ['polaris', 'protectorate']) {
+      const f = getFactions().find((x) => x.id === fid)!;
+      const resolved = resolveFactionProvenance(f);
+      expect(`${fid}: loreAuthor=${resolved.loreAuthor}`).toBe(`${fid}: loreAuthor=avb`);
+      for (const cr of factionCredits(fid)) {
+        expect(cr.author).toBe('V.Chertischev');
+        expect(cr.year).toBe(cr.work === 'Битва за Велиан' ? 2022 : undefined);
+      }
+    }
+  });
+
+  it('mercenaries остаётся с единичным кредитом «Косары» (одна книга — не массив)', () => {
+    const f = getFactions().find((x) => x.id === 'mercenaries')!;
+    expect(Array.isArray(f.provenance?.credit)).toBe(false);
+    expect(creditList(f.provenance?.credit).map((c) => c.work)).toEqual(['Косары']);
   });
 });

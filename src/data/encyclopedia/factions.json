@@ -30,7 +30,10 @@
     ],
     "provenance": {
       "loreAuthor": "avb",
-      "credit": { "author": "V.Chertischev", "work": "Битва за Велиан", "year": 2022 }
+      "credit": [
+        { "author": "V.Chertischev", "work": "Битва за Велиан", "year": 2022 },
+        { "author": "V.Chertischev", "work": "Имперские войны" }
+      ]
     }
   },
   {
@@ -47,7 +50,11 @@
     ],
     "provenance": {
       "loreAuthor": "avb",
-      "credit": { "author": "V.Chertischev", "work": "Битва за Велиан", "year": 2022 }
+      "credit": [
+        { "author": "V.Chertischev", "work": "Битва за Велиан", "year": 2022 },
+        { "author": "V.Chertischev", "work": "Имперские войны" },
+        { "author": "V.Chertischev", "work": "Штурмовики Протектората" }
+      ]
     }
   },
   {

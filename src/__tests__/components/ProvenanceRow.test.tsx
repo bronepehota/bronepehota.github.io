@@ -11,7 +11,8 @@
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { ProvenanceRow } from '@/components/encyclopedia/AttributionLabel';
-import type { Provenance } from '@/lib/provenance';
+import { getEncyclopediaUnit, getFactions } from '@/lib/encyclopedia-registry';
+import { resolveUnitProvenance, resolveFactionProvenance, type Provenance } from '@/lib/provenance';
 
 const renderRow = (p: Provenance) =>
   render(<ProvenanceRow provenance={p} withHeader={false} withContribute={false} />);
@@ -85,8 +86,54 @@ describe('ProvenanceRow — мини-АВБ-марка на кредит-чип�
     expect(screen.queryByTestId('lore-credit-chip')).toBeNull();
   });
 
-  it('avb-authored credit still carries the mark (loreAuthor avb ≠ tehnolog)', () => {
-    renderRow({ origin: 'avb', loreAuthor: 'avb', credit: { work: 'Фан-лор' } });
-    expect(screen.getByTestId('credit-avb-mark')).toBeInTheDocument();
+  it('origin avb: мини-марка подавлена — org-чип строки уже читается «АВБ» (dedup, кейс киберпехоты)', () => {
+    // Симметрия с полным бейджем: при origin==='avb' свёрнутый чип источника уже
+    // читается «АВБ» → мини-марка на кредит-чипе не дублирует его.
+    const { container } = renderRow({
+      origin: 'avb',
+      loreAuthor: 'avb',
+      credit: { author: 'V.Chertischev', work: 'Штурмовики Протектората' },
+    });
+    expect(screen.getByTestId('lore-credit-chip')).toBeInTheDocument();
+    expect(screen.queryByTestId('credit-avb-mark')).toBeNull();
+    expect(screen.queryByTestId('avb-badge')).toBeNull();
+    // «АВБ» остаётся в строке ровно один раз — самим org-чипом.
+    expect(container.textContent).toContain('АВБ');
+  });
+
+  it('штурмовая киберпехота (реальные данные): кредит есть, но без двойного АВБ', () => {
+    // Единственный юнит с origin avb + кредитом: строка = [АВБ · сообщество] +
+    // [V.Chertischev · Штурмовики Протектората] — и НИЧЕГО изумрудного сверх того.
+    const unit = getEncyclopediaUnit('protectorate_shturmovaya_kiber_pehota')!;
+    expect(unit).toBeTruthy();
+    renderRow(resolveUnitProvenance(unit));
+    expect(screen.getByTestId('lore-credit-chip')).toBeInTheDocument();
+    expect(screen.queryByTestId('credit-avb-mark')).toBeNull();
+    expect(screen.queryByTestId('avb-badge')).toBeNull();
+  });
+});
+
+describe('ProvenanceRow — массив кредитов (лор из нескольких книг)', () => {
+  it('рендерит по одному кредит-чипу на каждую книгу', () => {
+    const { container } = renderRow({
+      origin: 'tehnolog',
+      loreAuthor: 'avb',
+      credit: [
+        { author: 'V.Chertischev', work: 'Битва за Велиан', year: 2022 },
+        { author: 'V.Chertischev', work: 'Имперские войны' },
+      ],
+    });
+    const chips = screen.getAllByTestId('lore-credit-chip');
+    expect(chips).toHaveLength(2);
+    expect(container.textContent).toContain('Битва за Велиан');
+    expect(container.textContent).toContain('Имперские войны');
+    // Каждая не-Технолог книга помечается мини-АВБ (origin tehnolog → dedup не срабатывает).
+    expect(screen.getAllByTestId('credit-avb-mark')).toHaveLength(2);
+  });
+
+  it('фракция Протекторат (реальные данные): 3 кредит-чипа на карточке', () => {
+    const f = getFactions().find((x) => x.id === 'protectorate')!;
+    renderRow(resolveFactionProvenance(f));
+    expect(screen.getAllByTestId('lore-credit-chip')).toHaveLength(3);
   });
 });
