@@ -20,7 +20,7 @@ export function UnitArmament({ unit }: UnitArmamentProps) {
   if (!armament || armament.length === 0) return null;
 
   return (
-    <div className="folded-paper military-corners p-6" data-testid="unit-armament">
+    <div id="armament" className="folded-paper military-corners p-6 scroll-mt-4" data-testid="unit-armament">
       <h2 className="font-oswald text-lg text-military-sand mb-4 flex items-center gap-2">
         <Crosshair className="w-5 h-5 text-military-rust" />
         Вооружение

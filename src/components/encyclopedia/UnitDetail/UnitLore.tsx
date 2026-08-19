@@ -17,7 +17,7 @@ export function UnitLore({ unit }: UnitLoreProps) {
   if (!hasContent) return null;
 
   return (
-    <div className="folded-paper military-corners p-6">
+    <div id="lore" className="folded-paper military-corners p-6 scroll-mt-4">
       <h2 className="font-oswald text-lg text-military-sand mb-3 flex items-center gap-2">
         <BookOpen className="w-5 h-5 text-military-rust" />
         Лор и история

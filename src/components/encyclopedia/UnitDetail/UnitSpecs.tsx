@@ -39,7 +39,7 @@ export function UnitSpecs({ unit }: UnitSpecsProps) {
   const sourceUrl = enc.sourceUrl;
 
   return (
-    <div className="folded-paper military-corners p-6" data-testid="unit-specs">
+    <div id="specs" className="folded-paper military-corners p-6 scroll-mt-4" data-testid="unit-specs">
       <h2 className="font-oswald text-lg text-military-sand mb-4 flex items-center gap-2">
         <Gauge className="w-5 h-5 text-military-rust" />
         Характеристики

@@ -19,7 +19,7 @@ export function UnitLoreDetail({ doc }: { doc: UnitLoreDoc }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="folded-paper military-corners p-6" data-testid="unit-lore-detail">
+    <div id="full-lore" className="folded-paper military-corners p-6 scroll-mt-4" data-testid="unit-lore-detail">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}

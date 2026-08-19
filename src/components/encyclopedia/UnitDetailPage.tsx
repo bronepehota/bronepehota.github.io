@@ -22,6 +22,7 @@ import { PainterChip, ProvenanceRow, ImageSourceChip, MiniatureChip, SponsorChip
 import { FactionLogo } from '@/components/FactionLogo';
 import { getFactionColors, factionLogos, factionDisplayNames } from '@/lib/faction-colors';
 import { UnitStatTable } from './UnitDetail/UnitStatTable';
+import { UnitSectionNav } from './UnitDetail/UnitSectionNav';
 import type { Squad, Machine } from '@/lib/types';
 
 interface UnitDetailPageProps {
@@ -430,6 +431,10 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc }:
               onSourceChange={unit.sources.length > 1 ? setActiveSource : undefined}
             />
 
+            {/* Anchor chips — jump to the sections below (only the ones that
+                render for THIS unit; mirrors each section's null-condition). */}
+            <UnitSectionNav unit={unit} activeUnit={activeUnit} hasLoreDoc={!!loreDoc} />
+
             {/* Характеристики — spec plate (ТТХ): physical specs (mass, crew, моноблок,
                 разработчик). Constants of the machine, so base `unit` (not source-switched). */}
             <UnitSpecs unit={unit} />
@@ -446,7 +451,7 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc }:
 
             {/* Tactics */}
             {activeUnit.encyclopedia?.tactics && (
-              <section className="folded-paper military-corners p-6">
+              <section id="tactics" className="folded-paper military-corners p-6 scroll-mt-4">
                 <h2 className="font-oswald text-lg text-military-sand mb-3 flex items-center gap-2">
                   <Target className="w-5 h-5 text-military-rust" /> Тактика применения
                 </h2>
