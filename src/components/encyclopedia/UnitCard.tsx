@@ -60,11 +60,15 @@ export function UnitCard({ unit }: UnitCardProps) {
         {/* Image container with tactical overlay. Group-photo units use a wide
             3:2 frame (whole squad visible); others stay portrait 3:4. */}
         <div className={`relative w-full overflow-hidden ${hasGroup ? 'aspect-[3/2]' : 'aspect-[3/4]'}`}>
-          {/* Unit image */}
+          {/* Unit image — lazy: the catalog renders 100+ cards (~360 img /
+              ~11 MB); off-screen cards must not compete with the first paint.
+              The unit DETAIL hero stays eager (it is the LCP element there). */}
           <GitHubPagesImage
             src={displayImage}
             alt={unit.name}
             fill
+            loading="lazy"
+            decoding="async"
             className="object-cover transition-transform duration-500 group-hover:scale-110"
           />
 
@@ -87,7 +91,7 @@ export function UnitCard({ unit }: UnitCardProps) {
             >
               {logo ? (
                 <div className="absolute inset-1">
-                  <GitHubPagesImage src={logo} alt={unit.faction} fill className="object-contain" />
+                  <GitHubPagesImage src={logo} alt={unit.faction} fill loading="lazy" decoding="async" className="object-contain" />
                 </div>
               ) : (
                 <span className="font-ibm-mono text-[9px] font-bold text-white tracking-wider">
@@ -110,6 +114,8 @@ export function UnitCard({ unit }: UnitCardProps) {
                 src={badgeLogo}
                 alt={badgeName}
                 fill
+                loading="lazy"
+                decoding="async"
                 className="object-contain p-0.5"
               />
             </div>
@@ -135,6 +141,8 @@ export function UnitCard({ unit }: UnitCardProps) {
                   alt="АВБ"
                   width={14}
                   height={14}
+                  loading="lazy"
+                  decoding="async"
                   className="shrink-0 rounded-[1px]"
                 />
                 <span className="font-ibm-mono text-[8px] font-bold tracking-wider text-emerald-300">
