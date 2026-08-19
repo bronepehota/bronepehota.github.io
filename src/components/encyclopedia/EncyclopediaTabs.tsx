@@ -53,8 +53,11 @@ const TABS: TabDef[] = [
  * Encyclopedia mode selector — a prominent tactical segmented switch between
  * Units / Missions / Factions / History. Rendered in the header of every
  * encyclopedia list page so the four sections are equally discoverable.
+ *
+ * `dense` trims the segment padding for the sticky console on /encyclopedia,
+ * where the bar shares the screen with search + filters while scrolling.
  */
-export function EncyclopediaTabs({ className }: { className?: string }) {
+export function EncyclopediaTabs({ className, dense = false }: { className?: string; dense?: boolean }) {
   const pathname = usePathname();
 
   return (
@@ -94,7 +97,7 @@ export function EncyclopediaTabs({ className }: { className?: string }) {
               data-testid={`encyclopedia-tab-${tab.id}`}
               className={cn(
                 'group relative flex-1 flex items-center justify-center gap-2',
-                'py-3 px-2 md:py-3.5 md:px-4',
+                dense ? 'py-2 px-2 md:py-2.5 md:px-4' : 'py-3 px-2 md:py-3.5 md:px-4',
                 'font-russo uppercase tracking-wider text-xs md:text-sm',
                 'transition-all duration-300',
                 active
