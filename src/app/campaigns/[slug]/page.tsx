@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getAllCampaigns, getCampaign } from '@/lib/campaigns';
+import { LoreSourceRow } from '@/components/encyclopedia/AttributionLabel';
 import { BASE_PATH } from '@/lib/constants';
 
 const CHRONICLE_BG = `${BASE_PATH}/images/campaigns/chronicle-bg.jpg`;
@@ -101,6 +102,19 @@ export default async function CampaignDetailPage({
             dangerouslySetInnerHTML={{ __html: campaign.bodyHtml }}
           />
         </section>
+
+        {/* Source attribution — the novel / official edition the chronicle retells.
+            Rendered only when the frontmatter carries one (no invented sources). */}
+        {(campaign.loreAuthor || campaign.credit) && (
+          <section className="px-4 pb-8">
+            <div
+              className="fade-in-up max-w-3xl mx-auto"
+              style={{ animationDelay: '0.35s', animationFillMode: 'both' }}
+            >
+              <LoreSourceRow loreAuthor={campaign.loreAuthor} credit={campaign.credit} />
+            </div>
+          </section>
+        )}
 
         {/* Participants — link out to encyclopedia unit pages */}
         {campaign.units && campaign.units.length > 0 && (

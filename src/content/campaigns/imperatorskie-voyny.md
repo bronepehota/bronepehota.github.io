@@ -5,6 +5,10 @@ subtitle: Вторжение 4451 года и рождение Империи П
 era: "4451–4528"
 factions: [polaris, protectorate, mercenaries]
 order: 4
+loreAuthor: star_system
+credit:
+  author: Chertischev
+  work: Имперские войны
 units:
   - { id: raptor, role: «Имперская линейная танкетка мехкорпусов» }
   - { id: bronekhod, role: «Гусеничная самоходка роботанковых бригад Протектората» }

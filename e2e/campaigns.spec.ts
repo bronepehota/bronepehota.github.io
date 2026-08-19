@@ -55,4 +55,20 @@ test.describe('Хроники войн', () => {
 
     await expect(page.getByRole('heading', { name: 'Имперские войны' })).toBeVisible();
   });
+
+  test('«Имперские войны» — виден источник (роман Chertischev) с АВБ-маркой', async ({ page }) => {
+    await page.goto('/campaigns');
+    await page.waitForLoadState('networkidle');
+
+    const card = page.locator('[data-testid="campaign-card"]', { hasText: 'Имперские войны' }).first();
+    await card.click();
+    await page.waitForLoadState('networkidle');
+
+    const source = page.getByTestId('lore-source-row');
+    await expect(source).toBeVisible();
+    await expect(source).toContainText('Chertischev');
+    await expect(source).toContainText('Имперские войны');
+    // The novel is non-Технолог → its credit chip carries the mini АВБ mark.
+    await expect(page.getByTestId('credit-avb-mark')).toBeVisible();
+  });
 });

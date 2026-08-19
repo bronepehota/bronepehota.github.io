@@ -72,4 +72,28 @@ describe('campaigns loader', () => {
     expect(c?.units?.some((u) => u.id === 'bronekhod')).toBe(true);
     expect(c?.units?.some((u) => u.id === 'mercenaries_kosari')).toBe(true);
   });
+
+  it('Штурм Велиана несёт кредит романа Chertischev (не-Технолог источник)', () => {
+    const sv = getAllCampaigns().find((c) => c.slug === 'shturm-velyana')!;
+    expect(sv.loreAuthor).toBe('star_system');
+    expect(sv.credit?.author).toBe('Chertischev');
+    expect(sv.credit?.work).toBe('Битва за Велиан');
+    expect(sv.credit?.year).toBe(2022);
+  });
+
+  it('Имперские войны несут кредит романа — без года (не указан в издании)', () => {
+    const iv = getAllCampaigns().find((c) => c.slug === 'imperatorskie-voyny')!;
+    expect(iv.loreAuthor).toBe('star_system');
+    expect(iv.credit?.author).toBe('Chertischev');
+    expect(iv.credit?.work).toBe('Имперские войны');
+    expect(iv.credit?.year).toBeUndefined();
+  });
+
+  it('кампании без установленного источника не выдумывают атрибуцию', () => {
+    for (const slug of ['korporativnye-voyny', 'skrytyj-vrag']) {
+      const c = getAllCampaigns().find((x) => x.slug === slug)!;
+      expect(c.loreAuthor).toBeUndefined();
+      expect(c.credit).toBeUndefined();
+    }
+  });
 });

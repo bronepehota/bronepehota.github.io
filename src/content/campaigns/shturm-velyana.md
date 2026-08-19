@@ -5,6 +5,11 @@ subtitle: Третья волна вторжения и «Бдительный �
 era: "4527–4528"
 factions: [protectorate, polaris]
 order: 3
+loreAuthor: star_system
+credit:
+  author: Chertischev
+  work: Битва за Велиан
+  year: 2022
 units:
   - { id: protectorate_olgerd, role: «Советник Ольгерд Хенс» }
   - { id: predator, role: «Личный гир майора Холдера "Акеллы"» }
