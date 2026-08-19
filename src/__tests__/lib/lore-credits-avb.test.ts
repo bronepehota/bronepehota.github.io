@@ -3,7 +3,7 @@
  * пользователя 2026-08-19):
  *
  *   Технолог           = «Справочник техники» + «Летопись: Звёздные герои»
- *   НЕ Технолог (АВБ)  = 4 романа В. Чернецова (независимый автор) — «Битва за
+ *   НЕ Технолог (АВБ)  = 4 романа V.Chertischev (независимый автор) — «Битва за
  *                        Велиан», «Имперские войны», «Косары», «Штурмовики Протектората»
  *
  * The mini АВБ mark on a credit chip is driven by the RESOLVED `loreAuthor` axis
@@ -42,14 +42,14 @@ const credited: Credited[] = [
 ].filter((c): c is Credited => Boolean(c.work));
 
 describe('именные кредиты книг: мини-АВБ ровно на не-Технолог произведениях', () => {
-  it('в базе есть кредиты всех JSON-несомых романов В. Чернецова', () => {
+  it('в базе есть кредиты всех JSON-несомых романов V.Chertischev', () => {
     const works = credited.map((c) => c.work);
     for (const work of JSON_BACKED_WORKS) {
       expect(works).toContain(work);
     }
   });
 
-  it('каждый кредит романа В. Чернецова разрешается с loreAuthor = avb (независимый автор)', () => {
+  it('каждый кредит романа V.Chertischev разрешается с loreAuthor = avb (независимый автор)', () => {
     for (const c of credited) {
       if (NON_TEHNOLOG_WORKS.includes(c.work)) {
         expect(`${c.id}: loreAuthor=${c.loreAuthor}`).toBe(`${c.id}: loreAuthor=avb`);

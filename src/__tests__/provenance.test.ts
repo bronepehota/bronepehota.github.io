@@ -178,7 +178,7 @@ describe('provenance resolver', () => {
   });
 
   describe('named-author credit (LoreCredit) pass-through', () => {
-    const novel = { author: 'В. Чернецов', work: 'Битва за Велиан', year: 2022 };
+    const novel = { author: 'V.Chertischev', work: 'Битва за Велиан', year: 2022 };
 
     test('unit: credit override is preserved alongside resolved org axes', () => {
       const p = resolveUnitProvenance(unit('polaris', { credit: novel }, { sources: ['tehnolog'] }));

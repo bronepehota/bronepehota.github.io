@@ -7,7 +7,7 @@ factions: [polaris, protectorate, mercenaries]
 order: 4
 loreAuthor: avb
 credit:
-  author: "В. Чернецов"
+  author: "V.Chertischev"
   work: Имперские войны
 units:
   - { id: raptor, role: «Имперская линейная танкетка мехкорпусов» }
@@ -75,4 +75,4 @@ units:
 
 ---
 
-*Кампания по мотивам романа **В. Чернецова** «Хроники Имперских войн», официальная вселенная Star System / Робогир компании «Технолог».*
+*Кампания по мотивам романа **V.Chertischev** «Хроники Имперских войн», официальная вселенная Star System / Робогир компании «Технолог».*

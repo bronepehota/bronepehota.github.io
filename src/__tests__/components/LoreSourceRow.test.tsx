@@ -23,11 +23,11 @@ describe('LoreSourceRow — строка источника кампаний и 
     const { container } = render(
       <LoreSourceRow
         loreAuthor="avb"
-        credit={{ author: 'В. Чернецов', work: 'Имперские войны' }}
+        credit={{ author: 'V.Chertischev', work: 'Имперские войны' }}
       />,
     );
     expect(screen.getByTestId('lore-source-row')).toBeInTheDocument();
-    expect(container.textContent).toContain('В. Чернецов');
+    expect(container.textContent).toContain('V.Chertischev');
     expect(container.textContent).toContain('Имперские войны');
     expect(screen.getByTestId('credit-avb-mark')).toBeInTheDocument();
   });

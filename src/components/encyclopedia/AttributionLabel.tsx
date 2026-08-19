@@ -243,7 +243,7 @@ const LORE_CREDIT_TONE = '#c2924a';
 
 /** Mini АВБ mark for the named-author credit chip — icon-only sibling of the full
  *  <AlternativeVersionBadge>. Flags that the *book* the lore was adapted from is a
- *  non-Технолог work (a В. Чернецов novel etc.) WITHOUT claiming the whole entity
+ *  non-Технолог work (a V.Chertischev novel etc.) WITHOUT claiming the whole entity
  *  is alternative: official units keep their Технолог origin and get only this mark
  *  on the source. Carries the same disclaimer tooltip as the full badge. */
 export function CreditAvbMark({ compact }: { compact?: boolean }) {
@@ -277,13 +277,13 @@ interface LoreCreditChipOptions {
 /** Renders a `LoreCredit` (a named author + work the lore was adapted from) as a
  *  dossier chip, visually unified with the org-source chips but flagged by a BookOpen
  *  icon. Orthogonal to the origin/loreAuthor chips — e.g. «Технолог» canon adapted
- *  from В. Чернецов's «Битва за Велиан» shows both the org badge and this citation.
+ *  from V.Chertischev's «Битва за Велиан» shows both the org badge and this citation.
  *  When the book itself is non-Технолог (`loreAuthor ≠ tehnolog`), the chip carries
  *  the mini АВБ mark right next to it. */
 function loreCreditChip(credit: LoreCredit, { loreAuthor, compact }: LoreCreditChipOptions = {}) {
   const name = credit.author ?? credit.work ?? 'Источник лора';
   // When the author is named, the work + year go to the role sub-label
-  // («В. Чернецов · Битва за Велиан, 2022»); with no author, the work is the name.
+  // («V.Chertischev · Битва за Велиан, 2022»); with no author, the work is the name.
   const role = credit.author
     ? [credit.work, credit.year].filter(Boolean).join(', ')
     : credit.year

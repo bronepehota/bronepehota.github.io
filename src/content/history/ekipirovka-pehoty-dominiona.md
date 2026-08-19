@@ -4,7 +4,7 @@ title: Пехота Доминиона
 order: 8
 loreAuthor: avb
 credit:
-  author: "В. Чернецов"
+  author: "V.Chertischev"
   work: Косары
 ---
 

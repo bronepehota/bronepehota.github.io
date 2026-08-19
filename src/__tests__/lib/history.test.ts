@@ -27,10 +27,10 @@ describe('history chapters', () => {
     }
   });
 
-  it('глава 8 (пехота Доминиона) — из «Косарей»: avb + кредит В. Чернецова', () => {
+  it('глава 8 (пехота Доминиона) — из «Косарей»: avb + кредит V.Chertischev', () => {
     const ch8 = chapters.find((c) => c.slug === 'ekipirovka-pehoty-dominiona')!;
     expect(ch8.loreAuthor).toBe('avb');
-    expect(ch8.credit?.author).toBe('В. Чернецов');
+    expect(ch8.credit?.author).toBe('V.Chertischev');
     expect(ch8.credit?.work).toBe('Косары');
   });
 });

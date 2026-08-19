@@ -5,9 +5,9 @@ describe('лор наёмников из «Косарей»', () => {
     expect(getEncyclopediaFaction('mercenaries')?.description).toContain('Зал Наёмников');
   });
 
-  it('kosari несут кредит В. Чернецова (независимый автор — АВБ)', () => {
+  it('kosari несут кредит V.Chertischev (независимый автор — АВБ)', () => {
     const credit = getEncyclopediaUnit('mercenaries_kosari')?.provenance?.credit;
-    expect(credit?.author).toBe('В. Чернецов');
+    expect(credit?.author).toBe('V.Chertischev');
     expect(credit?.work).toBe('Косары');
   });
 

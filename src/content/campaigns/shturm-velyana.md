@@ -7,7 +7,7 @@ factions: [protectorate, polaris]
 order: 3
 loreAuthor: avb
 credit:
-  author: "В. Чернецов"
+  author: "V.Chertischev"
   work: Битва за Велиан
   year: 2022
 units:
@@ -43,4 +43,4 @@ units:
 
 ---
 
-*Кампания по мотивам романа **В. Чернецова** «Битва за Велиан» (2022), официальная вселенная Star System / Робогир компании «Технолог».*
+*Кампания по мотивам романа **V.Chertischev** «Битва за Велиан» (2022), официальная вселенная Star System / Робогир компании «Технолог».*

@@ -1,6 +1,6 @@
 import { getEncyclopediaUnit, getEncyclopediaFaction } from '@/lib/encyclopedia-registry';
 
-const CREDIT = { author: 'В. Чернецов', work: 'Штурмовики Протектората' };
+const CREDIT = { author: 'V.Chertischev', work: 'Штурмовики Протектората' };
 
 const SHTURM_SQUADS = [
   'protectorate_shturmovaya_kiber_pehota',
@@ -11,7 +11,7 @@ const SHTURM_SQUADS = [
 ];
 
 describe('лор штурмовых отрядов Протектората', () => {
-  it('все затронутые отряды несут кредит В. Чернецова', () => {
+  it('все затронутые отряды несут кредит V.Chertischev', () => {
     for (const id of SHTURM_SQUADS) {
       const credit = getEncyclopediaUnit(id)?.provenance?.credit;
       expect({ id, credit }).toEqual({ id, credit: CREDIT });
