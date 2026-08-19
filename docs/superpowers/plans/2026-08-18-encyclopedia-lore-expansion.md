@@ -1052,3 +1052,22 @@ gh pr ready feat/encyclopedia-novel-lore 2>&1 | cat
 ```
 
 Дальше — CI гоняет E2E (armament, история, кампания); после мержа чек-лист GA4/Метрики НЕ требуется (контентные изменения, новых событий аналитики нет).
+
+---
+
+### Task 11 (добавлен по директиве пользователя 2026-08-19): «Везде ссылки на источники + АВБ на не-Технолог источниках»
+
+**Классификация (решение пользователя):** «Технолог» = Справочник техники + «Летопись» (без АВБ). Четыре романа Chertischev («Битва за Велиан», «Имперские войны», «Косары», «Штурмовики Протектората») = не Технолог → их кредит-чипы несут АВБ-марку. Полный АВБ-бейдж на сущности остаётся привязан к origin (чей концепт) — официальные юниты с лором из романов НЕ помечаются целиком.
+
+**Files:**
+- Modify: `src/lib/campaigns.ts` (CampaignMeta + provenance/credit из frontmatter), `src/lib/history.ts` (HistoryChapterMeta + credit/loreAuthor)
+- Modify: `src/app/campaigns/[slug]/page.tsx` (строка источника), `src/app/encyclopedia/history/page.tsx` (строка источника у главы)
+- Modify: `src/components/encyclopedia/AttributionLabel.tsx` (кредит-чип: мини-АВБ-марка когда loreAuthor ≠ tehnolog)
+- Modify (данные): `factions.json` (у кредитов «Битвы за Велиан» loreAuthor:"tehnolog" → "star_system"), `units/{polaris,protectorate}/squads.json` (то же), `units/{polaris,protectorate}/machines.json` (кредиты Велиана: + loreAuthor:"star_system"), 2 кампании md (frontmatter + credit), 8 глав истории md (frontmatter: гл.1-7 loreAuthor tehnolog; гл.8 star_system + credit «Косары»)
+- Test: юнит-тесты рендера кредит-чипа с/без АВБ, лоадеров кампаний/истории (frontmatter provenance), данных (все не-Технолог кредиты сопровождаются loreAuthor≠tehnolog)
+
+**Правила:**
+- loreAuthor у кредитов Велиана в фракциях/отрядах: просто убрать override `"tehnolog"` (дефолт фракций/неофициальных скуwadов уже star_system) или поставить "star_system" явно — по контексту; для официальных отрядов (tehnolog-лист) и машин — явный `"loreAuthor": "star_system"`.
+- Кредиты Справочника/Летописи: без АВБ (loreAuthor tehnolog).
+- Кампании korporativnye-voyny/skrytyj-vrag: источник НЕ выдумывать — нет данных, нет кредита (проверить docs/ENCYCLOPEDIA_LORE_SOURCES.md; если там указан источник — поставить по нему).
+- E2E: страница истории показывает строку источника у главы 8 с АВБ-маркой; страница кампании «Имперские войны» — источник с АВБ (CI-only).
