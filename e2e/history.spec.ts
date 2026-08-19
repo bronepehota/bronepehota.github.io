@@ -19,4 +19,30 @@ test.describe('История вселенной', () => {
     await page.waitForLoadState('networkidle');
     await expect(page).toHaveURL(/\/encyclopedia\/history$/);
   });
+
+  test('глава «Пехота Доминиона» несёт источник («Косары») с АВБ-маркой', async ({ page }) => {
+    await page.goto('/encyclopedia/history');
+    await page.waitForLoadState('networkidle');
+
+    const chapter = page.locator('[data-testid="history-chapter"]', {
+      hasText: 'Пехота Доминиона',
+    });
+    await expect(chapter).toBeVisible();
+
+    const source = chapter.getByTestId('lore-source-row');
+    await expect(source).toBeVisible();
+    await expect(source).toContainText('Chertischev');
+    await expect(source).toContainText('Косары');
+    // The novel is non-Технолог → the credit chip carries the mini АВБ mark.
+    await expect(chapter.getByTestId('credit-avb-mark')).toBeVisible();
+  });
+
+  test('главы «Летописи» ссылаются на издание «Технолог» — без АВБ-марки', async ({ page }) => {
+    await page.goto('/encyclopedia/history');
+    await page.waitForLoadState('networkidle');
+
+    const first = page.getByTestId('history-chapter').first();
+    await expect(first.getByTestId('lore-source-row')).toContainText('Издание «Технолог»');
+    await expect(first.getByTestId('credit-avb-mark')).toHaveCount(0);
+  });
 });

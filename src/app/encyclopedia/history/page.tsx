@@ -1,5 +1,6 @@
 import { getAllHistoryChapters, getHistoryChapter } from '@/lib/history';
 import { EncyclopediaTabs } from '@/components/encyclopedia/EncyclopediaTabs';
+import { LoreSourceRow } from '@/components/encyclopedia/AttributionLabel';
 
 export const metadata = {
   title: 'История вселенной — Энциклопедия Бронепехоты',
@@ -87,6 +88,10 @@ export default async function HistoryPage() {
               className="prose-invert text-military-sand/80 leading-relaxed space-y-4 text-sm md:text-base [&_h3]:font-oswald [&_h3]:text-military-sand"
               dangerouslySetInnerHTML={{ __html: c.bodyHtml }}
             />
+            {/* Source row — «Летопись» chapters cite the official edition; chapter VIII
+                cites the «Косары» novel (non-Технолог → carries the mini АВБ mark).
+                Renders nothing for a chapter without attribution. */}
+            <LoreSourceRow loreAuthor={c.loreAuthor} credit={c.credit} className="mt-4" />
           </section>
         ))}
       </div>
