@@ -4,7 +4,7 @@ title: Операция «Скрытый враг»
 subtitle: Второй рутенийский конфликт
 era: "4537"
 factions: [mercenaries, protectorate]
-order: 2
+order: 3
 units:
   - { id: mercenaries_piraty_markusa_novye, role: «Банда пиратов Маркуса» }
   - { id: mercenaries_reydery_pylnoy_zony, role: «Рейдеры Пыльной Зоны» }

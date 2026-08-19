@@ -4,7 +4,7 @@ title: Корпоративные войны
 subtitle: Кампания на планете Мантис
 era: "4546"
 factions: [polaris, protectorate, mercenaries]
-order: 1
+order: 4
 units:
   - id: protectorate_tyazhyolaya_shturmovaya_pehota_veliana
     role: «Велианские штурмовики»

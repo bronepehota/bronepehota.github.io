@@ -4,7 +4,7 @@ title: Имперские войны
 subtitle: Вторжение 4451 года и рождение Империи Полярис
 era: "4451–4528"
 factions: [polaris, protectorate, mercenaries]
-order: 4
+order: 1
 loreAuthor: avb
 credit:
   author: "V.Chertischev"

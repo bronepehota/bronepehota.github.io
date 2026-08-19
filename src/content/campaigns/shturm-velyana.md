@@ -4,7 +4,7 @@ title: Штурм Велиана
 subtitle: Третья волна вторжения и «Бдительный Мир»
 era: "4527–4528"
 factions: [protectorate, polaris]
-order: 3
+order: 2
 loreAuthor: avb
 credit:
   author: "V.Chertischev"

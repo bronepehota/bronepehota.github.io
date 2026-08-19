@@ -20,7 +20,13 @@ describe('campaigns loader', () => {
 
   it('sorts campaigns by order', () => {
     const all = getAllCampaigns();
-    expect(all[0].slug).toBe('korporativnye-voyny');
+    // Chronological (ascending era): the earliest war reads first.
+    expect(all.map((c) => c.slug)).toEqual([
+      'imperatorskie-voyny',
+      'shturm-velyana',
+      'skrytyj-vrag',
+      'korporativnye-voyny',
+    ]);
   });
 
   it('discovers the Скрытый враг chronicle', () => {
@@ -59,14 +65,15 @@ describe('campaigns loader', () => {
     expect(sv.units?.some((u) => u.id === 'protectorate_regulyary_planety_velian')).toBe(true);
   });
 
-  it('включает кампанию «Имперские войны» — самая ранняя эра, order 4', () => {
+  it('включает кампанию «Имперские войны» — самая ранняя эра, открывает хронику', () => {
     const all = getAllCampaigns();
     const c = all.find((x) => x.slug === 'imperatorskie-voyny');
     expect(c).toBeDefined();
-    expect(c?.order).toBe(4);
+    expect(c?.order).toBe(1);
     expect(c?.factions).toContain('polaris');
-    // Newest era first: korporativnye (1), skrytyj (2), shturm-velyana (3) — this one is 4th.
-    expect(all[3]?.slug).toBe('imperatorskie-voyny');
+    // Chronological order: this 4451 campaign is first, before shturm-velyana (2),
+    // skrytyj (3) and korporativnye (4).
+    expect(all[0]?.slug).toBe('imperatorskie-voyny');
     // Roster carries the war's signature machines.
     expect(c?.units?.some((u) => u.id === 'raptor')).toBe(true);
     expect(c?.units?.some((u) => u.id === 'bronekhod')).toBe(true);
