@@ -61,7 +61,11 @@ export function EncyclopediaTabs({ className }: { className?: string }) {
     <div className={cn('flex justify-center', className)}>
       <div
         className={cn(
-          'relative inline-flex items-stretch w-full max-w-md',
+          // md: (≥768px) cell min-content grows to ~600px (icons + index + px-4 +
+          // text-sm) — cap the bar at 2xl (672px) so the 4th segment is never
+          // clipped by the container's overflow-hidden. Below md the 448px cap
+          // keeps the mobile fit (icons hidden <400px) intact.
+          'relative inline-flex items-stretch w-full max-w-md md:max-w-2xl',
           'rounded-xl overflow-hidden',
           'border border-military-steel/40 bg-military-charcoal/70 backdrop-blur-md',
           'shadow-[0_8px_30px_-12px_rgba(0,0,0,0.8)]',

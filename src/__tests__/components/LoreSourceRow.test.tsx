@@ -9,7 +9,7 @@
  */
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { LoreSourceRow } from '@/components/encyclopedia/AttributionLabel';
+import { LoreSourceRow } from '@/components/encyclopedia/LoreSourceRow';
 
 describe('LoreSourceRow — строка источника кампаний и глав истории', () => {
   it('tehnolog без кредита: чип «Издание „Технолог“», без АВБ-марки', () => {

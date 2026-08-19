@@ -1,6 +1,6 @@
 import { getAllHistoryChapters, getHistoryChapter } from '@/lib/history';
 import { EncyclopediaTabs } from '@/components/encyclopedia/EncyclopediaTabs';
-import { LoreSourceRow } from '@/components/encyclopedia/AttributionLabel';
+import { LoreSourceRow } from '@/components/encyclopedia/LoreSourceRow';
 
 export const metadata = {
   title: 'История вселенной — Энциклопедия Бронепехоты',

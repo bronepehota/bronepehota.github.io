@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getAllCampaigns, getCampaign } from '@/lib/campaigns';
-import { LoreSourceRow } from '@/components/encyclopedia/AttributionLabel';
+import { LoreSourceRow } from '@/components/encyclopedia/LoreSourceRow';
 import { BASE_PATH } from '@/lib/constants';
 
 const CHRONICLE_BG = `${BASE_PATH}/images/campaigns/chronicle-bg.jpg`;
