@@ -193,7 +193,7 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
               </div>
 
               <Link
-                href="/campaigns"
+                href="/encyclopedia/history#wars"
                 data-testid="encyclopedia-campaigns-link"
                 className="inline-flex items-center gap-1.5 font-ibm-mono text-[11px] text-military-amber/70 hover:text-military-amber transition-colors tracking-widest uppercase whitespace-nowrap"
               >

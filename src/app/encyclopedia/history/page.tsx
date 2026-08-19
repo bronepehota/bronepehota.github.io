@@ -1,11 +1,13 @@
 import { getAllHistoryChapters, getHistoryChapter } from '@/lib/history';
+import { getAllCampaigns } from '@/lib/campaigns';
+import { CampaignsBlock } from '@/components/encyclopedia/CampaignsBlock';
 import { EncyclopediaTabs } from '@/components/encyclopedia/EncyclopediaTabs';
 import { LoreSourceRow } from '@/components/encyclopedia/LoreSourceRow';
 
 export const metadata = {
   title: 'История вселенной — Энциклопедия Бронепехоты',
   description:
-    'Хроника человечества: от Тунгусского артефакта и первых прыжков к звёздам до Доминиона и двух сверхдержав.',
+    'Хроника человечества: от Тунгусского артефакта и первых прыжков к звёздам до Доминиона, двух сверхдержав и хроник войн 4451–4546 годов.',
 };
 
 export default async function HistoryPage() {
@@ -13,6 +15,14 @@ export default async function HistoryPage() {
   const chapters = (await Promise.all(metas.map((m) => getHistoryChapter(m.slug)))).filter(
     (c): c is NonNullable<typeof c> => c !== null,
   );
+  // «Хроники войн» live as the closing section of the history page (#wars) —
+  // chronological order, the standalone /campaigns list redirects here.
+  const campaigns = getAllCampaigns();
+  // Era span of the whole wars block (TOC badge): first campaign's opening
+  // year → last campaign's closing year, e.g. 4451–4546.
+  const firstWar = campaigns[0]?.era?.match(/\d{4}/)?.[0];
+  const lastWar = campaigns[campaigns.length - 1]?.era?.match(/(\d{4})\s*$/)?.[1];
+  const warsEra = firstWar && lastWar ? `${firstWar}–${lastWar}` : undefined;
 
   return (
     <main className="min-h-screen bg-military-dark relative overflow-hidden">
@@ -61,6 +71,20 @@ export default async function HistoryPage() {
                 </a>
               </li>
             ))}
+            {/* Wars chronicle — not a chapter; separated entry anchoring #wars */}
+            <li className="pt-2 mt-2 border-t border-military-steel/20">
+              <a href="#wars" className="flex items-baseline gap-3 group">
+                <span className="font-ibm-mono text-[10px] text-military-rust">{'//'}</span>
+                <span className="font-oswald text-military-sand group-hover:text-military-amber transition-colors">
+                  Хроники войн
+                </span>
+                {warsEra && (
+                  <span className="font-ibm-mono text-[10px] text-military-steel/50">
+                    {warsEra}
+                  </span>
+                )}
+              </a>
+            </li>
           </ol>
         </nav>
 
@@ -94,6 +118,9 @@ export default async function HistoryPage() {
             <LoreSourceRow loreAuthor={c.loreAuthor} credit={c.credit} className="mt-4" />
           </section>
         ))}
+
+        {/* «Хроники войн» — campaigns as the closing section (anchor #wars) */}
+        <CampaignsBlock campaigns={campaigns} />
       </div>
     </main>
   );

@@ -6,12 +6,15 @@ test.describe('Хроники войн', () => {
     await clearStorage(page);
   });
 
-  test('список кампаний открывается и ведёт на страницу кампании', async ({ page }) => {
-    await page.goto('/campaigns');
+  test('секция «Хроники войн» на странице истории ведёт на страницу кампании', async ({ page }) => {
+    await page.goto('/encyclopedia/history');
     await page.waitForLoadState('networkidle');
 
+    // Wars section is the closing block of the history page
     await expect(page.getByTestId('campaigns-title')).toHaveText('ХРОНИКИ ВОЙН');
-    const card = page.getByTestId('campaign-card').first();
+    const card = page
+      .locator('[data-testid="campaign-card"]', { hasText: 'Корпоративные войны' })
+      .first();
     await expect(card).toBeVisible();
     await card.click();
     await page.waitForLoadState('networkidle');
@@ -24,16 +27,25 @@ test.describe('Хроники войн', () => {
     await expect(page.getByText('Миссии')).toBeVisible();
   });
 
-  test('футер лендинга ведёт в Хроники', async ({ page }) => {
+  test('старый адрес /campaigns редиректит на историю вселенной', async ({ page }) => {
+    await page.goto('/campaigns');
+    await page.waitForLoadState('networkidle');
+
+    // Meta-refresh redirect (static export) lands on the history page
+    await expect(page).toHaveURL(/\/encyclopedia\/history/);
+    await expect(page.getByTestId('campaigns-title')).toBeVisible();
+  });
+
+  test('футер лендинга ведёт в Хроники (секция истории)', async ({ page }) => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
     await page.getByTestId('campaigns-link').click();
     await page.waitForLoadState('networkidle');
-    await expect(page).toHaveURL(/\/campaigns$/);
+    await expect(page).toHaveURL(/\/encyclopedia\/history$/);
   });
 
   test('в Хрониках видна операция «Скрытый враг»', async ({ page }) => {
-    await page.goto('/campaigns');
+    await page.goto('/encyclopedia/history');
     await page.waitForLoadState('networkidle');
 
     const card = page.locator('[data-testid="campaign-card"]', { hasText: 'Скрытый враг' }).first();
@@ -45,7 +57,7 @@ test.describe('Хроники войн', () => {
   });
 
   test('в Хрониках видна «Имперские войны»', async ({ page }) => {
-    await page.goto('/campaigns');
+    await page.goto('/encyclopedia/history');
     await page.waitForLoadState('networkidle');
 
     const card = page.locator('[data-testid="campaign-card"]', { hasText: 'Имперские войны' }).first();
@@ -57,7 +69,7 @@ test.describe('Хроники войн', () => {
   });
 
   test('«Имперские войны» — виден источник (роман V.Chertischev) с АВБ-маркой', async ({ page }) => {
-    await page.goto('/campaigns');
+    await page.goto('/encyclopedia/history');
     await page.waitForLoadState('networkidle');
 
     const card = page.locator('[data-testid="campaign-card"]', { hasText: 'Имперские войны' }).first();

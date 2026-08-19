@@ -35,9 +35,9 @@ export default function Footer({ className }: FooterProps) {
             </span>
           </Link>
 
-          {/* Chronicles link */}
+          {/* Chronicles link — wars section of the encyclopedia history */}
           <Link
-            href="/campaigns"
+            href="/encyclopedia/history"
             data-testid="campaigns-link"
             className="flex items-center gap-1 md:gap-2 px-2 md:px-4 py-1.5 rounded-sm border border-slate-700/50 hover:border-military-amber/50 transition-all duration-300 group touch-manipulation whitespace-nowrap"
           >

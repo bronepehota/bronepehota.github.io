@@ -53,7 +53,7 @@ export default async function CampaignDetailPage({
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-military-rust/60 to-transparent animate-pulse" />
           <div className="relative z-10 max-w-3xl mx-auto">
             <Link
-              href="/campaigns"
+              href="/encyclopedia/history#wars"
               className="fade-in-up inline-flex items-center gap-2 font-ibm-mono text-xs md:text-sm text-military-rust/60 hover:text-military-amber transition-colors tracking-widest uppercase mb-6"
               style={{ animationDelay: '0.1s', animationFillMode: 'both' }}
             >
