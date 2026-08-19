@@ -74,6 +74,10 @@ test.describe('Хроники войн', () => {
 
     const card = page.locator('[data-testid="campaign-card"]', { hasText: 'Имперские войны' }).first();
     await card.click();
+    // Client-side <Link> navigation: networkidle resolves instantly on SPA
+    // transitions — wait for the URL state instead, or lore-source-row would
+    // multi-match the still-mounted history chapters (strict mode violation).
+    await expect(page).toHaveURL(/\/campaigns\/imperatorskie-voyny/);
     await page.waitForLoadState('networkidle');
 
     const source = page.getByTestId('lore-source-row');
