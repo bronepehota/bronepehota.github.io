@@ -108,7 +108,7 @@ npm run test:e2e            # All E2E tests pass
 
 | Area | Spec file | Tests |
 |------|-----------|-------|
-| Analytics | `analytics.spec.ts` | 4 |
+| Analytics | `analytics.spec.ts` | 5 |
 | Aimed shot | `aimed-shot.spec.ts` | 7 |
 | Army creation | `army-creation.spec.ts` | 5 |
 | Battle buffs | `battle-buffs.spec.ts` | 11 |
@@ -117,14 +117,14 @@ npm run test:e2e            # All E2E tests pass
 | Campaigns (Хроники войн) | `campaigns.spec.ts` | 3 |
 | Combat flow | `combat.spec.ts` | 4 |
 | Editor | `editor.spec.ts` | 7 |
-| Encyclopedia | `encyclopedia.spec.ts` | 11 |
+| Encyclopedia | `encyclopedia.spec.ts` | 12 |
 | Example/smoke | `example.spec.ts` | 3 |
 | Fire rate | `unit-card-fire-rate.spec.ts` | 1 |
 | Focus trap (a11y) | `focus-trap.spec.ts` | 1 |
 | Game session | `game-session.spec.ts` | 2 |
 | Grenade targets | `grenade-targets.spec.ts` | 1 |
 | Height bonus (community) | `height-bonus.spec.ts` | 3 |
-| Landing | `landing.spec.ts` | 2 |
+| Landing | `landing.spec.ts` | 4 |
 | Machine capture | `machine-capture.spec.ts` | 2 |
 | Machine melee/ram | `machine-melee-ram.spec.ts` | 2 |
 | Melee defender armor | `melee-defender-armor.spec.ts` | 1 |
