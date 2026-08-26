@@ -517,7 +517,7 @@ Static-export SEO generated at build time (`output: 'export'`):
 автоматически. `RouteTracker` в root layout шлёт просмотры при смене маршрута + `pwa_install`.
 
 **События**: `wizard_step` (6 шагов), `battle_start`, `battle_turn` (turn), `battle_engaged`
-(ход 2 = «реальный бой»), `editor_unit_saved`, `pwa_install`. Спека+таксономия:
+(ход 2 = «реальный бой»), `battle_entry` (from: landing_hero | landing_factions | encyclopedia_unit | encyclopedia_factions) — мосты в /app, `editor_unit_saved`, `pwa_install`. Спека+таксономия:
 `docs/superpowers/specs/2026-08-18-analytics-battles-design.md`.
 
 **Чек-лист после деплоя (руками, один раз)**: GA4 → Admin → Data streams → Enhanced measurement →
