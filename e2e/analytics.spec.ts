@@ -1,5 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
-import { clearStorage, setupToPreparation, setupGameSessionWithSquad } from './helpers/setup';
+import { clearStorage, dismissIntroIfShown, setupToPreparation, setupGameSessionWithSquad } from './helpers/setup';
 
 // Перехват аналитики ДО загрузки страниц:
 // - ym: геттер/сеттер на window.ym — реальный tag.js не может перезаписать рекордер;
@@ -44,6 +44,7 @@ async function gaCalls(page: Page): Promise<unknown[][]> {
 test('SPA-переход лендинг→/app даёт pageview в обеих системах', async ({ page }) => {
   await page.goto('/');
   await page.getByTestId('landing-cta-button').first().click();
+  await dismissIntroIfShown(page);
   // /app загружен: виден первый шаг визарда (дев-компиляция ~до 30с)
   await expect(page.getByTestId('rules-confirm-button')).toBeVisible({ timeout: 30000 });
 
@@ -58,6 +59,7 @@ test('SPA-переход лендинг→/app даёт pageview в обеих �
 test('воронка: wizard_step на каждом confirm-клике', async ({ page }) => {
   await page.goto('/');
   await page.getByTestId('landing-cta-button').first().click();
+  await dismissIntroIfShown(page);
   await expect(page.getByTestId('rules-confirm-button')).toBeVisible({ timeout: 30000 });
   await page.getByTestId('rules-confirm-button').click();
   await expect(page.getByTestId('source-confirm-button')).toBeVisible({ timeout: 10000 });
@@ -117,6 +119,7 @@ test('первая смена хода: battle_turn(2) и battle_engaged', async
 test('battle_entry(from=encyclopedia_unit) при клике на странице юнита', async ({ page }) => {
   await page.goto('/encyclopedia/unit/polaris_lineynaya_klon_pehota');
   await page.getByTestId('unit-to-battle-cta').getByRole('link').click();
+  await dismissIntroIfShown(page);
   await expect(page.getByTestId('rules-confirm-button')).toBeVisible({ timeout: 30000 });
 
   const ym = await ymCalls(page);

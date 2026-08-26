@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { clearStorage } from './helpers/setup';
+import { clearStorage, dismissIntroIfShown } from './helpers/setup';
 
 test.describe('Энциклопедия', () => {
   test.beforeEach(async ({ page }) => {
@@ -135,6 +135,7 @@ test.describe('Энциклопедия', () => {
     await page.goto('/encyclopedia/unit/protectorate_felitsianskaya_gvardiya');
     await expect(page.getByTestId('unit-to-battle-cta')).toBeVisible();
     await page.getByTestId('unit-to-battle-cta').getByRole('link').click();
+    await dismissIntroIfShown(page);
 
     // /app компилируется по требованию (~до 30с в dev)
     await expect(page.getByTestId('rules-confirm-button')).toBeVisible({ timeout: 30000 });

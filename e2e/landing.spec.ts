@@ -47,4 +47,16 @@ test.describe('Landing Page', () => {
     await page.getByTestId('landing-faction-card').first().click();
     await page.waitForURL(/\/encyclopedia\/factions/);
   });
+
+  test('брифинг новичка: интро → «Начать» → выбор правил; повторный вход без интро', async ({ page }) => {
+    await page.getByTestId('landing-cta-button').click();
+    await expect(page.getByTestId('intro-briefing')).toBeVisible({ timeout: 30000 });
+    await page.getByTestId('intro-start-button').click();
+    await expect(page.getByTestId('rules-confirm-button')).toBeVisible({ timeout: 10000 });
+
+    // setup_step сохранён → интро больше не показывается
+    await page.reload();
+    await expect(page.getByTestId('intro-briefing')).toBeHidden({ timeout: 30000 });
+    await expect(page.getByTestId('rules-confirm-button')).toBeVisible({ timeout: 10000 });
+  });
 });

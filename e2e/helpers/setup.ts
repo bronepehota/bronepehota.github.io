@@ -26,10 +26,27 @@ export async function clearStorage(page: Page) {
   });
 }
 
+/**
+ * Новичок видит брифинг-экран (шаг intro визарда) — пройти его, если показан.
+ * Воронка всегда стартует с чистого localStorage, так что путь быстрый;
+ * 3с — запас на дев-компиляцию /app.
+ */
+export async function dismissIntroIfShown(page: Page) {
+  const start = page.getByTestId('intro-start-button');
+  const shown = await start
+    .waitFor({ state: 'visible', timeout: 3000 })
+    .then(() => true)
+    .catch(() => false);
+  if (shown) {
+    await start.click();
+  }
+}
+
 /** Navigate through Rules → Source confirmation */
 export async function confirmRulesAndSource(page: Page) {
   await page.goto('/app');
   await page.waitForLoadState('networkidle');
+  await dismissIntroIfShown(page);
 
   const rulesConfirm = page.getByTestId('rules-confirm-button');
   await expect(rulesConfirm).toBeVisible({ timeout: TIMEOUTS.load });
