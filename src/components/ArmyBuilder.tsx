@@ -7,6 +7,7 @@ import { PointBudgetInput } from './controls/PointBudgetInput';
 import { UnitSelector } from './UnitSelector';
 import { RulesSelector } from './rules/RulesSelector';
 import { StepProgressIndicator } from './rules/StepProgressIndicator';
+import { IntroBriefing } from './rules/IntroBriefing';
 import { getAllRulesVersions } from '@/lib/rules-registry';
 import { getAllSourcesWithCustom, getSourceWithCustom, isValidSourceWithCustom, getDefaultSource } from '@/lib/sources-registry';
 import { SourceSelector } from './rules/SourceSelector';
@@ -36,6 +37,22 @@ interface ArmyBuilderProps {
   onStepToCmFactorChange?: (value: '4' | '5') => void;
   autoCompleteEnabled?: boolean;
   onAutoCompleteEnabledChange?: (enabled: boolean) => void;
+}
+
+export type SetupStep = 'intro' | 'rules' | 'source' | 'faction' | 'budget' | 'mission' | 'units' | 'preparation';
+
+/** Шаги визарда без брифинга (intro не персистится). */
+const PERSISTED_SETUP_STEPS = ['rules', 'source', 'faction', 'budget', 'mission', 'units', 'preparation'];
+
+/**
+ * Начальный шаг визарда: новичок (нет сохранённого шага) видит брифинг-intro.
+ * SETUP_STEP пишется только кнопкой «Начать» интро — наличие ключа = «видел».
+ */
+export function initialSetupStep(saved: string | null): SetupStep {
+  if (saved && PERSISTED_SETUP_STEPS.includes(saved)) {
+    return saved as SetupStep;
+  }
+  return 'intro';
 }
 
 export default function ArmyBuilder({
@@ -102,15 +119,11 @@ export default function ArmyBuilder({
   });
 
   // Setup step state for guided flow - sync with army.currentStep
-  const [setupStep, setSetupStep] = useState<'rules' | 'source' | 'faction' | 'budget' | 'mission' | 'units' | 'preparation'>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.SETUP_STEP);
-      if (saved && ['rules', 'source', 'faction', 'budget', 'mission', 'units', 'preparation'].includes(saved)) {
-        return saved as 'rules' | 'source' | 'faction' | 'budget' | 'mission' | 'units' | 'preparation';
-      }
-    }
-    return 'rules';
-  });
+  const [setupStep, setSetupStep] = useState<SetupStep>(() =>
+    initialSetupStep(
+      typeof window === 'undefined' ? null : localStorage.getItem(LOCAL_STORAGE_KEYS.SETUP_STEP),
+    ),
+  );
   const [showBackConfirm, setShowBackConfirm] = useState(false);
   const [pendingBackStep, setPendingBackStep] = useState<string | null>(null);
 
@@ -190,7 +203,7 @@ export default function ArmyBuilder({
 
   // Handle step navigation from StepProgressIndicator
   const handleStepClick = useCallback((step: 'rules' | 'source' | 'faction' | 'budget' | 'mission' | 'units' | 'preparation') => {
-    const stepOrder = ['rules', 'source', 'faction', 'mission', 'budget', 'units', 'preparation'];
+    const stepOrder: string[] = ['rules', 'source', 'faction', 'mission', 'budget', 'units', 'preparation'];
     const currentIndex = stepOrder.indexOf(setupStep);
     const targetIndex = stepOrder.indexOf(step);
 
@@ -231,7 +244,7 @@ export default function ArmyBuilder({
     if (!pendingBackStep) return;
 
     const step = pendingBackStep as 'rules' | 'source' | 'faction' | 'budget' | 'mission' | 'units' | 'preparation';
-    const stepOrder = ['rules', 'source', 'faction', 'mission', 'budget', 'units', 'preparation'];
+    const stepOrder: string[] = ['rules', 'source', 'faction', 'mission', 'budget', 'units', 'preparation'];
     const targetIndex = stepOrder.indexOf(step);
 
     // Reset army completely
@@ -256,6 +269,17 @@ export default function ArmyBuilder({
 
   const trackWizardStep = (step: string) =>
     trackEvent('wizard_step', { step, faction: army.faction, rules: rulesVersion });
+
+  // Брифинг новичка: полный экран, единственный путь — «Начать».
+  const handleIntroStart = () => {
+    localStorage.setItem(LOCAL_STORAGE_KEYS.SETUP_STEP, 'rules');
+    trackWizardStep('intro');
+    setSetupStep('rules');
+  };
+
+  if (setupStep === 'intro') {
+    return <IntroBriefing onStart={handleIntroStart} />;
+  }
 
   // Validate currentStep - allow 'faction-select', 'unit-select', or 'preparation'
   const validStep = (army.currentStep === 'faction-select' || army.currentStep === 'unit-select' || army.currentStep === 'preparation')
