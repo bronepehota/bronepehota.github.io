@@ -131,7 +131,7 @@ test.describe('Энциклопедия', () => {
 
   test('«Взять отряд в бой»: deep-link предвыбирает фракцию юнита', async ({ page }) => {
     await clearStorage(page);
-    // Неп Fleet — не дефолтная фракция (polaris — initial state в /app): тест доказателен.
+    // Протекторат — не дефолтная фракция (polaris — initial state в /app): тест доказателен.
     await page.goto('/encyclopedia/unit/protectorate_felitsianskaya_gvardiya');
     await expect(page.getByTestId('unit-to-battle-cta')).toBeVisible();
     await page.getByTestId('unit-to-battle-cta').getByRole('link').click();
