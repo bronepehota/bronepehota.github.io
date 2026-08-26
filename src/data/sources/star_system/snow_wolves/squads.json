@@ -1,0 +1,318 @@
+[
+  {
+    "id": "snow_wolves_valkyrii",
+    "name": "Валькирии",
+    "shortName": "Валькирии",
+    "faction": "snow_wolves",
+    "cost": 75,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 2,
+        "speed": 5,
+        "range": "D6",
+        "power": "2D6",
+        "melee": 5,
+        "armor": 1,
+        "image": "/images/squads/snow_wolves/valkyrii/1.png",
+        "modifiers": [
+          "jump_boost_5"
+        ]
+      },
+      {
+        "num": 2,
+        "rank": 2,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 3,
+        "armor": 1,
+        "image": "/images/squads/snow_wolves/valkyrii/6.png",
+        "modifiers": [
+          "jump_boost_5"
+        ]
+      },
+      {
+        "num": 3,
+        "rank": 2,
+        "speed": 5,
+        "range": "D6",
+        "power": "2D6",
+        "melee": 5,
+        "armor": 1,
+        "image": "/images/squads/snow_wolves/valkyrii/4.png",
+        "modifiers": [
+          "jump_boost_5"
+        ]
+      },
+      {
+        "num": 4,
+        "rank": 2,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 3,
+        "armor": 1,
+        "image": "/images/squads/snow_wolves/valkyrii/3.png",
+        "modifiers": [
+          "jump_boost_5"
+        ]
+      },
+      {
+        "num": 5,
+        "rank": 2,
+        "speed": 5,
+        "range": "D6",
+        "power": "2D6",
+        "melee": 5,
+        "armor": 1,
+        "image": "/images/squads/snow_wolves/valkyrii/2.png",
+        "modifiers": [
+          "jump_boost_5"
+        ]
+      },
+      {
+        "num": 6,
+        "rank": 2,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 3,
+        "armor": 1,
+        "image": "/images/squads/snow_wolves/valkyrii/5.png",
+        "modifiers": [
+          "jump_boost_5"
+        ]
+      }
+    ],
+    "image": "/images/squads/snow_wolves/valkyrii/1.png"
+  },
+  {
+    "id": "snow_wolves_ulfhednary",
+    "name": "Ульфхеднары",
+    "shortName": "Ульфхеднары",
+    "faction": "snow_wolves",
+    "cost": 65,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 2,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 6,
+        "armor": 2,
+        "image": "/images/squads/snow_wolves/ulfhednary/1.png",
+        "modifiers": [
+          "jump_boost_4"
+        ]
+      },
+      {
+        "num": 2,
+        "rank": 2,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 5,
+        "armor": 2,
+        "image": "/images/squads/snow_wolves/ulfhednary/6.png",
+        "modifiers": [
+          "jump_boost_4"
+        ]
+      },
+      {
+        "num": 3,
+        "rank": 2,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 6,
+        "armor": 2,
+        "image": "/images/squads/snow_wolves/ulfhednary/5.png",
+        "modifiers": [
+          "jump_boost_4"
+        ]
+      },
+      {
+        "num": 4,
+        "rank": 2,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 5,
+        "armor": 2,
+        "image": "/images/squads/snow_wolves/ulfhednary/2.png",
+        "modifiers": [
+          "jump_boost_4"
+        ]
+      },
+      {
+        "num": 5,
+        "rank": 2,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 5,
+        "armor": 2,
+        "image": "/images/squads/snow_wolves/ulfhednary/3.png",
+        "modifiers": [
+          "jump_boost_4"
+        ]
+      },
+      {
+        "num": 6,
+        "rank": 2,
+        "speed": 5,
+        "range": "",
+        "power": "",
+        "melee": 5,
+        "armor": 2,
+        "image": "/images/squads/snow_wolves/ulfhednary/4.png",
+        "modifiers": [
+          "jump_boost_4"
+        ]
+      }
+    ],
+    "image": "/images/squads/snow_wolves/ulfhednary/1.png"
+  },
+  {
+    "id": "snow_wolves_hirdmany",
+    "name": "Хирдманы",
+    "shortName": "Хирдманы",
+    "faction": "snow_wolves",
+    "cost": 100,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 3,
+        "speed": 5,
+        "range": "2D6",
+        "power": "D6+1",
+        "melee": 5,
+        "armor": 3,
+        "image": "/images/squads/snow_wolves/hirdmany/1.png"
+      },
+      {
+        "num": 2,
+        "rank": 3,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 5,
+        "armor": 3,
+        "image": "/images/squads/snow_wolves/hirdmany/4.png"
+      },
+      {
+        "num": 3,
+        "rank": 3,
+        "speed": 5,
+        "range": "2D12",
+        "power": "D20",
+        "melee": 0,
+        "armor": 4,
+        "image": "/images/squads/snow_wolves/hirdmany/2.png"
+      },
+      {
+        "num": 4,
+        "rank": 3,
+        "speed": 5,
+        "range": "D6",
+        "power": "D12",
+        "melee": 2,
+        "armor": 3,
+        "image": "/images/squads/snow_wolves/hirdmany/5.png"
+      },
+      {
+        "num": 5,
+        "rank": 3,
+        "speed": 5,
+        "range": "D6",
+        "power": "D12",
+        "melee": 2,
+        "armor": 3,
+        "image": "/images/squads/snow_wolves/hirdmany/6.png"
+      },
+      {
+        "num": 6,
+        "rank": 3,
+        "speed": 5,
+        "range": "D12",
+        "power": "2D6",
+        "melee": 2,
+        "armor": 3,
+        "image": "/images/squads/snow_wolves/hirdmany/3.png"
+      }
+    ],
+    "image": "/images/squads/snow_wolves/hirdmany/1.png"
+  },
+  {
+    "id": "snow_wolves_huskarly",
+    "name": "Хускарлы",
+    "shortName": "Хускарлы",
+    "faction": "snow_wolves",
+    "cost": 140,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 4,
+        "speed": 3,
+        "range": "D6",
+        "power": "D12",
+        "melee": 3,
+        "armor": 5,
+        "image": "/images/squads/snow_wolves/huskarly/1.png"
+      },
+      {
+        "num": 2,
+        "rank": 4,
+        "speed": 3,
+        "range": "D6",
+        "power": "3D6",
+        "melee": 3,
+        "armor": 5,
+        "image": "/images/squads/snow_wolves/huskarly/2.png"
+      },
+      {
+        "num": 3,
+        "rank": 4,
+        "speed": 3,
+        "range": "2D12",
+        "power": "D20",
+        "melee": 0,
+        "armor": 5,
+        "image": "/images/squads/snow_wolves/huskarly/3.png"
+      },
+      {
+        "num": 4,
+        "rank": 4,
+        "speed": 3,
+        "range": "D12",
+        "power": "2D12",
+        "melee": 0,
+        "armor": 5,
+        "image": "/images/squads/snow_wolves/huskarly/4.png"
+      },
+      {
+        "num": 5,
+        "rank": 4,
+        "speed": 3,
+        "range": "D12",
+        "power": "2D12",
+        "melee": 0,
+        "armor": 5,
+        "image": "/images/squads/snow_wolves/huskarly/5.png"
+      },
+      {
+        "num": 6,
+        "rank": 4,
+        "speed": 3,
+        "range": "D12",
+        "power": "2D12",
+        "melee": 0,
+        "armor": 5,
+        "image": "/images/squads/snow_wolves/huskarly/6.png"
+      }
+    ],
+    "image": "/images/squads/snow_wolves/huskarly/1.png"
+  }
+]

@@ -23,6 +23,16 @@ export const SQUAD_GROUP_IMAGE: Record<string, string> = {
   dead_fleet_aboardazhniki_erharda: '/images/squads/dead_fleet/aboardazhniki_erharda/group.jpg',
   dead_fleet_ohotniki_erharda: '/images/squads/dead_fleet/ohotniki_erharda/group.jpg',
   dead_fleet_shturmovye_marodery: '/images/squads/dead_fleet/shturmovye_marodery/group.jpg',
+  // Снежные Волки (покрасы Шнайдера, миниатюры — Звёздные Системы):
+  snow_wolves_valkyrii: '/images/squads/snow_wolves/valkyrii/group.jpg',
+  snow_wolves_ulfhednary: '/images/squads/snow_wolves/ulfhednary/group.jpg',
+  snow_wolves_hirdmany: '/images/squads/snow_wolves/hirdmany/group.jpg',
+  snow_wolves_huskarly: '/images/squads/snow_wolves/huskarly/group.jpg',
+  // Покрасы Лисицына:
+  polaris_lineynaya_klon_pehota_fox1: '/images/squads/polaris/lineynaya_klon_pehota_fox1/group.jpg',
+  protectorate_spetsnaz_planety_felitsiya_fox1: '/images/squads/protectorate/spetsnaz_planety_felitsiya_fox1/group.jpg',
+  rutenia_pervoprohodtsy: '/images/squads/rutenia/pervoprohodtsy/group.jpg',
+  protectorate_ekspeditsionnyy_otryad_nyu_rodezii: '/images/squads/protectorate/ekspeditsionnyy_otryad_nyu_rodezii/group.jpg',
 };
 
 /** Photo credit per painter/photographer source. */
@@ -69,14 +79,22 @@ export const SQUAD_PHOTO_SOURCE: Record<string, PhotoSource> = {
   dead_fleet_mark_ballard: 'shnayder',
   // Андрей Суков (покрас лёгкой киберпехоты — ранее ошибочно приписан Шнайдеру):
   protectorate_lyogkaya_kiberpehota: 'sukov',
+  // Снежные Волки (покрасы Шнайдера, миниатюры — Звёздные Системы):
+  snow_wolves_valkyrii: 'shnayder',
+  snow_wolves_ulfhednary: 'shnayder',
+  snow_wolves_hirdmany: 'shnayder',
+  snow_wolves_huskarly: 'shnayder',
   // Лисицин (покрас):
   rutenia_komandnoe_otdelenie: 'lisitsin',
   rutenia_otryad_podderzhki: 'lisitsin',
   rutenia_staraya_gvardiya: 'lisitsin',
   rutenia_pervoprohodtsy: 'lisitsin',
   protectorate_peschanie_sokoly: 'lisitsin',
-  // NB: «линейка Fox» (рендеры Лисицына для армлистов) — НЕ покрашена → без чипа покраса
-  // (показывается // ИЗОБРАЖЕНИЯ → imageSource field (Lisitsin for Fox squads), else Star System fallback). Скульптор = Лисицын (в нейминге Fox.N).
+  polaris_lineynaya_klon_pehota_fox1: 'lisitsin',
+  protectorate_spetsnaz_planety_felitsiya_fox1: 'lisitsin',
+  protectorate_ekspeditsionnyy_otryad_nyu_rodezii: 'lisitsin',
+  // NB: «линейка Fox» — рендеры Лисицына; Fox.1 теперь ПОКРАШЕН им же (см. выше),
+  // остальные Fox-отряды без чипа покраса (// ИЗОБРАЖЕНИЯ → imageSource field). Скульптор = Лисицын (в нейминге Fox.N).
 };
 
 /** Painter credit for a unit, or `undefined` when the squad has no attribution. */

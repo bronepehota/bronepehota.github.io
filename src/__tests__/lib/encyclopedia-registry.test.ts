@@ -23,9 +23,9 @@ describe('encyclopedia-registry', () => {
         expect(f.name).toBeTruthy();
       }
     });
-    it('returns exactly the 5 known factions including rutenia and dead_fleet', () => {
+    it('returns exactly the 6 known factions including rutenia, dead_fleet and snow_wolves', () => {
       const factions = getFactions();
-      expect(factions.map((f) => f.id).sort()).toEqual(['dead_fleet', 'mercenaries', 'polaris', 'protectorate', 'rutenia']);
+      expect(factions.map((f) => f.id).sort()).toEqual(['dead_fleet', 'mercenaries', 'polaris', 'protectorate', 'rutenia', 'snow_wolves']);
     });
   });
 
