@@ -129,6 +129,24 @@ test.describe('Энциклопедия', () => {
     await expect(switcher.getByText('Технолог')).toBeVisible();
   });
 
+  test('«Взять отряд в бой»: deep-link предвыбирает фракцию юнита', async ({ page }) => {
+    await clearStorage(page);
+    await page.goto('/encyclopedia/unit/polaris_lineynaya_klon_pehota');
+    await expect(page.getByTestId('unit-to-battle-cta')).toBeVisible();
+    await page.getByTestId('unit-to-battle-cta').getByRole('link').click();
+
+    // /app компилируется по требованию (~до 30с в dev)
+    await expect(page.getByTestId('rules-confirm-button')).toBeVisible({ timeout: 30000 });
+
+    // армия получила фракцию (persist дебаунс 300мс)
+    await expect
+      .poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('bronepehota_army') ?? '{}').faction))
+      .toBe('polaris');
+
+    // параметр вычищен из URL
+    await expect(page).toHaveURL(/\/app$/);
+  });
+
   test('несуществующий ID возвращает 404', async ({ page }) => {
     // Note: With Next.js static export, non-existent dynamic routes return 500 instead of 404
     // This is a known limitation of static export with dynamic routes

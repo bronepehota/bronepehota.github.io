@@ -33,4 +33,18 @@ test.describe('Landing Page', () => {
     const url = page.url();
     expect(url).toContain('/app'); // Should be on /app route
   });
+
+  test('модульная строка: ЭНЦИКЛОПЕДИЯ и КАЛЬКУЛЯТОР ведут куда надо', async ({ page }) => {
+    await page.getByTestId('landing-encyclopedia-button').click();
+    await page.waitForURL(/\/encyclopedia/);
+
+    await page.goBack();
+    await page.getByTestId('landing-calculator-button').click();
+    await page.waitForURL(/\/calculator/);
+  });
+
+  test('карточка фракции ведёт в энциклопедию фракций', async ({ page }) => {
+    await page.getByTestId('landing-faction-card').first().click();
+    await page.waitForURL(/\/encyclopedia\/factions/);
+  });
 });

@@ -113,3 +113,20 @@ test('первая смена хода: battle_turn(2) и battle_engaged', async
   ).toBeTruthy();
   expect(ym.some((c) => c[1] === 'reachGoal' && c[2] === 'battle_engaged')).toBeTruthy();
 });
+
+test('battle_entry(from=encyclopedia_unit) при клике на странице юнита', async ({ page }) => {
+  await page.goto('/encyclopedia/unit/polaris_lineynaya_klon_pehota');
+  await page.getByTestId('unit-to-battle-cta').getByRole('link').click();
+  await expect(page.getByTestId('rules-confirm-button')).toBeVisible({ timeout: 30000 });
+
+  const ym = await ymCalls(page);
+  const ga = await gaCalls(page);
+  expect(
+    ym.some(
+      (c) =>
+        c[1] === 'reachGoal' && c[2] === 'battle_entry' &&
+        (c[3] as { from?: string }).from === 'encyclopedia_unit',
+    ),
+  ).toBeTruthy();
+  expect(ga.some((c) => c[0] === 'event' && c[1] === 'battle_entry')).toBeTruthy();
+});
