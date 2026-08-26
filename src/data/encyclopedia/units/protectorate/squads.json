@@ -181,7 +181,13 @@
       "tactics": "Тяжёлый штурмовой отряд с кибернетикой и смешанным вооружением. Силён везде, особенно при штурме позиций.",
       "shortDescription": "Штурмовики ЦСО Протектората: тяжёлая киберпехота для прорыва."
     },
-    "provenance": { "loreAuthor": "avb", "credit": { "author": "V.Chertischev", "work": "Штурмовики Протектората" } },
+    "provenance": {
+      "loreAuthor": "avb",
+      "credit": {
+        "author": "V.Chertischev",
+        "work": "Штурмовики Протектората"
+      }
+    },
     "image": "/images/squads/protectorate/shturmovoy_otryad_stervyatniki/1.png"
   },
   {
@@ -205,7 +211,13 @@
       "tactics": "Элитный штурмовой отряд нового образца с усиленным вооружением: сильнее в огневом бою, чем старая версия.",
       "shortDescription": "Штурмовой спецназ нового поколения: усиленная огневая элита."
     },
-    "provenance": { "loreAuthor": "avb", "credit": { "author": "V.Chertischev", "work": "Штурмовики Протектората" } },
+    "provenance": {
+      "loreAuthor": "avb",
+      "credit": {
+        "author": "V.Chertischev",
+        "work": "Штурмовики Протектората"
+      }
+    },
     "image": "/images/squads/protectorate/shturmovoy_spetsnaz_novye/1.png"
   },
   {
@@ -229,7 +241,13 @@
       "tactics": "Элитный штурмовой отряд со смешанным вооружением и специалистом ближнего боя для критических ситуаций. Универсален в любых операциях.",
       "shortDescription": "Ветеранский штурмовой спецназ: проверенная элита со специалистом ближнего боя."
     },
-    "provenance": { "loreAuthor": "avb", "credit": { "author": "V.Chertischev", "work": "Штурмовики Протектората" } },
+    "provenance": {
+      "loreAuthor": "avb",
+      "credit": {
+        "author": "V.Chertischev",
+        "work": "Штурмовики Протектората"
+      }
+    },
     "image": "/images/squads/protectorate/shturmovoy_spetsnaz_starye/1.png"
   },
   {
@@ -276,7 +294,13 @@
       "tactics": "Тяжёлый штурмовой отряд в броне максимальной защиты со сбалансированным вооружением: малочислен, но почти непробиваем — для штурма укреплений.",
       "shortDescription": "Тяжёлые штурмовики Велиана: непробиваемая броня для уличных боёв."
     },
-    "provenance": { "loreAuthor": "avb", "credit": { "author": "V.Chertischev", "work": "Штурмовики Протектората" } },
+    "provenance": {
+      "loreAuthor": "avb",
+      "credit": {
+        "author": "V.Chertischev",
+        "work": "Штурмовики Протектората"
+      }
+    },
     "image": "/images/squads/protectorate/tyazhyolaya_shturmovaya_pehota_veliana/1.png"
   },
   {
@@ -560,7 +584,10 @@
     "provenance": {
       "origin": "avb",
       "loreAuthor": "avb",
-      "credit": { "author": "V.Chertischev", "work": "Штурмовики Протектората" }
+      "credit": {
+        "author": "V.Chertischev",
+        "work": "Штурмовики Протектората"
+      }
     },
     "sponsor": {
       "name": "Егорик Елеусизов",
@@ -612,5 +639,29 @@
     "image": "/images/squads/protectorate/nyu_stirling_opolchentsy/1.png",
     "miniatureSource": "lisitsin",
     "imageSource": "lisitsin"
+  },
+  {
+    "id": "protectorate_spetsnaz_planety_felitsiya_fox1",
+    "name": "Спецназ планеты Фелиция Fox.1",
+    "shortName": "Фелиция Fox.1",
+    "faction": "protectorate",
+    "type": "squad",
+    "sources": [
+      {
+        "id": "star_system"
+      }
+    ],
+    "encyclopedia": {
+      "class": "Специальные силы",
+      "lore": "Высокомобильный спецназ Фелиции с реактивными движителями — мастера молниеносных рейдов и диверсий против пиратов Пыльной Зоны. Фелиция веками отбивается от корсаров Маркуса, и её противодиверсионные части, включая знаменитую роту «Валькирия», стали ночным кошмаром любого наёмника и отличились в рутенийских конфликтах.",
+      "history": "Создана для дальних противодиверсионных рейдов на пиратские базы; её прообразом стала рота «Валькирия», отличившаяся в рутенийских конфликтах.",
+      "tactics": "Высокомобильный спецназ с реактивными движителями и мощным вооружением: превосходит большинство отрядов в скорости — для быстрых рейдов и диверсий.",
+      "shortDescription": "Фелицийский мобильный спецназ: молниеносные рейды и диверсии."
+    },
+    "image": "/images/squads/protectorate/spetsnaz_planety_felitsiya_fox1/2.png",
+    "provenance": {
+      "origin": "star_system"
+    },
+    "miniatureSource": "lisitsin"
   }
 ]

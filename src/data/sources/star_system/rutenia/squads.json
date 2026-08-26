@@ -215,7 +215,7 @@
   {
     "id": "rutenia_pervoprohodtsy",
     "name": "Отряд «Первопроходцы»",
-    "shortName": "Первопроходцы",
+    "shortName": "Отряд «Первопроходцы»",
     "faction": "rutenia",
     "cost": 105,
     "soldiers": [
@@ -227,7 +227,7 @@
         "power": "2D6",
         "melee": 3,
         "armor": 3,
-        "image": "/images/squads/rutenia/pervoprohodtsy/1.png"
+        "image": "/images/squads/rutenia/pervoprohodtsy/5.png"
       },
       {
         "num": 2,
@@ -237,7 +237,7 @@
         "power": "2D6",
         "melee": 3,
         "armor": 3,
-        "image": "/images/squads/rutenia/pervoprohodtsy/2.png"
+        "image": "/images/squads/rutenia/pervoprohodtsy/3.png"
       },
       {
         "num": 3,
@@ -247,7 +247,7 @@
         "power": "2D6",
         "melee": 2,
         "armor": 3,
-        "image": "/images/squads/rutenia/pervoprohodtsy/3.png"
+        "image": "/images/squads/rutenia/pervoprohodtsy/1.png"
       },
       {
         "num": 4,
@@ -257,7 +257,7 @@
         "power": "1D20",
         "melee": 0,
         "armor": 3,
-        "image": "/images/squads/rutenia/pervoprohodtsy/4.png"
+        "image": "/images/squads/rutenia/pervoprohodtsy/2.png"
       },
       {
         "num": 5,
@@ -267,7 +267,7 @@
         "power": "1D20",
         "melee": 0,
         "armor": 3,
-        "image": "/images/squads/rutenia/pervoprohodtsy/5.png"
+        "image": "/images/squads/rutenia/pervoprohodtsy/4.png"
       },
       {
         "num": 6,

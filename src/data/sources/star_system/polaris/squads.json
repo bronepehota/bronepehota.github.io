@@ -834,7 +834,7 @@
         "power": "D12",
         "melee": 3,
         "armor": 2,
-        "image": "/images/squads/polaris/lineynaya_klon_pehota_fox1/6.png"
+        "image": "/images/squads/polaris/lineynaya_klon_pehota_fox1/1.png"
       },
       {
         "num": 2,
@@ -844,7 +844,7 @@
         "power": "D12",
         "melee": 3,
         "armor": 2,
-        "image": "/images/squads/polaris/lineynaya_klon_pehota_fox1/3.png"
+        "image": "/images/squads/polaris/lineynaya_klon_pehota_fox1/6.png"
       },
       {
         "num": 3,
@@ -854,7 +854,7 @@
         "power": "D12",
         "melee": 3,
         "armor": 2,
-        "image": "/images/squads/polaris/lineynaya_klon_pehota_fox1/5.png"
+        "image": "/images/squads/polaris/lineynaya_klon_pehota_fox1/3.png"
       },
       {
         "num": 4,
@@ -864,7 +864,7 @@
         "power": "D12",
         "melee": 3,
         "armor": 2,
-        "image": "/images/squads/polaris/lineynaya_klon_pehota_fox1/2.png"
+        "image": "/images/squads/polaris/lineynaya_klon_pehota_fox1/4.png"
       },
       {
         "num": 5,
@@ -874,7 +874,7 @@
         "power": "D12",
         "melee": 3,
         "armor": 2,
-        "image": "/images/squads/polaris/lineynaya_klon_pehota_fox1/4.png"
+        "image": "/images/squads/polaris/lineynaya_klon_pehota_fox1/5.png"
       },
       {
         "num": 6,
@@ -884,7 +884,7 @@
         "power": "D12",
         "melee": 3,
         "armor": 2,
-        "image": "/images/squads/polaris/lineynaya_klon_pehota_fox1/1.png"
+        "image": "/images/squads/polaris/lineynaya_klon_pehota_fox1/2.png"
       }
     ],
     "image": "/images/squads/polaris/lineynaya_klon_pehota_fox1/1.png"
