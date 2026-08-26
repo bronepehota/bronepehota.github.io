@@ -245,7 +245,7 @@ export default function FactionsListPage({ factions }: FactionsListPageProps) {
                           href={`/app?faction=${faction.id}`}
                           onClick={() => trackEvent('battle_entry', { from: 'encyclopedia_factions' })}
                           data-testid="faction-build-army-link"
-                          className="ml-5 inline-flex items-center gap-2 font-ibm-mono uppercase tracking-wider transition-opacity hover:opacity-80 text-military-rust"
+                          className={cn('ml-5 inline-flex items-center gap-2 font-ibm-mono uppercase tracking-wider transition-opacity hover:opacity-80 text-military-rust', isSub ? 'text-[10px]' : 'text-xs')}
                         >
                           <span>Собрать армию</span>
                           <span>→</span>

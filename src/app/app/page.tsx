@@ -6,7 +6,7 @@ import ArmyBuilder from '@/components/ArmyBuilder';
 import GameSession from '@/components/GameSession';
 import { AlertTriangle, X } from 'lucide-react';
 import { isValidRulesVersion } from '@/lib/rules-registry';
-import { getDefaultSource, getSource } from '@/lib/sources-registry';
+import { getDefaultSource, getSourceWithCustom } from '@/lib/sources-registry';
 import { factionParamToApply } from '@/lib/deep-link';
 import { LOCAL_STORAGE_KEYS } from '@/lib/constants';
 import { loadArmy, saveArmy } from '@/lib/army-storage';
@@ -184,7 +184,7 @@ export default function Home() {
   // игрока не перезаписываем. Параметр вычищаем из URL, чтобы F5 не применял его снова.
   useEffect(() => {
     if (!isArmyLoaded || typeof window === 'undefined') return;
-    const source = getSource(army.sourceId ?? getDefaultSource());
+    const source = getSourceWithCustom(army.sourceId ?? getDefaultSource());
     const validFactions = source ? source.factions.map((f) => String(f.id)) : [];
     const faction = factionParamToApply(window.location.search, army, validFactions);
     if (!faction) return;
