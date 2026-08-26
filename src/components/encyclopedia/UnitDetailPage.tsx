@@ -23,6 +23,7 @@ import { FactionLogo } from '@/components/FactionLogo';
 import { getFactionColors, factionLogos, factionDisplayNames } from '@/lib/faction-colors';
 import { UnitStatTable } from './UnitDetail/UnitStatTable';
 import { UnitSectionNav } from './UnitDetail/UnitSectionNav';
+import { UnitToBattleCta } from './UnitDetail/UnitToBattleCta';
 import type { Squad, Machine } from '@/lib/types';
 
 interface UnitDetailPageProps {
@@ -506,6 +507,8 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc }:
                 </div>
               </section>
             )}
+            {/* Мост в приложение — deep-link предвыбирает фракцию юнита */}
+            <UnitToBattleCta faction={unit.faction} />
           </div>
         </main>
 
