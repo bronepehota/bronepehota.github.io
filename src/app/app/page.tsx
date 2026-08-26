@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Army, ArmyUnit, RulesVersionID } from '@/lib/types';
+import { Army, ArmyUnit, FactionID, RulesVersionID } from '@/lib/types';
 import ArmyBuilder from '@/components/ArmyBuilder';
 import GameSession from '@/components/GameSession';
 import { AlertTriangle, X } from 'lucide-react';
 import { isValidRulesVersion } from '@/lib/rules-registry';
+import { getDefaultSource, getSource } from '@/lib/sources-registry';
+import { factionParamToApply } from '@/lib/deep-link';
 import { LOCAL_STORAGE_KEYS } from '@/lib/constants';
 import { loadArmy, saveArmy } from '@/lib/army-storage';
 import { CombatTargetProvider } from '@/contexts/CombatTargetContext';
@@ -176,6 +178,19 @@ export default function Home() {
     // Mark army as loaded regardless of whether localStorage had data
     setIsArmyLoaded(true);
   }, [isMounted]);
+
+  // Deep-link /app?faction=<id> — мост из энциклопедии: предвыбор фракции.
+  // Только для «свежей» армии (см. factionParamToApply): армию вернувшегося
+  // игрока не перезаписываем. Параметр вычищаем из URL, чтобы F5 не применял его снова.
+  useEffect(() => {
+    if (!isArmyLoaded || typeof window === 'undefined') return;
+    const source = getSource(army.sourceId ?? getDefaultSource());
+    const validFactions = source ? source.factions.map((f) => String(f.id)) : [];
+    const faction = factionParamToApply(window.location.search, army, validFactions);
+    if (!faction) return;
+    setArmy((prev) => ({ ...prev, faction: faction as FactionID }));
+    window.history.replaceState({}, '', window.location.pathname);
+  }, [isArmyLoaded, army]);
 
   // Save army to localStorage when it changes. Debounced (300ms) — serializing a
   // large army on every action caused main-thread jank on mobile. Only after load.
