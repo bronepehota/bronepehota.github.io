@@ -9,6 +9,8 @@ import { FactionLogo } from '@/components/FactionLogo';
 import { GitHubPagesImage } from '@/components/GitHubPagesImage';
 import { resolveFactionProvenance, isAlternativeVersion } from '@/lib/provenance';
 import { ALTERNATIVE_VERSION_HINT } from '@/components/encyclopedia/AttributionLabel';
+import Link from 'next/link';
+import { trackEvent } from '@/lib/analytics';
 
 interface FactionsSectionProps {
   className?: string;
@@ -53,10 +55,13 @@ export default function FactionsSection({ className }: FactionsSectionProps) {
           const isAltVersion = isAlternativeVersion(resolveFactionProvenance(faction));
 
           return (
-            <div
+            <Link
               key={faction.id}
+              href="/encyclopedia/factions"
+              data-testid="landing-faction-card"
+              onClick={() => trackEvent('battle_entry', { from: 'landing_factions' })}
               className={cn(
-                'folded-paper military-corners p-6 md:p-8',
+                'folded-paper military-corners p-6 md:p-8 block no-underline',
                 'group cursor-pointer transition-all duration-300',
                 'fade-in-up opacity-0',
                 `stagger-${index + 1}`
@@ -164,7 +169,7 @@ export default function FactionsSection({ className }: FactionsSectionProps) {
                   </span>
                 </div>
               )}
-            </div>
+            </Link>
           );
         })}
       </div>
