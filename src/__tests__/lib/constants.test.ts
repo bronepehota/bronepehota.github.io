@@ -122,7 +122,7 @@ describe('constants', () => {
 
   describe('FACTIONS', () => {
     it('should contain all factions', () => {
-      expect(FACTIONS).toEqual(['polaris', 'protectorate', 'mercenaries', 'rutenia', 'dead_fleet']);
+      expect(FACTIONS).toEqual(['polaris', 'protectorate', 'mercenaries', 'rutenia', 'dead_fleet', 'snow_wolves']);
     });
   });
 

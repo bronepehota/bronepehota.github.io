@@ -25,6 +25,8 @@ import ruteniaSquads from '@/data/encyclopedia/units/rutenia/squads.json';
 import ruteniaMachines from '@/data/encyclopedia/units/rutenia/machines.json';
 import deadFleetSquads from '@/data/encyclopedia/units/dead_fleet/squads.json';
 import deadFleetMachines from '@/data/encyclopedia/units/dead_fleet/machines.json';
+import snowWolvesSquads from '@/data/encyclopedia/units/snow_wolves/squads.json';
+import snowWolvesMachines from '@/data/encyclopedia/units/snow_wolves/machines.json';
 
 // Type definitions
 export interface UnitSource {
@@ -127,6 +129,8 @@ const encyclopediaUnits: EncyclopediaUnit[] = [
   ...(ruteniaMachines as EncyclopediaUnit[]),
   ...(deadFleetSquads as EncyclopediaUnit[]),
   ...(deadFleetMachines as EncyclopediaUnit[]),
+  ...(snowWolvesSquads as EncyclopediaUnit[]),
+  ...(snowWolvesMachines as EncyclopediaUnit[]),
 ];
 const encyclopediaFactions: EncyclopediaFaction[] = factionsJson as EncyclopediaFaction[];
 
