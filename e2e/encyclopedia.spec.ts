@@ -131,17 +131,25 @@ test.describe('Энциклопедия', () => {
 
   test('«Взять отряд в бой»: deep-link предвыбирает фракцию юнита', async ({ page }) => {
     await clearStorage(page);
-    await page.goto('/encyclopedia/unit/polaris_lineynaya_klon_pehota');
+    // Неп Fleet — не дефолтная фракция (polaris — initial state в /app): тест доказателен.
+    await page.goto('/encyclopedia/unit/protectorate_felitsianskaya_gvardiya');
     await expect(page.getByTestId('unit-to-battle-cta')).toBeVisible();
     await page.getByTestId('unit-to-battle-cta').getByRole('link').click();
 
     // /app компилируется по требованию (~до 30с в dev)
     await expect(page.getByTestId('rules-confirm-button')).toBeVisible({ timeout: 30000 });
 
-    // армия получила фракцию (persist дебаунс 300мс)
+    // армия получила фракцию (persist дебаунс 300мс).
+    // saveArmy пишет конверт {schemaVersion, army} — читаем .army.faction
+    // (legacy-фолбэк на голый Army оставляем на всякий случай).
     await expect
-      .poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('bronepehota_army') ?? '{}').faction))
-      .toBe('polaris');
+      .poll(() =>
+        page.evaluate(() => {
+          const raw = JSON.parse(localStorage.getItem('bronepehota_army') ?? '{}');
+          return raw?.army?.faction ?? raw?.faction;
+        }),
+      )
+      .toBe('protectorate');
 
     // параметр вычищен из URL
     await expect(page).toHaveURL(/\/app$/);
