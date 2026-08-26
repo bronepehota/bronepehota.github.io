@@ -29,12 +29,12 @@ export async function clearStorage(page: Page) {
 /**
  * Новичок видит брифинг-экран (шаг intro визарда) — пройти его, если показан.
  * Воронка всегда стартует с чистого localStorage, так что путь быстрый;
- * 3с — запас на дев-компиляцию /app.
+ * 30с — терпимость на дев-компиляцию /app (первое открытие).
  */
 export async function dismissIntroIfShown(page: Page) {
   const start = page.getByTestId('intro-start-button');
   const shown = await start
-    .waitFor({ state: 'visible', timeout: 3000 })
+    .waitFor({ state: 'visible', timeout: 30000 })
     .then(() => true)
     .catch(() => false);
   if (shown) {

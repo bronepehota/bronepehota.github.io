@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { clearStorage } from './helpers/setup';
+import { clearStorage, dismissIntroIfShown } from './helpers/setup';
 
 /**
  * Source Selection E2E tests
@@ -11,6 +11,7 @@ test.describe('Source Selection', () => {
     await clearStorage(page);
     await page.goto('/app');
     await page.waitForLoadState('networkidle');
+    await dismissIntroIfShown(page);
   });
 
   test('should display source selector after rules confirmation', async ({ page }) => {
