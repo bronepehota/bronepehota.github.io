@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, Sword, RotateCcw, Clock, Calculator } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { trackEvent } from '@/lib/analytics';
 
 interface CTAButtonProps {
   className?: string;
@@ -39,6 +40,69 @@ function formatBattleDate(isoString: string): string {
     return `${diffDays}д ${remainingHours}ч`;
   }
   return `${diffDays}д`;
+}
+
+/** Модульная строка первого экрана: ШТАБ (primary) + ЭНЦИКЛОПЕДИЯ + КАЛЬКУЛЯТОР.
+ *  Единая разметка для SSR и свежего состояния клиента. */
+function ModuleRow({ className }: { className?: string }) {
+  return (
+    <div className={cn('flex flex-col items-stretch gap-2.5 w-full max-w-sm mx-auto', className)}>
+      {/* Primary: ШТАБ */}
+      <Link
+        href="/app"
+        data-testid="landing-cta-button"
+        onClick={() => trackEvent('battle_entry', { from: 'landing_hero' })}
+        className="group relative inline-flex bg-transparent border-2 border-military-rust/60 font-russo font-bold text-sm sm:text-base uppercase tracking-wider md:tracking-widest text-military-rust hover:border-military-amber hover:text-military-amber transition-all duration-300 overflow-hidden touch-manipulation min-h-[56px] no-underline"
+      >
+        <span className="absolute inset-0 bg-military-rust/10 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300" />
+        <span className="absolute top-0 left-0 w-2 h-2 sm:w-3 sm:h-3 border-t-2 border-l-2 border-military-rust" />
+        <span className="absolute top-0 right-0 w-2 h-2 sm:w-3 sm:h-3 border-t-2 border-r-2 border-military-rust" />
+        <span className="absolute bottom-0 left-0 w-2 h-2 sm:w-3 sm:h-3 border-b-2 border-l-2 border-military-rust" />
+        <span className="absolute bottom-0 right-0 w-2 h-2 sm:w-3 sm:h-3 border-b-2 border-r-2 border-military-rust" />
+        <span className="relative flex items-center justify-between gap-3 w-full px-4 sm:px-6">
+          <span className="flex flex-col items-start leading-tight text-left">
+            <span>ШТАБ</span>
+            <span className="font-ibm-mono text-[9px] sm:text-[10px] normal-case tracking-normal text-military-steel/80">
+              собери армию и веди бой
+            </span>
+          </span>
+          <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 transform group-hover:translate-x-1 transition-transform duration-300" />
+        </span>
+      </Link>
+
+      {/* Secondary: ЭНЦИКЛОПЕДИЯ + КАЛЬКУЛЯТОР */}
+      <div className="grid grid-cols-2 gap-2.5">
+        <Link
+          href="/encyclopedia"
+          data-testid="landing-encyclopedia-button"
+          className="group relative inline-flex items-center bg-transparent border-2 border-military-steel/30 hover:border-military-steel/60 transition-all duration-300 overflow-hidden touch-manipulation min-h-[44px] no-underline"
+        >
+          <span className="relative flex flex-col items-center justify-center leading-tight w-full px-2 py-2">
+            <span className="font-russo font-bold text-[10px] sm:text-xs uppercase tracking-wider text-military-steel/80 group-hover:text-military-steel">
+              ЭНЦИКЛОПЕДИЯ
+            </span>
+            <span className="font-ibm-mono text-[8px] sm:text-[9px] text-military-steel/50">
+              отряды, лор, тактика
+            </span>
+          </span>
+        </Link>
+        <Link
+          href="/calculator"
+          data-testid="landing-calculator-button"
+          className="group relative inline-flex items-center bg-transparent border-2 border-military-steel/30 hover:border-military-steel/60 transition-all duration-300 overflow-hidden touch-manipulation min-h-[44px] no-underline"
+        >
+          <span className="relative flex flex-col items-center justify-center leading-tight w-full px-2 py-2">
+            <span className="font-russo font-bold text-[10px] sm:text-xs uppercase tracking-wider text-military-steel/80 group-hover:text-military-steel">
+              КАЛЬКУЛЯТОР
+            </span>
+            <span className="font-ibm-mono text-[8px] sm:text-[9px] text-military-steel/50">
+              броски и урон в бою
+            </span>
+          </span>
+        </Link>
+      </div>
+    </div>
+  );
 }
 
 export default function CTAButton({ className }: CTAButtonProps) {
@@ -90,41 +154,7 @@ export default function CTAButton({ className }: CTAButtonProps) {
 
   // Don't render different content during SSR to avoid hydration mismatch
   if (!isMounted) {
-    return (
-      <Link
-        href="/app"
-        data-testid="landing-cta-button"
-        className={cn(
-          'group relative inline-flex',
-          'px-4 py-2 sm:px-6 sm:py-3 md:px-8 md:py-4',
-          'bg-transparent',
-          'border-2 border-military-rust/60',
-          'font-russo font-bold text-sm sm:text-base md:text-lg',
-          'uppercase tracking-wider md:tracking-widest',
-          'text-military-rust',
-          'hover:border-military-amber hover:text-military-amber transition-all duration-300',
-          'overflow-hidden touch-manipulation',
-          'min-h-[44px] md:min-h-[56px]',
-          'hover:shadow-[0_0_20px_rgba(234,88,12,0.3)]',
-          'no-underline',
-          className
-        )}
-      >
-        <span className="absolute inset-0 bg-military-rust/10 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300" />
-        <span className="absolute top-0 left-0 w-2 h-2 sm:w-3 sm:h-3 border-t-2 border-l-2 border-military-rust" />
-        <span className="absolute top-0 right-0 w-2 h-2 sm:w-3 sm:h-3 border-t-2 border-r-2 border-military-rust" />
-        <span className="absolute bottom-0 left-0 w-2 h-2 sm:w-3 sm:h-3 border-b-2 border-l-2 border-military-rust" />
-        <span className="absolute bottom-0 right-0 w-2 h-2 sm:w-3 sm:h-3 border-b-2 border-r-2 border-military-rust" />
-        <span className="relative flex items-center gap-2 md:gap-3">
-          <span className="hidden sm:inline">ПЕРЕЙТИ В ШТАБ</span>
-          <span className="sm:hidden">В ШТАБ</span>
-          <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 transform group-hover:translate-x-1 transition-transform duration-300" />
-        </span>
-        <span className="absolute inset-0 overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <span className="absolute inset-0 bg-gradient-to-r from-transparent via-military-rust/20 to-transparent transform -translate-x-full group-hover:animate-shine" />
-        </span>
-      </Link>
-    );
+    return <ModuleRow />;
   }
 
   // Active battle state - compact battle card
@@ -212,71 +242,6 @@ export default function CTAButton({ className }: CTAButtonProps) {
     );
   }
 
-  // Normal state - CTA button + calculator link
-  return (
-    <div className={cn('flex flex-col sm:flex-row items-center justify-center gap-3', className)}>
-      <Link
-        href="/app"
-        data-testid="landing-cta-button"
-        className={cn(
-          'group relative inline-flex',
-          'px-4 py-2 sm:px-6 sm:py-3 md:px-8 md:py-4',
-          'bg-transparent',
-          'border-2 border-military-rust/60',
-          'font-russo font-bold text-sm sm:text-base md:text-lg',
-          'uppercase tracking-wider md:tracking-widest',
-          'text-military-rust',
-          'hover:border-military-amber hover:text-military-amber transition-all duration-300',
-          'overflow-hidden touch-manipulation',
-          'min-h-[44px] md:min-h-[56px]',
-          'hover:shadow-[0_0_20px_rgba(234,88,12,0.3)]',
-          'no-underline'
-        )}
-      >
-        {/* Button background overlay */}
-        <span className="absolute inset-0 bg-military-rust/10 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300" />
-
-        {/* Corner accents - responsive size */}
-        <span className="absolute top-0 left-0 w-2 h-2 sm:w-3 sm:h-3 border-t-2 border-l-2 border-military-rust" />
-        <span className="absolute top-0 right-0 w-2 h-2 sm:w-3 sm:h-3 border-t-2 border-r-2 border-military-rust" />
-        <span className="absolute bottom-0 left-0 w-2 h-2 sm:w-3 sm:h-3 border-b-2 border-l-2 border-military-rust" />
-        <span className="absolute bottom-0 right-0 w-2 h-2 sm:w-3 sm:h-3 border-b-2 border-r-2 border-military-rust" />
-
-        {/* Button content - responsive icon and gap */}
-        <span className="relative flex items-center gap-2 md:gap-3">
-          <span className="hidden sm:inline">ПЕРЕЙТИ В ШТАБ</span>
-          <span className="sm:hidden">В ШТАБ</span>
-          <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 transform group-hover:translate-x-1 transition-transform duration-300" />
-        </span>
-
-        {/* Scanline effect on hover */}
-        <span className="absolute inset-0 overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <span className="absolute inset-0 bg-gradient-to-r from-transparent via-military-rust/20 to-transparent transform -translate-x-full group-hover:animate-shine" />
-        </span>
-      </Link>
-
-      <Link
-        href="/calculator"
-        className={cn(
-          'group relative inline-flex',
-          'px-4 py-2 sm:px-5 sm:py-3',
-          'bg-transparent',
-          'border-2 border-military-steel/30',
-          'font-russo font-bold text-xs sm:text-sm',
-          'uppercase tracking-wider',
-          'text-military-steel/70',
-          'hover:border-military-steel/60 hover:text-military-steel transition-all duration-300',
-          'overflow-hidden touch-manipulation',
-          'min-h-[44px] md:min-h-[56px]',
-          'no-underline'
-        )}
-      >
-        <span className="relative flex items-center gap-1.5 sm:gap-2">
-          <Calculator className="w-4 h-4" />
-          <span className="hidden sm:inline">КАЛЬКУЛЯТОР БОЯ</span>
-          <span className="sm:hidden">КАЛЬКУЛЯТОР</span>
-        </span>
-      </Link>
-    </div>
-  );
+  // Normal state - модульная строка: ШТАБ + ЭНЦИКЛОПЕДИЯ + КАЛЬКУЛЯТОР
+  return <ModuleRow className={className} />;
 }
