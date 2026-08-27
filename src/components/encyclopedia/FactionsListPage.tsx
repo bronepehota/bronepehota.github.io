@@ -235,7 +235,7 @@ export default function FactionsListPage({ factions }: FactionsListPageProps) {
                       <div className="mt-3">
                         <Link
                           href={`/encyclopedia?faction=${faction.id}`}
-                          className={cn('inline-flex items-center gap-2 font-ibm-mono uppercase tracking-wider transition-opacity hover:opacity-80', isSub ? 'text-[10px]' : 'text-xs')}
+                          className={cn('inline-flex items-center gap-2 py-2 -my-2 font-ibm-mono uppercase tracking-wider transition-opacity hover:opacity-80', isSub ? 'text-[10px]' : 'text-xs')}
                           style={{ color: colors.primary }}
                         >
                           <span>Отряды фракции «{factionDisplayNames[faction.id] ?? faction.id}»</span>
@@ -245,7 +245,7 @@ export default function FactionsListPage({ factions }: FactionsListPageProps) {
                           href={`/app?faction=${faction.id}`}
                           onClick={() => trackEvent('battle_entry', { from: 'encyclopedia_factions' })}
                           data-testid="faction-build-army-link"
-                          className={cn('ml-5 inline-flex items-center gap-2 font-ibm-mono uppercase tracking-wider transition-opacity hover:opacity-80 text-military-rust', isSub ? 'text-[10px]' : 'text-xs')}
+                          className={cn('ml-5 inline-flex items-center gap-2 py-2 -my-2 font-ibm-mono uppercase tracking-wider transition-opacity hover:opacity-80 text-military-rust', isSub ? 'text-[10px]' : 'text-xs')}
                         >
                           <span>Собрать армию</span>
                           <span>→</span>

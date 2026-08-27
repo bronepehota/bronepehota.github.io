@@ -521,8 +521,8 @@ Static-export SEO generated at build time (`output: 'export'`):
 `docs/superpowers/specs/2026-08-18-analytics-battles-design.md`.
 
 **Чек-лист после деплоя (руками, один раз)**: GA4 → Admin → Data streams → Enhanced measurement →
-выключить «Page views» (иначе дубли с RouteTracker); пометить `battle_start`/`battle_engaged`
-как Key events. Затем Admin → Custom definitions: зарегистрировать event-scoped размеры для параметров `step`, `turn`, `faction`, `rules`, `pwa` — без этого параметры видны только в отладке, воронка в отчётах GA4 не собирается.
+выключить «Page views» (иначе дубли с RouteTracker); пометить `battle_start`/`battle_engaged`/`app_open`
+как Key events. Затем Admin → Custom definitions: зарегистрировать event-scoped размеры для параметров `step`, `turn`, `faction`, `rules`, `pwa`, `from` — без этого параметры видны только в отладке, воронка в отчётах GA4 не собирается.
 Метрика → цели «JavaScript-событие» на `battle_start` и `battle_engaged`.
 Сверять события (не сессии): дельта GA ≤ Метрика для РФ — норма (блокировщики).
 

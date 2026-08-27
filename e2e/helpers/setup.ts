@@ -30,6 +30,7 @@ export async function clearStorage(page: Page) {
  * Новичок видит брифинг-экран (шаг intro визарда) — пройти его, если показан.
  * Воронка всегда стартует с чистого localStorage, так что путь быстрый;
  * 30с — терпимость на дев-компиляцию /app (первое открытие).
+ * Префикс: вызывать только на свежем контексте (после clearStorage/без засеянного setup_step) — иначе интро не появится и хелпер честно прождёт 30с.
  */
 export async function dismissIntroIfShown(page: Page) {
   const start = page.getByTestId('intro-start-button');

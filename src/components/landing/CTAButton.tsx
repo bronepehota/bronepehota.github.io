@@ -154,7 +154,7 @@ export default function CTAButton({ className }: CTAButtonProps) {
 
   // Don't render different content during SSR to avoid hydration mismatch
   if (!isMounted) {
-    return <ModuleRow />;
+    return <ModuleRow className={className} />;
   }
 
   // Active battle state - compact battle card
