@@ -316,4 +316,12 @@ test.describe('Энциклопедия', () => {
     await expect(page.getByTestId('unit-armament')).toBeVisible();
     await expect(page.getByTestId('armament-entry').first()).toContainText('Световой меч');
   });
+
+  test('плашка режима боя ведёт в штаб', async ({ page }) => {
+    await page.goto('/encyclopedia');
+    await expect(page.getByTestId('encyclopedia-battle-banner')).toBeVisible();
+    await page.getByTestId('encyclopedia-battle-banner-link').click();
+    await dismissIntroIfShown(page);
+    await expect(page.getByTestId('rules-confirm-button')).toBeVisible({ timeout: 30000 });
+  });
 });

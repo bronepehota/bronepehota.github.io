@@ -12,6 +12,7 @@ import { EncyclopediaTabs } from './EncyclopediaTabs';
 import { EncyclopediaAttributionBanner } from './EncyclopediaAttributionBanner';
 import { SQUAD_GROUP_IMAGE, getCredit } from '@/lib/painted-images';
 import { cn } from '@/lib/utils';
+import { trackEvent } from '@/lib/analytics';
 
 interface EncyclopediaPageProps {
   initialUnits: EncyclopediaUnit[];
@@ -204,6 +205,24 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
             </div>
           </div>
         </header>
+
+        {/* Мост в режим боя — энциклопедия как витрина армии */}
+        <div data-testid="encyclopedia-battle-banner" className="mx-auto max-w-7xl px-4">
+          <div className="folded-paper military-corners p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+            <div className="flex-1">
+              <div className="font-ibm-mono text-[10px] uppercase tracking-[0.3em] text-military-rust/70 mb-1">{'// РЕЖИМ БОЯ'}</div>
+              <p className="font-oswald text-sm md:text-base text-military-sand">Любой отряд можно собрать и вести в бой</p>
+            </div>
+            <Link
+              href="/app"
+              onClick={() => trackEvent('battle_entry', { from: 'encyclopedia_main' })}
+              data-testid="encyclopedia-battle-banner-link"
+              className="inline-flex items-center justify-center gap-2 min-h-[48px] px-5 border-2 border-military-rust/60 hover:border-military-amber font-russo text-xs uppercase tracking-widest text-military-rust hover:text-military-amber transition-all touch-manipulation no-underline"
+            >
+              ШТАБ →
+            </Link>
+          </div>
+        </div>
 
         {/* Sticky navigation console — tabs + search + filters stay reachable
             from anywhere in the 20+ screen catalog. Sticky works because the
