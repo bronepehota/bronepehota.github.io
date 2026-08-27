@@ -54,3 +54,24 @@ test('appinstalled → pwa_install', () => {
   window.dispatchEvent(new Event('appinstalled'));
   expect(trackEvent).toHaveBeenCalledWith('pwa_install');
 });
+
+test('первая загрузка /app → app_open + initial pageview', () => {
+  usePathnameMock = () => '/app';
+  render(<RouteTracker />);
+  expect(trackEvent).toHaveBeenCalledWith('app_open');
+  expect(trackInitialPageView).toHaveBeenCalledWith('/app');
+});
+
+test('SPA-переход в /app → app_open', () => {
+  const { rerender } = render(<RouteTracker />);
+  usePathnameMock = () => '/app';
+  rerender(<RouteTracker />);
+  expect(trackEvent).toHaveBeenCalledWith('app_open');
+});
+
+test('другие маршруты не шлют app_open', () => {
+  const { rerender } = render(<RouteTracker />);
+  usePathnameMock = () => '/encyclopedia';
+  rerender(<RouteTracker />);
+  expect(trackEvent).not.toHaveBeenCalledWith('app_open');
+});

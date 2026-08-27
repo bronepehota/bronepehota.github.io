@@ -54,6 +54,8 @@ test('SPA-переход лендинг→/app даёт pageview в обеих �
   expect(
     ga.some((c) => c[0] === 'config' && (c[2] as { page_path?: string } | undefined)?.page_path === '/app'),
   ).toBeTruthy();
+  expect(ym.some((c) => c[1] === 'reachGoal' && c[2] === 'app_open')).toBeTruthy();
+  expect(ga.some((c) => c[0] === 'event' && c[1] === 'app_open')).toBeTruthy();
 });
 
 test('воронка: wizard_step на каждом confirm-клике', async ({ page }) => {
