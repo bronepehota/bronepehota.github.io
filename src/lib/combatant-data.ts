@@ -1,6 +1,6 @@
 // src/lib/combatant-data.ts
 
-import type { Weapon } from './types';
+import type { Weapon, Soldier } from './types';
 
 /**
  * Minimal data needed to perform combat calculations.
@@ -80,4 +80,21 @@ export function missingFields(data: CombatantData, actionType: 'shot' | 'melee' 
     missing.push('rank');
   }
   return missing;
+}
+
+/**
+ * Prefill боевой песочницы энциклопедии: статы солдата отряда как есть.
+ * range/power в JSON армлистов уже финальные; undefined/пустые значения
+ * оставляем как есть — песочница запросит их через DiceInputPopup.
+ */
+export function soldierToCombatantData(soldier: Soldier): CombatantData {
+  return {
+    type: 'squad',
+    range: soldier.range,
+    power: soldier.power,
+    melee: soldier.melee ?? 0,
+    armor: soldier.armor ?? 0,
+    rank: soldier.rank ?? 1,
+    grenadesAvailable: true,
+  };
 }
