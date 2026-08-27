@@ -1,5 +1,5 @@
 // src/__tests__/components/UnitCombatSandbox.test.tsx
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { UnitCombatSandbox } from '@/components/encyclopedia/UnitDetail/UnitCombatSandbox';
 import { useStandaloneCombatFlow } from '@/hooks/useStandaloneCombatFlow';
 import { trackEvent } from '@/lib/analytics';
@@ -85,7 +85,7 @@ describe('UnitCombatSandbox — боевая песочница юнита', () 
     expect(trackEvent).toHaveBeenCalledTimes(1);
   });
 
-  it('различающиеся статы → чипы солдат; клик чипа проталкивает поля и сбрасывает расчёт', () => {
+  it('различающиеся статы → чипы солдат; клик чипа проталкивает поля и отложенно сбрасывает расчёт', () => {
     renderSandbox([
       soldier(),
       soldier({ rank: 2, range: 'D6', power: '1D20', melee: 4, armor: 5 }),
@@ -96,7 +96,19 @@ describe('UnitCombatSandbox — боевая песочница юнита', () 
     // подписи «1»…«n»
     expect(screen.getByTestId('sandbox-soldier-0')).toHaveTextContent('1');
 
-    fireEvent.click(screen.getByTestId('sandbox-soldier-1'));
+    // Зонд: фиксируем состояние DOM в момент вызова newCalculation.
+    // Синхронный вызов в обработчике клика видел бы СТАРЫЙ DOM (aria-pressed=false) —
+    // и, главное, старое замыкание combatantData предыдущего солдата.
+    const domAtNewCalcCall: Array<string | null> = [];
+    flow.newCalculation.mockImplementation(() => {
+      domAtNewCalcCall.push(
+        screen.getByTestId('sandbox-soldier-1').getAttribute('aria-pressed'),
+      );
+    });
+
+    act(() => {
+      fireEvent.click(screen.getByTestId('sandbox-soldier-1'));
+    });
 
     // хук берёт initialCombatant только при монтировании — поля идут через updateCombatantField
     expect(flow.updateCombatantField).toHaveBeenCalledWith('range', 'D6');
@@ -104,7 +116,10 @@ describe('UnitCombatSandbox — боевая песочница юнита', () 
     expect(flow.updateCombatantField).toHaveBeenCalledWith('melee', 4);
     expect(flow.updateCombatantField).toHaveBeenCalledWith('armor', 5);
     expect(flow.updateCombatantField).toHaveBeenCalledWith('rank', 2);
+
+    // сброс расчёта — ровно один раз, после флеша эффектов (не синхронно в обработчике)
     expect(flow.newCalculation).toHaveBeenCalledTimes(1);
+    expect(domAtNewCalcCall).toEqual(['true']);
 
     // выделение переехало на второй чип
     expect(screen.getByTestId('sandbox-soldier-1')).toHaveAttribute('aria-pressed', 'true');
@@ -126,7 +141,7 @@ describe('UnitCombatSandbox — боевая песочница юнита', () 
   it('клик по оверлею закрывает, клик по панели — нет', () => {
     const { onClose } = renderSandbox([soldier()]);
     const panel = screen.getByTestId('unit-combat-sandbox');
-    const overlay = panel.parentElement as HTMLElement;
+    const overlay = screen.getByTestId('unit-combat-sandbox-overlay');
 
     fireEvent.click(panel);
     expect(onClose).not.toHaveBeenCalled();

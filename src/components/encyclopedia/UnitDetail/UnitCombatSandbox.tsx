@@ -66,6 +66,7 @@ type DicePopupField = 'range' | 'power' | 'melee' | 'rank' | null;
 export function UnitCombatSandbox({ unit, soldiers, onClose }: UnitCombatSandboxProps) {
   const [soldierIdx, setSoldierIdx] = useState(0);
   const [dicePopupField, setDicePopupField] = useState<DicePopupField>(null);
+  const [resetTick, setResetTick] = useState(0);
 
   const flow = useStandaloneCombatFlow(
     soldiers.length > 0 ? soldierToCombatantData(soldiers[0]) : undefined,
@@ -79,7 +80,10 @@ export function UnitCombatSandbox({ unit, soldiers, onClose }: UnitCombatSandbox
   const showChips = useMemo(() => distinctSoldiers(soldiers), [soldiers]);
 
   // Хук берёт initialCombatant только при монтировании — пересоздать поток нельзя,
-  // поэтому переключение солдата проталкиваем полями + сбрасываем расчёт.
+  // поэтому переключение солдата проталкиваем полями. Расчёт сбрасываем ОТЛОЖЕННО:
+  // синхронный newCalculation в том же обработчике замыкался бы на прошлое
+  // combatantData (useCallback deps [combatantData]) и стартовал бой со статами
+  // предыдущего солдата.
   const pickSoldier = (i: number) => {
     setSoldierIdx(i);
     const d = soldierToCombatantData(soldiers[i]);
@@ -88,8 +92,15 @@ export function UnitCombatSandbox({ unit, soldiers, onClose }: UnitCombatSandbox
     flow.updateCombatantField('melee', d.melee);
     flow.updateCombatantField('armor', d.armor);
     flow.updateCombatantField('rank', d.rank);
-    flow.newCalculation();
+    setResetTick((t) => t + 1);
   };
+
+  // Отложенный сброс: эффект выполняется после коммита новых статов —
+  // замыкание newCalculation уже свежее (deps [combatantData]).
+  useEffect(() => {
+    if (resetTick > 0) flow.newCalculation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resetTick]);
 
   const handleDataNeeded = useCallback((field: 'range' | 'power' | 'melee' | 'rank') => {
     setDicePopupField(field);
@@ -117,6 +128,7 @@ export function UnitCombatSandbox({ unit, soldiers, onClose }: UnitCombatSandbox
 
   return (
     <div
+      data-testid="unit-combat-sandbox-overlay"
       className="fixed inset-0 z-[70] bg-black/60 animate-fadeIn"
       onClick={onClose}
     >
