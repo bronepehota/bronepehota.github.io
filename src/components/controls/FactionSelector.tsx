@@ -138,9 +138,9 @@ export function FactionSelector({
                       «{parent.motto}»
                     </p>
                   )}
-                  {parent.description && (
-                    <p className="mt-1.5 text-xs md:text-sm text-slate-400 leading-snug line-clamp-2">
-                      {parent.description}
+                  {(parent.shortDescription ?? parent.description) && (
+                    <p className="mt-1.5 text-xs md:text-sm text-slate-400 leading-snug truncate" title={parent.shortDescription ?? parent.description}>
+                      {parent.shortDescription ?? parent.description}
                     </p>
                   )}
                 </div>

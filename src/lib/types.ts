@@ -16,6 +16,8 @@ export interface Faction {
   color: string;
   symbol?: string;
   description: string;
+  /** Одна короткая строка о фракции — для карточек (лендинг, выбор фракции). */
+  shortDescription?: string;
   homeWorld: string;
   motto: string;
   allies?: FactionID[]; // faction ids allied with this one (symmetric); "*" = ally of all

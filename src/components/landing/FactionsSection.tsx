@@ -114,9 +114,12 @@ export default function FactionsSection({ className }: FactionsSectionProps) {
                 </div>
               </div>
 
-              {/* Faction teaser — 2 строки, единообразно (полный лор в энциклопедии) */}
-              <p className="font-oswald text-sm md:text-base text-military-taupe leading-snug mb-4 line-clamp-2">
-                {faction.description}
+              {/* Faction teaser — одна короткая строка (полный лор в энциклопедии) */}
+              <p
+                className="font-oswald text-sm md:text-base text-military-taupe leading-snug mb-4 truncate"
+                title={faction.shortDescription ?? faction.description}
+              >
+                {faction.shortDescription ?? faction.description}
               </p>
 
               {/* Компактная мета: девиз одной строкой + мир/переход — без рваных justify-строк.
