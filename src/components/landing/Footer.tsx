@@ -23,25 +23,15 @@ export default function Footer({ className }: FooterProps) {
 
       <div className="max-w-7xl mx-auto flex flex-col items-center gap-2">
         {/* Links row */}
-        <div className="flex flex-row items-center justify-between gap-2 md:gap-4 w-full">
-          {/* Encyclopedia link */}
-          <Link
-            href="/encyclopedia"
-            data-testid="encyclopedia-link"
-            className="flex items-center gap-1 md:gap-2 px-2 md:px-4 py-1.5 rounded-sm border border-slate-700/50 hover:border-military-amber/50 transition-all duration-300 group touch-manipulation whitespace-nowrap"
-          >
-            <span className="font-russo text-[10px] md:text-xs text-slate-400 group-hover:text-military-amber transition-colors">
-              ЭНЦИКЛОПЕДИЯ
-            </span>
-          </Link>
-
-          {/* Chronicles link — wars section of the encyclopedia history */}
+        <div className="flex flex-row items-center justify-center gap-2 md:gap-4 w-full">
+          {/* Chronicles link — wars section of the encyclopedia history.
+              Энциклопедию не дублируем: она в модульной строке первого экрана. */}
           <Link
             href="/encyclopedia/history"
             data-testid="campaigns-link"
             className="flex items-center gap-1 md:gap-2 px-2 md:px-4 py-1.5 rounded-sm border border-slate-700/50 hover:border-military-amber/50 transition-all duration-300 group touch-manipulation whitespace-nowrap"
           >
-            <span className="font-russo text-[10px] md:text-xs text-slate-400 group-hover:text-military-amber transition-colors">
+            <span className="font-russo text-[11px] md:text-xs text-slate-300 group-hover:text-military-amber transition-colors">
               ХРОНИКИ
             </span>
           </Link>
@@ -52,7 +42,7 @@ export default function Footer({ className }: FooterProps) {
             data-testid="editor-link"
             className="flex items-center gap-1 md:gap-2 px-2 md:px-4 py-1.5 rounded-sm border border-slate-700/50 hover:border-hud-green/50 transition-all duration-300 group touch-manipulation whitespace-nowrap"
           >
-            <span className="font-russo text-[10px] md:text-xs text-slate-400 group-hover:text-hud-green transition-colors">
+            <span className="font-russo text-[11px] md:text-xs text-slate-300 group-hover:text-hud-green transition-colors">
               РЕДАКТОР
             </span>
           </Link>
@@ -66,7 +56,7 @@ export default function Footer({ className }: FooterProps) {
               rel="noopener noreferrer"
               className="flex items-center gap-1 md:gap-2 px-2 md:px-3 py-1.5 rounded-sm border border-slate-700/50 hover:border-blue-400/50 transition-all duration-300 group touch-manipulation whitespace-nowrap"
             >
-              <span className="font-russo text-[10px] md:text-xs text-slate-400 group-hover:text-blue-400 transition-colors">
+              <span className="font-russo text-[11px] md:text-xs text-slate-300 group-hover:text-blue-400 transition-colors">
                 VK
               </span>
             </a>
@@ -78,13 +68,13 @@ export default function Footer({ className }: FooterProps) {
               rel="noopener noreferrer"
               className="flex items-center gap-1 px-2 py-1.5 rounded-sm border border-hud-slate-light/30 hover:border-hud-green/50 transition-all duration-300 group touch-manipulation"
             >
-              <Github className="w-3 h-3 md:w-4 md:h-4 text-slate-400 group-hover:text-hud-green transition-colors" />
+              <Github className="w-3 h-3 md:w-4 md:h-4 text-slate-300 group-hover:text-hud-green transition-colors" />
             </a>
           </div>
         </div>
 
         {/* Disclaimer — официальный + фанатский контент (свернуто с бывшей секции лендинга) */}
-        <p className="font-ibm-mono text-[9px] md:text-[10px] text-slate-600/80 text-center max-w-xl leading-relaxed">
+        <p className="font-ibm-mono text-[9px] md:text-[10px] text-slate-500 text-center max-w-xl leading-relaxed">
           Официальный лор «Технолог» + фанатские материалы сообществ. Неточность? «Дополнить» на странице отряда.
         </p>
 

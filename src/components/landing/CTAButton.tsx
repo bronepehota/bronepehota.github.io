@@ -52,7 +52,7 @@ function ModuleRow({ className }: { className?: string }) {
         href="/app"
         data-testid="landing-cta-button"
         onClick={() => trackEvent('battle_entry', { from: 'landing_hero' })}
-        className="group relative inline-flex bg-transparent border-2 border-military-rust/60 font-russo font-bold text-sm sm:text-base uppercase tracking-wider md:tracking-widest text-military-rust hover:border-military-amber hover:text-military-amber transition-all duration-300 overflow-hidden touch-manipulation min-h-[56px] no-underline"
+        className="group relative inline-flex bg-military-dark/85 backdrop-blur-sm border-2 border-military-rust font-russo font-bold text-sm sm:text-base uppercase tracking-wider md:tracking-widest text-military-rust hover:border-military-amber hover:text-military-amber transition-all duration-300 overflow-hidden touch-manipulation min-h-[56px] no-underline"
       >
         <span className="absolute inset-0 bg-military-rust/10 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300" />
         <span className="absolute top-0 left-0 w-2 h-2 sm:w-3 sm:h-3 border-t-2 border-l-2 border-military-rust" />
@@ -62,7 +62,7 @@ function ModuleRow({ className }: { className?: string }) {
         <span className="relative flex items-center justify-between gap-3 w-full px-4 sm:px-6">
           <span className="flex flex-col items-start leading-tight text-left">
             <span>ШТАБ</span>
-            <span className="font-ibm-mono text-[9px] sm:text-[10px] normal-case tracking-normal text-military-steel/80">
+            <span className="font-ibm-mono text-[9px] sm:text-[10px] normal-case tracking-normal text-military-sand/70">
               собери армию и веди бой
             </span>
           </span>
@@ -75,13 +75,13 @@ function ModuleRow({ className }: { className?: string }) {
         <Link
           href="/encyclopedia"
           data-testid="landing-encyclopedia-button"
-          className="group relative inline-flex items-center bg-transparent border-2 border-military-steel/30 hover:border-military-steel/60 transition-all duration-300 overflow-hidden touch-manipulation min-h-[44px] no-underline"
+          className="group relative inline-flex items-center bg-military-dark/75 backdrop-blur-sm border-2 border-military-steel/50 hover:border-military-steel transition-all duration-300 overflow-hidden touch-manipulation min-h-[44px] no-underline"
         >
           <span className="relative flex flex-col items-center justify-center leading-tight w-full px-2 py-2">
-            <span className="font-russo font-bold text-[10px] sm:text-xs uppercase tracking-wider text-military-steel/80 group-hover:text-military-steel">
+            <span className="font-russo font-bold text-[10px] sm:text-xs uppercase tracking-wider text-military-sand/90 group-hover:text-white">
               ЭНЦИКЛОПЕДИЯ
             </span>
-            <span className="font-ibm-mono text-[9px] sm:text-[10px] text-military-steel/60">
+            <span className="font-ibm-mono text-[9px] sm:text-[10px] text-military-sand/60">
               отряды, лор, тактика
             </span>
           </span>
@@ -89,13 +89,13 @@ function ModuleRow({ className }: { className?: string }) {
         <Link
           href="/calculator"
           data-testid="landing-calculator-button"
-          className="group relative inline-flex items-center bg-transparent border-2 border-military-steel/30 hover:border-military-steel/60 transition-all duration-300 overflow-hidden touch-manipulation min-h-[44px] no-underline"
+          className="group relative inline-flex items-center bg-military-dark/75 backdrop-blur-sm border-2 border-military-steel/50 hover:border-military-steel transition-all duration-300 overflow-hidden touch-manipulation min-h-[44px] no-underline"
         >
           <span className="relative flex flex-col items-center justify-center leading-tight w-full px-2 py-2">
-            <span className="font-russo font-bold text-[10px] sm:text-xs uppercase tracking-wider text-military-steel/80 group-hover:text-military-steel">
+            <span className="font-russo font-bold text-[10px] sm:text-xs uppercase tracking-wider text-military-sand/90 group-hover:text-white">
               КАЛЬКУЛЯТОР
             </span>
-            <span className="font-ibm-mono text-[9px] sm:text-[10px] text-military-steel/60">
+            <span className="font-ibm-mono text-[9px] sm:text-[10px] text-military-sand/60">
               броски и урон в бою
             </span>
           </span>
