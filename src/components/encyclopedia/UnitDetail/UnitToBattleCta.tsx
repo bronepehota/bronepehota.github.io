@@ -9,10 +9,13 @@ import { cn } from '@/lib/utils';
 
 interface UnitToBattleCtaProps {
   faction: FactionID;
+  /** Задан (отряды) — под primary рисуется кнопка «ПРОВЕРИТЬ БОЕМ» (песочница).
+   *  У машин статов солдата нет, поэтому callback не передаётся. */
+  onOpenSandbox?: () => void;
 }
 
 /** Мост «энциклопедия → игра»: панель призыва в конце досье юнита. */
-export function UnitToBattleCta({ faction }: UnitToBattleCtaProps) {
+export function UnitToBattleCta({ faction, onOpenSandbox }: UnitToBattleCtaProps) {
   const colors = getFactionColors(faction);
   return (
     <section
@@ -39,6 +42,22 @@ export function UnitToBattleCta({ faction }: UnitToBattleCtaProps) {
         </span>
         <ArrowRight className="w-5 h-5 shrink-0 transform group-hover:translate-x-1 transition-transform duration-300" />
       </Link>
+      {onOpenSandbox && (
+        <button
+          type="button"
+          data-testid="unit-sandbox-open"
+          onClick={onOpenSandbox}
+          className={cn(
+            'mt-3 w-full flex items-center justify-center',
+            'min-h-[48px] px-4 py-3 touch-manipulation',
+            'border-2 bg-transparent transition-all duration-300 hover:brightness-125',
+            'font-russo font-bold text-sm uppercase tracking-wider',
+          )}
+          style={{ borderColor: `${colors.primary}99`, color: colors.primary }}
+        >
+          {'ПРОВЕРИТЬ БОЕМ'}
+        </button>
+      )}
     </section>
   );
 }
