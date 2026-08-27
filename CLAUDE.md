@@ -516,7 +516,7 @@ Static-export SEO generated at build time (`output: 'export'`):
 Офлайн-буфер `bronepehota_analytics_queue` (кап 200, at-most-once флеш), метка `pwa` подмешивается
 автоматически. `RouteTracker` в root layout шлёт просмотры при смене маршрута + `pwa_install`.
 
-**События**: `wizard_step` (6 шагов), `battle_start`, `battle_turn` (turn), `battle_engaged`
+**События**: `wizard_step` (7 шагов: intro), `battle_start`, `battle_turn` (turn), `battle_engaged`
 (ход 2 = «реальный бой»), `battle_entry` (from: landing_hero | landing_factions | encyclopedia_unit | encyclopedia_factions) — мосты в /app, `editor_unit_saved`, `pwa_install`. Спека+таксономия:
 `docs/superpowers/specs/2026-08-18-analytics-battles-design.md`.
 
