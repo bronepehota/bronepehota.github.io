@@ -27,17 +27,17 @@ export function UnitToBattleCta({ faction }: UnitToBattleCtaProps) {
         href={`/app?faction=${faction}`}
         onClick={() => trackEvent('battle_entry', { from: 'encyclopedia_unit' })}
         className={cn(
-          'inline-flex items-center justify-between gap-3 w-full',
+          'group inline-flex items-center justify-between gap-3 w-full',
           'min-h-[52px] px-4 md:px-5 py-3 no-underline touch-manipulation',
-          'border-2 transition-all duration-300 hover:opacity-80',
-          'hover:shadow-[0_0_24px_-6px]',
+          'border-2 transition-all duration-300 hover:brightness-110',
+          'shadow-[0_0_24px_-10px]',
         )}
-        style={{ borderColor: `${colors.primary}99`, color: colors.primary }}
+        style={{ borderColor: colors.primary, backgroundColor: colors.primary, color: '#fff' }}
       >
         <span className="font-russo font-bold text-sm md:text-base uppercase tracking-wider">
           Взять отряд в бой
         </span>
-        <ArrowRight className="w-5 h-5 shrink-0" />
+        <ArrowRight className="w-5 h-5 shrink-0 transform group-hover:translate-x-1 transition-transform duration-300" />
       </Link>
     </section>
   );

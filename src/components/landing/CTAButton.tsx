@@ -81,7 +81,7 @@ function ModuleRow({ className }: { className?: string }) {
             <span className="font-russo font-bold text-[10px] sm:text-xs uppercase tracking-wider text-military-steel/80 group-hover:text-military-steel">
               ЭНЦИКЛОПЕДИЯ
             </span>
-            <span className="font-ibm-mono text-[8px] sm:text-[9px] text-military-steel/50">
+            <span className="font-ibm-mono text-[9px] sm:text-[10px] text-military-steel/60">
               отряды, лор, тактика
             </span>
           </span>
@@ -95,7 +95,7 @@ function ModuleRow({ className }: { className?: string }) {
             <span className="font-russo font-bold text-[10px] sm:text-xs uppercase tracking-wider text-military-steel/80 group-hover:text-military-steel">
               КАЛЬКУЛЯТОР
             </span>
-            <span className="font-ibm-mono text-[8px] sm:text-[9px] text-military-steel/50">
+            <span className="font-ibm-mono text-[9px] sm:text-[10px] text-military-steel/60">
               броски и урон в бою
             </span>
           </span>
