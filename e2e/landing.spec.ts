@@ -15,10 +15,6 @@ test.describe('Landing Page', () => {
     // Check main CTA button
     const ctaButton = page.getByTestId('landing-cta-button');
     await expect(ctaButton).toBeVisible();
-
-    // Should have navigation to app
-    const finalCTA = page.getByTestId('final-cta-button');
-    await expect(finalCTA).toBeVisible();
   });
 
   test('should navigate to app when clicking CTA', async ({ page }) => {

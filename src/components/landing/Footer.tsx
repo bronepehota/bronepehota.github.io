@@ -83,6 +83,11 @@ export default function Footer({ className }: FooterProps) {
           </div>
         </div>
 
+        {/* Disclaimer — официальный + фанатский контент (свернуто с бывшей секции лендинга) */}
+        <p className="font-ibm-mono text-[9px] md:text-[10px] text-slate-600/80 text-center max-w-xl leading-relaxed">
+          Официальный лор «Технолог» + фанатские материалы сообществ. Неточность? «Дополнить» на странице отряда.
+        </p>
+
         {/* Scroll indicator */}
         <div className="animate-bounce flex flex-col items-center gap-0.5 text-slate-500/40">
           <ChevronDown className="w-4 h-4" />

@@ -1,8 +1,5 @@
-import Link from 'next/link';
 import HeroSection from '@/components/landing/HeroSection';
-import LoreSection from '@/components/landing/LoreSection';
 import FactionsSection from '@/components/landing/FactionsSection';
-import FinalCTA from '@/components/landing/FinalCTA';
 import Footer from '@/components/landing/Footer';
 import PWAInstallHint from '@/components/landing/PWAInstallHint';
 import JsonLd from '@/components/JsonLd';
@@ -18,56 +15,8 @@ export default function Home() {
         <Footer />
       </div>
 
-      {/* Rest of the content below - partially visible to hint at scroll */}
-      <LoreSection />
+      {/* Витрина фракций — единственный блок ниже первого экрана */}
       <FactionsSection />
-
-      {/* Disclaimer: official + fan content */}
-      <div className="mx-auto max-w-2xl px-4 py-6 text-center">
-        <p className="font-ibm-mono text-[11px] text-military-steel/60 leading-relaxed">
-          Энциклопедия содержит официальный лор «Технолог» и фанатские материалы различных сообществ. Заметили неточность? Нажмите «Дополнить» на странице отряда — поможете сделать лучше.
-        </p>
-      </div>
-
-      <FinalCTA />
-
-      {/* Help the project section */}
-      <section className="relative py-12 md:py-16 px-4 md:px-8 bg-military-charcoal border-t border-slate-800/50">
-        <div className="max-w-2xl mx-auto text-center">
-          <h2 className="font-russo font-bold text-lg md:text-xl text-military-sand mb-3">
-            ПОМОЧЬ ПРОЕКТУ
-          </h2>
-          <p className="font-oswald text-sm md:text-base text-military-taupe mb-6 max-w-lg mx-auto">
-            Бронепехота — открытый проект. Помогайте с разработкой, предлагайте идеи,
-            сообщайте о багах или просто делитесь впечатлениями.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <a
-              href="https://github.com/bronepehota/bronepehota.github.io"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-sm border border-hud-green/40 hover:border-hud-green text-hud-green font-russo text-xs uppercase tracking-wider transition-all hover:bg-hud-green/10"
-            >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-              GitHub
-            </a>
-            <a
-              href="https://vk.com/lastbpcoder"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-sm border border-blue-400/40 hover:border-blue-400 text-blue-400 font-russo text-xs uppercase tracking-wider transition-all hover:bg-blue-400/10"
-            >
-              Сообщество VK
-            </a>
-            <Link
-              href="/calculator"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-sm border border-amber-400/40 hover:border-amber-400 text-amber-400 font-russo text-xs uppercase tracking-wider transition-all hover:bg-amber-400/10"
-            >
-              Калькулятор боя
-            </Link>
-          </div>
-        </div>
-      </section>
 
       <PWAInstallHint />
     </main>
