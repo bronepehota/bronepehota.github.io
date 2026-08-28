@@ -114,11 +114,8 @@ export default function FactionsSection({ className }: FactionsSectionProps) {
                 </div>
               </div>
 
-              {/* Faction teaser — одна короткая строка (полный лор в энциклопедии) */}
-              <p
-                className="font-oswald text-sm md:text-base text-military-taupe leading-snug mb-4 truncate"
-                title={faction.shortDescription ?? faction.description}
-              >
+              {/* Faction teaser — короткое описание с переносами (полный лор в энциклопедии) */}
+              <p className="font-oswald text-sm md:text-base text-military-taupe leading-snug mb-4">
                 {faction.shortDescription ?? faction.description}
               </p>
 
