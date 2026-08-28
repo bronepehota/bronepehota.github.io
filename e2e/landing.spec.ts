@@ -46,7 +46,11 @@ test.describe('Landing Page', () => {
     await page.getByTestId('intro-start-button').click();
     await expect(page.getByTestId('rules-confirm-button')).toBeVisible({ timeout: 10000 });
 
-    // setup_step сохранён → интро больше не показывается
+    // setup_step сохранён → интро больше не показывается.
+    // reload повторно исполняет init-скрипты (включая clearStorage из beforeEach,
+    // который стирает setup_step) — восстанавливаем ключ своим init-скриптом
+    // (порядок регистрации: clearStorage раньше, наш позже).
+    await page.addInitScript(() => localStorage.setItem('bronepehota_setup_step', 'rules'));
     await page.reload();
     await expect(page.getByTestId('intro-briefing')).toBeHidden({ timeout: 30000 });
     await expect(page.getByTestId('rules-confirm-button')).toBeVisible({ timeout: 10000 });

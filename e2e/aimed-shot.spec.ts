@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { clearStorage } from './helpers/setup';
+import { clearStorage, dismissIntroIfShown } from './helpers/setup';
 
 /**
  * Aimed Shot E2E tests
@@ -226,6 +226,8 @@ test.describe('Aimed Shot - Combat Modal', () => {
  * New flow: Rules is the first step, so we just wait for it to load
  */
 async function navigateToRulesScreen(page: import('@playwright/test').Page) {
+  // Брифинг-интро новичка (шаг intro) перекрывает экран правил — пройти его
+  await dismissIntroIfShown(page);
   // Rules is now the first screen - just wait for it to be visible
   await page.waitForSelector('#rules-selector', { timeout: 10000 });
 }
