@@ -17,7 +17,7 @@ export function LoreSearchHints({ pages, query }: LoreSearchHintsProps) {
     <div data-testid="lore-search-hints" className="flex flex-wrap items-center gap-2">
       {matches.map((p) => (
         <Link
-          key={p.href}
+          key={`${p.kind}-${p.title}`}
           href={p.href}
           data-testid="lore-search-hint"
           className="inline-flex items-center gap-1.5 rounded-full border border-military-amber/40 bg-military-charcoal/60 px-3 py-1 font-ibm-mono text-[10px] uppercase tracking-wide text-military-amber/90 hover:border-military-amber transition-colors"
