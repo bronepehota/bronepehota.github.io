@@ -4,6 +4,7 @@ import { UnitCombatSandbox } from '@/components/encyclopedia/UnitDetail/UnitComb
 import { useStandaloneCombatFlow } from '@/hooks/useStandaloneCombatFlow';
 import { trackEvent } from '@/lib/analytics';
 import type { Soldier } from '@/lib/types';
+import type { CombatActionType } from '@/lib/combat-types';
 import type { EnrichedUnit } from '@/lib/encyclopedia-utils';
 
 jest.mock('@/hooks/useStandaloneCombatFlow', () => ({
@@ -13,12 +14,25 @@ jest.mock('@/hooks/useStandaloneCombatFlow', () => ({
 jest.mock('@/lib/analytics', () => ({ trackEvent: jest.fn() }));
 
 // Стабы боевых детей — тестируем обвязку песочницы, не их внутренности.
+// ParameterInputs-стаб пробрасывает onDataNeeded наружу кнопкой — так тесты
+// могут открыть попап кубиков без настоящей фазы PARAMETERS.
 jest.mock('@/components/combat/ParameterInputs', () => ({
-  ParameterInputs: () => <div data-testid="parameter-inputs-stub" />,
+  ParameterInputs: ({ onDataNeeded }: { onDataNeeded?: (field: string) => void }) => (
+    <div data-testid="parameter-inputs-stub">
+      {onDataNeeded && (
+        <button type="button" data-testid="stub-open-dice" onClick={() => onDataNeeded('range')}>
+          open dice
+        </button>
+      )}
+    </div>
+  ),
 }));
 jest.mock('@/components/combat/CombatResults', () => ({
   CombatResults: () => <div data-testid="combat-results-stub" />,
 }));
+// ВАЖНО: стаб БЕЗ stopPropagation — как настоящий DiceInputPopup. Если попап
+// окажется вложен в оверлей (onClick={onClose}), клик по нему всплывёт и
+// закроет песочницу — это и есть регрессия, которую ловит тест ниже.
 jest.mock('@/components/calculator/DiceInputPopup', () => ({
   DiceInputPopup: () => <div data-testid="dice-popup-stub" />,
 }));
@@ -38,8 +52,9 @@ const soldier = (overrides: Partial<Soldier> = {}): Soldier => ({
 function makeFlow() {
   return {
     combatState: {
-      phase: 'ACTION_SELECT' as const,
-      actionType: null,
+      // широкие типы — тесты переключают фазу/действие без пересоздания стаба
+      phase: 'ACTION_SELECT' as 'ACTION_SELECT' | 'PARAMETERS' | 'ROLLING' | 'RESULTS' | 'APPLY',
+      actionType: null as CombatActionType | null,
       unitType: 'squad' as const,
       parameters: { distance: 6, targetArmor: 3, targetMelee: 2, fortification: 'none' as const },
       result: null,
@@ -83,6 +98,17 @@ describe('UnitCombatSandbox — боевая песочница юнита', () 
     expect(screen.getByText('Тестовый отряд')).toBeInTheDocument();
     expect(trackEvent).toHaveBeenCalledWith('sandbox_open', { unit: 'star_system_polaris_test' });
     expect(trackEvent).toHaveBeenCalledTimes(1);
+  });
+
+  it('панель: мобайл — приклеена к низу full-width; md+ — парящая карточка-диалог', () => {
+    renderSandbox([soldier()]);
+    const panel = screen.getByTestId('unit-combat-sandbox');
+    // базовые (мобайл) классы не трогаем
+    expect(panel).toHaveClass('fixed', 'inset-x-0', 'bottom-0', 'rounded-t-2xl');
+    // адаптив: центрирование, ограничение ширины, радиус со всех сторон, отступ снизу
+    expect(panel).toHaveClass('md:mx-auto', 'md:max-w-xl', 'md:rounded-2xl', 'md:bottom-6');
+    // оверлей остаётся fullscreen
+    expect(screen.getByTestId('unit-combat-sandbox-overlay')).toHaveClass('fixed', 'inset-0');
   });
 
   it('различающиеся статы → чипы солдат; клик чипа проталкивает поля и отложенно сбрасывает расчёт', () => {
@@ -148,6 +174,50 @@ describe('UnitCombatSandbox — боевая песочница юнита', () 
 
     fireEvent.click(overlay);
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('регрессия: клик внутри попапа кубиков не закрывает песочницу', () => {
+    // Фаза PARAMETERS — ParameterInputs-стаб рендерит кнопку, дёргающую
+    // onDataNeeded('range') → открывается DiceInputPopup.
+    flow.combatState = {
+      ...flow.combatState,
+      phase: 'PARAMETERS' as const,
+      actionType: 'shot' as const,
+    };
+    const { onClose } = renderSandbox([soldier()]);
+
+    act(() => {
+      fireEvent.click(screen.getByTestId('stub-open-dice'));
+    });
+    expect(screen.getByTestId('dice-popup-stub')).toBeInTheDocument();
+
+    // Стаб попапа НЕ останавливает всплытие: если попап вложен в оверлей
+    // с onClick={onClose}, клик по нему закроет песочницу.
+    act(() => {
+      fireEvent.click(screen.getByTestId('dice-popup-stub'));
+    });
+
+    expect(onClose).not.toHaveBeenCalled();
+    expect(screen.getByTestId('unit-combat-sandbox')).toBeInTheDocument();
+    expect(screen.getByTestId('dice-popup-stub')).toBeInTheDocument();
+  });
+
+  it('повторный клик по уже выбранному чипу солдата ничего не проталкивает', () => {
+    renderSandbox([
+      soldier(),
+      soldier({ rank: 2, range: 'D6', power: '1D20', melee: 4, armor: 5 }),
+    ]);
+
+    // чип 0 выбран по умолчанию (soldierIdx = 0)
+    expect(screen.getByTestId('sandbox-soldier-0')).toHaveAttribute('aria-pressed', 'true');
+
+    act(() => {
+      fireEvent.click(screen.getByTestId('sandbox-soldier-0'));
+    });
+
+    expect(flow.updateCombatantField).not.toHaveBeenCalled();
+    expect(flow.newCalculation).not.toHaveBeenCalled();
+    expect(screen.getByTestId('sandbox-soldier-0')).toHaveAttribute('aria-pressed', 'true');
   });
 
   it('предлагает только выстрел и ближний бой; клик вызывает selectAction', () => {

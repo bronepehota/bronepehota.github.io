@@ -144,7 +144,9 @@ export default function ArmyBuilder({
           color: encyclopediaFaction.color || '#94a3b8',
           symbol: encyclopediaFaction.symbol,
           description: encyclopediaFaction.description || '',
-          shortDescription: encyclopediaFaction.shortDescription || '',
+          // без `|| ''` — undefined протекает, и FactionSelector/FactionsSection
+          // сами падают на `?? description`
+          shortDescription: encyclopediaFaction.shortDescription,
           homeWorld: encyclopediaFaction.homeWorld || '',
           motto: encyclopediaFaction.motto || '',
           allies: encyclopediaFaction.allies ?? [],

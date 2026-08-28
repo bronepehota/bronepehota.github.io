@@ -332,7 +332,7 @@ src/components/
 ├── cards/           - Unit/soldier card components (UnitCard, SoldierCard, SquadView, MachineView)
 │   └── soldier-card/ - Soldier sub-components (ModifierIndicator, SoldierActions, SoldierStats)
 │   └── unit-card/   - Unit sub-components + hooks (useUnitCardState)
-├── calculator/      - Dice-input controls for the sandbox (DiceInputPopup, ModifiersSelector, RulesSelector)
+├── calculator/      - Dice-input controls for the sandbox (DiceInputPopup, RulesSelector)
 ├── combat/          - Combat modals (BottomSheetCombatModal, ActionSelector, ParameterInputs, CombatResults, ActiveModifiersDisplay, HitProbabilityIndicator)
 ├── controls/        - Shared controls (FortificationSelector, DistanceConverter)
 ├── editor/          - Desktop-only unit editor (SourcesList, SquadEditor, MachineEditor, ModifiersEditor, UnifiedSaveArea, BuffSelector, ModifierIcons, UnitsList, FactionsList, CreateSourceModal)
