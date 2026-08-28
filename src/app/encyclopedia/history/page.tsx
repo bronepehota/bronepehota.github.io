@@ -52,26 +52,39 @@ export default async function HistoryPage() {
         {/* Anchor TOC */}
         <nav data-testid="history-toc" className="folded-paper military-corners p-6 mb-8">
           <ol className="space-y-2">
-            {chapters.map((c, i) => (
-              <li key={c.slug}>
-                <a
-                  href={`#${c.slug}`}
-                  className="flex items-baseline gap-3 group"
-                >
-                  <span className="font-ibm-mono text-[10px] text-military-rust">
-                    {String(i + 1).padStart(2, '0')}
-                  </span>
-                  <span className="font-oswald text-military-sand group-hover:text-military-amber transition-colors">
-                    {c.title}
-                  </span>
-                  {c.era && (
-                    <span className="font-ibm-mono text-[10px] text-military-steel/50">
-                      {c.era}
-                    </span>
-                  )}
-                </a>
-              </li>
-            ))}
+            {(() => {
+              let chrono = 0;
+              let lastGroup: string | undefined;
+              return chapters.map((c) => {
+                const showHeader = c.group !== undefined && c.group !== lastGroup;
+                lastGroup = c.group;
+                const number = c.group ? '// ' : String(++chrono).padStart(2, '0');
+                return (
+                  <li
+                    key={c.slug}
+                    className={showHeader ? 'pt-2 mt-2 border-t border-military-steel/20' : ''}
+                  >
+                    {showHeader && (
+                      <p
+                        data-testid={`history-group-${c.group}`}
+                        className="font-ibm-mono text-[10px] uppercase tracking-[0.2em] text-military-amber/70 mb-1"
+                      >
+                        {`// ${c.group}`}
+                      </p>
+                    )}
+                    <a href={`#${c.slug}`} className="flex items-baseline gap-3 group">
+                      <span className="font-ibm-mono text-[10px] text-military-rust">{number}</span>
+                      <span className="font-oswald text-military-sand group-hover:text-military-amber transition-colors">
+                        {c.title}
+                      </span>
+                      {c.era && (
+                        <span className="font-ibm-mono text-[10px] text-military-steel/50">{c.era}</span>
+                      )}
+                    </a>
+                  </li>
+                );
+              });
+            })()}
             {/* Wars chronicle — not a chapter; separated entry anchoring #wars */}
             <li className="pt-2 mt-2 border-t border-military-steel/20">
               <a href="#wars" className="flex items-baseline gap-3 group">
@@ -89,7 +102,7 @@ export default async function HistoryPage() {
           </ol>
         </nav>
 
-        {/* Chapters */}
+        {/* Chapters — grouped sections («Справочник») render '//' instead of a number */}
         {chapters.map((c, i) => (
           <section
             key={c.slug}
@@ -99,7 +112,7 @@ export default async function HistoryPage() {
           >
             <div className="flex items-baseline gap-3 mb-4">
               <span className="font-ibm-mono text-xs text-military-rust">
-                {String(i + 1).padStart(2, '0')}
+                {c.group ? '//' : String(i + 1).padStart(2, '0')}
               </span>
               <h2 className="font-oswald text-xl md:text-2xl text-military-sand">{c.title}</h2>
             </div>

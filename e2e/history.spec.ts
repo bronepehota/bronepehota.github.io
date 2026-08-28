@@ -57,4 +57,14 @@ test.describe('История вселенной', () => {
     await expect(chapter.getByTestId('lore-source-row')).toContainText('Новейшая история Империи');
     await expect(chapter.getByTestId('credit-avb-mark')).toHaveCount(0);
   });
+
+  test('справочные секции идут под заголовком группы «Справочник»', async ({ page }) => {
+    await page.goto('/encyclopedia/history');
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.getByTestId('history-group-Справочник')).toBeVisible();
+    const kosmo = page.locator('[data-testid="history-chapter"]', { hasText: 'Космография Доминиона' });
+    await expect(kosmo).toBeVisible();
+    await expect(kosmo.getByTestId('lore-source-row')).toContainText('Летопись');
+  });
 });

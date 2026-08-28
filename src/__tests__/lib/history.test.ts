@@ -3,10 +3,30 @@ import { getAllHistoryChapters } from '@/lib/history';
 describe('history chapters', () => {
   const chapters = getAllHistoryChapters();
 
-  it('возвращает 11 глав, отсортированных по order', () => {
-    expect(chapters).toHaveLength(11);
+  it('возвращает 15 глав, отсортированных по order', () => {
+    expect(chapters).toHaveLength(15);
     const orders = chapters.map((c) => c.order ?? 99);
     expect(orders).toEqual([...orders].sort((a, b) => a - b));
+  });
+
+  it('справочные секции Star Heroes: order 12–15, группа «Справочник», без эры', () => {
+    const ref = chapters.filter((c) => {
+      const o = c.order ?? 99;
+      return o >= 12 && o <= 15;
+    });
+    expect(ref).toHaveLength(4);
+    expect(ref.map((c) => c.slug)).toEqual([
+      'kosmografiya-dominiona',
+      'politicheskoe-ustroystvo',
+      'sravnenie-voennykh-struktur',
+      'polyaris-perevorot',
+    ]);
+    for (const c of ref) {
+      expect(`${c.slug}: ${c.group}`).toBe(`${c.slug}: Справочник`);
+      expect(c.era).toBeUndefined();
+      expect(`${c.slug}: ${c.loreAuthor}`).toBe(`${c.slug}: tehnolog`);
+      expect(c.credit).toEqual({ work: 'Летопись: Звёздные герои' });
+    }
   });
 
   it('первая глава — Тунгусский артефакт, восьмая — экипировка пехоты', () => {

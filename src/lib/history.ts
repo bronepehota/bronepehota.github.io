@@ -9,6 +9,9 @@ export interface HistoryChapterMeta {
   title: string;
   era?: string;
   order?: number;
+  /** Grouping label for non-chronicle sections (TOC subheader): «Справочник»,
+   *  «Творчество игроков». Absent = the chronological flow (numbered chapters). */
+  group?: string;
   /** Org-level author of the chapter text (frontmatter): «Летопись» chapters are
    *  tehnolog; chapter VIII (from «Косары») is avb → carries the АВБ mark. */
   loreAuthor?: LoreSource;
