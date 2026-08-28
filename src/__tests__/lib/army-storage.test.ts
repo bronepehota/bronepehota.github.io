@@ -77,6 +77,26 @@ describe('army-storage', () => {
     expect(migrated.units[0].machineShotsUsed).toBe(2);
     expect(migrated.units[0].isMachineShot).toBe(true);
   });
+
+  it('sanitizes broken unit entries at the storage boundary: keeps ONLY valid instances', () => {
+    const validSquad = {
+      instanceId: 's1', type: 'squad', data: { id: 's', name: 'S' },
+    } as unknown as ArmyUnit;
+    const brokenUnits = [
+      {},                                              // совсем пустой объект
+      { instanceId: 'x', type: 'squad' },              // без data
+      { instanceId: 'y', type: 'weird', data: {} },    // чужой type
+    ] as unknown as ArmyUnit[];
+    localStorage.setItem('bronepehota_army', JSON.stringify({
+      schemaVersion: ARMY_SCHEMA_VERSION,
+      army: { ...baseArmy, units: [...brokenUnits, validSquad] },
+    }));
+
+    const loaded = loadArmy();
+    expect(loaded?.units).toHaveLength(1);
+    expect(loaded?.units[0].instanceId).toBe('s1');
+    expect(loaded?.units[0].type).toBe('squad');
+  });
 });
 
 describe('army-storage — rehydrate from source', () => {

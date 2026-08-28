@@ -8,6 +8,12 @@ jest.mock('next/navigation', () => ({
 }));
 jest.mock('@/lib/analytics', () => ({ trackEvent: jest.fn() }));
 
+// Изоляция тестов: без этого battle-state localStorage протекает между
+// тестами/порядком запуска (jsdom хранит его на всё время жизни окружения).
+beforeEach(() => {
+  localStorage.clear();
+});
+
 describe('CTAButton — модульная строка (fresh state)', () => {
   it('рендерит ШТАБ и широкую ЭНЦИКЛОПЕДИЮ с верными href', () => {
     render(<CTAButton />);

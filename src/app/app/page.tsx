@@ -192,6 +192,13 @@ export default function Home() {
     window.history.replaceState({}, '', window.location.pathname);
   }, [isArmyLoaded, army]);
 
+  // view='game' без юнитов (битый localStorage) — чиним состояние, а не только рендер:
+  // иначе первый добавленный юнит перескочил бы в бой, минуя подготовку.
+  useEffect(() => {
+    if (!isArmyLoaded) return;
+    if (view === 'game' && army.units.length === 0) setView('builder');
+  }, [isArmyLoaded, view, army.units]);
+
   // Save army to localStorage when it changes. Debounced (300ms) — serializing a
   // large army on every action caused main-thread jank on mobile. Only after load.
   useEffect(() => {
@@ -221,9 +228,7 @@ export default function Home() {
         <div className="flex items-center justify-center h-full">
           <div className="text-slate-500 text-sm">Загрузка...</div>
         </div>
-      // view='game' без юнитов (битый/очищенный localStorage) → фолбэк в билдер,
-      // иначе GameSession рендерится с пустой армией (пустой экран).
-      ) : view === 'builder' || army.units.length === 0 ? (
+      ) : view === 'builder' ? (
         <ArmyBuilder
           army={army}
           setArmy={setArmy}
