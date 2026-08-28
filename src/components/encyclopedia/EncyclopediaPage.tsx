@@ -7,6 +7,7 @@ import { EncyclopediaUnit, getFactions } from '@/lib/encyclopedia-registry';
 import { FactionID } from '@/lib/types';
 import { orderedFactions } from '@/lib/faction-hierarchy';
 import { factionDisplayNames, getFactionColors } from '@/lib/faction-colors';
+import { buildSearchHaystack, matchesSearch } from '@/lib/unit-search';
 import { UnitCard } from './UnitCard';
 import { EncyclopediaTabs } from './EncyclopediaTabs';
 import { EncyclopediaAttributionBanner } from './EncyclopediaAttributionBanner';
@@ -41,6 +42,13 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
   const [selectedSculptor, setSelectedSculptor] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoaded, setIsLoaded] = useState(false);
+
+  // Haystacks are built once (lore fields are stable per unit); the filter
+  // effect below then does a cheap substring check per keystroke.
+  const haystacks = useMemo(
+    () => new Map(units.map((u) => [u.id, buildSearchHaystack(u)])),
+    [units],
+  );
 
   // Derive the faction filter from the units data — a new faction appears here
   // automatically once it has units (no hardcoded faction list to maintain).
@@ -131,16 +139,15 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
           return false;
         }
       }
-      if (searchQuery) {
-        const searchLower = searchQuery.toLowerCase();
-        const nameMatch = unit.name.toLowerCase().includes(searchLower);
-        const shortNameMatch = unit.shortName?.toLowerCase().includes(searchLower);
-        if (!nameMatch && !shortNameMatch) return false;
+      // Search covers name, shortName, faction, manufacturer and lore fields —
+      // see buildSearchHaystack (queries like «Робогир» or «Блауд» find units).
+      if (searchQuery && !matchesSearch(unit, searchQuery, haystacks.get(unit.id))) {
+        return false;
       }
       return true;
     });
     setFilteredUnits(filtered);
-  }, [units, selectedFaction, selectedSculptor, selectedType, searchQuery]);
+  }, [units, haystacks, selectedFaction, selectedSculptor, selectedType, searchQuery]);
 
   const activeFilterCount =
     (selectedFaction !== 'all' ? 1 : 0) +
@@ -261,7 +268,7 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
                   type="text"
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  placeholder="ПОИСК ПО НАЗВАНИЮ…"
+                  placeholder="ПОИСК…"
                   className="w-full rounded-full border border-military-steel/30 bg-military-charcoal/60 py-1.5 pl-9 pr-3 font-ibm-mono text-[11px] tracking-wide text-white placeholder:text-military-steel/50 focus:border-military-amber/50 focus:outline-none"
                 />
               </div>
