@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { clearStorage } from './helpers/setup';
+import { clearStorage, dismissIntroIfShown } from './helpers/setup';
 
 /**
  * Game Session E2E tests
@@ -8,6 +8,39 @@ import { clearStorage } from './helpers/setup';
 test.describe('Game Session', () => {
   test.beforeEach(async ({ page }) => {
     await clearStorage(page);
+  });
+
+  // Регрессии класса «битый localStorage» (ручные находки 2026-08-28):
+  test('юнит без data (битый localStorage) не роняет GameSession', async ({ page }) => {
+    const errors: string[] = [];
+    page.on('pageerror', (e) => errors.push(String(e)));
+    await page.goto('/app');
+    await page.evaluate(() => {
+      // конверт saveArmy + юнит-заглушка без data — раньше: TypeError reading 'id'/'name'
+      localStorage.setItem('bronepehota_army', JSON.stringify({
+        schemaVersion: 1,
+        army: { name: 'T', faction: 'polaris', units: [{}], totalCost: 0, isInBattle: true, currentTurn: 1 },
+      }));
+      localStorage.setItem('bronepehota_view', 'game');
+    });
+    await page.reload();
+    await page.waitForLoadState('networkidle');
+    // страница живая: нет pageerror, рендер не белый
+    expect(errors).toEqual([]);
+    await expect(page.getByTestId('game-session').first()).toBeVisible({ timeout: 10000 });
+  });
+
+  test('view=game без армии → фолбэк в билдер (не пустой экран)', async ({ page }) => {
+    await page.goto('/app');
+    await page.evaluate(() => {
+      localStorage.removeItem('bronepehota_army');
+      localStorage.setItem('bronepehota_view', 'game');
+    });
+    await page.reload();
+    await dismissIntroIfShown(page);
+    // юнитов нет — GameSession не монтируется, билдер (экран правил) виден
+    await expect(page.getByTestId('rules-confirm-button')).toBeVisible({ timeout: 30000 });
+    expect(await page.getByTestId('game-session').count()).toBe(0);
   });
 
   test('should display game session interface when in battle', async ({ page }) => {
