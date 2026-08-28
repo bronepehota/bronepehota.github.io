@@ -921,7 +921,10 @@ export default function GameSession({
 
               {/* Unit number */}
               {(() => {
-                const sameTypeCount = army.units.filter(u => u.data.id === focusedUnit.data.id).length;
+                // Guard от битого localStorage (юнит без data) — не белый экран
+                const sameTypeCount = focusedUnit?.data?.id
+                  ? army.units.filter(u => u.data?.id === focusedUnit.data.id).length
+                  : 0;
                 return focusedUnit.instanceNumber && sameTypeCount > 1 && (
                   <span className={cn(
                     "shrink-0 px-1 py-0.5 text-[9px] font-mono font-bold",
