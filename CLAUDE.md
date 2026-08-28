@@ -112,8 +112,7 @@ npm run test:e2e            # All E2E tests pass
 | Aimed shot | `aimed-shot.spec.ts` | 7 |
 | Army creation | `army-creation.spec.ts` | 5 |
 | Battle buffs | `battle-buffs.spec.ts` | 11 |
-| Calculator | `calculator.spec.ts` | 7 |
-| Calculator tab | `calculator-tab.spec.ts` | 7 |
+| Editor cost calculator | `calculator-tab.spec.ts` | 7 |
 | Campaigns (Хроники войн) | `campaigns.spec.ts` | 3 |
 | Combat flow | `combat.spec.ts` | 4 |
 | Editor | `editor.spec.ts` | 7 |
@@ -136,6 +135,7 @@ npm run test:e2e            # All E2E tests pass
 | Pilot | `pilot-functionality.spec.ts` | 1 |
 | Pilot test (defender) | `defender-pilot-test.spec.ts` | 1 |
 | Preparation | `preparation-phase.spec.ts` | 5 |
+| Sandbox (песочница боя) | `sandbox.spec.ts` | 4 |
 | Soldier state | `soldier-state-management.spec.ts` | 6 |
 | Source selection | `source-selection.spec.ts` | 9 |
 | Squad scroll | `squad-scroll.spec.ts` | 1 |
@@ -332,7 +332,7 @@ src/components/
 ├── cards/           - Unit/soldier card components (UnitCard, SoldierCard, SquadView, MachineView)
 │   └── soldier-card/ - Soldier sub-components (ModifierIndicator, SoldierActions, SoldierStats)
 │   └── unit-card/   - Unit sub-components + hooks (useUnitCardState)
-├── calculator/      - Standalone combat calculator (CalculatorPage, DiceInputPopup, ModifiersSelector, RulesSelector)
+├── calculator/      - Dice-input controls for the sandbox (DiceInputPopup, ModifiersSelector, RulesSelector)
 ├── combat/          - Combat modals (BottomSheetCombatModal, ActionSelector, ParameterInputs, CombatResults, ActiveModifiersDisplay, HitProbabilityIndicator)
 ├── controls/        - Shared controls (FortificationSelector, DistanceConverter)
 ├── editor/          - Desktop-only unit editor (SourcesList, SquadEditor, MachineEditor, ModifiersEditor, UnifiedSaveArea, BuffSelector, ModifierIcons, UnitsList, FactionsList, CreateSourceModal)
@@ -355,7 +355,7 @@ src/components/
 
 **`deriveUnitStatus`** (`src/lib/unit-status.ts`) returns `'active' | 'done' | 'dead' | 'captured'`. `'captured'` (machines only, `isCaptured` flag) renders orange in the navigator (Flag icon) — de facto dead but recaptureable.
 
-**Calculator Page** (`src/app/calculator/page.tsx`): Standalone combat calculator — fully decoupled from Army/ArmyUnit. Users manually input all combat parameters (range, power, melee, armor, rank) via `DiceInputPopup`. Reuses combat components (`ActionSelector`, `ParameterInputs`, `CombatResults`) via the `CombatantData` adapter pattern. Accessible from landing page and direct URL.
+**Боевая песочница (UnitCombatSandbox)** (`src/components/encyclopedia/UnitDetail/UnitCombatSandbox.tsx`): bottom-sheet на странице юнита энциклопедии — кнопка «ПРОВЕРИТЬ БОЕМ» в CTA-панели (**только отряды**; машины — v2). Quick-расчёт без создания армии: действия только выстрел и ближний бой (гранату не экспонируем). Prefill статов первого солдата через `soldierToCombatantData` (`src/lib/combatant-data.ts`); чипы солдат — только если их боевые статы различаются, переключение проталкивается полями (хук берёт `initial` лишь при монтировании) с отложенным `newCalculation` (stale-closure guard). Переиспользует `useStandaloneCombatFlow(initial?)` + боевые компоненты (`ParameterInputs`, `CombatResults`, `DiceInputPopup`, `RulesSelector`) через `CombatantData`-адаптер. Аналитика: `sandbox_open` (unit) при открытии. **Маршрут `/calculator` удалён** — модуль лендинга теперь одна широкая ЭНЦИКЛОПЕДИЯ; e2e — `e2e/sandbox.spec.ts`.
 
 ### Grenade Combat Mechanics
 
@@ -393,8 +393,8 @@ Edit `squads.json` or `machines.json` in `src/data/sources/{source_id}/{faction}
   - Touch handlers for drag-to-close
 - `useCombatFlow.ts` - Combat state machine for shots, melee, grenades
   - `executeShot()`, `executeMelee()`, `executeGrenade()`, `checkGrenadeTarget()`
-  - Accepts optional `combatantData` (5th param of `startCombat`) for standalone calculator mode
-- `useStandaloneCombatFlow.ts` - Standalone calculator state (no ArmyUnit dependency)
+  - Accepts optional `combatantData` (5th param of `startCombat`) for standalone combat mode
+- `useStandaloneCombatFlow.ts` - Standalone combat-flow state (no ArmyUnit dependency); powers the encyclopedia sandbox. Takes optional `initial` CombatantData (prefill via `soldierToCombatantData`) — read only at mount
   - Uses `combatantData` adapter pattern via `combatantToUnitLike()` to create fake ArmyUnit
   - Manages rules version, modifier summary, combatant data
   - Provides `switchAction()`, `newCalculation()`, `updateCombatantField()`
@@ -415,7 +415,7 @@ Edit `squads.json` or `machines.json` in `src/data/sources/{source_id}/{faction}
 
 - `unit-utils.ts` - Helper functions for unit operations (numbering, validation, etc.)
 - `combat-types.ts` - TypeScript types for combat system (CombatParameters, ShotResult, MeleeResult, GrenadeBlastResult, etc.)
-- `combatant-data.ts` - Calculator adapter: `CombatantData` interface, `combatantToUnitLike()`, `isCombatReady()`, `missingFields()`
+- `combatant-data.ts` - Combatant adapter: `CombatantData` interface, `combatantToUnitLike()`, `isCombatReady()`, `missingFields()`, `soldierToCombatantData()` (Soldier → prefill для песочницы)
 - `dice-history.ts` - Dice input history persistence: `loadHistory()`, `saveEntry()`, `getRecentForField()`, `fieldFromTitle()`
 - `faction-colors.ts` - Centralized faction color mappings (getFactionColors function)
   - Polaris: red tones, Protectorate: cyan tones, Mercenaries: yellow tones
@@ -500,7 +500,7 @@ npm run build && npx serve out -l 3000
 
 Static-export SEO generated at build time (`output: 'export'`):
 
-- **`app/sitemap.ts`** — every route (landing, encyclopedia, all units/missions/campaigns, calculator). **`app/robots.ts`** — allow-all + sitemap link. Both emit to `out/`.
+- **`app/sitemap.ts`** — every route (landing, encyclopedia, all units/missions/campaigns). **`app/robots.ts`** — allow-all + sitemap link. Both emit to `out/`.
 - **`SITE_URL`** (`src/lib/constants.ts`) — canonical origin; production sets it via the `NEXT_PUBLIC_SITE_URL` repo secret (= `https://bronepehota.github.io`). `src/lib/seo.ts` exposes `absoluteUrl()` (sitemap/canonical/OG) + JSON-LD builders. NOTE: read with `||` not `??` — deploy.yml renders an absent secret as `''`, and `??` would pass `''` through to `new URL('')` and crash the build.
 - **Structured data** — `src/lib/seo.ts` + `src/components/JsonLd.tsx`: `WebApplication`+`Organization` on landing, `BreadcrumbList` on unit/mission detail pages.
 - **Analytics/verification env vars** (all optional; components no-op without id): `NEXT_PUBLIC_GA_MEASUREMENT_ID`, `NEXT_PUBLIC_YANDEX_METRICA_ID`, `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION`, `NEXT_PUBLIC_YANDEX_VERIFICATION`.
@@ -517,7 +517,7 @@ Static-export SEO generated at build time (`output: 'export'`):
 автоматически. `RouteTracker` в root layout шлёт просмотры при смене маршрута + `pwa_install`.
 
 **События**: `wizard_step` (7 шагов: intro), `battle_start`, `battle_turn` (turn), `battle_engaged`
-(ход 2 = «реальный бой»), `battle_entry` (from: landing_hero | landing_factions | encyclopedia_unit | encyclopedia_factions) — мосты в /app, `app_open` (вход в /app), `editor_unit_saved`, `pwa_install`. Спека+таксономия:
+(ход 2 = «реальный бой»), `battle_entry` (from: landing_hero | landing_factions | encyclopedia_main | encyclopedia_unit | encyclopedia_factions) — мосты в /app, `app_open` (вход в /app), `sandbox_open` (unit — открытие боевой песочницы на странице юнита), `editor_unit_saved`, `pwa_install`. Спека+таксономия:
 `docs/superpowers/specs/2026-08-18-analytics-battles-design.md`.
 
 **Чек-лист после деплоя (руками, один раз)**: GA4 → Admin → Data streams → Enhanced measurement →
