@@ -27,3 +27,31 @@ describe('CTAButton — модульная строка (fresh state)', () => {
     expect(trackEvent).toHaveBeenCalledWith('battle_entry', { from: 'landing_hero' });
   });
 });
+
+describe('CTAButton — карточка «Бой идёт» (battle state)', () => {
+  it('КОНВЕРТ {schemaVersion, army} с isInBattle → карточка боя, не модули', () => {
+    localStorage.setItem('bronepehota_army', JSON.stringify({
+      schemaVersion: 1,
+      army: { isInBattle: true, lastBattleDate: '2026-08-28T10:00:00Z', units: [{}] },
+    }));
+    render(<CTAButton />);
+    expect(screen.getByTestId('landing-continue-button')).toBeInTheDocument();
+    expect(screen.queryByTestId('landing-encyclopedia-button')).not.toBeInTheDocument();
+  });
+
+  it('легаси-голый Army тоже работает', () => {
+    localStorage.setItem('bronepehota_army', JSON.stringify({ isInBattle: true }));
+    render(<CTAButton />);
+    expect(screen.getByTestId('landing-continue-button')).toBeInTheDocument();
+  });
+
+  it('isInBattle=false → модульная строка', () => {
+    localStorage.setItem('bronepehota_army', JSON.stringify({
+      schemaVersion: 1,
+      army: { isInBattle: false, units: [] },
+    }));
+    render(<CTAButton />);
+    expect(screen.queryByTestId('landing-continue-button')).not.toBeInTheDocument();
+    expect(screen.getByTestId('landing-encyclopedia-button')).toBeInTheDocument();
+  });
+});

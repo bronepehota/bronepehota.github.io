@@ -105,7 +105,11 @@ export default function CTAButton({ className }: CTAButtonProps) {
     const saved = localStorage.getItem('bronepehota_army');
     if (saved) {
       try {
-        const army = JSON.parse(saved);
+        // saveArmy пишет конверт {schemaVersion, army}; поддерживаем и голый
+        // Army (легаси) — иначе isInBattle всегда undefined и карточка «Бой идёт»
+        // не показывается (баг с PR #223, пойман ручным тестом 2026-08-28).
+        const parsed = JSON.parse(saved);
+        const army = parsed?.army ?? parsed;
         if (army.isInBattle === true) {
           setHasActiveBattle(true);
           setLastBattleDate(army.lastBattleDate || null);
