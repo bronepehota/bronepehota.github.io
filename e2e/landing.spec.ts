@@ -30,13 +30,9 @@ test.describe('Landing Page', () => {
     expect(url).toContain('/app'); // Should be on /app route
   });
 
-  test('модульная строка: ЭНЦИКЛОПЕДИЯ и КАЛЬКУЛЯТОР ведут куда надо', async ({ page }) => {
+  test('модульная строка: ЭНЦИКЛОПЕДИЯ ведёт в энциклопедию', async ({ page }) => {
     await page.getByTestId('landing-encyclopedia-button').click();
     await page.waitForURL(/\/encyclopedia/);
-
-    await page.goBack();
-    await page.getByTestId('landing-calculator-button').click();
-    await page.waitForURL(/\/calculator/);
   });
 
   test('карточка фракции ведёт в энциклопедию фракций', async ({ page }) => {

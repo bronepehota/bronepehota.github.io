@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Sword, RotateCcw, Clock, Calculator } from 'lucide-react';
+import { ArrowRight, Sword, RotateCcw, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { trackEvent } from '@/lib/analytics';
 
@@ -42,7 +42,7 @@ function formatBattleDate(isoString: string): string {
   return `${diffDays}д`;
 }
 
-/** Модульная строка первого экрана: ШТАБ (primary) + ЭНЦИКЛОПЕДИЯ + КАЛЬКУЛЯТОР.
+/** Модульная строка первого экрана: ШТАБ (primary) + широкая ЭНЦИКЛОПЕДИЯ.
  *  Единая разметка для SSR и свежего состояния клиента. */
 function ModuleRow({ className }: { className?: string }) {
   return (
@@ -70,14 +70,14 @@ function ModuleRow({ className }: { className?: string }) {
         </span>
       </Link>
 
-      {/* Secondary: ЭНЦИКЛОПЕДИЯ + КАЛЬКУЛЯТОР */}
-      <div className="grid grid-cols-2 gap-2.5">
-        <Link
-          href="/encyclopedia"
-          data-testid="landing-encyclopedia-button"
-          className="group relative inline-flex items-center bg-military-dark/75 backdrop-blur-sm border-2 border-military-steel/50 hover:border-military-steel transition-all duration-300 overflow-hidden touch-manipulation min-h-[44px] no-underline"
-        >
-          <span className="relative flex flex-col items-center justify-center leading-tight w-full px-2 py-2">
+      {/* Secondary: широкая ЭНЦИКЛОПЕДИЯ (быстрый расчёт боя — песочница на странице юнита) */}
+      <Link
+        href="/encyclopedia"
+        data-testid="landing-encyclopedia-button"
+        className="group relative inline-flex items-center bg-military-dark/75 backdrop-blur-sm border-2 border-military-steel/50 hover:border-military-steel transition-all duration-300 overflow-hidden touch-manipulation min-h-[44px] no-underline"
+      >
+        <span className="relative flex items-center justify-between leading-tight w-full px-4 py-2">
+          <span className="flex flex-col items-start text-left">
             <span className="font-russo font-bold text-[10px] sm:text-xs uppercase tracking-wider text-military-sand/90 group-hover:text-white">
               ЭНЦИКЛОПЕДИЯ
             </span>
@@ -85,22 +85,9 @@ function ModuleRow({ className }: { className?: string }) {
               отряды, лор, тактика
             </span>
           </span>
-        </Link>
-        <Link
-          href="/calculator"
-          data-testid="landing-calculator-button"
-          className="group relative inline-flex items-center bg-military-dark/75 backdrop-blur-sm border-2 border-military-steel/50 hover:border-military-steel transition-all duration-300 overflow-hidden touch-manipulation min-h-[44px] no-underline"
-        >
-          <span className="relative flex flex-col items-center justify-center leading-tight w-full px-2 py-2">
-            <span className="font-russo font-bold text-[10px] sm:text-xs uppercase tracking-wider text-military-sand/90 group-hover:text-white">
-              КАЛЬКУЛЯТОР
-            </span>
-            <span className="font-ibm-mono text-[9px] sm:text-[10px] text-military-sand/60">
-              броски и урон в бою
-            </span>
-          </span>
-        </Link>
-      </div>
+          <ArrowRight className="w-4 h-4 text-military-sand/50 group-hover:text-white group-hover:translate-x-0.5 transition-all" />
+        </span>
+      </Link>
     </div>
   );
 }
@@ -223,25 +210,11 @@ export default function CTAButton({ className }: CTAButtonProps) {
               <span className="sm:hidden">В бой</span>
             </span>
           </Link>
-
-          {/* Calculator */}
-          <Link
-            href="/calculator"
-            className="group flex items-center justify-center gap-1 px-2 sm:px-3 py-2
-              bg-slate-800/30 hover:bg-slate-700/50
-              transition-all duration-200 touch-manipulation no-underline"
-          >
-            <Calculator className="w-3.5 h-3.5 text-slate-500 group-hover:text-slate-400 transition-colors" />
-            <span className="font-russo text-[10px] sm:text-xs text-slate-400 group-hover:text-slate-300 transition-colors uppercase">
-              <span className="hidden sm:inline">Калькулятор</span>
-              <span className="sm:hidden">Кальк</span>
-            </span>
-          </Link>
         </div>
       </div>
     );
   }
 
-  // Normal state - модульная строка: ШТАБ + ЭНЦИКЛОПЕДИЯ + КАЛЬКУЛЯТОР
+  // Normal state - модульная строка: ШТАБ + ЭНЦИКЛОПЕДИЯ
   return <ModuleRow className={className} />;
 }

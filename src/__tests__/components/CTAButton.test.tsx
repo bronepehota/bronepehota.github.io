@@ -9,18 +9,16 @@ jest.mock('next/navigation', () => ({
 jest.mock('@/lib/analytics', () => ({ trackEvent: jest.fn() }));
 
 describe('CTAButton — модульная строка (fresh state)', () => {
-  it('рендерит три модуля с верными href', () => {
+  it('рендерит ШТАБ и широкую ЭНЦИКЛОПЕДИЮ с верными href', () => {
     render(<CTAButton />);
     expect(screen.getByTestId('landing-cta-button').getAttribute('href')).toBe('/app');
     expect(screen.getByTestId('landing-encyclopedia-button').getAttribute('href')).toBe('/encyclopedia');
-    expect(screen.getByTestId('landing-calculator-button').getAttribute('href')).toBe('/calculator');
   });
 
   it('микротексты модулей', () => {
     render(<CTAButton />);
     expect(screen.getByText('собери армию и веди бой')).toBeInTheDocument();
     expect(screen.getByText('отряды, лор, тактика')).toBeInTheDocument();
-    expect(screen.getByText('броски и урон в бою')).toBeInTheDocument();
   });
 
   it('клик по ШТАБ шлёт battle_entry(from=landing_hero)', () => {
