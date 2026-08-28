@@ -68,13 +68,11 @@ button, a, input, select, textarea {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Mobile-safe touch targets */
-@media (max-width: 768px) {
-  button, a, .touch-target {
-    min-height: 44px;
-    min-width: 44px;
-  }
-}
+/* Mobile-safe touch targets — УБРАНО blanket-правило (2026-08-28): оно
+   раздувало ВСЕ ссылки/кнопки до 44px, включая инлайн-чипы и лейблы
+   («Дополнить», атрибуцию, «отряды →») — на мобильном энциклопедия
+   «расползалась». Крупные контролы несут явные min-h-[44px]+ в компонентах;
+   мелкие чипы остаются чипами (WCAG 2.5.8 допускает inline-исключения). */
 
 /* Print styles */
 @media print {
