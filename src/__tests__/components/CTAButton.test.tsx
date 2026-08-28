@@ -29,14 +29,16 @@ describe('CTAButton — модульная строка (fresh state)', () => {
 });
 
 describe('CTAButton — карточка «Бой идёт» (battle state)', () => {
-  it('КОНВЕРТ {schemaVersion, army} с isInBattle → карточка боя, не модули', () => {
+  it('КОНВЕРТ {schemaVersion, army} с isInBattle → карточка боя; энциклопедия доступна', () => {
     localStorage.setItem('bronepehota_army', JSON.stringify({
       schemaVersion: 1,
       army: { isInBattle: true, lastBattleDate: '2026-08-28T10:00:00Z', units: [{}] },
     }));
     render(<CTAButton />);
     expect(screen.getByTestId('landing-continue-button')).toBeInTheDocument();
-    expect(screen.queryByTestId('landing-encyclopedia-button')).not.toBeInTheDocument();
+    // модульная строка скрыта, но вход в энциклопедию остаётся третьим сегментом карточки
+    expect(screen.queryByTestId('landing-cta-button')).not.toBeInTheDocument();
+    expect(screen.getByTestId('landing-encyclopedia-button').getAttribute('href')).toBe('/encyclopedia');
   });
 
   it('легаси-голый Army тоже работает', () => {

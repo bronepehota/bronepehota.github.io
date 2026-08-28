@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Sword, RotateCcw, Clock } from 'lucide-react';
+import { ArrowRight, Sword, RotateCcw, Clock, BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { trackEvent } from '@/lib/analytics';
 
@@ -212,6 +212,21 @@ export default function CTAButton({ className }: CTAButtonProps) {
             <span className="font-russo text-[10px] sm:text-xs text-amber-400 group-hover:text-amber-300 transition-colors uppercase font-semibold">
               <span className="hidden sm:inline">Продолжить бой</span>
               <span className="sm:hidden">В бой</span>
+            </span>
+          </Link>
+
+          {/* Encyclopedia — вход в базу не теряется и у игрока в бою */}
+          <Link
+            href="/encyclopedia"
+            data-testid="landing-encyclopedia-button"
+            className="group flex items-center justify-center gap-1 px-2 sm:px-3 py-2
+              bg-slate-800/30 hover:bg-slate-700/50
+              transition-all duration-200 touch-manipulation no-underline"
+          >
+            <BookOpen className="w-3.5 h-3.5 text-slate-500 group-hover:text-slate-400 transition-colors" />
+            <span className="font-russo text-[10px] sm:text-xs text-slate-400 group-hover:text-slate-300 transition-colors uppercase">
+              <span className="hidden sm:inline">Энциклопедия</span>
+              <span className="sm:hidden">Энцикл.</span>
             </span>
           </Link>
         </div>
