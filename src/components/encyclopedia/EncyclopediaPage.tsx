@@ -12,6 +12,7 @@ import { EncyclopediaTabs } from './EncyclopediaTabs';
 import { EncyclopediaAttributionBanner } from './EncyclopediaAttributionBanner';
 import { SQUAD_GROUP_IMAGE, getCredit } from '@/lib/painted-images';
 import { cn } from '@/lib/utils';
+import { trackEvent } from '@/lib/analytics';
 
 interface EncyclopediaPageProps {
   initialUnits: EncyclopediaUnit[];
@@ -205,29 +206,27 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
           </div>
         </header>
 
-        {/* Мост в режим боя — СПРЯТАН по решению владельца (2026-08-28).
-            Тонкая строка-телетайп ниже; вернуть — выставить флаг в true.
-        {SHOW_BATTLE_BANNER && (
-          <div data-testid="encyclopedia-battle-banner" className="mx-auto max-w-7xl px-4">
-            <Link
-              href="/app"
-              onClick={() => trackEvent('battle_entry', { from: 'encyclopedia_main' })}
-              data-testid="encyclopedia-battle-banner-link"
-              className="flex items-center gap-3 min-h-[44px] px-2 border border-military-rust/30 hover:border-military-amber/60 transition-colors group touch-manipulation no-underline"
-            >
-              <span className="font-ibm-mono text-[10px] uppercase tracking-[0.25em] text-military-rust/80 shrink-0">
-                {'// РЕЖИМ БОЯ'}
-              </span>
-              <span className="hidden sm:inline font-ibm-mono text-[10px] md:text-xs text-military-steel/70 truncate">
-                любой отряд — в строй
-              </span>
-              <span className="flex-1" />
-              <span className="font-russo text-[10px] md:text-xs uppercase tracking-widest text-military-rust group-hover:text-military-amber transition-colors shrink-0">
-                ШТАБ →
-              </span>
-            </Link>
-          </div>
-        )} */}
+        {/* Мост в режим боя — тонкая строка-телетайп, вся кликабельна
+            (вернули по решению владельца 2026-08-28: прятали только песочницу) */}
+        <div data-testid="encyclopedia-battle-banner" className="mx-auto max-w-7xl px-4">
+          <Link
+            href="/app"
+            onClick={() => trackEvent('battle_entry', { from: 'encyclopedia_main' })}
+            data-testid="encyclopedia-battle-banner-link"
+            className="flex items-center gap-3 min-h-[44px] px-2 border border-military-rust/30 hover:border-military-amber/60 transition-colors group touch-manipulation no-underline"
+          >
+            <span className="font-ibm-mono text-[10px] uppercase tracking-[0.25em] text-military-rust/80 shrink-0">
+              {'// РЕЖИМ БОЯ'}
+            </span>
+            <span className="hidden sm:inline font-ibm-mono text-[10px] md:text-xs text-military-steel/70 truncate">
+              любой отряд — в строй
+            </span>
+            <span className="flex-1" />
+            <span className="font-russo text-[10px] md:text-xs uppercase tracking-widest text-military-rust group-hover:text-military-amber transition-colors shrink-0">
+              ШТАБ →
+            </span>
+          </Link>
+        </div>
 
         {/* Sticky navigation console — tabs + search + filters stay reachable
             from anywhere in the 20+ screen catalog. Sticky works because the

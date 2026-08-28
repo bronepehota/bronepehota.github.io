@@ -317,9 +317,7 @@ test.describe('Энциклопедия', () => {
     await expect(page.getByTestId('armament-entry').first()).toContainText('Световой меч');
   });
 
-  // Плашка «// РЕЖИМ БОЯ» спрятана по решению владельца (2026-08-28) —
-  // вернуть вместе с SHOW_BATTLE_BANNER в EncyclopediaPage.tsx.
-  test.skip('плашка режима боя ведёт в штаб', async ({ page }) => {
+  test('плашка режима боя ведёт в штаб', async ({ page }) => {
     await page.goto('/encyclopedia');
     await expect(page.getByTestId('encyclopedia-battle-banner')).toBeVisible();
     await page.getByTestId('encyclopedia-battle-banner-link').click();
