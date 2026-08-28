@@ -5,9 +5,9 @@ import { EncyclopediaTabs } from '@/components/encyclopedia/EncyclopediaTabs';
 import { LoreSourceRow } from '@/components/encyclopedia/LoreSourceRow';
 
 export const metadata = {
-  title: 'История вселенной — Энциклопедия Бронепехоты',
+  title: 'История вселенной Робогир — Энциклопедия Бронепехоты',
   description:
-    'Хроника человечества: от Тунгусского артефакта и первых прыжков к звёздам до Доминиона, двух сверхдержав и хроник войн 4451–4546 годов.',
+    'Хроника вселенной Робогир (Robogear) — общего мира настольных игр «Робогир» и «Бронепехота»: от Тунгусского артефакта и первых прыжков к звёздам до Доминиона, Новейшей истории Империи, Легендарных Лордов и хроник войн.',
   alternates: { canonical: '/encyclopedia/history' },
 };
 
@@ -47,6 +47,9 @@ export default async function HistoryPage() {
             История вселенной
           </h1>
           <EncyclopediaTabs className="mb-6" />
+          <p className="font-ibm-mono text-[10px] md:text-[11px] text-military-steel/60 tracking-wide">
+            {'// Вселенная настольных игр «Робогир» (Robogear) и «Бронепехота» — общая'}
+          </p>
         </header>
 
         {/* Anchor TOC */}

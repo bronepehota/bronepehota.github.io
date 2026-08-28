@@ -42,6 +42,10 @@ export default function FactionsSection({ className }: FactionsSectionProps) {
             ФРАКЦИИ
           </h2>
           <div className="military-divider max-w-md mx-auto" />
+          <p className="mt-4 text-center text-sm text-military-sand/60 max-w-2xl mx-auto">
+            Вселенная общая с настольной игрой «Робогир» (Robogear): Протекторат,
+            Полярис и боевая техника — те же.
+          </p>
         </div>
       </div>
 
