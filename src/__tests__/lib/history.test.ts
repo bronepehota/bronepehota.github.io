@@ -3,8 +3,8 @@ import { getAllHistoryChapters } from '@/lib/history';
 describe('history chapters', () => {
   const chapters = getAllHistoryChapters();
 
-  it('возвращает 8 глав, отсортированных по order', () => {
-    expect(chapters).toHaveLength(8);
+  it('возвращает 11 глав, отсортированных по order', () => {
+    expect(chapters).toHaveLength(11);
     const orders = chapters.map((c) => c.order ?? 99);
     expect(orders).toEqual([...orders].sort((a, b) => a - b));
   });
@@ -12,6 +12,23 @@ describe('history chapters', () => {
   it('первая глава — Тунгусский артефакт, восьмая — экипировка пехоты', () => {
     expect(chapters[0]?.slug).toBe('tungusskiy-artefakt');
     expect(chapters[7]?.slug).toBe('ekipirovka-pehoty-dominiona');
+  });
+
+  it('главы 9–11 — «Новейшая история Империи»: tehnolog, кредит издания без автора', () => {
+    const empire = chapters.filter((c) => {
+      const o = c.order ?? 99;
+      return o >= 9 && o <= 11;
+    });
+    expect(empire).toHaveLength(3);
+    expect(empire.map((c) => c.slug)).toEqual([
+      'konversiya-raskol-regentstvo',
+      'flot-epokhi-regentstva',
+      'legendarnye-imperskie-lordy',
+    ]);
+    for (const c of empire) {
+      expect(`${c.slug}: ${c.loreAuthor}`).toBe(`${c.slug}: tehnolog`);
+      expect(c.credit).toEqual({ work: 'Новейшая история Империи' });
+    }
   });
 
   it('каждая глава имеет title', () => {

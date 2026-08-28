@@ -45,4 +45,16 @@ test.describe('История вселенной', () => {
     await expect(first.getByTestId('lore-source-row')).toContainText('Летопись');
     await expect(first.getByTestId('credit-avb-mark')).toHaveCount(0);
   });
+
+  test('глава «Конверсия, Раскол, Регентство» отображается с источником «Новейшая история Империи»', async ({ page }) => {
+    await page.goto('/encyclopedia/history');
+    await page.waitForLoadState('networkidle');
+
+    const chapter = page.locator('[data-testid="history-chapter"]', {
+      hasText: 'Конверсия, Раскол, Регентство',
+    });
+    await expect(chapter).toBeVisible();
+    await expect(chapter.getByTestId('lore-source-row')).toContainText('Новейшая история Империи');
+    await expect(chapter.getByTestId('credit-avb-mark')).toHaveCount(0);
+  });
 });
