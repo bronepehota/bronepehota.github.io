@@ -221,7 +221,9 @@ export default function Home() {
         <div className="flex items-center justify-center h-full">
           <div className="text-slate-500 text-sm">Загрузка...</div>
         </div>
-      ) : view === 'builder' ? (
+      // view='game' без юнитов (битый/очищенный localStorage) → фолбэк в билдер,
+      // иначе GameSession рендерится с пустой армией (пустой экран).
+      ) : view === 'builder' || army.units.length === 0 ? (
         <ArmyBuilder
           army={army}
           setArmy={setArmy}
