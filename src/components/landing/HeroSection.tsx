@@ -28,7 +28,7 @@ export default function HeroSection({ className }: HeroSectionProps) {
     <section
       className={cn(
         'relative flex flex-col flex-1 overflow-hidden',
-        'items-center justify-center px-3 md:px-8 py-4 md:py-6',
+        'items-center px-3 md:px-8 py-4 md:py-6',
         className
       )}
       style={{
@@ -73,8 +73,10 @@ export default function HeroSection({ className }: HeroSectionProps) {
       {/* HUD Overlay */}
       <HUDOverlay />
 
-      {/* Content - more compact */}
-      <div className="relative z-10 w-full max-w-5xl mx-auto px-2 text-center">
+      {/* Content - more compact. HUD-композиция: атмосфера сверху,
+          консоль команд прижата к нижней кромке (над футером). */}
+      <div className="relative z-10 w-full max-w-5xl mx-auto px-2 text-center flex-1 flex flex-col justify-between">
+        <div className="pt-6 md:pt-12">
         {/* Main title - more responsive sizes */}
         <h1
           className={cn(
@@ -141,6 +143,10 @@ export default function HeroSection({ className }: HeroSectionProps) {
             <span className="text-military-amber font-semibold"> Кто победит?</span>
           </p>
         </div>
+        </div>
+
+        {/* Консоль команд — прижата к нижней кромке */}
+        <div className="pb-2">
 
         {/* CTA Button */}
         <div
@@ -167,6 +173,7 @@ export default function HeroSection({ className }: HeroSectionProps) {
           >
             Помочь с проектом
           </Link>
+        </div>
         </div>
       </div>
     </section>

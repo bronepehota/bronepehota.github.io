@@ -35,6 +35,9 @@ export default function RouteTracker() {
 
   useEffect(() => {
     if (!pathname) return;
+    // Вход в штаб — событие в обеих системах (мосты меряет battle_entry,
+    // фактический приход — app_open; метку pwa подмешает фасад).
+    if (pathname === '/app') trackEvent('app_open');
     if (lastPath.current === null) {
       trackInitialPageView(pathname);
     } else if (lastPath.current !== pathname) {

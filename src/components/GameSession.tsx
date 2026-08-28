@@ -914,14 +914,17 @@ export default function GameSession({
 
           </div>
           </div>
-          {/* Current unit info bar - with turn button, armor/speed, menu, done toggle */}
-          {!isDockExpanded && focusedUnit && (
+          {/* Current unit info bar - with turn button, armor/speed, menu, done toggle.
+              Guard focusedUnit?.data: юнит без data (битый localStorage) не рендерим. */}
+          {!isDockExpanded && focusedUnit?.data && (
             <div className="px-2 py-1 border-t border-slate-800/50 flex items-center gap-1.5">
 
 
               {/* Unit number */}
               {(() => {
-                const sameTypeCount = army.units.filter(u => u.data.id === focusedUnit.data.id).length;
+                // Guard от битого localStorage (юнит без data) — не белый экран;
+                // сам блок уже под focusedUnit?.data &&, здесь только defense-in-depth u.data?.id
+                const sameTypeCount = army.units.filter(u => u.data?.id === focusedUnit.data.id).length;
                 return focusedUnit.instanceNumber && sameTypeCount > 1 && (
                   <span className={cn(
                     "shrink-0 px-1 py-0.5 text-[9px] font-mono font-bold",

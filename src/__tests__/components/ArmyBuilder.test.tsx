@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import ArmyBuilder from '@/components/ArmyBuilder';
+import ArmyBuilder, { initialSetupStep } from '@/components/ArmyBuilder';
 import type { Army } from '@/lib/types';
 
 const mockArmy: Army = {
@@ -33,6 +33,8 @@ describe('ArmyBuilder back navigation', () => {
     jest.clearAllMocks();
     // Mock localStorage
     const store: Record<string, string> = {};
+    // Wizard past intro — renders assume the rules screen immediately (see initialSetupStep below)
+    store['bronepehota_setup_step'] = 'rules';
     jest.spyOn(Storage.prototype, 'getItem').mockImplementation((key) => store[key] || null);
     jest.spyOn(Storage.prototype, 'setItem').mockImplementation((key, val) => { store[key] = val; });
   });
@@ -141,5 +143,19 @@ describe('ArmyBuilder back navigation', () => {
         expect.objectContaining({ currentStep: 'faction-select' })
       );
     });
+  });
+});
+
+describe('initialSetupStep', () => {
+  it('новичок (нет сохранённого шага) → intro', () => {
+    expect(initialSetupStep(null)).toBe('intro');
+  });
+  it('сохранённый валидный шаг → он сам', () => {
+    expect(initialSetupStep('rules')).toBe('rules');
+    expect(initialSetupStep('units')).toBe('units');
+  });
+  it('мусор → intro', () => {
+    expect(initialSetupStep('garbage')).toBe('intro');
+    expect(initialSetupStep('intro')).toBe('intro'); // intro не персистится
   });
 });

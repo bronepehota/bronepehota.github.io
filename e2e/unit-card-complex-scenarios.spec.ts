@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { clearStorage, setupToArmyBuilder } from './helpers/setup';
+import { clearStorage, dismissIntroIfShown, setupToArmyBuilder } from './helpers/setup';
 
 test.describe('UnitCard Complex Scenarios', () => {
   test.beforeEach(async ({ page }) => {
@@ -52,6 +52,8 @@ test.describe('UnitCard Complex Scenarios', () => {
   });
 
   test('switching between rules versions', async ({ page }) => {
+    await dismissIntroIfShown(page);
+
     expect(await page.locator('text=Выберите версию правил').isVisible()).toBe(true);
     expect(await page.locator('h3:has-text("Технолог")').isVisible()).toBe(true);
     expect(await page.locator('h3:has-text("Правила от Сообщества Star System")').isVisible()).toBe(true);

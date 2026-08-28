@@ -23,7 +23,14 @@ import { FactionLogo } from '@/components/FactionLogo';
 import { getFactionColors, factionLogos, factionDisplayNames } from '@/lib/faction-colors';
 import { UnitStatTable } from './UnitDetail/UnitStatTable';
 import { UnitSectionNav } from './UnitDetail/UnitSectionNav';
-import type { Squad, Machine } from '@/lib/types';
+import { UnitToBattleCta } from './UnitDetail/UnitToBattleCta';
+import { UnitCombatSandbox } from './UnitDetail/UnitCombatSandbox';
+
+// Песочница «ПРОВЕРИТЬ БОЕМ» СПРЯТАНА по решению владельца (2026-08-28):
+// не так хороша, как реальный бой в штабе, — только смущает. Код и тесты
+// остаются; вернуть — выставить флаг в true.
+const SHOW_SANDBOX = false;
+import type { Squad, Machine, Soldier } from '@/lib/types';
 
 interface UnitDetailPageProps {
   unit: EnrichedUnit;
@@ -56,6 +63,8 @@ const factionBadges: Record<string, string> = {
 export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc }: UnitDetailPageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [activeSource, setActiveSource] = useState<string>(sourceOrder[0] ?? unit.sources[0]?.id ?? '');
+  // Боевая песочница (bottom-sheet) — открывается кнопкой «ПРОВЕРИТЬ БОЕМ» в CTA-панели.
+  const [sandboxOpen, setSandboxOpen] = useState(false);
   const activeUnit = bySource[activeSource] ?? unit;
   const factionColors = getFactionColors(unit.faction);
   const detailLogo = factionLogos[unit.faction];
@@ -506,6 +515,12 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc }:
                 </div>
               </section>
             )}
+            {/* Мост в приложение — deep-link предвыбирает фракцию юнита.
+                Отряды дополнительно получают «ПРОВЕРИТЬ БОЕМ» → песочница. */}
+            <UnitToBattleCta
+              faction={unit.faction}
+              onOpenSandbox={SHOW_SANDBOX && unit.type === 'squad' ? () => setSandboxOpen(true) : undefined}
+            />
           </div>
         </main>
 
@@ -514,6 +529,15 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc }:
           <div className="military-divider mb-8" />
         </div>
       </div>
+
+      {/* Боевая песочница — fixed bottom-sheet, поэтому в корне (вне space-y-8 контейнера). */}
+      {sandboxOpen && unit.type === 'squad' && (
+        <UnitCombatSandbox
+          unit={unit}
+          soldiers={(activeUnit.soldiers ?? []) as Soldier[]}
+          onClose={() => setSandboxOpen(false)}
+        />
+      )}
     </div>
   );
 }

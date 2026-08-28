@@ -84,7 +84,12 @@ export function rehydrateFromSource(army: Army): Army {
 export function migrateArmy(army: Army, now: number = Date.now()): Army {
   const withDefaults: Army = {
     ...army,
-    units: army.units ?? [],
+    // Санитайзинг на границе хранения: битые записи (без data / чужой type) выкидываем,
+    // чтобы каждый downstream-потребитель (GameSession, UnitCard, навигатор) был
+    // защищён by construction, а render-гарды остались defense-in-depth.
+    units: (army.units ?? []).filter(
+      (u): u is ArmyUnit => !!u?.data && (u.type === 'squad' || u.type === 'machine'),
+    ),
     currentStep: army.currentStep ?? 'faction-select',
     isInBattle: army.isInBattle ?? false,
     currentTurn: army.currentTurn ?? 1,

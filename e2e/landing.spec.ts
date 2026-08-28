@@ -15,10 +15,6 @@ test.describe('Landing Page', () => {
     // Check main CTA button
     const ctaButton = page.getByTestId('landing-cta-button');
     await expect(ctaButton).toBeVisible();
-
-    // Should have navigation to app
-    const finalCTA = page.getByTestId('final-cta-button');
-    await expect(finalCTA).toBeVisible();
   });
 
   test('should navigate to app when clicking CTA', async ({ page }) => {
@@ -32,5 +28,31 @@ test.describe('Landing Page', () => {
     // Should be on app page now
     const url = page.url();
     expect(url).toContain('/app'); // Should be on /app route
+  });
+
+  test('модульная строка: ЭНЦИКЛОПЕДИЯ ведёт в энциклопедию', async ({ page }) => {
+    await page.getByTestId('landing-encyclopedia-button').click();
+    await page.waitForURL(/\/encyclopedia/);
+  });
+
+  test('карточка фракции ведёт в энциклопедию фракций', async ({ page }) => {
+    await page.getByTestId('landing-faction-card').first().click();
+    await page.waitForURL(/\/encyclopedia\/factions/);
+  });
+
+  test('брифинг новичка: интро → «Начать» → выбор правил; повторный вход без интро', async ({ page }) => {
+    await page.getByTestId('landing-cta-button').click();
+    await expect(page.getByTestId('intro-briefing')).toBeVisible({ timeout: 30000 });
+    await page.getByTestId('intro-start-button').click();
+    await expect(page.getByTestId('rules-confirm-button')).toBeVisible({ timeout: 10000 });
+
+    // setup_step сохранён → интро больше не показывается.
+    // reload повторно исполняет init-скрипты (включая clearStorage из beforeEach,
+    // который стирает setup_step) — восстанавливаем ключ своим init-скриптом
+    // (порядок регистрации: clearStorage раньше, наш позже).
+    await page.addInitScript(() => localStorage.setItem('bronepehota_setup_step', 'rules'));
+    await page.reload();
+    await expect(page.getByTestId('intro-briefing')).toBeHidden({ timeout: 30000 });
+    await expect(page.getByTestId('rules-confirm-button')).toBeVisible({ timeout: 10000 });
   });
 });

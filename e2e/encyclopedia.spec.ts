@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { clearStorage } from './helpers/setup';
+import { clearStorage, dismissIntroIfShown } from './helpers/setup';
 
 test.describe('Энциклопедия', () => {
   test.beforeEach(async ({ page }) => {
@@ -127,6 +127,33 @@ test.describe('Энциклопедия', () => {
     // Оба источника представлены пилюлями (полные названия)
     await expect(switcher.getByText('Star System')).toBeVisible();
     await expect(switcher.getByText('Технолог')).toBeVisible();
+  });
+
+  test('«Взять отряд в бой»: deep-link предвыбирает фракцию юнита', async ({ page }) => {
+    await clearStorage(page);
+    // Протекторат — не дефолтная фракция (polaris — initial state в /app): тест доказателен.
+    await page.goto('/encyclopedia/unit/protectorate_felitsianskaya_gvardiya');
+    await expect(page.getByTestId('unit-to-battle-cta')).toBeVisible();
+    await page.getByTestId('unit-to-battle-cta').getByRole('link').click();
+    await dismissIntroIfShown(page);
+
+    // /app компилируется по требованию (~до 30с в dev)
+    await expect(page.getByTestId('rules-confirm-button')).toBeVisible({ timeout: 30000 });
+
+    // армия получила фракцию (persist дебаунс 300мс).
+    // saveArmy пишет конверт {schemaVersion, army} — читаем .army.faction
+    // (legacy-фолбэк на голый Army оставляем на всякий случай).
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const raw = JSON.parse(localStorage.getItem('bronepehota_army') ?? '{}');
+          return raw?.army?.faction ?? raw?.faction;
+        }),
+      )
+      .toBe('protectorate');
+
+    // параметр вычищен из URL
+    await expect(page).toHaveURL(/\/app$/);
   });
 
   test('несуществующий ID возвращает 404', async ({ page }) => {
@@ -288,5 +315,13 @@ test.describe('Энциклопедия', () => {
 
     await expect(page.getByTestId('unit-armament')).toBeVisible();
     await expect(page.getByTestId('armament-entry').first()).toContainText('Световой меч');
+  });
+
+  test('плашка режима боя ведёт в штаб', async ({ page }) => {
+    await page.goto('/encyclopedia');
+    await expect(page.getByTestId('encyclopedia-battle-banner')).toBeVisible();
+    await page.getByTestId('encyclopedia-battle-banner-link').click();
+    await dismissIntroIfShown(page);
+    await expect(page.getByTestId('rules-confirm-button')).toBeVisible({ timeout: 30000 });
   });
 });

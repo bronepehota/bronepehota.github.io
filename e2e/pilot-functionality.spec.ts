@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { clearStorage } from './helpers/setup';
+import { clearStorage, dismissIntroIfShown } from './helpers/setup';
 
 /**
  * E2E tests for pilot functionality
@@ -25,6 +25,9 @@ test.describe('Pilot Functionality', () => {
    * Flow: Rules → Source → Faction → Budget → Army Builder → Game Session
    */
   async function navigateToGameSession(page: any) {
+    // Пройти брифинг-интро новичка (чистый localStorage в beforeEach)
+    await dismissIntroIfShown(page);
+
     // First: Rules confirmation
     await page.click('[data-testid="rules-confirm-button"]');
 

@@ -9,6 +9,8 @@ import { FactionLogo } from '@/components/FactionLogo';
 import { GitHubPagesImage } from '@/components/GitHubPagesImage';
 import { resolveFactionProvenance, isAlternativeVersion } from '@/lib/provenance';
 import { ALTERNATIVE_VERSION_HINT } from '@/components/encyclopedia/AttributionLabel';
+import Link from 'next/link';
+import { trackEvent } from '@/lib/analytics';
 
 interface FactionsSectionProps {
   className?: string;
@@ -53,10 +55,13 @@ export default function FactionsSection({ className }: FactionsSectionProps) {
           const isAltVersion = isAlternativeVersion(resolveFactionProvenance(faction));
 
           return (
-            <div
+            <Link
               key={faction.id}
+              href="/encyclopedia/factions"
+              data-testid="landing-faction-card"
+              onClick={() => trackEvent('battle_entry', { from: 'landing_factions' })}
               className={cn(
-                'folded-paper military-corners p-6 md:p-8',
+                'folded-paper military-corners p-4 md:p-6 block no-underline',
                 'group cursor-pointer transition-all duration-300',
                 'fade-in-up opacity-0',
                 `stagger-${index + 1}`
@@ -67,7 +72,7 @@ export default function FactionsSection({ className }: FactionsSectionProps) {
               }}
             >
               {/* Faction header with icon */}
-              <div className="flex items-start justify-between mb-6">
+              <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
                   <div className="font-ibm-mono text-xs text-military-rust/60 mb-2">
                     FACTION_{(index + 1).toString().padStart(2, '0')}
@@ -109,31 +114,26 @@ export default function FactionsSection({ className }: FactionsSectionProps) {
                 </div>
               </div>
 
-              {/* Faction description */}
-              <p className="font-oswald text-sm md:text-base text-military-taupe leading-relaxed mb-6">
-                {faction.description}
+              {/* Faction teaser — короткое описание с переносами (полный лор в энциклопедии) */}
+              <p className="font-oswald text-sm md:text-base text-military-taupe leading-snug mb-4">
+                {faction.shortDescription ?? faction.description}
               </p>
 
-              {/* Faction details — extra right padding on community factions so the
-                  bottom-right АВБ badge can't overlap the right-aligned motto/homeWorld. */}
-              <div className={cn('space-y-3 border-t border-military-steel/30 pt-4', isAltVersion && 'pr-10')}>
-                <div className="flex items-center justify-between">
-                  <span className="font-ibm-mono text-xs text-military-steel/60 uppercase">
-                    Родной мир
-                  </span>
-                  <span className="font-oswald text-sm text-military-sand">
+              {/* Компактная мета: девиз одной строкой + мир/переход — без рваных justify-строк.
+                  Доп. отступ справа у АВБ-фракций, чтобы бейдж не налез на «отряды →». */}
+              <div className={cn('border-t border-military-steel/30 pt-3', isAltVersion && 'pr-10')}>
+                <p
+                  className="font-oswald text-sm md:text-base font-semibold truncate"
+                  style={{ color: faction.color }}
+                >
+                  «{faction.motto}»
+                </p>
+                <div className="flex items-center justify-between gap-2 mt-1">
+                  <span className="font-ibm-mono text-[10px] md:text-[11px] text-military-steel/60 uppercase tracking-wide truncate">
                     {faction.homeWorld}
                   </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="font-ibm-mono text-xs text-military-steel/60 uppercase">
-                    Девиз
-                  </span>
-                  <span
-                    className="font-oswald text-sm font-semibold text-right"
-                    style={{ color: faction.color }}
-                  >
-                    {faction.motto}
+                  <span className="font-ibm-mono text-[10px] uppercase tracking-wider text-military-steel/50 group-hover:text-military-amber transition-colors shrink-0">
+                    отряды →
                   </span>
                 </div>
               </div>
@@ -164,7 +164,7 @@ export default function FactionsSection({ className }: FactionsSectionProps) {
                   </span>
                 </div>
               )}
-            </div>
+            </Link>
           );
         })}
       </div>

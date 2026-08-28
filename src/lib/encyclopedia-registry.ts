@@ -101,6 +101,8 @@ export interface EncyclopediaFaction {
   color?: string;
   symbol?: string;
   description?: string;
+  /** Одна короткая строка о фракции — для карточек (лендинг, выбор фракции). */
+  shortDescription?: string;
   homeWorld?: string;
   motto?: string;
   icon?: string;

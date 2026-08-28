@@ -17,9 +17,9 @@ const DEFAULT_COMBATANT: CombatantData = {
   grenadesAvailable: true,
 };
 
-export function useStandaloneCombatFlow() {
+export function useStandaloneCombatFlow(initialCombatant?: CombatantData) {
   const combatFlow = useCombatFlow();
-  const [combatantData, setCombatantData] = useState<CombatantData>(DEFAULT_COMBATANT);
+  const [combatantData, setCombatantData] = useState<CombatantData>(initialCombatant ?? DEFAULT_COMBATANT);
   const [rulesVersion, setRulesVersion] = useState<RulesVersionID>('tehnolog');
   const [modifierSummary, setModifierSummary] = useState<ModifierSummary>({
     ...EMPTY_MODIFIER_SUMMARY,

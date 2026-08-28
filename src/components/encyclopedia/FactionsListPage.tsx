@@ -8,6 +8,7 @@ import { getUnitsForFaction } from '@/lib/encyclopedia-registry';
 import { FactionLogo } from '@/components/FactionLogo';
 import { getFactionColors, factionDisplayNames } from '@/lib/faction-colors';
 import { resolveFactionProvenance } from '@/lib/provenance';
+import { trackEvent } from '@/lib/analytics';
 import { orderedFactions, getParent, getSubFactions } from '@/lib/faction-hierarchy';
 import { EncyclopediaTabs } from './EncyclopediaTabs';
 import { ProvenanceRow } from './AttributionLabel';
@@ -234,10 +235,19 @@ export default function FactionsListPage({ factions }: FactionsListPageProps) {
                       <div className="mt-3">
                         <Link
                           href={`/encyclopedia?faction=${faction.id}`}
-                          className={cn('inline-flex items-center gap-2 font-ibm-mono uppercase tracking-wider transition-opacity hover:opacity-80', isSub ? 'text-[10px]' : 'text-xs')}
+                          className={cn('inline-flex items-center gap-2 py-2 -my-2 font-ibm-mono uppercase tracking-wider transition-opacity hover:opacity-80', isSub ? 'text-[10px]' : 'text-xs')}
                           style={{ color: colors.primary }}
                         >
                           <span>Отряды фракции «{factionDisplayNames[faction.id] ?? faction.id}»</span>
+                          <span>→</span>
+                        </Link>
+                        <Link
+                          href={`/app?faction=${faction.id}`}
+                          onClick={() => trackEvent('battle_entry', { from: 'encyclopedia_factions' })}
+                          data-testid="faction-build-army-link"
+                          className={cn('ml-5 inline-flex items-center gap-2 py-2 -my-2 font-ibm-mono uppercase tracking-wider transition-opacity hover:opacity-80 text-military-rust', isSub ? 'text-[10px]' : 'text-xs')}
+                        >
+                          <span>Собрать армию</span>
                           <span>→</span>
                         </Link>
                         {faction.siteUrl && (

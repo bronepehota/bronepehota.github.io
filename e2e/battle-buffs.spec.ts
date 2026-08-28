@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { clearStorage } from './helpers/setup';
+import { clearStorage, dismissIntroIfShown } from './helpers/setup';
 
 /**
  * E2E tests for bonuses branch changes:
@@ -17,6 +17,7 @@ test.describe('Editor promo link on source selection', () => {
     await clearStorage(page);
     await page.goto('/app');
     await page.waitForLoadState('networkidle');
+    await dismissIntroIfShown(page);
 
     // Step 1: Rules confirmation
     await page.getByTestId('rules-confirm-button').click();
@@ -235,6 +236,7 @@ test.describe('Full flow regression with editor link', () => {
     await clearStorage(page);
     await page.goto('/app');
     await page.waitForLoadState('networkidle');
+    await dismissIntroIfShown(page);
 
     // Step 1: Rules
     await page.getByTestId('rules-confirm-button').click();
