@@ -101,7 +101,7 @@ npm run test:e2e            # All E2E tests pass
 - **Background dev server**: run `npm run dev` as its own background command. Don't chain it behind `pkill`/`rm` in the same backgrounded call — that compound form has failed with empty output (exit 1). Do the cleanup in a separate foreground call first.
 - **Headed mode**: `npm run test:e2e:headed` (visible browser)
 - **Debug mode**: `npm run test:e2e:debug` (Playwright Inspector)
-- **Shared setup helpers**: `e2e/helpers/setup.ts` — use `setupToArmyBuilder`, `setupGameSessionWithSquad`, `setupToPreparation` etc. to reduce setup duplication
+- **Shared setup helpers**: `e2e/helpers/setup.ts` — use `setupToArmyBuilder`, `setupGameSessionWithSquad`, `setupToPreparation` etc. to reduce setup duplication. `dismissIntroIfShown` — обязателен в любом тесте, заходящем в `/app` с чистого localStorage (шаг `intro` визарда — брифинг новичка перекрывает экран правил)
 - **`setupGameSessionWithSquad` clears localStorage**: its `addInitScript` calls `localStorage.clear()`. To persist custom keys (rules, flags), register your `addInitScript` AFTER calling the helper (execution order = registration order), then `page.reload()`.
 
 ### Existing E2E coverage
@@ -229,7 +229,7 @@ Both `.md` files are machine-converted from their PDFs; the PDF is authoritative
 ### State Management
 
 **Client-side persistence** (localStorage keys — most are defined in `src/lib/constants.ts`, a few live inline in their component/hook):
-- `bronepehota_army` - Player's army state (units, totalCost, faction, sourceId). Stored as `{ schemaVersion: 1, army: Army }`. When seeding for testing, set localStorage on the landing page (`/`) BEFORE navigating to `/app` — the `/app` pagehide handler flushes the in-memory army, overwriting any seed set while `/app` is loaded.
+- `bronepehota_army` - Player's army state (units, totalCost, faction, sourceId). Stored as `{ schemaVersion: 1, army: Army }`. When seeding for testing, set localStorage on the landing page (`/`) BEFORE navigating to `/app` — the `/app` pagehide handler flushes the in-memory army, overwriting any seed set while `/app` is loaded. **Конверт при чтении**: любой прямой читатель обязан разворачивать `parsed?.army ?? parsed` (трижды ловили «isInBattle всегда undefined»). Валидность юнитов гарантирует `migrateArmy` (`army-storage.ts` — фильтрует записи без `data`/`type`); не дублировать проверки в потребителях.
 - `bronepehota_view` - Current view: 'army' (builder) or 'game' (session)
 - `bronepehota_display_mode` - Display mode preference
 - `bronepehota_army_list_source` - Selected army list source ('star_system' or 'tehnolog')
@@ -394,7 +394,7 @@ Edit `squads.json` or `machines.json` in `src/data/sources/{source_id}/{faction}
 - `useCombatFlow.ts` - Combat state machine for shots, melee, grenades
   - `executeShot()`, `executeMelee()`, `executeGrenade()`, `checkGrenadeTarget()`
   - Accepts optional `combatantData` (5th param of `startCombat`) for standalone combat mode
-- `useStandaloneCombatFlow.ts` - Standalone combat-flow state (no ArmyUnit dependency); powers the encyclopedia sandbox. Takes optional `initial` CombatantData (prefill via `soldierToCombatantData`) — read only at mount
+- `useStandaloneCombatFlow.ts` - Standalone combat-flow state (no ArmyUnit dependency); powers the encyclopedia sandbox. Takes optional `initial` CombatantData (prefill via `soldierToCombatantData`) — read only at mount. Гочча: `newCalculation()` в том же тике, что и `updateCombatantField`, замыкается на СТАРЫХ статах — сброс только отложенно (эффект по тику, см. UnitCombatSandbox)
   - Uses `combatantData` adapter pattern via `combatantToUnitLike()` to create fake ArmyUnit
   - Manages rules version, modifier summary, combatant data
   - Provides `switchAction()`, `newCalculation()`, `updateCombatantField()`
@@ -459,7 +459,8 @@ Edit `squads.json` or `machines.json` in `src/data/sources/{source_id}/{faction}
   - Polaris: red tones (#ef4444)
   - Protectorate: cyan tones (#06b6d4)
   - Mercenaries: yellow tones (#eab308)
-- **Touch-friendly targets**: Minimum 44x44px tap targets (WCAG 2.5.5)
+- **Touch-friendly targets**: Minimum 44x44px tap targets (WCAG 2.5.5) — задаются ЯВНО (`min-h-[44px]`) на реальных контролах; глобальное blanket-правило в globals.css удалено (раздувало инлайн-чипы/лейблы на мобиле — «Дополнить», атрибуция). Мелкие чипы остаются чипами.
+- **Metadata-only `layout.tsx` требует default export** — dev-рантайм Next 14 валидирует его даже у layout без компоненты; без него 500 «default export is not a React Component» (type-check/юнит-тесты молчат, ловится только реальным рендером). Паттерн: pass-through `export default ({children}) => children`.
 - **Responsive patterns**: Bottom sheets for mobile modals, centered cards for desktop, hide labels on mobile (`hidden md:inline`)
 - **Path alias**: `@/*` maps to `src/*` (configured in `tsconfig.json`)
 - **Dossier `// LABEL` text in JSX**: wrap in braces — `{'// ИСТОЧНИК'}` — or `react/jsx-no-comment-textnodes` errors (bare `//` parses as a comment).
