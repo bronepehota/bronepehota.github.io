@@ -1663,5 +1663,93 @@
       }
     ],
     "image": "/images/squads/protectorate/spetsnaz_planety_felitsiya_fox1/1.png"
+  },
+  {
+    "id": "protectorate_otryad_x",
+    "name": "Отряд «Х»",
+    "shortName": "Отряд «Х»",
+    "faction": "protectorate",
+    "cost": 180,
+    "soldiers": [
+      {
+        "num": 1,
+        "rank": 4,
+        "speed": 4,
+        "range": "D6",
+        "power": "2D6",
+        "melee": 7,
+        "armor": 7,
+        "image": "/images/squads/protectorate/otryad_x/2.png",
+        "modifiers": [
+          "jump_boost_4"
+        ]
+      },
+      {
+        "num": 2,
+        "rank": 4,
+        "speed": 4,
+        "range": "D12",
+        "power": "2D12",
+        "melee": 0,
+        "armor": 5,
+        "image": "/images/squads/protectorate/otryad_x/1.png",
+        "modifiers": [
+          "jump_boost_4"
+        ]
+      },
+      {
+        "num": 3,
+        "rank": 4,
+        "speed": 4,
+        "range": "2D12",
+        "power": "D20",
+        "melee": 0,
+        "armor": 5,
+        "image": "/images/squads/protectorate/otryad_x/3.png",
+        "modifiers": [
+          "jump_boost_4"
+        ]
+      },
+      {
+        "num": 4,
+        "rank": 4,
+        "speed": 4,
+        "range": "D6",
+        "power": "D12",
+        "melee": 5,
+        "armor": 5,
+        "image": "/images/squads/protectorate/otryad_x/4.png",
+        "modifiers": [
+          "jump_boost_4"
+        ]
+      },
+      {
+        "num": 5,
+        "rank": 4,
+        "speed": 4,
+        "range": "D12",
+        "power": "D12",
+        "melee": 4,
+        "armor": 7,
+        "image": "/images/squads/protectorate/otryad_x/5.png",
+        "modifiers": [
+          "jump_boost_4"
+        ]
+      },
+      {
+        "num": 6,
+        "rank": 4,
+        "speed": 4,
+        "range": "D12+2",
+        "power": "D12",
+        "melee": 4,
+        "armor": 5,
+        "image": "/images/squads/protectorate/otryad_x/6.png",
+        "modifiers": [
+          "jump_boost_4"
+        ]
+      }
+    ],
+    "image": "/images/squads/protectorate/otryad_x/1.png"
   }
 ]
