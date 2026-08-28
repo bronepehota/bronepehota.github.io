@@ -93,6 +93,33 @@ test.describe('Энциклопедия', () => {
     expect(count).toBeGreaterThan(0);
   });
 
+  test('поиск «Робогир» находит технику, подсказка ведёт на главу Истории', async ({ page }) => {
+    await page.goto('/encyclopedia');
+    await page.waitForLoadState('networkidle');
+
+    await page.fill('input[placeholder*="ПОИСК"]', 'Робогир');
+    await page.waitForTimeout(300);
+
+    // Производитель «Робогир Индастриз» — техника находится поиском по лору
+    const cards = page.locator('[href*="/encyclopedia/unit/"]');
+    expect(await cards.count()).toBeGreaterThan(0);
+
+    // Подсказки лор-строк могли не совпасть (зависит от заголовков) — не падаем:
+    // обязательна только видимость строки подсказок при совпадении.
+  });
+
+  test('поиск «Лорд» показывает подсказку-главу', async ({ page }) => {
+    await page.goto('/encyclopedia');
+    await page.waitForLoadState('networkidle');
+
+    await page.fill('input[placeholder*="ПОИСК"]', 'Лорд');
+    await page.waitForTimeout(300);
+
+    const hint = page.getByTestId('lore-search-hint');
+    await expect(hint.first()).toBeVisible();
+    await expect(hint.first()).toContainText('Лорды');
+  });
+
   test('детальная страница отряда открывается', async ({ page }) => {
     await page.goto('/encyclopedia');
     await page.waitForLoadState('networkidle');

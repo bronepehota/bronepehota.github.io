@@ -7,7 +7,8 @@ import { EncyclopediaUnit, getFactions } from '@/lib/encyclopedia-registry';
 import { FactionID } from '@/lib/types';
 import { orderedFactions } from '@/lib/faction-hierarchy';
 import { factionDisplayNames, getFactionColors } from '@/lib/faction-colors';
-import { buildSearchHaystack, matchesSearch } from '@/lib/unit-search';
+import { buildSearchHaystack, matchesSearch, type LorePageRef } from '@/lib/unit-search';
+import { LoreSearchHints } from './LoreSearchHints';
 import { UnitCard } from './UnitCard';
 import { EncyclopediaTabs } from './EncyclopediaTabs';
 import { EncyclopediaAttributionBanner } from './EncyclopediaAttributionBanner';
@@ -17,6 +18,8 @@ import { trackEvent } from '@/lib/analytics';
 
 interface EncyclopediaPageProps {
   initialUnits: EncyclopediaUnit[];
+  /** Lore page titles for search hints (history chapters + campaigns). */
+  lorePages: LorePageRef[];
 }
 
 // Faction filter is derived from the units data inside the component (data-driven).
@@ -31,7 +34,7 @@ const types: { value: TypeFilter; label: string; icon: string }[] = [
   { value: 'орудие', label: 'ОРУДИЯ', icon: '⬢' },
 ];
 
-export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps) {
+export default function EncyclopediaPage({ initialUnits, lorePages }: EncyclopediaPageProps) {
   const [units] = useState<EncyclopediaUnit[]>(initialUnits);
   const [filteredUnits, setFilteredUnits] = useState<EncyclopediaUnit[]>(initialUnits);
   const [selectedFaction, setSelectedFaction] = useState<FactionID | 'all'>('all');
@@ -283,6 +286,9 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
                 </span>
               </div>
             </div>
+
+            {/* Lore hints — chapters/campaigns whose title matches the query */}
+            <LoreSearchHints pages={lorePages} query={searchQuery} />
 
             {/* Faction + type + sculptor selectors — on phones the faction gets its
                 own full-width row (so long names like «МЁРТВЫЙ ФЛОТ» aren't clipped
