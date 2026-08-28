@@ -17,6 +17,9 @@ const customJestConfig = {
   testPathIgnorePatterns: [
     '/node_modules/',
     '/e2e/',
+    // Stale git worktrees under .claude/worktrees carry full test copies that
+    // fail on their missing setup — never run tests from there.
+    '/.claude/',
   ],
 }
 
