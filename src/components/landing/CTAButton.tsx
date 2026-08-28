@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Sword, RotateCcw, Clock, BookOpen } from 'lucide-react';
+import { ArrowRight, Sword } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { trackEvent } from '@/lib/analytics';
 
@@ -152,81 +152,61 @@ export default function CTAButton({ className }: CTAButtonProps) {
   if (hasActiveBattle) {
     const dateText = lastBattleDate ? formatBattleDate(lastBattleDate) : null;
 
+    // Та же структура, что у ModuleRow без боя: primary во всю ширину +
+    // вторичный ряд из двух модулей — вместо тесной 3-сегментной полосы.
     return (
-      <div className={cn(
-        'relative w-full max-w-sm mx-auto',
-        'bg-slate-900/60 backdrop-blur-sm',
-        'border border-slate-700/50',
-        'rounded-lg overflow-hidden',
-        className
-      )}>
-        {/* Status bar with date */}
-        <div className="flex items-center justify-between px-3 py-1.5 bg-slate-800/50 border-b border-slate-700/50">
-          <div className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
-            <span className="font-ibm-mono text-[10px] text-amber-400/90 tracking-wide uppercase">
-              Бой идёт
-            </span>
-          </div>
-          {dateText && (
-            <div className="flex items-center gap-1 text-slate-500">
-              <Clock className="w-3 h-3" />
-              <span className="font-ibm-mono text-[10px] text-slate-400">
-                {dateText}
+      <div className={cn('flex flex-col items-stretch gap-2.5 w-full max-w-sm mx-auto', className)}>
+        {/* Primary: Продолжить бой */}
+        <Link
+          href="/app"
+          onClick={handleContinueBattle}
+          data-testid="landing-continue-button"
+          className="group relative inline-flex bg-military-dark/85 backdrop-blur-sm border-2 border-amber-500/70 hover:border-amber-400 font-russo font-bold text-sm sm:text-base uppercase tracking-wider md:tracking-widest text-amber-400 hover:text-amber-300 transition-all duration-300 overflow-hidden touch-manipulation min-h-[56px] no-underline"
+        >
+          <span className="absolute top-0 left-0 w-2 h-2 sm:w-3 sm:h-3 border-t-2 border-l-2 border-amber-500" />
+          <span className="absolute top-0 right-0 w-2 h-2 sm:w-3 sm:h-3 border-t-2 border-r-2 border-amber-500" />
+          <span className="absolute bottom-0 left-0 w-2 h-2 sm:w-3 sm:h-3 border-b-2 border-l-2 border-amber-500" />
+          <span className="absolute bottom-0 right-0 w-2 h-2 sm:w-3 sm:h-3 border-b-2 border-r-2 border-amber-500" />
+          <span className="relative flex items-center justify-between gap-3 w-full px-4 sm:px-6">
+            <span className="flex flex-col items-start leading-tight text-left">
+              <span>Продолжить бой</span>
+              <span className="font-ibm-mono text-[9px] sm:text-[10px] normal-case tracking-normal text-military-sand/70">
+                бой идёт{dateText ? ` · ${dateText}` : ''}
               </span>
-            </div>
-          )}
-        </div>
+            </span>
+            <Sword className="w-4 h-4 sm:w-5 sm:h-5 shrink-0 transform group-hover:translate-x-1 transition-transform duration-300" />
+          </span>
+        </Link>
 
-        {/* Action buttons - horizontal, compact */}
-        <div className="flex items-stretch divide-x divide-slate-700/50">
-          {/* Restart - secondary, compact */}
+        {/* Secondary: Начать заново + Энциклопедия */}
+        <div className="grid grid-cols-2 gap-2.5">
           <Link
             href="/app"
             onClick={handleRestart}
             data-testid="landing-restart-button"
-            className="group flex-1 flex items-center justify-center gap-1.5 px-2 sm:px-3 py-2
-              bg-slate-800/30 hover:bg-slate-700/50
-              transition-all duration-200 touch-manipulation no-underline"
+            className="group relative inline-flex items-center bg-military-dark/75 backdrop-blur-sm border-2 border-military-steel/50 hover:border-military-steel transition-all duration-300 overflow-hidden touch-manipulation min-h-[44px] no-underline"
           >
-            <RotateCcw className="w-3.5 h-3.5 text-slate-500 group-hover:text-slate-400 transition-colors" />
-            <span className="font-russo text-[10px] sm:text-xs text-slate-400 group-hover:text-slate-300 transition-colors uppercase">
-              Начать заново
+            <span className="relative flex flex-col items-center justify-center leading-tight w-full px-2 py-2">
+              <span className="font-russo font-bold text-[10px] sm:text-xs uppercase tracking-wider text-military-sand/90 group-hover:text-white">
+                ЗАНОВО
+              </span>
+              <span className="font-ibm-mono text-[9px] sm:text-[10px] text-military-sand/60">
+                сброс армии
+              </span>
             </span>
           </Link>
-
-          {/* Continue - primary, emphasized */}
-          <Link
-            href="/app"
-            onClick={handleContinueBattle}
-            data-testid="landing-continue-button"
-            className="group flex-1 flex items-center justify-center gap-1.5 px-2 sm:px-3 py-2
-              bg-amber-950/40 hover:bg-amber-950/60
-              relative overflow-hidden
-              transition-all duration-200 touch-manipulation no-underline"
-          >
-            {/* Active glow effect */}
-            <span className="absolute inset-0 bg-gradient-to-r from-amber-500/5 via-amber-500/10 to-amber-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-
-            <Sword className="w-3.5 h-3.5 text-amber-500 group-hover:text-amber-400 transition-colors" />
-            <span className="font-russo text-[10px] sm:text-xs text-amber-400 group-hover:text-amber-300 transition-colors uppercase font-semibold">
-              <span className="hidden sm:inline">Продолжить бой</span>
-              <span className="sm:hidden">В бой</span>
-            </span>
-          </Link>
-
-          {/* Encyclopedia — вход в базу не теряется и у игрока в бою */}
           <Link
             href="/encyclopedia"
             data-testid="landing-encyclopedia-button"
-            className="group flex items-center justify-center gap-1 px-2 sm:px-3 py-2
-              bg-slate-800/30 hover:bg-slate-700/50
-              transition-all duration-200 touch-manipulation no-underline"
+            className="group relative inline-flex items-center bg-military-dark/75 backdrop-blur-sm border-2 border-military-steel/50 hover:border-military-steel transition-all duration-300 overflow-hidden touch-manipulation min-h-[44px] no-underline"
           >
-            <BookOpen className="w-3.5 h-3.5 text-slate-500 group-hover:text-slate-400 transition-colors" />
-            <span className="font-russo text-[10px] sm:text-xs text-slate-400 group-hover:text-slate-300 transition-colors uppercase">
-              <span className="hidden sm:inline">Энциклопедия</span>
-              <span className="sm:hidden">Энцикл.</span>
+            <span className="relative flex flex-col items-center justify-center leading-tight w-full px-2 py-2">
+              <span className="font-russo font-bold text-[10px] sm:text-xs uppercase tracking-wider text-military-sand/90 group-hover:text-white">
+                ЭНЦИКЛОПЕДИЯ
+              </span>
+              <span className="font-ibm-mono text-[9px] sm:text-[10px] text-military-sand/60">
+                отряды, лор, тактика
+              </span>
             </span>
           </Link>
         </div>
