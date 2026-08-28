@@ -3,8 +3,8 @@ import { getAllHistoryChapters } from '@/lib/history';
 describe('history chapters', () => {
   const chapters = getAllHistoryChapters();
 
-  it('возвращает 15 глав, отсортированных по order', () => {
-    expect(chapters).toHaveLength(15);
+  it('возвращает 24 главы, отсортированные по order', () => {
+    expect(chapters).toHaveLength(24);
     const orders = chapters.map((c) => c.order ?? 99);
     expect(orders).toEqual([...orders].sort((a, b) => a - b));
   });
@@ -69,5 +69,22 @@ describe('history chapters', () => {
     expect(ch8.loreAuthor).toBe('avb');
     expect(ch8.credit?.author).toBe('V.Chertischev');
     expect(ch8.credit?.work).toBe('Косары');
+  });
+
+  it('рассказы игроков: order 100+, группа, avb + именной кредит с URL', () => {
+    const stories = chapters.filter((c) => (c.order ?? 99) >= 100);
+    expect(stories).toHaveLength(9);
+    for (const s of stories) {
+      expect(`${s.slug}: ${s.group}`).toBe(`${s.slug}: Творчество игроков`);
+      expect(`${s.slug}: ${s.loreAuthor}`).toBe(`${s.slug}: avb`);
+      expect(s.credit?.author?.length).toBeGreaterThan(2);
+      expect(s.credit?.url).toMatch(/^http:\/\/www\.robogear\.ru\/skelet\/6\//);
+      expect(s.credit?.work).toBe(s.title);
+    }
+    expect(stories.map((s) => s.slug)).toEqual([
+      'krasnaya-yarost', 'seryy-leytenant', 'domashnyaya-voyna', 'general',
+      'istoriya-odnogo-soldata', 'put-voyna',
+      'mayndfaytery-1', 'mayndfaytery-2', 'mayndfaytery-3',
+    ]);
   });
 });

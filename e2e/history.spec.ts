@@ -67,4 +67,14 @@ test.describe('История вселенной', () => {
     await expect(kosmo).toBeVisible();
     await expect(kosmo.getByTestId('lore-source-row')).toContainText('Летопись');
   });
+
+  test('рассказ «Красная ярость» — кредит автора с мини-АВБ', async ({ page }) => {
+    await page.goto('/encyclopedia/history');
+    await page.waitForLoadState('networkidle');
+
+    const story = page.locator('[data-testid="history-chapter"]', { hasText: 'Красная ярость' });
+    await expect(story).toBeVisible();
+    await expect(story.getByTestId('lore-source-row')).toContainText('Rasher');
+    await expect(story.getByTestId('credit-avb-mark')).toBeVisible();
+  });
 });

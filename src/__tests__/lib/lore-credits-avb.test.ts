@@ -13,6 +13,7 @@
  * (→ no mark). Checked across ALL encyclopedia units AND factions.
  */
 import { getAllUnits, getFactions } from '@/lib/encyclopedia-registry';
+import { getAllHistoryChapters } from '@/lib/history';
 import { resolveUnitProvenance, resolveFactionProvenance, creditList } from '@/lib/provenance';
 import type { LoreSource } from '@/lib/provenance';
 
@@ -105,5 +106,21 @@ describe('фракции с массивом кредитов (лор собра
     const f = getFactions().find((x) => x.id === 'mercenaries')!;
     expect(Array.isArray(f.provenance?.credit)).toBe(false);
     expect(creditList(f.provenance?.credit).map((c) => c.work)).toEqual(['Косары']);
+  });
+});
+
+describe('главы Истории: мини-АВБ ровно на не-Технолог текстах', () => {
+  it('рассказы игроков — avb, главы «Летописи» и Империи — tehnolog', () => {
+    const chapters = getAllHistoryChapters();
+    for (const c of chapters) {
+      if ((c.order ?? 99) >= 100) {
+        expect(`${c.slug}: ${c.loreAuthor}`).toBe(`${c.slug}: avb`);
+      } else {
+        // главы 1–8 и 9–15: tehnolog, кроме главы 8 («Косары», avb)
+        if (c.slug !== 'ekipirovka-pehoty-dominiona') {
+          expect(`${c.slug}: ${c.loreAuthor}`).toBe(`${c.slug}: tehnolog`);
+        }
+      }
+    }
   });
 });
