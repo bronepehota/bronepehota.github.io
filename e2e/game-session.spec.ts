@@ -11,21 +11,32 @@ test.describe('Game Session', () => {
   });
 
   // Регрессии класса «битый localStorage» (ручные находки 2026-08-28):
-  test('юнит без data (битый localStorage) не роняет GameSession', async ({ page }) => {
+  test('битый юнит в армии не роняет GameSession (санитайзинг на границе хранилища)', async ({ page }) => {
     const errors: string[] = [];
     page.on('pageerror', (e) => errors.push(String(e)));
     await page.goto('/app');
     await page.evaluate(() => {
-      // конверт saveArmy + юнит-заглушка без data — раньше: TypeError reading 'id'/'name'
+      // конверт saveArmy + валидный юнит + мусорные записи ({}, без data, кривой type).
+      // migrateArmy фильтрует мусор — раньше: TypeError reading 'zone'/'id'/'name'.
+      const valid = {
+        instanceId: 'broken-seed-valid-1',
+        type: 'squad',
+        data: {
+          id: 'polaris_lineynaya_klon_pehota', name: 'Линейная клон-пехота', shortName: 'Линейная',
+          faction: 'polaris', cost: 50, image: '',
+          soldiers: [{ num: 1, rank: 2, speed: 5, range: 'D6', power: '2D6', melee: 3, props: [], armor: 2, image: '' }],
+        },
+        instanceNumber: 1, currentSoldiers: [0], deadSoldiers: [], actionsUsed: [],
+      };
       localStorage.setItem('bronepehota_army', JSON.stringify({
         schemaVersion: 1,
-        army: { name: 'T', faction: 'polaris', units: [{}], totalCost: 0, isInBattle: true, currentTurn: 1 },
+        army: { name: 'T', faction: 'polaris', units: [valid, {}, { type: 'weird' }], totalCost: 50, isInBattle: true, currentTurn: 1 },
       }));
       localStorage.setItem('bronepehota_view', 'game');
     });
     await page.reload();
     await page.waitForLoadState('networkidle');
-    // страница живая: нет pageerror, рендер не белый
+    // страница живая: нет pageerror, сессия смонтировалась на валидном юните
     expect(errors).toEqual([]);
     await expect(page.getByTestId('game-session').first()).toBeVisible({ timeout: 10000 });
   });
