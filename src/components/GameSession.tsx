@@ -914,8 +914,9 @@ export default function GameSession({
 
           </div>
           </div>
-          {/* Current unit info bar - with turn button, armor/speed, menu, done toggle */}
-          {!isDockExpanded && focusedUnit && (
+          {/* Current unit info bar - with turn button, armor/speed, menu, done toggle.
+              Guard focusedUnit?.data: юнит без data (битый localStorage) не рендерим. */}
+          {!isDockExpanded && focusedUnit?.data && (
             <div className="px-2 py-1 border-t border-slate-800/50 flex items-center gap-1.5">
 
 
