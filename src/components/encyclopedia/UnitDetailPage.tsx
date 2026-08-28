@@ -25,6 +25,11 @@ import { UnitStatTable } from './UnitDetail/UnitStatTable';
 import { UnitSectionNav } from './UnitDetail/UnitSectionNav';
 import { UnitToBattleCta } from './UnitDetail/UnitToBattleCta';
 import { UnitCombatSandbox } from './UnitDetail/UnitCombatSandbox';
+
+// Песочница «ПРОВЕРИТЬ БОЕМ» СПРЯТАНА по решению владельца (2026-08-28):
+// не так хороша, как реальный бой в штабе, — только смущает. Код и тесты
+// остаются; вернуть — выставить флаг в true.
+const SHOW_SANDBOX = false;
 import type { Squad, Machine, Soldier } from '@/lib/types';
 
 interface UnitDetailPageProps {
@@ -514,7 +519,7 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc }:
                 Отряды дополнительно получают «ПРОВЕРИТЬ БОЕМ» → песочница. */}
             <UnitToBattleCta
               faction={unit.faction}
-              onOpenSandbox={unit.type === 'squad' ? () => setSandboxOpen(true) : undefined}
+              onOpenSandbox={SHOW_SANDBOX && unit.type === 'squad' ? () => setSandboxOpen(true) : undefined}
             />
           </div>
         </main>

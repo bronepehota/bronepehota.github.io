@@ -17,7 +17,9 @@ async function openSandbox(page: Page) {
   return sheet;
 }
 
-test.describe('Unit combat sandbox (encyclopedia)', () => {
+// Песочница «ПРОВЕРИТЬ БОЕМ» спрятана по решению владельца (2026-08-28) —
+// вернуть вместе с SHOW_SANDBOX в UnitDetailPage.tsx.
+test.describe.skip('Unit combat sandbox (encyclopedia)', () => {
   test.beforeEach(async ({ page }) => {
     await clearStorage(page);
   });
