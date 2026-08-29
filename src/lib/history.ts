@@ -85,7 +85,9 @@ function groupDividerVisual(group: string): { outline: string; stamp: string; su
  * Era ticks use the FIRST year of the chapter `era` (e.g. «1908–2398» → 1908);
  * the divider repeats it as the giant outlined year. Chapters without `era`
  * (08–11, the Regency tail) inherit the latest era zone — no divider of
- * their own. Group seams (Справочник / Творчество игроков) always cut a zone.
+ * their own. An era-less chrono chapter that STARTS the flow or resumes it
+ * after a group section cuts a bare «ХРОНИКА» zone (no outlined year).
+ * Group seams (Справочник / Творчество игроков) always cut a zone.
  */
 export function buildHistoryFlow(chapters: HistoryChapterMeta[]): HistoryFlow {
   const ticks: HistoryEraTick[] = [];
@@ -102,7 +104,11 @@ export function buildHistoryFlow(chapters: HistoryChapterMeta[]): HistoryFlow {
   for (const c of chapters) {
     const groupChanged = (c.group ?? undefined) !== prevGroup;
     const eraChanged = c.group === undefined && c.era !== undefined && c.era !== prevEra;
-    if (groupChanged || eraChanged) {
+    // Every chapter must land in a zone: a flow that STARTS with an era-less
+    // chrono chapter cuts no seam of its own — open the ХРОНИКА zone here or
+    // the slug would be silently dropped (zones is still empty below).
+    const needsZone = zones.length === 0;
+    if (groupChanged || eraChanged || needsZone) {
       if (eraChanged) {
         const year = c.era!.match(/\d{4}/)?.[0] ?? c.era!;
         const stamp =
@@ -110,12 +116,20 @@ export function buildHistoryFlow(chapters: HistoryChapterMeta[]): HistoryFlow {
             ? 'ХРОНИКА' // the very first divider doubles as the chrono group stamp
             : `ЭПОХА ${c.era}`;
         openZone({ outline: year, stamp }, { label: year, href: `#${c.slug}`, kind: 'era' });
-      } else {
+      } else if (c.group !== undefined) {
         // Group seam (Справочник / Творчество игроков): label tick + archival stamp
         const anchorId = `history-anchor-${ticks.length}`;
         openZone(
-          { anchorId, ...groupDividerVisual(c.group!) },
-          { label: groupDividerVisual(c.group!).stamp, href: `#${anchorId}`, kind: 'group' },
+          { anchorId, ...groupDividerVisual(c.group) },
+          { label: groupDividerVisual(c.group).stamp, href: `#${anchorId}`, kind: 'group' },
+        );
+      } else {
+        // Chrono chapter with no seam of its own: the flow either starts or
+        // resumes (after a group section) without an era — ХРОНИКА zone with
+        // no outlined year (was a TypeError via groupDividerVisual(undefined)).
+        openZone(
+          { outline: '//', stamp: 'ХРОНИКА' },
+          { label: 'ХРОНИКА', href: `#${c.slug}`, kind: 'era' },
         );
       }
       prevGroup = c.group ?? undefined;

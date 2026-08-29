@@ -3,6 +3,7 @@ import {
   estimateReadingMinutes,
   getAllHistoryChapters,
   historyCentury,
+  type HistoryChapterMeta,
 } from '@/lib/history';
 
 describe('history chapters', () => {
@@ -175,5 +176,39 @@ describe('«ДЕЛО RG-4530» showcase helpers (Phase 2)', () => {
     const html = words.join(' ');
     expect(estimateReadingMinutes([html])).toBe(10);
     expect(estimateReadingMinutes(['<h3>заголовок</h3> без слов'])).toBe(1);
+  });
+});
+
+describe('buildHistoryFlow — защитные ветки безэройных глав', () => {
+  const meta = (slug: string, extra: Partial<HistoryChapterMeta> = {}): HistoryChapterMeta => ({
+    slug,
+    title: slug,
+    ...extra,
+  });
+
+  it('(a) поток, начинающийся главой без era/group: глава не выпадает — зона ХРОНИКА без контурного года', () => {
+    const flow = buildHistoryFlow([meta('bez-epochi'), meta('s-epokhoy', { era: '3001–3100' })]);
+    // Era-less opener opens its own zone instead of vanishing (zones was empty)
+    expect(flow.zones[0].slugs).toEqual(['bez-epochi']);
+    expect(flow.zones[0].divider).toMatchObject({ outline: '//', stamp: 'ХРОНИКА' });
+    expect(flow.zones[0].divider.outline).not.toMatch(/\d{4}/);
+    expect(flow.ticks[0]).toMatchObject({ label: 'ХРОНИКА', href: '#bez-epochi', kind: 'era' });
+    // Following era still cuts its own zone; full coverage, in order
+    expect(flow.zones.map((z) => z.slugs)).toEqual([['bez-epochi'], ['s-epokhoy'], []]);
+    expect(flow.zones.flatMap((z) => z.slugs)).toEqual(['bez-epochi', 's-epokhoy']);
+  });
+
+  it('(b) группа → хроника без эры: зона ХРОНИКА, а не TypeError из groupDividerVisual', () => {
+    const flow = buildHistoryFlow([
+      meta('epokha', { era: '1908–2398' }),
+      meta('spravka', { group: 'Справочник' }),
+      meta('hronika-bez-ery'),
+    ]);
+    expect(flow.zones.map((z) => z.divider.stamp)).toEqual([
+      'ХРОНИКА', 'СПРАВОЧНИК', 'ХРОНИКА', 'ВОЙНЫ',
+    ]);
+    expect(flow.zones[2].divider).toMatchObject({ outline: '//', stamp: 'ХРОНИКА' });
+    expect(flow.zones[2].slugs).toEqual(['hronika-bez-ery']);
+    expect(flow.zones.flatMap((z) => z.slugs)).toEqual(['epokha', 'spravka', 'hronika-bez-ery']);
   });
 });

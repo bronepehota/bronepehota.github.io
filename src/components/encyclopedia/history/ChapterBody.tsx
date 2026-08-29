@@ -17,12 +17,14 @@ interface ChapterBodyProps {
  *  - measure 65ch, 15px→16px, leading 1.75 (direction 2 «Подшивка»);
  *  - drop cap on the first paragraph of CHRONICLE chapters;
  *  - `h3` sub-numbering «// 07.1» — CSS counters, the per-section `chapter`
- *    counter is set inline (`counter-reset: chapter N`).
+ *    counter is set inline. The inline value re-resets `subsec` too: an inline
+ *    `counter-reset` replaces the class-level declaration entirely, so
+ *    `chapter N` alone would leak the previous section's subsec count.
  */
 export function ChapterBody({ html, chapterNumber, chronicle, className }: ChapterBodyProps) {
   return (
     <div
-      style={chapterNumber != null ? { counterReset: `chapter ${chapterNumber}` } : undefined}
+      style={chapterNumber != null ? { counterReset: `chapter ${chapterNumber} subsec` } : undefined}
       className={cn(
         'history-body max-w-[65ch] mx-auto',
         'text-[15px] md:text-base leading-[1.75] space-y-5',

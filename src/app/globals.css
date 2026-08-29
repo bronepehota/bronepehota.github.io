@@ -491,6 +491,8 @@ button, a, input, select, textarea {
   .radar-scan,
   .typewriter-text,
   .fade-in-up,
+  /* Tailwind twin of .fade-in-up (tailwind.config.ts animation) — e.g. BackToToc */
+  .animate-fade-in-up,
   .slide-in-left,
   .slide-in-right,
   .diagonal-reveal {
@@ -1115,10 +1117,13 @@ button, a, input, select, textarea {
   color: #ea580c;
   writing-mode: vertical-rl;
   user-select: none;
+  pointer-events: none;
 }
 
 /* Longread body: h3 sub-numbering «// 07.1» via CSS counters.
-   The `chapter` counter is set inline per section (counter-reset);
+   The `chapter` counter is set inline per section (counter-reset) — the
+   inline value also re-resets `subsec` (an inline `counter-reset` replaces
+   this class-level declaration, not merges with it);
    numbered sections get the «NN.M» form, grouped ones plain «// N». */
 .history-body {
   counter-reset: subsec;

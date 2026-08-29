@@ -75,6 +75,9 @@ export default async function HistoryPage() {
     campaigns.length + chapters.filter((c) => c.group === 'Творчество игроков').length;
   const years = historyEraYears(metas);
   if (warsEra) years.push(...(warsEra.match(/\b\d{4}\b/g) ?? []).map(Number));
+  // Guard: Math.min(...[]) is Infinity — with no eras on record the lead
+  // paragraph simply drops the year clause instead of printing «Infinity».
+  const firstYear = years.length ? Math.min(...years) : null;
   const spanYears = years.length ? `${Math.min(...years)}–${Math.max(...years)}` : '';
   const spanCenturies = years.length ? Math.round((Math.max(...years) - Math.min(...years)) / 100) : 0;
 
@@ -87,11 +90,9 @@ export default async function HistoryPage() {
   ];
 
   // timeline-scope lifts each named view-timeline of the zone wrappers to a
-  // common ancestor so the sticky-ribbon ticks can bind to them. Two Chromium
-  // gotchas dictate the shape: (1) React serializes inline styles as
-  // `timeline-scope:--name` (no space after the colon) — such declarations are
-  // silently dropped, so the rule must come from a stylesheet; (2) Chromium
-  // ignores multi-name values — hence one nested wrapper per timeline name.
+  // common ancestor so the sticky-ribbon ticks can bind to them. Chromium
+  // gotcha: multi-name `timeline-scope` values are ignored — hence one nested
+  // wrapper per timeline name, each scoped by its own generated rule below.
   const scopeRules = flow.ticks
     .map((_, i) => `.history-scope-${i} { timeline-scope: --hist-tick-${i}; }`)
     .join('\n');
@@ -141,9 +142,10 @@ export default async function HistoryPage() {
                 История вселенной
               </h1>
               <p className="max-w-[60ch] text-sm md:text-base text-military-taupe leading-relaxed mb-5">
-                {`Общий мир настольных игр «Робогир» и «Бронепехота» — вселенная СтарСис (Star Systems): от Тунгусского артефакта ${Math.min(
-                  ...years,
-                )} года — к звёздным державам ${century}-го века. За ${spanCenturies} веков человечество разделили две сверхдержавы — Империя Полярис и Протекторат Доминиона; между ними — наёмники, корпорации и шагающие боевые машины.`}
+                {`Общий мир настольных игр «Робогир» и «Бронепехота» — вселенная СтарСис (Star Systems):`}
+                {firstYear !== null &&
+                  ` от Тунгусского артефакта ${firstYear} года — к звёздным державам ${century}-го века.`}
+                {` За ${spanCenturies} веков человечество разделили две сверхдержавы — Империя Полярис и Протекторат Доминиона; между ними — наёмники, корпорации и шагающие боевые машины.`}
               </p>
               <dl
                 data-testid="history-stats"
