@@ -111,6 +111,30 @@ export function getCampaignRaw(slug: string): string | null {
   return fs.readFileSync(fullPath, 'utf8');
 }
 
+/** Reverse lookup entry of `unitCampaigns` — which war chronicle a unit fought in. */
+export interface UnitCampaignRef {
+  slug: string;
+  title: string;
+  role: string;
+}
+
+/**
+ * Reverse index of the campaign→unit link: every chronicle whose frontmatter
+ * `units[]` roster names this unit, in `getAllCampaigns()` (chronological)
+ * order. The forward edge (campaign detail → unit dossiers) already exists;
+ * this is what powers the «// УЧАСТИЕ В ВОЙНАХ» block on the unit page.
+ * Pure and sync (frontmatter only) — Jest-safe.
+ */
+export function unitCampaigns(unitId: string): UnitCampaignRef[] {
+  return getAllCampaigns()
+    .filter((c) => (c.units ?? []).some((u) => u.id === unitId))
+    .map((c) => ({
+      slug: c.slug,
+      title: c.title,
+      role: c.units!.find((u) => u.id === unitId)!.role,
+    }));
+}
+
 // Async: dynamically imports remark (ESM-only) so the module stays Jest-importable.
 export async function getCampaign(slug: string): Promise<Campaign | null> {
   const fullPath = path.join(CAMPAIGNS_DIR, `${slug}.md`);

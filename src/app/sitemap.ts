@@ -31,6 +31,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/encyclopedia/missions', freq: 'monthly', priority: 0.8 },
     { path: '/encyclopedia/history', freq: 'monthly', priority: 0.8 },
     { path: '/encyclopedia/world', freq: 'monthly', priority: 0.7 },
+    { path: '/encyclopedia/sources', freq: 'yearly', priority: 0.3 },
   ];
 
   return [

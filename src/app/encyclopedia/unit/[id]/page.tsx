@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getEnrichedUnit, getAllUnits, EnrichedUnit } from '@/lib/encyclopedia-utils';
 import { getUnitLoreDoc } from '@/lib/unit-lore';
+import { unitCampaigns } from '@/lib/campaigns';
 import UnitDetailPage from '@/components/encyclopedia/UnitDetailPage';
 import JsonLd from '@/components/JsonLd';
 import { absoluteUrl, breadcrumbJsonLd } from '@/lib/seo';
@@ -56,6 +57,9 @@ export default async function Page({ params }: PageProps) {
 
   // Long-form lore doc (build-time render → lands in static HTML). Null when absent.
   const loreDoc = await getUnitLoreDoc(params.id);
+  // «// УЧАСТИЕ В ВОЙНАХ» — reverse index over the campaign frontmatter rosters
+  // (the campaign→unit edge already exists; this makes it bidirectional).
+  const campaigns = unitCampaigns(params.id);
 
   return (
     <>
@@ -68,7 +72,13 @@ export default async function Page({ params }: PageProps) {
           { name: unit.name, path: `/encyclopedia/unit/${unit.id}` },
         ])}
       />
-      <UnitDetailPage unit={unit} bySource={bySource} sourceOrder={sourceOrder} loreDoc={loreDoc} />
+      <UnitDetailPage
+        unit={unit}
+        bySource={bySource}
+        sourceOrder={sourceOrder}
+        loreDoc={loreDoc}
+        campaigns={campaigns}
+      />
     </>
   );
 }

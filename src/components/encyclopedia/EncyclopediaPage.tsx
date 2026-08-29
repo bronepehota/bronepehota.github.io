@@ -9,6 +9,7 @@ import { orderedFactions } from '@/lib/faction-hierarchy';
 import { factionDisplayNames, getFactionColors } from '@/lib/faction-colors';
 import { buildSearchHaystack, matchesSearch, matchLoreTitles, type LorePageRef } from '@/lib/unit-search';
 import { LoreSearchHints } from './LoreSearchHints';
+import { LoreGuide } from './LoreGuide';
 import { UnitCard } from './UnitCard';
 import { EncyclopediaTabs } from './EncyclopediaTabs';
 import { EncyclopediaAttributionBanner } from './EncyclopediaAttributionBanner';
@@ -414,6 +415,11 @@ export default function EncyclopediaPage({ initialUnits, lorePages }: Encycloped
         {/* Units grid */}
         <main className="px-4 py-4 pb-20">
           <div className="mx-auto max-w-7xl">
+            {/* Новичковый путь «с чего начать» — над сеткой: вход во вселенную
+                через сюжет (глава 01 → Летопись → войны → фракции), не через каталог. */}
+            <div className="mb-4">
+              <LoreGuide />
+            </div>
             <div className="mb-4">
               <EncyclopediaAttributionBanner />
             </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { ChevronDown, Megaphone } from 'lucide-react';
 import { GitHubPagesImage } from '@/components/GitHubPagesImage';
 import { cn } from '@/lib/utils';
@@ -73,11 +74,11 @@ export function EncyclopediaAttributionBanner() {
           <ChevronDown className={cn('h-3 w-3 transition-transform duration-300', expanded && 'rotate-180')} />
         </button>
 
-        {/* Дополнить */}
+        {/* Дополнить — CTA (не кредит первоисточника), поэтому nofollow */}
         <a
           href="https://vk.ru/lastbpcoder"
           target="_blank"
-          rel="noopener noreferrer"
+          rel="noopener noreferrer nofollow"
           className="inline-flex items-center gap-1 rounded-sm border border-military-amber/40 bg-military-amber/10 px-2 py-0.5 font-ibm-mono text-[10px] text-military-amber transition-colors hover:bg-military-amber/20"
         >
           <Megaphone className="h-3 w-3" />
@@ -129,6 +130,14 @@ export function EncyclopediaAttributionBanner() {
             лого конкретного сообщества («Миниатюры Лисицина», «Звёздные Системы» и т.д.) — для неофициального.
             На странице отряда — подробные метки источников и авторов, а метка АВБ отмечает весь неофициальный контент.
           </p>
+
+          {/* Правовая сводка — полный текст на отдельной странице */}
+          <Link
+            href="/encyclopedia/sources"
+            className="inline-block pt-1 font-ibm-mono text-[9px] uppercase tracking-[0.2em] text-military-rust/60 hover:text-military-amber transition-colors"
+          >
+            {'// ИСТОЧНИКИ И ПРАВА →'}
+          </Link>
         </div>
       )}
     </aside>

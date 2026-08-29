@@ -1,4 +1,4 @@
-import { getAllCampaigns, warsEraSpan } from '@/lib/campaigns';
+import { getAllCampaigns, unitCampaigns, warsEraSpan } from '@/lib/campaigns';
 
 describe('campaigns loader', () => {
   it('discovers the Корпоративные войны campaign', () => {
@@ -258,5 +258,35 @@ describe('warsEraSpan — эпоха всего блока «Хроники во
 
   it('внутри одной эры-диапазона берутся оба конца', () => {
     expect(warsEraSpan([{ era: '4527–4528' }])).toBe('4527–4528');
+  });
+});
+
+describe('unitCampaigns — обратный индекс юнит → хроники («// УЧАСТИЕ В ВОЙНАХ»)', () => {
+  it('raptor воевал в пяти хрониках — в порядке блока (по order)', () => {
+    expect(unitCampaigns('raptor').map((c) => c.slug)).toEqual([
+      'imperatorskie-voyny',
+      'shturm-velyana',
+      'pervaya-volna-gront-i-rum',
+      'oborona-blauda',
+      'padenie-midgaarda',
+    ]);
+  });
+
+  it('каждая запись несёт title и роль из ростера кампании', () => {
+    const shturm = unitCampaigns('raptor').find((c) => c.slug === 'shturm-velyana')!;
+    expect(shturm.title).toBe('Штурм Велиана');
+    // Роли в frontmatter хранятся вместе с кавычками «…» (как на детальной кампании).
+    expect(shturm.role).toBe('«Линейная танкетка — на службе обеих сторон»');
+  });
+
+  it('снежные волки: ульфхеднары — Первая волна и Падение Мидгаарда', () => {
+    expect(unitCampaigns('snow_wolves_ulfhednary').map((c) => c.slug)).toEqual([
+      'pervaya-volna-gront-i-rum',
+      'padenie-midgaarda',
+    ]);
+  });
+
+  it('юнит вне хроник → пустой массив (блок на досье не рендерится)', () => {
+    expect(unitCampaigns('nonexistent_unit')).toEqual([]);
   });
 });

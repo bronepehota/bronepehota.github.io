@@ -120,11 +120,13 @@ export default function MissionListPage({ missions, campaigns }: MissionListPage
                 className={cn('fade-in-up opacity-0', isLoaded && 'opacity-100')}
                 style={{ animationFillMode: 'forwards', animationDelay: `${0.4 + gi * 0.1}s` }}
               >
-                {/* Campaign header */}
+                {/* Scenario-set header. Deliberately NOT «кампания»: that word is
+                    reserved for the lore chronicles of «Хроники войн» (history #wars)
+                    — these JSON groups are scenario boxes («Цербер», «Классические»). */}
                 <div className="flex items-center gap-3 mb-4 md:mb-6">
                   <Target className="w-5 h-5 text-military-rust" />
                   <h2 className="font-oswald text-xl md:text-2xl text-military-sand uppercase tracking-wide">
-                    Кампания «{group.campaign.name}»
+                    Набор сценариев «{group.campaign.name}»
                   </h2>
                 </div>
                 {group.campaign.intro && (

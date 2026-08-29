@@ -284,6 +284,13 @@ export default async function HistoryPage() {
             >
               {'// АЛФАВИТ ВСЕЛЕННОЙ →'}
             </Link>
+            {/* Правовая сводка — сноска той же mono-строкой (адаптации, © Технолог) */}
+            <Link
+              href="/encyclopedia/sources"
+              className="block mt-1 font-ibm-mono text-[10px] uppercase tracking-[0.2em] text-military-steel/60 hover:text-military-amber transition-colors"
+            >
+              {'// ИСТОЧНИКИ И ПРАВА →'}
+            </Link>
           </nav>
         </div>
 

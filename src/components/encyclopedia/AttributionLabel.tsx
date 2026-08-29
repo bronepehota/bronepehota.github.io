@@ -78,7 +78,9 @@ export function ContributeButton({ compact, url = CONTRIBUTION_VK_URL, subject }
     <a
       href={url}
       target="_blank"
-      rel="noopener noreferrer"
+      // nofollow: repeated CTA (~200 sitewide links to one VK profile), not a
+      // source credit — primary-source credits stay follow by design.
+      rel="noopener noreferrer nofollow"
       onClick={handleClick}
       title={title}
       aria-label={title}
@@ -364,7 +366,15 @@ export function SponsorChip({ name, url, withHeader = true, compact }: SponsorCh
           {'// СПОНСОР'}
         </span>
       )}
-      <SourceChip name={name ?? 'Спонсор отряда'} icon={Heart} tone="#f43f5e" url={url} compact={compact} />
+      {/* nofollow — a sponsor chip is promo, not a source credit. */}
+      <SourceChip
+        name={name ?? 'Спонсор отряда'}
+        icon={Heart}
+        tone="#f43f5e"
+        url={url}
+        rel="noopener noreferrer nofollow"
+        compact={compact}
+      />
     </div>
   );
 }

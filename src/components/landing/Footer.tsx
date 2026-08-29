@@ -78,6 +78,15 @@ export default function Footer({ className }: FooterProps) {
           Официальный лор «Технолог» + фанатские материалы сообществ. Неточность? «Дополнить» на странице отряда.
         </p>
 
+        {/* Sources & rights — мелкая mono-строка под дисклеймером (правовая сводка) */}
+        <Link
+          href="/encyclopedia/sources"
+          data-testid="sources-link"
+          className="font-ibm-mono text-[9px] uppercase tracking-[0.2em] text-slate-600 hover:text-military-amber transition-colors"
+        >
+          {'// ИСТОЧНИКИ И ПРАВА'}
+        </Link>
+
         {/* Scroll indicator */}
         <div className="animate-bounce flex flex-col items-center gap-0.5 text-slate-500/40">
           <ChevronDown className="w-4 h-4" />

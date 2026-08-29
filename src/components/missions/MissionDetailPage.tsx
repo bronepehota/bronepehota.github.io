@@ -108,7 +108,7 @@ export default function MissionDetailPage({ mission, campaign }: MissionDetailPa
                 })}
                 {campaign && (
                   <span className="font-ibm-mono text-xs text-military-rust/60 uppercase tracking-wider">
-                    Кампания «{campaign.name}»
+                    Набор сценариев «{campaign.name}»
                   </span>
                 )}
               </div>

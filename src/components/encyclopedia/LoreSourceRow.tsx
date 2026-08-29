@@ -52,13 +52,16 @@ interface SourceChipProps {
   logo?: string;
   /** When set, the chip becomes a link. */
   url?: string;
+  /** Link relation. Default keeps primary-source credits follow;
+   *  CTAs and sponsor chips pass a nofollow variant. */
+  rel?: string;
   /** Hex tone for the icon and border tint (ignored when `logo` is set). */
   tone?: string;
   /** Compact sizing for dense surfaces (faction cards). */
   compact?: boolean;
 }
 
-export function SourceChip({ name, role, icon, logo, url, tone, compact }: SourceChipProps) {
+export function SourceChip({ name, role, icon, logo, url, rel = 'noopener noreferrer', tone, compact }: SourceChipProps) {
   const Icon = icon;
   const padX = compact ? 'px-1.5' : 'px-2';
   const padY = compact ? 'py-0.5' : 'py-1';
@@ -102,7 +105,7 @@ export function SourceChip({ name, role, icon, logo, url, tone, compact }: Sourc
       <a
         href={url}
         target="_blank"
-        rel="noopener noreferrer"
+        rel={rel}
         className={cls}
         style={style}
         title={url}
