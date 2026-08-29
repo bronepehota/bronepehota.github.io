@@ -4,6 +4,7 @@ import { Metadata } from 'next';
 import { getAllCampaigns, getCampaign } from '@/lib/campaigns';
 import { LoreSourceRow } from '@/components/encyclopedia/LoreSourceRow';
 import { BASE_PATH } from '@/lib/constants';
+import { pageOpenGraph } from '@/lib/seo';
 
 const CHRONICLE_BG = `${BASE_PATH}/images/campaigns/chronicle-bg.jpg`;
 
@@ -36,7 +37,15 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     title: `${campaign.title} — Хроники войн | Бронепехота`,
     description,
     alternates: { canonical: `/campaigns/${campaign.slug}` },
-    openGraph: { title: campaign.title, description },
+    // Full OG set via pageOpenGraph — a bare {title, description} object would
+    // REPLACE the layout's og:image card (Next merges only top-level fields).
+    // Long-form chronicle → og:type article, plus this page's own og:url.
+    openGraph: pageOpenGraph({
+      title: campaign.title,
+      description,
+      path: `/campaigns/${campaign.slug}`,
+      type: 'article',
+    }),
   };
 }
 

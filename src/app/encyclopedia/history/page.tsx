@@ -1,14 +1,27 @@
+import Link from 'next/link';
 import { getAllHistoryChapters, getHistoryChapter } from '@/lib/history';
 import { getAllCampaigns, warsEraSpan } from '@/lib/campaigns';
 import { CampaignsBlock } from '@/components/encyclopedia/CampaignsBlock';
 import { EncyclopediaTabs } from '@/components/encyclopedia/EncyclopediaTabs';
 import { LoreSourceRow } from '@/components/encyclopedia/LoreSourceRow';
+import { pageOpenGraph } from '@/lib/seo';
+
+const TITLE = 'История вселенной Робогир — Энциклопедия Бронепехоты';
+const DESCRIPTION =
+  'Хроника вселенной Робогир (Robogear) — общего мира настольных игр «Робогир» и «Бронепехота»: от Тунгусского артефакта и первых прыжков к звёздам до Доминиона, Новейшей истории Империи, Легендарных Лордов и хроник войн.';
 
 export const metadata = {
-  title: 'История вселенной Робогир — Энциклопедия Бронепехоты',
-  description:
-    'Хроника вселенной Робогир (Robogear) — общего мира настольных игр «Робогир» и «Бронепехота»: от Тунгусского артефакта и первых прыжков к звёздам до Доминиона, Новейшей истории Империи, Легендарных Лордов и хроник войн.',
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: '/encyclopedia/history' },
+  // A page-level openGraph object REPLACES the root-layout one (Next merges
+  // top-level fields only) — pageOpenGraph reassembles the full set, including
+  // the site og:image card, and adds this page's own og:url.
+  openGraph: pageOpenGraph({
+    title: TITLE,
+    description: DESCRIPTION,
+    path: '/encyclopedia/history',
+  }),
 };
 
 export default async function HistoryPage() {
@@ -103,7 +116,11 @@ export default async function HistoryPage() {
           </ol>
         </nav>
 
-        {/* Chapters — grouped sections («Справочник») render '//' instead of a number */}
+        {/* Chapters — grouped sections («Справочник») render '//' instead of a number.
+            SEO NOTE: the hub↔chapter content duplication is deliberate — the hub is
+            the reading experience, each chapter also has its own indexable page
+            (/encyclopedia/history/[slug], self-canonical + Article JSON-LD); the
+            small permalink below lets a reader save/share that chapter URL. */}
         {chapters.map((c, i) => (
           <section
             key={c.slug}
@@ -116,6 +133,14 @@ export default async function HistoryPage() {
                 {c.group ? '//' : String(i + 1).padStart(2, '0')}
               </span>
               <h2 className="font-oswald text-xl md:text-2xl text-military-sand">{c.title}</h2>
+              {/* Unobtrusive chapter permalink — own URL for saving/sharing */}
+              <Link
+                href={`/encyclopedia/history/${c.slug}`}
+                data-testid="chapter-permalink"
+                className="ml-auto font-ibm-mono text-[10px] text-military-steel/50 hover:text-military-amber transition-colors whitespace-nowrap"
+              >
+                ⤴ отдельная страница
+              </Link>
             </div>
             {c.era && (
               <p className="font-ibm-mono text-[10px] uppercase tracking-wider text-military-steel/50 mb-4">

@@ -193,11 +193,12 @@ export default function EncyclopediaPage({ initialUnits, lorePages }: Encycloped
                 <span className="sm:hidden">Назад</span>
               </Link>
 
-              {/* Small wordmark (replaces the giant title) */}
+              {/* Small wordmark (replaces the giant title). H1 — the page's only
+                  one (units below start at h3); visually identical to the old div. */}
               <div className="text-center leading-none">
-                <div className="font-russo text-sm md:text-base tracking-[0.25em] text-military-sand">
+                <h1 className="font-russo text-sm md:text-base tracking-[0.25em] text-military-sand">
                   ЭНЦИКЛОПЕДИЯ
-                </div>
+                </h1>
                 <div className="mt-0.5 font-ibm-mono text-[8px] md:text-[9px] text-military-rust/60 tracking-[0.3em] uppercase">
                   {'// База боевых единиц'}
                 </div>

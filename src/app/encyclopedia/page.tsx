@@ -4,12 +4,20 @@ import { getAllHistoryChapters } from '@/lib/history';
 import { getAllCampaigns } from '@/lib/campaigns';
 import type { LorePageRef } from '@/lib/unit-search';
 import EncyclopediaPageClient from '@/components/encyclopedia/EncyclopediaPage';
+import { pageOpenGraph } from '@/lib/seo';
+import { ENCYCLOPEDIA_DESCRIPTION, ENCYCLOPEDIA_TITLE } from './meta';
 
 // Own canonical — the root layout no longer provides one (it used to make every
 // alternates-less page a "duplicate" of the homepage). Title/desc live in the
-// encyclopedia layout.
+// encyclopedia layout; the page-level openGraph adds og:url (a page-level OG
+// object replaces the root one — pageOpenGraph keeps the site og:image card).
 export const metadata: Metadata = {
   alternates: { canonical: '/encyclopedia' },
+  openGraph: pageOpenGraph({
+    title: ENCYCLOPEDIA_TITLE,
+    description: ENCYCLOPEDIA_DESCRIPTION,
+    path: '/encyclopedia',
+  }),
 };
 
 export default async function EncyclopediaPage() {

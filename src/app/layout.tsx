@@ -6,7 +6,7 @@ import { SerwistRegister } from '@/components/SerwistRegister'
 import NavigationProgress from '@/components/NavigationProgress'
 import RouteTracker from '@/components/RouteTracker'
 import { BASE_PATH, SITE_URL } from '@/lib/constants'
-import { absoluteUrl } from '@/lib/seo'
+import { SITE_NAME, DEFAULT_OG_IMAGE } from '@/lib/seo'
 import GoogleAnalytics from '@/components/GoogleAnalytics'
 import YandexMetrica from '@/components/YandexMetrica'
 
@@ -39,10 +39,9 @@ const oswald = Oswald({
   display: 'swap',
 })
 
-const SITE_NAME = 'Бронепехота';
-// Fully-absolute default social card — a 1200×630 screenshot of the landing hero
-// (regenerate via tools/regen-og-image.mjs + tools/regen-og-crop.py when the landing changes).
-const OG_IMAGE = absoluteUrl('/og-image.png');
+// SITE_NAME + DEFAULT_OG_IMAGE (the site social card) live in src/lib/seo.ts —
+// single source of truth, shared with pageOpenGraph() for per-page OG objects.
+const OG_IMAGE = DEFAULT_OG_IMAGE;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
