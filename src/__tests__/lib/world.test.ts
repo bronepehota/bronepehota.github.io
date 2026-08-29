@@ -10,15 +10,38 @@ import { getEncyclopediaUnit, getEncyclopediaFaction } from '@/lib/encyclopedia-
 describe('world entries («Алфавит вселенной»)', () => {
   const entries = getAllWorldEntries();
 
-  it('возвращает первую партию из 6 записей', () => {
-    expect(entries).toHaveLength(6);
+  it('возвращает 25 записей (6 первой партии + 19 контент-волны)', () => {
+    expect(entries).toHaveLength(25);
     expect(entries.map((e) => e.slug)).toEqual([
+      // Первая партия
       'lord-kross',
       'lord-erkhart',
       'markus-trehglazyy',
       'impireya-polyaris',
       'dominion',
       'gront',
+      // Контент-волна: персоны
+      'lord-dolgorukiy',
+      'ledi-agata',
+      'lord-shindzhi',
+      'elvit',
+      'breyg-ulufson',
+      'prizrak',
+      'mark-ballard',
+      // Контент-волна: локации, битвы, топонимы-термины
+      'velian',
+      'blaund',
+      'run',
+      'midgaard',
+      'buffernaya-zona',
+      'teklius',
+      'zolotaya-sotnya',
+      'pylnaya-zona',
+      'shturm-velyana',
+      // Контент-волна: термины
+      'klon-pehota',
+      'protectorat-torgovyy',
+      'bditelnyy-mir',
     ]);
   });
 
@@ -49,6 +72,34 @@ describe('world entries («Алфавит вселенной»)', () => {
       era: '4451',
       subtitle: expect.stringContaining('Нонус'),
     });
+  });
+
+  it('меты контент-волны: kinds и фракции ключевых записей', () => {
+    const byslug = Object.fromEntries(entries.map((e) => [e.slug, e]));
+    // Персоны волны.
+    expect(byslug['lord-dolgorukiy']).toMatchObject({ kind: 'person', faction: 'polaris' });
+    expect(byslug['ledi-agata']!.kind).toBe('person');
+    expect(byslug['lord-shindzhi']).toMatchObject({ kind: 'person', faction: 'polaris' });
+    expect(byslug['elvit']).toMatchObject({ kind: 'person', faction: 'protectorate' });
+    expect(byslug['breyg-ulufson']).toMatchObject({ kind: 'person', faction: 'snow_wolves' });
+    expect(byslug['prizrak']).toMatchObject({ kind: 'person', faction: 'protectorate' });
+    expect(byslug['mark-ballard']).toMatchObject({ kind: 'person', faction: 'dead_fleet' });
+    // Локации и битва.
+    expect(byslug['velian']).toMatchObject({ kind: 'location' });
+    expect(byslug['blaund']).toMatchObject({ kind: 'location', faction: 'protectorate' });
+    expect(byslug['run']).toMatchObject({ kind: 'location', faction: 'protectorate' });
+    expect(byslug['midgaard']).toMatchObject({ kind: 'location', faction: 'snow_wolves' });
+    expect(byslug['teklius']).toMatchObject({ kind: 'location', faction: 'polaris' });
+    // «Штурм Велиана» — первая запись вида battle.
+    const battles = entries.filter((e) => e.kind === 'battle');
+    expect(battles.map((e) => e.slug)).toEqual(['shturm-velyana']);
+    // Термины волны.
+    expect(byslug['buffernaya-zona']!.kind).toBe('term');
+    expect(byslug['zolotaya-sotnya']).toMatchObject({ kind: 'term', faction: 'protectorate' });
+    expect(byslug['pylnaya-zona']).toMatchObject({ kind: 'term', faction: 'mercenaries' });
+    expect(byslug['klon-pehota']).toMatchObject({ kind: 'term', faction: 'polaris' });
+    expect(byslug['protectorat-torgovyy']).toMatchObject({ kind: 'term', faction: 'protectorate' });
+    expect(byslug['bditelnyy-mir']!.kind).toBe('term');
   });
 
   it('related.units ссылаются на реальные юниты энциклопедии', () => {
@@ -126,8 +177,15 @@ describe('world entries («Алфавит вселенной»)', () => {
   });
 
   it('сортировка: order, затем алфавит по title (ru locale)', () => {
-    // Первая партия полностью пронумерована — порядок стабилен.
-    expect(entries.map((e) => e.order)).toEqual([1, 2, 3, 4, 5, 6]);
+    // Обе партии пронумерованы уникальными order — порядок стабилен:
+    // 1–6 первая партия, 10–16 персоны волны, 20–28 локации/битвы/термины-места,
+    // 30–32 термины волны.
+    expect(entries.map((e) => e.order)).toEqual([
+      1, 2, 3, 4, 5, 6,
+      10, 11, 12, 13, 14, 15, 16,
+      20, 21, 22, 23, 24, 25, 26, 27, 28,
+      30, 31, 32,
+    ]);
   });
 
   it('каждая запись несёт sources (прозрачность происхождения сводки)', () => {

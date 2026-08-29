@@ -106,6 +106,7 @@ export default function FactionsListPage({ factions }: FactionsListPageProps) {
               return (
                 <section
                   key={faction.id}
+                  id={faction.id}
                   data-testid={`encyclopedia-faction-card-${faction.id}`}
                   className={cn(
                     'relative folded-paper military-corners overflow-hidden',

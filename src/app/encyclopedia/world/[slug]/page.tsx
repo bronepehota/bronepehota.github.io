@@ -108,8 +108,8 @@ export default async function WorldEntryPage({ params }: PageProps) {
 
   const description = entryDescription(entry);
   // Резолв related-ссылок в человекочитаемые имена (реестры — sync fs).
-  // Список фракций не несёт per-faction якорей (FactionsListPage) — ссылки
-  // идут на общий /encyclopedia/factions.
+  // Карточки фракций несут якоря id={faction.id} (FactionsListPage) — ссылки
+  // ведут на конкретную карточку /encyclopedia/factions#<id>.
   const chapterTitles = new Map(getAllHistoryChapters().map((c) => [c.slug, c.title]));
   const campaignTitles = new Map(getAllCampaigns().map((c) => [c.slug, c.title]));
   const relatedUnits = (entry.related?.units ?? []).map((id) => ({
@@ -117,7 +117,7 @@ export default async function WorldEntryPage({ params }: PageProps) {
     title: getEncyclopediaUnit(id)?.name ?? id,
   }));
   const relatedFactions = (entry.related?.factions ?? []).map((id) => ({
-    href: '/encyclopedia/factions',
+    href: `/encyclopedia/factions#${id}`,
     title: getEncyclopediaFaction(id)?.name ?? id,
   }));
   const relatedChapters = (entry.related?.chapters ?? []).map((slug) => ({
