@@ -20,7 +20,8 @@ describe('campaigns loader', () => {
 
   it('sorts campaigns by order', () => {
     const all = getAllCampaigns();
-    // Chronological (ascending era): the earliest war reads first.
+    // Order-based, not era-based: mostly chronological, but the 4451 Первая
+    // волна (order 5) closes the list.
     expect(all.map((c) => c.slug)).toEqual([
       'imperatorskie-voyny',
       'shturm-velyana',
