@@ -22,7 +22,8 @@ describe('campaigns loader', () => {
     const all = getAllCampaigns();
     // Order-based, not era-based: mostly chronological, but the 4451 Первая
     // волна (order 5) closes the pre-existing block; the 4d wave (orders
-    // 6–10) appends Блауд, Полярис, Мидгаард, Теклиус и Косары.
+    // 6–10) appends Блауд, Полярис, Мидгаард, Теклиус и Косары; the 4e wave
+    // (orders 11–13) appends ЦСО и обе волны Имперских войн.
     expect(all.map((c) => c.slug)).toEqual([
       'imperatorskie-voyny',
       'shturm-velyana',
@@ -34,6 +35,9 @@ describe('campaigns loader', () => {
       'padenie-midgaarda',
       'teklius',
       'voyny-kosarey',
+      'operatsii-tso',
+      'vtoraya-volna',
+      'tretiya-volna',
     ]);
   });
 
@@ -96,6 +100,66 @@ describe('campaigns loader', () => {
     expect(sv.credit?.year).toBe(2022);
   });
 
+  it('Штурм Велиана расширены миссиями романа — контратака, монорельс, блокада, бастион', () => {
+    const sv = getAllCampaigns().find((c) => c.slug === 'shturm-velyana')!;
+    expect(sv.missions?.length).toBe(4);
+    expect(sv.missions?.map((m) => m.name)).toEqual([
+      'Улица Свободы',
+      'Рейд по монорельсу',
+      'Караван руды',
+      'Двенадцатый бастион',
+    ]);
+  });
+
+  it('включает «Операции ЦСО» — штурмовые батальоны Протектората, order 11', () => {
+    const all = getAllCampaigns();
+    const c = all.find((x) => x.slug === 'operatsii-tso');
+    expect(c).toBeDefined();
+    expect(c?.title).toBe('Операции ЦСО');
+    expect(c?.order).toBe(11);
+    expect(c?.era).toBe('4521–4530');
+    expect(c?.factions).toEqual(['protectorate']);
+    // Ростер: штурмовые отряды + командные «Карниворы» и звенья бронедивизиона.
+    expect(c?.units?.some((u) => u.id === 'protectorate_shturmovoy_otryad_stervyatniki')).toBe(true);
+    expect(c?.units?.some((u) => u.id === 'carnivore')).toBe(true);
+    expect(c?.units?.some((u) => u.id === 'varan')).toBe(true);
+    expect(c?.missions?.length).toBe(3);
+    // Повесть V.Chertischev — независимый автор → мини-АВБ.
+    expect(c?.loreAuthor).toBe('avb');
+    expect(c?.credit?.author).toBe('V.Chertischev');
+    expect(c?.credit?.work).toBe('Штурмовики Протектората');
+  });
+
+  it('включает «Вторую волну» — манёвренная война 4478–4495, order 12', () => {
+    const all = getAllCampaigns();
+    const c = all.find((x) => x.slug === 'vtoraya-volna');
+    expect(c).toBeDefined();
+    expect(c?.title).toBe('Вторая волна');
+    expect(c?.order).toBe(12);
+    expect(c?.era).toBe('4478–4495');
+    expect(c?.factions).toEqual(['polaris', 'protectorate']);
+    expect(c?.units?.some((u) => u.id === 'raptor')).toBe(true);
+    expect(c?.units?.some((u) => u.id === 'snow_wolves_ulfhednary')).toBe(true);
+    expect(c?.missions?.length).toBe(3);
+    expect(c?.loreAuthor).toBe('avb');
+    expect(c?.credit?.work).toBe('Имперские войны');
+  });
+
+  it('включает «Третью волну» — восстания и супероружие 4522–4528, order 13', () => {
+    const all = getAllCampaigns();
+    const c = all.find((x) => x.slug === 'tretiya-volna');
+    expect(c).toBeDefined();
+    expect(c?.title).toBe('Третья волна');
+    expect(c?.order).toBe(13);
+    expect(c?.era).toBe('4522–4528');
+    expect(c?.factions).toEqual(['polaris', 'protectorate']);
+    expect(c?.units?.some((u) => u.id === 'polaris_ledi_agata')).toBe(true);
+    expect(c?.units?.some((u) => u.id === 'madbull')).toBe(true);
+    expect(c?.missions?.length).toBe(3);
+    expect(c?.loreAuthor).toBe('avb');
+    expect(c?.credit?.work).toBe('Имперские войны');
+  });
+
   it('Имперские войны несут кредит романа V.Chertischev — без года (не указан в издании)', () => {
     const iv = getAllCampaigns().find((c) => c.slug === 'imperatorskie-voyny')!;
     expect(iv.loreAuthor).toBe('avb');
@@ -119,7 +183,8 @@ describe('campaigns loader', () => {
     expect(c?.title).toBe('Первая волна: Гронт и Рун');
     expect(c?.order).toBe(5);
     expect(c?.era).toBe('4451');
-    expect(all[all.length - 1]?.slug).toBe('voyny-kosarey');
+    // Блок замыкает уже не Косари (order 10), а волна 4e: Третья волна (13).
+    expect(all[all.length - 1]?.slug).toBe('tretiya-volna');
     expect(c?.factions).toEqual(expect.arrayContaining(['polaris', 'protectorate', 'snow_wolves']));
     // Roster: клон-пехота вторжения + мидгаардские ульфхеднары.
     expect(c?.units?.some((u) => u.id === 'polaris_lineynaya_klon_pehota')).toBe(true);
@@ -228,11 +293,13 @@ describe('campaigns loader', () => {
 });
 
 describe('warsEraSpan — эпоха всего блока «Хроники войн»', () => {
-  it('текущие 10 кампаний → «4360–4546» (min–max по всем годам всех кампаний)', () => {
+  it('текущие 13 кампаний → «4360–4546» (min–max по всем годам всех кампаний)', () => {
     // Порядок по `order`: Имперские войны (4451–4528), Штурм Велиана (4527–4528),
     // Скрытый враг (4537), Корпоративные войны (4546), Первая волна (4451!),
     // + волна 4d: Блауд (4478–4495), Полярис (4451–4461), Мидгаард (4449–4451),
-    // Теклиус (4540), Косары (4360–4451 — нижняя граница всего блока).
+    // Теклиус (4540), Косары (4360–4451 — нижняя граница всего блока),
+    // + волна 4e: ЦСО (4521–4530), Вторая волна (4478–4495), Третья волна
+    // (4522–4528) — все внутри коридора 4360–4546, границы не сдвигаются.
     // Порядковый first/last давал «4451–4451» — регрессия этого кейса.
     expect(warsEraSpan(getAllCampaigns())).toBe('4360–4546');
   });
@@ -262,13 +329,14 @@ describe('warsEraSpan — эпоха всего блока «Хроники во
 });
 
 describe('unitCampaigns — обратный индекс юнит → хроники («// УЧАСТИЕ В ВОЙНАХ»)', () => {
-  it('raptor воевал в пяти хрониках — в порядке блока (по order)', () => {
+  it('raptor воевал в шести хрониках — в порядке блока (по order)', () => {
     expect(unitCampaigns('raptor').map((c) => c.slug)).toEqual([
       'imperatorskie-voyny',
       'shturm-velyana',
       'pervaya-volna-gront-i-rum',
       'oborona-blauda',
       'padenie-midgaarda',
+      'vtoraya-volna',
     ]);
   });
 
@@ -279,10 +347,11 @@ describe('unitCampaigns — обратный индекс юнит → хрон�
     expect(shturm.role).toBe('«Линейная танкетка — на службе обеих сторон»');
   });
 
-  it('снежные волки: ульфхеднары — Первая волна и Падение Мидгаарда', () => {
+  it('снежные волки: ульфхеднары — Первая волна, Падение Мидгаарда и Вторая волна (Сера 4479)', () => {
     expect(unitCampaigns('snow_wolves_ulfhednary').map((c) => c.slug)).toEqual([
       'pervaya-volna-gront-i-rum',
       'padenie-midgaarda',
+      'vtoraya-volna',
     ]);
   });
 
