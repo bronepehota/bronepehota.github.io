@@ -55,6 +55,27 @@ export function getAllCampaigns(): CampaignMeta[] {
 }
 
 /**
+ * Era badge for the whole «Хроники войн» block (TOC): the min–max year span across
+ * ALL campaigns — each `era` may itself be a range («4451–4528»). Taking the first
+ * campaign's opening year and the last campaign's closing year is WRONG: the list
+ * is ordered by `order`, not chronology (the 4451 «Первая волна» closes it), which
+ * used to produce «4451–4451».
+ *
+ * Undefined when no campaign carries a parseable 4-digit year (no badge rendered).
+ */
+export function warsEraSpan(campaigns: { era?: string }[]): string | undefined {
+  const years = campaigns.flatMap((c) => {
+    const matches = c.era?.match(/\b\d{4}\b/g) ?? [];
+    return matches.map(Number);
+  });
+  if (years.length === 0) return undefined;
+  const min = Math.min(...years);
+  const max = Math.max(...years);
+  // Single-year span collapses to just the year («4546», not «4546–4546»).
+  return min === max ? String(min) : `${min}–${max}`;
+}
+
+/**
  * Markdown → sanitized HTML.
  *
  * `remark-html` does NOT sanitize (raw `<script>`/`onerror=` pass through), so we

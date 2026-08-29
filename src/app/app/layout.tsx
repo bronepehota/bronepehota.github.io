@@ -3,8 +3,10 @@ import type { ReactNode } from 'react';
 
 // Тайтл вкладки для штаба — короткий, не SEO-строка лендинга.
 // Остальные метаданные наследуются от root layout.
+// noindex: приложение — инструмент сессии, не публичный контент (в sitemap его нет).
 export const metadata: Metadata = {
   title: 'Штаб — Бронепехота',
+  robots: { index: false, follow: false },
 };
 
 // Pass-through layout: только метаданные,(children) рендерятся как есть.

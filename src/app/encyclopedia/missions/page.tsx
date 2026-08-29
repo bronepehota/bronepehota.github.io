@@ -4,6 +4,7 @@ import MissionListPage from '@/components/missions/MissionListPage';
 export const metadata = {
   title: 'Миссии — Энциклопедия Бронепехота',
   description: 'Боевые сценарии (миссии) с предысториями, схемами расстановки и условиями победы.',
+  alternates: { canonical: '/encyclopedia/missions' },
 };
 
 export default function MissionsPage() {

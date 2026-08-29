@@ -1,4 +1,4 @@
-import { getAllCampaigns } from '@/lib/campaigns';
+import { getAllCampaigns, warsEraSpan } from '@/lib/campaigns';
 
 describe('campaigns loader', () => {
   it('discovers the Корпоративные войны campaign', () => {
@@ -128,5 +128,37 @@ describe('campaigns loader', () => {
       'Наборы «СтарСис»: «Схватка на Гронте» и «Вторжение на Рун» (2001)'
     );
     expect(c.credit?.year).toBeUndefined();
+  });
+});
+
+describe('warsEraSpan — эпоха всего блока «Хроники войн»', () => {
+  it('текущие 5 кампаний → «4451–4546» (min–max по всем годам всех кампаний)', () => {
+    // Порядок по `order`: Имперские войны (4451–4528), Штурм Велиана (4527–4528),
+    // Скрытый враг (4537), Корпоративные войны (4546), Первая волна (4451!).
+    // Порядковый first/last давал «4451–4451» — регрессия этого кейса.
+    expect(warsEraSpan(getAllCampaigns())).toBe('4451–4546');
+  });
+
+  it('кампания без эры пропускается', () => {
+    expect(
+      warsEraSpan([{ era: '4451–4528' }, { era: undefined }, { era: '4546' }])
+    ).toBe('4451–4546');
+  });
+
+  it('нет эр ни у одной кампании → undefined (бейдж не рендерится)', () => {
+    expect(warsEraSpan([{ era: undefined }, {}])).toBeUndefined();
+    expect(warsEraSpan([])).toBeUndefined();
+  });
+
+  it('эры без четырёхзначных годов игнорируются', () => {
+    expect(warsEraSpan([{ era: 'без даты' }, { era: 'около 330-го цикла' }])).toBeUndefined();
+  });
+
+  it('все войны в одном году → год без диапазона', () => {
+    expect(warsEraSpan([{ era: '4546' }, { era: '4546–4546' }])).toBe('4546');
+  });
+
+  it('внутри одной эры-диапазона берутся оба конца', () => {
+    expect(warsEraSpan([{ era: '4527–4528' }])).toBe('4527–4528');
   });
 });

@@ -4,6 +4,7 @@ import FactionsListPage from '@/components/encyclopedia/FactionsListPage';
 export const metadata = {
   title: 'Фракции — Энциклопедия Бронепехота',
   description: 'Стороны конфликта: Империя Полярис, Торговый Протекторат, Наёмники и Мародеры.',
+  alternates: { canonical: '/encyclopedia/factions' },
 };
 
 export default function FactionsPage() {

@@ -75,13 +75,13 @@ export const metadata: Metadata = {
     'техника',
   ],
   manifest: `${BASE_PATH}/manifest.json`,
-  alternates: {
-    canonical: absoluteUrl('/'),
-  },
+  // NOTE: no `alternates.canonical` / `openGraph.url` here — a root-layout value is
+  // inherited by EVERY page without its own alternates, telling search engines that
+  // /encyclopedia etc. are duplicates of the homepage (deindexing risk). Each public
+  // page declares its own canonical; the landing does it in src/app/page.tsx.
   openGraph: {
     type: 'website',
     locale: 'ru_RU',
-    url: absoluteUrl('/'),
     siteName: SITE_NAME,
     images: [
       {

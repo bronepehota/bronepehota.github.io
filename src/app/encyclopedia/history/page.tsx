@@ -1,5 +1,5 @@
 import { getAllHistoryChapters, getHistoryChapter } from '@/lib/history';
-import { getAllCampaigns } from '@/lib/campaigns';
+import { getAllCampaigns, warsEraSpan } from '@/lib/campaigns';
 import { CampaignsBlock } from '@/components/encyclopedia/CampaignsBlock';
 import { EncyclopediaTabs } from '@/components/encyclopedia/EncyclopediaTabs';
 import { LoreSourceRow } from '@/components/encyclopedia/LoreSourceRow';
@@ -19,11 +19,9 @@ export default async function HistoryPage() {
   // «Хроники войн» live as the closing section of the history page (#wars) —
   // chronological order, the standalone /campaigns list redirects here.
   const campaigns = getAllCampaigns();
-  // Era span of the whole wars block (TOC badge): first campaign's opening
-  // year → last campaign's closing year, e.g. 4451–4546.
-  const firstWar = campaigns[0]?.era?.match(/\d{4}/)?.[0];
-  const lastWar = campaigns[campaigns.length - 1]?.era?.match(/(\d{4})\s*$/)?.[1];
-  const warsEra = firstWar && lastWar ? `${firstWar}–${lastWar}` : undefined;
+  // Era span of the whole wars block (TOC badge): min–max year across ALL
+  // campaigns, e.g. 4451–4546 (order-based first/last used to yield «4451–4451»).
+  const warsEra = warsEraSpan(campaigns);
 
   return (
     <main className="min-h-screen bg-military-dark relative overflow-hidden">

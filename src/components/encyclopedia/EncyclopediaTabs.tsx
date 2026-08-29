@@ -37,7 +37,9 @@ const TABS: TabDef[] = [
     href: '/encyclopedia/factions',
     label: 'Фракции',
     icon: Flag,
-    isActive: (p) => p.startsWith('/encyclopedia/faction'),
+    // Exact match — `startsWith('/encyclopedia/faction')` was a leftover from a
+    // planned per-faction detail route (/encyclopedia/faction/[id]) that never shipped.
+    isActive: (p) => p === '/encyclopedia/factions',
   },
   {
     id: 'history',

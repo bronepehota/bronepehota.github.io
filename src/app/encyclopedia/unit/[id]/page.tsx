@@ -61,8 +61,10 @@ export default async function Page({ params }: PageProps) {
     <>
       <JsonLd
         data={breadcrumbJsonLd([
+          // Aligned with the visible navigation: the unit page's back-link reads
+          // «К энциклопедии» (tab 01 «Юниты», /encyclopedia) — NOT /encyclopedia/factions.
           { name: 'Энциклопедия', path: '/encyclopedia' },
-          { name: 'Фракции', path: '/encyclopedia/factions' },
+          { name: 'Юниты', path: '/encyclopedia' },
           { name: unit.name, path: `/encyclopedia/unit/${unit.id}` },
         ])}
       />
