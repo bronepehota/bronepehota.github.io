@@ -10,8 +10,8 @@ import { getEncyclopediaUnit, getEncyclopediaFaction } from '@/lib/encyclopedia-
 describe('world entries («Алфавит вселенной»)', () => {
   const entries = getAllWorldEntries();
 
-  it('возвращает 44 записи (6 первой партии + 20 контент-волны + 18 кораблей флотов)', () => {
-    expect(entries).toHaveLength(44);
+  it('возвращает 56 записей (6 первой партии + 20 контент-волны + 18 кораблей флотов + 12 волны 4g)', () => {
+    expect(entries).toHaveLength(56);
     expect(entries.map((e) => e.slug)).toEqual([
       // Первая партия
       'lord-kross',
@@ -39,10 +39,20 @@ describe('world entries («Алфавит вселенной»)', () => {
       'zolotaya-sotnya',
       'pylnaya-zona',
       'shturm-velyana',
+      // Волна 4g: локация Кейта (статьи «КРАСНЫЙ КОРПУС»)
+      'keyta',
       // Контент-волна: термины
       'klon-pehota',
       'protectorat-torgovyy',
       'bditelnyy-mir',
+      // Волна 4g: военный словарь (статьи Мёртвого Флота) — слоты 33–39
+      'reksmarine',
+      'vspomogatelnyy-flot',
+      'katafrakty',
+      'tafgai',
+      'rezhimniki',
+      'df-batareya-nuska',
+      't5-garpun',
       // Корабли флотов (справочники VK): Империя — 8
       'ezarh',
       'asgard',
@@ -63,6 +73,11 @@ describe('world entries («Алфавит вселенной»)', () => {
       'yarost',
       'svobodnyy',
       'proekt-22',
+      // Волна 4g: корабль ЧВК + хвост военного словаря (слоты 58–61)
+      'torturador',
+      'bpr',
+      'gurs',
+      'prizrachnye-linii',
     ]);
   });
 
@@ -122,6 +137,46 @@ describe('world entries («Алфавит вселенной»)', () => {
     expect(byslug['klon-pehota']).toMatchObject({ kind: 'term', faction: 'polaris' });
     expect(byslug['protectorat-torgovyy']).toMatchObject({ kind: 'term', faction: 'protectorate' });
     expect(byslug['bditelnyy-mir']!.kind).toBe('term');
+  });
+
+  it('волна 4g (статьи «Голоса мёртвых флотов»): Кейта, Тортурадор и военный словарь', () => {
+    const byslug = Object.fromEntries(entries.map((e) => [e.slug, e]));
+    // Кейта — Окраинный мир без фракции держав (гражданская война корпораций).
+    expect(byslug['keyta']).toMatchObject({ kind: 'location' });
+    expect(byslug['keyta']!.faction).toBeUndefined();
+    expect(byslug['keyta']!.related?.units).toEqual(
+      expect.arrayContaining(['madbull', 'raptor', 'bronekhod', 'condor', 'trex', 'octopus']),
+    );
+    // Военный словарь — слаги списком (порядок = order).
+    expect(entries.filter((e) => e.kind === 'term').map((e) => e.slug)).toEqual([
+      'impireya-polyaris',
+      'dominion',
+      'buffernaya-zona',
+      'zolotaya-sotnya',
+      'pylnaya-zona',
+      'klon-pehota',
+      'protectorat-torgovyy',
+      'bditelnyy-mir',
+      'reksmarine',
+      'vspomogatelnyy-flot',
+      'katafrakty',
+      'tafgai',
+      'rezhimniki',
+      'df-batareya-nuska',
+      't5-garpun',
+      'bpr',
+      'gurs',
+      'prizrachnye-linii',
+    ]);
+    // Ключевые меты словаря: фракции и связки.
+    expect(byslug['reksmarine']).toMatchObject({ kind: 'term', faction: 'polaris' });
+    expect(byslug['tafgai']).toMatchObject({ kind: 'term', faction: 'dead_fleet' });
+    expect(byslug['katafrakty']).toMatchObject({ kind: 'term', faction: 'protectorate' });
+    expect(byslug['rezhimniki']!.related?.units).toContain('polaris_rezhimnaya_klon_pehota');
+    expect(byslug['df-batareya-nuska']).toMatchObject({ kind: 'term', faction: 'protectorate' });
+    expect(byslug['t5-garpun']!.related?.units).toBeUndefined();
+    expect(byslug['bpr']!.related?.campaigns).toContain('liberator-zheleznyy-veter');
+    expect(byslug['katafrakty']!.related?.campaigns).toContain('liberator-zheleznyy-veter');
   });
 
   it('related.units ссылаются на реальные юниты энциклопедии', () => {
@@ -207,9 +262,9 @@ describe('world entries («Алфавит вселенной»)', () => {
     expect(invalid).toEqual([]);
   });
 
-  it('корабли флотов: 18 записей kind=ship, гриф КОРАБЛЬ, флот в related.factions, юнитов нет', () => {
+  it('корабли флотов: 19 записей kind=ship, гриф КОРАБЛЬ, флот в related.factions, юнитов нет', () => {
     const ships = entries.filter((e) => e.kind === 'ship');
-    expect(ships).toHaveLength(18);
+    expect(ships).toHaveLength(19);
     expect(ships.map((e) => e.slug)).toEqual([
       // Флот Империи Полярис (справочник «Основные корабли Империи»)
       'ezarh',
@@ -231,6 +286,9 @@ describe('world entries («Алфавит вселенной»)', () => {
       'yarost',
       'svobodnyy',
       'proekt-22',
+      // Волна 4g: «Тортурадор» — корабль ЧВК «Красный Корпус», не флот державы
+      // (related.factions пуст — привязки к polaris/protectorate нет).
+      'torturador',
     ]);
     // Маппинг флотов: «Империя» → polaris (8), «Протекторат» → protectorate (10).
     // Сами страницы фракциям не принадлежат (frontmatter faction не задаётся) —
@@ -265,15 +323,18 @@ describe('world entries («Алфавит вселенной»)', () => {
   it('сортировка: order, затем алфавит по title (ru locale)', () => {
     // Все партии пронумерованы уникальными order — порядок стабилен:
     // 1–6 первая партия, 10–16 и 18 персоны волны (18 — фон Ханнеман, фаза 4f),
-    // 20–28 локации/битвы/термины-места,
-    // 30–32 термины волны, 40–57 корабли флотов (Империя 40–47, Протекторат 48–57).
+    // 20–29 локации/битвы/термины-места (29 — Кейта, фаза 4g),
+    // 30–32 термины волны, 33–39 военный словарь 4g,
+    // 40–57 корабли флотов (Империя 40–47, Протекторат 48–57),
+    // 58–61 волна 4g: «Тортурадор» (58) + хвост словаря (59–61, после кораблей).
     expect(entries.map((e) => e.order)).toEqual([
       1, 2, 3, 4, 5, 6,
       10, 11, 12, 13, 14, 15, 16, 18,
-      20, 21, 22, 23, 24, 25, 26, 27, 28,
-      30, 31, 32,
+      20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+      30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
       40, 41, 42, 43, 44, 45, 46, 47,
       48, 49, 50, 51, 52, 53, 54, 55, 56, 57,
+      58, 59, 60, 61,
     ]);
   });
 

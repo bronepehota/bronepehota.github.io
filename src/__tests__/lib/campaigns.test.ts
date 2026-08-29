@@ -24,7 +24,8 @@ describe('campaigns loader', () => {
     // волна (order 5) closes the pre-existing block; the 4d wave (orders
     // 6–10) appends Блауд, Полярис, Мидгаард, Теклиус и Косары; the 4e wave
     // (orders 11–13) appends ЦСО и обе волны Имперских войн; the 4f wave —
-    // Войны Пыльной Зоны (order 14, эра 4472 — между волнами).
+    // Войны Пыльной Зоны (order 14, эра 4472 — между волнами); the 4g wave —
+    // «Либератор: Железный ветер» (order 15, статьи Мёртвого Флота).
     expect(all.map((c) => c.slug)).toEqual([
       'imperatorskie-voyny',
       'shturm-velyana',
@@ -40,6 +41,7 @@ describe('campaigns loader', () => {
       'vtoraya-volna',
       'tretiya-volna',
       'voyny-pylnoy-zony',
+      'liberator-zheleznyy-veter',
     ]);
   });
 
@@ -162,6 +164,31 @@ describe('campaigns loader', () => {
     expect(c?.credit?.work).toBe('Имперские войны');
   });
 
+  it('включает «Либератор: Железный ветер» — оккупированная Рутения 4513–4528, order 15', () => {
+    const all = getAllCampaigns();
+    const c = all.find((x) => x.slug === 'liberator-zheleznyy-veter');
+    expect(c).toBeDefined();
+    expect(c?.title).toBe('Либератор: Железный ветер');
+    expect(c?.order).toBe(15);
+    expect(c?.era).toBe('4513–4528');
+    // Имперский гарнизон оккупации + протекторатская операция «Железный ветер».
+    expect(c?.factions).toEqual(['polaris', 'protectorate']);
+    // Ростер: Советник Ольгерд (мост к «Третьей волне») + машины гарнизона и Велиана.
+    expect(c?.units?.some((u) => u.id === 'protectorate_olgerd')).toBe(true);
+    expect(c?.units?.some((u) => u.id === 'wildbear')).toBe(true);
+    expect(c?.units?.some((u) => u.id === 'hunter')).toBe(true);
+    expect(c?.units?.some((u) => u.id === 'trex')).toBe(true);
+    expect(c?.units?.some((u) => u.id === 'varan')).toBe(true);
+    expect(c?.units?.some((u) => u.id === 'thunder')).toBe(true);
+    expect(c?.units?.some((u) => u.id === 'grinder')).toBe(true);
+    expect(c?.missions?.length).toBe(3);
+    // Статьи сообщества «Голоса мёртвых флотов» — АВБ-контент, кредит сообщества.
+    expect(c?.loreAuthor).toBe('avb');
+    expect(c?.credit?.author).toBe('Сообщество «Голоса мёртвых флотов»');
+    expect(c?.credit?.work).toBe('Либератор: Железный ветер');
+    expect(c?.credit?.url).toBe('https://vk.ru/@dead_fleet-liberator-zheleznyi-veter1');
+  });
+
   it('Имперские войны несут кредит романа V.Chertischev — без года (не указан в издании)', () => {
     const iv = getAllCampaigns().find((c) => c.slug === 'imperatorskie-voyny')!;
     expect(iv.loreAuthor).toBe('avb');
@@ -185,8 +212,8 @@ describe('campaigns loader', () => {
     expect(c?.title).toBe('Первая волна: Гронт и Рун');
     expect(c?.order).toBe(5);
     expect(c?.era).toBe('4451');
-    // Блок замыкает уже не Третья волна (13), а фаза 4f: Войны Пыльной Зоны (14).
-    expect(all[all.length - 1]?.slug).toBe('voyny-pylnoy-zony');
+    // Блок замыкает уже не Третья волна (13) и не 4f (14), а фаза 4g: «Либератор» (15).
+    expect(all[all.length - 1]?.slug).toBe('liberator-zheleznyy-veter');
     expect(c?.factions).toEqual(expect.arrayContaining(['polaris', 'protectorate', 'snow_wolves']));
     // Roster: клон-пехота вторжения + мидгаардские ульфхеднары.
     expect(c?.units?.some((u) => u.id === 'polaris_lineynaya_klon_pehota')).toBe(true);
@@ -316,7 +343,7 @@ describe('campaigns loader', () => {
 });
 
 describe('warsEraSpan — эпоха всего блока «Хроники войн»', () => {
-  it('текущие 14 кампаний → «4360–4546» (min–max по всем годам всех кампаний)', () => {
+  it('текущие 15 кампаний → «4360–4546» (min–max по всем годам всех кампаний)', () => {
     // Порядок по `order`: Имперские войны (4451–4528), Штурм Велиана (4527–4528),
     // Скрытый враг (4537), Корпоративные войны (4546), Первая волна (4451!),
     // + волна 4d: Блауд (4478–4495), Полярис (4451–4461), Мидгаард (4449–4451),
@@ -324,8 +351,9 @@ describe('warsEraSpan — эпоха всего блока «Хроники во
     // + волна 4e: ЦСО (4521–4530), Вторая волна (4478–4495), Третья волна
     // (4522–4528),
     // + волна 4f: Войны Пыльной Зоны (4472 — пограничная стычка между волнами;
-    // расхождение 4472/4478 с романами оговорено в самой кампании) — все
-    // внутри коридора 4360–4546, границы не сдвигаются.
+    // расхождение 4472/4478 с романами оговорено в самой кампании),
+    // + волна 4g: Либератор (4513–4528) — все внутри коридора 4360–4546,
+    // границы не сдвигаются.
     // Порядковый first/last давал «4451–4451» — регрессия этого кейса.
     expect(warsEraSpan(getAllCampaigns())).toBe('4360–4546');
   });
@@ -355,7 +383,7 @@ describe('warsEraSpan — эпоха всего блока «Хроники во
 });
 
 describe('unitCampaigns — обратный индекс юнит → хроники («// УЧАСТИЕ В ВОЙНАХ»)', () => {
-  it('raptor воевал в семи хрониках — в порядке блока (по order)', () => {
+  it('raptor воевал в восьми хрониках — в порядке блока (по order)', () => {
     expect(unitCampaigns('raptor').map((c) => c.slug)).toEqual([
       'imperatorskie-voyny',
       'shturm-velyana',
@@ -364,6 +392,7 @@ describe('unitCampaigns — обратный индекс юнит → хрон�
       'padenie-midgaarda',
       'vtoraya-volna',
       'voyny-pylnoy-zony',
+      'liberator-zheleznyy-veter',
     ]);
   });
 
