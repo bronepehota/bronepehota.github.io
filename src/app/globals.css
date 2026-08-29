@@ -1142,6 +1142,26 @@ button, a, input, select, textarea {
   content: '// ' counter(chapter, decimal-leading-zero) '.' counter(subsec) '  ';
 }
 
+/* Campaign chronicle bodies (/campaigns/[slug]) — subsections are h2 in the
+   .md (history chapters use h3): same dossier treatment — Oswald subhead with
+   the mono «//» requisition prefix, but un-numbered (the campaign's ordinal
+   lives on the folder spine, not in the chapter counter). */
+.history-body.campaign-body h2 {
+  font-family: var(--font-oswald), sans-serif;
+  font-size: 1.125rem;
+  letter-spacing: 0.05em;
+  color: #d6d3d1;
+}
+.history-body.campaign-body h2::before {
+  content: '//  ';
+  font-family: var(--font-ibm-mono), monospace;
+  font-size: 0.7em;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  color: #ea580c;
+  margin-right: 0.35em;
+}
+
 /* Drop cap on the first paragraph of CHRONICLE chapters (no group).
    initial-letter where supported, float::first-letter fallback. */
 .history-dropcap > p:first-of-type::first-letter {
