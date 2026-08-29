@@ -3,8 +3,8 @@ import { getAllHistoryChapters } from '@/lib/history';
 describe('history chapters', () => {
   const chapters = getAllHistoryChapters();
 
-  it('возвращает 24 главы, отсортированные по order', () => {
-    expect(chapters).toHaveLength(24);
+  it('возвращает 22 главы, отсортированные по order', () => {
+    expect(chapters).toHaveLength(22);
     const orders = chapters.map((c) => c.order ?? 99);
     expect(orders).toEqual([...orders].sort((a, b) => a - b));
   });
@@ -71,9 +71,10 @@ describe('history chapters', () => {
     expect(ch8.credit?.work).toBe('Косары');
   });
 
-  it('рассказы игроков: order 100+, группа, avb + именной кредит с URL', () => {
+  it('лор-сведения из творчества игроков: order 100–106, группа, avb + именной кредит с URL', () => {
     const stories = chapters.filter((c) => (c.order ?? 99) >= 100);
-    expect(stories).toHaveLength(9);
+    expect(stories).toHaveLength(7);
+    expect(stories.map((s) => s.order)).toEqual([100, 101, 102, 103, 104, 105, 106]);
     for (const s of stories) {
       expect(`${s.slug}: ${s.group}`).toBe(`${s.slug}: Творчество игроков`);
       expect(`${s.slug}: ${s.loreAuthor}`).toBe(`${s.slug}: avb`);
@@ -83,8 +84,11 @@ describe('history chapters', () => {
     }
     expect(stories.map((s) => s.slug)).toEqual([
       'krasnaya-yarost', 'seryy-leytenant', 'domashnyaya-voyna', 'general',
-      'istoriya-odnogo-soldata', 'put-voyna',
-      'mayndfaytery-1', 'mayndfaytery-2', 'mayndfaytery-3',
+      'istoriya-odnogo-soldata', 'put-voyna', 'mayndfaytery',
     ]);
+    // Майндфайтеры: три части рассказа — одна лор-запись, кредит на первую страницу
+    const mind = stories.find((s) => s.slug === 'mayndfaytery')!;
+    expect(mind.credit?.work).toBe('Майндфайтеры');
+    expect(mind.credit?.url).toBe('http://www.robogear.ru/skelet/6/story_16.php');
   });
 });
