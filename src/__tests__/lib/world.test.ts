@@ -10,8 +10,8 @@ import { getEncyclopediaUnit, getEncyclopediaFaction } from '@/lib/encyclopedia-
 describe('world entries («Алфавит вселенной»)', () => {
   const entries = getAllWorldEntries();
 
-  it('возвращает 43 записи (6 первой партии + 19 контент-волны + 18 кораблей флотов)', () => {
-    expect(entries).toHaveLength(43);
+  it('возвращает 44 записи (6 первой партии + 20 контент-волны + 18 кораблей флотов)', () => {
+    expect(entries).toHaveLength(44);
     expect(entries.map((e) => e.slug)).toEqual([
       // Первая партия
       'lord-kross',
@@ -28,6 +28,7 @@ describe('world entries («Алфавит вселенной»)', () => {
       'breyg-ulufson',
       'prizrak',
       'mark-ballard',
+      'fon-hanneman',
       // Контент-волна: локации, битвы, топонимы-термины
       'velian',
       'blaund',
@@ -104,6 +105,7 @@ describe('world entries («Алфавит вселенной»)', () => {
     expect(byslug['breyg-ulufson']).toMatchObject({ kind: 'person', faction: 'snow_wolves' });
     expect(byslug['prizrak']).toMatchObject({ kind: 'person', faction: 'protectorate' });
     expect(byslug['mark-ballard']).toMatchObject({ kind: 'person', faction: 'dead_fleet' });
+    expect(byslug['fon-hanneman']).toMatchObject({ kind: 'person', faction: 'polaris' });
     // Локации и битва.
     expect(byslug['velian']).toMatchObject({ kind: 'location' });
     expect(byslug['blaund']).toMatchObject({ kind: 'location', faction: 'protectorate' });
@@ -186,6 +188,15 @@ describe('world entries («Алфавит вселенной»)', () => {
     expect(
       entries.find((e) => e.slug === 'gront')!.related?.campaigns,
     ).toContain('pervaya-volna-gront-i-rum');
+    // Пыльная Зона — буфер, через который шла альдебаранская диверсионная
+    // война; фон Ханнеман связан с тремя хрониками одного рейда (4472/4478 —
+    // расхождение дат между «Роботехом» и романами).
+    expect(
+      entries.find((e) => e.slug === 'pylnaya-zona')!.related?.campaigns,
+    ).toContain('voyny-pylnoy-zony');
+    expect(
+      entries.find((e) => e.slug === 'fon-hanneman')!.related?.campaigns,
+    ).toEqual(['voyny-pylnoy-zony', 'imperatorskie-voyny', 'vtoraya-volna']);
   });
 
   it('frontmatter faction (если задан) существует в реестре фракций', () => {
@@ -253,11 +264,12 @@ describe('world entries («Алфавит вселенной»)', () => {
 
   it('сортировка: order, затем алфавит по title (ru locale)', () => {
     // Все партии пронумерованы уникальными order — порядок стабилен:
-    // 1–6 первая партия, 10–16 персоны волны, 20–28 локации/битвы/термины-места,
+    // 1–6 первая партия, 10–16 и 18 персоны волны (18 — фон Ханнеман, фаза 4f),
+    // 20–28 локации/битвы/термины-места,
     // 30–32 термины волны, 40–57 корабли флотов (Империя 40–47, Протекторат 48–57).
     expect(entries.map((e) => e.order)).toEqual([
       1, 2, 3, 4, 5, 6,
-      10, 11, 12, 13, 14, 15, 16,
+      10, 11, 12, 13, 14, 15, 16, 18,
       20, 21, 22, 23, 24, 25, 26, 27, 28,
       30, 31, 32,
       40, 41, 42, 43, 44, 45, 46, 47,

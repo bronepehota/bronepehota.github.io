@@ -23,7 +23,8 @@ describe('campaigns loader', () => {
     // Order-based, not era-based: mostly chronological, but the 4451 Первая
     // волна (order 5) closes the pre-existing block; the 4d wave (orders
     // 6–10) appends Блауд, Полярис, Мидгаард, Теклиус и Косары; the 4e wave
-    // (orders 11–13) appends ЦСО и обе волны Имперских войн.
+    // (orders 11–13) appends ЦСО и обе волны Имперских войн; the 4f wave —
+    // Войны Пыльной Зоны (order 14, эра 4472 — между волнами).
     expect(all.map((c) => c.slug)).toEqual([
       'imperatorskie-voyny',
       'shturm-velyana',
@@ -38,6 +39,7 @@ describe('campaigns loader', () => {
       'operatsii-tso',
       'vtoraya-volna',
       'tretiya-volna',
+      'voyny-pylnoy-zony',
     ]);
   });
 
@@ -183,8 +185,8 @@ describe('campaigns loader', () => {
     expect(c?.title).toBe('Первая волна: Гронт и Рун');
     expect(c?.order).toBe(5);
     expect(c?.era).toBe('4451');
-    // Блок замыкает уже не Косари (order 10), а волна 4e: Третья волна (13).
-    expect(all[all.length - 1]?.slug).toBe('tretiya-volna');
+    // Блок замыкает уже не Третья волна (13), а фаза 4f: Войны Пыльной Зоны (14).
+    expect(all[all.length - 1]?.slug).toBe('voyny-pylnoy-zony');
     expect(c?.factions).toEqual(expect.arrayContaining(['polaris', 'protectorate', 'snow_wolves']));
     // Roster: клон-пехота вторжения + мидгаардские ульфхеднары.
     expect(c?.units?.some((u) => u.id === 'polaris_lineynaya_klon_pehota')).toBe(true);
@@ -290,16 +292,40 @@ describe('campaigns loader', () => {
     expect(c?.credit?.author).toBe('V.Chertischev');
     expect(c?.credit?.work).toBe('Косары');
   });
+
+  it('включает «Войны Пыльной Зоны» — альдебаранский рейд 4472, order 14', () => {
+    const all = getAllCampaigns();
+    const c = all.find((x) => x.slug === 'voyny-pylnoy-zony');
+    expect(c).toBeDefined();
+    expect(c?.title).toBe('Войны Пыльной Зоны');
+    expect(c?.order).toBe(14);
+    // Эра «4472» — середина перемирия между Первой (4451–4461) и Второй
+    // (4478+) волнами: расхождение с романами (4478) оговорено в тексте.
+    expect(c?.era).toBe('4472');
+    expect(c?.factions).toEqual(['polaris', 'protectorate']);
+    // Ростер: танкетки Альдебаранского Корпуса + бронемашины роботанковых бригад.
+    expect(c?.units?.some((u) => u.id === 'raptor')).toBe(true);
+    expect(c?.units?.some((u) => u.id === 'bronekhod')).toBe(true);
+    expect(c?.missions?.length).toBe(3);
+    // Исходник — игра «Роботех», прародитель вселенной: правообладатель не
+    // установлен → паттерн безымянного официального издания (без АВБ, без автора).
+    expect(c?.loreAuthor).toBe('tehnolog');
+    expect(c?.credit?.work).toBe('Роботех (исходник)');
+    expect(c?.credit?.author).toBeUndefined();
+  });
 });
 
 describe('warsEraSpan — эпоха всего блока «Хроники войн»', () => {
-  it('текущие 13 кампаний → «4360–4546» (min–max по всем годам всех кампаний)', () => {
+  it('текущие 14 кампаний → «4360–4546» (min–max по всем годам всех кампаний)', () => {
     // Порядок по `order`: Имперские войны (4451–4528), Штурм Велиана (4527–4528),
     // Скрытый враг (4537), Корпоративные войны (4546), Первая волна (4451!),
     // + волна 4d: Блауд (4478–4495), Полярис (4451–4461), Мидгаард (4449–4451),
     // Теклиус (4540), Косары (4360–4451 — нижняя граница всего блока),
     // + волна 4e: ЦСО (4521–4530), Вторая волна (4478–4495), Третья волна
-    // (4522–4528) — все внутри коридора 4360–4546, границы не сдвигаются.
+    // (4522–4528),
+    // + волна 4f: Войны Пыльной Зоны (4472 — пограничная стычка между волнами;
+    // расхождение 4472/4478 с романами оговорено в самой кампании) — все
+    // внутри коридора 4360–4546, границы не сдвигаются.
     // Порядковый first/last давал «4451–4451» — регрессия этого кейса.
     expect(warsEraSpan(getAllCampaigns())).toBe('4360–4546');
   });
@@ -329,7 +355,7 @@ describe('warsEraSpan — эпоха всего блока «Хроники во
 });
 
 describe('unitCampaigns — обратный индекс юнит → хроники («// УЧАСТИЕ В ВОЙНАХ»)', () => {
-  it('raptor воевал в шести хрониках — в порядке блока (по order)', () => {
+  it('raptor воевал в семи хрониках — в порядке блока (по order)', () => {
     expect(unitCampaigns('raptor').map((c) => c.slug)).toEqual([
       'imperatorskie-voyny',
       'shturm-velyana',
@@ -337,6 +363,7 @@ describe('unitCampaigns — обратный индекс юнит → хрон�
       'oborona-blauda',
       'padenie-midgaarda',
       'vtoraya-volna',
+      'voyny-pylnoy-zony',
     ]);
   });
 
