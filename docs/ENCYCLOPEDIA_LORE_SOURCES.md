@@ -19,6 +19,9 @@
   на книгу. Так несут `polaris` («Битва за Велиан» + «Имперские войны») и
   `protectorate` («Битва за Велиан» + «Имперские войны» + «Штурмовики
   Протектората»).
+- **Дословные исходники** всех обработанных (записи №1–11) и новых (Роботех,
+  VK-документы) источников заархивированы в Markdown в `docs/lore-sources/`
+  (карта архива — `docs/lore-sources/README.md`); в сборку сайта архив не входит.
 - Где живёт лор: фракции → `src/data/encyclopedia/factions.json`; кампании →
   `src/content/campaigns/*.md`; главы истории → `src/content/history/*.md`;
   машины/отряды → `src/data/encyclopedia/units/<faction>/{machines,squads}.json`
