@@ -124,3 +124,19 @@ describe('главы Истории: мини-АВБ ровно на не-Тех
     }
   });
 });
+
+describe('отряд «Х»: спонсор и автор лора — Егорик Елеусизов (решение 2026-08-29)', () => {
+  it('кредит на человека + sponsor; loreAuthor avb → мини-АВБ на чипе', () => {
+    const unit = getAllUnits().find((u) => u.id === 'protectorate_otryad_x')!;
+    expect(unit.provenance?.loreAuthor).toBe('avb');
+    expect(unit.provenance?.credit).toEqual({
+      author: 'Егорик Елеусизов',
+      url: 'https://vk.ru/id140723645',
+    });
+    expect(unit.sponsor).toEqual({
+      name: 'Егорик Елеусизов',
+      url: 'https://vk.ru/id140723645',
+    });
+    expect(resolveUnitProvenance(unit).loreAuthor).not.toBe('tehnolog');
+  });
+});

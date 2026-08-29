@@ -677,10 +677,15 @@
     ],
     "provenance": {
       "origin": "star_system",
+      "loreAuthor": "avb",
       "credit": {
-        "author": "Сообщество «Старая гвардия»",
-        "url": "https://vk.ru/bronepehotastarayagvardia"
+        "author": "Егорик Елеусизов",
+        "url": "https://vk.ru/id140723645"
       }
+    },
+    "sponsor": {
+      "name": "Егорик Елеусизов",
+      "url": "https://vk.ru/id140723645"
     },
     "image": "/images/squads/protectorate/otryad_x/1.png",
     "miniatureSource": "lisitsin",
