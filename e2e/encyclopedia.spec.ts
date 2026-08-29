@@ -352,3 +352,63 @@ test.describe('Энциклопедия', () => {
     await expect(page.getByTestId('rules-confirm-button')).toBeVisible({ timeout: 30000 });
   });
 });
+
+// ——— Поиск: тела лора, миссии в подсказках, empty state (Фаза 3 аудита поиска) ——
+test.describe('Энциклопедия — поиск по телам лора', () => {
+  test.beforeEach(async ({ page }) => {
+    await clearStorage(page);
+  });
+
+  test('«Блауд» находит подсказку по телу главы (не по титулу)', async ({ page }) => {
+    await page.goto('/encyclopedia');
+    await page.waitForLoadState('networkidle');
+
+    // «Блауд» — планета из ТЕЛА глав («Космография Доминиона», «Императорские
+    // войны»); в титулы и данные юнитов слово не входит — раньше был тупик ∅.
+    await page.fill('input[placeholder*="ПОИСК"]', 'Блауд');
+    const hint = page.getByTestId('lore-search-hint');
+    await expect(hint.first()).toBeVisible();
+    await expect(hint.first()).toContainText('Космография');
+    // Матч по телу — глава ведёт на свой якорь в Истории
+    await expect(hint.first()).toHaveAttribute('href', /\/encyclopedia\/history#/);
+  });
+
+  test('«Капкан» показывает подсказку-миссию', async ({ page }) => {
+    await page.goto('/encyclopedia');
+    await page.waitForLoadState('networkidle');
+
+    await page.fill('input[placeholder*="ПОИСК"]', 'Капкан');
+    const hint = page.getByTestId('lore-search-hint');
+    await expect(hint.first()).toBeVisible();
+    await expect(hint.first()).toContainText('МИССИЯ');
+    await expect(hint.first()).toContainText('Капкан');
+    await expect(hint.first()).toHaveAttribute('href', /\/encyclopedia\/mission\/kapkan/);
+  });
+
+  test('пустой результат: эхо, сброс фильтров и чипы-примеры', async ({ page }) => {
+    await page.goto('/encyclopedia');
+    await page.waitForLoadState('networkidle');
+
+    // «зызы» — нет ни юнитов, ни лора
+    await page.fill('input[placeholder*="ПОИСК"]', 'зызы');
+    const reset = page.getByTestId('search-empty-reset');
+    await expect(reset).toBeVisible();
+
+    // Сброс возвращает всю сетку и очищает инпут
+    await reset.click();
+    const input = page.locator('input[placeholder*="ПОИСК"]');
+    await expect(input).toHaveValue('');
+    await expect(page.getByTestId('unit-grid')).toBeVisible();
+    // Счётчик вернулся к полному каталогу
+    await expect(page.getByTestId('unit-grid').locator('[href*="/encyclopedia/unit/"]')).not.toHaveCount(0);
+
+    // Чип-пример подставляет запрос и находит результат
+    await page.fill('input[placeholder*="ПОИСК"]', 'зызы');
+    await expect(page.getByTestId('search-empty-reset')).toBeVisible();
+    const example = page.getByTestId('search-example');
+    await expect(example.first()).toBeVisible();
+    await example.first().click();
+    await expect(page.locator('input[placeholder*="ПОИСК"]')).toHaveValue('Робогир');
+    await expect(page.getByTestId('unit-grid').locator('[href*="/encyclopedia/unit/"]').first()).toBeVisible();
+  });
+});

@@ -2,12 +2,12 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { Search } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { EncyclopediaUnit, getFactions } from '@/lib/encyclopedia-registry';
 import { FactionID } from '@/lib/types';
 import { orderedFactions } from '@/lib/faction-hierarchy';
 import { factionDisplayNames, getFactionColors } from '@/lib/faction-colors';
-import { buildSearchHaystack, matchesSearch, type LorePageRef } from '@/lib/unit-search';
+import { buildSearchHaystack, matchesSearch, matchLoreTitles, type LorePageRef } from '@/lib/unit-search';
 import { LoreSearchHints } from './LoreSearchHints';
 import { UnitCard } from './UnitCard';
 import { EncyclopediaTabs } from './EncyclopediaTabs';
@@ -34,6 +34,11 @@ const types: { value: TypeFilter; label: string; icon: string }[] = [
   { value: 'орудие', label: 'ОРУДИЯ', icon: '⬢' },
 ];
 
+// Example queries on the empty state: manufacturer (units), a lore word from
+// chapter BODIES (hints) and a place name from a campaign — three different
+// kinds of hit, showing what the search covers.
+const SEARCH_EXAMPLES = ['Робогир', 'Блауд', 'Велиан'];
+
 export default function EncyclopediaPage({ initialUnits, lorePages }: EncyclopediaPageProps) {
   const [units] = useState<EncyclopediaUnit[]>(initialUnits);
   const [filteredUnits, setFilteredUnits] = useState<EncyclopediaUnit[]>(initialUnits);
@@ -47,10 +52,18 @@ export default function EncyclopediaPage({ initialUnits, lorePages }: Encycloped
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Haystacks are built once (lore fields are stable per unit); the filter
-  // effect below then does a cheap substring check per keystroke.
+  // effect below then does a cheap token-AND check per keystroke.
   const haystacks = useMemo(
     () => new Map(units.map((u) => [u.id, buildSearchHaystack(u)])),
     [units],
+  );
+
+  // Lore hints (chapters/campaigns/missions/unit-lore by title or body) —
+  // computed here (not inside LoreSearchHints) so analytics reports the same
+  // match count the user sees.
+  const loreMatches = useMemo(
+    () => matchLoreTitles(searchQuery, lorePages),
+    [searchQuery, lorePages],
   );
 
   // Derive the faction filter from the units data — a new faction appears here
@@ -142,8 +155,9 @@ export default function EncyclopediaPage({ initialUnits, lorePages }: Encycloped
           return false;
         }
       }
-      // Search covers name, shortName, faction, manufacturer and lore fields —
-      // see buildSearchHaystack (queries like «Робогир» or «Блауд» find units).
+      // Search covers name, shortName, faction, manufacturer, reference-book
+      // fields (designation/class/armament) and lore — see buildSearchHaystack
+      // and matchesSearch (token-AND: «полярис герой» needs both words).
       if (searchQuery && !matchesSearch(unit, searchQuery, haystacks.get(unit.id))) {
         return false;
       }
@@ -151,6 +165,37 @@ export default function EncyclopediaPage({ initialUnits, lorePages }: Encycloped
     });
     setFilteredUnits(filtered);
   }, [units, haystacks, selectedFaction, selectedSculptor, selectedType, searchQuery]);
+
+  // Debounced search tracking: fires once 1200ms after the query AND result
+  // count settle (the final state of a typing burst, not every keystroke).
+  // Zero results additionally fire encyclopedia_search_empty — demand without
+  // content is the SEO/content priority signal from the search audit.
+  useEffect(() => {
+    const q = searchQuery.trim();
+    if (!q) return;
+    const results = filteredUnits.length + loreMatches.length;
+    const timer = setTimeout(() => {
+      trackEvent('encyclopedia_search', { query: q, results });
+      if (results === 0) trackEvent('encyclopedia_search_empty', { query: q });
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, [searchQuery, filteredUnits.length, loreMatches.length]);
+
+  const resetFilters = () => {
+    setSelectedFaction('all');
+    setSelectedType('all');
+    setSelectedSculptor('all');
+    setSearchQuery('');
+  };
+
+  // Example queries on the empty state: fill the search AND drop the other
+  // filters so the example is guaranteed to produce results.
+  const applySearchExample = (q: string) => {
+    setSelectedFaction('all');
+    setSelectedType('all');
+    setSelectedSculptor('all');
+    setSearchQuery(q);
+  };
 
   const activeFilterCount =
     (selectedFaction !== 'all' ? 1 : 0) +
@@ -273,8 +318,20 @@ export default function EncyclopediaPage({ initialUnits, lorePages }: Encycloped
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   placeholder="ПОИСК…"
-                  className="w-full rounded-full border border-military-steel/30 bg-military-charcoal/60 py-1.5 pl-9 pr-3 font-ibm-mono text-[11px] tracking-wide text-white placeholder:text-military-steel/50 focus:border-military-amber/50 focus:outline-none"
+                  className="w-full rounded-full border border-military-steel/30 bg-military-charcoal/60 py-1.5 pl-9 pr-9 font-ibm-mono text-[11px] tracking-wide text-white placeholder:text-military-steel/50 focus:border-military-amber/50 focus:outline-none"
                 />
+                {/* ✕ — clear the query without long backspacing (mobile audit point) */}
+                {searchQuery && (
+                  <button
+                    type="button"
+                    data-testid="search-clear"
+                    aria-label="Очистить поиск"
+                    onClick={() => setSearchQuery('')}
+                    className="absolute inset-y-0 right-1 flex w-8 items-center justify-center text-military-steel/60 hover:text-military-amber transition-colors"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
               </div>
               <div className="flex shrink-0 items-center gap-1.5">
                 {activeFilterCount > 0 && (
@@ -288,8 +345,9 @@ export default function EncyclopediaPage({ initialUnits, lorePages }: Encycloped
               </div>
             </div>
 
-            {/* Lore hints — chapters/campaigns whose title matches the query */}
-            <LoreSearchHints pages={lorePages} query={searchQuery} />
+            {/* Lore hints — chapters/campaigns/missions/unit-lore matching the
+                query by title or body (computed above, shared with analytics) */}
+            <LoreSearchHints matches={loreMatches} />
 
             {/* Faction + type + sculptor selectors — on phones the faction gets its
                 own full-width row (so long names like «МЁРТВЫЙ ФЛОТ» aren't clipped
@@ -360,12 +418,50 @@ export default function EncyclopediaPage({ initialUnits, lorePages }: Encycloped
               <EncyclopediaAttributionBanner />
             </div>
             {filteredUnits.length === 0 ? (
-              <div className="py-20 text-center">
+              <div className="py-16 text-center">
                 <div className="mb-3 text-5xl opacity-20">∅</div>
                 <p className="font-oswald text-lg text-military-taupe">НИЧЕГО НЕ НАЙДЕНО</p>
-                <p className="mt-1 font-ibm-mono text-xs text-military-steel">
-                  Измените параметры фильтрации
-                </p>
+                {searchQuery ? (
+                  // Empty state WITH a query: echo it, offer a one-tap reset
+                  // (a forgotten faction selector + query = zero without a clue)
+                  // and example queries that are known to hit.
+                  <>
+                    <p className="mt-1 font-ibm-mono text-xs text-military-steel">
+                      по запросу «{searchQuery}»
+                    </p>
+                    <div className="mt-5">
+                      <button
+                        type="button"
+                        data-testid="search-empty-reset"
+                        onClick={resetFilters}
+                        className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-military-amber/50 bg-military-charcoal/60 px-5 font-ibm-mono text-[11px] uppercase tracking-wider text-military-amber hover:border-military-amber transition-colors touch-manipulation"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                        Сбросить фильтры
+                      </button>
+                    </div>
+                    <p className="mt-6 font-ibm-mono text-[10px] uppercase tracking-wider text-military-steel/50">
+                      возможно, вы искали:
+                    </p>
+                    <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
+                      {SEARCH_EXAMPLES.map((ex) => (
+                        <button
+                          key={ex}
+                          type="button"
+                          data-testid="search-example"
+                          onClick={() => applySearchExample(ex)}
+                          className="inline-flex items-center rounded-full border border-military-amber/40 bg-military-charcoal/60 px-3 py-1.5 font-ibm-mono text-[10px] uppercase tracking-wide text-military-amber/90 hover:border-military-amber transition-colors touch-manipulation"
+                        >
+                          {ex}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <p className="mt-1 font-ibm-mono text-xs text-military-steel">
+                    Измените параметры фильтрации
+                  </p>
+                )}
               </div>
             ) : (
               <div

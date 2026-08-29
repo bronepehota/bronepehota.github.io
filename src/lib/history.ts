@@ -172,6 +172,14 @@ export function getAllHistoryChapters(): HistoryChapterMeta[] {
   return metas;
 }
 
+/** Sync raw markdown (frontmatter + body) of a chapter — no remark. Used at
+ *  build time to feed search-hint bodies (encyclopedia page); Jest-safe. */
+export function getHistoryChapterRaw(slug: string): string | null {
+  const fullPath = path.join(HISTORY_DIR, `${slug}.md`);
+  if (!fs.existsSync(fullPath)) return null;
+  return fs.readFileSync(fullPath, 'utf8');
+}
+
 // Async: dynamically imports remark via the campaigns pipeline — module stays Jest-importable.
 export async function getHistoryChapter(slug: string): Promise<HistoryChapter | null> {
   const fullPath = path.join(HISTORY_DIR, `${slug}.md`);

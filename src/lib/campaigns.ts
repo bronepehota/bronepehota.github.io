@@ -103,6 +103,14 @@ export async function renderMarkdownToSanitizedHtml(content: string): Promise<st
   return String(file);
 }
 
+/** Sync raw markdown (frontmatter + body) of a campaign — no remark. Used at
+ *  build time to feed search-hint bodies (encyclopedia page); Jest-safe. */
+export function getCampaignRaw(slug: string): string | null {
+  const fullPath = path.join(CAMPAIGNS_DIR, `${slug}.md`);
+  if (!fs.existsSync(fullPath)) return null;
+  return fs.readFileSync(fullPath, 'utf8');
+}
+
 // Async: dynamically imports remark (ESM-only) so the module stays Jest-importable.
 export async function getCampaign(slug: string): Promise<Campaign | null> {
   const fullPath = path.join(CAMPAIGNS_DIR, `${slug}.md`);
