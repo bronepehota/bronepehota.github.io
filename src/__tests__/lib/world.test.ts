@@ -10,8 +10,8 @@ import { getEncyclopediaUnit, getEncyclopediaFaction } from '@/lib/encyclopedia-
 describe('world entries («Алфавит вселенной»)', () => {
   const entries = getAllWorldEntries();
 
-  it('возвращает 56 записей (6 первой партии + 20 контент-волны + 18 кораблей флотов + 12 волны 4g)', () => {
-    expect(entries).toHaveLength(56);
+  it('возвращает 62 записи (6 первой партии + 20 контент-волны + 18 кораблей флотов + 12 волны 4g + 6 волны 4g-2)', () => {
+    expect(entries).toHaveLength(62);
     expect(entries.map((e) => e.slug)).toEqual([
       // Первая партия
       'lord-kross',
@@ -20,6 +20,8 @@ describe('world entries («Алфавит вселенной»)', () => {
       'impireya-polyaris',
       'dominion',
       'gront',
+      // Волна 4g-2: локация Пояс Мрака (сборник «Империя Полярис»)
+      'poyas-mraka',
       // Контент-волна: персоны
       'lord-dolgorukiy',
       'ledi-agata',
@@ -28,7 +30,11 @@ describe('world entries («Алфавит вселенной»)', () => {
       'breyg-ulufson',
       'prizrak',
       'mark-ballard',
+      // Волна 4g-2: персона Вайсман (сборник «Империя Полярис»)
+      'benedikt-vaysman',
       'fon-hanneman',
+      // Волна 4g-2: персона Пириэль (сборники «Империя Полярис»/«Протекторат»)
+      'elena-piriel',
       // Контент-волна: локации, битвы, топонимы-термины
       'velian',
       'blaund',
@@ -78,6 +84,10 @@ describe('world entries («Алфавит вселенной»)', () => {
       'bpr',
       'gurs',
       'prizrachnye-linii',
+      // Волна 4g-2: термины сборников фракций (слоты 62–64)
+      'tribunatory',
+      'oap',
+      'torgovyy-reyder',
     ]);
   });
 
@@ -167,6 +177,9 @@ describe('world entries («Алфавит вселенной»)', () => {
       'bpr',
       'gurs',
       'prizrachnye-linii',
+      'tribunatory',
+      'oap',
+      'torgovyy-reyder',
     ]);
     // Ключевые меты словаря: фракции и связки.
     expect(byslug['reksmarine']).toMatchObject({ kind: 'term', faction: 'polaris' });
@@ -177,6 +190,30 @@ describe('world entries («Алфавит вселенной»)', () => {
     expect(byslug['t5-garpun']!.related?.units).toBeUndefined();
     expect(byslug['bpr']!.related?.campaigns).toContain('liberator-zheleznyy-veter');
     expect(byslug['katafrakty']!.related?.campaigns).toContain('liberator-zheleznyy-veter');
+  });
+
+  it('волна 4g-2 (сборники фракций VK): Пояс Мрака, Вайсман, Пириэль и словарь', () => {
+    const byslug = Object.fromEntries(entries.map((e) => [e.slug, e]));
+    // Пояс Мрака — локация без фракции держав (сектор на окраине Империи),
+    // колыбель найтсталкеров.
+    expect(byslug['poyas-mraka']).toMatchObject({ kind: 'location' });
+    expect(byslug['poyas-mraka']!.faction).toBeUndefined();
+    expect(byslug['poyas-mraka']!.related?.units).toEqual(['mercenaries_naytstalkery']);
+    // Персоны волны: учёный Империи и советница Протектората.
+    expect(byslug['benedikt-vaysman']).toMatchObject({ kind: 'person', faction: 'polaris' });
+    expect(byslug['benedikt-vaysman']!.related?.units).toContain('polaris_lineynaya_klon_pehota');
+    expect(byslug['elena-piriel']).toMatchObject({ kind: 'person', faction: 'protectorate' });
+    expect(byslug['elena-piriel']!.related?.units).toEqual(['protectorate_piriel']);
+    expect(byslug['elena-piriel']!.related?.campaigns).toContain('shturm-velyana');
+    // Термины сборников: трибунаторы (Империя), ОАП (Протекторат),
+    // торговый рейдер — орудие обеих держав Рейдовых войн.
+    expect(byslug['tribunatory']).toMatchObject({ kind: 'term', faction: 'polaris' });
+    expect(byslug['tribunatory']!.related?.campaigns).toContain('operatsii-tso');
+    expect(byslug['oap']).toMatchObject({ kind: 'term', faction: 'protectorate' });
+    expect(byslug['torgovyy-reyder']).toMatchObject({ kind: 'term' });
+    expect(byslug['torgovyy-reyder']!.faction).toBeUndefined();
+    expect(byslug['torgovyy-reyder']!.related?.factions).toEqual(['polaris', 'protectorate']);
+    expect(byslug['torgovyy-reyder']!.related?.campaigns).toContain('teklius');
   });
 
   it('related.units ссылаются на реальные юниты энциклопедии', () => {
@@ -322,19 +359,22 @@ describe('world entries («Алфавит вселенной»)', () => {
 
   it('сортировка: order, затем алфавит по title (ru locale)', () => {
     // Все партии пронумерованы уникальными order — порядок стабилен:
-    // 1–6 первая партия, 10–16 и 18 персоны волны (18 — фон Ханнеман, фаза 4f),
+    // 1–6 первая партия, 7 Пояс Мрака (4g-2), 10–16 и 18 персоны волны
+    // (18 — фон Ханнеман, фаза 4f), 17 Вайсман и 19 Пириэль (4g-2),
     // 20–29 локации/битвы/термины-места (29 — Кейта, фаза 4g),
     // 30–32 термины волны, 33–39 военный словарь 4g,
     // 40–57 корабли флотов (Империя 40–47, Протекторат 48–57),
-    // 58–61 волна 4g: «Тортурадор» (58) + хвост словаря (59–61, после кораблей).
+    // 58–61 волна 4g: «Тортурадор» (58) + хвост словаря (59–61, после кораблей),
+    // 62–64 термины сборников фракций (4g-2).
     expect(entries.map((e) => e.order)).toEqual([
-      1, 2, 3, 4, 5, 6,
-      10, 11, 12, 13, 14, 15, 16, 18,
+      1, 2, 3, 4, 5, 6, 7,
+      10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
       20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
       30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
       40, 41, 42, 43, 44, 45, 46, 47,
       48, 49, 50, 51, 52, 53, 54, 55, 56, 57,
       58, 59, 60, 61,
+      62, 63, 64,
     ]);
   });
 
