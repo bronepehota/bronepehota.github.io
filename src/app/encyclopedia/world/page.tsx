@@ -6,7 +6,7 @@ import { pageOpenGraph } from '@/lib/seo';
 
 const TITLE = 'Алфавит вселенной — Энциклопедия Бронепехоты';
 const DESCRIPTION =
-  'Персоны, локации, битвы и термины вселенной Бронепехоты (Робогир): лорд Кросс, лорд Эркхарт, Маркус Трёхглазый, Империя Полярис, Доминион, Гронт и другие сущности канона — с досье и связями с юнитами, фракциями и хрониками.';
+  'Персоны, локации, битвы, термины и корабли флотов вселенной Бронепехоты (Робогир): лорд Кросс, Империя Полярис, Доминион, линкор «Экзарх», носитель «Асгард», крейсер «Йорк» и другие сущности канона — с досье и связями с фракциями и хрониками.';
 
 /**
  * «Алфавит вселенной» — индекс сущностных страниц (/encyclopedia/world/[slug]).
@@ -26,12 +26,15 @@ export const metadata: Metadata = {
   }),
 };
 
-/** Плашка-гриф kind в списке — цветовая кодировка по разделу канона. */
+/** Плашка-гриф kind в списке — цветовая кодировка по разделу канона.
+ *  Корабли — светлый «стальной корпус» (sand): отличим и от бронзы персон,
+ *  и от ржавчины битв. */
 const KIND_BADGE: Record<WorldKind, string> = {
   person: 'border-military-amber/40 text-military-amber/90',
   location: 'border-military-steel/40 text-military-steel/80',
   battle: 'border-military-rust/50 text-military-rust/90',
   term: 'border-military-taupe/40 text-military-taupe/80',
+  ship: 'border-military-sand/40 text-military-sand/90',
 };
 
 export default function WorldIndexPage() {
@@ -70,7 +73,7 @@ export default function WorldIndexPage() {
             Алфавит вселенной
           </h1>
           <p className="max-w-[60ch] text-sm md:text-base text-military-taupe leading-relaxed">
-            {`Персоны, локации, битвы и термины канона — справочная картотека к «Истории вселенной». Каждая запись — досье со связями на юниты, фракции, главы и хроники войн.`}
+            {`Персоны, локации, битвы, термины и корабли флотов канона — справочная картотека к «Истории вселенной». Каждая запись — досье со связями на юниты, фракции, главы и хроники войн.`}
           </p>
           <p className="mt-4 font-ibm-mono text-[10px] text-military-steel/60">
             {`// ${Object.entries(byKind)

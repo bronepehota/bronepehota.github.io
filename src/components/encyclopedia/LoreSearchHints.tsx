@@ -11,8 +11,9 @@ interface LoreSearchHintsProps {
 
 /** Chip prefix per page kind — dossier-style mono labels (in braces because
  *  of the leading `//`, see react/jsx-no-comment-textnodes). World entity
- *  pages override this per entry via `label` (ПЕРСОНА/ЛОКАЦИЯ/БИТВА/ТЕРМИН —
- *  точнее, чем общий гриф «сущность»). */
+ *  pages override this per entry via `label` (ПЕРСОНА/ЛОКАЦИЯ/БИТВА/ТЕРМИН/
+ *  КОРАБЛЬ — точнее, чем общий гриф «сущность»; гриф берётся из
+ *  WORLD_KIND_LABELS в encyclopedia/page.tsx). */
 const KIND_PREFIX: Record<LorePageRef['kind'], string> = {
   chapter: '// ГЛАВА',
   campaign: '// ХРОНИКИ',

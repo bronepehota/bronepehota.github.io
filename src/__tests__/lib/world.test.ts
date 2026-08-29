@@ -10,8 +10,8 @@ import { getEncyclopediaUnit, getEncyclopediaFaction } from '@/lib/encyclopedia-
 describe('world entries («Алфавит вселенной»)', () => {
   const entries = getAllWorldEntries();
 
-  it('возвращает 25 записей (6 первой партии + 19 контент-волны)', () => {
-    expect(entries).toHaveLength(25);
+  it('возвращает 43 записи (6 первой партии + 19 контент-волны + 18 кораблей флотов)', () => {
+    expect(entries).toHaveLength(43);
     expect(entries.map((e) => e.slug)).toEqual([
       // Первая партия
       'lord-kross',
@@ -42,6 +42,26 @@ describe('world entries («Алфавит вселенной»)', () => {
       'klon-pehota',
       'protectorat-torgovyy',
       'bditelnyy-mir',
+      // Корабли флотов (справочники VK): Империя — 8
+      'ezarh',
+      'asgard',
+      'direvolf',
+      'suvorov',
+      'varyag',
+      'tayfun',
+      'molnienosnyy',
+      'mamba',
+      // Корабли флотов: Протекторат — 10
+      'york',
+      'altair',
+      'kovcheg',
+      'ares',
+      'temza',
+      'mstitel',
+      'archer',
+      'yarost',
+      'svobodnyy',
+      'proekt-22',
     ]);
   });
 
@@ -49,7 +69,7 @@ describe('world entries («Алфавит вселенной»)', () => {
     const invalid: string[] = [];
     for (const e of entries) {
       if (!isWorldKind(e.kind)) invalid.push(`${e.slug}: kind=${String(e.kind)}`);
-      if (!/^(ПЕРСОНА|ЛОКАЦИЯ|БИТВА|ТЕРМИН)$/.test(WORLD_KIND_LABELS[e.kind as keyof typeof WORLD_KIND_LABELS] ?? ''))
+      if (!/^(ПЕРСОНА|ЛОКАЦИЯ|БИТВА|ТЕРМИН|КОРАБЛЬ)$/.test(WORLD_KIND_LABELS[e.kind as keyof typeof WORLD_KIND_LABELS] ?? ''))
         invalid.push(`${e.slug}: label`);
       if (!e.title || e.title.length <= 2) invalid.push(`${e.slug}: title`);
     }
@@ -176,15 +196,72 @@ describe('world entries («Алфавит вселенной»)', () => {
     expect(invalid).toEqual([]);
   });
 
+  it('корабли флотов: 18 записей kind=ship, гриф КОРАБЛЬ, флот в related.factions, юнитов нет', () => {
+    const ships = entries.filter((e) => e.kind === 'ship');
+    expect(ships).toHaveLength(18);
+    expect(ships.map((e) => e.slug)).toEqual([
+      // Флот Империи Полярис (справочник «Основные корабли Империи»)
+      'ezarh',
+      'asgard',
+      'direvolf',
+      'suvorov',
+      'varyag',
+      'tayfun',
+      'molnienosnyy',
+      'mamba',
+      // Космический флот Протектората (справочник «Основные корабли Протектората»)
+      'york',
+      'altair',
+      'kovcheg',
+      'ares',
+      'temza',
+      'mstitel',
+      'archer',
+      'yarost',
+      'svobodnyy',
+      'proekt-22',
+    ]);
+    // Маппинг флотов: «Империя» → polaris (8), «Протекторат» → protectorate (10).
+    // Сами страницы фракциям не принадлежат (frontmatter faction не задаётся) —
+    // привязка только через related.factions.
+    const fleetOf = Object.fromEntries(ships.map((e) => [e.slug, e.related?.factions ?? []]));
+    for (const slug of [
+      'ezarh', 'asgard', 'direvolf', 'suvorov', 'varyag', 'tayfun', 'molnienosnyy', 'mamba',
+    ]) {
+      expect(fleetOf[slug]).toContain('polaris');
+      expect(fleetOf[slug]).not.toContain('protectorate');
+    }
+    for (const slug of [
+      'york', 'altair', 'kovcheg', 'ares', 'temza', 'mstitel', 'archer', 'yarost', 'svobodnyy', 'proekt-22',
+    ]) {
+      expect(fleetOf[slug]).toContain('protectorate');
+      expect(fleetOf[slug]).not.toContain('polaris');
+    }
+    // Корабли — НЕ юниты (решение владельца: играть нельзя) — related.units пуст.
+    // Главы/кампании корабли поимённо не упоминают (проверено грепом) — chapters/campaigns не заданы.
+    const invalid: string[] = [];
+    for (const e of ships) {
+      if (e.related?.units && e.related.units.length > 0) invalid.push(`${e.slug}: units`);
+      if (e.related?.chapters && e.related.chapters.length > 0) invalid.push(`${e.slug}: chapters`);
+      if (e.related?.campaigns && e.related.campaigns.length > 0) invalid.push(`${e.slug}: campaigns`);
+      if (e.faction) invalid.push(`${e.slug}: frontmatter faction`);
+      if (!e.subtitle || !e.subtitle.includes('·')) invalid.push(`${e.slug}: subtitle «класс · флот»`);
+      if (!WORLD_KIND_LABELS[e.kind] || WORLD_KIND_LABELS[e.kind] !== 'КОРАБЛЬ') invalid.push(`${e.slug}: label`);
+    }
+    expect(invalid).toEqual([]);
+  });
+
   it('сортировка: order, затем алфавит по title (ru locale)', () => {
-    // Обе партии пронумерованы уникальными order — порядок стабилен:
+    // Все партии пронумерованы уникальными order — порядок стабилен:
     // 1–6 первая партия, 10–16 персоны волны, 20–28 локации/битвы/термины-места,
-    // 30–32 термины волны.
+    // 30–32 термины волны, 40–57 корабли флотов (Империя 40–47, Протекторат 48–57).
     expect(entries.map((e) => e.order)).toEqual([
       1, 2, 3, 4, 5, 6,
       10, 11, 12, 13, 14, 15, 16,
       20, 21, 22, 23, 24, 25, 26, 27, 28,
       30, 31, 32,
+      40, 41, 42, 43, 44, 45, 46, 47,
+      48, 49, 50, 51, 52, 53, 54, 55, 56, 57,
     ]);
   });
 

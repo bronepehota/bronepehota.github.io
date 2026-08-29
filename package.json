@@ -16,7 +16,7 @@
     "test:ci": "jest --ci --coverage --maxWorkers=2",
     "test:e2e:ci": "playwright test",
     "type-check": "tsc --noEmit",
-    "check:copy-paste": "python3 tools/check_copy_paste.py --self-check && python3 tools/check_copy_paste.py --content 'src/content/history/*.md' --sources 'docs/lore-sources/robogear-stories/*.md' && python3 tools/check_copy_paste.py --content 'src/content/campaigns/*.md' --sources 'docs/lore-sources/v-chertischev/*.md'",
+    "check:copy-paste": "python3 tools/check_copy_paste.py --self-check && python3 tools/check_copy_paste.py --content 'src/content/history/*.md' --sources 'docs/lore-sources/robogear-stories/*.md' && python3 tools/check_copy_paste.py --content 'src/content/campaigns/*.md' --sources 'docs/lore-sources/v-chertischev/*.md' && python3 tools/check_copy_paste.py --content 'src/content/world/*.md' --sources 'docs/lore-sources/vk-starsys/*.md'",
     "validate": "npm run type-check && npm run lint && npm run test"
   },
   "dependencies": {
