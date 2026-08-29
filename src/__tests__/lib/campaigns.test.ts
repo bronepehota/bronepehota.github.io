@@ -26,6 +26,7 @@ describe('campaigns loader', () => {
       'shturm-velyana',
       'skrytyj-vrag',
       'korporativnye-voyny',
+      'pervaya-volna-gront-i-rum',
     ]);
   });
 
@@ -102,5 +103,29 @@ describe('campaigns loader', () => {
       expect(c.loreAuthor).toBeUndefined();
       expect(c.credit).toBeUndefined();
     }
+  });
+
+  it('включает кампанию «Первая волна: Гронт и Рун» — наборы «СтарСис» 2001, order 5', () => {
+    const all = getAllCampaigns();
+    const c = all.find((x) => x.slug === 'pervaya-volna-gront-i-rum');
+    expect(c).toBeDefined();
+    expect(c?.title).toBe('Первая волна: Гронт и Рун');
+    expect(c?.order).toBe(5);
+    expect(c?.era).toBe('4451');
+    expect(all[all.length - 1]?.slug).toBe('pervaya-volna-gront-i-rum');
+    expect(c?.factions).toEqual(expect.arrayContaining(['polaris', 'protectorate', 'snow_wolves']));
+    // Roster: клон-пехота вторжения + мидгаардские ульфхеднары.
+    expect(c?.units?.some((u) => u.id === 'polaris_lineynaya_klon_pehota')).toBe(true);
+    expect(c?.units?.some((u) => u.id === 'snow_wolves_ulfhednary')).toBe(true);
+  });
+
+  it('«Первая волна» несёт кредит наборов «СтарСис» — официальный «Технолог», без АВБ и без автора', () => {
+    const c = getAllCampaigns().find((x) => x.slug === 'pervaya-volna-gront-i-rum')!;
+    expect(c.loreAuthor).toBe('tehnolog');
+    expect(c.credit?.author).toBeUndefined();
+    expect(c.credit?.work).toBe(
+      'Наборы «СтарСис»: «Схватка на Гронте» и «Вторжение на Рун» (2001)'
+    );
+    expect(c.credit?.year).toBeUndefined();
   });
 });

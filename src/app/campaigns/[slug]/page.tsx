@@ -11,11 +11,15 @@ const FACTION_COLORS: Record<string, string> = {
   polaris: '#DC2626',
   protectorate: '#06b6d4',
   mercenaries: '#EAB308',
+  snow_wolves: '#2563eb',
+  // Unit-list dots are keyed by the id prefix (factionOf) — cover it too.
+  snow: '#2563eb',
 };
 const FACTION_LABELS: Record<string, string> = {
   polaris: 'ИМП',
   protectorate: 'ПРОТ',
   mercenaries: 'НАЁМ',
+  snow_wolves: 'ВОЛКИ',
 };
 const factionOf = (id: string) => id.split('_')[0];
 
