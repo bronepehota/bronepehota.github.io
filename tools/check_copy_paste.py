@@ -29,6 +29,12 @@
       --content 'src/content/history/*.md' \
       --sources 'docs/lore-sources/robogear-stories/*.md'
 
+  # 1b) Книги V.Chertischev (MD-архив) — тоже закоммичены, сверяем кампании
+  #     (эти два прогона и входят в `npm run check:copy-paste`):
+  python3 tools/check_copy_paste.py \
+      --content 'src/content/campaigns/*.md' \
+      --sources 'docs/lore-sources/v-chertischev/*.md'
+
   # 2) PDF-издания (~/Documents/BP и ~/Documents/pict) — прогнать через
   #    pdftotext и сверить (см. docs/ENCYCLOPEDIA_LORE_SOURCES.md, шпаргалка):
   pdftotext -layout ~/Documents/BP/LETOPIS_-_ZVEZDNYE_GEROI.pdf /tmp/letopis.txt
