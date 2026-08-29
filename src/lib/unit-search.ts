@@ -1,14 +1,18 @@
 import type { EncyclopediaUnit } from './encyclopedia-registry';
 import { factionDisplayNames } from './faction-colors';
 
-/** Lore page reference for search hints (chapters, campaigns, missions, unit lore). */
+/** Lore page reference for search hints (chapters, campaigns, missions, unit
+ *  lore, world entity pages). */
 export interface LorePageRef {
   title: string;
   href: string;
-  kind: 'chapter' | 'campaign' | 'mission' | 'unit-lore';
+  kind: 'chapter' | 'campaign' | 'mission' | 'unit-lore' | 'world';
   /** Pre-lowered plain-text body for search matching (build-time, ~1-2KB).
    *  Optional — pages without it match by title only, as before. */
   body?: string;
+  /** Override для чипа-грифа (иначе KIND_PREFIX по kind): записи «world» несут
+   *  свой гриф по сущности — '// ПЕРСОНА', '// ТЕРМИН', … */
+  label?: string;
 }
 
 /** Build-time: raw markdown / HTML text → compact lowercase search body.

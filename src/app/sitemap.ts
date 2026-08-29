@@ -3,6 +3,7 @@ import { getAllUnits } from '@/lib/encyclopedia-utils';
 import { getAllMissions } from '@/lib/missions-registry';
 import { getAllCampaigns } from '@/lib/campaigns';
 import { getAllHistoryChapters } from '@/lib/history';
+import { getAllWorldEntries } from '@/lib/world';
 import { absoluteUrl } from '@/lib/seo';
 
 type ChangeFreq = MetadataRoute.Sitemap[number]['changeFrequency'];
@@ -20,6 +21,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ]);
   // History chapters — frontmatter only (sync fs read, no markdown rendering).
   const chapters = getAllHistoryChapters();
+  // World entity pages («Алфавит вселенной») — frontmatter only too.
+  const worldEntries = getAllWorldEntries();
 
   const staticRoutes: Array<{ path: string; freq: ChangeFreq; priority: number }> = [
     { path: '/', freq: 'weekly', priority: 1.0 },
@@ -27,6 +30,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/encyclopedia/factions', freq: 'monthly', priority: 0.8 },
     { path: '/encyclopedia/missions', freq: 'monthly', priority: 0.8 },
     { path: '/encyclopedia/history', freq: 'monthly', priority: 0.8 },
+    { path: '/encyclopedia/world', freq: 'monthly', priority: 0.7 },
   ];
 
   return [
@@ -57,6 +61,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Article JSON-LD; anchor links #slug in a sitemap are ignored by crawlers).
     ...chapters.map((chapter) => ({
       url: absoluteUrl(`/encyclopedia/history/${chapter.slug}`),
+      changeFrequency: 'monthly' as ChangeFreq,
+      priority: 0.6,
+    })),
+    // Every world entity page — search entries for canon nouns (Лорд Кросс,
+    // Империя Полярис, Доминион…).
+    ...worldEntries.map((entry) => ({
+      url: absoluteUrl(`/encyclopedia/world/${entry.slug}`),
       changeFrequency: 'monthly' as ChangeFreq,
       priority: 0.6,
     })),

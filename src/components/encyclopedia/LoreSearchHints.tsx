@@ -10,12 +10,15 @@ interface LoreSearchHintsProps {
 }
 
 /** Chip prefix per page kind — dossier-style mono labels (in braces because
- *  of the leading `//`, see react/jsx-no-comment-textnodes). */
+ *  of the leading `//`, see react/jsx-no-comment-textnodes). World entity
+ *  pages override this per entry via `label` (ПЕРСОНА/ЛОКАЦИЯ/БИТВА/ТЕРМИН —
+ *  точнее, чем общий гриф «сущность»). */
 const KIND_PREFIX: Record<LorePageRef['kind'], string> = {
   chapter: '// ГЛАВА',
   campaign: '// ХРОНИКИ',
   mission: '// МИССИЯ',
   'unit-lore': '// ЛОР',
+  world: '// СУЩНОСТЬ',
 };
 
 /** Thin row of lore-page chips above the unit grid: chapters, campaigns,
@@ -35,7 +38,7 @@ export function LoreSearchHints({ matches }: LoreSearchHintsProps) {
           data-testid="lore-search-hint"
           className="inline-flex items-center gap-1.5 rounded-full border border-military-amber/40 bg-military-charcoal/60 px-3 py-1 font-ibm-mono text-[10px] uppercase tracking-wide text-military-amber/90 hover:border-military-amber transition-colors"
         >
-          <span className="text-military-rust/60">{KIND_PREFIX[p.kind]}</span>
+          <span className="text-military-rust/60">{p.label ?? KIND_PREFIX[p.kind]}</span>
           <span>{p.title}</span>
           <span>→</span>
         </Link>

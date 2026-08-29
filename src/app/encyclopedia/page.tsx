@@ -5,6 +5,7 @@ import { getAllCampaigns, getCampaignRaw } from '@/lib/campaigns';
 import { getAllMissions } from '@/lib/missions-registry';
 import { getUnitLoreRaw } from '@/lib/unit-lore';
 import { getEncyclopediaUnit } from '@/lib/encyclopedia-registry';
+import { getAllWorldEntries, getWorldEntryRaw, WORLD_KIND_LABELS } from '@/lib/world';
 import { toSearchBody, type LorePageRef } from '@/lib/unit-search';
 import EncyclopediaPageClient from '@/components/encyclopedia/EncyclopediaPage';
 import { pageOpenGraph } from '@/lib/seo';
@@ -75,6 +76,15 @@ export default async function EncyclopediaPage() {
         kind: 'unit-lore' as const,
         body: toSearchBody(getUnitLoreRaw(u.id) ?? ''),
       })),
+    // World entity pages («Алфавит вселенной») — подсказки несут гриф по kind
+    // сущности (ПЕРСОНА/ЛОКАЦИЯ/БИТВА/ТЕРМИН) вместо общего «// СУЩНОСТЬ».
+    ...getAllWorldEntries().map((e) => ({
+      title: e.title,
+      href: `/encyclopedia/world/${e.slug}`,
+      kind: 'world' as const,
+      label: `// ${WORLD_KIND_LABELS[e.kind]}`,
+      body: toSearchBody(getWorldEntryRaw(e.slug) ?? ''),
+    })),
   ];
 
   return <EncyclopediaPageClient initialUnits={allUnits} lorePages={lorePages} />;

@@ -275,6 +275,15 @@ export default async function HistoryPage() {
                 </div>
               </li>
             </ol>
+            {/* Алфавит вселенной — сущностные страницы (персоны/локации/термины),
+                вход с Истории маленькой mono-строкой после блока войн */}
+            <Link
+              href="/encyclopedia/world"
+              data-testid="world-index-link"
+              className="block mt-3 pt-3 border-t border-military-steel/20 font-ibm-mono text-[10px] uppercase tracking-[0.2em] text-military-steel/60 hover:text-military-amber transition-colors"
+            >
+              {'// АЛФАВИТ ВСЕЛЕННОЙ →'}
+            </Link>
           </nav>
         </div>
 
