@@ -103,4 +103,68 @@ test.describe('История вселенной', () => {
     await expect(page).toHaveURL(/\/encyclopedia\/history\/liga-i-dominion$/);
     await expect(page.getByTestId('history-chapter-full')).toContainText('Лига и Доминион');
   });
+
+  // ——— Phase 2: витрина «ДЕЛО RG-4530» ———
+
+  test('обложка дела: реквизиты, цифры вселенной из данных и CTA «Читать с начала»', async ({
+    page,
+  }) => {
+    await page.goto('/encyclopedia/history');
+    await page.waitForLoadState('networkidle');
+
+    const cover = page.getByTestId('history-cover');
+    await expect(cover).toBeVisible();
+    await expect(cover).toContainText('ДЕЛО № RG-4530');
+    // Цифры считаются на билде: век 45 (год последней эры), 22 досье
+    await expect(page.getByTestId('history-stat-ВЕК')).toContainText('45');
+    await expect(page.getByTestId('history-stat-ДОСЬЕ')).toContainText('22');
+    await expect(page.getByTestId('history-reading-meta')).toContainText('ДОСЬЕ');
+
+    await page.getByTestId('history-read-cta').click();
+    await expect(page).toHaveURL(/#tungusskiy-artefakt$/);
+  });
+
+  test('лента эпох: тики-годы ведут к главам, «ВОЙНЫ» — к хроникам войн', async ({ page }) => {
+    await page.goto('/encyclopedia/history');
+    await page.waitForLoadState('networkidle');
+
+    const ribbon = page.getByTestId('history-era-ribbon');
+    await expect(ribbon).toBeVisible();
+    await expect(ribbon).toContainText('1908');
+    await ribbon.getByRole('link', { name: '4451' }).click();
+    await expect(page).toHaveURL(/#dve-sily$/);
+    await ribbon.getByRole('link', { name: 'ВОЙНЫ' }).click();
+    await expect(page).toHaveURL(/#wars$/);
+  });
+
+  test('кнопка ⧉ в оглавлении копирует ссылку-якорь главы', async ({ page }) => {
+    await page.goto('/encyclopedia/history');
+    await page.waitForLoadState('networkidle');
+    await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
+
+    const row = page.getByTestId('history-toc').locator('li', { hasText: 'Тунгусский артефакт' });
+    await row.getByTestId('toc-copy-link').click();
+    const copied = await page.evaluate(() => navigator.clipboard.readText());
+    expect(copied).toMatch(/\/encyclopedia\/history#tungusskiy-artefakt$/);
+  });
+
+  test('плавающая «▲ ОГЛАВЛЕНИЕ» появляется в глубине страницы и возвращает к индексу', async ({
+    page,
+  }) => {
+    await page.goto('/encyclopedia/history');
+    await page.waitForLoadState('networkidle');
+
+    // Вверху страницы кнопки нет — оглавление на экране
+    await expect(page.getByTestId('back-to-toc')).toHaveCount(0);
+
+    // Прыжок в глубину хроники — оглавление уходит вверх, кнопка появляется
+    await page.evaluate(() => document.getElementById('dve-sily')?.scrollIntoView());
+    await expect(page.getByTestId('back-to-toc')).toBeVisible();
+
+    await page.getByTestId('back-to-toc').click();
+    // Плавный скролл возвращает к оглавлению (scrollY меньше высоты обложки+TOC)
+    await expect
+      .poll(async () => page.evaluate(() => window.scrollY))
+      .toBeLessThan(2400);
+  });
 });

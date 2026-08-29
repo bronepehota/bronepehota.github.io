@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getAllHistoryChapters, getHistoryChapter, type HistoryChapter } from '@/lib/history';
 import { LoreSourceRow } from '@/components/encyclopedia/LoreSourceRow';
+import { ChapterBody } from '@/components/encyclopedia/history/ChapterBody';
 import JsonLd from '@/components/JsonLd';
 import {
   articleJsonLd,
@@ -73,8 +74,13 @@ export default async function HistoryChapterPage({ params }: PageProps) {
   const prev = index > 0 ? metas[index - 1] : undefined;
   const next = index >= 0 && index < metas.length - 1 ? metas[index + 1] : undefined;
   // Same numbering rule as the hub: chrono chapters get NN, grouped sections '//' —
-  // index in the order-sorted list (groups sort last, so numbering matches the TOC).
-  const number = chapter.group ? '//' : String(index + 1).padStart(2, '0');
+  // count only the chrono chapters up to this one (unified hub↔page counter).
+  let chrono = 0;
+  let chronoNumber: number | null = null;
+  for (let i = 0; i <= index; i++) {
+    if (!metas[i].group) chronoNumber = ++chrono;
+  }
+  if (chapter.group) chronoNumber = null;
   const description = chapterDescription(chapter);
 
   return (
@@ -106,21 +112,31 @@ export default async function HistoryChapterPage({ params }: PageProps) {
         </nav>
 
         {/* Same dossier layout as the chapter section on the hub (the title
-            becomes h1 here — on a standalone page the chapter IS the page). */}
-        <article data-testid="history-chapter-full" className="folded-paper military-corners p-6 mb-8">
-          <div className="flex items-baseline gap-3 mb-4">
-            <span className="font-ibm-mono text-xs text-military-rust">{number}</span>
-            <h1 className="font-oswald text-xl md:text-2xl text-military-sand">{chapter.title}</h1>
+            becomes h1 here — on a standalone page the chapter IS the page):
+            folder spine + uppercase title + the shared ChapterBody longread
+            typography (65ch, drop cap, «// NN.M» h3 counters). */}
+        <article
+          data-testid="history-chapter-full"
+          className="folded-paper military-corners relative pl-10 pr-5 py-6 mb-8"
+        >
+          <span aria-hidden className="history-spine">
+            {chapter.group ? '//' : String(chronoNumber).padStart(2, '0')}
+          </span>
+          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-3">
+            <h1 className="font-oswald text-xl md:text-2xl text-military-sand uppercase tracking-wide">
+              {chapter.title}
+            </h1>
+            {chapter.era && (
+              <span className="ml-auto font-ibm-mono text-[10px] uppercase tracking-wider text-military-steel/60 whitespace-nowrap">
+                {chapter.era}
+              </span>
+            )}
           </div>
-          {chapter.era && (
-            <p className="font-ibm-mono text-[10px] uppercase tracking-wider text-military-steel/50 mb-4">
-              {chapter.era}
-            </p>
-          )}
           {/* Chapter body — build-time sanitized HTML (campaigns pipeline). */}
-          <div
-            className="prose-invert text-military-sand/80 leading-relaxed space-y-4 text-sm md:text-base [&_h3]:font-oswald [&_h3]:text-military-sand"
-            dangerouslySetInnerHTML={{ __html: chapter.bodyHtml }}
+          <ChapterBody
+            html={chapter.bodyHtml}
+            chapterNumber={chronoNumber}
+            chronicle={!chapter.group}
           />
           {/* Per-chapter attribution (audit legal checklist: the credit chip must
               live on EVERY chapter page, not only in the hub TOC). */}

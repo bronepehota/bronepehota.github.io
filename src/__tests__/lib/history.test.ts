@@ -1,4 +1,9 @@
-import { getAllHistoryChapters } from '@/lib/history';
+import {
+  buildHistoryFlow,
+  estimateReadingMinutes,
+  getAllHistoryChapters,
+  historyCentury,
+} from '@/lib/history';
 
 describe('history chapters', () => {
   const chapters = getAllHistoryChapters();
@@ -90,5 +95,85 @@ describe('history chapters', () => {
     const mind = stories.find((s) => s.slug === 'mayndfaytery')!;
     expect(mind.credit?.work).toBe('Майндфайтеры');
     expect(mind.credit?.url).toBe('http://www.robogear.ru/skelet/6/story_16.php');
+  });
+});
+
+describe('«ДЕЛО RG-4530» showcase helpers (Phase 2)', () => {
+  const chapters = getAllHistoryChapters();
+
+  it('historyCentury: век последней эры — 45 (главы дают 4530, войны продлевают до 4546)', () => {
+    expect(historyCentury(chapters)).toBe(45);
+    expect(historyCentury(chapters, '4451–4546')).toBe(45);
+  });
+
+  it('buildHistoryFlow: лента эпох = 6 лет + СПРАВОЧНИК + ФОНД ПИСАТЕЛЬСТВ + ВОЙНЫ', () => {
+    const flow = buildHistoryFlow(chapters);
+    expect(flow.ticks.map((t) => t.label)).toEqual([
+      '1908', '2398', '2437', '2862', '3001', '4451',
+      'СПРАВОЧНИК', 'ФОНД ПИСАТЕЛЬСТВ', 'ВОЙНЫ',
+    ]);
+    // Era ticks jump straight to the era-opening chapter anchors
+    expect(flow.ticks[0]).toMatchObject({ href: '#tungusskiy-artefakt', kind: 'era' });
+    expect(flow.ticks[5]).toMatchObject({ href: '#dve-sily', kind: 'era' });
+    // Group ticks jump to their in-flow divider anchors
+    const refZone = flow.zones.find((z) => z.divider.stamp === 'СПРАВОЧНИК')!;
+    expect(flow.ticks[6].kind).toBe('group');
+    expect(flow.ticks[6].href).toBe(`#${refZone.divider.anchorId}`);
+    expect(flow.ticks[7].kind).toBe('group');
+    expect(flow.ticks[8]).toMatchObject({ href: '#wars', kind: 'wars' });
+    expect(flow.warsZoneIndex).toBe(8);
+  });
+
+  it('buildHistoryFlow: зоны непрерывно покрывают все 22 главы + замыкающая зона войн', () => {
+    const flow = buildHistoryFlow(chapters);
+    // 6 эр + 2 групповые + войн; главы 08–11 (без эры) наследуют зону 4451
+    expect(flow.zones.map((z) => z.slugs)).toEqual([
+      ['tungusskiy-artefakt'],
+      ['setka-mayakov'],
+      ['velikaya-expansiya', 'razvedkorpus'],
+      ['propavshaya-zemlya'],
+      ['liga-i-dominion'],
+      [
+        'dve-sily', 'ekipirovka-pehoty-dominiona', 'konversiya-raskol-regentstvo',
+        'flot-epokhi-regentstva', 'legendarnye-imperskie-lordy',
+      ],
+      ['kosmografiya-dominiona', 'politicheskoe-ustroystvo', 'sravnenie-voennykh-struktur', 'polyaris-perevorot'],
+      ['krasnaya-yarost', 'seryy-leytenant', 'domashnyaya-voyna', 'general',
+        'istoriya-odnogo-soldata', 'put-voyna', 'mayndfaytery'],
+      [], // войн зона — оборачивает <CampaignsBlock>, не главы
+    ]);
+    // Каждая глава попала ровно в одну зону, порядок сохранён
+    const zipped = flow.zones.flatMap((z) => z.slugs);
+    expect(zipped).toEqual(chapters.map((c) => c.slug));
+    // Индексы тиков у зон уникальны и плотны (зона N ↔ тик N ленты 1:1)
+    expect(flow.zones.map((z) => z.tickIndex)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8]);
+  });
+
+  it('buildHistoryFlow: разделители — контурный год эры на стыках, групповые штампы', () => {
+    const flow = buildHistoryFlow(chapters);
+    // Первый разделитель двойной: контурный 1908 + штамп ХРОНИКА (группа без своей зоны)
+    expect(flow.zones[0].divider).toMatchObject({ stamp: 'ХРОНИКА', outline: '1908' });
+    expect(flow.zones[1].divider).toMatchObject({ outline: '2398' });
+    expect(flow.zones[2].divider).toMatchObject({ outline: '2437' });
+    expect(flow.zones[3].divider).toMatchObject({ outline: '2862' });
+    expect(flow.zones[4].divider).toMatchObject({ outline: '3001' });
+    expect(flow.zones[5].divider).toMatchObject({ stamp: 'ЭПОХА 4451–4530', outline: '4451' });
+    expect(flow.zones[6].divider).toMatchObject({
+      stamp: 'СПРАВОЧНИК', outline: '§', anchorId: 'history-anchor-6',
+    });
+    expect(flow.zones[7].divider).toMatchObject({
+      stamp: 'ФОНД ПИСАТЕЛЬСТВ', outline: '//', sub: '// Творчество игроков',
+      anchorId: 'history-anchor-7',
+    });
+    expect(flow.zones[8].divider).toMatchObject({ stamp: 'ВОЙНЫ', outline: '†' });
+    // Штампы эр (кроме первого ХРОНИКА) повторяют era-строку главы
+    expect(flow.zones[2].divider.stamp).toBe('ЭПОХА 2437–2862');
+  });
+
+  it('estimateReadingMinutes: ~160 слов в минуту, HTML-теги не считаются', () => {
+    const words = '<p>слово</p>'.repeat(1600).replace(/<[^>]*>/g, ' ').split(/\s+/).filter(Boolean);
+    const html = words.join(' ');
+    expect(estimateReadingMinutes([html])).toBe(10);
+    expect(estimateReadingMinutes(['<h3>заголовок</h3> без слов'])).toBe(1);
   });
 });
