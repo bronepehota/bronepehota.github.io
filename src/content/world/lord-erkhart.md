@@ -3,7 +3,7 @@ slug: lord-erkhart
 title: Лорд Эркхарт
 kind: person
 subtitle: Стилклау, адмирал Флота Мертвых
-era: "4478–4530"
+era: "4495–4530"
 faction: polaris
 order: 2
 related:
