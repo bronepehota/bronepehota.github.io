@@ -107,6 +107,22 @@ describe('фракции с массивом кредитов (лор собра
     expect(Array.isArray(f.provenance?.credit)).toBe(false);
     expect(creditList(f.provenance?.credit).map((c) => c.work)).toEqual(['Косары']);
   });
+
+  it('snow_wolves несёт кредит наборов «СтарСис» 2001 — tehnolog, без АВБ (концепт остаётся Звёздных Систем)', () => {
+    const f = getFactions().find((x) => x.id === 'snow_wolves')!;
+    const resolved = resolveFactionProvenance(f);
+    // Официальное издание «Технолога»: кредит-чип без мини-АВБ (loreAuthor=tehnolog),
+    // но полный АВБ-бейдж фракции сохраняется — концепт/minis от Звёздных Систем.
+    expect(`${f.id}: loreAuthor=${resolved.loreAuthor}`).toBe(`${f.id}: loreAuthor=tehnolog`);
+    expect(resolved.origin).toBe('universestarsys');
+    const works = creditList(f.provenance?.credit).map((c) => c.work);
+    expect(works).toContain(
+      'Наборы «СтарСис»: «Схватка на Гронте» и «Вторжение на Рун» (2001)'
+    );
+    for (const cr of creditList(f.provenance?.credit)) {
+      expect(cr.author).toBeUndefined(); // авторы повестей не установлены — паттерн «Летописи»
+    }
+  });
 });
 
 describe('главы Истории: мини-АВБ ровно на не-Технолог текстах', () => {
