@@ -22,6 +22,12 @@ describe('htmlToPlainText', () => {
   it('leaves unknown entities as separators', () => {
     expect(htmlToPlainText('x&unknownentity;y')).toBe('x y');
   });
+
+  it('does not throw on out-of-range numeric entities (> 0x10FFFF)', () => {
+    // String.fromCodePoint(9999999999) would throw RangeError — replaced with a space
+    expect(() => htmlToPlainText('a&#9999999999;b')).not.toThrow();
+    expect(htmlToPlainText('a&#9999999999;b')).toBe('a b');
+  });
 });
 
 describe('metaDescription', () => {

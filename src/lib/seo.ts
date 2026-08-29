@@ -155,7 +155,11 @@ export function htmlToPlainText(html: string): string {
         const code = isHex
           ? parseInt(entity.slice(2), 16)
           : parseInt(entity.slice(1), 10);
-        return Number.isFinite(code) ? String.fromCodePoint(code) : match;
+        // Number.isFinite is not enough: String.fromCodePoint throws RangeError
+        // on code points beyond Unicode's 0x10FFFF — replace those with a space
+        // (collapsed by the whitespace pass below). Codes are non-negative by
+        // the regex construction (digits only).
+        return code <= 0x10ffff ? String.fromCodePoint(code) : ' ';
       }
       return HTML_ENTITIES[entity] ?? ' ';
     })

@@ -77,4 +77,30 @@ test.describe('История вселенной', () => {
     await expect(story.getByTestId('lore-source-row')).toContainText('Rasher');
     await expect(story.getByTestId('credit-avb-mark')).toBeVisible();
   });
+
+  test('отдельная страница главы: пермалинк с хаба и prev/next', async ({ page }) => {
+    // Хаб → пермалинк «Двух сил»
+    await page.goto('/encyclopedia/history');
+    await page.waitForLoadState('networkidle');
+    const dveSily = page.locator('[data-testid="history-chapter"]', { hasText: 'Две силы' });
+    await dveSily.getByTestId('chapter-permalink').click();
+    await expect(page).toHaveURL(/\/encyclopedia\/history\/dve-sily$/);
+    await expect(page.getByTestId('history-chapter-full')).toBeVisible();
+    await expect(page.getByTestId('history-chapter-full')).toContainText('Две силы');
+    // Title страницы собирается из generateMetadata — содержит название главы
+    await expect(page).toHaveTitle(/Две силы/);
+
+    // prev/next идут по order (frontmatter): у «Двух сил» (order 7) сосед слева —
+    // «Лига и Доминион» (order 6), справа — «Пехота Доминиона» (order 8)
+    await page.getByTestId('history-chapter-next').click();
+    await expect(page).toHaveURL(/\/encyclopedia\/history\/ekipirovka-pehoty-dominiona$/);
+    await expect(page.getByTestId('history-chapter-full')).toContainText('Пехота Доминиона');
+
+    await page.goBack();
+    await expect(page).toHaveURL(/\/encyclopedia\/history\/dve-sily$/);
+
+    await page.getByTestId('history-chapter-prev').click();
+    await expect(page).toHaveURL(/\/encyclopedia\/history\/liga-i-dominion$/);
+    await expect(page.getByTestId('history-chapter-full')).toContainText('Лига и Доминион');
+  });
 });
