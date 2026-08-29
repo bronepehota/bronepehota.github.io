@@ -21,13 +21,19 @@ describe('campaigns loader', () => {
   it('sorts campaigns by order', () => {
     const all = getAllCampaigns();
     // Order-based, not era-based: mostly chronological, but the 4451 Первая
-    // волна (order 5) closes the list.
+    // волна (order 5) closes the pre-existing block; the 4d wave (orders
+    // 6–10) appends Блауд, Полярис, Мидгаард, Теклиус и Косары.
     expect(all.map((c) => c.slug)).toEqual([
       'imperatorskie-voyny',
       'shturm-velyana',
       'skrytyj-vrag',
       'korporativnye-voyny',
       'pervaya-volna-gront-i-rum',
+      'oborona-blauda',
+      'myatezh-na-polyarise',
+      'padenie-midgaarda',
+      'teklius',
+      'voyny-kosarey',
     ]);
   });
 
@@ -113,7 +119,7 @@ describe('campaigns loader', () => {
     expect(c?.title).toBe('Первая волна: Гронт и Рун');
     expect(c?.order).toBe(5);
     expect(c?.era).toBe('4451');
-    expect(all[all.length - 1]?.slug).toBe('pervaya-volna-gront-i-rum');
+    expect(all[all.length - 1]?.slug).toBe('voyny-kosarey');
     expect(c?.factions).toEqual(expect.arrayContaining(['polaris', 'protectorate', 'snow_wolves']));
     // Roster: клон-пехота вторжения + мидгаардские ульфхеднары.
     expect(c?.units?.some((u) => u.id === 'polaris_lineynaya_klon_pehota')).toBe(true);
@@ -129,14 +135,106 @@ describe('campaigns loader', () => {
     );
     expect(c.credit?.year).toBeUndefined();
   });
+
+  it('включает «Оборону Блауда» — святыня Хорана, эра Второй волны, order 6', () => {
+    const all = getAllCampaigns();
+    const c = all.find((x) => x.slug === 'oborona-blauda');
+    expect(c).toBeDefined();
+    expect(c?.title).toBe('Оборона Блауда');
+    expect(c?.order).toBe(6);
+    expect(c?.era).toBe('4478–4495');
+    expect(c?.factions).toEqual(['polaris', 'protectorate']);
+    // Hurricane is the canonical Блауд defender tank (existing lore).
+    expect(c?.units?.some((u) => u.id === 'hurricane')).toBe(true);
+    expect(c?.units?.some((u) => u.id === 'werewolf')).toBe(true);
+    expect(c?.missions?.length).toBe(2);
+    // Летопись credit — официальный «Технолог», без автора, без АВБ.
+    expect(c?.loreAuthor).toBe('tehnolog');
+    expect(c?.credit?.work).toBe('Летопись: Звёздные герои');
+    expect(c?.credit?.author).toBeUndefined();
+  });
+
+  it('включает «Мятеж на Полярисе» — переворот 4451-го, order 7', () => {
+    const all = getAllCampaigns();
+    const c = all.find((x) => x.slug === 'myatezh-na-polyarise');
+    expect(c).toBeDefined();
+    expect(c?.title).toBe('Мятеж на Полярисе');
+    expect(c?.order).toBe(7);
+    expect(c?.era).toBe('4451–4461');
+    expect(c?.factions).toEqual(['polaris']);
+    // The Долгорукий roster: the hero himself + his three unit types.
+    expect(c?.units?.some((u) => u.id === 'polaris_dolgorukiy')).toBe(true);
+    expect(c?.units?.some((u) => u.id === 'polaris_regulyarnaya_pehota_dolgorukogo')).toBe(true);
+    expect(c?.units?.some((u) => u.id === 'polaris_shturmovaya_pehota_dolgorukogo')).toBe(true);
+    expect(c?.units?.some((u) => u.id === 'polaris_inzhenernyy_otryad_dolgorukogo')).toBe(true);
+    expect(c?.missions?.length).toBe(2);
+    expect(c?.loreAuthor).toBe('tehnolog');
+    expect(c?.credit?.work).toBe('Летопись: Звёздные герои');
+  });
+
+  it('включает «Падение Мидгаарда» — канун Вторжения, order 8, кредит наборов «СтарСис»', () => {
+    const all = getAllCampaigns();
+    const c = all.find((x) => x.slug === 'padenie-midgaarda');
+    expect(c).toBeDefined();
+    expect(c?.title).toBe('Падение Мидгаарда');
+    expect(c?.order).toBe(8);
+    expect(c?.era).toBe('4449–4451');
+    expect(c?.factions).toEqual(['polaris', 'snow_wolves']);
+    expect(c?.units?.some((u) => u.id === 'snow_wolves_ulfhednary')).toBe(true);
+    expect(c?.units?.some((u) => u.id === 'raptor')).toBe(true);
+    expect(c?.missions?.length).toBe(2);
+    expect(c?.loreAuthor).toBe('tehnolog');
+    expect(c?.credit?.work).toBe(
+      'Наборы «СтарСис»: «Схватка на Гронте» и «Вторжение на Рун» (2001)'
+    );
+  });
+
+  it('включает «Сражение за Теклиус» — реванш после Бдительного Мира, order 9', () => {
+    const all = getAllCampaigns();
+    const c = all.find((x) => x.slug === 'teklius');
+    expect(c).toBeDefined();
+    expect(c?.title).toBe('Сражение за Теклиус');
+    expect(c?.order).toBe(9);
+    expect(c?.era).toBe('4540');
+    expect(c?.factions).toEqual(['protectorate', 'polaris']);
+    // Ти-Рэкс и Супер Локуст несут имя Теклиуса в собственном лоре юнитов.
+    expect(c?.units?.some((u) => u.id === 'trex')).toBe(true);
+    expect(c?.units?.some((u) => u.id === 'superlocust')).toBe(true);
+    expect(c?.units?.some((u) => u.id === 'polaris_ledi_agata')).toBe(true);
+    expect(c?.units?.some((u) => u.id === 'protectorate_piriel')).toBe(true);
+    expect(c?.units?.some((u) => u.id === 'protectorate_zheleznyy_general')).toBe(true);
+    expect(c?.missions?.length).toBe(2);
+    expect(c?.loreAuthor).toBe('tehnolog');
+    expect(c?.credit?.work).toBe('Летопись: Звёздные герои');
+  });
+
+  it('включает «Войны Косарей» — Доимперские конфликты, order 10, кредит книги V.Chertischev', () => {
+    const all = getAllCampaigns();
+    const c = all.find((x) => x.slug === 'voyny-kosarey');
+    expect(c).toBeDefined();
+    expect(c?.title).toBe('Войны Косарей');
+    expect(c?.order).toBe(10);
+    expect(c?.era).toBe('4360–4451');
+    expect(c?.factions).toEqual(['mercenaries', 'protectorate']);
+    expect(c?.units?.some((u) => u.id === 'mercenaries_kosari')).toBe(true);
+    expect(c?.units?.some((u) => u.id === 'mercenaries_piraty_tortugi')).toBe(true);
+    expect(c?.units?.some((u) => u.id === 'polaris_markus_trehglazyy')).toBe(true);
+    expect(c?.missions?.length).toBe(2);
+    // Роман-справочник V.Chertischev — независимый автор → мини-АВБ.
+    expect(c?.loreAuthor).toBe('avb');
+    expect(c?.credit?.author).toBe('V.Chertischev');
+    expect(c?.credit?.work).toBe('Косары');
+  });
 });
 
 describe('warsEraSpan — эпоха всего блока «Хроники войн»', () => {
-  it('текущие 5 кампаний → «4451–4546» (min–max по всем годам всех кампаний)', () => {
+  it('текущие 10 кампаний → «4360–4546» (min–max по всем годам всех кампаний)', () => {
     // Порядок по `order`: Имперские войны (4451–4528), Штурм Велиана (4527–4528),
-    // Скрытый враг (4537), Корпоративные войны (4546), Первая волна (4451!).
+    // Скрытый враг (4537), Корпоративные войны (4546), Первая волна (4451!),
+    // + волна 4d: Блауд (4478–4495), Полярис (4451–4461), Мидгаард (4449–4451),
+    // Теклиус (4540), Косары (4360–4451 — нижняя граница всего блока).
     // Порядковый first/last давал «4451–4451» — регрессия этого кейса.
-    expect(warsEraSpan(getAllCampaigns())).toBe('4451–4546');
+    expect(warsEraSpan(getAllCampaigns())).toBe('4360–4546');
   });
 
   it('кампания без эры пропускается', () => {
