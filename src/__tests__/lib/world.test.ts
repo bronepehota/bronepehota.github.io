@@ -10,8 +10,8 @@ import { getEncyclopediaUnit, getEncyclopediaFaction } from '@/lib/encyclopedia-
 describe('world entries («Алфавит вселенной»)', () => {
   const entries = getAllWorldEntries();
 
-  it('возвращает 66 записей (6 первой партии + 20 контент-волны + 18 кораблей флотов + 12 волны 4g + 6 волны 4g-2 + 4 волны 4h)', () => {
-    expect(entries).toHaveLength(66);
+  it('возвращает 72 записи (6 первой партии + 20 контент-волны + 18 кораблей флотов + 12 волны 4g + 6 волны 4g-2 + 4 волны 4h + 6 волны 4j)', () => {
+    expect(entries).toHaveLength(72);
     expect(entries.map((e) => e.slug)).toEqual([
       // Первая партия
       'lord-kross',
@@ -94,6 +94,13 @@ describe('world entries («Алфавит вселенной»)', () => {
       'orden-krovi',
       'orden-pobeditelya',
       'nagradnaya-sistema-protectorata',
+      // Волна 4j: статьи клуба «ЭПОХА РОБОГИР» (слоты 68–73)
+      'periferiya',
+      'novofrankskaya-konfederaciya',
+      'chintayskaya-nebesnaya-imperiya',
+      'doktrina-imperatora',
+      'giperprostranstvo',
+      'era-sverhchelovechestva',
     ]);
   });
 
@@ -189,6 +196,11 @@ describe('world entries («Алфавит вселенной»)', () => {
       'orden-krovi',
       'orden-pobeditelya',
       'nagradnaya-sistema-protectorata',
+      'novofrankskaya-konfederaciya',
+      'chintayskaya-nebesnaya-imperiya',
+      'doktrina-imperatora',
+      'giperprostranstvo',
+      'era-sverhchelovechestva',
     ]);
     // Ключевые меты словаря: фракции и связки.
     expect(byslug['reksmarine']).toMatchObject({ kind: 'term', faction: 'polaris' });
@@ -242,6 +254,38 @@ describe('world entries («Алфавит вселенной»)', () => {
       faction: 'protectorate',
     });
     expect(byslug['nagradnaya-sistema-protectorata']!.related?.campaigns).toContain('oborona-blauda');
+  });
+
+  it('волна 4j (статьи клуба «ЭПОХА РОБОГИР»): Периферия, Конфедерация, Империи и термины', () => {
+    const byslug = Object.fromEntries(entries.map((e) => [e.slug, e]));
+    // Периферия — локация без фракции держав: Содружество, Гильдия, Маршалы.
+    expect(byslug['periferiya']).toMatchObject({ kind: 'location' });
+    expect(byslug['periferiya']!.faction).toBeUndefined();
+    expect(byslug['periferiya']!.related?.units).toEqual(
+      expect.arrayContaining(['mercenaries_reydery_pylnoy_zony', 'mercenaries_naytstalkery']),
+    );
+    expect(byslug['periferiya']!.related?.campaigns).toContain('voyny-pylnoy-zony');
+    // Новофранкская Конфедерация — третья держава в Договоре; связки с ЦСО/Теклиусом
+    // и танкетками Ле-Карна.
+    expect(byslug['novofrankskaya-konfederaciya']).toMatchObject({
+      kind: 'term',
+      faction: 'protectorate',
+    });
+    expect(byslug['novofrankskaya-konfederaciya']!.related?.units).toEqual(['viper', 'salamander']);
+    expect(byslug['novofrankskaya-konfederaciya']!.related?.campaigns).toContain('operatsii-tso');
+    expect(byslug['novofrankskaya-konfederaciya']!.related?.campaigns).toContain('teklius');
+    // Чинтайская Небесная Империя — держава вне блоков: без фракции и связок.
+    expect(byslug['chintayskaya-nebesnaya-imperiya']).toMatchObject({ kind: 'term' });
+    expect(byslug['chintayskaya-nebesnaya-imperiya']!.faction).toBeUndefined();
+    // Доктрина Императора — идеология Поляриса.
+    expect(byslug['doktrina-imperatora']).toMatchObject({ kind: 'term', faction: 'polaris' });
+    expect(byslug['doktrina-imperatora']!.related?.factions).toEqual(['polaris']);
+    // Гиперпространство — от Тунгусского артефакта до сети маяков.
+    expect(byslug['giperprostranstvo']).toMatchObject({ kind: 'term' });
+    expect(byslug['giperprostranstvo']!.related?.chapters).toContain('tungusskiy-artefakt');
+    // Эра Сверхчеловечества — ранняя легенда сообщества, до-Экспансионная эра.
+    expect(byslug['era-sverhchelovechestva']).toMatchObject({ kind: 'term' });
+    expect(byslug['era-sverhchelovechestva']!.related?.chapters).toContain('propavshaya-zemlya');
   });
 
   it('related.units ссылаются на реальные юниты энциклопедии', () => {
@@ -394,7 +438,8 @@ describe('world entries («Алфавит вселенной»)', () => {
     // 30–32 термины волны, 33–39 военный словарь 4g,
     // 40–57 корабли флотов (Империя 40–47, Протекторат 48–57),
     // 58–61 волна 4g: «Тортурадор» (58) + хвост словаря (59–61, после кораблей),
-    // 62–64 термины сборников фракций (4g-2), 65–67 ордена держав (4h).
+    // 62–64 термины сборников фракций (4g-2), 65–67 ордена держав (4h),
+    // 68–73 волна 4j: статьи клуба «ЭПОХА РОБОГИР».
     expect(entries.map((e) => e.order)).toEqual([
       1, 2, 3, 4, 5, 6, 7, 8,
       10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
@@ -405,6 +450,7 @@ describe('world entries («Алфавит вселенной»)', () => {
       58, 59, 60, 61,
       62, 63, 64,
       65, 66, 67,
+      68, 69, 70, 71, 72, 73,
     ]);
   });
 

@@ -14,9 +14,9 @@ import {
 const catalog = getSourcesCatalog();
 
 describe('sources-catalog: структура записей', () => {
-  it('в каталоге 23 произведения (16 из реестра + 7 рассказов игроков)', () => {
-    expect(catalog).toHaveLength(23);
-    expect(catalog.filter((e) => e.kind === 'story')).toHaveLength(7);
+  it('в каталоге 26 произведений (17 из реестра + 7 рассказов игроков + 2 рассказа клуба)', () => {
+    expect(catalog).toHaveLength(26);
+    expect(catalog.filter((e) => e.kind === 'story')).toHaveLength(9);
   });
 
   it('id уникальны, slug-формат', () => {
@@ -29,7 +29,8 @@ describe('sources-catalog: структура записей', () => {
     const sectionIds = new Set(SOURCES_CATALOG_SECTIONS.map((s) => s.id));
     const kinds = Object.keys(KIND_STAMPS);
     for (const e of catalog) {
-      expect(`${e.id}: ${e.title.length > 3 ? 'title ok' : 'КОРОТКО'}`).toBe(`${e.id}: title ok`);
+      // «Мяу» (волна 4j) — легитимный короткий титул: порог 3 символа.
+      expect(`${e.id}: ${e.title.length >= 3 ? 'title ok' : 'КОРОТКО'}`).toBe(`${e.id}: title ok`);
       expect(kinds).toContain(e.kind);
       expect(sectionIds.has(e.section)).toBe(true);
       // Описание — сжатая сводка, 2–4 предложения (допуск до 6 у рассказов)
@@ -54,9 +55,13 @@ describe('sources-catalog: структура записей', () => {
 
 describe('sources-catalog: рассказы игроков', () => {
   const stories = catalog.filter((e) => e.kind === 'story');
+  // Волна 4j: в секции vk появились два рассказа клуба «ЭПОХА РОБОГИР»
+  // («Мяу» — без подписи, «Выбор» — Юрык Данец-Вашэцькаў); договоры
+  // robogear.ru касаются только секции players.
+  const playerStories = stories.filter((e) => e.section === 'players');
 
-  it('у каждого рассказа есть author и url на robogear.ru', () => {
-    for (const s of stories) {
+  it('у каждого рассказа игроков есть author и url на robogear.ru', () => {
+    for (const s of playerStories) {
       expect(`${s.id}: ${s.author ?? 'БЕЗ АВТОРА'}`).toBe(`${s.id}: ${s.author}`);
       expect((s.author ?? '').length).toBeGreaterThan(2);
       expect(s.url).toMatch(/^http:\/\/www\.robogear\.ru\/skelet\/6\/story_\d+\.php$/);
@@ -64,17 +69,25 @@ describe('sources-catalog: рассказы игроков', () => {
   });
 
   it('семь рассказов «Клуба Robogear» — известные авторы и работы', () => {
-    expect(stories.map((s) => s.id)).toEqual([
+    expect(playerStories.map((s) => s.id)).toEqual([
       'krasnaya-yarost', 'seryy-leytenant', 'domashnyaya-voyna', 'general',
       'istoriya-odnogo-soldata', 'put-voyna', 'mayndfaytery',
     ]);
-    const authors = new Set(stories.map((s) => s.author));
+    const authors = new Set(playerStories.map((s) => s.author));
     for (const a of ['Rasher', 'Ervin', 'Chebur', 'Анатолий', 'Найтрос']) {
       expect(authors.has(a)).toBe(true);
     }
     // Майндфайтеры: три части рассказа — одна запись, url на первую страницу
-    const mind = stories.find((s) => s.id === 'mayndfaytery')!;
+    const mind = playerStories.find((s) => s.id === 'mayndfaytery')!;
     expect(mind.url).toBe('http://www.robogear.ru/skelet/6/story_16.php');
+  });
+
+  it('рассказы клуба «ЭПОХА РОБОГИР» — vk.ru url; «Мяу» без автора, «Выбор» подписан', () => {
+    const club = stories.filter((e) => e.section === 'vk');
+    expect(club.map((s) => s.id)).toEqual(['myau', 'vybor']);
+    for (const s of club) expect(s.url).toMatch(/^https:\/\/vk\.ru\/@age_of_robogear-/);
+    expect(club.find((s) => s.id === 'myau')?.author).toBeUndefined();
+    expect(club.find((s) => s.id === 'vybor')?.author).toBe('Юрык Данец-Вашэцькаў');
   });
 
   it('сводки рассказов сообщают и сюжет, и вклад во вселенную (3–5 предложений)', () => {
@@ -92,7 +105,8 @@ describe('sources-catalog: секции страницы /encyclopedia/sources',
     expect(grouped.map((g) => g.section.id)).toEqual([
       'official', 'vchertischev', 'vk', 'players',
     ]);
-    expect(grouped.map((g) => g.entries.length)).toEqual([7, 4, 5, 7]);
+    // Волна 4j: секция vk + сборник «ЭПОХА РОБОГИР» и два рассказа клуба (8).
+    expect(grouped.map((g) => g.entries.length)).toEqual([7, 4, 8, 7]);
     for (const g of grouped) expect(g.entries.length).toBeGreaterThan(0);
     // Группировка без потерь и дублей
     const flat = grouped.flatMap((g) => g.entries);

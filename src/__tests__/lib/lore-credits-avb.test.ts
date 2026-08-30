@@ -18,7 +18,16 @@ import { getSourcesCatalog } from '@/lib/sources-catalog';
 import { resolveUnitProvenance, resolveFactionProvenance, creditList } from '@/lib/provenance';
 import type { LoreSource } from '@/lib/provenance';
 
-const NON_TEHNOLOG_WORKS = ['Битва за Велиан', 'Имперские войны', 'Косары', 'Штурмовики Протектората'];
+const NON_TEHNOLOG_WORKS = [
+  'Битва за Велиан',
+  'Имперские войны',
+  'Косары',
+  'Штурмовики Протектората',
+  // Волна 4j: справочник «Бронетехника» подписан Сержем Коржиком (клуб
+  // «ЭПОХА РОБОГИР») — именной автор ⇒ кредиты несут мини-АВБ (решение
+  // владельца 2026-08-30). АВБ-бейдж самих юнитов не меняется: origin не тронут.
+  'Бронетехника (справочник клуба «ЭПОХА РОБОГИР»)',
+];
 
 /** Works expected to carry JSON credits (units + factions). */
 const JSON_BACKED_WORKS = ['Битва за Велиан', 'Косары', 'Штурмовики Протектората'];
@@ -69,6 +78,32 @@ describe('именные кредиты книг: мини-АВБ ровно н�
       if (!NON_TEHNOLOG_WORKS.includes(c.work)) {
         expect(`${c.id}: loreAuthor=${c.loreAuthor}`).toBe(`${c.id}: loreAuthor=tehnolog`);
       }
+    }
+  });
+
+  it('справочник «Бронетехника» клуба несёт кредит Коржика и разрешается loreAuthor=avb (волна 4j)', () => {
+    const korzhik = credited.filter((c) => c.work === 'Бронетехника (справочник клуба «ЭПОХА РОБОГИР»)');
+    // Все 20 юнитов, чей лор опирается на статью, получили именной кредит с URL.
+    expect(korzhik.length).toBe(20);
+    for (const c of korzhik) {
+      expect(`${c.id}: loreAuthor=${c.loreAuthor}`).toBe(`${c.id}: loreAuthor=avb`);
+    }
+    // У всех — автор Коржик и ссылка на статью клуба.
+    for (const u of getAllUnits()) {
+      for (const cr of creditList(u.provenance?.credit)) {
+        if (cr.work === 'Бронетехника (справочник клуба «ЭПОХА РОБОГИР»)') {
+          expect(cr.author).toBe('Серж Коржик');
+          expect(cr.url).toBe('https://vk.ru/@age_of_robogear-bronetehnika');
+        }
+      }
+    }
+    // Predator/Salamander несут ДВА кредита: роман «Битва за Велиан» + справочник клуба.
+    for (const id of ['predator', 'salamander']) {
+      const u = getAllUnits().find((x) => x.id === id)!;
+      expect(creditList(u.provenance?.credit).map((c) => c.work)).toEqual([
+        'Битва за Велиан',
+        'Бронетехника (справочник клуба «ЭПОХА РОБОГИР»)',
+      ]);
     }
   });
 });
@@ -141,12 +176,21 @@ describe('главы Истории и каталог источников: ми
     }
   });
 
-  it('каталог источников: все kind=story — loreAuthor avb (мини-АВБ на сводках игроков)', () => {
+  it('каталог источников: рассказы игроков (robogear.ru) — loreAuthor avb; «Мяу» клуба — tehnolog, «Выбор» — avb', () => {
+    // Волна 4j добавила в каталог два рассказа клуба «ЭПОХА РОБОГИР»: «Мяу»
+    // опубликовано без подписи → tehnolog (паттерн «Летописи», без АВБ);
+    // «Выбор» подписан Юрыком Данцем-Вашэцькаў → avb. Рассказы «Клуба
+    // Robogear» (section players) остаются avb.
     const stories = getSourcesCatalog().filter((e) => e.kind === 'story');
-    expect(stories.length).toBeGreaterThanOrEqual(7);
+    expect(stories.length).toBeGreaterThanOrEqual(9);
     for (const e of stories) {
-      expect(`${e.id}: ${e.loreAuthor}`).toBe(`${e.id}: avb`);
+      if (e.section === 'players') {
+        expect(`${e.id}: ${e.loreAuthor}`).toBe(`${e.id}: avb`);
+      }
     }
+    expect(getSourcesCatalog().find((e) => e.id === 'myau')?.loreAuthor).toBe('tehnolog');
+    expect(getSourcesCatalog().find((e) => e.id === 'vybor')?.loreAuthor).toBe('avb');
+    expect(getSourcesCatalog().find((e) => e.id === 'vybor')?.author).toBe('Юрык Данец-Вашэцькаў');
   });
 });
 

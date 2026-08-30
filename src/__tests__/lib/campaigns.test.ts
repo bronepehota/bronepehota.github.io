@@ -25,7 +25,8 @@ describe('campaigns loader', () => {
     // 6–10) appends Блауд, Полярис, Мидгаард, Теклиус и Косары; the 4e wave
     // (orders 11–13) appends ЦСО и обе волны Имперских войн; the 4f wave —
     // Войны Пыльной Зоны (order 14, эра 4472 — между волнами); the 4g wave —
-    // «Либератор: Железный ветер» (order 15, статьи Мёртвого Флота).
+    // «Либератор: Железный ветер» (order 15, статьи Мёртвого Флота); the 4j
+    // wave — «4541: Димекса» (order 16, статьи клуба «ЭПОХА РОБОГИР»).
     expect(all.map((c) => c.slug)).toEqual([
       'imperatorskie-voyny',
       'shturm-velyana',
@@ -42,6 +43,7 @@ describe('campaigns loader', () => {
       'tretiya-volna',
       'voyny-pylnoy-zony',
       'liberator-zheleznyy-veter',
+      'dimeksa',
     ]);
   });
 
@@ -212,8 +214,8 @@ describe('campaigns loader', () => {
     expect(c?.title).toBe('Первая волна: Гронт и Рун');
     expect(c?.order).toBe(5);
     expect(c?.era).toBe('4451');
-    // Блок замыкает уже не Третья волна (13) и не 4f (14), а фаза 4g: «Либератор» (15).
-    expect(all[all.length - 1]?.slug).toBe('liberator-zheleznyy-veter');
+    // Блок замыкает уже не Третья волна (13) и не 4f (14) — фаза 4j: «Димекса» (16).
+    expect(all[all.length - 1]?.slug).toBe('dimeksa');
     expect(c?.factions).toEqual(expect.arrayContaining(['polaris', 'protectorate', 'snow_wolves']));
     // Roster: клон-пехота вторжения + мидгаардские ульфхеднары.
     expect(c?.units?.some((u) => u.id === 'polaris_lineynaya_klon_pehota')).toBe(true);
@@ -320,6 +322,27 @@ describe('campaigns loader', () => {
     expect(c?.credit?.work).toBe('Косары');
   });
 
+  it('включает «4541: Димекса» — «Троянский конь» Рейдовых войн, order 16, кредит Коржика', () => {
+    const all = getAllCampaigns();
+    const c = all.find((x) => x.slug === 'dimeksa');
+    expect(c).toBeDefined();
+    expect(c?.title).toBe('4541: Димекса');
+    expect(c?.order).toBe(16);
+    expect(c?.era).toBe('4541');
+    expect(c?.factions).toEqual(['polaris', 'protectorate']);
+    // Ростер: бронегруппа Белински (Локусты, Супер Локуст Корн) + патрули «Ти-Рэксов».
+    expect(c?.units?.some((u) => u.id === 'locust')).toBe(true);
+    expect(c?.units?.some((u) => u.id === 'superlocust')).toBe(true);
+    expect(c?.units?.some((u) => u.id === 'trex')).toBe(true);
+    expect(c?.missions?.length).toBe(3);
+    // Статья клуба «ЭПОХА РОБОГИР», подписана Сержем Коржиком → avb + именной кредит.
+    expect(c?.loreAuthor).toBe('avb');
+    expect(c?.credit?.author).toBe('Серж Коржик');
+    expect(c?.credit?.url).toBe(
+      'https://vk.ru/@age_of_robogear-4541-g-zahvat-resursov-na-planete-dimeksa-imperiei-polyaris'
+    );
+  });
+
   it('включает «Войны Пыльной Зоны» — альдебаранский рейд 4472, order 14', () => {
     const all = getAllCampaigns();
     const c = all.find((x) => x.slug === 'voyny-pylnoy-zony');
@@ -343,7 +366,7 @@ describe('campaigns loader', () => {
 });
 
 describe('warsEraSpan — эпоха всего блока «Хроники войн»', () => {
-  it('текущие 15 кампаний → «4360–4546» (min–max по всем годам всех кампаний)', () => {
+  it('текущие 16 кампаний → «4360–4546» (min–max по всем годам всех кампаний)', () => {
     // Порядок по `order`: Имперские войны (4451–4528), Штурм Велиана (4527–4528),
     // Скрытый враг (4537), Корпоративные войны (4546), Первая волна (4451!),
     // + волна 4d: Блауд (4478–4495), Полярис (4451–4461), Мидгаард (4449–4451),
@@ -352,7 +375,8 @@ describe('warsEraSpan — эпоха всего блока «Хроники во
     // (4522–4528),
     // + волна 4f: Войны Пыльной Зоны (4472 — пограничная стычка между волнами;
     // расхождение 4472/4478 с романами оговорено в самой кампании),
-    // + волна 4g: Либератор (4513–4528) — все внутри коридора 4360–4546,
+    // + волна 4g: Либератор (4513–4528),
+    // + волна 4j: Димекса (4541) — все внутри коридора 4360–4546,
     // границы не сдвигаются.
     // Порядковый first/last давал «4451–4451» — регрессия этого кейса.
     expect(warsEraSpan(getAllCampaigns())).toBe('4360–4546');

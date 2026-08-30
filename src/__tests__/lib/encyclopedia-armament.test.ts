@@ -5,11 +5,13 @@ const names = (id: string) =>
 
 const WITH_ARMAMENT = [
   // protectorate
-  'bronekhod', 'carnivore', 'griffin', 'hurricane', 'octopus', 'predator',
-  'salamander', 'tornado', 'trex', 'varan', 'werewolf',
+  'bronekhod', 'carnivore', 'condor', 'griffin', 'hurricane', 'octopus',
+  'predator', 'puma', 'salamander', 'tornado', 'trex', 'varan', 'viper',
+  'werewolf',
   // polaris
-  'demolisher', 'devastator', 'eraser', 'helix', 'locust', 'madbull',
-  'raptor', 'ravingbeast', 'spider', 'superlocust', 'thunder', 'wildbear',
+  'demolisher', 'devastator', 'eraser', 'helix', 'hornet', 'hunter',
+  'locust', 'madbull', 'raptor', 'ravingbeast', 'spider', 'superlocust',
+  'thunder', 'wildbear',
 ] as const;
 
 describe('encyclopedia machine armament (Справочник техники)', () => {
@@ -30,10 +32,11 @@ describe('encyclopedia machine armament (Справочник техники)', 
     }
   });
 
-  it('machines outside the handbook have no armament (секции нет — данных нет)', () => {
-    // hornet/hunter/t_600 — 0 упоминаний в «Справочнике техники» (проверено
-    // grep'ом по декодированному тексту и по извлечённым секциям «Вооружение»)
-    for (const id of ['hornet', 'hunter', 't_600']) {
+  it('machines outside the sources have no armament (секции нет — данных нет)', () => {
+    // t_600 — нет ни в «Справочнике техники», ни в статье клуба «Бронетехника»
+    // (волна 4j закрыла armament-дыры у condor/puma/viper/hornet/hunter —
+    // эти машины переехали в WITH_ARMAMENT выше).
+    for (const id of ['t_600']) {
       expect(getEncyclopediaUnit(id)?.encyclopedia?.armament).toBeUndefined();
     }
   });
@@ -42,12 +45,27 @@ describe('encyclopedia machine armament (Справочник техники)', 
     const ids = [
       ...WITH_ARMAMENT,
       // моноблок без индекса в спек-блоке — designation обязана отсутствовать
-      'hornet', 'hunter', 't_600',
+      't_600',
     ];
     for (const id of ids) {
       const d = getEncyclopediaUnit(id)?.encyclopedia?.designation;
       // id в объекте — идентифицирует машину в сообщении об ошибке
       if (d) expect({ id, d }).toEqual({ id, d: expect.stringMatching(/^(БМР|УМ)/) });
+    }
+  });
+
+  it('Локуст/Супер Локуст несут свои пушки (баг-фикс волны 4j: свап против статьи «Бронетехника»)', () => {
+    // Первоисточник (статья клуба + геймплейные данные star_system): Локуст —
+    // скорострельные «Бамбук» ATC-40 40 мм; Супер Локуст — тяжёлые АТС-76 76 мм.
+    // Ранее энциклопедический JSON нёс их наоборот.
+    expect(names('locust')).toContain('«Бамбук» (ATC-40)');
+    expect(names('locust')).not.toContain('АТС-76');
+    expect(names('superlocust')).toContain('(АТС-76)');
+    expect(names('superlocust')).not.toContain('ATC-40');
+    // Энергетический гарпун — индекс PB-1M («Power Bolt»), не PG-1M.
+    for (const id of ['madbull', 'eraser', 'ravingbeast']) {
+      expect(names(id)).toContain('Энергетический гарпун (PB-1M)');
+      expect(names(id)).not.toContain('PG-1M');
     }
   });
 

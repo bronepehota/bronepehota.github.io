@@ -80,7 +80,7 @@ export const SOURCES_CATALOG_SECTIONS: Array<{
   {
     id: 'vk',
     title: 'Материалы сообществ (VK)',
-    note: 'Справочники, сборники и статьи сообществ Star System и Мёртвого Флота',
+    note: 'Справочники, сборники, статьи и рассказы сообществ: Star System, Мёртвый Флот, клуб «ЭПОХА РОБОГИР»',
   },
   {
     id: 'players',
