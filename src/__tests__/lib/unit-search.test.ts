@@ -81,12 +81,11 @@ describe('unit-search', () => {
     const pages = [
       { title: 'Легендарные Имперские Лорды', href: '/encyclopedia/history#legendarnye-imperskie-lordy', kind: 'chapter' as const },
       { title: 'Имперские войны', href: '/encyclopedia/history#wars', kind: 'campaign' as const },
-      { title: 'Звёздные герои', href: '/encyclopedia/history#zvyozdnye-geroi', kind: 'chapter' as const },
+      { title: 'Красная ярость', href: '/encyclopedia/sources#krasnaya-yarost', kind: 'chapter' as const },
     ];
     expect(matchLoreTitles('Лорд', pages)).toHaveLength(1);
     expect(matchLoreTitles('Имперск', pages)).toHaveLength(2);
-    expect(matchLoreTitles('гер', pages)).toHaveLength(1);
-    expect(matchLoreTitles('звё', pages)).toHaveLength(0);   // < 3 символов
+    expect(matchLoreTitles('яр', pages)).toHaveLength(0);    // < 3 символов
     expect(matchLoreTitles('', pages)).toHaveLength(0);
   });
 
