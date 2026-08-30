@@ -199,12 +199,18 @@ describe('campaigns loader', () => {
     expect(iv.credit?.year).toBeUndefined();
   });
 
-  it('кампании без установленного источника не выдумывают атрибуцию', () => {
-    for (const slug of ['korporativnye-voyny', 'skrytyj-vrag']) {
-      const c = getAllCampaigns().find((x) => x.slug === slug)!;
-      expect(c.loreAuthor).toBeUndefined();
-      expect(c.credit).toBeUndefined();
-    }
+  it('кампании сообщества «Технолог/СтарСис» несут кредит источника', () => {
+    // «Корпоративные войны» — docx «Хало и Вахо 2» (кампания, 2020).
+    const kv = getAllCampaigns().find((x) => x.slug === 'korporativnye-voyny')!;
+    expect(kv.loreAuthor).toBe('avb');
+    expect(kv.credit?.author).toBe('Сообщество ВК «Технолог/СтарСис»');
+    expect(kv.credit?.work).toBe('«Хало и Вахо 2» — кампания (docx, 2020)');
+    // «Скрытый враг» — фанатская редакция правил Jeek (рутенийский цикл).
+    const sv = getAllCampaigns().find((x) => x.slug === 'skrytyj-vrag')!;
+    expect(sv.loreAuthor).toBe('avb');
+    expect(sv.credit?.author).toBe('Сообщество ВК «Технолог/СтарСис»');
+    expect(sv.credit?.work).toBe('«Бронепехота»: правила, редакция Jeek (2020)');
+    expect(sv.credit?.url).toBe('https://vk.ru/docs-207479666');
   });
 
   it('включает кампанию «Первая волна: Гронт и Рун» — наборы «СтарСис» 2001, order 5', () => {

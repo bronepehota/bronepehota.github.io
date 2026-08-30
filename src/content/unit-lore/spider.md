@@ -1,6 +1,6 @@
 ---
 sourceLabel: Справочник техники «Робогир»
-sourceUrl: https://www.robogear.ru
+sourceUrl: http://www.robogear.ru
 ---
 
 ## Концепция
