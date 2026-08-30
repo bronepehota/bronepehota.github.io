@@ -34,7 +34,7 @@ test.describe('IA лора: перекрёстные ссылки, путево�
     await expect(page.getByTestId('unit-breadcrumb')).toContainText('ЭНЦИКЛОПЕДИЯ / ЮНИТЫ /');
   });
 
-  test('энциклопедия: путеводитель «// С ЧЕГО НАЧАТЬ» над сеткой', async ({ page }) => {
+  test('энциклопедия: путеводитель «// С ЧЕГО НАЧАТЬ» — футер хаба', async ({ page }) => {
     await page.goto('/encyclopedia');
     await page.waitForLoadState('networkidle');
 
@@ -57,6 +57,17 @@ test.describe('IA лора: перекрёстные ссылки, путево�
       'href',
       '/encyclopedia/factions',
     );
+    // На хабе гид целиком из ссылок: последний шаг «юниты» — переход в каталог
+    // (со страницы каталога он был меткой «вы здесь»).
+    await expect(guide.getByTestId('lore-guide-units')).toHaveAttribute(
+      'href',
+      '/encyclopedia/units',
+    );
+
+    // А сам каталог (/encyclopedia/units) гида больше не дублирует.
+    await page.goto('/encyclopedia/units');
+    await page.waitForLoadState('networkidle');
+    await expect(page.getByTestId('lore-guide')).toHaveCount(0);
   });
 
   test('страница «Источники и права»: положение, реестр изданий, контакт', async ({ page }) => {

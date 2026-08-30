@@ -147,9 +147,9 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc, c
         {/* Header */}
         <header className="relative py-6 md:py-12 px-4">
           <div className="max-w-6xl mx-auto">
-            {/* Back link */}
+            {/* Back link — to the units catalog (the root is now the archive hub) */}
             <Link
-              href="/encyclopedia"
+              href="/encyclopedia/units"
               className={cn(
                 'inline-flex items-center gap-2 font-ibm-mono text-xs md:text-sm',
                 'text-military-rust/60 hover:text-military-amber transition-colors',

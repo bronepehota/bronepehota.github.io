@@ -222,7 +222,7 @@ export default function FactionsListPage({ factions }: FactionsListPageProps) {
                             <span key={s.id}>
                               {i > 0 && ', '}
                               <Link
-                                href={`/encyclopedia?faction=${s.id}`}
+                                href={`/encyclopedia/units?faction=${s.id}`}
                                 className="hover:text-military-amber transition-colors"
                                 style={{ color: colors.primary }}
                               >
@@ -235,7 +235,7 @@ export default function FactionsListPage({ factions }: FactionsListPageProps) {
 
                       <div className="mt-3">
                         <Link
-                          href={`/encyclopedia?faction=${faction.id}`}
+                          href={`/encyclopedia/units?faction=${faction.id}`}
                           className={cn('inline-flex items-center gap-2 py-2 -my-2 font-ibm-mono uppercase tracking-wider transition-opacity hover:opacity-80', isSub ? 'text-[10px]' : 'text-xs')}
                           style={{ color: colors.primary }}
                         >

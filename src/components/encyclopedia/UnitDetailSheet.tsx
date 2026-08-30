@@ -98,7 +98,7 @@ export function UnitDetailSheet({ unit, type, sourceId, isOpen, onClose, onAdd }
         {/* Footer */}
         <div className="px-3 py-2 border-t border-military-rust/30 flex items-center gap-2">
           <Link
-            href="/encyclopedia"
+            href="/encyclopedia/units"
             className="font-ibm-mono text-[11px] text-military-steel hover:text-military-sand inline-flex items-center gap-1"
           >
             <BookOpen className="w-3.5 h-3.5" /> Энциклопедия

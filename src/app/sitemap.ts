@@ -26,7 +26,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const staticRoutes: Array<{ path: string; freq: ChangeFreq; priority: number }> = [
     { path: '/', freq: 'weekly', priority: 1.0 },
+    // Root = the «Архив вселенной» hub (lore showcase); the unit catalog has
+    // its own entry below.
     { path: '/encyclopedia', freq: 'weekly', priority: 0.9 },
+    { path: '/encyclopedia/units', freq: 'weekly', priority: 0.85 },
     { path: '/encyclopedia/factions', freq: 'monthly', priority: 0.8 },
     { path: '/encyclopedia/missions', freq: 'monthly', priority: 0.8 },
     { path: '/encyclopedia/history', freq: 'monthly', priority: 0.8 },

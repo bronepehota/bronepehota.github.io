@@ -13,7 +13,9 @@ test.describe('История вселенной', () => {
   });
 
   test('таб «История» ведёт на страницу из энциклопедии', async ({ page }) => {
-    await page.goto('/encyclopedia');
+    // Табы живут на страницах разделов (хаб /encyclopedia вместо них показывает
+    // папки-разделы — вход в Историю оттуда проверяет encyclopedia.spec.ts).
+    await page.goto('/encyclopedia/units');
     await page.waitForLoadState('networkidle');
     await page.getByRole('link', { name: 'История' }).click();
     await page.waitForLoadState('networkidle');

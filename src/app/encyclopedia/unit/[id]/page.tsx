@@ -65,10 +65,10 @@ export default async function Page({ params }: PageProps) {
     <>
       <JsonLd
         data={breadcrumbJsonLd([
-          // Aligned with the visible navigation: the unit page's back-link reads
-          // «К энциклопедии» (tab 01 «Юниты», /encyclopedia) — NOT /encyclopedia/factions.
+          // Aligned with the visible navigation: «Энциклопедия» is the archive
+          // hub (root), «Юниты» — the catalog the back-link returns to.
           { name: 'Энциклопедия', path: '/encyclopedia' },
-          { name: 'Юниты', path: '/encyclopedia' },
+          { name: 'Юниты', path: '/encyclopedia/units' },
           { name: unit.name, path: `/encyclopedia/unit/${unit.id}` },
         ])}
       />
