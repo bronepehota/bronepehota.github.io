@@ -14,9 +14,9 @@ import {
 const catalog = getSourcesCatalog();
 
 describe('sources-catalog: структура записей', () => {
-  it('в каталоге 26 произведений (17 из реестра + 7 рассказов игроков + 2 рассказа клуба)', () => {
-    expect(catalog).toHaveLength(26);
-    expect(catalog.filter((e) => e.kind === 'story')).toHaveLength(9);
+  it('в каталоге 27 произведений (17 из реестра + 7 рассказов игроков + 3 рассказа клуба)', () => {
+    expect(catalog).toHaveLength(27);
+    expect(catalog.filter((e) => e.kind === 'story')).toHaveLength(10);
   });
 
   it('id уникальны, slug-формат', () => {
@@ -82,12 +82,14 @@ describe('sources-catalog: рассказы игроков', () => {
     expect(mind.url).toBe('http://www.robogear.ru/skelet/6/story_16.php');
   });
 
-  it('рассказы клуба «ЭПОХА РОБОГИР» — vk.ru url; «Мяу» без автора, «Выбор» подписан', () => {
+  it('рассказы клуба «ЭПОХА РОБОГИР» — vk.ru url; «Мяу» без автора, «Выбор» и «Торговцы» подписаны', () => {
     const club = stories.filter((e) => e.section === 'vk');
-    expect(club.map((s) => s.id)).toEqual(['myau', 'vybor']);
+    expect(club.map((s) => s.id)).toEqual(['myau', 'vybor', 'torgovcy']);
     for (const s of club) expect(s.url).toMatch(/^https:\/\/vk\.ru\/@age_of_robogear-/);
     expect(club.find((s) => s.id === 'myau')?.author).toBeUndefined();
     expect(club.find((s) => s.id === 'vybor')?.author).toBe('Юрык Данец-Вашэцькаў');
+    // Волна 4k: «Торговцы» — двойная атрибуция (текст Коржика по зарисовке Владимира Че)
+    expect(club.find((s) => s.id === 'torgovcy')?.author).toBe('Серж Коржик (по зарисовке Владимира Че)');
   });
 
   it('сводки рассказов сообщают и сюжет, и вклад во вселенную (3–5 предложений)', () => {
@@ -105,8 +107,9 @@ describe('sources-catalog: секции страницы /encyclopedia/sources',
     expect(grouped.map((g) => g.section.id)).toEqual([
       'official', 'vchertischev', 'vk', 'players',
     ]);
-    // Волна 4j: секция vk + сборник «ЭПОХА РОБОГИР» и два рассказа клуба (8).
-    expect(grouped.map((g) => g.entries.length)).toEqual([7, 4, 8, 7]);
+    // Волна 4j: секция vk + сборник «ЭПОХА РОБОГИР» и два рассказа клуба (8);
+    // волна 4k добавила зарисовку «Торговцы» (9).
+    expect(grouped.map((g) => g.entries.length)).toEqual([7, 4, 9, 7]);
     for (const g of grouped) expect(g.entries.length).toBeGreaterThan(0);
     // Группировка без потерь и дублей
     const flat = grouped.flatMap((g) => g.entries);
