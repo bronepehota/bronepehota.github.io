@@ -316,17 +316,18 @@ test.describe('Энциклопедия', () => {
     await expect(page.getByTestId('image-source-chip')).toHaveCount(0);
   });
 
-  test('легенда об источниках показывается и разворачивается', async ({ page }) => {
+  test('легенда атрибуции убрана — в футере строка источников и «Дополнить»', async ({ page }) => {
     await page.goto('/encyclopedia/units');
     await page.waitForLoadState('networkidle');
 
-    const banner = page.getByTestId('encyclopedia-sources-banner');
-    await expect(banner).toBeVisible();
-    // Compact mode: logos + labels visible — official canon + АВБ (alternative) umbrella mark
-    await expect(banner.getByText('Официальный канон')).toBeVisible();
-    await expect(banner.getByText('АВБ — альтернативная версия')).toBeVisible();
-    // «Дополнить» CTA is a link
-    await expect(banner.getByRole('link', { name: /дополнить/i })).toBeVisible();
+    // Блок-легенда (Технолог/АВБ) убрана со страницы-каталога (решение 2026-08-30):
+    // канон объясняют тултипы чипов, досье и /encyclopedia/sources.
+    await expect(page.getByTestId('encyclopedia-sources-banner')).toHaveCount(0);
+    const footer = page.getByTestId('encyclopedia-sources-footer');
+    await expect(footer).toBeVisible();
+    await expect(footer).toContainText('ИСТОЧНИКИ И ПРАВА');
+    // «Дополнить» — CTA сообществу, внешний nofollow-линк
+    await expect(page.getByTestId('encyclopedia-contribute-footer')).toBeVisible();
   });
 
   test('чин происхождения кликабелен и ведёт на сайт источника', async ({ page }) => {
@@ -346,12 +347,11 @@ test.describe('Энциклопедия', () => {
     await expect(page.getByTestId('armament-entry').first()).toContainText('Световой меч');
   });
 
-  test('плашка режима боя ведёт в штаб', async ({ page }) => {
+  test('боевой баннер не занимает каталог — живёт на хабе', async ({ page }) => {
+    // Решение 2026-08-30: «в бой» на каталоге убран (конкурент поиска);
+    // входы в бой — CTA на досье юнита и баннер хаба (следующий тест).
     await page.goto('/encyclopedia/units');
-    await expect(page.getByTestId('encyclopedia-battle-banner')).toBeVisible();
-    await page.getByTestId('encyclopedia-battle-banner-link').click();
-    await dismissIntroIfShown(page);
-    await expect(page.getByTestId('rules-confirm-button')).toBeVisible({ timeout: 30000 });
+    await expect(page.getByTestId('encyclopedia-battle-banner')).toHaveCount(0);
   });
 });
 

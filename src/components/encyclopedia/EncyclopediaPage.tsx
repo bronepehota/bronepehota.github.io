@@ -11,7 +11,6 @@ import { buildSearchHaystack, matchesSearch, matchLoreTitles, type LorePageRef }
 import { LoreSearchHints } from './LoreSearchHints';
 import { UnitCard } from './UnitCard';
 import { EncyclopediaTabs } from './EncyclopediaTabs';
-import { EncyclopediaAttributionBanner } from './EncyclopediaAttributionBanner';
 import { SQUAD_GROUP_IMAGE, getCredit } from '@/lib/painted-images';
 import { cn } from '@/lib/utils';
 import { trackEvent } from '@/lib/analytics';
@@ -270,27 +269,9 @@ export default function EncyclopediaPage({ initialUnits, lorePages }: Encycloped
           </div>
         </header>
 
-        {/* Мост в режим боя — тонкая строка-телетайп, вся кликабельна
-            (вернули по решению владельца 2026-08-28: прятали только песочницу) */}
-        <div data-testid="encyclopedia-battle-banner" className="mx-auto max-w-7xl px-4">
-          <Link
-            href="/app"
-            onClick={() => trackEvent('battle_entry', { from: 'encyclopedia_main' })}
-            data-testid="encyclopedia-battle-banner-link"
-            className="flex items-center gap-3 min-h-[44px] px-2 border border-military-rust/30 hover:border-military-amber/60 transition-colors group touch-manipulation no-underline"
-          >
-            <span className="font-ibm-mono text-[10px] uppercase tracking-[0.25em] text-military-rust shrink-0">
-              {'// РЕЖИМ БОЯ'}
-            </span>
-            <span className="hidden sm:inline font-ibm-mono text-[10px] md:text-xs text-military-taupe/80 truncate">
-              любой отряд — в строй
-            </span>
-            <span className="flex-1" />
-            <span className="font-russo text-[10px] md:text-xs uppercase tracking-widest text-military-rust group-hover:text-military-amber transition-colors shrink-0">
-              ШТАБ →
-            </span>
-          </Link>
-        </div>
+        {/* Боевой баннер убран со страницы-каталога (решение владельца 2026-08-30):
+            «в бой» — контекстный CTA на каждом досье юнита + баннер на хабе
+            «Архив вселенной»; здесь он лишь третий конкурент поиска. */}
 
         {/* Sticky navigation console — tabs + search + filters stay reachable
             from anywhere in the 20+ screen catalog. Sticky works because the
@@ -424,10 +405,9 @@ export default function EncyclopediaPage({ initialUnits, lorePages }: Encycloped
           <div className="mx-auto max-w-7xl">
             {/* Новичковый гид «// С ЧЕГО НАЧАТЬ» переехал на хаб /encyclopedia
                 (витрина вселенной) — на каталоге юнитов он дублировал назначение
-                страницы. Здесь — только легенда источников и сетка. */}
-            <div className="mb-4">
-              <EncyclopediaAttributionBanner />
-            </div>
+                страницы. Легенда атрибуции (Технолог/АВБ) убрана тем же решением
+                2026-08-30: её учат тултипы чипов, досье юнита и страница
+                «Источники и права»; на каталоге осталась строка-футер под сеткой. */}
             {filteredUnits.length === 0 ? (
               <div className="py-16 text-center">
                 <div className="mb-3 text-5xl opacity-20">∅</div>
@@ -503,9 +483,29 @@ export default function EncyclopediaPage({ initialUnits, lorePages }: Encycloped
           </div>
         </main>
 
-        <div className="mx-auto max-w-7xl">
-          <div className="military-divider mb-8" />
-        </div>
+        {/* Футер-строка каталога: канон и «Дополнить» — одним тапом, без блока-легенды.
+            «Дополнить» — CTA сообществу (не кредит первоисточника), поэтому nofollow. */}
+        <footer className="mx-auto max-w-7xl px-4 pb-10">
+          <div className="military-divider mb-4" />
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+            <Link
+              href="/encyclopedia/sources"
+              data-testid="encyclopedia-sources-footer"
+              className="font-ibm-mono text-[10px] uppercase tracking-[0.2em] text-military-rust hover:text-military-amber transition-colors"
+            >
+              {'// ИСТОЧНИКИ И ПРАВА →'}
+            </Link>
+            <a
+              href="https://vk.ru/lastbpcoder"
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+              data-testid="encyclopedia-contribute-footer"
+              className="inline-flex min-h-[44px] items-center gap-1.5 font-ibm-mono text-[10px] uppercase tracking-wider text-military-amber/90 hover:text-military-amber transition-colors touch-manipulation"
+            >
+              ДОПОЛНИТЬ ↗
+            </a>
+          </div>
+        </footer>
       </div>
     </div>
   );
