@@ -112,6 +112,15 @@ export default function SourcesPage() {
                     {/* Реквизиты: автор · год · эпоха произведения */}
                     <p className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 mb-2.5 font-ibm-mono text-[11px] text-military-steel/80">
                       {entry.author && <span className="text-military-taupe">{entry.author}</span>}
+                      {entry.loreAuthor === 'avb' && (
+                        <span
+                          data-testid="catalog-avb-mark"
+                          title="независимый автор / сообщество"
+                          className="font-ibm-mono text-[8px] border border-military-amber/50 text-military-amber px-1 rounded-sm"
+                        >
+                          АВБ
+                        </span>
+                      )}
                       {entry.year !== undefined && <span>{entry.year}</span>}
                       {entry.era && <span className="text-military-amber/70">{entry.era}</span>}
                     </p>
@@ -139,7 +148,7 @@ export default function SourcesPage() {
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1.5 mt-3 font-ibm-mono text-[10px] uppercase tracking-[0.2em] text-military-steel/60 hover:text-military-amber transition-colors"
                       >
-                        Читать на robogear.ru ↗
+                        Читать первоисточник ↗
                       </a>
                     )}
                   </article>

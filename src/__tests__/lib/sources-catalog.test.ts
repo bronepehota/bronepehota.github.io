@@ -100,7 +100,7 @@ describe('sources-catalog: секции страницы /encyclopedia/sources',
   });
 
   it('у каждого типа произведения есть гриф (// РОМАН, // ХРОНИКА, // РАССКАЗ…)', () => {
-    for (const [kind, stamp] of Object.entries(KIND_STAMPS)) {
+    for (const stamp of Object.values(KIND_STAMPS)) {
       expect(stamp).toMatch(/^[А-ЯЁ]+$/);
     }
     // Используемые kind покрыты грифами карты (не story-виды не обязаны все встречаться)
