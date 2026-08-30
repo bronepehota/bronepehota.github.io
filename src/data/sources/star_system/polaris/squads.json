@@ -701,8 +701,8 @@
   },
   {
     "id": "polaris_markus_trehglazyy",
-    "name": "Маркус Трехглазый",
-    "shortName": "Маркус Трехглазый",
+    "name": "Маркус Трёхглазый",
+    "shortName": "Маркус Трёхглазый",
     "faction": "polaris",
     "cost": 109,
     "soldiers": [
@@ -721,8 +721,8 @@
   },
   {
     "id": "polaris_erkkhard",
-    "name": "Лорд Эркхард",
-    "shortName": "Эркхард",
+    "name": "Лорд Эркхарт",
+    "shortName": "Эркхарт",
     "faction": "polaris",
     "cost": 110,
     "soldiers": [
