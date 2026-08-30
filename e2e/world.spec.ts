@@ -10,7 +10,8 @@ test.describe('Алфавит вселенной (сущностные стра�
     // Title страницы собирается из generateMetadata
     await expect(page).toHaveTitle(/Лорд Кросс — вселенная Бронепехоты/);
     // kind-гриф и Russo-заголовок
-    await expect(page.getByTestId('world-kind')).toHaveText('// ПЕРСОНА');
+    // Контейнер грифа несёт и era/faction-чипы (обогащения волн 4g–4k) — проверяем вхождение
+    await expect(page.getByTestId('world-kind')).toContainText('// ПЕРСОНА');
     await expect(page.getByTestId('world-title')).toContainText('Кросс');
     // era-реквизит
     await expect(page.getByTestId('world-era')).toContainText('4451');
@@ -50,6 +51,6 @@ test.describe('Алфавит вселенной (сущностные стра�
     // Из индекса — в досье Гронта
     await page.locator('[data-testid="world-index-entry"]', { hasText: 'Гронт' }).click();
     await expect(page).toHaveURL(/\/encyclopedia\/world\/gront$/);
-    await expect(page.getByTestId('world-kind')).toHaveText('// ЛОКАЦИЯ');
+    await expect(page.getByTestId('world-kind')).toContainText('// ЛОКАЦИЯ');
   });
 });

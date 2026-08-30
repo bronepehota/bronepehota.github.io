@@ -13,8 +13,9 @@ test.describe('IA лора: перекрёстные ссылки, путево�
     const block = page.getByTestId('unit-campaigns');
     await expect(block).toBeVisible();
     await expect(block).toContainText('УЧАСТИЕ В ВОЙНАХ');
-    // 5 хроник с «Раптором» (Имперские войны, Штурм Велиана, Первая волна, Блауд, Мидгаард).
-    await expect(block.locator('[data-testid="unit-campaign-link"]')).toHaveCount(5);
+    // 8 хроник с «Раптором»: Имперские войны, Штурм Велиана, Первая волна, Блауд,
+    // Мидгаард + Либератор, Пыльная Зона, Вторая волна (волны 4e–4j пополняли ростеры).
+    await expect(block.locator('[data-testid="unit-campaign-link"]')).toHaveCount(8);
     await expect(block.getByText('Штурм Велиана')).toBeVisible();
 
     // Cross-link actually navigates to the chronicle.
@@ -26,7 +27,8 @@ test.describe('IA лора: перекрёстные ссылки, путево�
   });
 
   test('досье юнита вне хроник: блок участия не рендерится, крошка на месте', async ({ page }) => {
-    await page.goto('/encyclopedia/unit/hunter');
+    // hunter с волны 4g участвует в «Либераторе»; вне хроник — «Спрут» (octopus).
+    await page.goto('/encyclopedia/unit/octopus');
     await page.waitForLoadState('networkidle');
 
     await expect(page.getByTestId('unit-campaigns')).toHaveCount(0);

@@ -79,9 +79,10 @@ test.describe('Хроники войн', () => {
     await page.waitForLoadState('networkidle');
 
     await expect(page.getByRole('heading', { name: 'Оборона Блауда' })).toBeVisible();
-    // Missions appendix of the new wave renders.
+    // Missions appendix of the new wave renders. Фраза «Оборона святыни» встречается
+    // и в тексте кампании (лид-абзац), и в заголовке миссии — берём точное совпадение.
     await expect(page.getByText('Миссии')).toBeVisible();
-    await expect(page.getByText('Оборона святыни')).toBeVisible();
+    await expect(page.getByText('Оборона святыни', { exact: true })).toBeVisible();
     // «Летопись: Звёздные герои» — official Технолог source row, no АВБ mark.
     const source = page.getByTestId('lore-source-row');
     await expect(source).toBeVisible();

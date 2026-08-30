@@ -244,7 +244,7 @@ export function MissionSelector({ selectedMissionId, onSelect, onConfirm }: Miss
             <div className="flex items-center gap-3 py-2">
               <div className="h-px flex-1 bg-amber-500/30" />
               <span className="text-sm font-semibold text-amber-400 font-mono tracking-wider">
-                КАМПАНИЯ «{group.campaign.name}»
+                НАБОР СЦЕНАРИЕВ «{group.campaign.name}»
               </span>
               <div className="h-px flex-1 bg-amber-500/30" />
             </div>
