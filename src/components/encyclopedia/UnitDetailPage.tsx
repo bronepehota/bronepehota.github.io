@@ -292,7 +292,9 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc, c
                     {unit.name}
                   </h1>
 
-                  {/* Faction */}
+                  {/* Faction — the name links to the faction-filtered catalog
+                      (deep-link ?faction= restores the filter; review UX:
+                      «путь дальше» from a unit dossier). */}
                   <div className="flex items-center gap-3 mb-3 md:mb-4">
                     <div
                       className="p-2 rounded-lg"
@@ -302,12 +304,15 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc, c
                         <FactionLogo faction={unit.faction} className="w-full h-full" fallback={FactionIcon} />
                       </div>
                     </div>
-                    <span
-                      className="font-oswald text-lg md:text-xl"
+                    <Link
+                      href={`/encyclopedia/units?faction=${unit.faction}`}
+                      data-testid="unit-faction-link"
+                      title={`Все юниты фракции «${faction.name}»`}
+                      className="font-oswald text-lg md:text-xl transition-opacity hover:opacity-80"
                       style={{ color: faction.color }}
                     >
                       {faction.name}
-                    </span>
+                    </Link>
                   </div>
 
                   {/* Class + Rank */}

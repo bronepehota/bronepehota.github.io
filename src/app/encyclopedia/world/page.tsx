@@ -58,6 +58,22 @@ export default function WorldIndexPage() {
       />
 
       <div className="relative z-10 max-w-4xl mx-auto px-4 py-8 md:py-14">
+        {/* Вход на хаб — компактный back-линк в стиле соседних страниц глав
+            (history/[slug], campaigns/[slug]): архив должен быть достижим из
+            каждой секции (ревью UX). */}
+        <nav
+          aria-label="Навигация по энциклопедии"
+          className="mb-4 flex items-center justify-between gap-4"
+        >
+          <Link
+            href="/encyclopedia"
+            aria-label="На главную энциклопедии"
+            className="inline-flex items-center gap-2 font-ibm-mono text-xs text-military-rust/60 hover:text-military-amber transition-colors tracking-widest uppercase"
+          >
+            <span className="text-lg">←</span>
+            <span>Энциклопедия</span>
+          </Link>
+        </nav>
         {/* Шапка-досье индекса */}
         <header
           data-testid="world-index"

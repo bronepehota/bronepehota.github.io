@@ -144,14 +144,19 @@ export function HubSearch({ units, lorePages }: HubSearchProps) {
                   );
                 })}
               </div>
-              <Link
-                href={`/encyclopedia/units?q=${encodeURIComponent(query)}`}
-                data-testid="hub-search-more"
-                className="flex min-h-[44px] items-center justify-between px-3 border-t border-military-steel/20 font-ibm-mono text-[10px] uppercase tracking-wider text-military-amber/80 hover:text-military-amber transition-colors no-underline touch-manipulation"
-              >
-                <span>{`все совпадения в каталоге (${unitMatches.length})`}</span>
-                <span aria-hidden>→</span>
-              </Link>
+              {/* Lore-only matches: the «все совпадения в каталоге» deep-link
+                  would advertise a count of ZERO units — render it only when
+                  there is actually something in the catalog (review UX). */}
+              {unitMatches.length > 0 && (
+                <Link
+                  href={`/encyclopedia/units?q=${encodeURIComponent(query)}`}
+                  data-testid="hub-search-more"
+                  className="flex min-h-[44px] items-center justify-between px-3 border-t border-military-steel/20 font-ibm-mono text-[10px] uppercase tracking-wider text-military-amber/80 hover:text-military-amber transition-colors no-underline touch-manipulation"
+                >
+                  <span>{`все совпадения в каталоге (${unitMatches.length})`}</span>
+                  <span aria-hidden>→</span>
+                </Link>
+              )}
             </>
           ) : (
             <p className="px-3 py-3 font-ibm-mono text-[10px] uppercase tracking-wider text-military-steel/60">

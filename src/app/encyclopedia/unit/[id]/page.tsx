@@ -5,7 +5,7 @@ import { getUnitLoreDoc } from '@/lib/unit-lore';
 import { unitCampaigns } from '@/lib/campaigns';
 import UnitDetailPage from '@/components/encyclopedia/UnitDetailPage';
 import JsonLd from '@/components/JsonLd';
-import { absoluteUrl, breadcrumbJsonLd } from '@/lib/seo';
+import { absoluteUrl, breadcrumbJsonLd, metaDescription, pageOpenGraph } from '@/lib/seo';
 
 interface PageProps {
   params: { id: string };
@@ -21,19 +21,35 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!unit) {
     return {
-      title: 'Не найдено — Энциклопедия Бронепехота',
+      title: 'Не найдено — Энциклопедия Бронепехоты',
     };
   }
 
+  // Meta description — the lore's first ~180 chars (word boundary + ellipsis),
+  // same pattern as the history/world pages; raw lore can run 1000+ chars.
+  const description = metaDescription(
+    unit.encyclopedia?.lore || `Отряд ${unit.name} фракции ${unit.faction}`,
+    180,
+  );
+
   return {
-    title: `${unit.name} — Энциклопедия Бронепехота`,
-    description: unit.encyclopedia?.lore || `Отряд ${unit.name} фракции ${unit.faction}`,
+    title: `${unit.name} — Энциклопедия Бронепехоты`,
+    description,
     alternates: {
       canonical: absoluteUrl(`/encyclopedia/unit/${unit.id}`),
     },
-    openGraph: {
-      images: unit.image ? [absoluteUrl(unit.image)] : [],
-    },
+    // Full OG set via pageOpenGraph — the old bare `openGraph: { images }`
+    // REPLACED the layout's og:title/description/locale and, when the unit had
+    // no image, wiped og:image entirely (empty array) (seo.ts gotcha). Keeps
+    // the unit card as the social image, falls back to the site card.
+    openGraph: pageOpenGraph({
+      title: `${unit.name} — Энциклопедия Бронепехоты`,
+      description,
+      path: `/encyclopedia/unit/${unit.id}`,
+      images: unit.image
+        ? [{ url: absoluteUrl(unit.image), alt: unit.name }]
+        : undefined,
+    }),
   };
 }
 

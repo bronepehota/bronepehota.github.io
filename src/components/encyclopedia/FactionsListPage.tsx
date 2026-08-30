@@ -41,19 +41,35 @@ export default function FactionsListPage({ factions }: FactionsListPageProps) {
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-military-rust/60 to-transparent animate-pulse" />
 
           <div className="max-w-7xl mx-auto">
-            <Link
-              href="/app"
+            {/* Top row: back to the app + hub wordmark — the archive hub must be
+                reachable from every section (review UX). Same nav-link styling. */}
+            <div
               className={cn(
-                'inline-flex items-center gap-2 font-ibm-mono text-xs md:text-sm',
-                'text-military-rust/60 hover:text-military-amber transition-colors',
-                'tracking-widest uppercase mb-4 md:mb-8',
+                'flex items-center justify-between gap-4 mb-4 md:mb-8',
                 'fade-in-up opacity-0', isLoaded && 'opacity-100',
               )}
               style={{ animationFillMode: 'forwards', animationDelay: '0.1s' }}
             >
-              <ArrowLeft className="w-4 h-4" strokeWidth={2} />
-              <span>В приложение</span>
-            </Link>
+              <Link
+                href="/app"
+                className={cn(
+                  'inline-flex items-center gap-2 font-ibm-mono text-xs md:text-sm',
+                  'text-military-rust/60 hover:text-military-amber transition-colors',
+                  'tracking-widest uppercase',
+                )}
+              >
+                <ArrowLeft className="w-4 h-4" strokeWidth={2} />
+                <span>В приложение</span>
+              </Link>
+              <Link
+                href="/encyclopedia"
+                aria-label="На главную энциклопедии"
+                className="inline-flex items-center gap-2 font-ibm-mono text-xs md:text-sm text-military-rust/60 hover:text-military-amber transition-colors tracking-widest uppercase"
+              >
+                <span>Энциклопедия</span>
+                <span aria-hidden>→</span>
+              </Link>
+            </div>
 
             <div className="text-center mb-6 md:mb-8">
               <h1
@@ -233,10 +249,13 @@ export default function FactionsListPage({ factions }: FactionsListPageProps) {
                         </p>
                       )}
 
-                      <div className="mt-3">
+                      {/* CTA row — each link is its own 44px tap zone with real
+                          spacing between them (review UX: the two CTAs sat one
+                          ligature apart after a wrap on mobile). */}
+                      <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2">
                         <Link
                           href={`/encyclopedia/units?faction=${faction.id}`}
-                          className={cn('inline-flex items-center gap-2 py-2 -my-2 font-ibm-mono uppercase tracking-wider transition-opacity hover:opacity-80', isSub ? 'text-[10px]' : 'text-xs')}
+                          className={cn('inline-flex min-h-[44px] items-center gap-2 font-ibm-mono uppercase tracking-wider transition-opacity hover:opacity-80 touch-manipulation', isSub ? 'text-[10px]' : 'text-xs')}
                           style={{ color: colors.primary }}
                         >
                           <span>Отряды фракции «{factionDisplayNames[faction.id] ?? faction.id}»</span>
@@ -246,7 +265,7 @@ export default function FactionsListPage({ factions }: FactionsListPageProps) {
                           href={`/app?faction=${faction.id}`}
                           onClick={() => trackEvent('battle_entry', { from: 'encyclopedia_factions' })}
                           data-testid="faction-build-army-link"
-                          className={cn('ml-5 inline-flex items-center gap-2 py-2 -my-2 font-ibm-mono uppercase tracking-wider transition-opacity hover:opacity-80 text-military-rust', isSub ? 'text-[10px]' : 'text-xs')}
+                          className={cn('inline-flex min-h-[44px] items-center gap-2 font-ibm-mono uppercase tracking-wider transition-opacity hover:opacity-80 text-military-rust touch-manipulation', isSub ? 'text-[10px]' : 'text-xs')}
                         >
                           <span>Собрать армию</span>
                           <span>→</span>
@@ -256,7 +275,7 @@ export default function FactionsListPage({ factions }: FactionsListPageProps) {
                             href={faction.siteUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="mt-1.5 inline-flex items-center gap-1.5 font-ibm-mono text-[11px] uppercase tracking-wider text-military-taupe/70 transition-colors hover:text-military-amber"
+                            className="inline-flex min-h-[44px] items-center gap-1.5 font-ibm-mono text-[11px] uppercase tracking-wider text-military-taupe/70 transition-colors hover:text-military-amber touch-manipulation"
                             title={faction.siteUrl}
                           >
                             <ExternalLink className="w-3 h-3" /> Официальный сайт

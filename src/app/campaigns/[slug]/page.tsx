@@ -4,7 +4,13 @@ import { Metadata } from 'next';
 import { getAllCampaigns, getCampaign } from '@/lib/campaigns';
 import { LoreSourceRow } from '@/components/encyclopedia/LoreSourceRow';
 import { ChapterBody } from '@/components/encyclopedia/history/ChapterBody';
-import { pageOpenGraph } from '@/lib/seo';
+import JsonLd from '@/components/JsonLd';
+import {
+  articleJsonLd,
+  breadcrumbJsonLd,
+  organizationJsonLd,
+  pageOpenGraph,
+} from '@/lib/seo';
 
 const FACTION_COLORS: Record<string, string> = {
   polaris: '#DC2626',
@@ -32,7 +38,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const description = campaign.subtitle
     || `Хроника войны: ${campaign.title}${campaign.era ? ` (${campaign.era})` : ''}`;
   return {
-    title: `${campaign.title} — Хроники войн | Бронепехота`,
+    title: `${campaign.title} — Хроники войн — Бронепехота`,
     description,
     alternates: { canonical: `/campaigns/${campaign.slug}` },
     // Full OG set via pageOpenGraph — a bare {title, description} object would
@@ -74,6 +80,10 @@ export default async function CampaignDetailPage({
   // list position as the fallback.
   const num = campaign.order ?? index + 1;
   const spineNumber = String(num).padStart(2, '0');
+  // Same description derivation as generateMetadata — the JSON-LD graph below
+  // reuses it (article.description must match the meta description).
+  const description = campaign.subtitle
+    || `Хроника войны: ${campaign.title}${campaign.era ? ` (${campaign.era})` : ''}`;
 
   return (
     <main className="min-h-screen bg-military-dark relative overflow-hidden">
@@ -254,6 +264,28 @@ export default async function CampaignDetailPage({
           )}
         </nav>
       </div>
+
+      {/* Article + breadcrumb + publisher (review SEO — same graph shape as
+          history/[slug]): a chronicle is long-form content, so it gets the
+          Article schema; the breadcrumb mirrors the visible nav (Энциклопедия →
+          История → хроника). The publisher @id resolves within this graph. */}
+      <JsonLd
+        data={[
+          breadcrumbJsonLd([
+            { name: 'Энциклопедия', path: '/encyclopedia' },
+            { name: 'История', path: '/encyclopedia/history' },
+            { name: campaign.title, path: `/campaigns/${campaign.slug}` },
+          ]),
+          articleJsonLd({
+            title: campaign.title,
+            description,
+            path: `/campaigns/${campaign.slug}`,
+            authorName: campaign.credit?.author,
+            isPartOfPath: '/encyclopedia/history',
+          }),
+          organizationJsonLd(),
+        ]}
+      />
     </main>
   );
 }

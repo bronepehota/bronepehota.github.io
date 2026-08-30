@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { getAllMissions, getMission, getCampaign } from '@/lib/missions-registry';
 import MissionDetailPage from '@/components/missions/MissionDetailPage';
 import JsonLd from '@/components/JsonLd';
-import { absoluteUrl, breadcrumbJsonLd } from '@/lib/seo';
+import { absoluteUrl, breadcrumbJsonLd, pageOpenGraph } from '@/lib/seo';
 
 interface PageProps {
   params: { id: string };
@@ -17,15 +17,23 @@ export function generateStaticParams() {
 export function generateMetadata({ params }: PageProps): Metadata {
   const mission = getMission(params.id);
   if (!mission) {
-    return { title: 'Не найдено — Энциклопедия Бронепехота' };
+    return { title: 'Миссия не найдена — Энциклопедия Бронепехоты' };
   }
   const firstObjective = Object.values(mission.objectives)[0];
+  const description = firstObjective?.text ?? `Боевой сценарий «${mission.name}»`;
   return {
-    title: `Миссия «${mission.name}» — Энциклопедия Бронепехота`,
-    description: firstObjective?.text ?? `Боевой сценарий «${mission.name}»`,
+    title: `Миссия «${mission.name}» — Энциклопедия Бронепехоты`,
+    description,
     alternates: {
       canonical: absoluteUrl(`/encyclopedia/mission/${mission.id}`),
     },
+    // Full OG set via pageOpenGraph — a bare {title, description} object would
+    // REPLACE the layout's og:image card (Next merges only top-level fields).
+    openGraph: pageOpenGraph({
+      title: `Миссия «${mission.name}»`,
+      description,
+      path: `/encyclopedia/mission/${mission.id}`,
+    }),
   };
 }
 

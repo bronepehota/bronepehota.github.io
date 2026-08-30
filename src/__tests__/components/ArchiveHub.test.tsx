@@ -151,4 +151,32 @@ describe('ArchiveHub — корень-хаб «Архив вселенной»',
     expect(await screen.findByTestId('encyclopedia-hub-cover')).toBeInTheDocument();
     expect(replaceMock).not.toHaveBeenCalled();
   });
+
+  test('«// НОВОЕ В АРХИВЕ»: каждый захардкоженный href существует в реестрах', async () => {
+    // FRESH_ENTRIES в HubFresh закреплены в коде (витрина владельца) — ссылка
+    // протухает, если слаг переименовали/удалили. Проверяем каждый href против
+    // реестров кампаний и world-досье, чтобы падало здесь, а не 404-ом в проде.
+    renderHub();
+    await screen.findByTestId('hub-fresh');
+
+    const entries = screen.getAllByTestId('hub-fresh-entry');
+    expect(entries.length).toBeGreaterThanOrEqual(4);
+
+    const campaignSlugs = new Set(getAllCampaigns().map((c) => c.slug));
+    const worldSlugs = new Set(getAllWorldEntries().map((e) => e.slug));
+
+    for (const link of entries) {
+      // ?? '' — пропущенный href это тоже протухшая ссылка: не матчит ни один
+      // префикс и роняет финальную проверку.
+      const href = link.getAttribute('href') ?? '';
+      if (href.startsWith('/campaigns/')) {
+        expect(campaignSlugs.has(href.slice('/campaigns/'.length))).toBe(true);
+      } else if (href.startsWith('/encyclopedia/world/')) {
+        expect(worldSlugs.has(href.slice('/encyclopedia/world/'.length))).toBe(true);
+      } else {
+        // Неизвестный префикс — опечатка в href; честно роняем тест.
+        expect(href).toMatch(/^\/(campaigns|encyclopedia\/world)\//);
+      }
+    }
+  });
 });

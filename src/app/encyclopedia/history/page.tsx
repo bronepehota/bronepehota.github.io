@@ -120,6 +120,21 @@ export default async function HistoryPage() {
         <div className="relative z-10 pb-20">
         {/* ——— Обложка дела: dossier cover instead of a form-like header ——— */}
         <div className="max-w-4xl mx-auto px-4 pt-8 md:pt-14">
+          {/* Hub entry — the archive root must stay reachable from the section
+              pages (review UX). Same compact mono nav as the chapter pages. */}
+          <nav
+            aria-label="Навигация по энциклопедии"
+            className="mb-4 flex items-center justify-between gap-4"
+          >
+            <Link
+              href="/encyclopedia"
+              aria-label="На главную энциклопедии"
+              className="inline-flex items-center gap-2 font-ibm-mono text-xs text-military-rust/60 hover:text-military-amber transition-colors tracking-widest uppercase"
+            >
+              <span className="text-lg">←</span>
+              <span>Энциклопедия</span>
+            </Link>
+          </nav>
           <header
             data-testid="history-cover"
             className="relative folded-paper military-corners p-5 md:p-8 mb-6 overflow-hidden"

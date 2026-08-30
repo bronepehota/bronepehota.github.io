@@ -239,15 +239,23 @@ export default function EncyclopediaPage({ initialUnits, lorePages }: Encycloped
               </Link>
 
               {/* Small wordmark (replaces the giant title). H1 — the page's only
-                  one (units below start at h3); visually identical to the old div. */}
-              <div className="text-center leading-none">
-                <h1 className="font-russo text-sm md:text-base tracking-[0.25em] text-military-sand">
-                  ЭНЦИКЛОПЕДИЯ
-                </h1>
-                <div className="mt-0.5 font-ibm-mono text-[8px] md:text-[9px] text-military-rust/60 tracking-[0.3em] uppercase">
-                  {'// База боевых единиц'}
+                  one (units below start at h3); visually identical to the old div.
+                  The wordmark is a LINK to the archive hub (/encyclopedia) — the
+                  catalog is a section, the hub must stay one tap away (review UX). */}
+              <Link
+                href="/encyclopedia"
+                aria-label="На главную энциклопедии"
+                className="group no-underline"
+              >
+                <div className="text-center leading-none">
+                  <h1 className="font-russo text-sm md:text-base tracking-[0.25em] text-military-sand transition-colors group-hover:text-military-amber">
+                    ЭНЦИКЛОПЕДИЯ
+                  </h1>
+                  <div className="mt-0.5 font-ibm-mono text-[8px] md:text-[9px] text-military-rust/60 tracking-[0.3em] uppercase transition-colors group-hover:text-military-amber/70">
+                    {'// База боевых единиц'}
+                  </div>
                 </div>
-              </div>
+              </Link>
 
               <Link
                 href="/encyclopedia/history#wars"
@@ -318,7 +326,7 @@ export default function EncyclopediaPage({ initialUnits, lorePages }: Encycloped
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   placeholder="ПОИСК…"
-                  className="w-full rounded-full border border-military-steel/30 bg-military-charcoal/60 py-1.5 pl-9 pr-9 font-ibm-mono text-[11px] tracking-wide text-white placeholder:text-military-steel/50 focus:border-military-amber/50 focus:outline-none"
+                  className="w-full min-h-[44px] rounded-full border border-military-steel/30 bg-military-charcoal/60 py-2 pl-9 pr-9 font-ibm-mono text-[11px] tracking-wide text-white placeholder:text-military-steel/50 focus:border-military-amber/50 focus:outline-none touch-manipulation"
                 />
                 {/* ✕ — clear the query without long backspacing (mobile audit point) */}
                 {searchQuery && (
@@ -364,7 +372,7 @@ export default function EncyclopediaPage({ initialUnits, lorePages }: Encycloped
                   aria-label="Фракция"
                   value={selectedFaction}
                   onChange={e => setSelectedFaction(e.target.value as FactionID | 'all')}
-                  className="w-full rounded-full border border-military-steel/30 bg-military-charcoal/70 py-1.5 pl-7 pr-3 font-ibm-mono text-[10px] tracking-wide text-white focus:border-military-amber/50 focus:outline-none md:text-xs"
+                  className="w-full min-h-[44px] rounded-full border border-military-steel/30 bg-military-charcoal/70 py-2 pl-7 pr-3 font-ibm-mono text-[10px] tracking-wide text-white focus:border-military-amber/50 focus:outline-none md:text-xs touch-manipulation"
                 >
                   {factions.map(f => (
                     <option key={f.value} value={f.value} className="bg-military-charcoal text-white">
@@ -381,7 +389,7 @@ export default function EncyclopediaPage({ initialUnits, lorePages }: Encycloped
                     aria-label="Тип"
                     value={selectedType}
                     onChange={e => setSelectedType(e.target.value as TypeFilter)}
-                    className="w-full rounded-full border border-military-steel/30 bg-military-charcoal/70 py-1.5 pl-3 pr-3 font-ibm-mono text-[10px] tracking-wide text-white focus:border-military-amber/50 focus:outline-none md:text-xs"
+                    className="w-full min-h-[44px] rounded-full border border-military-steel/30 bg-military-charcoal/70 py-2 pl-3 pr-3 font-ibm-mono text-[10px] tracking-wide text-white focus:border-military-amber/50 focus:outline-none md:text-xs touch-manipulation"
                   >
                     {types.map(t => (
                       <option key={t.value} value={t.value} className="bg-military-charcoal text-white">
@@ -397,7 +405,7 @@ export default function EncyclopediaPage({ initialUnits, lorePages }: Encycloped
                     aria-label="Источник миниатюр"
                     value={selectedSculptor}
                     onChange={e => setSelectedSculptor(e.target.value)}
-                    className="w-full rounded-full border border-military-steel/30 bg-military-charcoal/70 py-1.5 pl-3 pr-3 font-ibm-mono text-[10px] tracking-wide text-white focus:border-military-amber/50 focus:outline-none md:text-xs"
+                    className="w-full min-h-[44px] rounded-full border border-military-steel/30 bg-military-charcoal/70 py-2 pl-3 pr-3 font-ibm-mono text-[10px] tracking-wide text-white focus:border-military-amber/50 focus:outline-none md:text-xs touch-manipulation"
                   >
                     {sculptors.map(s => (
                       <option key={s.value} value={s.value} className="bg-military-charcoal text-white">
