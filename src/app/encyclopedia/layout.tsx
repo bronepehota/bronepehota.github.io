@@ -1,8 +1,9 @@
 import { ReactNode } from 'react';
+import { ENCYCLOPEDIA_TITLE, ENCYCLOPEDIA_DESCRIPTION } from './meta';
 
 export const metadata = {
-  title: 'Энциклопедия — Бронепехота',
-  description: 'Полный справочник по отрядам и технике Бронепехоты',
+  title: ENCYCLOPEDIA_TITLE,
+  description: ENCYCLOPEDIA_DESCRIPTION,
 };
 
 export default function EncyclopediaLayout({

@@ -194,7 +194,7 @@ export function BattlePreparationScreen({
                 </div>
                 {missionCampaign && (
                   <span className="font-mono text-[10px] text-slate-500 uppercase tracking-wider">
-                    Кампания «{missionCampaign.name}»
+                    Набор сценариев «{missionCampaign.name}»
                   </span>
                 )}
               </div>

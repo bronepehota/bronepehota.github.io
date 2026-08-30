@@ -31,6 +31,14 @@ export function hasUnitLoreDoc(id: string): boolean {
   return fs.existsSync(path.join(UNIT_LORE_DIR, `${id}.md`));
 }
 
+/** Sync raw markdown (frontmatter + body) of a doc — no remark. Used at build
+ *  time to feed search-hint bodies (encyclopedia page); Jest-safe. */
+export function getUnitLoreRaw(id: string): string | null {
+  const fullPath = path.join(UNIT_LORE_DIR, `${id}.md`);
+  if (!fs.existsSync(fullPath)) return null;
+  return fs.readFileSync(fullPath, 'utf8');
+}
+
 /** Async: reads + renders the doc (dynamic remark import — do not unit-test). */
 export async function getUnitLoreDoc(id: string): Promise<UnitLoreDoc | null> {
   const fullPath = path.join(UNIT_LORE_DIR, `${id}.md`);

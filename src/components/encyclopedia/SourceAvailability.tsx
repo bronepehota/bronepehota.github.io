@@ -80,7 +80,7 @@ export function SourceAvailability({
   // shoving the stat table down. Desktop keeps the roomier sizing.
   return (
     <div data-testid="source-switcher" className="flex items-center gap-1.5 md:gap-2 flex-wrap">
-      <span className="font-ibm-mono text-[10px] text-military-rust/60 uppercase tracking-wider">
+      <span className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider">
         Армлист:
       </span>
       {unit.sources.map((source) => {

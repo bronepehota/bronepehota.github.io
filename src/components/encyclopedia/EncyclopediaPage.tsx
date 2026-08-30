@@ -2,20 +2,23 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { Search } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { EncyclopediaUnit, getFactions } from '@/lib/encyclopedia-registry';
 import { FactionID } from '@/lib/types';
 import { orderedFactions } from '@/lib/faction-hierarchy';
 import { factionDisplayNames, getFactionColors } from '@/lib/faction-colors';
+import { buildSearchHaystack, matchesSearch, matchLoreTitles, type LorePageRef } from '@/lib/unit-search';
+import { LoreSearchHints } from './LoreSearchHints';
 import { UnitCard } from './UnitCard';
 import { EncyclopediaTabs } from './EncyclopediaTabs';
-import { EncyclopediaAttributionBanner } from './EncyclopediaAttributionBanner';
 import { SQUAD_GROUP_IMAGE, getCredit } from '@/lib/painted-images';
 import { cn } from '@/lib/utils';
 import { trackEvent } from '@/lib/analytics';
 
 interface EncyclopediaPageProps {
   initialUnits: EncyclopediaUnit[];
+  /** Lore page titles for search hints (history chapters + campaigns). */
+  lorePages: LorePageRef[];
 }
 
 // Faction filter is derived from the units data inside the component (data-driven).
@@ -30,7 +33,12 @@ const types: { value: TypeFilter; label: string; icon: string }[] = [
   { value: 'орудие', label: 'ОРУДИЯ', icon: '⬢' },
 ];
 
-export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps) {
+// Example queries on the empty state: manufacturer (units), a lore word from
+// chapter BODIES (hints) and a place name from a campaign — three different
+// kinds of hit, showing what the search covers.
+const SEARCH_EXAMPLES = ['Робогир', 'Блауд', 'Велиан'];
+
+export default function EncyclopediaPage({ initialUnits, lorePages }: EncyclopediaPageProps) {
   const [units] = useState<EncyclopediaUnit[]>(initialUnits);
   const [filteredUnits, setFilteredUnits] = useState<EncyclopediaUnit[]>(initialUnits);
   const [selectedFaction, setSelectedFaction] = useState<FactionID | 'all'>('all');
@@ -41,6 +49,21 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
   const [selectedSculptor, setSelectedSculptor] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoaded, setIsLoaded] = useState(false);
+
+  // Haystacks are built once (lore fields are stable per unit); the filter
+  // effect below then does a cheap token-AND check per keystroke.
+  const haystacks = useMemo(
+    () => new Map(units.map((u) => [u.id, buildSearchHaystack(u)])),
+    [units],
+  );
+
+  // Lore hints (chapters/campaigns/missions/unit-lore by title or body) —
+  // computed here (not inside LoreSearchHints) so analytics reports the same
+  // match count the user sees.
+  const loreMatches = useMemo(
+    () => matchLoreTitles(searchQuery, lorePages),
+    [searchQuery, lorePages],
+  );
 
   // Derive the faction filter from the units data — a new faction appears here
   // automatically once it has units (no hardcoded faction list to maintain).
@@ -131,16 +154,47 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
           return false;
         }
       }
-      if (searchQuery) {
-        const searchLower = searchQuery.toLowerCase();
-        const nameMatch = unit.name.toLowerCase().includes(searchLower);
-        const shortNameMatch = unit.shortName?.toLowerCase().includes(searchLower);
-        if (!nameMatch && !shortNameMatch) return false;
+      // Search covers name, shortName, faction, manufacturer, reference-book
+      // fields (designation/class/armament) and lore — see buildSearchHaystack
+      // and matchesSearch (token-AND: «полярис герой» needs both words).
+      if (searchQuery && !matchesSearch(unit, searchQuery, haystacks.get(unit.id))) {
+        return false;
       }
       return true;
     });
     setFilteredUnits(filtered);
-  }, [units, selectedFaction, selectedSculptor, selectedType, searchQuery]);
+  }, [units, haystacks, selectedFaction, selectedSculptor, selectedType, searchQuery]);
+
+  // Debounced search tracking: fires once 1200ms after the query AND result
+  // count settle (the final state of a typing burst, not every keystroke).
+  // Zero results additionally fire encyclopedia_search_empty — demand without
+  // content is the SEO/content priority signal from the search audit.
+  useEffect(() => {
+    const q = searchQuery.trim();
+    if (!q) return;
+    const results = filteredUnits.length + loreMatches.length;
+    const timer = setTimeout(() => {
+      trackEvent('encyclopedia_search', { query: q, results });
+      if (results === 0) trackEvent('encyclopedia_search_empty', { query: q });
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, [searchQuery, filteredUnits.length, loreMatches.length]);
+
+  const resetFilters = () => {
+    setSelectedFaction('all');
+    setSelectedType('all');
+    setSelectedSculptor('all');
+    setSearchQuery('');
+  };
+
+  // Example queries on the empty state: fill the search AND drop the other
+  // filters so the example is guaranteed to produce results.
+  const applySearchExample = (q: string) => {
+    setSelectedFaction('all');
+    setSelectedType('all');
+    setSelectedSculptor('all');
+    setSearchQuery(q);
+  };
 
   const activeFilterCount =
     (selectedFaction !== 'all' ? 1 : 0) +
@@ -176,22 +230,31 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
             >
               <Link
                 href="/app"
-                className="inline-flex items-center gap-1.5 font-ibm-mono text-[11px] text-military-rust/60 hover:text-military-amber transition-colors tracking-widest uppercase whitespace-nowrap"
+                className="inline-flex items-center gap-1.5 font-ibm-mono text-[11px] text-military-rust hover:text-military-amber transition-colors tracking-widest uppercase whitespace-nowrap"
               >
                 <span>←</span>
                 <span className="hidden sm:inline">В приложение</span>
                 <span className="sm:hidden">Назад</span>
               </Link>
 
-              {/* Small wordmark (replaces the giant title) */}
-              <div className="text-center leading-none">
-                <div className="font-russo text-sm md:text-base tracking-[0.25em] text-military-sand">
-                  ЭНЦИКЛОПЕДИЯ
+              {/* Small wordmark (replaces the giant title). H1 — the page's only
+                  one (units below start at h3); visually identical to the old div.
+                  The wordmark is a LINK to the archive hub (/encyclopedia) — the
+                  catalog is a section, the hub must stay one tap away (review UX). */}
+              <Link
+                href="/encyclopedia"
+                aria-label="На главную энциклопедии"
+                className="group no-underline"
+              >
+                <div className="text-center leading-none">
+                  <h1 className="font-russo text-sm md:text-base tracking-[0.25em] text-military-sand transition-colors group-hover:text-military-amber">
+                    ЭНЦИКЛОПЕДИЯ
+                  </h1>
+                  <div className="mt-0.5 font-ibm-mono text-[8px] md:text-[9px] text-military-rust tracking-[0.3em] uppercase transition-colors group-hover:text-military-amber/70">
+                    {'// База боевых единиц'}
+                  </div>
                 </div>
-                <div className="mt-0.5 font-ibm-mono text-[8px] md:text-[9px] text-military-rust/60 tracking-[0.3em] uppercase">
-                  {'// База боевых единиц'}
-                </div>
-              </div>
+              </Link>
 
               <Link
                 href="/encyclopedia/history#wars"
@@ -206,27 +269,9 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
           </div>
         </header>
 
-        {/* Мост в режим боя — тонкая строка-телетайп, вся кликабельна
-            (вернули по решению владельца 2026-08-28: прятали только песочницу) */}
-        <div data-testid="encyclopedia-battle-banner" className="mx-auto max-w-7xl px-4">
-          <Link
-            href="/app"
-            onClick={() => trackEvent('battle_entry', { from: 'encyclopedia_main' })}
-            data-testid="encyclopedia-battle-banner-link"
-            className="flex items-center gap-3 min-h-[44px] px-2 border border-military-rust/30 hover:border-military-amber/60 transition-colors group touch-manipulation no-underline"
-          >
-            <span className="font-ibm-mono text-[10px] uppercase tracking-[0.25em] text-military-rust/80 shrink-0">
-              {'// РЕЖИМ БОЯ'}
-            </span>
-            <span className="hidden sm:inline font-ibm-mono text-[10px] md:text-xs text-military-steel/70 truncate">
-              любой отряд — в строй
-            </span>
-            <span className="flex-1" />
-            <span className="font-russo text-[10px] md:text-xs uppercase tracking-widest text-military-rust group-hover:text-military-amber transition-colors shrink-0">
-              ШТАБ →
-            </span>
-          </Link>
-        </div>
+        {/* Боевой баннер убран со страницы-каталога (решение владельца 2026-08-30):
+            «в бой» — контекстный CTA на каждом досье юнита + баннер на хабе
+            «Архив вселенной»; здесь он лишь третий конкурент поиска. */}
 
         {/* Sticky navigation console — tabs + search + filters stay reachable
             from anywhere in the 20+ screen catalog. Sticky works because the
@@ -256,14 +301,26 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
             {/* Search + count */}
             <div className="flex items-center gap-3">
               <div className="relative flex-1">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-military-rust/50" />
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-military-rust" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  placeholder="ПОИСК ПО НАЗВАНИЮ…"
-                  className="w-full rounded-full border border-military-steel/30 bg-military-charcoal/60 py-1.5 pl-9 pr-3 font-ibm-mono text-[11px] tracking-wide text-white placeholder:text-military-steel/50 focus:border-military-amber/50 focus:outline-none"
+                  placeholder="ПОИСК…"
+                  className="w-full min-h-[44px] rounded-full border border-military-steel/30 bg-military-charcoal/60 py-2 pl-9 pr-9 font-ibm-mono text-[11px] tracking-wide text-white placeholder:text-military-taupe/80 focus:border-military-amber/50 focus:outline-none touch-manipulation"
                 />
+                {/* ✕ — clear the query without long backspacing (mobile audit point) */}
+                {searchQuery && (
+                  <button
+                    type="button"
+                    data-testid="search-clear"
+                    aria-label="Очистить поиск"
+                    onClick={() => setSearchQuery('')}
+                    className="absolute inset-y-0 right-1 flex w-8 items-center justify-center text-military-taupe/80 hover:text-military-amber transition-colors"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
               </div>
               <div className="flex shrink-0 items-center gap-1.5">
                 {activeFilterCount > 0 && (
@@ -271,11 +328,15 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
                     {activeFilterCount}
                   </span>
                 )}
-                <span className="font-ibm-mono text-[10px] text-military-rust/60 tabular-nums whitespace-nowrap">
+                <span className="font-ibm-mono text-[10px] text-military-rust tabular-nums whitespace-nowrap">
                   {filteredUnits.length}/{units.length}
                 </span>
               </div>
             </div>
+
+            {/* Lore hints — chapters/campaigns/missions/unit-lore matching the
+                query by title or body (computed above, shared with analytics) */}
+            <LoreSearchHints matches={loreMatches} />
 
             {/* Faction + type + sculptor selectors — on phones the faction gets its
                 own full-width row (so long names like «МЁРТВЫЙ ФЛОТ» aren't clipped
@@ -292,7 +353,7 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
                   aria-label="Фракция"
                   value={selectedFaction}
                   onChange={e => setSelectedFaction(e.target.value as FactionID | 'all')}
-                  className="w-full rounded-full border border-military-steel/30 bg-military-charcoal/70 py-1.5 pl-7 pr-3 font-ibm-mono text-[10px] tracking-wide text-white focus:border-military-amber/50 focus:outline-none md:text-xs"
+                  className="w-full min-h-[44px] rounded-full border border-military-steel/30 bg-military-charcoal/70 py-2 pl-7 pr-3 font-ibm-mono text-[10px] tracking-wide text-white focus:border-military-amber/50 focus:outline-none md:text-xs touch-manipulation"
                 >
                   {factions.map(f => (
                     <option key={f.value} value={f.value} className="bg-military-charcoal text-white">
@@ -309,7 +370,7 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
                     aria-label="Тип"
                     value={selectedType}
                     onChange={e => setSelectedType(e.target.value as TypeFilter)}
-                    className="w-full rounded-full border border-military-steel/30 bg-military-charcoal/70 py-1.5 pl-3 pr-3 font-ibm-mono text-[10px] tracking-wide text-white focus:border-military-amber/50 focus:outline-none md:text-xs"
+                    className="w-full min-h-[44px] rounded-full border border-military-steel/30 bg-military-charcoal/70 py-2 pl-3 pr-3 font-ibm-mono text-[10px] tracking-wide text-white focus:border-military-amber/50 focus:outline-none md:text-xs touch-manipulation"
                   >
                     {types.map(t => (
                       <option key={t.value} value={t.value} className="bg-military-charcoal text-white">
@@ -325,7 +386,7 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
                     aria-label="Источник миниатюр"
                     value={selectedSculptor}
                     onChange={e => setSelectedSculptor(e.target.value)}
-                    className="w-full rounded-full border border-military-steel/30 bg-military-charcoal/70 py-1.5 pl-3 pr-3 font-ibm-mono text-[10px] tracking-wide text-white focus:border-military-amber/50 focus:outline-none md:text-xs"
+                    className="w-full min-h-[44px] rounded-full border border-military-steel/30 bg-military-charcoal/70 py-2 pl-3 pr-3 font-ibm-mono text-[10px] tracking-wide text-white focus:border-military-amber/50 focus:outline-none md:text-xs touch-manipulation"
                   >
                     {sculptors.map(s => (
                       <option key={s.value} value={s.value} className="bg-military-charcoal text-white">
@@ -342,16 +403,56 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
         {/* Units grid */}
         <main className="px-4 py-4 pb-20">
           <div className="mx-auto max-w-7xl">
-            <div className="mb-4">
-              <EncyclopediaAttributionBanner />
-            </div>
+            {/* Новичковый гид «// С ЧЕГО НАЧАТЬ» переехал на хаб /encyclopedia
+                (витрина вселенной) — на каталоге юнитов он дублировал назначение
+                страницы. Легенда атрибуции (Технолог/АВБ) убрана тем же решением
+                2026-08-30: её учат тултипы чипов, досье юнита и страница
+                «Источники и права»; на каталоге осталась строка-футер под сеткой. */}
             {filteredUnits.length === 0 ? (
-              <div className="py-20 text-center">
+              <div className="py-16 text-center">
                 <div className="mb-3 text-5xl opacity-20">∅</div>
                 <p className="font-oswald text-lg text-military-taupe">НИЧЕГО НЕ НАЙДЕНО</p>
-                <p className="mt-1 font-ibm-mono text-xs text-military-steel">
-                  Измените параметры фильтрации
-                </p>
+                {searchQuery ? (
+                  // Empty state WITH a query: echo it, offer a one-tap reset
+                  // (a forgotten faction selector + query = zero without a clue)
+                  // and example queries that are known to hit.
+                  <>
+                    <p className="mt-1 font-ibm-mono text-xs text-military-taupe">
+                      по запросу «{searchQuery}»
+                    </p>
+                    <div className="mt-5">
+                      <button
+                        type="button"
+                        data-testid="search-empty-reset"
+                        onClick={resetFilters}
+                        className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-military-amber/50 bg-military-charcoal/60 px-5 font-ibm-mono text-[11px] uppercase tracking-wider text-military-amber hover:border-military-amber transition-colors touch-manipulation"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                        Сбросить фильтры
+                      </button>
+                    </div>
+                    <p className="mt-6 font-ibm-mono text-[10px] uppercase tracking-wider text-military-taupe/80">
+                      возможно, вы искали:
+                    </p>
+                    <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
+                      {SEARCH_EXAMPLES.map((ex) => (
+                        <button
+                          key={ex}
+                          type="button"
+                          data-testid="search-example"
+                          onClick={() => applySearchExample(ex)}
+                          className="inline-flex items-center rounded-full border border-military-amber/40 bg-military-charcoal/60 px-3 py-1.5 font-ibm-mono text-[10px] uppercase tracking-wide text-military-amber/90 hover:border-military-amber transition-colors touch-manipulation"
+                        >
+                          {ex}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <p className="mt-1 font-ibm-mono text-xs text-military-taupe">
+                    Измените параметры фильтрации
+                  </p>
+                )}
               </div>
             ) : (
               <div
@@ -382,9 +483,29 @@ export default function EncyclopediaPage({ initialUnits }: EncyclopediaPageProps
           </div>
         </main>
 
-        <div className="mx-auto max-w-7xl">
-          <div className="military-divider mb-8" />
-        </div>
+        {/* Футер-строка каталога: канон и «Дополнить» — одним тапом, без блока-легенды.
+            «Дополнить» — CTA сообществу (не кредит первоисточника), поэтому nofollow. */}
+        <footer className="mx-auto max-w-7xl px-4 pb-10">
+          <div className="military-divider mb-4" />
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+            <Link
+              href="/encyclopedia/sources"
+              data-testid="encyclopedia-sources-footer"
+              className="font-ibm-mono text-[10px] uppercase tracking-[0.2em] text-military-rust hover:text-military-amber transition-colors"
+            >
+              {'// ИСТОЧНИКИ И ПРАВА →'}
+            </Link>
+            <a
+              href="https://vk.ru/lastbpcoder"
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+              data-testid="encyclopedia-contribute-footer"
+              className="inline-flex min-h-[44px] items-center gap-1.5 font-ibm-mono text-[10px] uppercase tracking-wider text-military-amber/90 hover:text-military-amber transition-colors touch-manipulation"
+            >
+              ДОПОЛНИТЬ ↗
+            </a>
+          </div>
+        </footer>
       </div>
     </div>
   );

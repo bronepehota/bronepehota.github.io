@@ -52,13 +52,16 @@ interface SourceChipProps {
   logo?: string;
   /** When set, the chip becomes a link. */
   url?: string;
+  /** Link relation. Default keeps primary-source credits follow;
+   *  CTAs and sponsor chips pass a nofollow variant. */
+  rel?: string;
   /** Hex tone for the icon and border tint (ignored when `logo` is set). */
   tone?: string;
   /** Compact sizing for dense surfaces (faction cards). */
   compact?: boolean;
 }
 
-export function SourceChip({ name, role, icon, logo, url, tone, compact }: SourceChipProps) {
+export function SourceChip({ name, role, icon, logo, url, rel = 'noopener noreferrer', tone, compact }: SourceChipProps) {
   const Icon = icon;
   const padX = compact ? 'px-1.5' : 'px-2';
   const padY = compact ? 'py-0.5' : 'py-1';
@@ -81,11 +84,11 @@ export function SourceChip({ name, role, icon, logo, url, tone, compact }: Sourc
       )}
       <span className={cn(nameCls, 'uppercase text-military-sand')}>{name}</span>
       {role && (
-        <span className="font-ibm-mono text-[9px] normal-case tracking-normal text-military-steel/60">
+        <span className="font-ibm-mono text-[9px] normal-case tracking-normal text-military-taupe/80">
           · {role}
         </span>
       )}
-      {url && <ExternalLink className={cn(compact ? 'w-2.5 h-2.5' : 'w-3 h-3', 'text-military-steel/50')} aria-hidden />}
+      {url && <ExternalLink className={cn(compact ? 'w-2.5 h-2.5' : 'w-3 h-3', 'text-military-taupe/80')} aria-hidden />}
     </>
   );
 
@@ -102,7 +105,7 @@ export function SourceChip({ name, role, icon, logo, url, tone, compact }: Sourc
       <a
         href={url}
         target="_blank"
-        rel="noopener noreferrer"
+        rel={rel}
         className={cls}
         style={style}
         title={url}
@@ -229,7 +232,7 @@ export function LoreSourceRow({ loreAuthor, credit, withHeader = true, compact, 
   return (
     <div data-testid="lore-source-row" className={cn('flex flex-wrap items-center gap-2', className)}>
       {withHeader && (
-        <span className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider">
+        <span className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider">
           {'// ИСТОЧНИК'}
         </span>
       )}

@@ -48,21 +48,36 @@ export default function MissionListPage({ missions, campaigns }: MissionListPage
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-military-rust/60 to-transparent animate-pulse" />
 
           <div className="max-w-7xl mx-auto">
-            {/* Back link */}
-            <Link
-              href="/app"
+            {/* Top row: back to the app + hub wordmark — the archive hub must be
+                reachable from every section (review UX). Same nav-link styling. */}
+            <div
               className={cn(
-                'inline-flex items-center gap-2 font-ibm-mono text-xs md:text-sm',
-                'text-military-rust/60 hover:text-military-amber transition-colors',
-                'tracking-widest uppercase mb-4 md:mb-8',
+                'flex items-center justify-between gap-4 mb-4 md:mb-8',
                 'fade-in-up opacity-0',
                 isLoaded && 'opacity-100',
               )}
               style={{ animationFillMode: 'forwards', animationDelay: '0.1s' }}
             >
-              <ArrowLeft className="w-4 h-4" strokeWidth={2} />
-              <span>В приложение</span>
-            </Link>
+              <Link
+                href="/app"
+                className={cn(
+                  'inline-flex items-center gap-2 font-ibm-mono text-xs md:text-sm',
+                  'text-military-rust/60 hover:text-military-amber transition-colors',
+                  'tracking-widest uppercase',
+                )}
+              >
+                <ArrowLeft className="w-4 h-4" strokeWidth={2} />
+                <span>В приложение</span>
+              </Link>
+              <Link
+                href="/encyclopedia"
+                aria-label="На главную энциклопедии"
+                className="inline-flex items-center gap-2 font-ibm-mono text-xs md:text-sm text-military-rust/60 hover:text-military-amber transition-colors tracking-widest uppercase"
+              >
+                <span>Энциклопедия</span>
+                <span aria-hidden>→</span>
+              </Link>
+            </div>
 
             {/* Main title */}
             <div className="text-center mb-4 md:mb-10">
@@ -120,11 +135,13 @@ export default function MissionListPage({ missions, campaigns }: MissionListPage
                 className={cn('fade-in-up opacity-0', isLoaded && 'opacity-100')}
                 style={{ animationFillMode: 'forwards', animationDelay: `${0.4 + gi * 0.1}s` }}
               >
-                {/* Campaign header */}
+                {/* Scenario-set header. Deliberately NOT «кампания»: that word is
+                    reserved for the lore chronicles of «Хроники войн» (history #wars)
+                    — these JSON groups are scenario boxes («Цербер», «Классические»). */}
                 <div className="flex items-center gap-3 mb-4 md:mb-6">
                   <Target className="w-5 h-5 text-military-rust" />
                   <h2 className="font-oswald text-xl md:text-2xl text-military-sand uppercase tracking-wide">
-                    Кампания «{group.campaign.name}»
+                    Набор сценариев «{group.campaign.name}»
                   </h2>
                 </div>
                 {group.campaign.intro && (

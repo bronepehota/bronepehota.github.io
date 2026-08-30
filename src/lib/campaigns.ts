@@ -55,6 +55,27 @@ export function getAllCampaigns(): CampaignMeta[] {
 }
 
 /**
+ * Era badge for the whole «Хроники войн» block (TOC): the min–max year span across
+ * ALL campaigns — each `era` may itself be a range («4451–4528»). Taking the first
+ * campaign's opening year and the last campaign's closing year is WRONG: the list
+ * is ordered by `order`, not chronology (the 4451 «Первая волна» closes it), which
+ * used to produce «4451–4451».
+ *
+ * Undefined when no campaign carries a parseable 4-digit year (no badge rendered).
+ */
+export function warsEraSpan(campaigns: { era?: string }[]): string | undefined {
+  const years = campaigns.flatMap((c) => {
+    const matches = c.era?.match(/\b\d{4}\b/g) ?? [];
+    return matches.map(Number);
+  });
+  if (years.length === 0) return undefined;
+  const min = Math.min(...years);
+  const max = Math.max(...years);
+  // Single-year span collapses to just the year («4546», not «4546–4546»).
+  return min === max ? String(min) : `${min}–${max}`;
+}
+
+/**
  * Markdown → sanitized HTML.
  *
  * `remark-html` does NOT sanitize (raw `<script>`/`onerror=` pass through), so we
@@ -80,6 +101,38 @@ export async function renderMarkdownToSanitizedHtml(content: string): Promise<st
     .use(rehypeStringify)     // hast → HTML string
     .process(content);
   return String(file);
+}
+
+/** Sync raw markdown (frontmatter + body) of a campaign — no remark. Used at
+ *  build time to feed search-hint bodies (encyclopedia page); Jest-safe. */
+export function getCampaignRaw(slug: string): string | null {
+  const fullPath = path.join(CAMPAIGNS_DIR, `${slug}.md`);
+  if (!fs.existsSync(fullPath)) return null;
+  return fs.readFileSync(fullPath, 'utf8');
+}
+
+/** Reverse lookup entry of `unitCampaigns` — which war chronicle a unit fought in. */
+export interface UnitCampaignRef {
+  slug: string;
+  title: string;
+  role: string;
+}
+
+/**
+ * Reverse index of the campaign→unit link: every chronicle whose frontmatter
+ * `units[]` roster names this unit, in `getAllCampaigns()` (chronological)
+ * order. The forward edge (campaign detail → unit dossiers) already exists;
+ * this is what powers the «// УЧАСТИЕ В ВОЙНАХ» block on the unit page.
+ * Pure and sync (frontmatter only) — Jest-safe.
+ */
+export function unitCampaigns(unitId: string): UnitCampaignRef[] {
+  return getAllCampaigns()
+    .filter((c) => (c.units ?? []).some((u) => u.id === unitId))
+    .map((c) => ({
+      slug: c.slug,
+      title: c.title,
+      role: c.units!.find((u) => u.id === unitId)!.role,
+    }));
 }
 
 // Async: dynamically imports remark (ESM-only) so the module stays Jest-importable.

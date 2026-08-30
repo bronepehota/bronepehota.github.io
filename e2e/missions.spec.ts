@@ -133,10 +133,10 @@ test.describe('Миссии', () => {
     await expect(page.getByTestId('mission-confirm-button')).toBeVisible();
     // The capture-hold card is visible next to free play
     await expect(page.getByTestId('mission-card-zahvat_tochek')).toBeVisible();
-    // No campaign header for classic (it is not grouped in the wizard)
-    await expect(page.getByText('Кампания «Классические сценарии»')).toHaveCount(0);
-    // Цербер campaign header still present (grouping intact)
-    await expect(page.getByText('Кампания «Цербер»')).toBeVisible();
+    // No scenario-set header for classic (it is not grouped in the wizard)
+    await expect(page.getByText('Набор сценариев «Классические сценарии»')).toHaveCount(0);
+    // Цербер scenario-set header still present (grouping intact)
+    await expect(page.getByText('Набор сценариев «Цербер»')).toBeVisible();
   });
 
   test('бой: попап завершения тура показывает лимит ходов миссии', async ({ page }) => {
@@ -158,7 +158,7 @@ test.describe('Миссии', () => {
     await page.goto('/encyclopedia/missions');
     await page.waitForLoadState('networkidle');
 
-    await expect(page.getByText('Кампания «Классические сценарии»')).toBeVisible();
+    await expect(page.getByText('Набор сценариев «Классические сценарии»')).toBeVisible();
     await expect(page.getByTestId('mission-group-classic')).toBeVisible();
     await expect(page.getByTestId('mission-card-zahvat_tochek')).toBeVisible();
   });

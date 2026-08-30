@@ -15,6 +15,7 @@ import { UnitLore } from './UnitDetail/UnitLore';
 import { UnitSpecs } from './UnitDetail/UnitSpecs';
 import { UnitArmament } from './UnitDetail/UnitArmament';
 import { UnitLoreDetail } from './UnitDetail/UnitLoreDetail';
+import { UnitCampaigns } from './UnitDetail/UnitCampaigns';
 import { DesignationChip } from './UnitDetail/DesignationChip';
 import type { UnitLoreDoc } from '@/lib/unit-lore';
 import { SourceAvailability } from './SourceAvailability';
@@ -30,6 +31,7 @@ import { UnitCombatSandbox } from './UnitDetail/UnitCombatSandbox';
 // не так хороша, как реальный бой в штабе, — только смущает. Код и тесты
 // остаются; вернуть — выставить флаг в true.
 const SHOW_SANDBOX = false;
+import type { UnitCampaignRef } from '@/lib/campaigns';
 import type { Squad, Machine, Soldier } from '@/lib/types';
 
 interface UnitDetailPageProps {
@@ -38,6 +40,9 @@ interface UnitDetailPageProps {
   sourceOrder: string[];
   /** Optional long-form lore doc (rendered by <UnitLoreDetail>). Null when absent. */
   loreDoc?: UnitLoreDoc | null;
+  /** «// УЧАСТИЕ В ВОЙНАХ» roster — chronicles naming this unit (server-computed
+   *  via `unitCampaigns`; empty array hides the block). */
+  campaigns?: UnitCampaignRef[];
 }
 
 const factionIcons: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -60,7 +65,7 @@ const factionBadges: Record<string, string> = {
 // e.g. «Мёртвый Флот») — NOT a local copy that goes stale when factions are
 // added. `factionDisplayNames` is the short-name fallback.
 
-export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc }: UnitDetailPageProps) {
+export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc, campaigns = [] }: UnitDetailPageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [activeSource, setActiveSource] = useState<string>(sourceOrder[0] ?? unit.sources[0]?.id ?? '');
   // Боевая песочница (bottom-sheet) — открывается кнопкой «ПРОВЕРИТЬ БОЕМ» в CTA-панели.
@@ -142,13 +147,13 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc }:
         {/* Header */}
         <header className="relative py-6 md:py-12 px-4">
           <div className="max-w-6xl mx-auto">
-            {/* Back link */}
+            {/* Back link — to the units catalog (the root is now the archive hub) */}
             <Link
-              href="/encyclopedia"
+              href="/encyclopedia/units"
               className={cn(
                 'inline-flex items-center gap-2 font-ibm-mono text-xs md:text-sm',
-                'text-military-rust/60 hover:text-military-amber transition-colors',
-                'tracking-widest uppercase mb-5 md:mb-8',
+                'text-military-rust hover:text-military-amber transition-colors',
+                'tracking-widest uppercase mb-2 md:mb-2.5',
                 'fade-in-up opacity-0',
                 isLoaded && 'opacity-100'
               )}
@@ -157,6 +162,20 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc }:
               <ArrowLeft className="w-4 h-4" strokeWidth={2} />
               <span>К энциклопедии</span>
             </Link>
+
+            {/* Mini mono breadcrumb — aligns the visible location with the
+                JSON-LD one (Энциклопедия → Юниты → unit). Non-interactive:
+                the back-link above already covers the navigation. */}
+            <nav
+              aria-label="Хлебные крошки"
+              data-testid="unit-breadcrumb"
+              className="font-ibm-mono text-[10px] uppercase tracking-[0.2em] text-military-taupe/80 mb-5 md:mb-8"
+            >
+              {'ЭНЦИКЛОПЕДИЯ / ЮНИТЫ / '}
+              <span aria-current="page" className="text-military-rust">
+                {unit.name.toUpperCase()}
+              </span>
+            </nav>
 
             {/* Title section */}
             <div className={cn('flex gap-6 items-start', groupPhoto ? 'flex-col' : 'flex-col md:flex-row')}>
@@ -273,7 +292,9 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc }:
                     {unit.name}
                   </h1>
 
-                  {/* Faction */}
+                  {/* Faction — the name links to the faction-filtered catalog
+                      (deep-link ?faction= restores the filter; review UX:
+                      «путь дальше» from a unit dossier). */}
                   <div className="flex items-center gap-3 mb-3 md:mb-4">
                     <div
                       className="p-2 rounded-lg"
@@ -283,12 +304,15 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc }:
                         <FactionLogo faction={unit.faction} className="w-full h-full" fallback={FactionIcon} />
                       </div>
                     </div>
-                    <span
-                      className="font-oswald text-lg md:text-xl"
+                    <Link
+                      href={`/encyclopedia/units?faction=${unit.faction}`}
+                      data-testid="unit-faction-link"
+                      title={`Все юниты фракции «${faction.name}»`}
+                      className="font-oswald text-lg md:text-xl transition-opacity hover:opacity-80"
                       style={{ color: faction.color }}
                     >
                       {faction.name}
-                    </span>
+                    </Link>
                   </div>
 
                   {/* Class + Rank */}
@@ -296,7 +320,7 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc }:
                     <div className="mb-4 md:mb-6 flex flex-wrap items-center gap-x-5 gap-y-1">
                       {unit.encyclopedia?.class && (
                         <span>
-                          <span className="font-ibm-mono text-xs text-military-steel/60 uppercase tracking-wider mr-2">
+                          <span className="font-ibm-mono text-xs text-military-taupe/80 uppercase tracking-wider mr-2">
                             CLASS
                           </span>
                           <span className="font-oswald text-military-sand">
@@ -306,7 +330,7 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc }:
                       )}
                       {rankLabel && (
                         <span>
-                          <span className="font-ibm-mono text-xs text-military-steel/60 uppercase tracking-wider mr-2">
+                          <span className="font-ibm-mono text-xs text-military-taupe/80 uppercase tracking-wider mr-2">
                             РАНГ
                           </span>
                           <span className="font-oswald text-military-amber">
@@ -329,7 +353,7 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc }:
                       with a separate painter + sculptor previously stacked two
                       double-header blocks — which looked broken under a wide group photo. */}
                   <div className="mb-4 md:mb-6 flex flex-wrap items-center gap-x-3 gap-y-2">
-                    <span className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider">
+                    <span className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider">
                       {attributionHeader}
                     </span>
                     {photoCredit ? (
@@ -362,7 +386,7 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc }:
                         Label + chip grouped so they don't split when the strip wraps on mobile. */}
                     {sculptorDiffers && miniatureSourceCredit && (
                       <span className="inline-flex items-center gap-1.5">
-                        <span className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider">
+                        <span className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider">
                           {'// МИНИАТЮРЫ'}
                         </span>
                         <MiniatureChip
@@ -377,7 +401,7 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc }:
                     {/* Squad sponsor — who funded/commissioned the squad (miniatures/lore). */}
                     {unit.sponsor && (
                       <span className="inline-flex items-center gap-1.5">
-                        <span className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider">
+                        <span className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider">
                           {'// СПОНСОР'}
                         </span>
                         <SponsorChip name={unit.sponsor.name} url={unit.sponsor.url} withHeader={false} />
@@ -476,6 +500,10 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc }:
             {/* Long-form lore («Читать подробнее») — only when a .md doc exists for this unit. */}
             {loreDoc && <UnitLoreDetail doc={loreDoc} />}
 
+            {/* «// УЧАСТИЕ В ВОЙНАХ» — reverse edge of the campaign rosters.
+                Renders nothing for units that fought in no chronicle. */}
+            <UnitCampaigns campaigns={campaigns} />
+
             {/* Buffs section */}
             {unit.buffs && unit.buffs.length > 0 && (
               <section
@@ -504,7 +532,7 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc }:
                               {t === 'army' ? 'армия' : t === 'machine' ? 'машина' : 'солдат'}
                             </span>
                           ))}
-                          <span className="text-[10px] px-2 py-0.5 rounded-full font-ibm-mono bg-military-steel/30 border border-military-steel/40 text-military-steel uppercase">
+                          <span className="text-[10px] px-2 py-0.5 rounded-full font-ibm-mono bg-military-steel/30 border border-military-steel/40 text-military-taupe uppercase">
                             {buff.phase === 'always' ? 'всегда' : buff.phase === 'shot' ? 'стрельба' : buff.phase === 'melee' ? 'ББ' : buff.phase}
                           </span>
                         </div>

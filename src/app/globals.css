@@ -491,6 +491,8 @@ button, a, input, select, textarea {
   .radar-scan,
   .typewriter-text,
   .fade-in-up,
+  /* Tailwind twin of .fade-in-up (tailwind.config.ts animation) — e.g. BackToToc */
+  .animate-fade-in-up,
   .slide-in-left,
   .slide-in-right,
   .diagonal-reveal {
@@ -1071,4 +1073,157 @@ button, a, input, select, textarea {
 .mobile-squad-scroll-container::-webkit-scrollbar-thumb {
   background-color: rgb(51 65 85);
   border-radius: 2px;
+}
+
+/* ========================================
+   HISTORY — «ДЕЛО RG-4530» (Phase 2 showcase)
+   Tokens only: military-*, russo/oswald/ibm-mono.
+   Scroll-driven pieces are CSS-only and degrade
+   to a static ribbon where unsupported.
+   ======================================== */
+
+/* Giant outlined era year on the full-bleed dividers (Russo, ~15-20vw).
+   Faint fill when text-stroke is unsupported. */
+.history-era-outline {
+  font-family: var(--font-russo), sans-serif;
+  font-weight: 900;
+  line-height: 0.85;
+  color: rgba(234, 88, 12, 0.07);
+  user-select: none;
+  pointer-events: none;
+}
+@supports (-webkit-text-stroke: 1px #000) {
+  .history-era-outline {
+    color: transparent;
+    -webkit-text-stroke: 1.5px rgba(234, 88, 12, 0.25);
+  }
+}
+
+/* Vertical folder spine — chapter number on the section's left edge */
+.history-spine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 2.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid rgba(234, 88, 12, 0.22);
+  background: rgba(0, 0, 0, 0.22);
+  font-family: var(--font-ibm-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.35em;
+  color: #ea580c;
+  writing-mode: vertical-rl;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Longread body: h3 sub-numbering «// 07.1» via CSS counters.
+   The `chapter` counter is set inline per section (counter-reset) — the
+   inline value also re-resets `subsec` (an inline `counter-reset` replaces
+   this class-level declaration, not merges with it);
+   numbered sections get the «NN.M» form, grouped ones plain «// N». */
+.history-body {
+  counter-reset: subsec;
+}
+.history-body h3::before {
+  counter-increment: subsec;
+  content: '// ' counter(subsec) '  ';
+  font-family: var(--font-ibm-mono), monospace;
+  font-size: 0.7em;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  color: #ea580c;
+  margin-right: 0.35em;
+}
+.history-body--numbered h3::before {
+  content: '// ' counter(chapter, decimal-leading-zero) '.' counter(subsec) '  ';
+}
+
+/* Campaign chronicle bodies (/campaigns/[slug]) — subsections are h2 in the
+   .md (history chapters use h3): same dossier treatment — Oswald subhead with
+   the mono «//» requisition prefix, but un-numbered (the campaign's ordinal
+   lives on the folder spine, not in the chapter counter). */
+.history-body.campaign-body h2 {
+  font-family: var(--font-oswald), sans-serif;
+  font-size: 1.125rem;
+  letter-spacing: 0.05em;
+  color: #d6d3d1;
+}
+.history-body.campaign-body h2::before {
+  content: '//  ';
+  font-family: var(--font-ibm-mono), monospace;
+  font-size: 0.7em;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  color: #ea580c;
+  margin-right: 0.35em;
+}
+
+/* Drop cap on the first paragraph of CHRONICLE chapters (no group).
+   initial-letter where supported, float::first-letter fallback. */
+.history-dropcap > p:first-of-type::first-letter {
+  float: left;
+  font-family: var(--font-russo), sans-serif;
+  font-weight: 900;
+  font-size: 3.2em;
+  line-height: 0.78;
+  padding: 0.05em 0.14em 0 0;
+  color: #ea580c;
+}
+@supports (initial-letter: 2) {
+  .history-dropcap > p:first-of-type::first-letter {
+    float: none;
+    initial-letter: 2;
+    font-size: 1em;
+    line-height: inherit;
+    padding: 0 0.14em 0 0;
+  }
+}
+
+/* Sticky era ribbon — the rust progress slider crawls along the ruler with
+   reading (scroll-driven), ticks light up while their divider is on screen
+   (view() timelines named per divider, wired via inline styles).
+   No support → static ruler (base Tailwind styles, fill stays at 0 width). */
+@keyframes era-ribbon-fill {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+@keyframes era-tick-active {
+  0%, 100% {
+    color: rgba(168, 162, 158, 0.55);
+    border-bottom-color: transparent;
+  }
+  /* Hot while the zone COVERS the viewport (animation-range: contain) —
+     i.e. from its divider passing the top edge to its last chapter leaving
+     the bottom edge. 0% / 100% stay dim so zones not yet reached (clamped
+     to 0) and already passed (clamped to 100%) never burn. */
+  0.3%, 99.7% {
+    color: #f59e0b;
+    border-bottom-color: rgba(234, 88, 12, 0.8);
+  }
+}
+@supports (animation-timeline: scroll()) {
+  .era-ribbon-progress {
+    animation: era-ribbon-fill linear both;
+    animation-timeline: scroll(root block);
+  }
+}
+@supports (animation-timeline: view()) {
+  .era-tick--sd {
+    animation: era-tick-active linear both;
+    /* `contain` — not the default `cover`: a zone spans a whole era of
+       chapters (often 20k+ px), so cover-relative keyframe percentages
+       would leave the tick dark for the first screens of the era. Contain
+       = 0% when the zone starts covering the viewport, 100% when it stops. */
+    animation-range: contain 0% contain 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .era-ribbon-progress,
+  .era-tick--sd {
+    animation: none !important;
+  }
 }

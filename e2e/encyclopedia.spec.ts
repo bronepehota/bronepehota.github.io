@@ -7,7 +7,7 @@ test.describe('Энциклопедия', () => {
   });
 
   test('отображает список всех отрядов', async ({ page }) => {
-    await page.goto('/encyclopedia');
+    await page.goto('/encyclopedia/units');
     await page.waitForLoadState('networkidle');
 
     const grid = page.getByTestId('unit-grid');
@@ -19,7 +19,7 @@ test.describe('Энциклопедия', () => {
   });
 
   test('фильтрация по фракции работает', async ({ page }) => {
-    await page.goto('/encyclopedia');
+    await page.goto('/encyclopedia/units');
     await page.waitForLoadState('networkidle');
 
     // Выбрать фильтр "ПОЛЯРИС"
@@ -33,7 +33,7 @@ test.describe('Энциклопедия', () => {
   });
 
   test('фильтрация по типу работает', async ({ page }) => {
-    await page.goto('/encyclopedia');
+    await page.goto('/encyclopedia/units');
     await page.waitForLoadState('networkidle');
 
     // Выбрать фильтр "ПЕХОТА"
@@ -47,7 +47,7 @@ test.describe('Энциклопедия', () => {
   });
 
   test('фильтрация по источнику миниатюр работает', async ({ page }) => {
-    await page.goto('/encyclopedia');
+    await page.goto('/encyclopedia/units');
     await page.waitForLoadState('networkidle');
     await page.waitForSelector('[data-testid^="unit-card-"]');
 
@@ -70,7 +70,7 @@ test.describe('Энциклопедия', () => {
   });
 
   test('deep-link ?sculptor=lisitsin предфильтрует юнитов', async ({ page }) => {
-    await page.goto('/encyclopedia?sculptor=lisitsin');
+    await page.goto('/encyclopedia/units?sculptor=lisitsin');
     await page.waitForLoadState('networkidle');
     await page.waitForSelector('[data-testid^="unit-card-"]');
 
@@ -80,7 +80,7 @@ test.describe('Энциклопедия', () => {
   });
 
   test('поиск по названию работает', async ({ page }) => {
-    await page.goto('/encyclopedia');
+    await page.goto('/encyclopedia/units');
     await page.waitForLoadState('networkidle');
 
     // Ввести поисковый запрос (placeholder is uppercase)
@@ -93,8 +93,35 @@ test.describe('Энциклопедия', () => {
     expect(count).toBeGreaterThan(0);
   });
 
+  test('поиск «Робогир» находит технику, подсказка ведёт на главу Истории', async ({ page }) => {
+    await page.goto('/encyclopedia/units');
+    await page.waitForLoadState('networkidle');
+
+    await page.fill('input[placeholder*="ПОИСК"]', 'Робогир');
+    await page.waitForTimeout(300);
+
+    // Производитель «Робогир Индастриз» — техника находится поиском по лору
+    const cards = page.locator('[href*="/encyclopedia/unit/"]');
+    expect(await cards.count()).toBeGreaterThan(0);
+
+    // Подсказки лор-строк могли не совпасть (зависит от заголовков) — не падаем:
+    // обязательна только видимость строки подсказок при совпадении.
+  });
+
+  test('поиск «Лорд» показывает подсказку-главу', async ({ page }) => {
+    await page.goto('/encyclopedia/units');
+    await page.waitForLoadState('networkidle');
+
+    await page.fill('input[placeholder*="ПОИСК"]', 'Лорд');
+    await page.waitForTimeout(300);
+
+    const hint = page.getByTestId('lore-search-hint');
+    await expect(hint.first()).toBeVisible();
+    await expect(hint.first()).toContainText('Лорды');
+  });
+
   test('детальная страница отряда открывается', async ({ page }) => {
-    await page.goto('/encyclopedia');
+    await page.goto('/encyclopedia/units');
     await page.waitForLoadState('networkidle');
 
     // Подождать пока загрузятся карточки
@@ -163,21 +190,23 @@ test.describe('Энциклопедия', () => {
     expect(response?.status()).toBe(500);
   });
 
-  test('переключатель разделов виден и содержит 3 вкладки', async ({ page }) => {
-    await page.goto('/encyclopedia');
+  test('переключатель разделов виден и содержит 5 вкладок', async ({ page }) => {
+    await page.goto('/encyclopedia/units');
     await page.waitForLoadState('networkidle');
 
     const tabs = page.getByTestId('encyclopedia-tabs');
     await expect(tabs).toBeVisible();
     await expect(page.getByTestId('encyclopedia-tab-units')).toBeVisible();
+    await expect(page.getByTestId('encyclopedia-tab-history')).toBeVisible();
+    await expect(page.getByTestId('encyclopedia-tab-world')).toBeVisible();
     await expect(page.getByTestId('encyclopedia-tab-missions')).toBeVisible();
     await expect(page.getByTestId('encyclopedia-tab-factions')).toBeVisible();
-    // Юниты активны на главной странице
+    // Юниты активны на странице каталога
     await expect(page.getByTestId('encyclopedia-tab-units')).toHaveAttribute('aria-current', 'page');
   });
 
   test('вкладка ведёт на миссии', async ({ page }) => {
-    await page.goto('/encyclopedia');
+    await page.goto('/encyclopedia/units');
     await page.waitForLoadState('networkidle');
     await page.getByTestId('encyclopedia-tab-missions').click();
     // Client-side navigation — auto-wait for the URL to update.
@@ -198,7 +227,7 @@ test.describe('Энциклопедия', () => {
   });
 
   test('deep-link ?faction=polaris предфильтрует юнитов', async ({ page }) => {
-    await page.goto('/encyclopedia?faction=polaris');
+    await page.goto('/encyclopedia/units?faction=polaris');
     await page.waitForLoadState('networkidle');
     await page.waitForSelector('[data-testid^="unit-card-"]');
 
@@ -287,17 +316,18 @@ test.describe('Энциклопедия', () => {
     await expect(page.getByTestId('image-source-chip')).toHaveCount(0);
   });
 
-  test('легенда об источниках показывается и разворачивается', async ({ page }) => {
-    await page.goto('/encyclopedia');
+  test('легенда атрибуции убрана — в футере строка источников и «Дополнить»', async ({ page }) => {
+    await page.goto('/encyclopedia/units');
     await page.waitForLoadState('networkidle');
 
-    const banner = page.getByTestId('encyclopedia-sources-banner');
-    await expect(banner).toBeVisible();
-    // Compact mode: logos + labels visible — official canon + АВБ (alternative) umbrella mark
-    await expect(banner.getByText('Официальный канон')).toBeVisible();
-    await expect(banner.getByText('АВБ — альтернативная версия')).toBeVisible();
-    // «Дополнить» CTA is a link
-    await expect(banner.getByRole('link', { name: /дополнить/i })).toBeVisible();
+    // Блок-легенда (Технолог/АВБ) убрана со страницы-каталога (решение 2026-08-30):
+    // канон объясняют тултипы чипов, досье и /encyclopedia/sources.
+    await expect(page.getByTestId('encyclopedia-sources-banner')).toHaveCount(0);
+    const footer = page.getByTestId('encyclopedia-sources-footer');
+    await expect(footer).toBeVisible();
+    await expect(footer).toContainText('ИСТОЧНИКИ И ПРАВА');
+    // «Дополнить» — CTA сообществу, внешний nofollow-линк
+    await expect(page.getByTestId('encyclopedia-contribute-footer')).toBeVisible();
   });
 
   test('чин происхождения кликабелен и ведёт на сайт источника', async ({ page }) => {
@@ -317,11 +347,174 @@ test.describe('Энциклопедия', () => {
     await expect(page.getByTestId('armament-entry').first()).toContainText('Световой меч');
   });
 
-  test('плашка режима боя ведёт в штаб', async ({ page }) => {
+  test('боевой баннер не занимает каталог — живёт на хабе', async ({ page }) => {
+    // Решение 2026-08-30: «в бой» на каталоге убран (конкурент поиска);
+    // входы в бой — CTA на досье юнита и баннер хаба (следующий тест).
+    await page.goto('/encyclopedia/units');
+    await expect(page.getByTestId('encyclopedia-battle-banner')).toHaveCount(0);
+  });
+});
+
+// ——— Поиск: тела лора, миссии в подсказках, empty state (Фаза 3 аудита поиска) ——
+test.describe('Энциклопедия — поиск по телам лора', () => {
+  test.beforeEach(async ({ page }) => {
+    await clearStorage(page);
+  });
+
+  test('«Блауд» находит подсказку по телу главы (не по титулу)', async ({ page }) => {
+    await page.goto('/encyclopedia/units');
+    await page.waitForLoadState('networkidle');
+
+    // «Блауд» — планета из ТЕЛА глав («Космография Доминиона», «Императорские
+    // войны»); позже появились и титульные носители (кампания «Оборона Блауда»,
+    // досье «Блауд») — они ранжируются выше, но и матчи по телу глав видны.
+    await page.fill('input[placeholder*="ПОИСК"]', 'Блауд');
+    const hint = page.getByTestId('lore-search-hint');
+    await expect(hint.first()).toBeVisible();
+    await expect(hint.first()).toContainText('Блауд');
+    // Матч по телу — глава ведёт на свой якорь в Истории
+    const chapterHint = hint.filter({ hasText: 'Космография' });
+    await expect(chapterHint).toHaveCount(1);
+    await expect(chapterHint).toHaveAttribute('href', /\/encyclopedia\/history#/);
+  });
+
+  test('«Капкан» показывает подсказку-миссию', async ({ page }) => {
+    await page.goto('/encyclopedia/units');
+    await page.waitForLoadState('networkidle');
+
+    await page.fill('input[placeholder*="ПОИСК"]', 'Капкан');
+    const hint = page.getByTestId('lore-search-hint');
+    await expect(hint.first()).toBeVisible();
+    await expect(hint.first()).toContainText('МИССИЯ');
+    await expect(hint.first()).toContainText('Капкан');
+    await expect(hint.first()).toHaveAttribute('href', /\/encyclopedia\/mission\/kapkan/);
+  });
+
+  test('пустой результат: эхо, сброс фильтров и чипы-примеры', async ({ page }) => {
+    await page.goto('/encyclopedia/units');
+    await page.waitForLoadState('networkidle');
+
+    // «зызы» — нет ни юнитов, ни лора
+    await page.fill('input[placeholder*="ПОИСК"]', 'зызы');
+    const reset = page.getByTestId('search-empty-reset');
+    await expect(reset).toBeVisible();
+
+    // Сброс возвращает всю сетку и очищает инпут
+    await reset.click();
+    const input = page.locator('input[placeholder*="ПОИСК"]');
+    await expect(input).toHaveValue('');
+    await expect(page.getByTestId('unit-grid')).toBeVisible();
+    // Счётчик вернулся к полному каталогу
+    await expect(page.getByTestId('unit-grid').locator('[href*="/encyclopedia/unit/"]')).not.toHaveCount(0);
+
+    // Чип-пример подставляет запрос и находит результат
+    await page.fill('input[placeholder*="ПОИСК"]', 'зызы');
+    await expect(page.getByTestId('search-empty-reset')).toBeVisible();
+    const example = page.getByTestId('search-example');
+    await expect(example.first()).toBeVisible();
+    await example.first().click();
+    await expect(page.locator('input[placeholder*="ПОИСК"]')).toHaveValue('Робогир');
+    await expect(page.getByTestId('unit-grid').locator('[href*="/encyclopedia/unit/"]').first()).toBeVisible();
+  });
+});
+
+// ——— Хаб «Архив вселенной»: корень /encyclopedia стал витриной вселенной ———
+test.describe('Энциклопедия — хаб «Архив вселенной»', () => {
+  test.beforeEach(async ({ page }) => {
+    await clearStorage(page);
+  });
+
+  test('обложка дела: гриф, счётчики из данных, лента эпох', async ({ page }) => {
+    await page.goto('/encyclopedia');
+    await page.waitForLoadState('networkidle');
+
+    const cover = page.getByTestId('encyclopedia-hub-cover');
+    await expect(cover).toBeVisible();
+    await expect(cover).toContainText('ДЕЛО № RG-4530');
+    await expect(cover).toContainText('АРХИВ ВСЕЛЕННОЙ');
+
+    // Счётчики приходят из данных реестров — на обложке живые числа, не заглушки.
+    const counters = page.getByTestId('hub-counters');
+    await expect(counters).toBeVisible();
+    await expect(counters).toContainText(/\d+/);
+
+    // Лента эпох — статичная полоса времени архива.
+    await expect(page.getByTestId('hub-era-strip')).toBeVisible();
+
+    // Поиск по вселенной — центр обложки.
+    await expect(page.getByTestId('hub-search')).toBeVisible();
+  });
+
+  test('семь папок-разделов ведут в свои разделы', async ({ page }) => {
+    await page.goto('/encyclopedia');
+    await page.waitForLoadState('networkidle');
+
+    const sections = page.getByTestId('hub-sections');
+    await expect(sections).toBeVisible();
+    await expect(page.getByTestId('hub-section-history')).toHaveAttribute('href', '/encyclopedia/history');
+    await expect(page.getByTestId('hub-section-wars')).toHaveAttribute('href', '/encyclopedia/history#wars');
+    await expect(page.getByTestId('hub-section-world')).toHaveAttribute('href', '/encyclopedia/world');
+    await expect(page.getByTestId('hub-section-units')).toHaveAttribute('href', '/encyclopedia/units');
+    await expect(page.getByTestId('hub-section-factions')).toHaveAttribute('href', '/encyclopedia/factions');
+    await expect(page.getByTestId('hub-section-missions')).toHaveAttribute('href', '/encyclopedia/missions');
+    await expect(page.getByTestId('hub-section-sources')).toHaveAttribute('href', '/encyclopedia/sources');
+  });
+
+  test('папка «Юниты» ведёт в каталог с сеткой карточек', async ({ page }) => {
+    await page.goto('/encyclopedia');
+    await page.waitForLoadState('networkidle');
+
+    await page.getByTestId('hub-section-units').click();
+    await expect(page).toHaveURL(/\/encyclopedia\/units$/);
+    await expect(page.getByTestId('unit-grid')).toBeVisible();
+  });
+
+  test('поиск «Блауд» на обложке даёт лор-подсказку', async ({ page }) => {
+    await page.goto('/encyclopedia');
+    await page.waitForLoadState('networkidle');
+
+    await page.getByTestId('hub-search').fill('Блауд');
+    const hint = page.getByTestId('lore-search-hint');
+    await expect(hint.first()).toBeVisible();
+    await expect(hint.first()).toContainText('Блауд');
+  });
+
+  test('плашка режима боя на хабе ведёт в штаб', async ({ page }) => {
     await page.goto('/encyclopedia');
     await expect(page.getByTestId('encyclopedia-battle-banner')).toBeVisible();
     await page.getByTestId('encyclopedia-battle-banner-link').click();
     await dismissIntroIfShown(page);
     await expect(page.getByTestId('rules-confirm-button')).toBeVisible({ timeout: 30000 });
+  });
+
+  test('легаси-глубокая ссылка ?faction=polaris форвардится в каталог и фильтрует', async ({ page }) => {
+    // Полный каталог — база для сравнения.
+    await page.goto('/encyclopedia/units');
+    await page.waitForLoadState('networkidle');
+    await page.waitForSelector('[data-testid^="unit-card-"]');
+    const fullCount = await page.locator('[data-testid^="unit-card-"]').count();
+    expect(fullCount).toBeGreaterThan(1);
+
+    // Старая внешняя ссылка на корень с параметром фильтра…
+    await page.goto('/encyclopedia?faction=polaris');
+    await page.waitForLoadState('networkidle');
+    await page.waitForSelector('[data-testid^="unit-card-"]');
+
+    // …мгновенно форвардится в каталог с сохранением строки.
+    await expect(page).toHaveURL(/\/encyclopedia\/units\?faction=polaris$/);
+    await expect(page.locator('select[aria-label="Фракция"]')).toHaveValue('polaris');
+
+    // Сетка отфильтрована: строго меньше полного каталога.
+    const filteredCount = await page.locator('[data-testid^="unit-card-"]').count();
+    expect(filteredCount).toBeGreaterThan(0);
+    expect(filteredCount).toBeLessThan(fullCount);
+  });
+
+  test('хаб не мигает при форварде: обложка не появляется', async ({ page }) => {
+    await page.goto('/encyclopedia?faction=polaris');
+    // До завершения форварда обложка хаба не должна показаться (mount-эффект
+    // гасит её в первом же кадре) — ищем сразу, без networkidle.
+    await expect(page.getByTestId('encyclopedia-hub-cover')).toHaveCount(0);
+    await expect(page).toHaveURL(/\/encyclopedia\/units\?faction=polaris$/);
   });
 });

@@ -29,7 +29,7 @@ export function UnitLore({ unit }: UnitLoreProps) {
 
       {unit.encyclopedia?.lore && (
         <div className="mb-4">
-          <h3 className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider mb-2">
+          <h3 className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider mb-2">
             {'// ОПИСАНИЕ'}
           </h3>
           <p className="text-military-sand/90 leading-relaxed">{unit.encyclopedia.lore}</p>
@@ -38,7 +38,7 @@ export function UnitLore({ unit }: UnitLoreProps) {
 
       {unit.encyclopedia?.history && (
         <div className="mb-4">
-          <h3 className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider mb-2">
+          <h3 className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider mb-2">
             {'// ИСТОРИЯ СОЗДАНИЯ'}
           </h3>
           <p className="text-military-sand/80 leading-relaxed">{unit.encyclopedia.history}</p>
@@ -47,7 +47,7 @@ export function UnitLore({ unit }: UnitLoreProps) {
 
       {unit.encyclopedia?.traditions && (
         <div className="mt-4">
-          <h3 className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider mb-2">
+          <h3 className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider mb-2">
             {'// ТРАДИЦИИ'}
           </h3>
           <p className="text-military-sand/80 leading-relaxed italic border-l-2 border-military-amber/60 pl-4">
@@ -58,7 +58,7 @@ export function UnitLore({ unit }: UnitLoreProps) {
 
       {unit.encyclopedia?.keyBattles && unit.encyclopedia.keyBattles.length > 0 && (
         <div className="mt-4">
-          <h3 className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider mb-2">
+          <h3 className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider mb-2">
             {'// КЛЮЧЕВЫЕ СРАЖЕНИЯ'}
           </h3>
           <div className="space-y-3">
@@ -69,7 +69,7 @@ export function UnitLore({ unit }: UnitLoreProps) {
                   <span className="font-ibm-mono text-xs text-military-amber">{battle.year}</span>
                 </div>
                 <p className="text-sm text-military-sand/70 mb-1">{battle.description}</p>
-                <p className="text-xs text-military-steel italic">{battle.outcome}</p>
+                <p className="text-xs text-military-taupe italic">{battle.outcome}</p>
               </div>
             ))}
           </div>
@@ -78,7 +78,7 @@ export function UnitLore({ unit }: UnitLoreProps) {
 
       {unit.encyclopedia?.locations && unit.encyclopedia.locations.length > 0 && (
         <div className="mt-4">
-          <h3 className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider mb-2">
+          <h3 className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider mb-2">
             {'// ЗНАЧИМЫЕ МЕСТА'}
           </h3>
           <div className="space-y-2">

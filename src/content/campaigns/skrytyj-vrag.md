@@ -5,6 +5,11 @@ subtitle: Второй рутенийский конфликт
 era: "4537"
 factions: [mercenaries, protectorate]
 order: 3
+loreAuthor: avb
+credit:
+  author: "Сообщество ВК «Технолог/СтарСис»"
+  work: "«Бронепехота»: правила, редакция Jeek (2020)"
+  url: "https://vk.ru/docs-207479666"
 units:
   - { id: mercenaries_piraty_markusa_novye, role: «Банда пиратов Маркуса» }
   - { id: mercenaries_reydery_pylnoy_zony, role: «Рейдеры Пыльной Зоны» }

@@ -6,7 +6,7 @@ import { SerwistRegister } from '@/components/SerwistRegister'
 import NavigationProgress from '@/components/NavigationProgress'
 import RouteTracker from '@/components/RouteTracker'
 import { BASE_PATH, SITE_URL } from '@/lib/constants'
-import { absoluteUrl } from '@/lib/seo'
+import { SITE_NAME, DEFAULT_OG_IMAGE } from '@/lib/seo'
 import GoogleAnalytics from '@/components/GoogleAnalytics'
 import YandexMetrica from '@/components/YandexMetrica'
 
@@ -39,10 +39,9 @@ const oswald = Oswald({
   display: 'swap',
 })
 
-const SITE_NAME = 'Бронепехота';
-// Fully-absolute default social card — a 1200×630 screenshot of the landing hero
-// (regenerate via tools/regen-og-image.mjs + tools/regen-og-crop.py when the landing changes).
-const OG_IMAGE = absoluteUrl('/og-image.png');
+// SITE_NAME + DEFAULT_OG_IMAGE (the site social card) live in src/lib/seo.ts —
+// single source of truth, shared with pageOpenGraph() for per-page OG objects.
+const OG_IMAGE = DEFAULT_OG_IMAGE;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -56,6 +55,13 @@ export const metadata: Metadata = {
     'варгейм',
     'настольный варгейм',
     'robogear',
+    'робогир',
+    'вселенная робогир',
+    'легенды робогир',
+    'летопись робогир',
+    'старсис',
+    'star systems',
+    'starsis',
     'звёздная система',
     'энциклопедия бронепехота',
     'правила бронепехота',
@@ -71,13 +77,13 @@ export const metadata: Metadata = {
     'техника',
   ],
   manifest: `${BASE_PATH}/manifest.json`,
-  alternates: {
-    canonical: absoluteUrl('/'),
-  },
+  // NOTE: no `alternates.canonical` / `openGraph.url` here — a root-layout value is
+  // inherited by EVERY page without its own alternates, telling search engines that
+  // /encyclopedia etc. are duplicates of the homepage (deindexing risk). Each public
+  // page declares its own canonical; the landing does it in src/app/page.tsx.
   openGraph: {
     type: 'website',
     locale: 'ru_RU',
-    url: absoluteUrl('/'),
     siteName: SITE_NAME,
     images: [
       {

@@ -23,7 +23,7 @@ export function UnitToBattleCta({ faction, onOpenSandbox }: UnitToBattleCtaProps
       className="folded-paper military-corners p-5 md:p-6"
       style={{ borderColor: `${colors.primary}55` }}
     >
-      <div className="font-ibm-mono text-[10px] uppercase tracking-[0.3em] text-military-rust/70 mb-3">
+      <div className="font-ibm-mono text-[10px] uppercase tracking-[0.3em] text-military-rust mb-3">
         {'// В БОЙ'}
       </div>
       <Link

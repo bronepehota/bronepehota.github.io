@@ -33,6 +33,13 @@ jobs:
       - name: Unit tests
         run: npm run test:ci
 
+      # Анти-копипаст-инвариант лора: ≤11 совпадающих слов подряд (self-check
+      # опубликованного контента + сверка против дословных архивов рассказов,
+      # которые закоммичены в docs/lore-sources). PDF-первоисточники вне CI —
+      # полный локальный прогон описан в tools/check_copy_paste.py.
+      - name: Anti copy-paste check (lore texts)
+        run: npm run check:copy-paste
+
   # E2E тесты - только для PR в main и push в main/develop
   e2e:
     name: E2E Tests

@@ -108,7 +108,7 @@ export default function MissionDetailPage({ mission, campaign }: MissionDetailPa
                 })}
                 {campaign && (
                   <span className="font-ibm-mono text-xs text-military-rust/60 uppercase tracking-wider">
-                    Кампания «{campaign.name}»
+                    Набор сценариев «{campaign.name}»
                   </span>
                 )}
               </div>
@@ -311,8 +311,11 @@ export default function MissionDetailPage({ mission, campaign }: MissionDetailPa
               </Section>
             )}
 
-            {/* Source link */}
-            {mission.sourceUrl && (
+            {/* Source link — fallback ONLY when the header provenance row doesn't
+                already carry it (ProvenanceRow renders linkUrl=sourceUrl as a chip).
+                The label derives from the URL's host: missions source from more than
+                one site (tehnolog.ru, m.vk.com) — a hardcoded «tehnolog.ru» lied. */}
+            {mission.sourceUrl && !provenance && (
               <Section delay="0.65s" isLoaded={isLoaded}>
                 <a
                   href={mission.sourceUrl}
@@ -321,7 +324,7 @@ export default function MissionDetailPage({ mission, campaign }: MissionDetailPa
                   className="inline-flex items-center gap-2 font-ibm-mono text-xs text-military-rust/70 hover:text-military-amber transition-colors uppercase tracking-wider"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
-                  Источник: tehnolog.ru
+                  Источник: {sourceHost(mission.sourceUrl)}
                 </a>
               </Section>
             )}
@@ -337,6 +340,17 @@ export default function MissionDetailPage({ mission, campaign }: MissionDetailPa
 }
 
 /* ---------- helpers ---------- */
+
+/** Hostname of a source URL for the «Источник:» label, sans the www. prefix
+ *  (http://www.tehnolog.ru/… → «tehnolog.ru»). Falls back to the raw URL when
+ *  it doesn't parse (defensive — data comes from missions.json). */
+function sourceHost(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return url;
+  }
+}
 
 function Section({
   title,

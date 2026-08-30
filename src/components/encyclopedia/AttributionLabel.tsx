@@ -78,7 +78,9 @@ export function ContributeButton({ compact, url = CONTRIBUTION_VK_URL, subject }
     <a
       href={url}
       target="_blank"
-      rel="noopener noreferrer"
+      // nofollow: repeated CTA (~200 sitewide links to one VK profile), not a
+      // source credit — primary-source credits stay follow by design.
+      rel="noopener noreferrer nofollow"
       onClick={handleClick}
       title={title}
       aria-label={title}
@@ -87,7 +89,7 @@ export function ContributeButton({ compact, url = CONTRIBUTION_VK_URL, subject }
         'inline-flex items-center gap-1 rounded-sm border transition-colors',
         copied
           ? 'border-military-amber/60 text-military-amber'
-          : 'border-military-steel/30 text-military-steel/60 hover:text-military-amber hover:border-military-amber/50',
+          : 'border-military-steel/30 text-military-taupe/80 hover:text-military-amber hover:border-military-amber/50',
         compact ? 'px-1.5 py-0.5' : 'px-2 py-1',
       )}
     >
@@ -214,7 +216,7 @@ export function ProvenanceRow({
   return (
     <div data-testid="provenance-row" className={cn('flex flex-wrap items-center gap-2', className)}>
       {withHeader && (
-        <span className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider">
+        <span className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider">
           {'// ИСТОЧНИК'}
         </span>
       )}
@@ -264,7 +266,7 @@ export function PainterChip({ name, logo, url, compact, withHeader = true, withC
   return (
     <div data-testid="painter-chip" className="flex flex-wrap items-center gap-2">
       {withHeader && (
-        <span className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider">
+        <span className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider">
           {'// ПОКРАС'}
         </span>
       )}
@@ -294,7 +296,7 @@ export function ImageSourceChip({ withHeader = true, compact, source }: ImageSou
   return (
     <div data-testid="image-source-chip" className="flex flex-wrap items-center gap-2">
       {withHeader && (
-        <span className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider">
+        <span className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider">
           {'// ИЗОБРАЖЕНИЯ'}
         </span>
       )}
@@ -331,7 +333,7 @@ export function MiniatureChip({ name, logo, url, compact, withHeader = true, hea
   return (
     <div data-testid="miniature-chip" className="flex flex-wrap items-center gap-2">
       {withHeader && (
-        <span className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider">
+        <span className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider">
           {headerText}
         </span>
       )}
@@ -360,11 +362,19 @@ export function SponsorChip({ name, url, withHeader = true, compact }: SponsorCh
   return (
     <div data-testid="sponsor-chip" className="flex flex-wrap items-center gap-2">
       {withHeader && (
-        <span className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider">
+        <span className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider">
           {'// СПОНСОР'}
         </span>
       )}
-      <SourceChip name={name ?? 'Спонсор отряда'} icon={Heart} tone="#f43f5e" url={url} compact={compact} />
+      {/* nofollow — a sponsor chip is promo, not a source credit. */}
+      <SourceChip
+        name={name ?? 'Спонсор отряда'}
+        icon={Heart}
+        tone="#f43f5e"
+        url={url}
+        rel="noopener noreferrer nofollow"
+        compact={compact}
+      />
     </div>
   );
 }
