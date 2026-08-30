@@ -6,7 +6,6 @@ import { getAllMissions } from './missions-registry';
 import { getUnitLoreRaw } from './unit-lore';
 import { getAllWorldEntries, getWorldEntryRaw, WORLD_KIND_LABELS } from './world';
 import { toSearchBody, type LorePageRef } from './unit-search';
-import { getAllUnits } from './encyclopedia-utils';
 
 /**
  * Build-time index of every lore page the search hints cover (history
@@ -74,9 +73,4 @@ export function buildLorePages(units: EncyclopediaUnit[]): LorePageRef[] {
       body: toSearchBody(getWorldEntryRaw(e.slug) ?? ''),
     })),
   ];
-}
-
-/** Convenience for callers that haven't loaded the units yet (server pages). */
-export async function buildLorePagesWithUnits(): Promise<LorePageRef[]> {
-  return buildLorePages(await getAllUnits());
 }

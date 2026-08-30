@@ -6,10 +6,12 @@ import Link from 'next/link';
  * с начала»): update these rows by hand when a wave of content lands.
  */
 const FRESH_ENTRIES: Array<{ label: string; kind: string; href: string }> = [
-  { label: 'Димекса 4541', kind: 'КАМПАНИЯ', href: '/encyclopedia/history#wars' },
-  { label: 'Периферия', kind: 'ДОСЬЕ', href: '/encyclopedia/world' },
-  { label: 'Ордена держав', kind: 'ТЕРМИНЫ', href: '/encyclopedia/world' },
-  { label: 'Косары', kind: 'ГЛАВА', href: '/encyclopedia/history' },
+  // Deep-links на страницы пополнения (ревью: индекс — хуже прямого входа);
+  // «Ордена держав» — три страницы, ведём на первую.
+  { label: 'Димекса 4541', kind: 'КАМПАНИЯ', href: '/campaigns/dimeksa' },
+  { label: 'Периферия', kind: 'ДОСЬЕ', href: '/encyclopedia/world/periferiya' },
+  { label: 'Орден Крови', kind: 'ТЕРМИН', href: '/encyclopedia/world/orden-krovi' },
+  { label: 'Косары', kind: 'ВОЙНА', href: '/campaigns/voyny-kosarey' },
 ];
 
 export function HubFresh() {

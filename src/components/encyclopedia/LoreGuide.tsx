@@ -66,13 +66,16 @@ export function LoreGuide({ unitsHref }: { unitsHref?: string }) {
         {/* On the hub every step is a link into the archive; only a guide
             rendered ON the units page would mark the last step «вы здесь». */}
         {unitsHref ? (
-          <Link
-            href={unitsHref}
-            data-testid="lore-guide-units"
-            className="text-military-amber/90 hover:text-military-amber transition-colors"
-          >
-            юниты
-          </Link>
+          // <li> обязательна: <ol> допускает только li-потомков (ревью хаба, Major)
+          <li>
+            <Link
+              href={unitsHref}
+              data-testid="lore-guide-units"
+              className="text-military-amber/90 hover:text-military-amber transition-colors"
+            >
+              юниты
+            </Link>
+          </li>
         ) : (
           <li className="text-military-steel/60" aria-current="step">
             юниты <span className="text-military-rust/60">· вы здесь</span>
