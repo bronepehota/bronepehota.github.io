@@ -39,7 +39,7 @@ export function LoreSearchHints({ matches }: LoreSearchHintsProps) {
           data-testid="lore-search-hint"
           className="inline-flex items-center gap-1.5 rounded-full border border-military-amber/40 bg-military-charcoal/60 px-3 py-1 font-ibm-mono text-[10px] uppercase tracking-wide text-military-amber/90 hover:border-military-amber transition-colors"
         >
-          <span className="text-military-rust/60">{p.label ?? KIND_PREFIX[p.kind]}</span>
+          <span className="text-military-rust">{p.label ?? KIND_PREFIX[p.kind]}</span>
           <span>{p.title}</span>
           <span>→</span>
         </Link>
@@ -47,7 +47,7 @@ export function LoreSearchHints({ matches }: LoreSearchHintsProps) {
       {more > 0 && (
         <span
           data-testid="lore-hints-more"
-          className="inline-flex items-center rounded-full border border-military-steel/30 bg-military-charcoal/40 px-3 py-1 font-ibm-mono text-[10px] tracking-wide text-military-steel/70"
+          className="inline-flex items-center rounded-full border border-military-steel/30 bg-military-charcoal/40 px-3 py-1 font-ibm-mono text-[10px] tracking-wide text-military-taupe/80"
         >
           {`+${more}`}
         </span>

@@ -46,7 +46,7 @@ export function CampaignsBlock({ campaigns }: { campaigns: CampaignMeta[] }) {
           ХРОНИКИ ВОЙН
         </h2>
         {eraSpan && (
-          <span className="font-ibm-mono text-[10px] tabular-nums text-military-steel/60">
+          <span className="font-ibm-mono text-[10px] tabular-nums text-military-taupe/80">
             {`· ${eraSpan}`}
           </span>
         )}
@@ -71,7 +71,7 @@ export function CampaignsBlock({ campaigns }: { campaigns: CampaignMeta[] }) {
               </span>
               <div className="flex items-center gap-2 mb-1.5">
                 {c.era && (
-                  <span className="font-ibm-mono text-[10px] uppercase tracking-wider text-military-steel/60">
+                  <span className="font-ibm-mono text-[10px] uppercase tracking-wider text-military-taupe/80">
                     {c.era}
                   </span>
                 )}
@@ -96,7 +96,7 @@ export function CampaignsBlock({ campaigns }: { campaigns: CampaignMeta[] }) {
                   {c.subtitle}
                 </p>
               )}
-              <div className="mt-3 flex items-center gap-2 font-ibm-mono text-[10px] uppercase tracking-widest text-military-rust/70 group-hover:text-military-amber transition-colors">
+              <div className="mt-3 flex items-center gap-2 font-ibm-mono text-[10px] uppercase tracking-widest text-military-rust group-hover:text-military-amber transition-colors">
                 Читать хронику
                 <span aria-hidden className="transition-transform group-hover:translate-x-1">
                   →

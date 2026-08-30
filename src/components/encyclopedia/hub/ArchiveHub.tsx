@@ -107,7 +107,7 @@ export default function ArchiveHub({ initialUnits, lorePages, counts, era }: Arc
             >
               <Link
                 href="/app"
-                className="inline-flex items-center gap-1.5 font-ibm-mono text-[11px] text-military-rust/60 hover:text-military-amber transition-colors tracking-widest uppercase whitespace-nowrap"
+                className="inline-flex items-center gap-1.5 font-ibm-mono text-[11px] text-military-rust hover:text-military-amber transition-colors tracking-widest uppercase whitespace-nowrap"
               >
                 <span>←</span>
                 <span className="hidden sm:inline">В приложение</span>
@@ -118,7 +118,7 @@ export default function ArchiveHub({ initialUnits, lorePages, counts, era }: Arc
                 <h1 className="font-russo text-sm md:text-base tracking-[0.25em] text-military-sand">
                   ЭНЦИКЛОПЕДИЯ
                 </h1>
-                <div className="mt-0.5 font-ibm-mono text-[8px] md:text-[9px] text-military-rust/60 tracking-[0.3em] uppercase">
+                <div className="mt-0.5 font-ibm-mono text-[8px] md:text-[9px] text-military-rust tracking-[0.3em] uppercase">
                   {'// Архив вселенной'}
                 </div>
               </div>
@@ -145,10 +145,10 @@ export default function ArchiveHub({ initialUnits, lorePages, counts, era }: Arc
             data-testid="encyclopedia-battle-banner-link"
             className="flex items-center gap-3 min-h-[44px] px-2 border border-military-rust/30 hover:border-military-amber/60 transition-colors group touch-manipulation no-underline"
           >
-            <span className="font-ibm-mono text-[10px] uppercase tracking-[0.25em] text-military-rust/80 shrink-0">
+            <span className="font-ibm-mono text-[10px] uppercase tracking-[0.25em] text-military-rust shrink-0">
               {'// РЕЖИМ БОЯ'}
             </span>
-            <span className="hidden sm:inline font-ibm-mono text-[10px] md:text-xs text-military-steel/70 truncate">
+            <span className="hidden sm:inline font-ibm-mono text-[10px] md:text-xs text-military-taupe/80 truncate">
               любой отряд — в строй
             </span>
             <span className="flex-1" />

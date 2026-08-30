@@ -50,7 +50,7 @@ export function UnitSpecs({ unit }: UnitSpecsProps) {
       <dl className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-4">
         {rows.map((f) => (
           <div key={f.key} className="border-t border-military-steel/20 pt-2">
-            <dt className="font-ibm-mono text-[10px] uppercase tracking-wider text-military-steel/50">
+            <dt className="font-ibm-mono text-[10px] uppercase tracking-wider text-military-taupe/80">
               {f.label}
             </dt>
             <dd className="font-oswald text-military-sand text-sm md:text-base leading-tight mt-1">
@@ -66,7 +66,7 @@ export function UnitSpecs({ unit }: UnitSpecsProps) {
             href={sourceUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 font-ibm-mono text-[10px] uppercase tracking-wider text-military-steel/60 hover:text-military-amber transition-colors"
+            className="inline-flex items-center gap-1.5 font-ibm-mono text-[10px] uppercase tracking-wider text-military-taupe/80 hover:text-military-amber transition-colors"
           >
             <ExternalLink className="w-3 h-3" aria-hidden />
             Источник ТТХ

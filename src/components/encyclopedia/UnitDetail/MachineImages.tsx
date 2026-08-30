@@ -36,8 +36,8 @@ export function MachineImages({ unit }: MachineImagesProps) {
   return (
     <section id="machine-images" className="folded-paper military-corners p-6">
       <div className="flex items-center gap-2 mb-6">
-        <Zap className="w-4 h-4 text-military-rust/60" />
-        <span className="font-ibm-mono text-[10px] text-military-rust/60 uppercase tracking-wider">
+        <Zap className="w-4 h-4 text-military-rust" />
+        <span className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider">
           DATA_VEHICLE
         </span>
       </div>
@@ -101,29 +101,29 @@ export function MachineImages({ unit }: MachineImagesProps) {
             style={{ animationFillMode: 'forwards', animationDelay: '0.2s' }}
           >
             <div className="flex items-center gap-2 mb-3">
-              <span className="font-ibm-mono text-[10px] text-military-rust/60 uppercase tracking-wider">
+              <span className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider">
                 DATA_CORE
               </span>
             </div>
             <div className="grid grid-cols-2 gap-3">
               {/* Durability */}
               <div className="text-center p-3 bg-military-charcoal/50 rounded">
-                <div className="font-ibm-mono text-[10px] text-military-steel uppercase">Прочность</div>
+                <div className="font-ibm-mono text-[10px] text-military-taupe uppercase">Прочность</div>
                 <div className="font-russo text-xl font-bold text-red-400">{machine.durability_max}</div>
               </div>
               {/* Speed */}
               <div className="text-center p-3 bg-military-charcoal/50 rounded">
-                <div className="font-ibm-mono text-[10px] text-military-steel uppercase">Скорость</div>
+                <div className="font-ibm-mono text-[10px] text-military-taupe uppercase">Скорость</div>
                 <div className="font-russo text-xl font-bold text-green-400">{maxSpeed}</div>
               </div>
               {/* Fire Rate */}
               <div className="text-center p-3 bg-military-charcoal/50 rounded">
-                <div className="font-ibm-mono text-[10px] text-military-steel uppercase">Скорострельность</div>
+                <div className="font-ibm-mono text-[10px] text-military-taupe uppercase">Скорострельность</div>
                 <div className="font-russo text-xl font-bold text-orange-400">{machine.fire_rate}</div>
               </div>
               {/* Ammo */}
               <div className="text-center p-3 bg-military-charcoal/50 rounded">
-                <div className="font-ibm-mono text-[10px] text-military-steel uppercase">Боезапас</div>
+                <div className="font-ibm-mono text-[10px] text-military-taupe uppercase">Боезапас</div>
                 <div className="font-russo text-xl font-bold text-cyan-400">{machine.ammo_max}</div>
               </div>
             </div>
@@ -139,7 +139,7 @@ export function MachineImages({ unit }: MachineImagesProps) {
             style={{ animationFillMode: 'forwards', animationDelay: '0.3s' }}
           >
             <div className="flex items-center gap-2 mb-3">
-              <span className="font-ibm-mono text-[10px] text-military-rust/60 uppercase tracking-wider">
+              <span className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider">
                 DATA_WEAPONS
               </span>
             </div>
@@ -152,15 +152,15 @@ export function MachineImages({ unit }: MachineImagesProps) {
                   <div className="font-russo text-sm font-bold text-white mb-2">{weapon.name}</div>
                   <div className="grid grid-cols-3 gap-2 text-center">
                     <div>
-                      <div className="font-ibm-mono text-[8px] text-military-steel uppercase">Дальность</div>
+                      <div className="font-ibm-mono text-[8px] text-military-taupe uppercase">Дальность</div>
                       <div className="font-ibm-mono text-xs text-cyan-400">{weapon.range}</div>
                     </div>
                     <div>
-                      <div className="font-ibm-mono text-[8px] text-military-steel uppercase">Мощность</div>
+                      <div className="font-ibm-mono text-[8px] text-military-taupe uppercase">Мощность</div>
                       <div className="font-ibm-mono text-xs text-red-400">{weapon.power}</div>
                     </div>
                     <div>
-                      <div className="font-ibm-mono text-[8px] text-military-steel uppercase">Особое</div>
+                      <div className="font-ibm-mono text-[8px] text-military-taupe uppercase">Особое</div>
                       <div className="font-ibm-mono text-xs text-yellow-400">
                         {typeof weapon.special === 'string' ? weapon.special : weapon.special ? 'Да' : '-'}
                       </div>
@@ -181,7 +181,7 @@ export function MachineImages({ unit }: MachineImagesProps) {
             style={{ animationFillMode: 'forwards', animationDelay: '0.4s' }}
           >
             <div className="flex items-center gap-2 mb-3">
-              <span className="font-ibm-mono text-[10px] text-military-rust/60 uppercase tracking-wider">
+              <span className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider">
                 DATA_SPEED_SECTORS
               </span>
             </div>
@@ -191,7 +191,7 @@ export function MachineImages({ unit }: MachineImagesProps) {
                   key={index}
                   className="flex items-center justify-between p-2 bg-military-charcoal/50 rounded text-sm"
                 >
-                  <span className="font-ibm-mono text-military-steel">
+                  <span className="font-ibm-mono text-military-taupe">
                     {sector.min_durability}-{sector.max_durability} █
                   </span>
                   <span className="font-russo font-bold text-green-400">{sector.speed} шаг</span>

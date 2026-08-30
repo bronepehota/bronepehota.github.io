@@ -129,7 +129,7 @@ export default async function HistoryPage() {
             <Link
               href="/encyclopedia"
               aria-label="На главную энциклопедии"
-              className="inline-flex items-center gap-2 font-ibm-mono text-xs text-military-rust/60 hover:text-military-amber transition-colors tracking-widest uppercase"
+              className="inline-flex items-center gap-2 font-ibm-mono text-xs text-military-rust hover:text-military-amber transition-colors tracking-widest uppercase"
             >
               <span className="text-lg">←</span>
               <span>Энциклопедия</span>
@@ -143,12 +143,12 @@ export default async function HistoryPage() {
             <div aria-hidden className="absolute inset-0 diagonal-stripes opacity-60 pointer-events-none" />
             <span
               aria-hidden
-              className="absolute top-4 right-4 rotate-6 border-2 border-military-rust/40 px-2 py-0.5 font-ibm-mono text-[9px] uppercase tracking-[0.25em] text-military-rust/70 select-none hidden sm:block"
+              className="absolute top-4 right-4 rotate-6 border-2 border-military-rust/40 px-2 py-0.5 font-ibm-mono text-[9px] uppercase tracking-[0.25em] text-military-rust select-none hidden sm:block"
             >
               ХРОНИКА {spanYears}
             </span>
             <div className="relative">
-              <p className="font-ibm-mono text-[10px] md:text-[11px] uppercase tracking-[0.15em] sm:tracking-[0.25em] text-military-rust/80 pb-3 mb-4 border-b border-military-steel/25">
+              <p className="font-ibm-mono text-[10px] md:text-[11px] uppercase tracking-[0.15em] sm:tracking-[0.25em] text-military-rust pb-3 mb-4 border-b border-military-steel/25">
                 {`ДЕЛО № RG-4530 · ЛЕТОПИСЬ ДОМИНИОНА · ЛИСТОВ: ${chapters.length}`}
               </p>
               <h1
@@ -173,13 +173,13 @@ export default async function HistoryPage() {
                     data-testid={`history-stat-${s.unit}`}
                     className="bg-military-dark/80 px-3 py-3"
                   >
-                    <dt className="font-ibm-mono text-[9px] uppercase tracking-[0.25em] text-military-rust/80 mb-1.5">
+                    <dt className="font-ibm-mono text-[9px] uppercase tracking-[0.25em] text-military-rust mb-1.5">
                       {s.unit}
                     </dt>
                     <dd className="font-ibm-mono tabular-nums text-2xl md:text-3xl leading-none text-military-amber">
                       {s.value}
                     </dd>
-                    <p className="text-[10px] text-military-taupe/60 mt-1.5 leading-snug">{s.caption}</p>
+                    <p className="text-[10px] text-military-taupe/80 mt-1.5 leading-snug">{s.caption}</p>
                   </div>
                 ))}
               </dl>
@@ -198,12 +198,12 @@ export default async function HistoryPage() {
                 )}
                 <a
                   href="#wars"
-                  className="font-ibm-mono text-[10px] uppercase tracking-[0.2em] text-military-steel/70 hover:text-military-amber transition-colors py-2"
+                  className="font-ibm-mono text-[10px] uppercase tracking-[0.2em] text-military-taupe/80 hover:text-military-amber transition-colors py-2"
                 >
                   Хроники войн →
                 </a>
               </div>
-              <p className="mt-4 font-ibm-mono text-[10px] text-military-steel/50 leading-relaxed">
+              <p className="mt-4 font-ibm-mono text-[10px] text-military-taupe/80 leading-relaxed">
                 {'// Тексты — сжатые адаптации; полные первоисточники — в блоках «// ИСТОЧНИК» каждой главы'}
               </p>
             </div>
@@ -228,7 +228,7 @@ export default async function HistoryPage() {
               </p>
               <p
                 data-testid="history-reading-meta"
-                className="font-ibm-mono text-[10px] tabular-nums text-military-steel/60 whitespace-nowrap"
+                className="font-ibm-mono text-[10px] tabular-nums text-military-taupe/80 whitespace-nowrap"
               >
                 {`${chapters.length} ДОСЬЕ · ≈${readingMinutes} МИН`}
               </p>
@@ -263,7 +263,7 @@ export default async function HistoryPage() {
                             {c.title}
                           </span>
                           {c.era && (
-                            <span className="ml-auto shrink-0 whitespace-nowrap font-ibm-mono text-[10px] text-military-steel/50 pl-2">
+                            <span className="ml-auto shrink-0 whitespace-nowrap font-ibm-mono text-[10px] text-military-taupe/80 pl-2">
                               {c.era}
                             </span>
                           )}
@@ -283,7 +283,7 @@ export default async function HistoryPage() {
                       Хроники войн
                     </span>
                     {warsEra && (
-                      <span className="ml-auto shrink-0 whitespace-nowrap font-ibm-mono text-[10px] text-military-steel/50 pl-2">
+                      <span className="ml-auto shrink-0 whitespace-nowrap font-ibm-mono text-[10px] text-military-taupe/80 pl-2">
                         {warsEra}
                       </span>
                     )}
@@ -296,14 +296,14 @@ export default async function HistoryPage() {
             <Link
               href="/encyclopedia/world"
               data-testid="world-index-link"
-              className="block mt-3 pt-3 border-t border-military-steel/20 font-ibm-mono text-[10px] uppercase tracking-[0.2em] text-military-steel/60 hover:text-military-amber transition-colors"
+              className="block mt-3 pt-3 border-t border-military-steel/20 font-ibm-mono text-[10px] uppercase tracking-[0.2em] text-military-taupe/80 hover:text-military-amber transition-colors"
             >
               {'// АЛФАВИТ ВСЕЛЕННОЙ →'}
             </Link>
             {/* Правовая сводка — сноска той же mono-строкой (адаптации, © Технолог) */}
             <Link
               href="/encyclopedia/sources"
-              className="block mt-1 font-ibm-mono text-[10px] uppercase tracking-[0.2em] text-military-steel/60 hover:text-military-amber transition-colors"
+              className="block mt-1 font-ibm-mono text-[10px] uppercase tracking-[0.2em] text-military-taupe/80 hover:text-military-amber transition-colors"
             >
               {'// ИСТОЧНИКИ И ПРАВА →'}
             </Link>
@@ -345,7 +345,7 @@ export default async function HistoryPage() {
                         </h2>
                         <span className="ml-auto flex items-baseline gap-3 whitespace-nowrap">
                           {c.era && (
-                            <span className="font-ibm-mono text-[10px] uppercase tracking-wider text-military-steel/60">
+                            <span className="font-ibm-mono text-[10px] uppercase tracking-wider text-military-taupe/80">
                               {c.era}
                             </span>
                           )}
@@ -353,7 +353,7 @@ export default async function HistoryPage() {
                           <Link
                             href={`/encyclopedia/history/${c.slug}`}
                             data-testid="chapter-permalink"
-                            className="font-ibm-mono text-[10px] text-military-steel/50 hover:text-military-amber transition-colors"
+                            className="font-ibm-mono text-[10px] text-military-taupe/80 hover:text-military-amber transition-colors"
                           >
                             ⤴ отдельная страница
                           </Link>
@@ -391,7 +391,7 @@ export default async function HistoryPage() {
           <Link
             href="/encyclopedia/sources"
             data-testid="stories-catalog-link"
-            className="block pt-3 font-ibm-mono text-[10px] uppercase tracking-[0.2em] text-military-steel/60 hover:text-military-amber transition-colors"
+            className="block pt-3 font-ibm-mono text-[10px] uppercase tracking-[0.2em] text-military-taupe/80 hover:text-military-amber transition-colors"
           >
             {'// ТВОРЧЕСТВО ИГРОКОВ → КАТАЛОГ ИСТОЧНИКОВ'}
           </Link>

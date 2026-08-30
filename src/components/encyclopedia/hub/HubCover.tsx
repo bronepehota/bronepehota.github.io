@@ -24,13 +24,13 @@ export function HubCover({ counts, children }: HubCoverProps) {
       {/* Classification stamp — dossier flourish, decorational only */}
       <span
         aria-hidden
-        className="absolute top-4 right-4 -rotate-6 border-2 border-military-rust/40 px-2 py-0.5 font-ibm-mono text-[9px] uppercase tracking-[0.25em] text-military-rust/70 select-none hidden sm:block"
+        className="absolute top-4 right-4 -rotate-6 border-2 border-military-rust/40 px-2 py-0.5 font-ibm-mono text-[9px] uppercase tracking-[0.25em] text-military-rust select-none hidden sm:block"
       >
         СТАРСИС
       </span>
 
       <div className="relative">
-        <p className="font-ibm-mono text-[10px] md:text-[11px] uppercase tracking-[0.15em] sm:tracking-[0.25em] text-military-rust/80 pb-3 mb-4 border-b border-military-steel/25">
+        <p className="font-ibm-mono text-[10px] md:text-[11px] uppercase tracking-[0.15em] sm:tracking-[0.25em] text-military-rust pb-3 mb-4 border-b border-military-steel/25">
           {'ДЕЛО № RG-4530 · АРХИВ ВСЕЛЕННОЙ'}
         </p>
 
@@ -44,19 +44,19 @@ export function HubCover({ counts, children }: HubCoverProps) {
           className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-military-steel/25 border border-military-steel/25 mb-5"
         >
           <div className="bg-military-dark/80 px-3 py-2.5">
-            <dt className="font-ibm-mono text-[9px] uppercase tracking-[0.25em] text-military-rust/80 mb-1">Глав</dt>
+            <dt className="font-ibm-mono text-[9px] uppercase tracking-[0.25em] text-military-rust mb-1">Глав</dt>
             <dd className="font-ibm-mono tabular-nums text-xl md:text-2xl leading-none text-military-amber">{counts.chapters}</dd>
           </div>
           <div className="bg-military-dark/80 px-3 py-2.5">
-            <dt className="font-ibm-mono text-[9px] uppercase tracking-[0.25em] text-military-rust/80 mb-1">Войн</dt>
+            <dt className="font-ibm-mono text-[9px] uppercase tracking-[0.25em] text-military-rust mb-1">Войн</dt>
             <dd className="font-ibm-mono tabular-nums text-xl md:text-2xl leading-none text-military-amber">{counts.campaigns}</dd>
           </div>
           <div className="bg-military-dark/80 px-3 py-2.5">
-            <dt className="font-ibm-mono text-[9px] uppercase tracking-[0.25em] text-military-rust/80 mb-1">Досье</dt>
+            <dt className="font-ibm-mono text-[9px] uppercase tracking-[0.25em] text-military-rust mb-1">Досье</dt>
             <dd className="font-ibm-mono tabular-nums text-xl md:text-2xl leading-none text-military-amber">{counts.world}</dd>
           </div>
           <div className="bg-military-dark/80 px-3 py-2.5">
-            <dt className="font-ibm-mono text-[9px] uppercase tracking-[0.25em] text-military-rust/80 mb-1">Юнитов</dt>
+            <dt className="font-ibm-mono text-[9px] uppercase tracking-[0.25em] text-military-rust mb-1">Юнитов</dt>
             <dd className="font-ibm-mono tabular-nums text-xl md:text-2xl leading-none text-military-amber">{counts.units}</dd>
           </div>
         </dl>

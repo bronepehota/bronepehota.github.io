@@ -33,7 +33,7 @@ export function UnitArmament({ unit }: UnitArmamentProps) {
               {w.name}
             </div>
             {(w.caliber || w.range) && (
-              <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 font-ibm-mono text-[10px] uppercase tracking-wider text-military-steel/60">
+              <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 font-ibm-mono text-[10px] uppercase tracking-wider text-military-taupe/80">
                 {w.caliber && <span>{w.caliber}</span>}
                 {w.range && <span>{w.range}</span>}
               </div>

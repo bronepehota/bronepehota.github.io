@@ -42,8 +42,8 @@ export function SoldierImages({ unit }: SoldierImagesProps) {
   return (
     <section id="personnel" className="folded-paper military-corners p-6 scroll-mt-4">
       <div className="flex items-center gap-2 mb-6">
-        <Users className="w-4 h-4 text-military-rust/60" />
-        <span className="font-ibm-mono text-[10px] text-military-rust/60 uppercase tracking-wider">
+        <Users className="w-4 h-4 text-military-rust" />
+        <span className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider">
           DATA_PERSONNEL
         </span>
       </div>
@@ -51,7 +51,7 @@ export function SoldierImages({ unit }: SoldierImagesProps) {
       <h3 className="font-russo text-xl text-white mb-6 flex items-center gap-3">
         <span className="text-military-amber">◆</span>
         Личный состав
-        <span className="font-ibm-mono text-sm text-military-steel/60">
+        <span className="font-ibm-mono text-sm text-military-taupe/80">
           ({squad.soldiers.length} бойцов)
         </span>
       </h3>

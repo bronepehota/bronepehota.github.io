@@ -31,8 +31,8 @@ export const metadata: Metadata = {
  *  и от ржавчины битв. */
 const KIND_BADGE: Record<WorldKind, string> = {
   person: 'border-military-amber/40 text-military-amber/90',
-  location: 'border-military-steel/40 text-military-steel/80',
-  battle: 'border-military-rust/50 text-military-rust/90',
+  location: 'border-military-steel/40 text-military-taupe/80',
+  battle: 'border-military-rust/50 text-military-rust',
   term: 'border-military-taupe/40 text-military-taupe/80',
   ship: 'border-military-sand/40 text-military-sand/90',
 };
@@ -68,7 +68,7 @@ export default function WorldIndexPage() {
           <Link
             href="/encyclopedia"
             aria-label="На главную энциклопедии"
-            className="inline-flex items-center gap-2 font-ibm-mono text-xs text-military-rust/60 hover:text-military-amber transition-colors tracking-widest uppercase"
+            className="inline-flex items-center gap-2 font-ibm-mono text-xs text-military-rust hover:text-military-amber transition-colors tracking-widest uppercase"
           >
             <span className="text-lg">←</span>
             <span>Энциклопедия</span>
@@ -79,7 +79,7 @@ export default function WorldIndexPage() {
           data-testid="world-index"
           className="folded-paper military-corners p-5 md:p-8 mb-6"
         >
-          <p className="font-ibm-mono text-[10px] md:text-[11px] uppercase tracking-[0.15em] sm:tracking-[0.25em] text-military-rust/80 pb-3 mb-4 border-b border-military-steel/25">
+          <p className="font-ibm-mono text-[10px] md:text-[11px] uppercase tracking-[0.15em] sm:tracking-[0.25em] text-military-rust pb-3 mb-4 border-b border-military-steel/25">
             {`ДЕЛО № RG-4530 · ПРИЛОЖЕНИЕ · ЗАПИСЕЙ: ${entries.length}`}
           </p>
           <h1
@@ -91,7 +91,7 @@ export default function WorldIndexPage() {
           <p className="max-w-[60ch] text-sm md:text-base text-military-taupe leading-relaxed">
             {`Персоны, локации, битвы, термины и корабли флотов канона — справочная картотека к «Истории вселенной». Каждая запись — досье со связями на юниты, фракции, главы и хроники войн.`}
           </p>
-          <p className="mt-4 font-ibm-mono text-[10px] text-military-steel/60">
+          <p className="mt-4 font-ibm-mono text-[10px] text-military-taupe/80">
             {`// ${Object.entries(byKind)
               .map(([kind, n]) => `${WORLD_KIND_LABELS[kind as WorldKind]}: ${n}`)
               .join(' · ')}`}
@@ -126,7 +126,7 @@ export default function WorldIndexPage() {
                     </span>
                   )}
                   {entry.era && (
-                    <span className="ml-auto shrink-0 whitespace-nowrap font-ibm-mono text-[10px] text-military-steel/50 pl-2">
+                    <span className="ml-auto shrink-0 whitespace-nowrap font-ibm-mono text-[10px] text-military-taupe/80 pl-2">
                       {entry.era}
                     </span>
                   )}

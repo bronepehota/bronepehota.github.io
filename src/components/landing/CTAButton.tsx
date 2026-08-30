@@ -85,7 +85,7 @@ function ModuleRow({ className }: { className?: string }) {
               отряды, лор, тактика
             </span>
           </span>
-          <ArrowRight className="w-4 h-4 text-military-sand/50 group-hover:text-white group-hover:translate-x-0.5 transition-all" />
+          <ArrowRight className="w-4 h-4 text-military-sand/60 group-hover:text-white group-hover:translate-x-0.5 transition-all" />
         </span>
       </Link>
     </div>

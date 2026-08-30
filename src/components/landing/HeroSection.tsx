@@ -122,7 +122,7 @@ export default function HeroSection({ className }: HeroSectionProps) {
             alt="Технолог"
             className="h-4 w-4 rounded-sm"
           />
-          <span className="font-ibm-mono text-[8px] sm:text-[9px] text-military-steel/50 tracking-wide">
+          <span className="font-ibm-mono text-[8px] sm:text-[9px] text-military-taupe/80 tracking-wide">
             Игра: tehnolog.ru
           </span>
         </a>
@@ -169,7 +169,7 @@ export default function HeroSection({ className }: HeroSectionProps) {
             href="https://vk.com/lastbpcoder"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-ibm-mono text-[9px] md:text-xs text-military-rust/50 hover:text-military-amber transition-colors duration-200 tracking-widest uppercase"
+            className="font-ibm-mono text-[9px] md:text-xs text-military-rust hover:text-military-amber transition-colors duration-200 tracking-widest uppercase"
           >
             Помочь с проектом
           </Link>

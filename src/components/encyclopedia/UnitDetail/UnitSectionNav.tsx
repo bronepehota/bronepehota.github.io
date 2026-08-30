@@ -77,7 +77,7 @@ export function UnitSectionNav({ unit, activeUnit, hasLoreDoc }: UnitSectionNavP
       <ul className="flex w-max items-center gap-1.5">
         <li
           aria-hidden
-          className="shrink-0 whitespace-nowrap pr-0.5 font-ibm-mono text-[10px] uppercase tracking-wider text-military-rust/60"
+          className="shrink-0 whitespace-nowrap pr-0.5 font-ibm-mono text-[10px] uppercase tracking-wider text-military-rust"
         >
           {'// РАЗДЕЛЫ'}
         </li>

@@ -30,7 +30,7 @@ export function EraRibbon({ ticks, className }: EraRibbonProps) {
           {ticks.map((t, i) => (
             <span key={t.href + t.label} className="flex items-center">
               {i > 0 && (
-                <span aria-hidden className="font-ibm-mono text-[8px] text-military-rust/40 px-0.5 select-none">
+                <span aria-hidden className="font-ibm-mono text-[8px] text-military-rust px-0.5 select-none">
                   ·
                 </span>
               )}
@@ -41,7 +41,7 @@ export function EraRibbon({ ticks, className }: EraRibbonProps) {
                 className={cn(
                   'era-tick--sd flex items-center h-full px-2.5 -mb-px whitespace-nowrap',
                   'font-ibm-mono text-[10px] tracking-[0.15em] uppercase',
-                  'text-military-taupe/60 hover:text-military-amber transition-colors',
+                  'text-military-taupe/80 hover:text-military-amber transition-colors',
                   'border-b-2 border-transparent',
                 )}
               >

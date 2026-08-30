@@ -100,7 +100,7 @@ export function EncyclopediaTabs({ className, dense = false }: { className?: str
         <span className="pointer-events-none absolute bottom-1 right-1 w-2.5 h-2.5 border-r border-b border-military-rust/50" />
 
         {/* Tiny mode label */}
-        <span className="pointer-events-none absolute -top-2 left-1/2 -translate-x-1/2 px-2 bg-military-dark font-ibm-mono text-[8px] tracking-[0.3em] text-military-rust/60 uppercase">
+        <span className="pointer-events-none absolute -top-2 left-1/2 -translate-x-1/2 px-2 bg-military-dark font-ibm-mono text-[8px] tracking-[0.3em] text-military-rust uppercase">
           data mode
         </span>
 
@@ -122,7 +122,7 @@ export function EncyclopediaTabs({ className, dense = false }: { className?: str
                 'transition-all duration-300',
                 active
                   ? 'text-white'
-                  : 'text-military-taupe/50 hover:text-military-sand hover:bg-military-steel/15',
+                  : 'text-military-taupe/80 hover:text-military-sand hover:bg-military-steel/15',
               )}
               style={
                 active
@@ -146,7 +146,7 @@ export function EncyclopediaTabs({ className, dense = false }: { className?: str
                     // (measured 739px) would overflow the 2xl bar cap and clip
                     // the last label.
                     'hidden lg:inline font-ibm-mono text-[9px] tracking-widest',
-                    active ? 'text-military-amber' : 'text-military-steel/60',
+                    active ? 'text-military-amber' : 'text-military-taupe/80',
                   )}
                 >
                   {tab.index}

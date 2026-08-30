@@ -81,7 +81,7 @@ export function UnitDetailSheet({ unit, type, sourceId, isOpen, onClose, onAdd }
             aria-label="Закрыть"
             className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center border border-military-rust/30 rounded-sm"
           >
-            <X className="w-4 h-4 text-military-steel" />
+            <X className="w-4 h-4 text-military-taupe" />
           </button>
         </div>
 
@@ -99,7 +99,7 @@ export function UnitDetailSheet({ unit, type, sourceId, isOpen, onClose, onAdd }
         <div className="px-3 py-2 border-t border-military-rust/30 flex items-center gap-2">
           <Link
             href="/encyclopedia/units"
-            className="font-ibm-mono text-[11px] text-military-steel hover:text-military-sand inline-flex items-center gap-1"
+            className="font-ibm-mono text-[11px] text-military-taupe hover:text-military-sand inline-flex items-center gap-1"
           >
             <BookOpen className="w-3.5 h-3.5" /> Энциклопедия
           </Link>

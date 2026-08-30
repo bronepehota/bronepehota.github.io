@@ -7,7 +7,7 @@ export default function NotFound() {
         <h1 className="font-russo text-3xl md:text-4xl font-black military-text-gradient uppercase tracking-wide mb-4">
           Отряд не найден
         </h1>
-        <p className="font-ibm-mono text-xs text-military-steel mb-8 uppercase tracking-wider">
+        <p className="font-ibm-mono text-xs text-military-taupe mb-8 uppercase tracking-wider">
           Такого отряда не существует в энциклопедии
         </p>
         <Link

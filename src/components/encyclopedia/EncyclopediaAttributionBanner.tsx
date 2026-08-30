@@ -68,7 +68,7 @@ export function EncyclopediaAttributionBanner() {
           onClick={toggle}
           aria-expanded={expanded}
           aria-label="Подробнее об источниках"
-          className="font-ibm-mono text-[9px] uppercase tracking-wider text-military-rust/50 transition-colors hover:text-military-amber ml-auto inline-flex items-center gap-1"
+          className="font-ibm-mono text-[9px] uppercase tracking-wider text-military-rust transition-colors hover:text-military-amber ml-auto inline-flex items-center gap-1"
         >
           Подробнее
           <ChevronDown className={cn('h-3 w-3 transition-transform duration-300', expanded && 'rotate-180')} />
@@ -98,7 +98,7 @@ export function EncyclopediaAttributionBanner() {
               <p className="font-ibm-mono text-[10px] uppercase tracking-wider text-cyan-400/80 mb-0.5">
                 Официальный канон
               </p>
-              <p className="text-[11px] leading-relaxed text-military-taupe/70">
+              <p className="text-[11px] leading-relaxed text-military-taupe/80">
                 Материалы от компании «Технолог» — официальные правила, книги, карточки отрядов.
                 Это исходный канон вселенной Бронепехоты.
               </p>
@@ -114,7 +114,7 @@ export function EncyclopediaAttributionBanner() {
               <p className="font-ibm-mono text-[10px] uppercase tracking-wider text-emerald-400/80 mb-0.5">
                 АВБ — Альтернативная Версия Бронепехоты
               </p>
-              <p className="text-[11px] leading-relaxed text-military-taupe/70">
+              <p className="text-[11px] leading-relaxed text-military-taupe/80">
                 Альтернативная Версия Бронепехоты — общая маркировка всех неофициальных материалов
                 (отряды, лор и миниатюры от «Звёздных Систем», «Миниатюр Лисицина», «Мёртвого Флота»
                 и других авторов). Она не является заменой оригинальным миниатюрам «Технолога», а даёт
@@ -125,7 +125,7 @@ export function EncyclopediaAttributionBanner() {
           </div>
 
           {/* Card badges explanation */}
-          <p className="text-[11px] leading-relaxed text-military-steel/50 border-t border-military-steel/15 pt-2">
+          <p className="text-[11px] leading-relaxed text-military-taupe/80 border-t border-military-steel/15 pt-2">
             В углу каждой карточки отряда — лого источника: Технолог для официального контента,
             лого конкретного сообщества («Миниатюры Лисицина», «Звёздные Системы» и т.д.) — для неофициального.
             На странице отряда — подробные метки источников и авторов, а метка АВБ отмечает весь неофициальный контент.
@@ -134,7 +134,7 @@ export function EncyclopediaAttributionBanner() {
           {/* Правовая сводка — полный текст на отдельной странице */}
           <Link
             href="/encyclopedia/sources"
-            className="inline-block pt-1 font-ibm-mono text-[9px] uppercase tracking-[0.2em] text-military-rust/60 hover:text-military-amber transition-colors"
+            className="inline-block pt-1 font-ibm-mono text-[9px] uppercase tracking-[0.2em] text-military-rust hover:text-military-amber transition-colors"
           >
             {'// ИСТОЧНИКИ И ПРАВА →'}
           </Link>

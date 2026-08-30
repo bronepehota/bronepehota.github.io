@@ -84,11 +84,11 @@ export function SourceChip({ name, role, icon, logo, url, rel = 'noopener norefe
       )}
       <span className={cn(nameCls, 'uppercase text-military-sand')}>{name}</span>
       {role && (
-        <span className="font-ibm-mono text-[9px] normal-case tracking-normal text-military-steel/60">
+        <span className="font-ibm-mono text-[9px] normal-case tracking-normal text-military-taupe/80">
           · {role}
         </span>
       )}
-      {url && <ExternalLink className={cn(compact ? 'w-2.5 h-2.5' : 'w-3 h-3', 'text-military-steel/50')} aria-hidden />}
+      {url && <ExternalLink className={cn(compact ? 'w-2.5 h-2.5' : 'w-3 h-3', 'text-military-taupe/80')} aria-hidden />}
     </>
   );
 
@@ -232,7 +232,7 @@ export function LoreSourceRow({ loreAuthor, credit, withHeader = true, compact, 
   return (
     <div data-testid="lore-source-row" className={cn('flex flex-wrap items-center gap-2', className)}>
       {withHeader && (
-        <span className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider">
+        <span className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider">
           {'// ИСТОЧНИК'}
         </span>
       )}

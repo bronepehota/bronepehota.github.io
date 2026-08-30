@@ -21,7 +21,7 @@ export function HubFresh() {
         <p className="font-ibm-mono text-[10px] uppercase tracking-[0.3em] text-military-amber/80">
           {'// НОВОЕ В АРХИВЕ'}
         </p>
-        <p className="font-ibm-mono text-[9px] uppercase tracking-[0.2em] text-military-steel/50">
+        <p className="font-ibm-mono text-[9px] uppercase tracking-[0.2em] text-military-taupe/80">
           последние пополнения
         </p>
       </div>
@@ -33,7 +33,7 @@ export function HubFresh() {
               data-testid="hub-fresh-entry"
               className="group flex min-h-[44px] items-center gap-3 no-underline touch-manipulation"
             >
-              <span className="shrink-0 font-ibm-mono text-[9px] uppercase tracking-[0.2em] text-military-rust/60 w-[74px]">
+              <span className="shrink-0 font-ibm-mono text-[9px] uppercase tracking-[0.2em] text-military-rust w-[74px]">
                 {e.kind}
               </span>
               <span className="font-oswald text-sm text-military-sand group-hover:text-military-amber transition-colors">
@@ -42,7 +42,7 @@ export function HubFresh() {
               <span aria-hidden className="min-w-4 flex-1 border-b border-dotted border-military-steel/25" />
               <span
                 aria-hidden
-                className="shrink-0 font-ibm-mono text-[11px] text-military-steel/40 group-hover:text-military-amber transition-colors"
+                className="shrink-0 font-ibm-mono text-[11px] text-military-taupe/80 group-hover:text-military-amber transition-colors"
               >
                 →
               </span>

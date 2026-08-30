@@ -78,7 +78,7 @@ export default function FactionsSection({ className }: FactionsSectionProps) {
               {/* Faction header with icon */}
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
-                  <div className="font-ibm-mono text-xs text-military-rust/60 mb-2">
+                  <div className="font-ibm-mono text-xs text-military-rust mb-2">
                     FACTION_{(index + 1).toString().padStart(2, '0')}
                   </div>
                   <h3
@@ -133,10 +133,10 @@ export default function FactionsSection({ className }: FactionsSectionProps) {
                   «{faction.motto}»
                 </p>
                 <div className="flex items-center justify-between gap-2 mt-1">
-                  <span className="font-ibm-mono text-[10px] md:text-[11px] text-military-steel/60 uppercase tracking-wide truncate">
+                  <span className="font-ibm-mono text-[10px] md:text-[11px] text-military-taupe/80 uppercase tracking-wide truncate">
                     {faction.homeWorld}
                   </span>
-                  <span className="font-ibm-mono text-[10px] uppercase tracking-wider text-military-steel/50 group-hover:text-military-amber transition-colors shrink-0">
+                  <span className="font-ibm-mono text-[10px] uppercase tracking-wider text-military-taupe/80 group-hover:text-military-amber transition-colors shrink-0">
                     отряды →
                   </span>
                 </div>

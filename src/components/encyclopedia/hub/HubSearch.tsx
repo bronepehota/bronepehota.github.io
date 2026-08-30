@@ -74,12 +74,12 @@ export function HubSearch({ units, lorePages }: HubSearchProps) {
     <div data-testid="hub-search-root">
       <label
         htmlFor="hub-search-input"
-        className="block font-ibm-mono text-[9px] uppercase tracking-[0.3em] text-military-rust/70 mb-2"
+        className="block font-ibm-mono text-[9px] uppercase tracking-[0.3em] text-military-rust mb-2"
       >
         {'// ПОИСК ПО ВСЕЛЕННОЙ'}
       </label>
       <div className="relative">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-military-rust/50" />
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-military-rust" />
         <input
           id="hub-search-input"
           type="text"
@@ -87,14 +87,14 @@ export function HubSearch({ units, lorePages }: HubSearchProps) {
           onChange={(e) => setQuery(e.target.value)}
           placeholder="БЛАУД, КОСАРИ, ГРОНТ…"
           data-testid="hub-search"
-          className="w-full min-h-[44px] rounded-full border border-military-steel/30 bg-military-dark/70 py-2 pl-9 pr-10 font-ibm-mono text-[11px] md:text-xs tracking-wide text-white placeholder:text-military-steel/40 focus:border-military-amber/50 focus:outline-none touch-manipulation"
+          className="w-full min-h-[44px] rounded-full border border-military-steel/30 bg-military-dark/70 py-2 pl-9 pr-10 font-ibm-mono text-[11px] md:text-xs tracking-wide text-white placeholder:text-military-taupe/80 focus:border-military-amber/50 focus:outline-none touch-manipulation"
         />
         {query && (
           <button
             type="button"
             aria-label="Очистить поиск"
             onClick={() => setQuery('')}
-            className="absolute inset-y-0 right-1 flex w-10 items-center justify-center text-military-steel/60 hover:text-military-amber transition-colors touch-manipulation"
+            className="absolute inset-y-0 right-1 flex w-10 items-center justify-center text-military-taupe/80 hover:text-military-amber transition-colors touch-manipulation"
           >
             <X className="h-3.5 w-3.5" />
           </button>
@@ -137,7 +137,7 @@ export function HubSearch({ units, lorePages }: HubSearchProps) {
                       </span>
                       {/* dotted ledger leader — dossier index typography */}
                       <span aria-hidden className="min-w-4 flex-1 border-b border-dotted border-military-steel/25" />
-                      <span className="shrink-0 font-ibm-mono text-[9px] uppercase tracking-wider text-military-steel/50">
+                      <span className="shrink-0 font-ibm-mono text-[9px] uppercase tracking-wider text-military-taupe/80">
                         {faction}
                       </span>
                     </Link>
@@ -159,7 +159,7 @@ export function HubSearch({ units, lorePages }: HubSearchProps) {
               )}
             </>
           ) : (
-            <p className="px-3 py-3 font-ibm-mono text-[10px] uppercase tracking-wider text-military-steel/60">
+            <p className="px-3 py-3 font-ibm-mono text-[10px] uppercase tracking-wider text-military-taupe/80">
               {`∅ по запросу «${query}» — в архиве ничего нет`}
             </p>
           )}

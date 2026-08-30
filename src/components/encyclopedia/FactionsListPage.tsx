@@ -54,7 +54,7 @@ export default function FactionsListPage({ factions }: FactionsListPageProps) {
                 href="/app"
                 className={cn(
                   'inline-flex items-center gap-2 font-ibm-mono text-xs md:text-sm',
-                  'text-military-rust/60 hover:text-military-amber transition-colors',
+                  'text-military-rust hover:text-military-amber transition-colors',
                   'tracking-widest uppercase',
                 )}
               >
@@ -64,7 +64,7 @@ export default function FactionsListPage({ factions }: FactionsListPageProps) {
               <Link
                 href="/encyclopedia"
                 aria-label="На главную энциклопедии"
-                className="inline-flex items-center gap-2 font-ibm-mono text-xs md:text-sm text-military-rust/60 hover:text-military-amber transition-colors tracking-widest uppercase"
+                className="inline-flex items-center gap-2 font-ibm-mono text-xs md:text-sm text-military-rust hover:text-military-amber transition-colors tracking-widest uppercase"
               >
                 <span>Энциклопедия</span>
                 <span aria-hidden>→</span>
@@ -233,7 +233,7 @@ export default function FactionsListPage({ factions }: FactionsListPageProps) {
 
                       {/* Parent card: list the sub-factions it contains */}
                       {subs.length > 0 && (
-                        <p className="mt-2.5 font-ibm-mono text-[11px] text-military-steel/70 uppercase tracking-wider">
+                        <p className="mt-2.5 font-ibm-mono text-[11px] text-military-taupe/80 uppercase tracking-wider">
                           Включает: {subs.map((s, i) => (
                             <span key={s.id}>
                               {i > 0 && ', '}
@@ -275,7 +275,7 @@ export default function FactionsListPage({ factions }: FactionsListPageProps) {
                             href={faction.siteUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex min-h-[44px] items-center gap-1.5 font-ibm-mono text-[11px] uppercase tracking-wider text-military-taupe/70 transition-colors hover:text-military-amber touch-manipulation"
+                            className="inline-flex min-h-[44px] items-center gap-1.5 font-ibm-mono text-[11px] uppercase tracking-wider text-military-taupe/80 transition-colors hover:text-military-amber touch-manipulation"
                             title={faction.siteUrl}
                           >
                             <ExternalLink className="w-3 h-3" /> Официальный сайт

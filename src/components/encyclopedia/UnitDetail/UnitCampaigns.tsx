@@ -18,7 +18,7 @@ export function UnitCampaigns({ campaigns }: UnitCampaignsProps) {
   if (campaigns.length === 0) return null;
   return (
     <section id="campaigns" className="folded-paper military-corners p-6 scroll-mt-4" data-testid="unit-campaigns">
-      <h2 className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider mb-3">
+      <h2 className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider mb-3">
         {'// УЧАСТИЕ В ВОЙНАХ'}
       </h2>
       <ul>
@@ -32,7 +32,7 @@ export function UnitCampaigns({ campaigns }: UnitCampaignsProps) {
               <span className="font-oswald text-military-sand group-hover:text-military-amber transition-colors">
                 {c.title}
               </span>
-              <span className="ml-auto text-right text-xs text-military-steel/70 group-hover:text-military-taupe transition-colors">
+              <span className="ml-auto text-right text-xs text-military-taupe/80 group-hover:text-military-taupe transition-colors">
                 {c.role}
               </span>
             </Link>

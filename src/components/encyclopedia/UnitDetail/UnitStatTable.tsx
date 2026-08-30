@@ -40,13 +40,13 @@ function isSpecial(s: Soldier): boolean {
 function SquadStats({ squad }: { squad: Squad }) {
   return (
     <section id="stats" className="folded-paper military-corners p-3 scroll-mt-4" data-testid="unit-stat-table" aria-label="Боевой расчёт">
-      <div className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider mb-2">
+      <div className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider mb-2">
         {'// БОЕВОЙ РАСЧЁТ'}
       </div>
       <div className="overflow-x-auto custom-scrollbar">
         <table className="w-full text-sm font-ibm-mono">
           <thead>
-            <tr className="text-military-steel text-[10px] uppercase">
+            <tr className="text-military-taupe text-[10px] uppercase">
               <th className="px-1 py-1 text-left font-medium">№</th>
               <th className="px-1 py-1 font-medium">А</th>
               <th className="px-1 py-1 font-medium">Ск</th>
@@ -104,14 +104,14 @@ function MachineStats({ machine }: { machine: Machine }) {
   ];
   return (
     <section id="stats" className="folded-paper military-corners p-3 scroll-mt-4" data-testid="unit-stat-table" aria-label="Боевой расчёт">
-      <div className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider mb-2">
+      <div className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider mb-2">
         {'// БОЕВОЙ РАСЧЁТ'}
       </div>
       <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-3">
         {tiles.map((t) => (
           <div key={t.label} className="text-center p-2 bg-military-charcoal/50 rounded">
             <div className={`font-russo text-base font-bold ${t.cls}`}>{t.value}</div>
-            <div className="font-ibm-mono text-[10px] text-military-steel uppercase">{t.label}</div>
+            <div className="font-ibm-mono text-[10px] text-military-taupe uppercase">{t.label}</div>
           </div>
         ))}
       </div>

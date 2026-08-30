@@ -152,7 +152,7 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc, c
               href="/encyclopedia/units"
               className={cn(
                 'inline-flex items-center gap-2 font-ibm-mono text-xs md:text-sm',
-                'text-military-rust/60 hover:text-military-amber transition-colors',
+                'text-military-rust hover:text-military-amber transition-colors',
                 'tracking-widest uppercase mb-2 md:mb-2.5',
                 'fade-in-up opacity-0',
                 isLoaded && 'opacity-100'
@@ -169,10 +169,10 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc, c
             <nav
               aria-label="Хлебные крошки"
               data-testid="unit-breadcrumb"
-              className="font-ibm-mono text-[10px] uppercase tracking-[0.2em] text-military-steel/40 mb-5 md:mb-8"
+              className="font-ibm-mono text-[10px] uppercase tracking-[0.2em] text-military-taupe/80 mb-5 md:mb-8"
             >
               {'ЭНЦИКЛОПЕДИЯ / ЮНИТЫ / '}
-              <span aria-current="page" className="text-military-rust/70">
+              <span aria-current="page" className="text-military-rust">
                 {unit.name.toUpperCase()}
               </span>
             </nav>
@@ -320,7 +320,7 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc, c
                     <div className="mb-4 md:mb-6 flex flex-wrap items-center gap-x-5 gap-y-1">
                       {unit.encyclopedia?.class && (
                         <span>
-                          <span className="font-ibm-mono text-xs text-military-steel/60 uppercase tracking-wider mr-2">
+                          <span className="font-ibm-mono text-xs text-military-taupe/80 uppercase tracking-wider mr-2">
                             CLASS
                           </span>
                           <span className="font-oswald text-military-sand">
@@ -330,7 +330,7 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc, c
                       )}
                       {rankLabel && (
                         <span>
-                          <span className="font-ibm-mono text-xs text-military-steel/60 uppercase tracking-wider mr-2">
+                          <span className="font-ibm-mono text-xs text-military-taupe/80 uppercase tracking-wider mr-2">
                             РАНГ
                           </span>
                           <span className="font-oswald text-military-amber">
@@ -353,7 +353,7 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc, c
                       with a separate painter + sculptor previously stacked two
                       double-header blocks — which looked broken under a wide group photo. */}
                   <div className="mb-4 md:mb-6 flex flex-wrap items-center gap-x-3 gap-y-2">
-                    <span className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider">
+                    <span className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider">
                       {attributionHeader}
                     </span>
                     {photoCredit ? (
@@ -386,7 +386,7 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc, c
                         Label + chip grouped so they don't split when the strip wraps on mobile. */}
                     {sculptorDiffers && miniatureSourceCredit && (
                       <span className="inline-flex items-center gap-1.5">
-                        <span className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider">
+                        <span className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider">
                           {'// МИНИАТЮРЫ'}
                         </span>
                         <MiniatureChip
@@ -401,7 +401,7 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc, c
                     {/* Squad sponsor — who funded/commissioned the squad (miniatures/lore). */}
                     {unit.sponsor && (
                       <span className="inline-flex items-center gap-1.5">
-                        <span className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider">
+                        <span className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider">
                           {'// СПОНСОР'}
                         </span>
                         <SponsorChip name={unit.sponsor.name} url={unit.sponsor.url} withHeader={false} />
@@ -532,7 +532,7 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc, c
                               {t === 'army' ? 'армия' : t === 'machine' ? 'машина' : 'солдат'}
                             </span>
                           ))}
-                          <span className="text-[10px] px-2 py-0.5 rounded-full font-ibm-mono bg-military-steel/30 border border-military-steel/40 text-military-steel uppercase">
+                          <span className="text-[10px] px-2 py-0.5 rounded-full font-ibm-mono bg-military-steel/30 border border-military-steel/40 text-military-taupe uppercase">
                             {buff.phase === 'always' ? 'всегда' : buff.phase === 'shot' ? 'стрельба' : buff.phase === 'melee' ? 'ББ' : buff.phase}
                           </span>
                         </div>

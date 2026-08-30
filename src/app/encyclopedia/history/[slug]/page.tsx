@@ -101,12 +101,12 @@ export default async function HistoryChapterPage({ params }: PageProps) {
         <nav aria-label="Навигация по истории" className="mb-6 flex items-center justify-between gap-4">
           <Link
             href="/encyclopedia/history"
-            className="inline-flex items-center gap-2 font-ibm-mono text-xs text-military-rust/60 hover:text-military-amber transition-colors tracking-widest uppercase"
+            className="inline-flex items-center gap-2 font-ibm-mono text-xs text-military-rust hover:text-military-amber transition-colors tracking-widest uppercase"
           >
             <span className="text-lg">←</span>
             <span>К оглавлению</span>
           </Link>
-          <p className="font-ibm-mono text-[10px] text-military-steel/50 tracking-wide hidden sm:block">
+          <p className="font-ibm-mono text-[10px] text-military-taupe/80 tracking-wide hidden sm:block">
             {'// История вселенной Робогир'}
           </p>
         </nav>
@@ -127,7 +127,7 @@ export default async function HistoryChapterPage({ params }: PageProps) {
               {chapter.title}
             </h1>
             {chapter.era && (
-              <span className="ml-auto font-ibm-mono text-[10px] uppercase tracking-wider text-military-steel/60 whitespace-nowrap">
+              <span className="ml-auto font-ibm-mono text-[10px] uppercase tracking-wider text-military-taupe/80 whitespace-nowrap">
                 {chapter.era}
               </span>
             )}

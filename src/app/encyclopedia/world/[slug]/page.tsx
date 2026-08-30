@@ -80,7 +80,7 @@ function RelatedGroup({
   if (items.length === 0) return null;
   return (
     <div>
-      <p className="font-ibm-mono text-[10px] uppercase tracking-[0.25em] text-military-rust/80 mb-2">
+      <p className="font-ibm-mono text-[10px] uppercase tracking-[0.25em] text-military-rust mb-2">
         {`// ${label}`}
       </p>
       <ul className="flex flex-wrap gap-2">
@@ -91,7 +91,7 @@ function RelatedGroup({
               className="inline-flex items-center gap-1.5 border border-military-steel/30 bg-military-charcoal/50 px-3 py-1.5 font-oswald text-sm text-military-sand hover:border-military-amber hover:text-military-amber transition-colors"
             >
               {item.title}
-              <span aria-hidden className="font-ibm-mono text-[10px] text-military-rust/70">
+              <span aria-hidden className="font-ibm-mono text-[10px] text-military-rust">
                 →
               </span>
             </Link>
@@ -160,12 +160,12 @@ export default async function WorldEntryPage({ params }: PageProps) {
         >
           <Link
             href="/encyclopedia/world"
-            className="inline-flex items-center gap-2 font-ibm-mono text-xs text-military-rust/60 hover:text-military-amber transition-colors tracking-widest uppercase"
+            className="inline-flex items-center gap-2 font-ibm-mono text-xs text-military-rust hover:text-military-amber transition-colors tracking-widest uppercase"
           >
             <span className="text-lg">←</span>
             <span>К алфавиту вселенной</span>
           </Link>
-          <p className="font-ibm-mono text-[10px] text-military-steel/50 tracking-wide hidden sm:block">
+          <p className="font-ibm-mono text-[10px] text-military-taupe/80 tracking-wide hidden sm:block">
             {'// Вселенная Бронепехоты'}
           </p>
         </nav>
@@ -182,13 +182,13 @@ export default async function WorldEntryPage({ params }: PageProps) {
             {entry.era && (
               <span
                 data-testid="world-era"
-                className="font-ibm-mono text-[10px] uppercase tracking-wider text-military-steel/60 whitespace-nowrap"
+                className="font-ibm-mono text-[10px] uppercase tracking-wider text-military-taupe/80 whitespace-nowrap"
               >
                 {entry.era}
               </span>
             )}
             {factionName && (
-              <span className="font-ibm-mono text-[10px] uppercase tracking-wider text-military-taupe/70 whitespace-nowrap">
+              <span className="font-ibm-mono text-[10px] uppercase tracking-wider text-military-taupe/80 whitespace-nowrap">
                 {factionName}
               </span>
             )}
@@ -210,7 +210,7 @@ export default async function WorldEntryPage({ params }: PageProps) {
           {entry.sources && entry.sources.length > 0 && (
             <p
               data-testid="world-sources"
-              className="mt-5 pt-3 border-t border-military-steel/20 font-ibm-mono text-[10px] leading-relaxed text-military-steel/60"
+              className="mt-5 pt-3 border-t border-military-steel/20 font-ibm-mono text-[10px] leading-relaxed text-military-taupe/80"
             >
               {`// ИСТОЧНИКИ: ${entry.sources.join(' · ')}`}
             </p>

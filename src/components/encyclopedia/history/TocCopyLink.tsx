@@ -65,10 +65,10 @@ export function TocCopyLink({ slug, title }: TocCopyLinkProps) {
       data-testid="toc-copy-link"
       aria-label={copied ? 'Ссылка скопирована' : `Скопировать ссылку на «${title}»`}
       title={`Скопировать ссылку на «${title}»`}
-      className="shrink-0 w-11 h-11 flex items-center justify-center text-military-steel/60 hover:text-military-amber transition-colors"
+      className="shrink-0 w-11 h-11 flex items-center justify-center text-military-taupe/80 hover:text-military-amber transition-colors"
     >
       {copied ? (
-        <Check className="w-4 h-4 text-military-green" aria-hidden />
+        <Check className="w-4 h-4 text-hud-green" aria-hidden />
       ) : (
         <Copy className="w-4 h-4" aria-hidden />
       )}

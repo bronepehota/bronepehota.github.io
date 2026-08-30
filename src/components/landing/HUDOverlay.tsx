@@ -33,7 +33,7 @@ export default function HUDOverlay({ className }: HUDOverlayProps) {
       <div className="absolute top-0 left-3/4 bottom-0 w-px bg-gradient-to-b from-transparent via-military-steel/10 to-transparent" />
 
       {/* Status indicators - top left - smaller on mobile */}
-      <div className="absolute top-3 left-12 sm:top-4 sm:left-24 font-ibm-mono text-[8px] sm:text-[10px] text-military-rust/60">
+      <div className="absolute top-3 left-12 sm:top-4 sm:left-24 font-ibm-mono text-[8px] sm:text-[10px] text-military-rust">
         <div className="flex items-center gap-1 sm:gap-2">
           <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-military-rust rounded-full animate-pulse-slow" />
           <span className="hidden sm:inline">STATUS:</span>
@@ -42,19 +42,19 @@ export default function HUDOverlay({ className }: HUDOverlayProps) {
       </div>
 
       {/* Coordinates - top right - hidden on very small screens */}
-      <div className="absolute top-3 right-12 sm:top-4 sm:right-24 font-ibm-mono text-[8px] sm:text-[10px] text-military-steel/60">
+      <div className="absolute top-3 right-12 sm:top-4 sm:right-24 font-ibm-mono text-[8px] sm:text-[10px] text-military-taupe/80">
         <div>COORDS: 45.9123</div>
         <div className="hidden sm:block">SECTOR: ALPHA-7</div>
       </div>
 
       {/* Bottom status - left - compact on mobile */}
-      <div className="absolute bottom-3 left-12 sm:bottom-4 sm:left-24 font-ibm-mono text-[8px] sm:text-[10px] text-military-steel/50">
+      <div className="absolute bottom-3 left-12 sm:bottom-4 sm:left-24 font-ibm-mono text-[8px] sm:text-[10px] text-military-taupe/80">
         <div>UNIT: COMMAND</div>
         <div className="hidden sm:block">VER: 2.4.1</div>
       </div>
 
       {/* Classification marker - right - compact on mobile */}
-      <div className="absolute bottom-3 right-12 sm:bottom-4 sm:right-24 font-ibm-mono text-[8px] sm:text-[10px] text-military-amber/50">
+      <div className="absolute bottom-3 right-12 sm:bottom-4 sm:right-24 font-ibm-mono text-[8px] sm:text-[10px] text-military-amber/70">
         <div className="flex items-center gap-1 sm:gap-2">
           <span className="animate-blink">▶</span>
           <span className="hidden sm:inline">CLASSIFIED</span>
@@ -89,7 +89,7 @@ export default function HUDOverlay({ className }: HUDOverlayProps) {
       <div className="absolute bottom-0 left-1/2 w-2 h-2 bg-military-rust/30 rounded-full animate-pulse-slow" />
 
       {/* Technical data blocks - compact on mobile */}
-      <div className="absolute top-1/2 right-2 sm:right-4 transform -translate-y-1/2 font-ibm-mono text-[6px] sm:text-[8px] text-military-steel/40 space-y-0.5 sm:space-y-1">
+      <div className="absolute top-1/2 right-2 sm:right-4 transform -translate-y-1/2 font-ibm-mono text-[6px] sm:text-[8px] text-military-taupe/80 space-y-0.5 sm:space-y-1">
         <div>MEM: 64TB</div>
         <div>CPU: 12%</div>
         <div className="hidden sm:block">NET: SECURE</div>
@@ -112,7 +112,7 @@ export default function HUDOverlay({ className }: HUDOverlayProps) {
       <div className="absolute bottom-1/4 right-1/4 w-4 h-4 border-r-2 border-b-2 border-military-steel/20" />
 
       {/* Animated data stream - left side */}
-      <div className="absolute top-1/3 left-1 font-ibm-mono text-[5px] sm:text-[6px] text-military-rust/20 space-y-0.5 overflow-hidden h-20 hidden sm:block">
+      <div className="absolute top-1/3 left-1 font-ibm-mono text-[5px] sm:text-[6px] text-military-rust space-y-0.5 overflow-hidden h-20 hidden sm:block">
         <div>01100110</div>
         <div>11010100</div>
         <div>00110011</div>
@@ -120,7 +120,7 @@ export default function HUDOverlay({ className }: HUDOverlayProps) {
       </div>
 
       {/* Animated data stream - right side */}
-      <div className="absolute bottom-1/3 right-1 font-ibm-mono text-[5px] sm:text-[6px] text-military-rust/20 space-y-0.5 overflow-hidden h-20 hidden sm:block">
+      <div className="absolute bottom-1/3 right-1 font-ibm-mono text-[5px] sm:text-[6px] text-military-rust space-y-0.5 overflow-hidden h-20 hidden sm:block">
         <div>10110011</div>
         <div>01010100</div>
         <div>11001101</div>

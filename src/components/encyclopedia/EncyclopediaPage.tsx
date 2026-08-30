@@ -231,7 +231,7 @@ export default function EncyclopediaPage({ initialUnits, lorePages }: Encycloped
             >
               <Link
                 href="/app"
-                className="inline-flex items-center gap-1.5 font-ibm-mono text-[11px] text-military-rust/60 hover:text-military-amber transition-colors tracking-widest uppercase whitespace-nowrap"
+                className="inline-flex items-center gap-1.5 font-ibm-mono text-[11px] text-military-rust hover:text-military-amber transition-colors tracking-widest uppercase whitespace-nowrap"
               >
                 <span>←</span>
                 <span className="hidden sm:inline">В приложение</span>
@@ -251,7 +251,7 @@ export default function EncyclopediaPage({ initialUnits, lorePages }: Encycloped
                   <h1 className="font-russo text-sm md:text-base tracking-[0.25em] text-military-sand transition-colors group-hover:text-military-amber">
                     ЭНЦИКЛОПЕДИЯ
                   </h1>
-                  <div className="mt-0.5 font-ibm-mono text-[8px] md:text-[9px] text-military-rust/60 tracking-[0.3em] uppercase transition-colors group-hover:text-military-amber/70">
+                  <div className="mt-0.5 font-ibm-mono text-[8px] md:text-[9px] text-military-rust tracking-[0.3em] uppercase transition-colors group-hover:text-military-amber/70">
                     {'// База боевых единиц'}
                   </div>
                 </div>
@@ -279,10 +279,10 @@ export default function EncyclopediaPage({ initialUnits, lorePages }: Encycloped
             data-testid="encyclopedia-battle-banner-link"
             className="flex items-center gap-3 min-h-[44px] px-2 border border-military-rust/30 hover:border-military-amber/60 transition-colors group touch-manipulation no-underline"
           >
-            <span className="font-ibm-mono text-[10px] uppercase tracking-[0.25em] text-military-rust/80 shrink-0">
+            <span className="font-ibm-mono text-[10px] uppercase tracking-[0.25em] text-military-rust shrink-0">
               {'// РЕЖИМ БОЯ'}
             </span>
-            <span className="hidden sm:inline font-ibm-mono text-[10px] md:text-xs text-military-steel/70 truncate">
+            <span className="hidden sm:inline font-ibm-mono text-[10px] md:text-xs text-military-taupe/80 truncate">
               любой отряд — в строй
             </span>
             <span className="flex-1" />
@@ -320,13 +320,13 @@ export default function EncyclopediaPage({ initialUnits, lorePages }: Encycloped
             {/* Search + count */}
             <div className="flex items-center gap-3">
               <div className="relative flex-1">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-military-rust/50" />
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-military-rust" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   placeholder="ПОИСК…"
-                  className="w-full min-h-[44px] rounded-full border border-military-steel/30 bg-military-charcoal/60 py-2 pl-9 pr-9 font-ibm-mono text-[11px] tracking-wide text-white placeholder:text-military-steel/50 focus:border-military-amber/50 focus:outline-none touch-manipulation"
+                  className="w-full min-h-[44px] rounded-full border border-military-steel/30 bg-military-charcoal/60 py-2 pl-9 pr-9 font-ibm-mono text-[11px] tracking-wide text-white placeholder:text-military-taupe/80 focus:border-military-amber/50 focus:outline-none touch-manipulation"
                 />
                 {/* ✕ — clear the query without long backspacing (mobile audit point) */}
                 {searchQuery && (
@@ -335,7 +335,7 @@ export default function EncyclopediaPage({ initialUnits, lorePages }: Encycloped
                     data-testid="search-clear"
                     aria-label="Очистить поиск"
                     onClick={() => setSearchQuery('')}
-                    className="absolute inset-y-0 right-1 flex w-8 items-center justify-center text-military-steel/60 hover:text-military-amber transition-colors"
+                    className="absolute inset-y-0 right-1 flex w-8 items-center justify-center text-military-taupe/80 hover:text-military-amber transition-colors"
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>
@@ -347,7 +347,7 @@ export default function EncyclopediaPage({ initialUnits, lorePages }: Encycloped
                     {activeFilterCount}
                   </span>
                 )}
-                <span className="font-ibm-mono text-[10px] text-military-rust/60 tabular-nums whitespace-nowrap">
+                <span className="font-ibm-mono text-[10px] text-military-rust tabular-nums whitespace-nowrap">
                   {filteredUnits.length}/{units.length}
                 </span>
               </div>
@@ -437,7 +437,7 @@ export default function EncyclopediaPage({ initialUnits, lorePages }: Encycloped
                   // (a forgotten faction selector + query = zero without a clue)
                   // and example queries that are known to hit.
                   <>
-                    <p className="mt-1 font-ibm-mono text-xs text-military-steel">
+                    <p className="mt-1 font-ibm-mono text-xs text-military-taupe">
                       по запросу «{searchQuery}»
                     </p>
                     <div className="mt-5">
@@ -451,7 +451,7 @@ export default function EncyclopediaPage({ initialUnits, lorePages }: Encycloped
                         Сбросить фильтры
                       </button>
                     </div>
-                    <p className="mt-6 font-ibm-mono text-[10px] uppercase tracking-wider text-military-steel/50">
+                    <p className="mt-6 font-ibm-mono text-[10px] uppercase tracking-wider text-military-taupe/80">
                       возможно, вы искали:
                     </p>
                     <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
@@ -469,7 +469,7 @@ export default function EncyclopediaPage({ initialUnits, lorePages }: Encycloped
                     </div>
                   </>
                 ) : (
-                  <p className="mt-1 font-ibm-mono text-xs text-military-steel">
+                  <p className="mt-1 font-ibm-mono text-xs text-military-taupe">
                     Измените параметры фильтрации
                   </p>
                 )}

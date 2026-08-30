@@ -15,7 +15,7 @@ import Link from 'next/link';
 export function LoreGuide({ unitsHref }: { unitsHref?: string }) {
   return (
     <section data-testid="lore-guide" className="folded-paper military-corners px-4 py-3 md:px-5 md:py-4">
-      <p className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider mb-1.5">
+      <p className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider mb-1.5">
         {'// С ЧЕГО НАЧАТЬ'}
       </p>
       <p className="text-[13px] leading-relaxed text-military-taupe mb-2.5">
@@ -28,11 +28,11 @@ export function LoreGuide({ unitsHref }: { unitsHref?: string }) {
             data-testid="lore-guide-chapter"
             className="inline-flex items-baseline gap-1.5 text-military-amber/90 hover:text-military-amber transition-colors"
           >
-            <span className="text-military-rust/60">01</span>
+            <span className="text-military-rust">01</span>
             Тунгусский артефакт
           </Link>
         </li>
-        <li aria-hidden className="text-military-steel/40">→</li>
+        <li aria-hidden className="text-military-taupe/80">→</li>
         <li>
           <Link
             href="/encyclopedia/history"
@@ -42,7 +42,7 @@ export function LoreGuide({ unitsHref }: { unitsHref?: string }) {
             вся Летопись
           </Link>
         </li>
-        <li aria-hidden className="text-military-steel/40">→</li>
+        <li aria-hidden className="text-military-taupe/80">→</li>
         <li>
           <Link
             href="/encyclopedia/history#wars"
@@ -52,7 +52,7 @@ export function LoreGuide({ unitsHref }: { unitsHref?: string }) {
             Хроники войн
           </Link>
         </li>
-        <li aria-hidden className="text-military-steel/40">→</li>
+        <li aria-hidden className="text-military-taupe/80">→</li>
         <li>
           <Link
             href="/encyclopedia/factions"
@@ -62,7 +62,7 @@ export function LoreGuide({ unitsHref }: { unitsHref?: string }) {
             фракции
           </Link>
         </li>
-        <li aria-hidden className="text-military-steel/40">→</li>
+        <li aria-hidden className="text-military-taupe/80">→</li>
         {/* On the hub every step is a link into the archive; only a guide
             rendered ON the units page would mark the last step «вы здесь». */}
         {unitsHref ? (
@@ -77,8 +77,8 @@ export function LoreGuide({ unitsHref }: { unitsHref?: string }) {
             </Link>
           </li>
         ) : (
-          <li className="text-military-steel/60" aria-current="step">
-            юниты <span className="text-military-rust/60">· вы здесь</span>
+          <li className="text-military-taupe/80" aria-current="step">
+            юниты <span className="text-military-rust">· вы здесь</span>
           </li>
         )}
       </ol>

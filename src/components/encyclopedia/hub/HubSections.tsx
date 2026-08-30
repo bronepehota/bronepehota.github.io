@@ -87,7 +87,7 @@ export function HubSections({ counts, factionDots }: HubSectionsProps) {
         <p className="font-ibm-mono text-[10px] uppercase tracking-[0.3em] text-military-amber/80">
           {'// РАЗДЕЛЫ АРХИВА'}
         </p>
-        <p className="font-ibm-mono text-[10px] tabular-nums text-military-steel/60 whitespace-nowrap">
+        <p className="font-ibm-mono text-[10px] tabular-nums text-military-taupe/80 whitespace-nowrap">
           {`${folders.length} ПАПОК`}
         </p>
       </div>
@@ -131,7 +131,7 @@ export function HubSections({ counts, factionDots }: HubSectionsProps) {
               <span
                 className={cn(
                   'relative font-ibm-mono text-[9px] tracking-[0.25em] uppercase',
-                  featured ? 'text-military-amber' : 'text-military-rust/70',
+                  featured ? 'text-military-amber' : 'text-military-rust',
                 )}
               >
                 {f.index}
@@ -160,7 +160,7 @@ export function HubSections({ counts, factionDots }: HubSectionsProps) {
                 </span>
               )}
 
-              <span className="relative mt-auto pt-2 font-ibm-mono text-[9px] md:text-[10px] uppercase tracking-wider text-military-steel/70">
+              <span className="relative mt-auto pt-2 font-ibm-mono text-[9px] md:text-[10px] uppercase tracking-wider text-military-taupe/80">
                 {f.caption}
               </span>
 
@@ -170,7 +170,7 @@ export function HubSections({ counts, factionDots }: HubSectionsProps) {
                   'absolute top-2.5 right-2.5 w-3.5 h-3.5 transition-all',
                   featured
                     ? 'text-military-amber/70 group-hover:text-military-amber'
-                    : 'text-military-steel/40 group-hover:text-military-amber',
+                    : 'text-military-taupe/80 group-hover:text-military-amber',
                 )}
                 strokeWidth={2}
               />

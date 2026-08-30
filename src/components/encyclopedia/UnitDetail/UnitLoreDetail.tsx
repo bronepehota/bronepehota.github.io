@@ -29,7 +29,7 @@ export function UnitLoreDetail({ doc }: { doc: UnitLoreDoc }) {
       >
         <BookOpen className="w-5 h-5 shrink-0" aria-hidden />
         Полное описание
-        <span className="ml-1 font-ibm-mono text-[10px] font-normal uppercase tracking-wider text-military-steel/60">
+        <span className="ml-1 font-ibm-mono text-[10px] font-normal uppercase tracking-wider text-military-taupe/80">
           {open ? 'свернуть' : 'первоисточник'}
         </span>
         <ChevronDown
@@ -58,13 +58,13 @@ export function UnitLoreDetail({ doc }: { doc: UnitLoreDoc }) {
                   href={doc.sourceUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 font-ibm-mono text-[10px] uppercase tracking-wider text-military-steel/60 hover:text-military-amber transition-colors"
+                  className="inline-flex items-center gap-1.5 font-ibm-mono text-[10px] uppercase tracking-wider text-military-taupe/80 hover:text-military-amber transition-colors"
                 >
                   <ExternalLink className="w-3 h-3" aria-hidden />
                   Первоисточник: {doc.sourceLabel || 'официальный канон «Технолог»'}
                 </a>
               ) : (
-                <span className="inline-flex items-center gap-1.5 font-ibm-mono text-[10px] uppercase tracking-wider text-military-steel/60">
+                <span className="inline-flex items-center gap-1.5 font-ibm-mono text-[10px] uppercase tracking-wider text-military-taupe/80">
                   <ExternalLink className="w-3 h-3" aria-hidden />
                   Первоисточник: {doc.sourceLabel}
                 </span>

@@ -50,7 +50,7 @@ export default function SourcesPage() {
         <nav className="mb-6">
           <Link
             href="/encyclopedia"
-            className="inline-flex items-center gap-2 font-ibm-mono text-xs text-military-rust/60 hover:text-military-amber transition-colors tracking-widest uppercase"
+            className="inline-flex items-center gap-2 font-ibm-mono text-xs text-military-rust hover:text-military-amber transition-colors tracking-widest uppercase"
           >
             <span className="text-lg">←</span>
             <span>К энциклопедии</span>
@@ -88,7 +88,7 @@ export default function SourcesPage() {
                 <p className="font-ibm-mono text-[10px] uppercase tracking-[0.3em] text-military-amber/80">
                   {`// ${section.title.toUpperCase()}`}
                 </p>
-                <p className="mt-1.5 text-[13px] text-military-taupe/70">{section.note}</p>
+                <p className="mt-1.5 text-[13px] text-military-taupe/80">{section.note}</p>
               </div>
               <div className="space-y-4">
                 {entries.map((entry) => (
@@ -110,7 +110,7 @@ export default function SourcesPage() {
                       </h2>
                     </div>
                     {/* Реквизиты: автор · год · эпоха произведения */}
-                    <p className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 mb-2.5 font-ibm-mono text-[11px] text-military-steel/80">
+                    <p className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 mb-2.5 font-ibm-mono text-[11px] text-military-taupe/80">
                       {entry.author && <span className="text-military-taupe">{entry.author}</span>}
                       {entry.loreAuthor === 'avb' && (
                         <span
@@ -146,7 +146,7 @@ export default function SourcesPage() {
                         href={entry.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 mt-3 font-ibm-mono text-[10px] uppercase tracking-[0.2em] text-military-steel/60 hover:text-military-amber transition-colors"
+                        className="inline-flex items-center gap-1.5 mt-3 font-ibm-mono text-[10px] uppercase tracking-[0.2em] text-military-taupe/80 hover:text-military-amber transition-colors"
                       >
                         Читать первоисточник ↗
                       </a>
@@ -209,7 +209,7 @@ export default function SourcesPage() {
             className="inline-flex items-center gap-2 mt-4 min-h-[44px] px-5 border border-military-amber/50 hover:border-military-amber transition-colors font-ibm-mono text-xs uppercase tracking-widest text-military-amber touch-manipulation"
           >
             Сообщество ВКонтакте →
-            <span className="text-military-steel/60 normal-case">vk.ru/lastbpcoder</span>
+            <span className="text-military-taupe/80 normal-case">vk.ru/lastbpcoder</span>
           </a>
         </section>
       </div>

@@ -31,7 +31,7 @@ export function HistoryDivider({ info }: HistoryDividerProps) {
         </span>
       </div>
       {info.sub && (
-        <p className="relative text-center font-ibm-mono text-[10px] uppercase tracking-[0.25em] text-military-steel/60 mt-2">
+        <p className="relative text-center font-ibm-mono text-[10px] uppercase tracking-[0.25em] text-military-taupe/80 mt-2">
           {info.sub}
         </p>
       )}
