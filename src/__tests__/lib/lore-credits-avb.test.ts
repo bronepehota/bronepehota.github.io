@@ -14,6 +14,7 @@
  */
 import { getAllUnits, getFactions } from '@/lib/encyclopedia-registry';
 import { getAllHistoryChapters } from '@/lib/history';
+import { getSourcesCatalog } from '@/lib/sources-catalog';
 import { resolveUnitProvenance, resolveFactionProvenance, creditList } from '@/lib/provenance';
 import type { LoreSource } from '@/lib/provenance';
 
@@ -125,18 +126,26 @@ describe('фракции с массивом кредитов (лор собра
   });
 });
 
-describe('главы Истории: мини-АВБ ровно на не-Технолог текстах', () => {
-  it('рассказы игроков — avb, главы «Летописи» и Империи — tehnolog', () => {
+describe('главы Истории и каталог источников: мини-АВБ ровно на не-Технолог текстах', () => {
+  it('все главы — tehnolog, кроме главы 8 («Косары», avb); рассказов в Истории больше нет', () => {
+    // Лор-записи рассказов убраны из Истории 2026-08-30 — сводки живут каталогом
+    // /encyclopedia/sources; факты уже в досье юнитов (решение владельца).
     const chapters = getAllHistoryChapters();
+    expect(chapters.some((c) => (c.order ?? 99) >= 100)).toBe(false);
     for (const c of chapters) {
-      if ((c.order ?? 99) >= 100) {
+      if (c.slug === 'ekipirovka-pehoty-dominiona') {
         expect(`${c.slug}: ${c.loreAuthor}`).toBe(`${c.slug}: avb`);
       } else {
-        // главы 1–8 и 9–15: tehnolog, кроме главы 8 («Косары», avb)
-        if (c.slug !== 'ekipirovka-pehoty-dominiona') {
-          expect(`${c.slug}: ${c.loreAuthor}`).toBe(`${c.slug}: tehnolog`);
-        }
+        expect(`${c.slug}: ${c.loreAuthor}`).toBe(`${c.slug}: tehnolog`);
       }
+    }
+  });
+
+  it('каталог источников: все kind=story — loreAuthor avb (мини-АВБ на сводках игроков)', () => {
+    const stories = getSourcesCatalog().filter((e) => e.kind === 'story');
+    expect(stories.length).toBeGreaterThanOrEqual(7);
+    for (const e of stories) {
+      expect(`${e.id}: ${e.loreAuthor}`).toBe(`${e.id}: avb`);
     }
   });
 });

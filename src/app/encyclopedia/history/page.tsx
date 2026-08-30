@@ -71,8 +71,9 @@ export default async function HistoryPage() {
     5,
     Math.round(estimateReadingMinutes(chapters.map((c) => c.bodyHtml)) / 5) * 5,
   );
-  const testimonies =
-    campaigns.length + chapters.filter((c) => c.group === 'Творчество игроков').length;
+  // «Свидетельств» = кампании; лор-сводки рассказов игроков живут отдельным
+  // каталогом /encyclopedia/sources (решение владельца 2026-08-30) — сюда не считаются.
+  const testimonies = campaigns.length;
   const years = historyEraYears(metas);
   if (warsEra) years.push(...(warsEra.match(/\b\d{4}\b/g) ?? []).map(Number));
   // Guard: Math.min(...[]) is Infinity — with no eras on record the lead
@@ -85,8 +86,8 @@ export default async function HistoryPage() {
     { value: century, unit: 'ВЕК', caption: 'эпоха летописи' },
     // Meaningful hardcode: the two superpowers the whole chronicle is about.
     { value: 2, unit: 'ДЕРЖАВЫ', caption: 'Империя Полярис и Протекторат' },
-    { value: chapters.length, unit: 'ДОСЬЕ', caption: 'глав, справок и рассказов' },
-    { value: testimonies, unit: 'СВИДЕТЕЛЬСТВ', caption: 'хроники войн и голоса игроков' },
+    { value: chapters.length, unit: 'ДОСЬЕ', caption: 'глав и справок' },
+    { value: testimonies, unit: 'СВИДЕТЕЛЬСТВ', caption: 'хроники войн' },
   ];
 
   // timeline-scope lifts each named view-timeline of the zone wrappers to a
@@ -368,6 +369,18 @@ export default async function HistoryPage() {
             </div>
           );
         })}
+
+        {/* Фонд писателей — лор-сводки рассказов игроков убраны из хроники
+            (факты уже в досье юнитов) и живут каталогом первоисточников. */}
+        <div className="max-w-4xl mx-auto px-4">
+          <Link
+            href="/encyclopedia/sources"
+            data-testid="stories-catalog-link"
+            className="block pt-3 font-ibm-mono text-[10px] uppercase tracking-[0.2em] text-military-steel/60 hover:text-military-amber transition-colors"
+          >
+            {'// ТВОРЧЕСТВО ИГРОКОВ → КАТАЛОГ ИСТОЧНИКОВ'}
+          </Link>
+        </div>
         </div>
       </TimelineScope>
 

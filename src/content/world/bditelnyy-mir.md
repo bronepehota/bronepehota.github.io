@@ -6,7 +6,7 @@ subtitle: Не мирный договор, а обоюдная готовнос
 era: "4528–…"
 order: 32
 related:
-  chapters: [dve-sily, mayndfaytery]
+  chapters: [dve-sily]
   campaigns: [imperatorskie-voyny, shturm-velyana, korporativnye-voyny]
 sources:
   - "Летопись: Звёздные герои"

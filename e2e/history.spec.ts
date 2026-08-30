@@ -68,14 +68,25 @@ test.describe('История вселенной', () => {
     await expect(kosmo.getByTestId('lore-source-row')).toContainText('Летопись');
   });
 
-  test('рассказ «Красная ярость» — кредит автора с мини-АВБ', async ({ page }) => {
+  test('stories-catalog-link ведёт на /encyclopedia/sources, карточка «Красная ярость» видна', async ({
+    page,
+  }) => {
+    // Рассказы игроков убраны из хроники (2026-08-30) — лор-сводки живут
+    // каталогом первоисточников; вход — mono-строка после блока войн.
     await page.goto('/encyclopedia/history');
     await page.waitForLoadState('networkidle');
 
-    const story = page.locator('[data-testid="history-chapter"]', { hasText: 'Красная ярость' });
-    await expect(story).toBeVisible();
-    await expect(story.getByTestId('lore-source-row')).toContainText('Rasher');
-    await expect(story.getByTestId('credit-avb-mark')).toBeVisible();
+    const link = page.getByTestId('stories-catalog-link');
+    await expect(link).toBeVisible();
+    await expect(link).toContainText('ТВОРЧЕСТВО ИГРОКОВ');
+    await link.click();
+    await page.waitForLoadState('networkidle');
+    await expect(page).toHaveURL(/\/encyclopedia\/sources$/);
+
+    const card = page.locator('[data-testid="source-card"]', { hasText: 'Красная ярость' });
+    await expect(card).toBeVisible();
+    await expect(card).toContainText('Rasher');
+    await expect(card.locator('a[href*="robogear.ru"]')).toHaveCount(1);
   });
 
   test('отдельная страница главы: пермалинк с хаба и prev/next', async ({ page }) => {
@@ -115,9 +126,10 @@ test.describe('История вселенной', () => {
     const cover = page.getByTestId('history-cover');
     await expect(cover).toBeVisible();
     await expect(cover).toContainText('ДЕЛО № RG-4530');
-    // Цифры считаются на билде: век 45 (год последней эры), 22 досье
+    // Цифры считаются на билде: век 45 (год последней эры), 15 досье
+    // (рассказы игроков ушли в каталог /encyclopedia/sources, 2026-08-30)
     await expect(page.getByTestId('history-stat-ВЕК')).toContainText('45');
-    await expect(page.getByTestId('history-stat-ДОСЬЕ')).toContainText('22');
+    await expect(page.getByTestId('history-stat-ДОСЬЕ')).toContainText('15');
     await expect(page.getByTestId('history-reading-meta')).toContainText('ДОСЬЕ');
 
     await page.getByTestId('history-read-cta').click();

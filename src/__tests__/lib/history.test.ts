@@ -9,10 +9,17 @@ import {
 describe('history chapters', () => {
   const chapters = getAllHistoryChapters();
 
-  it('возвращает 22 главы, отсортированные по order', () => {
-    expect(chapters).toHaveLength(22);
+  it('возвращает 15 глав, отсортированные по order', () => {
+    // 22 → 15 (2026-08-30): 7 лор-записей рассказов игроков убраны из Истории —
+    // сводки живут каталогом /encyclopedia/sources (решение владельца).
+    expect(chapters).toHaveLength(15);
     const orders = chapters.map((c) => c.order ?? 99);
     expect(orders).toEqual([...orders].sort((a, b) => a - b));
+  });
+
+  it('группы «Творчество игроков» больше нет — максимальный order 15', () => {
+    expect(chapters.some((c) => (c.order ?? 99) >= 100)).toBe(false);
+    expect(chapters.every((c) => c.group === undefined || c.group === 'Справочник')).toBe(true);
   });
 
   it('справочные секции Star Heroes: order 12–15, группа «Справочник», без эры', () => {
@@ -76,27 +83,6 @@ describe('history chapters', () => {
     expect(ch8.credit?.author).toBe('V.Chertischev');
     expect(ch8.credit?.work).toBe('Косары');
   });
-
-  it('лор-сведения из творчества игроков: order 100–106, группа, avb + именной кредит с URL', () => {
-    const stories = chapters.filter((c) => (c.order ?? 99) >= 100);
-    expect(stories).toHaveLength(7);
-    expect(stories.map((s) => s.order)).toEqual([100, 101, 102, 103, 104, 105, 106]);
-    for (const s of stories) {
-      expect(`${s.slug}: ${s.group}`).toBe(`${s.slug}: Творчество игроков`);
-      expect(`${s.slug}: ${s.loreAuthor}`).toBe(`${s.slug}: avb`);
-      expect(s.credit?.author?.length).toBeGreaterThan(2);
-      expect(s.credit?.url).toMatch(/^http:\/\/www\.robogear\.ru\/skelet\/6\//);
-      expect(s.credit?.work).toBe(s.title);
-    }
-    expect(stories.map((s) => s.slug)).toEqual([
-      'krasnaya-yarost', 'seryy-leytenant', 'domashnyaya-voyna', 'general',
-      'istoriya-odnogo-soldata', 'put-voyna', 'mayndfaytery',
-    ]);
-    // Майндфайтеры: три части рассказа — одна лор-запись, кредит на первую страницу
-    const mind = stories.find((s) => s.slug === 'mayndfaytery')!;
-    expect(mind.credit?.work).toBe('Майндфайтеры');
-    expect(mind.credit?.url).toBe('http://www.robogear.ru/skelet/6/story_16.php');
-  });
 });
 
 describe('«ДЕЛО RG-4530» showcase helpers (Phase 2)', () => {
@@ -107,11 +93,11 @@ describe('«ДЕЛО RG-4530» showcase helpers (Phase 2)', () => {
     expect(historyCentury(chapters, '4451–4546')).toBe(45);
   });
 
-  it('buildHistoryFlow: лента эпох = 6 лет + СПРАВОЧНИК + ФОНД ПИСАТЕЛЬСТВ + ВОЙНЫ', () => {
+  it('buildHistoryFlow: лента эпох = 6 лет + СПРАВОЧНИК + ВОЙНЫ', () => {
     const flow = buildHistoryFlow(chapters);
     expect(flow.ticks.map((t) => t.label)).toEqual([
       '1908', '2398', '2437', '2862', '3001', '4451',
-      'СПРАВОЧНИК', 'ФОНД ПИСАТЕЛЬСТВ', 'ВОЙНЫ',
+      'СПРАВОЧНИК', 'ВОЙНЫ',
     ]);
     // Era ticks jump straight to the era-opening chapter anchors
     expect(flow.ticks[0]).toMatchObject({ href: '#tungusskiy-artefakt', kind: 'era' });
@@ -120,14 +106,13 @@ describe('«ДЕЛО RG-4530» showcase helpers (Phase 2)', () => {
     const refZone = flow.zones.find((z) => z.divider.stamp === 'СПРАВОЧНИК')!;
     expect(flow.ticks[6].kind).toBe('group');
     expect(flow.ticks[6].href).toBe(`#${refZone.divider.anchorId}`);
-    expect(flow.ticks[7].kind).toBe('group');
-    expect(flow.ticks[8]).toMatchObject({ href: '#wars', kind: 'wars' });
-    expect(flow.warsZoneIndex).toBe(8);
+    expect(flow.ticks[7]).toMatchObject({ href: '#wars', kind: 'wars' });
+    expect(flow.warsZoneIndex).toBe(7);
   });
 
-  it('buildHistoryFlow: зоны непрерывно покрывают все 22 главы + замыкающая зона войн', () => {
+  it('buildHistoryFlow: зоны непрерывно покрывают все 15 глав + замыкающая зона войн', () => {
     const flow = buildHistoryFlow(chapters);
-    // 6 эр + 2 групповые + войн; главы 08–11 (без эры) наследуют зону 4451
+    // 6 эр + справочная групповая + войн; главы 08–11 (без эры) наследуют зону 4451
     expect(flow.zones.map((z) => z.slugs)).toEqual([
       ['tungusskiy-artefakt'],
       ['setka-mayakov'],
@@ -139,15 +124,13 @@ describe('«ДЕЛО RG-4530» showcase helpers (Phase 2)', () => {
         'flot-epokhi-regentstva', 'legendarnye-imperskie-lordy',
       ],
       ['kosmografiya-dominiona', 'politicheskoe-ustroystvo', 'sravnenie-voennykh-struktur', 'polyaris-perevorot'],
-      ['krasnaya-yarost', 'seryy-leytenant', 'domashnyaya-voyna', 'general',
-        'istoriya-odnogo-soldata', 'put-voyna', 'mayndfaytery'],
       [], // войн зона — оборачивает <CampaignsBlock>, не главы
     ]);
     // Каждая глава попала ровно в одну зону, порядок сохранён
     const zipped = flow.zones.flatMap((z) => z.slugs);
     expect(zipped).toEqual(chapters.map((c) => c.slug));
     // Индексы тиков у зон уникальны и плотны (зона N ↔ тик N ленты 1:1)
-    expect(flow.zones.map((z) => z.tickIndex)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8]);
+    expect(flow.zones.map((z) => z.tickIndex)).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
   });
 
   it('buildHistoryFlow: разделители — контурный год эры на стыках, групповые штампы', () => {
@@ -162,11 +145,7 @@ describe('«ДЕЛО RG-4530» showcase helpers (Phase 2)', () => {
     expect(flow.zones[6].divider).toMatchObject({
       stamp: 'СПРАВОЧНИК', outline: '§', anchorId: 'history-anchor-6',
     });
-    expect(flow.zones[7].divider).toMatchObject({
-      stamp: 'ФОНД ПИСАТЕЛЬСТВ', outline: '//', sub: '// Творчество игроков',
-      anchorId: 'history-anchor-7',
-    });
-    expect(flow.zones[8].divider).toMatchObject({ stamp: 'ВОЙНЫ', outline: '†' });
+    expect(flow.zones[7].divider).toMatchObject({ stamp: 'ВОЙНЫ', outline: '†' });
     // Штампы эр (кроме первого ХРОНИКА) повторяют era-строку главы
     expect(flow.zones[2].divider.stamp).toBe('ЭПОХА 2437–2862');
   });
