@@ -527,6 +527,9 @@ test.describe('Хаб: театры войн (карта + период)', () =>
 
     const showcase = page.getByTestId('invasion-showcase');
     await expect(showcase).toBeVisible();
+    // Демо-режим слайд-шоу может уже уйти с первого периода — пинуем выбор
+    // кликом по первому табу (останавливает автопрокрутку) и ассертим.
+    await showcase.getByTestId('invasion-map-tab').nth(0).click();
     await expect(showcase.getByTestId('invasion-showcase-text')).toContainText('Первая волна вторжения');
     await expect(showcase.getByTestId('invasion-map-img')).toHaveAttribute(
       'src',

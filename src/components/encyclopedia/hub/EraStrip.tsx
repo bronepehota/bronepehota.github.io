@@ -34,7 +34,6 @@ interface EraStripProps {
 export function EraStrip({ from, to, periods, activeSlug, onSelect }: EraStripProps) {
   if (from === null || to === null) return null;
   const interactive = Boolean(onSelect && periods && periods.length > 0);
-  const span = Math.max(to - from, 1);
 
   return (
     <div
@@ -58,10 +57,13 @@ export function EraStrip({ from, to, periods, activeSlug, onSelect }: EraStripPr
           />
         ))}
         {interactive ? (
-          /* Годы войн — кнопки-узлы, переключают витрину театров */
-          periods!.map((p) => {
+          /* Годы войн — кнопки-узлы РАВНОМЕРНО (на шкале 1908–4546 три
+             последних периода сжались бы в 86–92% и перекрывали друг друга).
+             Узлы фиксированного размера: активация — цвет и scale, соседние
+             узлы не сдвигаются и не перехватывают клики. */
+          periods!.map((p, i) => {
             const isActive = p.slug === activeSlug;
-            const left = Math.min(Math.max(((p.year - from) / span) * 100, 4), 96);
+            const left = 8 + (i * 84) / Math.max(periods!.length - 1, 1);
             return (
               <button
                 key={p.slug}
@@ -70,14 +72,15 @@ export function EraStrip({ from, to, periods, activeSlug, onSelect }: EraStripPr
                 aria-pressed={isActive}
                 title={p.label}
                 onClick={() => onSelect!(p.slug)}
-                className="group absolute top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-0.5 touch-manipulation"
+                className="group absolute top-1/2 -translate-x-1/2 -translate-y-1/2 flex h-7 w-9 flex-col items-center justify-center gap-0.5 touch-manipulation"
                 style={{ left: `${left}%` }}
               >
                 <span
                   className={
-                    isActive
-                      ? 'h-2.5 w-2.5 rotate-45 border border-military-amber bg-military-amber shadow-[0_0_10px_rgba(245,158,11,0.6)]'
-                      : 'h-2 w-2 rotate-45 border border-military-rust/80 bg-military-dark group-hover:border-military-amber transition-colors'
+                    'h-2 w-2 rotate-45 border transition-transform duration-200 ' +
+                    (isActive
+                      ? 'border-military-amber bg-military-amber scale-125 shadow-[0_0_10px_rgba(245,158,11,0.6)]'
+                      : 'border-military-rust/80 bg-military-dark group-hover:border-military-amber')
                   }
                 />
                 <span
