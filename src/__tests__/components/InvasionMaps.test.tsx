@@ -10,13 +10,14 @@ import path from 'path';
 import {
   INVASION_MAPS,
   CAMPAIGN_MAP,
+  CHAPTER_MAP,
   INVASION_MAPS_CREDIT_ID,
   getInvasionMap,
 } from '@/lib/invasion-maps';
 import { CREDITS } from '@/lib/painted-images';
 import {
-  InvasionMapsGallery,
   InvasionMapShowcase,
+  CampaignMapFigure,
 } from '@/components/encyclopedia/history/InvasionMaps';
 
 const ROOT = path.resolve(__dirname, '../../..');
@@ -52,6 +53,13 @@ describe('invasion-maps: реестр', () => {
     }
   });
 
+  it('CHAPTER_MAP: главы существуют, слаги карт валидны', () => {
+    for (const [chapterSlug, mapSlug] of Object.entries(CHAPTER_MAP)) {
+      expect(fs.existsSync(path.join(ROOT, 'src/content/history', `${chapterSlug}.md`))).toBe(true);
+      expect(getInvasionMap(mapSlug)).toBeDefined();
+    }
+  });
+
   it('кредит серии — Звёздные Системы, с лого и ссылкой', () => {
     const credit = CREDITS[INVASION_MAPS_CREDIT_ID];
     expect(credit.name).toBe('Звёздные Системы');
@@ -61,53 +69,39 @@ describe('invasion-maps: реестр', () => {
   });
 });
 
-describe('invasion-maps: галерея', () => {
-  it('показывает первый период и переключает карту по табам', () => {
-    render(<InvasionMapsGallery />);
-    const tabs = screen.getAllByTestId('invasion-map-tab');
-    expect(tabs).toHaveLength(5);
-    expect(tabs[0]).toHaveTextContent('4451–4461');
-
-    const img = screen.getByTestId('invasion-map-img');
-    expect(img).toHaveAttribute('src', expect.stringContaining(INVASION_MAPS[0].slug));
-
-    fireEvent.click(tabs[4]); // Раскол Империи
-    expect(screen.getByTestId('invasion-map-img')).toHaveAttribute(
-      'src',
-      expect.stringContaining('raskol-imperii-4550-4554'),
-    );
-    expect(screen.getByTestId('invasion-map-figure')).toHaveTextContent('Раскол Империи');
+describe('invasion-maps: витрина (карта + период, зум)', () => {
+  it('клик по карте открывает оригинал в новой вкладке', () => {
+    render(<InvasionMapShowcase />);
+    const open = screen.getByTestId('invasion-map-open');
+    expect(open).toHaveAttribute('target', '_blank');
+    expect(open).toHaveAttribute('href', expect.stringContaining('/images/maps/pervaya-volna-4451-4461.jpg'));
   });
 
   it('несёт кредит автора со ссылкой на сообщество', () => {
-    render(<InvasionMapsGallery />);
+    render(<InvasionMapShowcase />);
     const credit = screen.getByTestId('invasion-map-credit');
     expect(credit).toHaveAttribute('href', 'https://vk.ru/universestarsys');
     expect(credit).toHaveTextContent('ЗВЁЗДНЫЕ СИСТЕМЫ');
   });
+
+  it('управляемый режим: prop active доминирует над внутренним состоянием', () => {
+    render(<InvasionMapShowcase active="raskol-imperii-4550-4554" onSelect={() => {}} />);
+    expect(screen.getByTestId('invasion-showcase-text')).toHaveTextContent('Раскол Империи');
+  });
 });
 
-describe('invasion-maps: витрина хаба (карта рядом с описанием периода)', () => {
-  it('описание периода стоит рядом с картой и меняется вместе с ней', () => {
-    render(<InvasionMapShowcase />);
-    const text = screen.getByTestId('invasion-showcase-text');
-    expect(text).toHaveTextContent('Первая волна вторжения');
-    expect(text).toHaveTextContent('клон-пехоты');
-
-    const tabs = screen.getAllByTestId('invasion-map-tab');
-    fireEvent.click(tabs[3]); // Рейдовые войны
-    expect(screen.getByTestId('invasion-showcase-text')).toHaveTextContent('Рейдовые войны');
-    expect(screen.getByTestId('invasion-map-img')).toHaveAttribute(
-      'src',
-      expect.stringContaining('reydovye-voyny-4530-4543'),
+describe('invasion-maps: инлайн-фигура кампании', () => {
+  it('рендерит карту и зум-ссылку_CAMPAIGN_MAP', () => {
+    render(<CampaignMapFigure mapSlug="vtoraya-volna-4478-4495" />);
+    expect(screen.getByTestId('invasion-map-figure')).toHaveTextContent('Вторая волна вторжения');
+    expect(screen.getByTestId('invasion-map-open')).toHaveAttribute(
+      'href',
+      expect.stringContaining('vtoraya-volna-4478-4495.jpg'),
     );
   });
 
-  it('под картой — проход в полную галерею на хабе Истории', () => {
-    render(<InvasionMapShowcase />);
-    expect(screen.getByRole('link', { name: /все пять карт/i })).toHaveAttribute(
-      'href',
-      '/encyclopedia/history#maps',
-    );
+  it('неизвестный слаг — ничего не рендерит', () => {
+    const { container } = render(<CampaignMapFigure mapSlug="no-such-map" />);
+    expect(container).toBeEmptyDOMElement();
   });
 });

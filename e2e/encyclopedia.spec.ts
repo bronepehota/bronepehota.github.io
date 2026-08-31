@@ -539,6 +539,14 @@ test.describe('Хаб: театры войн (карта + период)', () =>
       'src',
       /raskol-imperii-4550-4554/,
     );
+
+    // Лента эпох — переключатель: узел 4478 меняет пару и подсвечивается
+    const node4478 = page
+      .getByTestId('era-period-node')
+      .filter({ hasText: '4478' });
+    await node4478.click();
+    await expect(showcase.getByTestId('invasion-showcase-text')).toContainText('Вторая волна вторжения');
+    await expect(node4478).toHaveAttribute('aria-pressed', 'true');
   });
 });
 

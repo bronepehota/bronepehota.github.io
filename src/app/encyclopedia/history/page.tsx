@@ -10,12 +10,13 @@ import {
 } from '@/lib/history';
 import { getAllCampaigns, warsEraSpan } from '@/lib/campaigns';
 import { CampaignsBlock } from '@/components/encyclopedia/CampaignsBlock';
+import { CampaignMapFigure } from '@/components/encyclopedia/history/InvasionMaps';
+import { CHAPTER_MAP } from '@/lib/invasion-maps';
 import { EncyclopediaTabs } from '@/components/encyclopedia/EncyclopediaTabs';
 import { LoreSourceRow } from '@/components/encyclopedia/LoreSourceRow';
 import { ChapterBody } from '@/components/encyclopedia/history/ChapterBody';
 import { EraRibbon } from '@/components/encyclopedia/history/EraRibbon';
 import { HistoryDivider } from '@/components/encyclopedia/history/HistoryDivider';
-import { InvasionMapsGallery } from '@/components/encyclopedia/history/InvasionMaps';
 import { TocCopyLink } from '@/components/encyclopedia/history/TocCopyLink';
 import { BackToToc } from '@/components/encyclopedia/history/BackToToc';
 import { pageOpenGraph } from '@/lib/seo';
@@ -367,6 +368,12 @@ export default async function HistoryPage() {
                         chapterNumber={number ?? null}
                         chronicle={!c.group}
                       />
+                      {/* Инлайн-карта театра войны — в главах о фронтах и
+                          космографии (CHAPTER_MAP; решение владельца
+                          2026-08-31: «в текст, не галереей»). */}
+                      {CHAPTER_MAP[c.slug] && (
+                        <CampaignMapFigure mapSlug={CHAPTER_MAP[c.slug]} />
+                      )}
                       {/* Source row — «Летопись» chapters cite the official edition;
                           chapter VIII cites the «Косары» novel (non-Технолог → carries
                           the mini АВБ mark). Renders nothing without attribution. */}
@@ -380,11 +387,6 @@ export default async function HistoryPage() {
               {zone.slugs.length === 0 && (
                 <div className="max-w-4xl mx-auto px-4">
                   <CampaignsBlock campaigns={campaigns} />
-                  {/* Карты театров войн — картографический эпилог хроник:
-                      пять периодов вселенной («СтарСис», Звёздные Системы). */}
-                  <div className="mt-8" id="maps">
-                    <InvasionMapsGallery />
-                  </div>
                 </div>
               )}
             </div>

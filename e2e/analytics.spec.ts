@@ -146,8 +146,9 @@ test('encyclopedia_search несёт surface=units при поиске в кат
   await page.waitForTimeout(2200);
 
   const ga = await gaCalls(page);
-  const search = ga.filter((e) => String(e[0]).includes('encyclopedia_search'));
+  // Форма записи ga: ['event', имя, параметры] — имя в e[1], параметры в e[2].
+  const search = ga.filter((e) => e[0] === 'event' && String(e[1]).includes('encyclopedia_search'));
   expect(search.length).toBeGreaterThanOrEqual(1);
-  const params = (search[0][1] ?? {}) as Record<string, unknown>;
+  const params = (search[0][2] ?? {}) as Record<string, unknown>;
   expect(params.surface).toBe('units');
 });

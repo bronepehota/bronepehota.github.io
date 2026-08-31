@@ -112,6 +112,15 @@ export const CAMPAIGN_MAP: Record<string, string> = {
   'tretiya-volna': 'tretiya-volna-4522-4528',
 };
 
+/** Карта главы истории — slug главы → slug карты (инлайн-фигура в тексте).
+ *  Отдельная галерея на /encyclopedia/history убрана (решение владельца
+ *  2026-08-31); карты живут инлайн: в главе про фронты — Вторая волна,
+ *  в космографии — политическая карта Доминиона («Рейдовые войны»). */
+export const CHAPTER_MAP: Record<string, string> = {
+  'dve-sily': 'vtoraya-volna-4478-4495',
+  'kosmografiya-dominiona': 'reydovye-voyny-4530-4543',
+};
+
 /** Кредит серии карт — id из CREDITS (painted-images.ts). */
 export const INVASION_MAPS_CREDIT_ID = 'universestarsys' as const;
 

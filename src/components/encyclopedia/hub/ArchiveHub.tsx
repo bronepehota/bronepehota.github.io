@@ -9,6 +9,7 @@ import { factionDisplayNames, getFactionColors } from '@/lib/faction-colors';
 import type { LorePageRef } from '@/lib/unit-search';
 import { LoreGuide } from '../LoreGuide';
 import { InvasionMapShowcase } from '../history/InvasionMaps';
+import { INVASION_MAPS } from '@/lib/invasion-maps';
 import { trackEvent } from '@/lib/analytics';
 import { cn } from '@/lib/utils';
 import { HubCover } from './HubCover';
@@ -57,6 +58,9 @@ export default function ArchiveHub({ lorePages, counts, era }: ArchiveHubProps) 
   const router = useRouter();
   const [isLoaded, setIsLoaded] = useState(false);
   const [forwarded, setForwarded] = useState(false);
+  // Активный период «// ТЕАТРОВ ВОЙН»: лента эпох и табы витрины переключают
+  // одну пару (решение владельца: лента эпох = переключатель).
+  const [mapSlug, setMapSlug] = useState(INVASION_MAPS[0].slug);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -180,7 +184,7 @@ export default function ArchiveHub({ lorePages, counts, era }: ArchiveHubProps) 
               className={cn('fade-in-up opacity-0', isLoaded && 'opacity-100')}
               style={{ animationFillMode: 'forwards', animationDelay: '0.22s' }}
             >
-              <InvasionMapShowcase />
+              <div id="invasion-showcase"><InvasionMapShowcase active={mapSlug} onSelect={setMapSlug} /></div>
             </div>
 
             {/* Лента эпох — статичная полоса времени архива */}
@@ -188,7 +192,21 @@ export default function ArchiveHub({ lorePages, counts, era }: ArchiveHubProps) 
               className={cn('fade-in-up opacity-0', isLoaded && 'opacity-100')}
               style={{ animationFillMode: 'forwards', animationDelay: '0.3s' }}
             >
-              <EraStrip from={era.from} to={era.to} />
+              <EraStrip
+                from={era.from}
+                to={era.to}
+                periods={INVASION_MAPS.map((m) => ({
+                  year: Number(m.years.slice(0, 4)),
+                  slug: m.slug,
+                  label: `${m.title} (${m.years})`,
+                }))}
+                activeSlug={mapSlug}
+                onSelect={(slug) => {
+                  setMapSlug(slug);
+                  // Витрина — над линейкой: если ушли вниз, вернуть её в кадр.
+                  document.getElementById('invasion-showcase')?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+                }}
+              />
             </div>
 
             {/* Папки-разделы */}

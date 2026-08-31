@@ -134,33 +134,28 @@ test.describe('Хроники войн', () => {
 
 // ——— Карты театров войн (серия «СтарСис», Звёздные Системы; запись №20 реестра) ——
 test.describe('Карты театров войн', () => {
-  test('галерея на хабе Истории: пять периодов, переключение и кредит', async ({ page }) => {
-    await page.goto('/encyclopedia/history#maps');
+  test('инлайн-карта в главе «Две силы» (в текст, не галереей)', async ({ page }) => {
+    await page.goto('/encyclopedia/history');
     await page.waitForLoadState('networkidle');
 
-    const gallery = page.getByTestId('invasion-maps');
-    await expect(gallery).toBeVisible();
-    await expect(gallery.getByTestId('invasion-map-tab')).toHaveCount(5);
-    // Активна первая волна; кредит автора — ссылка на сообщество
-    await expect(gallery.getByTestId('invasion-map-img')).toHaveAttribute(
-      'src',
-      /pervaya-volna-4451-4461/,
-    );
-    await expect(gallery.getByTestId('invasion-map-credit')).toHaveAttribute(
+    const chapter = page.locator('#dve-sily');
+    await expect(chapter).toBeVisible();
+    const figure = chapter.getByTestId('invasion-map-figure');
+    await expect(figure).toBeVisible();
+    await expect(figure).toContainText('Вторая волна вторжения');
+    await expect(figure.getByTestId('invasion-map-open')).toHaveAttribute(
       'href',
-      'https://vk.ru/universestarsys',
+      /vtoraya-volna-4478-4495\.jpg$/,
     );
-
-    // Переключение на «Раскол Империи»
-    await gallery.getByTestId('invasion-map-tab').nth(4).click();
-    await expect(gallery.getByTestId('invasion-map-img')).toHaveAttribute(
-      'src',
-      /raskol-imperii-4550-4554/,
-    );
-    await expect(gallery.getByTestId('invasion-map-figure')).toContainText('Раскол Империи');
   });
 
-  test('кампания волны несёт карту театра войны', async ({ page }) => {
+  test('кампания волны несёт карту театра войны (отдельная галерея Истории убрана)', async ({ page }) => {
+    // Галерея на /encyclopedia/history удалена (решение владельца 2026-08-31):
+    // карты живут инлайн в кампаниях волн + витриной на хабе.
+    await page.goto('/encyclopedia/history');
+    await page.waitForLoadState('networkidle');
+    await expect(page.getByTestId('invasion-maps')).toHaveCount(0);
+
     await page.goto('/campaigns/vtoraya-volna');
     await page.waitForLoadState('networkidle');
 
@@ -172,6 +167,11 @@ test.describe('Карты театров войн', () => {
     );
     await expect(figure).toContainText('Вторая волна вторжения');
     await expect(figure.getByTestId('invasion-map-credit')).toBeVisible();
+    // Клик по карте открывает оригинал (нативный зум)
+    await expect(figure.getByTestId('invasion-map-open')).toHaveAttribute(
+      'href',
+      /vtoraya-volna-4478-4495\.jpg$/,
+    );
   });
 });
 

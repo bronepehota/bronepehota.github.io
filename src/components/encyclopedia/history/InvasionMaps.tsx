@@ -12,19 +12,33 @@ import {
 import { cn } from '@/lib/utils';
 
 /**
- * «// КАРТЫ ТЕАТРОВ ВОЙН» — серия политико-военных карт вселенной («СтарСис»,
- * Звёздные Системы). На хабе Истории живёт переключателем периодов (одна
- * карта в кадре — страница и так длинная); в кампании волн та же карта
- * рендерится одиночной фигурой (`MapFigure`). Небыстрые карты грузятся
- * лениво — в кадре изначально только активный период.
+ * Карты театров войн (серия «СтарСис», Звёздные Системы). Две поверхности:
+ * витрина «// ТЕАТРЫ ВОЙН» на хабе (карта рядом с описанием периода,
+ * переключатель — лента эпох + табы-годы) и одиночные фигуры в кампаниях
+ * волн (`CampaignMapFigure`) — инлайн-карты «рядом с текстом» хроники.
+ *
+ * Отдельная галерея на странице Истории убрана по решению владельца
+ * (2026-08-31): инлайн-карты кампаний закрывают потребность, витрина хаба —
+ * обзор всех пяти периодов.
+ *
+ * Клик по карте открывает оригинал в новой вкладке — нативный зум браузера
+ * (пинч на мобильном) вместо собственного лайтбокса.
  */
 
 function MapFigure({ map, eager }: { map: InvasionMap; eager?: boolean }) {
   const credit = getCredit(INVASION_MAPS_CREDIT_ID);
   return (
     <figure data-testid="invasion-map-figure" className="m-0">
-      <div className="border border-military-steel/30 bg-military-charcoal/40 p-1.5">
-        {/* eslint-disable-next-line @next/next/no-img-element -- статический экспорт: unoptimized <img> с ручным BASE_PATH */}
+      <a
+        href={`${BASE_PATH}/images/maps/${map.slug}.jpg`}
+        target="_blank"
+        rel="noopener noreferrer"
+        title="Открыть карту полностью"
+        data-testid="invasion-map-open"
+        className="block border border-military-steel/30 bg-military-charcoal/40 p-1.5 hover:border-military-amber/50 transition-colors cursor-zoom-in"
+      >
+        {/* Статический экспорт: unoptimized <img> с ручным BASE_PATH. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={`${BASE_PATH}/images/maps/${map.slug}.jpg`}
           alt={`${map.title} (${map.years}) — карта театров войн вселенной СтарСис`}
@@ -35,7 +49,7 @@ function MapFigure({ map, eager }: { map: InvasionMap; eager?: boolean }) {
           height={1443}
           className="block w-full h-auto"
         />
-      </div>
+      </a>
       <figcaption className="mt-2.5">
         <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <span className="font-oswald text-sm text-military-sand uppercase tracking-wide">
@@ -99,75 +113,7 @@ function MapFigure({ map, eager }: { map: InvasionMap; eager?: boolean }) {
   );
 }
 
-export function InvasionMapsGallery() {
-  const [active, setActive] = useState(INVASION_MAPS[0].slug);
-  const current = INVASION_MAPS.find((m) => m.slug === active) ?? INVASION_MAPS[0];
-
-  return (
-    <section
-      aria-label="Карты театров войн"
-      data-testid="invasion-maps"
-      className="folded-paper military-corners px-4 py-4 md:px-5 md:py-5"
-    >
-      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 mb-3 pb-2.5 border-b border-military-steel/20">
-        <p className="font-ibm-mono text-[10px] uppercase tracking-[0.3em] text-military-amber/80">
-          {'// КАРТЫ ТЕАТРОВ ВОЙН'}
-        </p>
-        <p className="font-ibm-mono text-[9px] uppercase tracking-[0.2em] text-military-taupe/80">
-          пять периодов · одна вселенная
-        </p>
-      </div>
-
-      {/* Переключатель периодов: годы — по возрастанию фронта */}
-      <div
-        role="tablist"
-        aria-label="Период карты"
-        className="flex flex-wrap gap-1.5 mb-3"
-      >
-        {INVASION_MAPS.map((m) => {
-          const isActive = m.slug === active;
-          return (
-            <button
-              key={m.slug}
-              type="button"
-              role="tab"
-              aria-selected={isActive}
-              data-testid="invasion-map-tab"
-              onClick={() => setActive(m.slug)}
-              className={cn(
-                'rounded-sm border px-2.5 py-1 font-ibm-mono text-[10px] tracking-wider transition-colors touch-manipulation',
-                isActive
-                  ? 'border-military-amber/60 bg-military-amber/15 text-military-amber'
-                  : 'border-military-steel/30 text-military-taupe/80 hover:border-military-amber/40 hover:text-military-sand',
-              )}
-            >
-              {m.years}
-            </button>
-          );
-        })}
-      </div>
-
-      <MapFigure map={current} eager />
-
-      {/* Предзагрузка остальных периодов: скрытые eager-<img> (lazy в display:none
-          не грузится) — переключение занимает один кадр, не сеть. */}
-      <div hidden aria-hidden>
-        {INVASION_MAPS.filter((m) => m.slug !== active).map((m) => (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            key={m.slug}
-            src={`${BASE_PATH}/images/maps/${m.slug}.jpg`}
-            alt=""
-            loading="eager"
-            decoding="async"
-          />
-        ))}
-      </div>
-    </section>
-  );
-}
-
-/** Одиночная фигура карты для тела кампании (без переключателя). */
+/** Одиночная фигура карты для тела кампании (инлайн, без переключателя). */
 export function CampaignMapFigure({ mapSlug }: { mapSlug: string }) {
   const map = INVASION_MAPS.find((m) => m.slug === mapSlug);
   if (!map) return null;
@@ -179,12 +125,26 @@ export function CampaignMapFigure({ mapSlug }: { mapSlug: string }) {
 }
 
 /**
- * Витрина «// ТЕАТРЫ ВОЙН» для хаба «Архив вселенной»: карта РЯДОМ с описанием
- * периода (на мобиле — описание над картой). Табы-годы переключают пару целиком;
- * под картой — проход в полную галерею на хабе Истории (#maps).
+ * Витрина «// ТЕАТРЫ ВОЙН» для хаба «Архив вселенной»: карта РЯДОМ с
+ * описанием периода (на мобиле — описание над картой).
+ *
+ * Управляемая: хаб передаёт `active`/`onSelect`, чтобы лента эпох (под
+ * витриной) и табы-годы переключали пару синхронно; без пропсов валится на
+ * собственное состояние (юнит-тесты).
  */
-export function InvasionMapShowcase() {
-  const [active, setActive] = useState(INVASION_MAPS[0].slug);
+export function InvasionMapShowcase({
+  active: controlledActive,
+  onSelect,
+}: {
+  active?: string;
+  onSelect?: (slug: string) => void;
+}) {
+  const [internalActive, setInternalActive] = useState(INVASION_MAPS[0].slug);
+  const active = controlledActive ?? internalActive;
+  const setActive = (slug: string) => {
+    setInternalActive(slug);
+    onSelect?.(slug);
+  };
   const current = INVASION_MAPS.find((m) => m.slug === active) ?? INVASION_MAPS[0];
   const credit = getCredit(INVASION_MAPS_CREDIT_ID);
 
@@ -199,7 +159,7 @@ export function InvasionMapShowcase() {
           {'// ТЕАТРЫ ВОЙН'}
         </p>
         <p className="font-ibm-mono text-[9px] uppercase tracking-[0.2em] text-military-taupe/80">
-          карта + период
+          карта + период · клик по карте — увеличить
         </p>
       </div>
 
@@ -262,9 +222,16 @@ export function InvasionMapShowcase() {
         </div>
 
         <figure className="m-0">
-          <div className="border border-military-steel/30 bg-military-charcoal/40 p-1.5">
+          <a
+            href={`${BASE_PATH}/images/maps/${current.slug}.jpg`}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Открыть карту полностью"
+            data-testid="invasion-map-open"
+            className="block border border-military-steel/30 bg-military-charcoal/40 p-1.5 hover:border-military-amber/50 transition-colors cursor-zoom-in"
+          >
             {/* Статический экспорт: unoptimized <img> с ручным BASE_PATH. */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={`${BASE_PATH}/images/maps/${current.slug}.jpg`}
               alt={`${current.title} (${current.years}) — карта театров войн вселенной СтарСис`}
@@ -275,17 +242,11 @@ export function InvasionMapShowcase() {
               height={1443}
               className="block w-full h-auto"
             />
-          </div>
-          <Link
-            href="/encyclopedia/history#maps"
-            className="mt-2 inline-block font-ibm-mono text-[9px] uppercase tracking-[0.2em] text-military-taupe/80 hover:text-military-amber transition-colors"
-          >
-            {'// ВСЕ ПЯТЬ КАРТ →'}
-          </Link>
+          </a>
         </figure>
       </div>
 
-      {/* Переключатель периодов */}
+      {/* Табы-годы — второй переключатель (первый — лента эпох под витриной) */}
       <div role="tablist" aria-label="Период театра войн" className="flex flex-wrap gap-1.5 mt-4">
         {INVASION_MAPS.map((m) => {
           const isActive = m.slug === active;
@@ -327,4 +288,4 @@ export function InvasionMapShowcase() {
   );
 }
 
-export default InvasionMapsGallery;
+export default InvasionMapShowcase;
