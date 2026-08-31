@@ -541,3 +541,27 @@ test.describe('Хаб: театры войн (карта + период)', () =>
     );
   });
 });
+
+// ——— ?q= форвард и переход «все совпадения в каталог» (e2e-пробел ревью) ——
+test.describe('Хаб: легаси ?q и проход из подсказок в каталог', () => {
+  test('?q= форвардится в каталог с сохранением запроса', async ({ page }) => {
+    await page.goto('/encyclopedia?q=' + encodeURIComponent('Блауд'));
+    await page.waitForLoadState('networkidle');
+
+    await expect(page).toHaveURL(/\/encyclopedia\/units\?q=/);
+    await expect(page.locator('input[placeholder*="ПОИСК"]')).toHaveValue('Блауд');
+    await expect(page.getByTestId('lore-search-hint').first()).toBeVisible();
+  });
+
+  test('«все совпадения в каталоге» переносит запрос подсказок', async ({ page }) => {
+    await page.goto('/encyclopedia');
+    await page.waitForLoadState('networkidle');
+
+    await page.getByTestId('hub-search').fill('Блауд');
+    const more = page.getByTestId('hub-search-more');
+    await expect(more).toBeVisible();
+    await more.click();
+    await expect(page).toHaveURL(/\/encyclopedia\/units\?q=/);
+    await expect(page.locator('input[placeholder*="ПОИСК"]')).toHaveValue('Блауд');
+  });
+});

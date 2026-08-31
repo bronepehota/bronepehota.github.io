@@ -135,3 +135,19 @@ test('battle_entry(from=encyclopedia_unit) при клике на страниц
   ).toBeTruthy();
   expect(ga.some((c) => c[0] === 'event' && c[1] === 'battle_entry')).toBeTruthy();
 });
+
+// ——— Поиск по энциклопедии: событие с поверхностью (закрытие e2e-пробела) ——
+test('encyclopedia_search несёт surface=units при поиске в каталоге', async ({ page }) => {
+  await page.goto('/encyclopedia/units');
+  await page.waitForLoadState('networkidle');
+
+  await page.fill('input[placeholder*="ПОИСК"]', 'Велиан');
+  // debounce 1200ms — событие уходит один раз, после того как ввод устоялся
+  await page.waitForTimeout(2200);
+
+  const ga = await gaCalls(page);
+  const search = ga.filter((e) => String(e[0]).includes('encyclopedia_search'));
+  expect(search.length).toBeGreaterThanOrEqual(1);
+  const params = (search[0][1] ?? {}) as Record<string, unknown>;
+  expect(params.surface).toBe('units');
+});

@@ -174,3 +174,19 @@ test.describe('Карты театров войн', () => {
     await expect(figure.getByTestId('invasion-map-credit')).toBeVisible();
   });
 });
+
+// ——— Prev/Next навигация хроник (закрытие e2e-пробела финального ревью) ——
+test('prev/next ведут к соседним хроникам по order', async ({ page }) => {
+  await page.goto('/campaigns/imperatorskie-voyny');
+  await page.waitForLoadState('networkidle');
+
+  // Имперские войны = хроника № 1: prev нет, next ведёт к № 2
+  await expect(page.getByTestId('campaign-prev')).toHaveCount(0);
+  await page.getByTestId('campaign-next').click();
+  await expect(page).toHaveURL(/\/campaigns\/shturm-velyana$/);
+
+  // С середины списка работают оба направления
+  await expect(page.getByTestId('campaign-prev')).toBeVisible();
+  await page.getByTestId('campaign-prev').click();
+  await expect(page).toHaveURL(/\/campaigns\/imperatorskie-voyny$/);
+});

@@ -3,8 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import type { EncyclopediaUnit } from '@/lib/encyclopedia-registry';
-import { getFactions } from '@/lib/encyclopedia-registry';
+import { getFactions, getAllUnits } from '@/lib/encyclopedia-registry';
 import { orderedFactions } from '@/lib/faction-hierarchy';
 import { factionDisplayNames, getFactionColors } from '@/lib/faction-colors';
 import type { LorePageRef } from '@/lib/unit-search';
@@ -35,7 +34,6 @@ export interface HubEra {
 }
 
 interface ArchiveHubProps {
-  initialUnits: EncyclopediaUnit[];
   lorePages: LorePageRef[];
   counts: HubCounts;
   era: HubEra;
@@ -55,7 +53,7 @@ const FORWARD_PARAMS = ['faction', 'type', 'sculptor', 'q'] as const;
  * verbatim — the hub never flashes (it stays invisible until the check passes,
  * mirroring the page-load cascade the other pages already use).
  */
-export default function ArchiveHub({ initialUnits, lorePages, counts, era }: ArchiveHubProps) {
+export default function ArchiveHub({ lorePages, counts, era }: ArchiveHubProps) {
   const router = useRouter();
   const [isLoaded, setIsLoaded] = useState(false);
   const [forwarded, setForwarded] = useState(false);
@@ -71,9 +69,14 @@ export default function ArchiveHub({ initialUnits, lorePages, counts, era }: Arc
     setIsLoaded(true);
   }, [router]);
 
+  // Units come from the BUNDLED sync registry (the client bundle already
+  // carries it) — NOT from server props: the hub's flight payload drops
+  // ~181KB raw. Registry fields (name/faction/lore) cover search + dots.
+  const units = useMemo(() => getAllUnits(), []);
+
   // Faction dots for the units folder — data-driven, hierarchy order.
   const factionDots = useMemo(() => {
-    const present = new Set(initialUnits.map((u) => u.faction));
+    const present = new Set(units.map((u) => u.faction));
     return orderedFactions(
       getFactions().filter((f) => present.has(f.id)).map((f) => ({ id: f.id, parent: f.parent })),
     ).map((f) => ({
@@ -81,7 +84,7 @@ export default function ArchiveHub({ initialUnits, lorePages, counts, era }: Arc
       label: factionDisplayNames[f.id] ?? f.id,
       color: getFactionColors(f.id).primary,
     }));
-  }, [initialUnits]);
+  }, [units]);
 
   // While the forward check resolves (or the replace lands), render a quiet
   // stub — the hub content must not flash before the redirect.
@@ -167,7 +170,7 @@ export default function ArchiveHub({ initialUnits, lorePages, counts, era }: Arc
               style={{ animationFillMode: 'forwards', animationDelay: '0.15s' }}
             >
               <HubCover counts={counts}>
-                <HubSearch units={initialUnits} lorePages={lorePages} />
+                <HubSearch units={units} lorePages={lorePages} />
               </HubCover>
             </div>
 

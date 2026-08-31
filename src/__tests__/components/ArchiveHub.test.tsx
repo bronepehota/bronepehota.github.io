@@ -41,7 +41,6 @@ describe('ArchiveHub — корень-хаб «Архив вселенной»',
   function renderHub() {
     return render(
       <ArchiveHub
-        initialUnits={units}
         lorePages={buildLorePages(units)}
         counts={counts}
         era={{ from: 1908, to: 4546 }}
