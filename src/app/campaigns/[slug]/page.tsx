@@ -4,6 +4,8 @@ import { Metadata } from 'next';
 import { getAllCampaigns, getCampaign } from '@/lib/campaigns';
 import { LoreSourceRow } from '@/components/encyclopedia/LoreSourceRow';
 import { ChapterBody } from '@/components/encyclopedia/history/ChapterBody';
+import { CampaignMapFigure } from '@/components/encyclopedia/history/InvasionMaps';
+import { CAMPAIGN_MAP } from '@/lib/invasion-maps';
 import JsonLd from '@/components/JsonLd';
 import {
   articleJsonLd,
@@ -171,6 +173,10 @@ export default async function CampaignDetailPage({
           {/* Source attribution — the novel / official edition the chronicle
               retells. Renders only when the frontmatter carries one. */}
           <LoreSourceRow loreAuthor={campaign.loreAuthor} credit={campaign.credit} className="mt-4" />
+          {/* Карта театра войны — для кампаний волн (реестр CAMPAIGN_MAP). */}
+          {CAMPAIGN_MAP[params.slug] && (
+            <CampaignMapFigure mapSlug={CAMPAIGN_MAP[params.slug]} />
+          )}
         </article>
 
         {/* ——— Appendix: participants of the campaign (encyclopedia units) ——— */}
