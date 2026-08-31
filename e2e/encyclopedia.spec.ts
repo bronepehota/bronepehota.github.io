@@ -527,6 +527,9 @@ test.describe('Хаб: театры войн (карта + период)', () =>
 
     const showcase = page.getByTestId('invasion-showcase');
     await expect(showcase).toBeVisible();
+    // Демо-режим слайд-шоу может уже уйти с первого периода — пинуем выбор
+    // кликом по первому табу (останавливает автопрокрутку) и ассертим.
+    await showcase.getByTestId('invasion-map-tab').nth(0).click();
     await expect(showcase.getByTestId('invasion-showcase-text')).toContainText('Первая волна вторжения');
     await expect(showcase.getByTestId('invasion-map-img')).toHaveAttribute(
       'src',
@@ -539,5 +542,37 @@ test.describe('Хаб: театры войн (карта + период)', () =>
       'src',
       /raskol-imperii-4550-4554/,
     );
+
+    // Лента эпох — переключатель: узел 4478 меняет пару и подсвечивается
+    const node4478 = page
+      .getByTestId('era-period-node')
+      .filter({ hasText: '4478' });
+    await node4478.click();
+    await expect(showcase.getByTestId('invasion-showcase-text')).toContainText('Вторая волна вторжения');
+    await expect(node4478).toHaveAttribute('aria-pressed', 'true');
+  });
+});
+
+// ——— ?q= форвард и переход «все совпадения в каталог» (e2e-пробел ревью) ——
+test.describe('Хаб: легаси ?q и проход из подсказок в каталог', () => {
+  test('?q= форвардится в каталог с сохранением запроса', async ({ page }) => {
+    await page.goto('/encyclopedia?q=' + encodeURIComponent('Блауд'));
+    await page.waitForLoadState('networkidle');
+
+    await expect(page).toHaveURL(/\/encyclopedia\/units\?q=/);
+    await expect(page.locator('input[placeholder*="ПОИСК"]')).toHaveValue('Блауд');
+    await expect(page.getByTestId('lore-search-hint').first()).toBeVisible();
+  });
+
+  test('«все совпадения в каталоге» переносит запрос подсказок', async ({ page }) => {
+    await page.goto('/encyclopedia');
+    await page.waitForLoadState('networkidle');
+
+    await page.getByTestId('hub-search').fill('Блауд');
+    const more = page.getByTestId('hub-search-more');
+    await expect(more).toBeVisible();
+    await more.click();
+    await expect(page).toHaveURL(/\/encyclopedia\/units\?q=/);
+    await expect(page.locator('input[placeholder*="ПОИСК"]')).toHaveValue('Блауд');
   });
 });

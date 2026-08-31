@@ -1227,3 +1227,13 @@ button, a, input, select, textarea {
     animation: none !important;
   }
 }
+
+/* Кроссфейд периодов «// ТЕАТРОВ ВОЙН»: новая карта/текст проявляются
+   поверх прежних (гасится глобальным prefers-reduced-motion ниже). */
+@keyframes map-crossfade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.map-crossfade {
+  animation: map-crossfade 0.7s ease both;
+}

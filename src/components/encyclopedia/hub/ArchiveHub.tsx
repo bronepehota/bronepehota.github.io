@@ -3,13 +3,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import type { EncyclopediaUnit } from '@/lib/encyclopedia-registry';
-import { getFactions } from '@/lib/encyclopedia-registry';
+import { getFactions, getAllUnits } from '@/lib/encyclopedia-registry';
 import { orderedFactions } from '@/lib/faction-hierarchy';
 import { factionDisplayNames, getFactionColors } from '@/lib/faction-colors';
 import type { LorePageRef } from '@/lib/unit-search';
 import { LoreGuide } from '../LoreGuide';
 import { InvasionMapShowcase } from '../history/InvasionMaps';
+import { INVASION_MAPS } from '@/lib/invasion-maps';
 import { trackEvent } from '@/lib/analytics';
 import { cn } from '@/lib/utils';
 import { HubCover } from './HubCover';
@@ -35,7 +35,6 @@ export interface HubEra {
 }
 
 interface ArchiveHubProps {
-  initialUnits: EncyclopediaUnit[];
   lorePages: LorePageRef[];
   counts: HubCounts;
   era: HubEra;
@@ -55,10 +54,40 @@ const FORWARD_PARAMS = ['faction', 'type', 'sculptor', 'q'] as const;
  * verbatim — the hub never flashes (it stays invisible until the check passes,
  * mirroring the page-load cascade the other pages already use).
  */
-export default function ArchiveHub({ initialUnits, lorePages, counts, era }: ArchiveHubProps) {
+export default function ArchiveHub({ lorePages, counts, era }: ArchiveHubProps) {
   const router = useRouter();
   const [isLoaded, setIsLoaded] = useState(false);
   const [forwarded, setForwarded] = useState(false);
+  // Активный период «// ТЕАТРОВ ВОЙН»: лента эпох и табы витрины переключают
+  // одну пару (решение владельца: лента эпох = переключатель).
+  const [mapSlug, setMapSlug] = useState(INVASION_MAPS[0].slug);
+  // «Демо-режим» слайд-шоу периодов (решение владельца 2026-08-31): эпохи
+  // идут сами, пока читатель не выберет свою — первое касание останавливает
+  // вращение навсегда; наведение/фокус и скрытая вкладка ставят паузу;
+  // prefers-reduced-motion — вообще без автопрокрутки.
+  const [userTouchedMaps, setUserTouchedMaps] = useState(false);
+  const [mapsPaused, setMapsPaused] = useState(false);
+
+  useEffect(() => {
+    if (userTouchedMaps || mapsPaused) return;
+    if (typeof window.matchMedia === 'function'
+      && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const id = setInterval(() => {
+      if (document.hidden) return; // фоновая вкладка — пауза
+      setMapSlug((cur) => {
+        const i = INVASION_MAPS.findIndex((m) => m.slug === cur);
+        return INVASION_MAPS[(i + 1) % INVASION_MAPS.length].slug;
+      });
+    }, 7000);
+    return () => clearInterval(id);
+  }, [userTouchedMaps, mapsPaused]);
+
+  const selectMap = (slug: string) => {
+    setUserTouchedMaps(true);
+    setMapSlug(slug);
+    // Витрина — над линейкой: если ушли вниз, вернуть её в кадр.
+    document.getElementById('invasion-showcase')?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+  };
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -71,9 +100,14 @@ export default function ArchiveHub({ initialUnits, lorePages, counts, era }: Arc
     setIsLoaded(true);
   }, [router]);
 
+  // Units come from the BUNDLED sync registry (the client bundle already
+  // carries it) — NOT from server props: the hub's flight payload drops
+  // ~181KB raw. Registry fields (name/faction/lore) cover search + dots.
+  const units = useMemo(() => getAllUnits(), []);
+
   // Faction dots for the units folder — data-driven, hierarchy order.
   const factionDots = useMemo(() => {
-    const present = new Set(initialUnits.map((u) => u.faction));
+    const present = new Set(units.map((u) => u.faction));
     return orderedFactions(
       getFactions().filter((f) => present.has(f.id)).map((f) => ({ id: f.id, parent: f.parent })),
     ).map((f) => ({
@@ -81,7 +115,7 @@ export default function ArchiveHub({ initialUnits, lorePages, counts, era }: Arc
       label: factionDisplayNames[f.id] ?? f.id,
       color: getFactionColors(f.id).primary,
     }));
-  }, [initialUnits]);
+  }, [units]);
 
   // While the forward check resolves (or the replace lands), render a quiet
   // stub — the hub content must not flash before the redirect.
@@ -167,7 +201,7 @@ export default function ArchiveHub({ initialUnits, lorePages, counts, era }: Arc
               style={{ animationFillMode: 'forwards', animationDelay: '0.15s' }}
             >
               <HubCover counts={counts}>
-                <HubSearch units={initialUnits} lorePages={lorePages} />
+                <HubSearch units={units} lorePages={lorePages} />
               </HubCover>
             </div>
 
@@ -177,7 +211,15 @@ export default function ArchiveHub({ initialUnits, lorePages, counts, era }: Arc
               className={cn('fade-in-up opacity-0', isLoaded && 'opacity-100')}
               style={{ animationFillMode: 'forwards', animationDelay: '0.22s' }}
             >
-              <InvasionMapShowcase />
+              <div
+              id="invasion-showcase"
+              onMouseEnter={() => setMapsPaused(true)}
+              onMouseLeave={() => setMapsPaused(false)}
+              onFocusCapture={() => setMapsPaused(true)}
+              onBlurCapture={() => setMapsPaused(false)}
+            >
+              <InvasionMapShowcase active={mapSlug} onSelect={selectMap} />
+            </div>
             </div>
 
             {/* Лента эпох — статичная полоса времени архива */}
@@ -185,7 +227,17 @@ export default function ArchiveHub({ initialUnits, lorePages, counts, era }: Arc
               className={cn('fade-in-up opacity-0', isLoaded && 'opacity-100')}
               style={{ animationFillMode: 'forwards', animationDelay: '0.3s' }}
             >
-              <EraStrip from={era.from} to={era.to} />
+              <EraStrip
+                from={era.from}
+                to={era.to}
+                periods={INVASION_MAPS.map((m) => ({
+                  year: Number(m.years.slice(0, 4)),
+                  slug: m.slug,
+                  label: `${m.title} (${m.years})`,
+                }))}
+                activeSlug={mapSlug}
+                onSelect={selectMap}
+              />
             </div>
 
             {/* Папки-разделы */}

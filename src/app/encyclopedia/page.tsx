@@ -64,6 +64,6 @@ export default async function EncyclopediaHubPage() {
   const lorePages = buildLorePages(allUnits);
 
   return (
-    <ArchiveHub initialUnits={allUnits} lorePages={lorePages} counts={counts} era={era} />
+    <ArchiveHub lorePages={lorePages} counts={counts} era={era} />
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { Search, X } from 'lucide-react';
 import { EncyclopediaUnit, getFactions } from '@/lib/encyclopedia-registry';
@@ -48,6 +48,8 @@ export default function EncyclopediaPage({ initialUnits, lorePages }: Encycloped
   // unit's sculptor as `unit.miniatureSource ?? 'tehnolog'`.
   const [selectedSculptor, setSelectedSculptor] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  // Восстановленный запрос (deep-link/sessionStorage) — НЕ считаем новым поиском.
+  const restoredQuery = useRef<string | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Haystacks are built once (lore fields are stable per unit); the filter
@@ -125,7 +127,10 @@ export default function EncyclopediaPage({ initialUnits, lorePages }: Encycloped
     if (fac && fac !== 'all' && units.some((u) => u.faction === fac)) setSelectedFaction(fac as FactionID);
     if (typ && typ !== 'all') setSelectedType(typ as TypeFilter);
     if (sc && sc !== 'all' && units.some((u) => (u.miniatureSource ?? 'tehnolog') === sc)) setSelectedSculptor(sc);
-    if (q) setSearchQuery(q);
+    if (q) {
+      setSearchQuery(q);
+      restoredQuery.current = q;
+    }
   }, []);
 
   // Persist the active filter so returning from a unit page restores it.
@@ -174,8 +179,11 @@ export default function EncyclopediaPage({ initialUnits, lorePages }: Encycloped
     if (!q) return;
     const results = filteredUnits.length + loreMatches.length;
     const timer = setTimeout(() => {
-      trackEvent('encyclopedia_search', { query: q, results });
-      if (results === 0) trackEvent('encyclopedia_search_empty', { query: q });
+      // Deep-link/возврат «назад» восстанавливает запрос молча — событие
+      // шлём только когда запрос набран (или сменён) в этой сессии страницы.
+      if (restoredQuery.current === q) return;
+      trackEvent('encyclopedia_search', { query: q, results, surface: 'units' });
+      if (results === 0) trackEvent('encyclopedia_search_empty', { query: q, surface: 'units' });
     }, 1200);
     return () => clearTimeout(timer);
   }, [searchQuery, filteredUnits.length, loreMatches.length]);

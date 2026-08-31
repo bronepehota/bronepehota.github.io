@@ -41,7 +41,6 @@ describe('ArchiveHub — корень-хаб «Архив вселенной»',
   function renderHub() {
     return render(
       <ArchiveHub
-        initialUnits={units}
         lorePages={buildLorePages(units)}
         counts={counts}
         era={{ from: 1908, to: 4546 }}
@@ -179,4 +178,17 @@ describe('ArchiveHub — корень-хаб «Архив вселенной»',
       }
     }
   });
+
+test('лента эпох — переключатель витрины «// ТЕАТРЫ ВОЙН»', async () => {
+  renderHub();
+
+  // Узлы периодов на линейке; клик по 4550 показывает «Раскол Империи»
+  const nodes = screen.getAllByTestId('era-period-node');
+  expect(nodes.length).toBe(5);
+  fireEvent.click(nodes[4]);
+  await waitFor(() => {
+    expect(screen.getByTestId('invasion-showcase-text')).toHaveTextContent('Раскол Империи');
+  });
+  expect(nodes[4]).toHaveAttribute('aria-pressed', 'true');
+});
 });

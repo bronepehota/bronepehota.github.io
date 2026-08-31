@@ -62,8 +62,8 @@ export function HubSearch({ units, lorePages }: HubSearchProps) {
     if (!q) return;
     const results = loreMatches.length + unitMatches.length;
     const timer = setTimeout(() => {
-      trackEvent('encyclopedia_search', { query: q, results });
-      if (results === 0) trackEvent('encyclopedia_search_empty', { query: q });
+      trackEvent('encyclopedia_search', { query: q, results, surface: 'hub' });
+      if (results === 0) trackEvent('encyclopedia_search_empty', { query: q, surface: 'hub' });
     }, 1200);
     return () => clearTimeout(timer);
   }, [q, loreMatches.length, unitMatches.length]);
