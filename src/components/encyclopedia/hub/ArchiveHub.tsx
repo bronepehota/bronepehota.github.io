@@ -9,6 +9,7 @@ import { orderedFactions } from '@/lib/faction-hierarchy';
 import { factionDisplayNames, getFactionColors } from '@/lib/faction-colors';
 import type { LorePageRef } from '@/lib/unit-search';
 import { LoreGuide } from '../LoreGuide';
+import { InvasionMapShowcase } from '../history/InvasionMaps';
 import { trackEvent } from '@/lib/analytics';
 import { cn } from '@/lib/utils';
 import { HubCover } from './HubCover';
@@ -170,10 +171,19 @@ export default function ArchiveHub({ initialUnits, lorePages, counts, era }: Arc
               </HubCover>
             </div>
 
+            {/* Театры войн: карта РЯДОМ с описанием периода — визуальный якорь
+                хаба (полная галерея — на хабе Истории, #maps). */}
+            <div
+              className={cn('fade-in-up opacity-0', isLoaded && 'opacity-100')}
+              style={{ animationFillMode: 'forwards', animationDelay: '0.22s' }}
+            >
+              <InvasionMapShowcase />
+            </div>
+
             {/* Лента эпох — статичная полоса времени архива */}
             <div
               className={cn('fade-in-up opacity-0', isLoaded && 'opacity-100')}
-              style={{ animationFillMode: 'forwards', animationDelay: '0.24s' }}
+              style={{ animationFillMode: 'forwards', animationDelay: '0.3s' }}
             >
               <EraStrip from={era.from} to={era.to} />
             </div>
@@ -181,7 +191,7 @@ export default function ArchiveHub({ initialUnits, lorePages, counts, era }: Arc
             {/* Папки-разделы */}
             <div
               className={cn('fade-in-up opacity-0', isLoaded && 'opacity-100')}
-              style={{ animationFillMode: 'forwards', animationDelay: '0.3s' }}
+              style={{ animationFillMode: 'forwards', animationDelay: '0.36s' }}
             >
               <HubSections counts={counts} factionDots={factionDots} />
             </div>

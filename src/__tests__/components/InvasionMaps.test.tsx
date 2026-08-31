@@ -14,7 +14,10 @@ import {
   getInvasionMap,
 } from '@/lib/invasion-maps';
 import { CREDITS } from '@/lib/painted-images';
-import { InvasionMapsGallery } from '@/components/encyclopedia/history/InvasionMaps';
+import {
+  InvasionMapsGallery,
+  InvasionMapShowcase,
+} from '@/components/encyclopedia/history/InvasionMaps';
 
 const ROOT = path.resolve(__dirname, '../../..');
 
@@ -81,5 +84,30 @@ describe('invasion-maps: галерея', () => {
     const credit = screen.getByTestId('invasion-map-credit');
     expect(credit).toHaveAttribute('href', 'https://vk.ru/universestarsys');
     expect(credit).toHaveTextContent('ЗВЁЗДНЫЕ СИСТЕМЫ');
+  });
+});
+
+describe('invasion-maps: витрина хаба (карта рядом с описанием периода)', () => {
+  it('описание периода стоит рядом с картой и меняется вместе с ней', () => {
+    render(<InvasionMapShowcase />);
+    const text = screen.getByTestId('invasion-showcase-text');
+    expect(text).toHaveTextContent('Первая волна вторжения');
+    expect(text).toHaveTextContent('клон-пехоты');
+
+    const tabs = screen.getAllByTestId('invasion-map-tab');
+    fireEvent.click(tabs[3]); // Рейдовые войны
+    expect(screen.getByTestId('invasion-showcase-text')).toHaveTextContent('Рейдовые войны');
+    expect(screen.getByTestId('invasion-map-img')).toHaveAttribute(
+      'src',
+      expect.stringContaining('reydovye-voyny-4530-4543'),
+    );
+  });
+
+  it('под картой — проход в полную галерею на хабе Истории', () => {
+    render(<InvasionMapShowcase />);
+    expect(screen.getByRole('link', { name: /все пять карт/i })).toHaveAttribute(
+      'href',
+      '/encyclopedia/history#maps',
+    );
   });
 });

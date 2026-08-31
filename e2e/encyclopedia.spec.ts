@@ -518,3 +518,26 @@ test.describe('Энциклопедия — хаб «Архив вселенно
     await expect(page).toHaveURL(/\/encyclopedia\/units\?faction=polaris$/);
   });
 });
+
+// ——— Витрина «// ТЕАТРЫ ВОЙН» на хабе: карта рядом с описанием периода ——
+test.describe('Хаб: театры войн (карта + период)', () => {
+  test('описание периода стоит рядом с картой и переключается табами', async ({ page }) => {
+    await page.goto('/encyclopedia');
+    await page.waitForLoadState('networkidle');
+
+    const showcase = page.getByTestId('invasion-showcase');
+    await expect(showcase).toBeVisible();
+    await expect(showcase.getByTestId('invasion-showcase-text')).toContainText('Первая волна вторжения');
+    await expect(showcase.getByTestId('invasion-map-img')).toHaveAttribute(
+      'src',
+      /pervaya-volna-4451-4461/,
+    );
+
+    await showcase.getByTestId('invasion-map-tab').nth(4).click();
+    await expect(showcase.getByTestId('invasion-showcase-text')).toContainText('Раскол Империи');
+    await expect(showcase.getByTestId('invasion-map-img')).toHaveAttribute(
+      'src',
+      /raskol-imperii-4550-4554/,
+    );
+  });
+});
