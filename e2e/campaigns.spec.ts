@@ -131,3 +131,46 @@ test.describe('Хроники войн', () => {
     await expect(page.getByTestId('credit-avb-mark')).toBeVisible();
   });
 });
+
+// ——— Карты театров войн (серия «СтарСис», Звёздные Системы; запись №20 реестра) ——
+test.describe('Карты театров войн', () => {
+  test('галерея на хабе Истории: пять периодов, переключение и кредит', async ({ page }) => {
+    await page.goto('/encyclopedia/history#maps');
+    await page.waitForLoadState('networkidle');
+
+    const gallery = page.getByTestId('invasion-maps');
+    await expect(gallery).toBeVisible();
+    await expect(gallery.getByTestId('invasion-map-tab')).toHaveCount(5);
+    // Активна первая волна; кредит автора — ссылка на сообщество
+    await expect(gallery.getByTestId('invasion-map-img')).toHaveAttribute(
+      'src',
+      /pervaya-volna-4451-4461/,
+    );
+    await expect(gallery.getByTestId('invasion-map-credit')).toHaveAttribute(
+      'href',
+      'https://vk.ru/universestarsys',
+    );
+
+    // Переключение на «Раскол Империи»
+    await gallery.getByTestId('invasion-map-tab').nth(4).click();
+    await expect(gallery.getByTestId('invasion-map-img')).toHaveAttribute(
+      'src',
+      /raskol-imperii-4550-4554/,
+    );
+    await expect(gallery.getByTestId('invasion-map-figure')).toContainText('Раскол Империи');
+  });
+
+  test('кампания волны несёт карту театра войны', async ({ page }) => {
+    await page.goto('/campaigns/vtoraya-volna');
+    await page.waitForLoadState('networkidle');
+
+    const figure = page.getByTestId('invasion-map-figure');
+    await expect(figure).toBeVisible();
+    await expect(figure.getByTestId('invasion-map-img')).toHaveAttribute(
+      'src',
+      /vtoraya-volna-4478-4495/,
+    );
+    await expect(figure).toContainText('Вторая волна вторжения');
+    await expect(figure.getByTestId('invasion-map-credit')).toBeVisible();
+  });
+});

@@ -15,6 +15,7 @@ import { LoreSourceRow } from '@/components/encyclopedia/LoreSourceRow';
 import { ChapterBody } from '@/components/encyclopedia/history/ChapterBody';
 import { EraRibbon } from '@/components/encyclopedia/history/EraRibbon';
 import { HistoryDivider } from '@/components/encyclopedia/history/HistoryDivider';
+import { InvasionMapsGallery } from '@/components/encyclopedia/history/InvasionMaps';
 import { TocCopyLink } from '@/components/encyclopedia/history/TocCopyLink';
 import { BackToToc } from '@/components/encyclopedia/history/BackToToc';
 import { pageOpenGraph } from '@/lib/seo';
@@ -379,6 +380,11 @@ export default async function HistoryPage() {
               {zone.slugs.length === 0 && (
                 <div className="max-w-4xl mx-auto px-4">
                   <CampaignsBlock campaigns={campaigns} />
+                  {/* Карты театров войн — картографический эпилог хроник:
+                      пять периодов вселенной («СтарСис», Звёздные Системы). */}
+                  <div className="mt-8" id="maps">
+                    <InvasionMapsGallery />
+                  </div>
                 </div>
               )}
             </div>
