@@ -61,6 +61,33 @@ export default function ArchiveHub({ lorePages, counts, era }: ArchiveHubProps) 
   // Активный период «// ТЕАТРОВ ВОЙН»: лента эпох и табы витрины переключают
   // одну пару (решение владельца: лента эпох = переключатель).
   const [mapSlug, setMapSlug] = useState(INVASION_MAPS[0].slug);
+  // «Демо-режим» слайд-шоу периодов (решение владельца 2026-08-31): эпохи
+  // идут сами, пока читатель не выберет свою — первое касание останавливает
+  // вращение навсегда; наведение/фокус и скрытая вкладка ставят паузу;
+  // prefers-reduced-motion — вообще без автопрокрутки.
+  const [userTouchedMaps, setUserTouchedMaps] = useState(false);
+  const [mapsPaused, setMapsPaused] = useState(false);
+
+  useEffect(() => {
+    if (userTouchedMaps || mapsPaused) return;
+    if (typeof window.matchMedia === 'function'
+      && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const id = setInterval(() => {
+      if (document.hidden) return; // фоновая вкладка — пауза
+      setMapSlug((cur) => {
+        const i = INVASION_MAPS.findIndex((m) => m.slug === cur);
+        return INVASION_MAPS[(i + 1) % INVASION_MAPS.length].slug;
+      });
+    }, 7000);
+    return () => clearInterval(id);
+  }, [userTouchedMaps, mapsPaused]);
+
+  const selectMap = (slug: string) => {
+    setUserTouchedMaps(true);
+    setMapSlug(slug);
+    // Витрина — над линейкой: если ушли вниз, вернуть её в кадр.
+    document.getElementById('invasion-showcase')?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+  };
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -184,7 +211,15 @@ export default function ArchiveHub({ lorePages, counts, era }: ArchiveHubProps) 
               className={cn('fade-in-up opacity-0', isLoaded && 'opacity-100')}
               style={{ animationFillMode: 'forwards', animationDelay: '0.22s' }}
             >
-              <div id="invasion-showcase"><InvasionMapShowcase active={mapSlug} onSelect={setMapSlug} /></div>
+              <div
+              id="invasion-showcase"
+              onMouseEnter={() => setMapsPaused(true)}
+              onMouseLeave={() => setMapsPaused(false)}
+              onFocusCapture={() => setMapsPaused(true)}
+              onBlurCapture={() => setMapsPaused(false)}
+            >
+              <InvasionMapShowcase active={mapSlug} onSelect={selectMap} />
+            </div>
             </div>
 
             {/* Лента эпох — статичная полоса времени архива */}
@@ -201,11 +236,7 @@ export default function ArchiveHub({ lorePages, counts, era }: ArchiveHubProps) 
                   label: `${m.title} (${m.years})`,
                 }))}
                 activeSlug={mapSlug}
-                onSelect={(slug) => {
-                  setMapSlug(slug);
-                  // Витрина — над линейкой: если ушли вниз, вернуть её в кадр.
-                  document.getElementById('invasion-showcase')?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
-                }}
+                onSelect={selectMap}
               />
             </div>
 

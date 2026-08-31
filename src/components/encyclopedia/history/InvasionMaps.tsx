@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { BASE_PATH } from '@/lib/constants';
 import { getCredit } from '@/lib/painted-images';
@@ -141,6 +141,13 @@ export function InvasionMapShowcase({
 }) {
   const [internalActive, setInternalActive] = useState(INVASION_MAPS[0].slug);
   const active = controlledActive ?? internalActive;
+  // Кроссфейд периодов: новая карта проявляется ПОВЕРХ прежней (700 мс) —
+  // слайд-шоу досье не скользит, листы архива сменяются проявлением.
+  const [prevSlug, setPrevSlug] = useState(active);
+  useEffect(() => {
+    const t = setTimeout(() => setPrevSlug(active), 750);
+    return () => clearTimeout(t);
+  }, [active]);
   const setActive = (slug: string) => {
     setInternalActive(slug);
     onSelect?.(slug);
@@ -165,7 +172,7 @@ export function InvasionMapShowcase({
 
       {/* Пара: описание слева, карта справа (мобильный — стопкой) */}
       <div className="grid gap-4 md:grid-cols-[5fr,6fr] md:items-start">
-        <div data-testid="invasion-showcase-text">
+        <div key={current.slug} data-testid="invasion-showcase-text" className="map-crossfade">
           <h2 className="font-oswald text-lg md:text-xl text-military-sand uppercase tracking-wide">
             {current.title}
           </h2>
@@ -228,11 +235,22 @@ export function InvasionMapShowcase({
             rel="noopener noreferrer"
             title="Открыть карту полностью"
             data-testid="invasion-map-open"
-            className="block border border-military-steel/30 bg-military-charcoal/40 p-1.5 hover:border-military-amber/50 transition-colors cursor-zoom-in"
+            className="relative block border border-military-steel/30 bg-military-charcoal/40 p-1.5 hover:border-military-amber/50 transition-colors cursor-zoom-in"
           >
-            {/* Статический экспорт: unoptimized <img> с ручным BASE_PATH. */}
+            {/* Прежний период — подложка кроссфейда */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
+              src={`${BASE_PATH}/images/maps/${prevSlug}.jpg`}
+              alt=""
+              aria-hidden
+              width={2048}
+              height={1443}
+              className="block w-full h-auto"
+            />
+            {/* Текущий период — проявляется поверх (key перезапускает анимацию) */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              key={current.slug}
               src={`${BASE_PATH}/images/maps/${current.slug}.jpg`}
               alt={`${current.title} (${current.years}) — карта театров войн вселенной СтарСис`}
               data-testid="invasion-map-img"
@@ -240,7 +258,7 @@ export function InvasionMapShowcase({
               decoding="async"
               width={2048}
               height={1443}
-              className="block w-full h-auto"
+              className="absolute inset-1.5 w-[calc(100%-0.75rem)] h-auto map-crossfade"
             />
           </a>
         </figure>
