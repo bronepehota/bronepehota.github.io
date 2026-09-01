@@ -7,6 +7,7 @@ import {
   getHistoryChapter,
   historyCentury,
   historyEraYears,
+  WARS_BEFORE_SLUG,
 } from '@/lib/history';
 import { getAllCampaigns, warsEraSpan } from '@/lib/campaigns';
 import { CampaignsBlock } from '@/components/encyclopedia/CampaignsBlock';
@@ -53,8 +54,9 @@ export default async function HistoryPage() {
   const chapters = (await Promise.all(metas.map((m) => getHistoryChapter(m.slug)))).filter(
     (c): c is NonNullable<typeof c> => c !== null,
   );
-  // «Хроники войн» live as the closing section of the history page (#wars) —
-  // chronological order, the standalone /campaigns list redirects here.
+  // «Хроники войн» live inside the reading flow — between the wars era and
+  // the newest history (Раскол), so the chronicle ends with the freshest
+  // point (#wars; the standalone /campaigns list redirects here).
   const campaigns = getAllCampaigns();
   // Era span of the whole wars block (TOC badge): min–max year across ALL
   // campaigns, e.g. 4451–4546 (order-based first/last used to yield «4451–4451»).
@@ -238,12 +240,33 @@ export default async function HistoryPage() {
             <ol className="md:grid md:grid-cols-2 md:gap-x-8">
               {(() => {
                 let lastGroupKey: string | undefined;
-                return chapters.map((c) => {
+                // Wars chronicle — not a chapter; separated entry anchoring
+                // #wars. In the reading flow it sits between the wars era and
+                // the newest history (WARS_BEFORE_SLUG); without the anchor
+                // chapter it stays the closing row (flatMap-concat below).
+                const warsItem = (
+                  <li key="#wars" className="pt-2 mt-2 border-t border-military-steel/20">
+                    <div className="flex items-center">
+                      <a href="#wars" className="flex flex-1 items-baseline gap-3 py-2.5 group">
+                        <span className="font-ibm-mono text-[10px] text-military-rust shrink-0">{'//'}</span>
+                        <span className="font-oswald text-military-sand group-hover:text-military-amber transition-colors">
+                          Хроники войн
+                        </span>
+                        {warsEra && (
+                          <span className="ml-auto shrink-0 whitespace-nowrap font-ibm-mono text-[10px] text-military-taupe/80 pl-2">
+                            {warsEra}
+                          </span>
+                        )}
+                      </a>
+                    </div>
+                  </li>
+                );
+                const items = chapters.flatMap((c) => {
                   const groupKey = c.group ?? '__chrono';
                   const showHeader = groupKey !== lastGroupKey;
                   lastGroupKey = groupKey;
                   const number = chronoNumber.get(c.slug);
-                  return (
+                  const li = (
                     <li key={c.slug} className={showHeader ? 'pt-2 mt-2 border-t border-military-steel/20' : ''}>
                       {showHeader && (
                         <p
@@ -274,24 +297,12 @@ export default async function HistoryPage() {
                       </div>
                     </li>
                   );
+                  return c.slug === WARS_BEFORE_SLUG ? [warsItem, li] : [li];
                 });
+                return chapters.some((c) => c.slug === WARS_BEFORE_SLUG)
+                  ? items
+                  : items.concat(warsItem);
               })()}
-              {/* Wars chronicle — not a chapter; separated entry anchoring #wars */}
-              <li className="pt-2 mt-2 border-t border-military-steel/20">
-                <div className="flex items-center">
-                  <a href="#wars" className="flex flex-1 items-baseline gap-3 py-2.5 group">
-                    <span className="font-ibm-mono text-[10px] text-military-rust shrink-0">{'//'}</span>
-                    <span className="font-oswald text-military-sand group-hover:text-military-amber transition-colors">
-                      Хроники войн
-                    </span>
-                    {warsEra && (
-                      <span className="ml-auto shrink-0 whitespace-nowrap font-ibm-mono text-[10px] text-military-taupe/80 pl-2">
-                        {warsEra}
-                      </span>
-                    )}
-                  </a>
-                </div>
-              </li>
             </ol>
             {/* Алфавит вселенной — сущностные страницы (персоны/локации/термины),
                 вход с Истории маленькой mono-строкой после блока войн */}
@@ -382,8 +393,8 @@ export default async function HistoryPage() {
                   </div>
                 );
               })}
-              {/* The wars zone wraps <CampaignsBlock> — campaigns as the closing
-                  section (anchor #wars, stays last on the page). */}
+              {/* The wars zone (no chapter slugs) wraps <CampaignsBlock> —
+                  mid-flow, right before the newest-history tail. */}
               {zone.slugs.length === 0 && (
                 <div className="max-w-4xl mx-auto px-4">
                   <CampaignsBlock campaigns={campaigns} />

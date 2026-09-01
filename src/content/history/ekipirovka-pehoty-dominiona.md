@@ -1,7 +1,8 @@
 ---
 slug: ekipirovka-pehoty-dominiona
 title: Пехота Доминиона
-order: 8
+order: 11
+group: Справочник
 loreAuthor: avb
 credit:
   author: "V.Chertischev"

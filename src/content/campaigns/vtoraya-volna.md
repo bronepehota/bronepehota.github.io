@@ -4,7 +4,7 @@ title: Вторая волна
 subtitle: Манёвренная война и падение миров
 era: "4478–4495"
 factions: [polaris, protectorate]
-order: 12
+order: 7
 loreAuthor: avb
 credit:
   author: "V.Chertischev"

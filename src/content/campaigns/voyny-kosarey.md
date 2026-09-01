@@ -4,7 +4,7 @@ title: Войны Косарей
 subtitle: Пираты, наёмники и ополчения — столетие малых войн до Вторжения
 era: "4360–4451"
 factions: [mercenaries, protectorate]
-order: 10
+order: 1
 loreAuthor: avb
 credit:
   author: "V.Chertischev"

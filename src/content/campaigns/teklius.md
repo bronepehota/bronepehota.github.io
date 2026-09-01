@@ -4,7 +4,7 @@ title: Сражение за Теклиус
 subtitle: Реванш под чужим флагом — руины, которых не должно было существовать
 era: "4540"
 factions: [protectorate, polaris]
-order: 9
+order: 14
 loreAuthor: tehnolog
 credit:
   work: "Летопись: Звёздные герои"

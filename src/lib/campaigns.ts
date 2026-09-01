@@ -57,9 +57,9 @@ export function getAllCampaigns(): CampaignMeta[] {
 /**
  * Era badge for the whole «Хроники войн» block (TOC): the min–max year span across
  * ALL campaigns — each `era` may itself be a range («4451–4528»). Taking the first
- * campaign's opening year and the last campaign's closing year is WRONG: the list
- * is ordered by `order`, not chronology (the 4451 «Первая волна» closes it), which
- * used to produce «4451–4451».
+ * campaign's opening year and the last campaign's closing year is WRONG when the
+ * list is not chronological — min–max stays robust even if `order` and era ever
+ * diverge again (it used to produce «4451–4451» when «Первая волна» closed it).
  *
  * Undefined when no campaign carries a parseable 4-digit year (no badge rendered).
  */

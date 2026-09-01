@@ -4,7 +4,7 @@ title: '4541: Димекса'
 subtitle: Ледяной склад Золотой Сотни — рейд, ставший «Троянским конём» Рейдовых войн
 era: "4541"
 factions: [polaris, protectorate]
-order: 16
+order: 15
 loreAuthor: avb
 credit:
   author: "Серж Коржик"

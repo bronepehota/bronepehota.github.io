@@ -4,7 +4,7 @@ title: Операция «Скрытый враг»
 subtitle: Второй рутенийский конфликт
 era: "4537"
 factions: [mercenaries, protectorate]
-order: 3
+order: 13
 loreAuthor: avb
 credit:
   author: "Сообщество ВК «Технолог/СтарСис»"

@@ -1,7 +1,7 @@
 ---
 slug: flot-epokhi-regentstva
 title: Флот эпохи Регентства
-order: 10
+order: 9
 loreAuthor: tehnolog
 credit:
   work: "Новейшая история Империи"

@@ -4,7 +4,7 @@ title: Операции ЦСО
 subtitle: Штурмовые батальоны Протектората
 era: "4521–4530"
 factions: [protectorate]
-order: 11
+order: 10
 loreAuthor: avb
 credit:
   author: "V.Chertischev"

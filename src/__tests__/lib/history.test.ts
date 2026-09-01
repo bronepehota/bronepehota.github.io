@@ -3,6 +3,7 @@ import {
   estimateReadingMinutes,
   getAllHistoryChapters,
   historyCentury,
+  WARS_BEFORE_SLUG,
   type HistoryChapterMeta,
 } from '@/lib/history';
 
@@ -42,15 +43,19 @@ describe('history chapters', () => {
     }
   });
 
-  it('первая глава — Тунгусский артефакт, восьмая — экипировка пехоты', () => {
+  it('первая глава — Тунгусский артефакт, восьмая — Конверсия (новейшая история)', () => {
     expect(chapters[0]?.slug).toBe('tungusskiy-artefakt');
-    expect(chapters[7]?.slug).toBe('ekipirovka-pehoty-dominiona');
+    // Хроника заканчивается самым свежим — Расколом (решение владельца
+    // 2026-09-01): 8–10 = хвост новейшей истории, затем справочник.
+    expect(chapters[7]?.slug).toBe('konversiya-raskol-regentstvo');
+    expect(chapters[9]?.slug).toBe('legendarnye-imperskie-lordy');
+    expect(chapters[10]?.slug).toBe('ekipirovka-pehoty-dominiona');
   });
 
-  it('главы 9–11 — «Новейшая история Империи»: tehnolog, кредит издания без автора', () => {
+  it('главы 8–10 — «Новейшая история Империи»: tehnolog, кредит издания без автора', () => {
     const empire = chapters.filter((c) => {
       const o = c.order ?? 99;
-      return o >= 9 && o <= 11;
+      return o >= 8 && o <= 10;
     });
     expect(empire).toHaveLength(3);
     expect(empire.map((c) => c.slug)).toEqual([
@@ -77,11 +82,13 @@ describe('history chapters', () => {
     }
   });
 
-  it('глава 8 (пехота Доминиона) — из «Косарей»: avb + кредит V.Chertischev', () => {
-    const ch8 = chapters.find((c) => c.slug === 'ekipirovka-pehoty-dominiona')!;
-    expect(ch8.loreAuthor).toBe('avb');
-    expect(ch8.credit?.author).toBe('V.Chertischev');
-    expect(ch8.credit?.work).toBe('Косары');
+  it('справка «Пехота Доминиона» — из «Косарей»: avb + кредит V.Chertischev, группа Справочник', () => {
+    const pekhta = chapters.find((c) => c.slug === 'ekipirovka-pehoty-dominiona')!;
+    expect(pekhta.loreAuthor).toBe('avb');
+    expect(pekhta.credit?.author).toBe('V.Chertischev');
+    expect(pekhta.credit?.work).toBe('Косары');
+    // Разбор вооружения — справка, не хроника: не рвёт поток войны → Раскол.
+    expect(pekhta.group).toBe('Справочник');
   });
 });
 
@@ -93,44 +100,53 @@ describe('«ДЕЛО RG-4530» showcase helpers (Phase 2)', () => {
     expect(historyCentury(chapters, '4451–4546')).toBe(45);
   });
 
-  it('buildHistoryFlow: лента эпох = 6 лет + СПРАВОЧНИК + ВОЙНЫ', () => {
+  it('buildHistoryFlow: лента эпох = 6 лет + ВОЙНЫ + 4530 + СПРАВОЧНИК', () => {
     const flow = buildHistoryFlow(chapters);
     expect(flow.ticks.map((t) => t.label)).toEqual([
       '1908', '2398', '2437', '2862', '3001', '4451',
-      'СПРАВОЧНИК', 'ВОЙНЫ',
+      'ВОЙНЫ', '4530', 'СПРАВОЧНИК',
     ]);
     // Era ticks jump straight to the era-opening chapter anchors
     expect(flow.ticks[0]).toMatchObject({ href: '#tungusskiy-artefakt', kind: 'era' });
     expect(flow.ticks[5]).toMatchObject({ href: '#dve-sily', kind: 'era' });
+    // Wars tick — mid-flow, between the wars era and the newest history
+    expect(flow.ticks[6]).toMatchObject({ href: '#wars', kind: 'wars' });
+    expect(flow.warsZoneIndex).toBe(6);
+    // The newest-history tail cuts its own era zone
+    expect(flow.ticks[7]).toMatchObject({ href: '#konversiya-raskol-regentstvo', kind: 'era' });
     // Group ticks jump to their in-flow divider anchors
     const refZone = flow.zones.find((z) => z.divider.stamp === 'СПРАВОЧНИК')!;
-    expect(flow.ticks[6].kind).toBe('group');
-    expect(flow.ticks[6].href).toBe(`#${refZone.divider.anchorId}`);
-    expect(flow.ticks[7]).toMatchObject({ href: '#wars', kind: 'wars' });
-    expect(flow.warsZoneIndex).toBe(7);
+    expect(flow.ticks[8].kind).toBe('group');
+    expect(flow.ticks[8].href).toBe(`#${refZone.divider.anchorId}`);
   });
 
-  it('buildHistoryFlow: зоны непрерывно покрывают все 15 глав + замыкающая зона войн', () => {
+  it('buildHistoryFlow: зоны непрерывно покрывают все 15 глав; войн — между 4451 и 4530', () => {
     const flow = buildHistoryFlow(chapters);
-    // 6 эр + справочная групповая + войн; главы 08–11 (без эры) наследуют зону 4451
+    // 6 эр + войн + эра 4530 + справочная групповая; Флот и Лорды (без эры)
+    // наследуют зону новейшей истории — своих разделителей не режут.
     expect(flow.zones.map((z) => z.slugs)).toEqual([
       ['tungusskiy-artefakt'],
       ['setka-mayakov'],
       ['velikaya-expansiya', 'razvedkorpus'],
       ['propavshaya-zemlya'],
       ['liga-i-dominion'],
-      [
-        'dve-sily', 'ekipirovka-pehoty-dominiona', 'konversiya-raskol-regentstvo',
-        'flot-epokhi-regentstva', 'legendarnye-imperskie-lordy',
-      ],
-      ['kosmografiya-dominiona', 'politicheskoe-ustroystvo', 'sravnenie-voennykh-struktur', 'polyaris-perevorot'],
+      ['dve-sily'],
       [], // войн зона — оборачивает <CampaignsBlock>, не главы
+      [
+        'konversiya-raskol-regentstvo',
+        'flot-epokhi-regentstva',
+        'legendarnye-imperskie-lordy',
+      ],
+      [
+        'ekipirovka-pehoty-dominiona', 'kosmografiya-dominiona',
+        'politicheskoe-ustroystvo', 'sravnenie-voennykh-struktur', 'polyaris-perevorot',
+      ],
     ]);
     // Каждая глава попала ровно в одну зону, порядок сохранён
     const zipped = flow.zones.flatMap((z) => z.slugs);
     expect(zipped).toEqual(chapters.map((c) => c.slug));
     // Индексы тиков у зон уникальны и плотны (зона N ↔ тик N ленты 1:1)
-    expect(flow.zones.map((z) => z.tickIndex)).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
+    expect(flow.zones.map((z) => z.tickIndex)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8]);
   });
 
   it('buildHistoryFlow: разделители — контурный год эры на стыках, групповые штампы', () => {
@@ -142,10 +158,11 @@ describe('«ДЕЛО RG-4530» showcase helpers (Phase 2)', () => {
     expect(flow.zones[3].divider).toMatchObject({ outline: '2862' });
     expect(flow.zones[4].divider).toMatchObject({ outline: '3001' });
     expect(flow.zones[5].divider).toMatchObject({ stamp: 'ЭПОХА 4451–4530', outline: '4451' });
-    expect(flow.zones[6].divider).toMatchObject({
-      stamp: 'СПРАВОЧНИК', outline: '§', anchorId: 'history-anchor-6',
+    expect(flow.zones[6].divider).toMatchObject({ stamp: 'ВОЙНЫ', outline: '†' });
+    expect(flow.zones[7].divider).toMatchObject({ stamp: 'ЭПОХА 4530–4554', outline: '4530' });
+    expect(flow.zones[8].divider).toMatchObject({
+      stamp: 'СПРАВОЧНИК', outline: '§', anchorId: 'history-anchor-8',
     });
-    expect(flow.zones[7].divider).toMatchObject({ stamp: 'ВОЙНЫ', outline: '†' });
     // Штампы эр (кроме первого ХРОНИКА) повторяют era-строку главы
     expect(flow.zones[2].divider.stamp).toBe('ЭПОХА 2437–2862');
   });
@@ -189,5 +206,22 @@ describe('buildHistoryFlow — защитные ветки безэройных 
     expect(flow.zones[2].divider).toMatchObject({ outline: '//', stamp: 'ХРОНИКА' });
     expect(flow.zones[2].slugs).toEqual(['hronika-bez-ery']);
     expect(flow.zones.flatMap((z) => z.slugs)).toEqual(['epokha', 'spravka', 'hronika-bez-ery']);
+  });
+
+  it('(c) якорь WARS_BEFORE_SLUG: зона войн вставляется ПЕРЕД ним, а не в конец', () => {
+    const flow = buildHistoryFlow([
+      meta('epokha-voyn', { era: '4451–4530' }),
+      meta(WARS_BEFORE_SLUG, { era: '4530–4554' }),
+      meta('spravka', { group: 'Справочник' }),
+    ]);
+    expect(flow.zones.map((z) => z.divider.stamp)).toEqual([
+      'ХРОНИКА', 'ВОЙНЫ', 'ЭПОХА 4530–4554', 'СПРАВОЧНИК',
+    ]);
+    expect(flow.warsZoneIndex).toBe(1);
+    expect(flow.ticks[1]).toMatchObject({ href: '#wars', kind: 'wars' });
+    // Хвост новейшей истории — ПОСЛЕ войн (кампании старше Раскола)
+    expect(flow.zones.flatMap((z) => z.slugs)).toEqual([
+      'epokha-voyn', WARS_BEFORE_SLUG, 'spravka',
+    ]);
   });
 });

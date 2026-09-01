@@ -4,7 +4,7 @@
  * сущности, кредит-запись разрешения (лого+ссылка) на месте, галерея
  * переключает периоды и несёт кредит автора.
  */
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import fs from 'fs';
 import path from 'path';
 import {
@@ -58,6 +58,11 @@ describe('invasion-maps: реестр', () => {
       expect(fs.existsSync(path.join(ROOT, 'src/content/history', `${chapterSlug}.md`))).toBe(true);
       expect(getInvasionMap(mapSlug)).toBeDefined();
     }
+  });
+
+  it('CHAPTER_MAP: глава новейшей истории несёт карту Раскола Империи', () => {
+    // Раскол — самая свежая точка хроники: карта периода стоит в его главе.
+    expect(CHAPTER_MAP['konversiya-raskol-regentstvo']).toBe('raskol-imperii-4550-4554');
   });
 
   it('кредит серии — Звёздные Системы, с лого и ссылкой', () => {
