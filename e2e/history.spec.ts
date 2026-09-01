@@ -104,10 +104,11 @@ test.describe('История вселенной', () => {
     await expect(page).toHaveTitle(/Две силы/);
 
     // prev/next идут по order (frontmatter): у «Двух сил» (order 7) сосед слева —
-    // «Лига и Доминион» (order 6), справа — «Пехота Доминиона» (order 8)
+    // «Лига и Доминион» (order 6), справа — «Конверсия, Раскол, Регентство» (order 8,
+    // хвост новейшей истории после перенумерации 2026-09-01)
     await page.getByTestId('history-chapter-next').click();
-    await expect(page).toHaveURL(/\/encyclopedia\/history\/ekipirovka-pehoty-dominiona$/);
-    await expect(page.getByTestId('history-chapter-full')).toContainText('Пехота Доминиона');
+    await expect(page).toHaveURL(/\/encyclopedia\/history\/konversiya-raskol-regentstvo$/);
+    await expect(page.getByTestId('history-chapter-full')).toContainText('Конверсия, Раскол, Регентство');
 
     await page.goBack();
     await expect(page).toHaveURL(/\/encyclopedia\/history\/dve-sily$/);
