@@ -4,7 +4,7 @@ title: Оборона Блауда
 subtitle: Святыня бога войны против тридцати штурмов Империи
 era: "4478–4495"
 factions: [polaris, protectorate]
-order: 6
+order: 8
 loreAuthor: tehnolog
 credit:
   work: "Летопись: Звёздные герои"

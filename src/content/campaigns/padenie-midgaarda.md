@@ -4,7 +4,7 @@ title: Падение Мидгаарда
 subtitle: Двадцать лет волчьей войны и один день, когда пал «Средний мир»
 era: "4449–4451"
 factions: [polaris, snow_wolves]
-order: 8
+order: 2
 loreAuthor: tehnolog
 credit:
   work: "Наборы «СтарСис»: «Схватка на Гронте» и «Вторжение на Рун» (2001)"

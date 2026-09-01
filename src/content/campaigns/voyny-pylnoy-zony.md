@@ -4,7 +4,7 @@ title: Войны Пыльной Зоны
 subtitle: Диверсии между волнами — Альдебаранский рейд 4472 года
 era: "4472"
 factions: [polaris, protectorate]
-order: 14
+order: 6
 loreAuthor: tehnolog
 credit:
   work: "Роботех (исходник)"

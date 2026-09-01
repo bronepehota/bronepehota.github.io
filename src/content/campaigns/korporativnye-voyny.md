@@ -4,7 +4,7 @@ title: Корпоративные войны
 subtitle: Кампания на планете Мантис
 era: "4546"
 factions: [polaris, protectorate, mercenaries]
-order: 4
+order: 16
 loreAuthor: avb
 credit:
   author: "Сообщество ВК «Технолог/СтарСис»"

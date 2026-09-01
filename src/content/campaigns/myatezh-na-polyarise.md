@@ -4,7 +4,7 @@ title: Мятеж на Полярисе
 subtitle: Переворот дворцов и полк, застрявший не в то время и не в том месте
 era: "4451–4461"
 factions: [polaris]
-order: 7
+order: 4
 loreAuthor: tehnolog
 credit:
   work: "Летопись: Звёздные герои"

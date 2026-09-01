@@ -4,7 +4,7 @@ title: Третья волна
 subtitle: Восстания, каратели и супероружие
 era: "4522–4528"
 factions: [polaris, protectorate]
-order: 13
+order: 11
 loreAuthor: avb
 credit:
   author: "V.Chertischev"

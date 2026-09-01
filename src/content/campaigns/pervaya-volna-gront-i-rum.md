@@ -4,7 +4,7 @@ title: "Первая волна: Гронт и Рун"
 subtitle: "Два первых удара Империи — завязка Имперских войн"
 era: "4451"
 factions: [polaris, protectorate, snow_wolves]
-order: 5
+order: 3
 loreAuthor: tehnolog
 credit:
   work: "Наборы «СтарСис»: «Схватка на Гронте» и «Вторжение на Рун» (2001)"

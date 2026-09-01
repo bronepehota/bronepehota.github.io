@@ -1,7 +1,7 @@
 ---
 slug: legendarnye-imperskie-lordy
 title: Легендарные Имперские Лорды
-order: 11
+order: 10
 loreAuthor: tehnolog
 credit:
   work: "Новейшая история Империи"

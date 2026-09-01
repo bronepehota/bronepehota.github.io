@@ -1,7 +1,8 @@
 ---
 slug: konversiya-raskol-regentstvo
 title: Конверсия, Раскол, Регентство
-order: 9
+era: "4530–4554"
+order: 8
 loreAuthor: tehnolog
 credit:
   work: "Новейшая история Империи"

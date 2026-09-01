@@ -59,7 +59,8 @@ export interface HistoryZone {
 }
 
 export interface HistoryFlow {
-  /** Ribbon marks in flow order: era years, then group labels, then the wars. */
+  /** Ribbon marks in flow order (era years, group labels and the wars tick
+   *  wherever WARS_BEFORE_SLUG places it). */
   ticks: HistoryEraTick[];
   /** Contiguous zones covering every chapter in order; + the wars zone (no slugs). */
   zones: HistoryZone[];
@@ -75,6 +76,13 @@ function groupDividerVisual(group: string): { outline: string; stamp: string; su
   return { outline: '//', stamp: group.toUpperCase() };
 }
 
+/** Глава, ПЕРЕД которой в поток встаёт блок «Хроники войн»: кампании
+ *  (4360–4546) хронологически старше новейшей истории (Конверсия→Раскол,
+ *  4530–4554), поэтому читатель проходит войны ДО Раскола — и хроника
+ *  заканчивается самой свежей точкой (решение владельца 2026-09-01).
+ *  Если главы-якоря нет (переименование), wars остаются в конце страницы. */
+export const WARS_BEFORE_SLUG = 'konversiya-raskol-regentstvo';
+
 /**
  * Single walk over the order-sorted chapters producing BOTH the ribbon ticks
  * and the reading zones, so their indices stay in lockstep (tick N highlights
@@ -84,10 +92,11 @@ function groupDividerVisual(group: string): { outline: string; stamp: string; su
  *
  * Era ticks use the FIRST year of the chapter `era` (e.g. «1908–2398» → 1908);
  * the divider repeats it as the giant outlined year. Chapters without `era`
- * (08–11, the Regency tail) inherit the latest era zone — no divider of
- * their own. An era-less chrono chapter that STARTS the flow or resumes it
+ * (the Regency tail after Конверсия) inherit the latest era zone — no divider
+ * of their own. An era-less chrono chapter that STARTS the flow or resumes it
  * after a group section cuts a bare «ХРОНИКА» zone (no outlined year).
  * Group seams (Справочник / Творчество игроков) always cut a zone.
+ * The wars zone is cut before WARS_BEFORE_SLUG (or appended, if absent).
  */
 export function buildHistoryFlow(chapters: HistoryChapterMeta[]): HistoryFlow {
   const ticks: HistoryEraTick[] = [];
@@ -95,13 +104,22 @@ export function buildHistoryFlow(chapters: HistoryChapterMeta[]): HistoryFlow {
   let prevGroup: string | undefined; // undefined = the chrono flow (ХРОНИКА)
   let prevEra: string | undefined;
   let seenChrono = false;
+  let warsZoneIndex = -1;
 
   const openZone = (divider: HistoryDividerInfo, tick: HistoryEraTick) => {
     ticks.push(tick);
     zones.push({ tickIndex: ticks.length - 1, divider, slugs: [] });
   };
+  const openWarsZone = () => {
+    warsZoneIndex = zones.length;
+    openZone(
+      { outline: '†', stamp: 'ВОЙНЫ' },
+      { label: 'ВОЙНЫ', href: '#wars', kind: 'wars' },
+    );
+  };
 
   for (const c of chapters) {
+    if (warsZoneIndex === -1 && c.slug === WARS_BEFORE_SLUG) openWarsZone();
     const groupChanged = (c.group ?? undefined) !== prevGroup;
     const eraChanged = c.group === undefined && c.era !== undefined && c.era !== prevEra;
     // Every chapter must land in a zone: a flow that STARTS with an era-less
@@ -141,11 +159,8 @@ export function buildHistoryFlow(chapters: HistoryChapterMeta[]): HistoryFlow {
     zones[zones.length - 1]?.slugs.push(c.slug);
   }
 
-  const warsZoneIndex = zones.length;
-  openZone(
-    { outline: '†', stamp: 'ВОЙНЫ' },
-    { label: 'ВОЙНЫ', href: '#wars', kind: 'wars' },
-  );
+  // Fallback: no anchor chapter in this content set — wars close the page.
+  if (warsZoneIndex === -1) openWarsZone();
   return { ticks, zones, warsZoneIndex };
 }
 

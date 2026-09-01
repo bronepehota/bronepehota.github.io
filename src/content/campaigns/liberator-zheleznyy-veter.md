@@ -4,7 +4,7 @@ title: 'Либератор: Железный ветер'
 subtitle: Оккупированная Рутения — конвои, партизаны и охотники УНН
 era: "4513–4528"
 factions: [polaris, protectorate]
-order: 15
+order: 9
 loreAuthor: avb
 credit:
   author: "Сообщество «Голоса мёртвых флотов»"

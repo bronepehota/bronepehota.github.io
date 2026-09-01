@@ -10,7 +10,8 @@ test.describe('Хроники войн', () => {
     await page.goto('/encyclopedia/history');
     await page.waitForLoadState('networkidle');
 
-    // Wars section is the closing block of the history page
+    // Wars section sits mid-flow: after the wars-era chapters, before the
+    // newest history (Раскол) — the chronicle ends with the freshest point.
     await expect(page.getByTestId('campaigns-title')).toHaveText('ХРОНИКИ ВОЙН');
     const card = page
       .locator('[data-testid="campaign-card"]', { hasText: 'Корпоративные войны' })
@@ -180,13 +181,48 @@ test('prev/next ведут к соседним хроникам по order', asy
   await page.goto('/campaigns/imperatorskie-voyny');
   await page.waitForLoadState('networkidle');
 
-  // Имперские войны = хроника № 1: prev нет, next ведёт к № 2
-  await expect(page.getByTestId('campaign-prev')).toHaveCount(0);
+  // Хронологический порядок: Имперские войны = № 5 (4451–4528, между
+  // Мятежом на Полярисе и Войнами Пыльной Зоны)
   await page.getByTestId('campaign-next').click();
-  await expect(page).toHaveURL(/\/campaigns\/shturm-velyana$/);
+  await expect(page).toHaveURL(/\/campaigns\/voyny-pylnoy-zony$/);
 
-  // С середины списка работают оба направления
+  // Оба направления работают с середины списка
   await expect(page.getByTestId('campaign-prev')).toBeVisible();
   await page.getByTestId('campaign-prev').click();
   await expect(page).toHaveURL(/\/campaigns\/imperatorskie-voyny$/);
+  await page.getByTestId('campaign-prev').click();
+  await expect(page).toHaveURL(/\/campaigns\/myatezh-na-polyarise$/);
+});
+
+// ——— Хронология списка (решение владельца 2026-09-01): кампании по эпохам ——
+test('карточки войн идут хронологически: Косари открывают, Корпоративные замыкают', async ({ page }) => {
+  await page.goto('/encyclopedia/history');
+  await page.waitForLoadState('networkidle');
+
+  const cards = page.getByTestId('campaign-card');
+  await expect(cards).toHaveCount(16);
+  // Первая карточка — самая ранняя эра (4360), последняя — самая свежая (4546)
+  await expect(cards.first()).toContainText('Войны Косарей');
+  await expect(cards.last()).toContainText('Корпоративные войны');
+  // Волны идут в каноническом порядке: Первая (№3) → Вторая (№7) → Третья (№11)
+  const order = ['Войны Косарей', 'Первая волна: Гронт и Рун', 'Вторая волна', 'Третья волна'];
+  const texts = await cards.allTextContents();
+  const idx = order.map((t) => texts.findIndex((x) => x.includes(t)));
+  expect(idx.every((v) => v >= 0)).toBe(true);
+  expect([...idx].sort((a, b) => a - b)).toEqual(idx);
+});
+
+test('глава новейшей истории несёт инлайн-карту Раскола Империи', async ({ page }) => {
+  await page.goto('/encyclopedia/history');
+  await page.waitForLoadState('networkidle');
+
+  const chapter = page.locator('#konversiya-raskol-regentstvo');
+  await expect(chapter).toBeVisible();
+  const figure = chapter.getByTestId('invasion-map-figure');
+  await expect(figure).toBeVisible();
+  await expect(figure).toContainText('Раскол Империи');
+  await expect(figure.getByTestId('invasion-map-open')).toHaveAttribute(
+    'href',
+    /raskol-imperii-4550-4554\.jpg$/,
+  );
 });
