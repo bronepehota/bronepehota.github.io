@@ -201,7 +201,7 @@ test.describe('Миссии', () => {
     await page.goto('/encyclopedia/mission/zahvat_flaga');
     await page.waitForLoadState('networkidle');
 
-    await expect(page.locator('h1')).toContainText('Захват флага');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Захват флага');
     await expect(page.getByRole('heading', { name: 'Состав сторон' })).toBeVisible();
     const locust = page.getByRole('link', { name: 'Локуст' });
     await expect(locust).toBeVisible();

@@ -12,6 +12,7 @@ import {
   missionHasParticipantsForFaction,
   missionHasAnyParticipants,
 } from '@/lib/missions-registry';
+import { getEncyclopediaUnit } from '@/lib/encyclopedia-registry';
 import { resolveMissionProvenance } from '@/lib/provenance';
 
 describe('missions-registry', () => {
@@ -256,16 +257,6 @@ describe('missions-registry', () => {
   });
 
   describe('starsys_events & robogear campaigns', () => {
-    // Bare machine slugs valid for participant links — hardcoded mirror of the ids in
-    // src/data/encyclopedia/units/{polaris,protectorate,mercenaries}/machines.json.
-    const MACHINE_IDS = [
-      'demolisher', 'devastator', 'eraser', 'helix', 'hornet', 'hunter', 'locust', 'madbull',
-      'raptor', 'ravingbeast', 'spider', 'superlocust', 'thunder', 'wildbear', 't_600',
-      'bronekhod', 'carnivore', 'condor', 'griffin', 'hurricane', 'octopus', 'predator', 'puma',
-      'salamander', 'tornado', 'trex', 'varan', 'viper', 'werewolf', 'sparennaya_pushka', 'mdb_15',
-      't1000', 'buldog', 'executor', 'grinder', 'kibertank', 'minomet', 'mz_st', 'stilet',
-    ];
-
     const NEW_IDS = [
       'osada_pesok', 'regana',
       'stremitelnaya_ataka', 'zahvat_flaga', 'zapretnaya_zona', 'zvezdnaya_pyl',
@@ -316,8 +307,10 @@ describe('missions-registry', () => {
           expect(roster.length).toBeGreaterThanOrEqual(3);
           for (const p of roster) {
             if (p.unitId !== undefined) {
-              // ${id}: ${p.name} must link to a real encyclopedia machine
-              expect(MACHINE_IDS).toContain(p.unitId);
+              // ${id}: ${p.name} must link to a real encyclopedia machine —
+              // live lookup instead of a hardcoded id mirror (covers all factions,
+              // zero maintenance when machines.json grows).
+              expect(getEncyclopediaUnit(p.unitId)).toBeDefined();
             }
           }
         }
