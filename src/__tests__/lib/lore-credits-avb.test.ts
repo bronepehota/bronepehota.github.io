@@ -33,7 +33,14 @@ const NON_TEHNOLOG_WORKS = [
 ];
 
 /** Works expected to carry JSON credits (units + factions). */
-const JSON_BACKED_WORKS = ['Битва за Велиан', 'Косары', 'Штурмовики Протектората'];
+const JSON_BACKED_WORKS = [
+  'Битва за Велиан',
+  'Косары',
+  'Штурмовики Протектората',
+  // Волна «машинный лор из печатного каталога»: официальный каталог 2005 г.
+  // (ООО «Технолог») — источник history/lore 7 машин, кредит tehnolog без АВБ.
+  'Бронетехника галактических войск (каталог)',
+];
 
 interface Credited {
   id: string;
@@ -86,8 +93,12 @@ describe('именные кредиты книг: мини-АВБ ровно н�
 
   it('справочник «Бронетехника» клуба несёт кредит Коржика и разрешается loreAuthor=avb (волна 4j)', () => {
     const korzhik = credited.filter((c) => c.work === 'Бронетехника (справочник клуба «ЭПОХА РОБОГИР»)');
-    // Все 20 юнитов, чей лор опирается на статью, получили именной кредит с URL.
-    expect(korzhik.length).toBe(20);
+    // 20 кредитов волны 4j минус 7 машин (devastator, eraser, locust, ravingbeast,
+    // wildbear, tornado, varan): их history/lore после сверки с печатным каталогом
+    // «Бронетехника галактических войск» (Технолог, 2005) — адаптация ОФИЦИАЛЬНОГО
+    // текста (клубный справочник 2021 г. сам его перепечатывает), поэтому кредит
+    // Коржика снят, а loreAuthor переключён на tehnolog — см. тест ниже.
+    expect(korzhik.length).toBe(13);
     for (const c of korzhik) {
       expect(`${c.id}: loreAuthor=${c.loreAuthor}`).toBe(`${c.id}: loreAuthor=avb`);
     }
@@ -107,6 +118,27 @@ describe('именные кредиты книг: мини-АВБ ровно н�
         'Битва за Велиан',
         'Бронетехника (справочник клуба «ЭПОХА РОБОГИР»)',
       ]);
+    }
+  });
+
+  it('7 машин с лором из печатного каталога 2005 г. подписаны tehnolog без АВБ (сверка машинного лора)', () => {
+    // history/lore этих машин — адаптация официального «Бронетехника галактических
+    // войск» (ООО «Технолог», 2005); клубный справочник (2021) этот же текст лишь
+    // перепечатывает, поэтому отдельный клубный кредит им больше не нужен:
+    // class/shortDescription дублируют каталожные паспорта машин, tactics —
+    // игровая подсказка самого приложения.
+    const ids = ['devastator', 'eraser', 'locust', 'ravingbeast', 'wildbear', 'tornado', 'varan'];
+    for (const id of ids) {
+      const u = getAllUnits().find((x) => x.id === id)!;
+      expect(u).toBeTruthy();
+      const resolved = resolveUnitProvenance(u);
+      expect(`${id}: loreAuthor=${resolved.loreAuthor}`).toBe(`${id}: loreAuthor=tehnolog`);
+      const credits = creditList(u.provenance?.credit);
+      expect(credits.map((c) => c.work)).toEqual(['Бронетехника галактических войск (каталог)']);
+      expect(credits[0].year).toBe(2005);
+      expect(credits[0].url).toBe('https://vk.ru/doc-32426380_612803184');
+      // Каталог — официальное издание: без АВБ-марки на чипе.
+      expect(NON_TEHNOLOG_WORKS).not.toContain(credits[0].work);
     }
   });
 });

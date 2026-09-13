@@ -127,7 +127,7 @@ npm run test:e2e            # All E2E tests pass
 | Machine capture | `machine-capture.spec.ts` | 2 |
 | Machine melee/ram | `machine-melee-ram.spec.ts` | 2 |
 | Melee defender armor | `melee-defender-armor.spec.ts` | 1 |
-| Missions | `missions.spec.ts` | 14 |
+| Missions | `missions.spec.ts` | 16 |
 | Modifier display | `modifier-stat-display.spec.ts` | 7 |
 | Navigator | `expanded-navigator.spec.ts` | 1 |
 | Panic kill | `panic-kill.spec.ts` | 1 |

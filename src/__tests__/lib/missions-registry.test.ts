@@ -12,6 +12,7 @@ import {
   missionHasParticipantsForFaction,
   missionHasAnyParticipants,
 } from '@/lib/missions-registry';
+import { getEncyclopediaUnit } from '@/lib/encyclopedia-registry';
 import { resolveMissionProvenance } from '@/lib/provenance';
 
 describe('missions-registry', () => {
@@ -252,6 +253,97 @@ describe('missions-registry', () => {
       const m = getMission('osvobozhdenie')!;
       expect(m.provenance).toBeUndefined();
       expect(resolveMissionProvenance(m)).toEqual({ origin: 'tehnolog', loreAuthor: 'tehnolog' });
+    });
+  });
+
+  describe('starsys_events & robogear campaigns', () => {
+    const NEW_IDS = [
+      'osada_pesok', 'regana',
+      'stremitelnaya_ataka', 'zahvat_flaga', 'zapretnaya_zona', 'zvezdnaya_pyl',
+    ];
+
+    it('exposes both new scenario sets', () => {
+      const events = getCampaign('starsys_events');
+      expect(events).toBeDefined();
+      expect(events!.name).toBe('События ИС «СтарСис»');
+
+      const robogear = getCampaign('robogear');
+      expect(robogear).toBeDefined();
+      expect(robogear!.name).toBe('Миссии ИС Robogear');
+    });
+
+    it('places the 2 СтарСис events in starsys_events and the 4 Robogear sheets in robogear', () => {
+      const events = getMissionsForCampaign('starsys_events').map((m) => m.id);
+      expect(events).toEqual(['osada_pesok', 'regana']);
+
+      const robogear = getMissionsForCampaign('robogear').map((m) => m.id);
+      expect(robogear).toEqual([
+        'stremitelnaya_ataka', 'zahvat_flaga', 'zapretnaya_zona', 'zvezdnaya_pyl',
+      ]);
+    });
+
+    it('every new mission carries objectives for both of its factions', () => {
+      for (const id of NEW_IDS) {
+        const m = getMissionOrThrow(id);
+        expect(m.factions.length).toBe(2);
+        for (const f of m.factions) {
+          const obj = m.objectives[f];
+          expect(obj).toBeTruthy(); // missing objective for ${id}/${f}
+          expect(obj.text).toBeTruthy();
+          expect(obj.text.length).toBeGreaterThan(10);
+        }
+      }
+    });
+
+    it('robogear mission participants link only to real encyclopedia machines', () => {
+      const robogearIds = getMissionsForCampaign('robogear').map((m) => m.id);
+      expect(robogearIds).toEqual(NEW_IDS.slice(2));
+
+      for (const id of robogearIds) {
+        const m = getMissionOrThrow(id);
+        const rosters = Object.values(m.participants ?? {});
+        expect(rosters.length).toBeGreaterThanOrEqual(2);
+        for (const roster of rosters) {
+          expect(roster.length).toBeGreaterThanOrEqual(3);
+          for (const p of roster) {
+            if (p.unitId !== undefined) {
+              // ${id}: ${p.name} must link to a real encyclopedia machine —
+              // live lookup instead of a hardcoded id mirror (covers all factions,
+              // zero maintenance when machines.json grows).
+              expect(getEncyclopediaUnit(p.unitId)).toBeDefined();
+            }
+          }
+        }
+      }
+
+      // Concrete source rosters survived the import
+      const flag = getMission('zahvat_flaga')!;
+      expect(flag.participants?.polaris?.map((u) => u.unitId)).toContain('locust');
+      expect(flag.participants?.polaris?.map((u) => u.unitId)).toContain('raptor');
+      expect(flag.participants?.protectorate?.map((u) => u.unitId)).toContain('trex');
+      expect(flag.participants?.protectorate?.map((u) => u.unitId)).toContain('salamander');
+
+      const pyl = getMission('zvezdnaya_pyl')!;
+      expect(pyl.participants?.polaris?.map((u) => u.unitId)).toEqual(
+        expect.arrayContaining(['spider', 'locust', 'helix']),
+      );
+      expect(pyl.participants?.protectorate?.map((u) => u.unitId)).toEqual(
+        expect.arrayContaining(['condor', 'trex', 'salamander']),
+      );
+    });
+
+    it('keeps global order ascending with the 6 new missions numbered after the old ones', () => {
+      const all = getAllMissions();
+      const orders = all.map((m) => m.order);
+      for (let i = 1; i < orders.length; i++) {
+        expect(orders[i]).toBeGreaterThan(orders[i - 1]);
+      }
+
+      const ordersById = Object.fromEntries(all.map((m) => [m.id, m.order]));
+      // Previous max (skrytyj_vrag = 8) must stay below every new mission
+      const newOrders = NEW_IDS.map((id) => ordersById[id]);
+      expect(Math.max(...newOrders)).toBe(Math.max(...orders));
+      expect(newOrders).toEqual([...newOrders].sort((a, b) => a - b));
     });
   });
 });

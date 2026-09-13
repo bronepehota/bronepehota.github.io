@@ -186,4 +186,25 @@ test.describe('Миссии', () => {
     // mercenaries-side roster renders (guard against the hardcoded-faction-loop regression)
     await expect(page.getByRole('link', { name: 'Рейдеры Пыльной Зоны' })).toBeVisible();
   });
+
+  test('энциклопедия: наборы «События ИС «СтарСис»» и «Миссии ИС Robogear» в списке миссий', async ({ page }) => {
+    await page.goto('/encyclopedia/missions');
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.getByTestId('mission-group-starsys_events')).toBeVisible();
+    await expect(page.getByTestId('mission-group-robogear')).toBeVisible();
+    await expect(page.getByTestId('mission-card-osada_pesok')).toBeVisible();
+    await expect(page.getByTestId('mission-card-zahvat_flaga')).toBeVisible();
+  });
+
+  test('энциклопедия: миссия «Захват флага» показывает состав со ссылкой на Локуст', async ({ page }) => {
+    await page.goto('/encyclopedia/mission/zahvat_flaga');
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Захват флага');
+    await expect(page.getByRole('heading', { name: 'Состав сторон' })).toBeVisible();
+    const locust = page.getByRole('link', { name: 'Локуст' });
+    await expect(locust).toBeVisible();
+    await expect(locust).toHaveAttribute('href', /\/encyclopedia\/unit\/locust$/);
+  });
 });
