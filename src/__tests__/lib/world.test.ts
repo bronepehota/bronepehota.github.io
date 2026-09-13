@@ -10,8 +10,8 @@ import { getEncyclopediaUnit, getEncyclopediaFaction } from '@/lib/encyclopedia-
 describe('world entries («Алфавит вселенной»)', () => {
   const entries = getAllWorldEntries();
 
-  it('возвращает 72 записи (6 первой партии + 20 контент-волны + 18 кораблей флотов + 12 волны 4g + 6 волны 4g-2 + 4 волны 4h + 6 волны 4j)', () => {
-    expect(entries).toHaveLength(72);
+  it('возвращает 79 записей (6 первой партии + 20 контент-волны + 18 кораблей флотов + 12 волны 4g + 6 волны 4g-2 + 4 волны 4h + 6 волны 4j + 7 досье «Летописи Звёздного Бытия»)', () => {
+    expect(entries).toHaveLength(79);
     expect(entries.map((e) => e.slug)).toEqual([
       // Первая партия
       'lord-kross',
@@ -101,6 +101,14 @@ describe('world entries («Алфавит вселенной»)', () => {
       'doktrina-imperatora',
       'giperprostranstvo',
       'era-sverhchelovechestva',
+      // Волна «Летопись Звёздного Бытия» (starsys-official, 2002): слоты 74–80
+      'kosmicheskie-rytsari',
+      'oblako',
+      'zvezdnaya-shpaga',
+      'dzhamiriya',
+      'zvezdnyy-tyulpan',
+      'sovetniki',
+      'imperskiy-legion',
     ]);
   });
 
@@ -201,6 +209,12 @@ describe('world entries («Алфавит вселенной»)', () => {
       'doktrina-imperatora',
       'giperprostranstvo',
       'era-sverhchelovechestva',
+      // Волна «Летописи Звёздного Бытия» (слоты 74–80, кроме корабля и локации)
+      'kosmicheskie-rytsari',
+      'oblako',
+      'zvezdnaya-shpaga',
+      'sovetniki',
+      'imperskiy-legion',
     ]);
     // Ключевые меты словаря: фракции и связки.
     expect(byslug['reksmarine']).toMatchObject({ kind: 'term', faction: 'polaris' });
@@ -288,6 +302,31 @@ describe('world entries («Алфавит вселенной»)', () => {
     expect(byslug['era-sverhchelovechestva']!.related?.chapters).toContain('propavshaya-zemlya');
   });
 
+  it('волна «Летопись Звёздного Бытия» (starsys-official, 2002): Рыцари, супероружие, Джамирия, Тюльпан, Советники, Легион', () => {
+    const byslug = Object.fromEntries(entries.map((e) => [e.slug, e]));
+    // Космические Рыцари — третья сила: без фракции, вне одного периода.
+    expect(byslug['kosmicheskie-rytsari']).toMatchObject({ kind: 'term' });
+    expect(byslug['kosmicheskie-rytsari']!.faction).toBeUndefined();
+    expect(byslug['kosmicheskie-rytsari']!.related?.chapters).toContain('sravnenie-voennykh-struktur');
+    // Супероружие 4528 года: Шпага — Империя, Облако — Протекторат.
+    expect(byslug['zvezdnaya-shpaga']).toMatchObject({ kind: 'term', faction: 'polaris', era: '4528' });
+    expect(byslug['oblako']).toMatchObject({ kind: 'term', faction: 'protectorate', era: '4528' });
+    for (const slug of ['zvezdnaya-shpaga', 'oblako']) {
+      expect(byslug[slug]!.related?.chapters).toContain('dve-sily');
+      expect(byslug[slug]!.related?.campaigns).toContain('imperatorskie-voyny');
+    }
+    // Джамирия — погибшая планета-лидер Протектората (жертва Шпаги).
+    expect(byslug['dzhamiriya']).toMatchObject({ kind: 'location', faction: 'protectorate', era: 'до 4528' });
+    // «Звёздный тюльпан» — корабль-призрак вне флотов: related пуст целиком.
+    expect(byslug['zvezdnyy-tyulpan']).toMatchObject({ kind: 'ship' });
+    expect(byslug['zvezdnyy-tyulpan']!.related).toBeUndefined();
+    // Советники и Легион — противники-зеркала двух держав.
+    expect(byslug['sovetniki']).toMatchObject({ kind: 'term', faction: 'protectorate', era: '4478–4530' });
+    expect(byslug['sovetniki']!.related?.chapters).toContain('politicheskoe-ustroystvo');
+    expect(byslug['imperskiy-legion']).toMatchObject({ kind: 'term', faction: 'polaris', era: '4451–4530' });
+    expect(byslug['imperskiy-legion']!.related?.chapters).toContain('legendarnye-imperskie-lordy');
+  });
+
   it('related.units ссылаются на реальные юниты энциклопедии', () => {
     const invalid: string[] = [];
     for (const e of entries) {
@@ -371,9 +410,9 @@ describe('world entries («Алфавит вселенной»)', () => {
     expect(invalid).toEqual([]);
   });
 
-  it('корабли флотов: 19 записей kind=ship, гриф КОРАБЛЬ, флот в related.factions, юнитов нет', () => {
+  it('корабли флотов: 20 записей kind=ship, гриф КОРАБЛЬ, флот в related.factions, юнитов нет', () => {
     const ships = entries.filter((e) => e.kind === 'ship');
-    expect(ships).toHaveLength(19);
+    expect(ships).toHaveLength(20);
     expect(ships.map((e) => e.slug)).toEqual([
       // Флот Империи Полярис (справочник «Основные корабли Империи»)
       'ezarh',
@@ -398,6 +437,9 @@ describe('world entries («Алфавит вселенной»)', () => {
       // Волна 4g: «Тортурадор» — корабль ЧВК «Красный Корпус», не флот державы
       // (related.factions пуст — привязки к polaris/protectorate нет).
       'torturador',
+      // Волна «Летописи Звёздного Бытия»: «Звёздный тюльпан» — транспорт-призрак
+      // вне флотов держав (related пуст, как у «Тортурадора»).
+      'zvezdnyy-tyulpan',
     ]);
     // Маппинг флотов: «Империя» → polaris (8), «Протекторат» → protectorate (10).
     // Сами страницы фракциям не принадлежат (frontmatter faction не задаётся) —
@@ -439,7 +481,8 @@ describe('world entries («Алфавит вселенной»)', () => {
     // 40–57 корабли флотов (Империя 40–47, Протекторат 48–57),
     // 58–61 волна 4g: «Тортурадор» (58) + хвост словаря (59–61, после кораблей),
     // 62–64 термины сборников фракций (4g-2), 65–67 ордена держав (4h),
-    // 68–73 волна 4j: статьи клуба «ЭПОХА РОБОГИР».
+    // 68–73 волна 4j: статьи клуба «ЭПОХА РОБОГИР»,
+    // 74–80 волна «Летопись Звёздного Бытия» (starsys-official, 2002).
     expect(entries.map((e) => e.order)).toEqual([
       1, 2, 3, 4, 5, 6, 7, 8,
       10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
@@ -451,6 +494,7 @@ describe('world entries («Алфавит вселенной»)', () => {
       62, 63, 64,
       65, 66, 67,
       68, 69, 70, 71, 72, 73,
+      74, 75, 76, 77, 78, 79, 80,
     ]);
   });
 
