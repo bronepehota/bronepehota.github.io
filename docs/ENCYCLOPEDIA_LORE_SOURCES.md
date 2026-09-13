@@ -723,8 +723,8 @@
   «Пиратские войны Окраин» — ПАРАЛЛЕЛЬНЫЙ сеттинг (линейка SkyTech, не
   СтарСис)**: заархивирован verbatim (постраничный vision-OCR тёмного скана),
   в канон не мапится — вердикт OCR-триажа.
-- **Статус**: ✅ адаптация, не копия — пара machines.json ↔ starsys-official
-  добавлена в `check:copy-paste` (max run 7 при норме ≤11 слов подряд);
+- **Статус**: ✅ адаптация, не копия — две пары (world-досье и machines.json)
+  ↔ starsys-official добавлены в `check:copy-paste` (max run 7 при норме ≤11 слов подряд);
   миссии и досье покрыты тестами (`missions-registry.test.ts`,
   `world.test.ts`, e2e `missions.spec.ts`).
 
