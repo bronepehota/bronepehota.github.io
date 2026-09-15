@@ -27,6 +27,26 @@ describe('useStandaloneCombatFlow', () => {
     expect(result.current.combatantData.rank).toBe(0);
   });
 
+  it('updateCombatantField проталкивает ввод в боевой поток, а не только в локальный стейт', () => {
+    // Регресс: ручной ввод range/power жил в стейте хука, а executeShot читал
+    // снапшот state.combatantData c маунта (пустой) — бросок всегда выходил 0.
+    const { result } = renderHook(() => useStandaloneCombatFlow());
+    act(() => { result.current.selectAction('shot'); });
+    act(() => { result.current.updateCombatantField('range', 'D12'); });
+    expect(result.current.combatState.combatantData?.range).toBe('D12');
+  });
+
+  it('выстрел с вручную введённой дальностью реально бросает кубики: D12 на дистанции 1 попадает всегда', async () => {
+    const { result } = renderHook(() => useStandaloneCombatFlow());
+    act(() => { result.current.selectAction('shot'); });
+    act(() => { result.current.updateCombatantField('range', 'D12'); });
+    act(() => { result.current.updateCombatantField('power', 'D6'); });
+    act(() => { result.current.setParameters({ distance: 1, targetArmor: 2 }); });
+    await act(async () => { await result.current.executeAction(); });
+    expect(result.current.combatState.result?.hitResult?.success).toBe(true);
+    expect(result.current.combatState.result?.hitResult?.total ?? 0).toBeGreaterThanOrEqual(1);
+  });
+
   it('initializes with default rules version tehnolog', () => {
     const { result } = renderHook(() => useStandaloneCombatFlow());
     expect(result.current.rulesVersion).toBe('tehnolog');
