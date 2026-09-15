@@ -79,6 +79,14 @@ function combatFlowReducer(
         actionType: action.actionType,
       };
 
+    // Живой ввод standalone-калькулятора: подмешиваем в снапшот потока,
+    // не сбрасывая фазу и параметры (executeShot читает state.combatantData).
+    case 'UPDATE_COMBATANT_DATA':
+      return {
+        ...state,
+        combatantData: { ...(state.combatantData ?? {}), ...action.combatantData } as CombatantData,
+      };
+
     case 'GO_BACK_TO_ACTION_SELECT':
       return {
         ...state,
@@ -216,6 +224,14 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
    */
   const setParameters = useCallback((params: Partial<CombatParameters>) => {
     dispatch({ type: 'SET_PARAMETERS', parameters: params });
+  }, []);
+
+  /**
+   * Update standalone combatant data mid-flow (calculator manual input) —
+   * keeps phase and parameters, unlike restart via startCombat.
+   */
+  const updateCombatantData = useCallback((combatantData: Partial<CombatantData>) => {
+    dispatch({ type: 'UPDATE_COMBATANT_DATA', combatantData });
   }, []);
 
   /**
@@ -672,6 +688,7 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
     startCombat,
     selectAction,
     setParameters,
+    updateCombatantData,
     executeAction,
     applyResult,
     closeCombat,

@@ -73,7 +73,10 @@ export function useStandaloneCombatFlow(initialCombatant?: CombatantData) {
 
   const updateCombatantField = useCallback(<K extends keyof CombatantData>(field: K, value: CombatantData[K]) => {
     setCombatantData(prev => ({ ...prev, [field]: value }));
-  }, []);
+    // Проталкиваем в боевой поток: executeShot читает state.combatantData
+    // (снапшот маунта), локального стейта хука ему мало — иначе бросок 0.
+    combatFlow.updateCombatantData({ [field]: value });
+  }, [combatFlow]);
 
   return {
     combatState: combatFlow.state,
