@@ -42,6 +42,26 @@ export function UnitToBattleCta({ faction, onOpenSandbox }: UnitToBattleCtaProps
         </span>
         <ArrowRight className="w-5 h-5 shrink-0 transform group-hover:translate-x-1 transition-transform duration-300" />
       </Link>
+
+      {/* Тихий вход в standalone-калькулятор: упрощённый вариант — статы
+          руками; пояснение одной строкой, контраст с боевым режимом. */}
+      <Link
+        href="/calculator"
+        data-testid="unit-calculator-link"
+        className={cn(
+          'mt-3 w-full flex items-center justify-between gap-2',
+          'min-h-[44px] px-4 py-2.5 no-underline touch-manipulation',
+          'border bg-transparent transition-all duration-300 hover:brightness-125',
+          'font-russo font-bold text-[11px] sm:text-xs uppercase tracking-wider',
+        )}
+        style={{ borderColor: `${colors.primary}55`, color: colors.primary }}
+      >
+        <span>Калькулятор · без армии</span>
+        <ArrowRight className="w-4 h-4 shrink-0" />
+      </Link>
+      <div className="mt-1.5 font-ibm-mono text-[8px] uppercase tracking-[0.2em] text-military-taupe/70 text-center">
+        в бою статы подтянутся сами
+      </div>
       {onOpenSandbox && (
         <button
           type="button"

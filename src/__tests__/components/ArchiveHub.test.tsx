@@ -94,6 +94,11 @@ describe('ArchiveHub — корень-хаб «Архив вселенной»',
     expect(screen.getByTestId('encyclopedia-battle-banner-link')).toHaveAttribute('href', '/app');
   });
 
+  test('телеграф-строка калькулятора под боевым баннером ведёт на /calculator', async () => {
+    renderHub();
+    expect(await screen.findByTestId('encyclopedia-calculator-link')).toHaveAttribute('href', '/calculator');
+  });
+
   test('лента эпох и футер-гид: юниты — ссылка на каталог', async () => {
     renderHub();
     const strip = await screen.findByTestId('hub-era-strip');
