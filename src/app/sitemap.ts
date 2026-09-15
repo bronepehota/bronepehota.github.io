@@ -29,6 +29,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Root = the «Архив вселенной» hub (lore showcase); the unit catalog has
     // its own entry below.
     { path: '/encyclopedia', freq: 'weekly', priority: 0.9 },
+    // Standalone combat calculator (выстрел/ближний бой/граната без армии).
+    { path: '/calculator', freq: 'monthly', priority: 0.6 },
     { path: '/encyclopedia/units', freq: 'weekly', priority: 0.85 },
     { path: '/encyclopedia/factions', freq: 'monthly', priority: 0.8 },
     { path: '/encyclopedia/missions', freq: 'monthly', priority: 0.8 },

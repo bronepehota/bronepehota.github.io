@@ -32,6 +32,12 @@ describe('CTAButton — модульная строка (fresh state)', () => {
     fireEvent.click(screen.getByTestId('landing-cta-button'));
     expect(trackEvent).toHaveBeenCalledWith('battle_entry', { from: 'landing_hero' });
   });
+
+  it('терциарная телеграфная строка ведёт на /calculator', () => {
+    render(<CTAButton />);
+    expect(screen.getByTestId('landing-calculator-link').getAttribute('href')).toBe('/calculator');
+    expect(screen.getByText('без армии')).toBeInTheDocument();
+  });
 });
 
 describe('CTAButton — карточка «Бой идёт» (battle state)', () => {
@@ -51,6 +57,15 @@ describe('CTAButton — карточка «Бой идёт» (battle state)', ()
     localStorage.setItem('bronepehota_army', JSON.stringify({ isInBattle: true }));
     render(<CTAButton />);
     expect(screen.getByTestId('landing-continue-button')).toBeInTheDocument();
+  });
+
+  it('терциарная строка калькулятора остаётся и в battle state', () => {
+    localStorage.setItem('bronepehota_army', JSON.stringify({
+      schemaVersion: 1,
+      army: { isInBattle: true, lastBattleDate: '2026-08-28T10:00:00Z', units: [{}] },
+    }));
+    render(<CTAButton />);
+    expect(screen.getByTestId('landing-calculator-link').getAttribute('href')).toBe('/calculator');
   });
 
   it('isInBattle=false → модульная строка', () => {
