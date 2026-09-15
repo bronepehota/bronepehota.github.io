@@ -93,6 +93,29 @@ test.describe('Standalone Calculator', () => {
     await expect(page.getByRole('button', { name: /Стар Систем/ })).toBeVisible();
   });
 
+  // Регресс бага «Ваш бросок 0»: ручной ввод дальности не доходил до броска
+  // (executeShot читал снапшот state.combatantData с маунта) — вечный промах.
+  // D12 против дистанции 1 попадает ВСЕГДА (success = total >= distance).
+  test('введённая вручную дальность участвует в броске: D12 против дистанции 1 — ПОПАДАНИЕ', async ({ page }) => {
+    await page.getByTestId('calculator-tab-shot').click();
+
+    // дальность D12 через кубик-попап
+    await page.getByRole('button', { name: 'Нажмите для ввода' }).first().click();
+    await page.getByRole('button', { name: 'D12', exact: true }).click();
+    await page.getByRole('button', { name: 'Подтвердить' }).click();
+
+    // мощность D6
+    await page.getByRole('button', { name: 'Нажмите для ввода' }).first().click();
+    await page.getByRole('button', { name: 'D6', exact: true }).click();
+    await page.getByRole('button', { name: 'Подтвердить' }).click();
+
+    // дистанция → 1 шаг
+    await page.getByRole('spinbutton').first().fill('1');
+
+    await page.getByRole('button', { name: 'ВЫСТРЕЛИТЬ' }).click();
+    await expect(page.getByText('ПОПАДАНИЕ')).toBeVisible({ timeout: 15000 });
+  });
+
   test('should show melee input placeholder', async ({ page }) => {
     // Enter melee via action card
     const cards = await page.locator('[class*="relative w-full overflow-hidden"]').all();

@@ -142,6 +142,7 @@ export interface CombatFlowState {
  */
 export type CombatFlowAction =
   | { type: 'START_COMBAT'; unit: ArmyUnit; soldierIndex?: number; weaponIndex?: number; actionType?: CombatActionType; combatantData?: CombatantData }
+  | { type: 'UPDATE_COMBATANT_DATA'; combatantData: Partial<CombatantData> }
   | { type: 'SELECT_ACTION'; actionType: CombatActionType }
   | { type: 'SET_PARAMETERS'; parameters: Partial<CombatParameters> }
   | { type: 'EXECUTE_ROLL' }
