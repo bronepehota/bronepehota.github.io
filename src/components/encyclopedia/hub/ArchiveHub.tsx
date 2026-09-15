@@ -191,6 +191,25 @@ export default function ArchiveHub({ lorePages, counts, era }: ArchiveHubProps) 
               ШТАБ →
             </span>
           </Link>
+
+          {/* Тихий телеграф калькулятора под боевым баннером: упрощённый
+              расчёт без армии (plain-навигация, без analytics-события) */}
+          <Link
+            href="/calculator"
+            data-testid="encyclopedia-calculator-link"
+            className="mt-2 flex items-center gap-3 min-h-[36px] px-2 no-underline group touch-manipulation"
+          >
+            <span className="font-ibm-mono text-[10px] uppercase tracking-[0.25em] text-military-rust/70 group-hover:text-military-amber transition-colors shrink-0">
+              {'// КАЛЬКУЛЯТОР БОЯ'}
+            </span>
+            <span className="hidden sm:inline font-ibm-mono text-[10px] text-military-taupe/60 group-hover:text-military-taupe/90 transition-colors truncate">
+              без армии
+            </span>
+            <span className="flex-1" />
+            <span className="font-russo text-[10px] uppercase tracking-widest text-military-rust/70 group-hover:text-military-amber transition-colors shrink-0">
+              РАСЧЁТ →
+            </span>
+          </Link>
         </div>
 
         <main className="px-4 pt-5 pb-16">

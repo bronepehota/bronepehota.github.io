@@ -42,6 +42,25 @@ function formatBattleDate(isoString: string): string {
   return `${diffDays}д`;
 }
 
+/** Терциарный вход: телеграфная строка калькулятора боя — без рамки и
+ *  заливки, чтобы не конкурировать с модулями. Полная ширина = тап-зона. */
+function CalculatorTelegraph() {
+  return (
+    <Link
+      href="/calculator"
+      data-testid="landing-calculator-link"
+      className="group inline-flex items-baseline justify-center gap-2 w-full py-2 no-underline"
+    >
+      <span className="font-ibm-mono text-[10px] uppercase tracking-[0.25em] text-military-rust/80 group-hover:text-military-amber transition-colors">
+        {'// КАЛЬКУЛЯТОР БОЯ'}
+      </span>
+      <span className="font-ibm-mono text-[9px] text-military-sand/50 group-hover:text-military-sand/80 transition-colors">
+        без армии
+      </span>
+    </Link>
+  );
+}
+
 /** Модульная строка первого экрана: ШТАБ (primary) + широкая ЭНЦИКЛОПЕДИЯ.
  *  Единая разметка для SSR и свежего состояния клиента. */
 function ModuleRow({ className }: { className?: string }) {
@@ -70,7 +89,7 @@ function ModuleRow({ className }: { className?: string }) {
         </span>
       </Link>
 
-      {/* Secondary: широкая ЭНЦИКЛОПЕДИЯ (быстрый расчёт боя — песочница на странице юнита) */}
+      {/* Secondary: широкая ЭНЦИКЛОПЕДИЯ */}
       <Link
         href="/encyclopedia"
         data-testid="landing-encyclopedia-button"
@@ -88,6 +107,9 @@ function ModuleRow({ className }: { className?: string }) {
           <ArrowRight className="w-4 h-4 text-military-sand/60 group-hover:text-white group-hover:translate-x-0.5 transition-all" />
         </span>
       </Link>
+
+      {/* Tertiary: телеграфная строка калькулятора */}
+      <CalculatorTelegraph />
     </div>
   );
 }
@@ -210,6 +232,9 @@ export default function CTAButton({ className }: CTAButtonProps) {
             </span>
           </Link>
         </div>
+
+        {/* Tertiary: телеграфная строка калькулятора */}
+        <CalculatorTelegraph />
       </div>
     );
   }

@@ -120,7 +120,8 @@ test('первая смена хода: battle_turn(2) и battle_engaged', async
 
 test('battle_entry(from=encyclopedia_unit) при клике на странице юнита', async ({ page }) => {
   await page.goto('/encyclopedia/unit/polaris_lineynaya_klon_pehota');
-  await page.getByTestId('unit-to-battle-cta').getByRole('link').click();
+  // В панели две ссылки (бой + калькулятор) — трекаем именно боевую
+  await page.getByTestId('unit-to-battle-cta').getByRole('link', { name: 'Взять отряд в бой' }).click();
   await dismissIntroIfShown(page);
   await expect(page.getByTestId('rules-confirm-button')).toBeVisible({ timeout: 30000 });
 

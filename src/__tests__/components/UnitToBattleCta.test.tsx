@@ -14,13 +14,21 @@ describe('UnitToBattleCta', () => {
 
   it('клик шлёт battle_entry(from=encyclopedia_unit)', () => {
     render(<UnitToBattleCta faction="polaris" />);
-    fireEvent.click(screen.getByRole('link'));
+    // В панели две ссылки (бой + калькулятор) — трекаем именно боевую
+    fireEvent.click(screen.getByRole('link', { name: /Взять отряд в бой/ }));
     expect(trackEvent).toHaveBeenCalledWith('battle_entry', { from: 'encyclopedia_unit' });
   });
 
   it('onOpenSandbox не задан (машины) — кнопки песочницы нет', () => {
     render(<UnitToBattleCta faction="polaris" />);
     expect(screen.queryByTestId('unit-sandbox-open')).not.toBeInTheDocument();
+  });
+
+  it('тихая ссылка на калькулятор с пояснением «в бою статы подтянутся сами»', () => {
+    render(<UnitToBattleCta faction="polaris" />);
+    const link = screen.getByTestId('unit-calculator-link');
+    expect(link.getAttribute('href')).toBe('/calculator');
+    expect(screen.getByText('в бою статы подтянутся сами')).toBeInTheDocument();
   });
 
   it('onOpenSandbox задан — кнопка «ПРОВЕРИТЬ БОЕМ» есть, клик вызывает callback', () => {

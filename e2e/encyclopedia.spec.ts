@@ -161,7 +161,8 @@ test.describe('Энциклопедия', () => {
     // Протекторат — не дефолтная фракция (polaris — initial state в /app): тест доказателен.
     await page.goto('/encyclopedia/unit/protectorate_felitsianskaya_gvardiya');
     await expect(page.getByTestId('unit-to-battle-cta')).toBeVisible();
-    await page.getByTestId('unit-to-battle-cta').getByRole('link').click();
+    // В панели две ссылки (бой + калькулятор) — нужна именно боевая
+    await page.getByTestId('unit-to-battle-cta').getByRole('link', { name: 'Взять отряд в бой' }).click();
     await dismissIntroIfShown(page);
 
     // /app компилируется по требованию (~до 30с в dev)
