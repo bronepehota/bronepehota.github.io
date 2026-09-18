@@ -146,16 +146,17 @@ export async function setupToPreparation(page: Page, opts?: { faction?: string; 
  */
 export async function setupGameSessionWithSquad(
   page: Page,
-  opts?: { unitOverrides?: Record<string, unknown>; extraUnits?: Record<string, unknown>[]; missionId?: string; currentTurn?: number }
+  opts?: { unitOverrides?: Record<string, unknown>; extraUnits?: Record<string, unknown>[]; missionId?: string; currentTurn?: number; soldierCount?: number }
 ) {
   const config = {
     unitOverrides: opts?.unitOverrides || {},
     extraUnits: opts?.extraUnits || [],
     missionId: opts?.missionId,
     currentTurn: opts?.currentTurn ?? 1,
+    soldierCount: opts?.soldierCount ?? 6,
   };
-  await page.addInitScript((cfg: { unitOverrides: Record<string, unknown>; extraUnits: Record<string, unknown>[]; missionId?: string; currentTurn?: number }) => {
-    const soldiers = [
+  await page.addInitScript((cfg: { unitOverrides: Record<string, unknown>; extraUnits: Record<string, unknown>[]; missionId?: string; currentTurn?: number; soldierCount?: number }) => {
+    const allSoldiers = [
       { num: 1, rank: 2, speed: 5, range: 'D6', power: '2D6', melee: 3, props: [], armor: 2, image: '' },
       { num: 2, rank: 2, speed: 5, range: 'D12', power: '2D6', melee: 3, props: [], armor: 2, image: '' },
       { num: 3, rank: 2, speed: 5, range: 'D12', power: '2D6', melee: 3, props: [], armor: 2, image: '' },
@@ -163,6 +164,8 @@ export async function setupGameSessionWithSquad(
       { num: 5, rank: 2, speed: 5, range: 'D12', power: '2D6', melee: 3, props: [], armor: 2, image: '' },
       { num: 6, rank: 2, speed: 5, range: 'D12', power: '2D6', melee: 3, props: [], armor: 2, image: '' },
     ];
+    // soldierCount: короткие взводы (напр. 2 бойца) — фото заполняют экран
+    const soldiers = allSoldiers.slice(0, cfg.soldierCount ?? 6);
     const baseUnit = {
       instanceId: 'squad-test-1',
       type: 'squad',
@@ -176,7 +179,7 @@ export async function setupGameSessionWithSquad(
         soldiers,
       },
       instanceNumber: 1,
-      currentSoldiers: [0, 1, 2, 3, 4, 5],
+      currentSoldiers: soldiers.map((_, i) => i),
       deadSoldiers: [],
       actionsUsed: [],
     };

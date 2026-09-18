@@ -32,14 +32,29 @@ describe('SquadView', () => {
     getSoldierImage: jest.fn((idx: number) => `/images/soldier-${idx}.png`)
   };
 
-  it('renders soldiers grid', () => {
+  it('renders a list that fills available height (photos grow from a floor)', () => {
     const { container } = render(<SquadView {...defaultProps} />);
 
-    // Check that the grid container exists
-    const grid = container.querySelector('.grid');
-    expect(grid).toBeInTheDocument();
+    // Колонка растягивается на свободную высоту скролл-области (min-h-full),
+    // строки делят остаток (flex-1) — взвод заполняет экран (плейтест:
+    // фото были мелкие, снизу оставалось пустое место)
+    const list = container.querySelector('[data-testid="squad-list"]');
+    expect(list).toBeInTheDocument();
+    expect(list!.className).toContain('flex-col');
+    expect(list!.className).toContain('min-h-full');
 
-    // Check that SoldierCard components are rendered by looking for the status stripe
+    const row = list!.children[0];
+    expect(row.className).toContain('snap-start');
+    expect(row.className).toContain('flex-1');
+
+    // Пол роста фото = прежний размер: ширина не ниже 64px, высота — строкой
+    const photo = container.querySelector('[data-testid="soldier-photo"]');
+    expect(photo).toBeInTheDocument();
+    expect(photo!.className).toContain('h-full');
+    expect(photo!.className).toContain('min-w-16');
+    expect(photo!.className).toContain('aspect-[3/4]');
+
+    // SoldierCard отрендерен (статусная полоса)
     const statusStripes = container.querySelectorAll('[data-testid="soldier-status-stripe"]');
     expect(statusStripes.length).toBe(1);
   });
