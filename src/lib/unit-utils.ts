@@ -191,6 +191,16 @@ export function checkSquadUniformStats(unit: ArmyUnit): SquadUniformStats {
 }
 
 /**
+ * Alive soldiers in a squad ArmyUnit (dead excluded). Machines → 0.
+ * Shared by the battle dock aggregate badge and the expanded navigator card.
+ */
+export function getAliveSoldiersCount(unit: ArmyUnit): number {
+  if (unit.type !== 'squad') return 0;
+  const squad = unit.data as Squad;
+  return squad.soldiers.length - (unit.deadSoldiers?.length || 0);
+}
+
+/**
  * Shortens weapon names for mobile display by replacing long Russian words with abbreviations
  */
 export function shortenWeaponName(name: string): string {

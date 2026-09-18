@@ -6,6 +6,7 @@ import { ArmyUnit, Squad, Machine, FactionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { getFactionColors } from '@/lib/faction-colors';
 import { BASE_PATH } from '@/lib/constants';
+import { getAliveSoldiersCount } from '@/lib/unit-utils';
 import type { UnitStatus } from '@/lib/unit-status';
 
 interface ExpandedUnitCardProps {
@@ -62,8 +63,7 @@ function getUnitStats(unit: ArmyUnit, isMachine: boolean): string[] {
     return [`HP ${hp}`];
   }
   const squad = unit.data as Squad;
-  const alive = squad.soldiers.length - (unit.deadSoldiers?.length || 0);
-  return [`♥ ${alive}`];
+  return [`♥ ${getAliveSoldiersCount(unit)}/${squad.soldiers.length}`];
 }
 
 export const ExpandedUnitCard = memo(function ExpandedUnitCard({
