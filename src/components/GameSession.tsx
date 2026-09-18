@@ -824,9 +824,12 @@ export default function GameSession({
           ref={setDockRef}
           data-testid="unit-dock"
           className={cn(
-            "fixed left-0 right-0 z-50 bg-slate-950 border-t transition-all duration-200 ease-out",
-            isDockExpanded ? "top-16 bottom-0" : "bottom-0",
-            "border-slate-800/80"
+            // slate-900 + stronger edge + shadow: the dock must read as a
+            // distinct console panel over the battlefield (bg matches the
+            // page root otherwise — playtest: "не видно что это панель")
+            "fixed left-0 right-0 z-50 bg-slate-900 border-t-2 transition-all duration-200 ease-out",
+            "border-slate-700/70 shadow-[0_-8px_24px_rgba(0,0,0,0.45)]",
+            isDockExpanded ? "top-16 bottom-0" : "bottom-0"
           )}
           onMouseDown={handleDockMouseDown}
           onTouchStart={handleDockTouchStart}
