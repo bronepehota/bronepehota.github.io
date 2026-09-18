@@ -506,14 +506,16 @@ export default function GameSession({
     const newDoneState = !isDone;
 
     if (currentUnit.type === 'squad') {
-      // Toggle all alive soldiers
+      // Toggle all alive soldiers. Built over soldiers.length — a seeded or
+      // legacy unit may carry a shorter/empty actionsUsed array, and mapping
+      // over THAT silently marks nobody done (the toggle became a no-op).
       const squad = currentUnit.data as Squad;
-      const newActions = (currentUnit.actionsUsed || Array(squad.soldiers.length).fill({ moved: false, shot: false, melee: false, done: false }))
-        .map((action, idx) => {
-          const isDead = currentUnit.deadSoldiers?.includes(idx);
-          if (isDead) return action;
-          return { ...action, done: newDoneState };
-        });
+      const prevActions = currentUnit.actionsUsed;
+      const newActions = squad.soldiers.map((_, idx) => {
+        const existing = prevActions?.[idx] ?? { moved: false, shot: false, melee: false, done: false };
+        if (currentUnit.deadSoldiers?.includes(idx)) return existing;
+        return { ...existing, done: newDoneState };
+      });
       setArmy({
         ...army,
         units: army.units.map(u => u.instanceId === currentUnit.instanceId ? { ...u, actionsUsed: newActions } : u)
