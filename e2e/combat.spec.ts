@@ -30,10 +30,8 @@ test.describe('Combat Mechanics', () => {
       unitOverrides: { instanceId: 'combat-unit-1' },
     });
 
-    await page.waitForTimeout(500);
-
-    const menuButton = page.locator('.ml-auto button:has(svg.lucide-more-vertical)').last();
-    await menuButton.click({ force: true });
+    // Меню боя — кнопка ⋮ в доке (после редизайна дока — по testid)
+    await page.getByTestId('dock-menu-toggle').click();
 
     const initiativeButton = page.getByTestId('new-turn-button');
     await expect(initiativeButton).toBeVisible({ timeout: 5000 });

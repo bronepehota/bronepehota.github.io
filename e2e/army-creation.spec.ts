@@ -153,15 +153,20 @@ test.describe('Army Creation', () => {
     const names = (await cards.locator('h3').allInnerTexts()).map((n) => n.toLowerCase());
     expect(names.length).toBeGreaterThan(1);
 
-    // Distinctive probe: extend a prefix of the first card's name (spaces
-    // stripped) until exactly one catalog name contains it
-    const base = names[0].replace(/[^a-zа-я0-9]/gi, '');
+    // Distinctive probe: extend a prefix of some catalog name (spaces
+    // stripped) until exactly one name contains it. NOT necessarily the
+    // first name — catalogs with allied units can contain lookalikes
+    // («линейная клон-пехота» vs «… fox.1»), whose full name is a prefix
+    // of another's and never yields a unique probe.
     let probe = '';
-    for (let len = 4; len <= base.length; len++) {
-      const candidate = base.slice(0, len);
-      if (names.filter((n) => n.includes(candidate)).length === 1) {
-        probe = candidate;
-        break;
+    for (let i = 0; i < names.length && !probe; i++) {
+      const base = names[i].replace(/[^a-zа-я0-9]/gi, '');
+      for (let len = 4; len <= base.length; len++) {
+        const candidate = base.slice(0, len);
+        if (names.filter((n) => n.includes(candidate)).length === 1) {
+          probe = candidate;
+          break;
+        }
       }
     }
     expect(probe).toBeTruthy();
