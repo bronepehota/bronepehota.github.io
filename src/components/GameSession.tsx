@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import Link from 'next/link';
-import { Army, ArmyUnit, Squad, Machine, PilotInfo, FactionID } from '@/lib/types';
+import { Army, ArmyUnit, Squad, Machine, PilotInfo } from '@/lib/types';
 import { resolvePanic } from '@/lib/panic-logic';
 import { cleanupExpiredModifiers, getAllDebuffs, resolveSoldierEffects, collectActiveBuffsForUnit, collectDebuffsForUnit, collectBuffsForUnit } from '@/lib/modifier-utils';
 import { getSourceWithCustom } from '@/lib/sources-registry';
@@ -11,29 +11,15 @@ import { SoldierEffectsModal } from './modals/SoldierEffectsModal';
 import { getFactionColors } from '@/lib/faction-colors';
 import { trackEvent } from '@/lib/analytics';
 import UnitCard from './cards/UnitCard';
-import { History, X, Bomb, Heart, Shield, Footprints, CheckCircle2, MoreVertical, BookOpen, RotateCcw, MessageCircle, Target, Users } from 'lucide-react';
+import { History, X, Bomb, Heart, Shield, Footprints, CheckCircle2, MoreVertical, BookOpen, RotateCcw, MessageCircle, Target, Users, LayoutGrid } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CombatLogEntry } from '@/lib/combat-types';
 import { useCombatTargetContext } from '@/contexts/CombatTargetContext';
 import InitiativeModal from './modals/InitiativeModal';
-import { UnitNavigationCard, ExpandedNavigator } from './GameSession/index';
-import { checkSquadUniformStats, getAliveSoldiersCount } from '@/lib/unit-utils';
-import { deriveUnitStatus } from '@/lib/unit-status';
+import { ExpandedNavigator } from './GameSession/index';
+import { checkSquadUniformStats, getAliveSoldiersCount, countUnitsByStatus } from '@/lib/unit-utils';
+import { deriveUnitStatus, UnitStatus } from '@/lib/unit-status';
 import { resolveModifierSummary } from '@/lib/modifier-utils';
-
-// Faction styles for unit dock navigation
-const getUnitDockStyles = (factionId: string) => {
-  const colors = getFactionColors(factionId as FactionID);
-  return {
-    primary: colors.borderSolid,
-    primaryBg: colors.bgSolid,
-    muted: colors.border,
-    mutedBg: colors.bg,
-    text: colors.text,
-    activeGlow: colors.glow,
-    accent: colors.accent
-  };
-};
 
 interface GameSessionProps {
   army: Army;
@@ -444,12 +430,20 @@ export default function GameSession({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [nextUnit, prevUnit]);
 
-  // Dock expand/collapse gesture handlers
+  // Dock expand/collapse gesture handlers.
+  // Movement-gated: a press WITHOUT movement (a plain click) must NOT
+  // collapse the dock — collapsing on mouseup unmounts the expanded
+  // navigator between mouseup and click, swallowing the row's onClick
+  // (selection never lands). Zero-move press → no-op; the row/handle's own
+  // onClick acts. A real swipe still collapses (down) / expands (up >50%).
+  const dockDragMovedRef = useRef(false);
   const handleDockMouseDown = useCallback((e: React.MouseEvent) => {
     const startY = e.clientY;
+    dockDragMovedRef.current = false;
     const handleMove = (moveEvent: MouseEvent) => {
       const currentY = moveEvent.clientY;
       const diff = startY - currentY; // Positive when swiping up
+      if (Math.abs(diff) > 4) dockDragMovedRef.current = true;
       const progress = Math.max(0, Math.min(1, diff / 200));
       setDockDragProgress(progress);
     };
@@ -457,7 +451,7 @@ export default function GameSession({
     const handleEnd = () => {
       if (dockDragProgress > 0.5) {
         setIsDockExpanded(true);
-      } else {
+      } else if (dockDragMovedRef.current) {
         setIsDockExpanded(false);
       }
       setDockDragProgress(0);
@@ -471,9 +465,11 @@ export default function GameSession({
 
   const handleDockTouchStart = useCallback((e: React.TouchEvent) => {
     const startY = e.touches[0].clientY;
+    dockDragMovedRef.current = false;
     const handleMove = (moveEvent: TouchEvent) => {
       const currentY = moveEvent.touches[0].clientY;
       const diff = startY - currentY; // Positive when swiping up
+      if (Math.abs(diff) > 4) dockDragMovedRef.current = true;
       const progress = Math.max(0, Math.min(1, diff / 200));
       setDockDragProgress(progress);
     };
@@ -481,7 +477,7 @@ export default function GameSession({
     const handleEnd = () => {
       if (dockDragProgress > 0.5) {
         setIsDockExpanded(true);
-      } else {
+      } else if (dockDragMovedRef.current) {
         setIsDockExpanded(false);
       }
       setDockDragProgress(0);
@@ -558,6 +554,34 @@ export default function GameSession({
     }
   }, [handleToggleUnitDone, onToggleUnitDoneRef]);
 
+  // Auto-open the navigator when the FOCUSED unit's turn ends by any path:
+  // dock «Готов», combat auto-complete of the last alive soldier, machine
+  // destruction, capture toggle. Focused-only — Side-A capture appends a
+  // foreign ACTIVE machine that must not trigger this. Skipped when no
+  // active units remain: the floating «Завершить тур» button takes over.
+  // The baseline map advances on every run, so a new turn / «Отмена»
+  // (done→active, wrong direction) and army reloads never fire.
+  const prevStatusesRef = useRef<Map<string, UnitStatus> | null>(null);
+  useEffect(() => {
+    if (army.units.length === 0) {
+      prevStatusesRef.current = null;
+      return;
+    }
+    const statuses = new Map(army.units.map(u => [u.instanceId, deriveUnitStatus(u)]));
+    const prev = prevStatusesRef.current;
+    prevStatusesRef.current = statuses;
+    if (!prev) return; // first army load — record the baseline only
+
+    const focused = army.units[focusedUnitIdx];
+    if (!focused) return;
+    const before = prev.get(focused.instanceId);
+    const now = statuses.get(focused.instanceId);
+    if (before === 'active' && (now === 'done' || now === 'dead' || now === 'captured')) {
+      const anyActive = army.units.some(u => statuses.get(u.instanceId) === 'active');
+      if (anyActive) setIsDockExpanded(true);
+    }
+  }, [army.units, focusedUnitIdx]);
+
   const factionColors = getFactionColors(army.faction || 'polaris');
   const selectedMission = isFreePlay(army.missionId) ? null : getMission(army.missionId!) ?? null;
 
@@ -585,6 +609,11 @@ export default function GameSession({
       speedMultiplier: summary.speedMultiplier !== 1 ? summary.speedMultiplier : undefined,
     };
   }, [focusedUnit, hideArmorForUnit, army]);
+
+  // «СПИСОК N/M» counter: N = units no longer active (done + dead + captured)
+  const statusCounts = useMemo(() => countUnitsByStatus(army.units), [army.units]);
+  const finishedCount = statusCounts.done + statusCounts.dead + statusCounts.captured;
+  const totalUnits = army.units.length;
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden" data-testid="game-session">
@@ -853,66 +882,16 @@ export default function GameSession({
               onSelectUnit={(idx) => { setFocusedUnitIdx(idx); setIsDockExpanded(false); }}
             />
           ) : (
-            /* Compact view - horizontal scroll */
-            <div className="relative">
-              <div className="flex overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-hide items-center px-1 py-1.5 gap-1">
-            {(() => {
-              const statusOrder: Record<string, number> = { active: 0, done: 1, dead: 2, captured: 3 };
-              // Sort and group units: active first, then done/dead
-              const sortedUnits = army.units
-              .map((unit, idx) => ({ unit, idx, originalIndex: idx }))
-              .sort((a, b) => {
-                const getStatus = (u: ArmyUnit) => statusOrder[deriveUnitStatus(u)];
-                return getStatus(a.unit) - getStatus(b.unit) || a.originalIndex - b.originalIndex;
-              });
-
-            const elements: React.ReactNode[] = [];
-            let lastStatus = -1;
-
-            sortedUnits.forEach(({ unit, idx: originalIndex }, _arrayIndex) => {
-              const dockStyles = getUnitDockStyles(army.faction || 'polaris');
-              const isActive = focusedUnitIdx === originalIndex;
-              const isMachine = unit.type === 'machine';
-
-              // Calculate current unit status
-              const unitStatus = deriveUnitStatus(unit);
-              const currentStatus = statusOrder[unitStatus];
-
-              // Add spacer between active (0) and non-active (1, 2) units
-              if (lastStatus === 0 && currentStatus > 0) {
-                elements.push(
-                  <div key="spacer" className="w-2 md:w-3 flex-shrink-0" />
-                );
-              }
-              lastStatus = currentStatus;
-
-              const isDone = unitStatus === 'done' || unitStatus === 'dead' || unitStatus === 'captured';
-              const isDead = unitStatus === 'dead';
-              const isCaptured = unitStatus === 'captured';
-
-              elements.push(
-                <UnitNavigationCard
-                  key={unit.instanceId}
-                  unit={unit}
-                  isActive={isActive}
-                  isDone={isDone}
-                  isDead={isDead}
-                  isCaptured={isCaptured}
-                  isMachine={isMachine}
-                  onClick={() => setFocusedUnitIdx(originalIndex)}
-                  dockStyles={dockStyles}
-                />
-              );
-            });
-
-            return elements;
-          })()}
-          </div>
+            /* Compact view — info bar only (playtest 2026-09-18: лента
+               мелких иконок была нечитаемой; навигация между юнитами —
+               через развёрнутый навигатор: кнопка СПИСОК, свайп вверх и
+               авто-открытие при завершении хода юнита) */
+            <>
           {/* Current unit info bar — two readable rows (playtest fix: the old
               single text-xs row was unreadable on phones).
               Row 1: identity (number + name + живые бойцы). Row 2: stats + done.
               Guard focusedUnit?.data: юнит без data (битый localStorage) не рендерим. */}
-          {!isDockExpanded && focusedUnit?.data && (
+          {focusedUnit?.data && (
             <div
               data-testid="dock-info-bar"
               className="px-2 py-1.5 border-t border-slate-800/50 space-y-1"
@@ -969,8 +948,10 @@ export default function GameSession({
                 })()}
               </div>
 
-              {/* Row 2 — stats + labeled done button */}
-              <div className="flex items-center gap-1.5">
+              {/* Row 2 — stats + controls. flex-wrap: на 320px кластер
+                  кнопок переносится строкой вместо обрезания (высота дока
+                  авторастёт через ResizeObserver → bottomInset). */}
+              <div className="flex flex-wrap items-center gap-1.5">
                 {/* Armor badge - squads with uniform armor */}
                 {focusedUnit.type === 'squad' && squadUniformStats.isUniformArmor && squadUniformStats.commonArmor !== undefined && (() => {
                   const bonus = squadDockBonuses.armorBonus ? `+${squadDockBonuses.armorBonus}` : undefined;
@@ -1096,6 +1077,36 @@ export default function GameSession({
                 {/* Spacer */}
                 <div className="flex-1 min-w-0" />
 
+                {/* Navigator button — the primary unit switcher (playtest:
+                    the tiny-icon strip was unreadable). N/M = units that
+                    finished their turn (done + dead + captured). */}
+                <button
+                  data-testid="dock-open-navigator"
+                  onClick={toggleDockExpanded}
+                  aria-label={`Открыть список юнитов, завершено ${finishedCount} из ${totalUnits}`}
+                  title="Список юнитов"
+                  className={cn(
+                    "shrink-0 min-h-[44px] px-2 flex items-center justify-center gap-1.5 rounded-sm border",
+                    "font-mono text-[10px] font-black uppercase tracking-wider transition-all hover:scale-[1.02] active:scale-95",
+                    "border-slate-700/50 bg-slate-800/60 text-slate-300 hover:bg-slate-700/60 hover:text-slate-100"
+                  )}
+                >
+                  <LayoutGrid className="w-3.5 h-3.5 shrink-0" />
+                  Список
+                  <span
+                    data-testid="dock-nav-counter"
+                    aria-hidden="true"
+                    className={cn(
+                      "px-1 rounded-sm text-[10px] font-mono font-bold leading-none py-0.5",
+                      finishedCount === totalUnits && totalUnits > 0
+                        ? "bg-emerald-500/15 text-emerald-300"
+                        : "bg-slate-900/70 text-slate-200"
+                    )}
+                  >
+                    {finishedCount}/{totalUnits}
+                  </span>
+                </button>
+
                 {/* Unit done toggle — labeled, faction-tinted (playtest: solid
                     faction fill was too loud) + the dock menu right after it */}
                 {(() => {
@@ -1143,8 +1154,7 @@ export default function GameSession({
               </div>
             </div>
           )}
-
-        </div>
+            </>
           )}
         </div>
       )}
