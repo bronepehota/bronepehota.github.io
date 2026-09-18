@@ -23,8 +23,11 @@ export function SoldierImage({
   onImageClick,
 }: SoldierImageProps) {
   return (
-    <div data-testid="soldier-photo" className="relative w-16 md:w-20 aspect-[3/4] rounded-sm overflow-hidden flex-shrink-0 bg-slate-900 cursor-pointer shadow-md">
-      <div onClick={onImageClick} className="w-full h-full overflow-hidden">
+    <div data-testid="soldier-photo" className="relative aspect-[3/4] h-full min-w-16 md:min-w-20 min-h-[85.33px] md:min-h-[106.67px] rounded-sm overflow-hidden flex-shrink-0 bg-slate-900 cursor-pointer shadow-md">
+      {/* absolute: img не должен вносить min-content высоту (натуральные 300×400
+          раздували строку до капа в переполненном режиме) — размер бокса
+          диктуют только h-full/min-w/min-h/aspect обёртки-строки */}
+      <div onClick={onImageClick} className="absolute inset-0 overflow-hidden">
         <Image
           src={imageUrl}
           alt={`Солдат ${soldierIndex + 1}`}
