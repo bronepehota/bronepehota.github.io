@@ -9,7 +9,6 @@ describe('SoldierActions', () => {
     isInPanic: false,
     actions: { moved: false, shot: false, melee: false, done: false } as SoldierActionState,
     onActionClick: jest.fn(),
-    onToggleDone: jest.fn(),
     onToggleDead: jest.fn(),
     soldierIndex: 0,
     onStartLongPress: jest.fn(),
@@ -65,13 +64,13 @@ describe('SoldierActions', () => {
   });
 
   describe('Regular soldier rendering', () => {
-    it('should show ГОТОВ and УБИТЬ buttons for regular soldier', () => {
+    it('should show only УБИТЬ button — «Готов» moved onto the soldier image', () => {
       render(<SoldierActions {...defaultProps} isPilot={false} />);
 
-      const doneButton = screen.getByRole('button', { name: /Завершить ход бойца/i });
-      expect(doneButton).toBeInTheDocument();
       const killButton = screen.getByRole('button', { name: /Пометить бойца как убитого/i });
       expect(killButton).toBeInTheDocument();
+      // The done button now lives on the image (SoldierDoneButton), not in this column
+      expect(screen.queryByTestId('soldier-done-button')).not.toBeInTheDocument();
     });
 
     it('should not show action button (removed)', () => {

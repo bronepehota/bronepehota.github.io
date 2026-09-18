@@ -58,7 +58,6 @@ export function SquadPreview({
               imageUrl={soldier.image || '/images/soldiers/empty.png'}
               soldierIndex={index}
               isDead={false}
-              isDone={false}
               isInPanic={false}
               isMounted={true}
               onImageClick={() => {}}

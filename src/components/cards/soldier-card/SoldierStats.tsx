@@ -47,7 +47,10 @@ function StatBadge({ icon: Icon, value, color, bonus, disabled, statKey }: {
     <div
       data-testid={statKey ? `stat-badge-${statKey}` : undefined}
       className={cn(
-      'relative flex flex-row items-center justify-center gap-0.5 rounded-lg bg-slate-800/60 min-h-[40px] min-w-[44px] flex-1 px-1 transition-colors',
+      // min-w-0 (not min-w-[44px]): display badge, not a control — the whole
+      // grid is the tap target. Lets the 3 columns compress on 320px screens
+      // instead of pushing the action buttons out of the card.
+      'relative flex flex-row items-center justify-center gap-0.5 rounded-lg bg-slate-800/60 min-h-[40px] min-w-0 flex-1 px-1 transition-colors',
       isActive
         ? isDebuff
           ? 'border border-red-500/40 shadow-[inset_0_0_8px_rgba(239,68,68,0.06)]'

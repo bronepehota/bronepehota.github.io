@@ -1,13 +1,12 @@
 'use client';
 
 import { GitHubPagesImage as Image } from '@/components/GitHubPagesImage';
-import { CheckCircle2, Skull, Footprints } from 'lucide-react';
+import { Skull, Footprints } from 'lucide-react';
 
 interface SoldierImageProps {
   imageUrl: string;
   soldierIndex: number;
   isDead: boolean;
-  isDone: boolean;
   isInPanic: boolean;
   isMounted: boolean;
   isPilot?: boolean;
@@ -18,7 +17,6 @@ export function SoldierImage({
   imageUrl,
   soldierIndex,
   isDead,
-  isDone,
   isInPanic,
   isMounted,
   isPilot = false,
@@ -48,8 +46,8 @@ export function SoldierImage({
         </div>
       )}
 
-      {/* Soldier number HUD */}
-      <div className="absolute bottom-1 right-1 z-10">
+      {/* Soldier number HUD — top right (bottom left hosts the done button) */}
+      <div className="absolute top-1 right-1 z-10">
         <div className="px-1.5 py-0.5 backdrop-blur-md bg-slate-900/70 border border-slate-600/50 rounded-sm">
           <span className="font-mono text-[10px] font-bold text-white">
             #{soldierIndex + 1}
@@ -68,17 +66,11 @@ export function SoldierImage({
         </div>
       )}
 
-      {/* Done overlay */}
-      {isMounted && isDone && !isDead && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="bg-emerald-500 rounded-full p-1 md:p-1.5 shadow-[0_0_8px_rgba(16,185,129,0.8)]">
-            <CheckCircle2 className="w-5 h-5 md:w-6 md:h-6 text-white" strokeWidth={3} />
-          </div>
-        </div>
-      )}
+      {/* Done state: the emerald done button in the bottom-left corner IS the
+          indicator — no centered overlay (it would fight the button visually). */}
 
       {/* Panic overlay */}
-      {isMounted && isInPanic && !isDead && !isDone && (
+      {isMounted && isInPanic && !isDead && (
         <div className="absolute inset-0 flex items-center justify-center bg-orange-950/30">
           <Footprints
             className="w-8 h-8 md:w-10 md:h-10 text-orange-400"

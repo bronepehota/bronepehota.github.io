@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useMemo, memo } from 'react';
 import { SoldierActions } from './soldier-card/SoldierActions';
 import { SoldierStats } from './soldier-card/SoldierStats';
 import { SoldierImage } from './soldier-card/SoldierImage';
+import { SoldierDoneButton } from './soldier-card/SoldierDoneButton';
 import StatusStripe, { type SoldierState } from './soldier-card/StatusStripe';
 import { cn } from '@/lib/utils';
 import type { Squad, ArmyUnit, Army } from '@/lib/types';
@@ -237,17 +238,31 @@ function SoldierCard({
         </>
       )}
 
-      {/* Soldier image (left side) */}
-      <SoldierImage
-        imageUrl={getSoldierImage(soldierIndex)}
-        soldierIndex={soldierIndex}
-        isDead={isDead}
-        isDone={isDone}
-        isInPanic={isInPanic}
-        isMounted={isMounted}
-        isPilot={isPilot}
-        onImageClick={() => setShowSoldierImage(soldierIndex)}
-      />
+      {/* Soldier image (left side) with the «Готов» button overlaid bottom-left.
+          Hidden for pilots (nav button replaces actions) and panic (no DONE). */}
+      <div className="relative shrink-0">
+        <SoldierImage
+          imageUrl={getSoldierImage(soldierIndex)}
+          soldierIndex={soldierIndex}
+          isDead={isDead}
+          isInPanic={isInPanic}
+          isMounted={isMounted}
+          isPilot={isPilot}
+          onImageClick={() => setShowSoldierImage(soldierIndex)}
+        />
+        {!(soldier.isPilot && soldier.pilotOfInstanceId && onNavigateToUnit) && !isInPanic && (
+          <SoldierDoneButton
+            isDone={isDone}
+            isDead={isDead}
+            soldierIndex={soldierIndex}
+            onToggleDone={handleToggleAction}
+            onStartLongPress={startLongPress}
+            onEndLongPress={cancelLongPress}
+            isLongPressing={isLongPressing}
+            className="absolute bottom-0 left-0 z-10 rounded-none rounded-tr-sm"
+          />
+        )}
+      </div>
 
       {/* Stats (center - clickable for action) */}
       <SoldierStats
@@ -256,7 +271,7 @@ function SoldierCard({
         stepToCmFactor={stepToCmFactor}
         disabled={isDone || isDead || isInPanic}
         onClick={() => onSoldierAction(soldierIndex)}
-        className="flex-1"
+        className="flex-1 min-w-0"
         buffCount={buffCount}
         debuffCount={debuffCount}
         soldierModifiers={soldierModifiers}
@@ -267,14 +282,13 @@ function SoldierCard({
         hideSpeed={hideSpeed}
       />
 
-      {/* Action buttons (right - stacked vertically) */}
+      {/* Action buttons (right edge — kill only; «Готов» lives on the image) */}
       <SoldierActions
         isDead={isDead}
         isDone={isDone}
         isInPanic={isInPanic}
         actions={actions}
         onActionClick={() => onSoldierAction(soldierIndex)}
-        onToggleDone={handleToggleAction}
         onToggleDead={handleToggleDead}
         soldierIndex={soldierIndex}
         onStartLongPress={startLongPress}
