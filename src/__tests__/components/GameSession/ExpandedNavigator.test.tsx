@@ -59,24 +59,38 @@ const makeArmy = (units: ArmyUnit[]): Army =>
   ({ name: 'Тест', totalCost: 200, units, faction: 'polaris' }) as Army;
 
 describe('ExpandedNavigator', () => {
-  it('рендерит все четыре секции, включая «Захвачены» (регресс: захваченные не рисовались)', () => {
+  it('плоский список: все юниты, статус — в aria-label, убитые уходят вниз', () => {
     render(
       <ExpandedNavigator
         army={makeArmy([
           makeSquad('row-active', 'Линейная клон-пехота', 6, { dead: [1, 3] }),
           makeSquad('row-done', 'Снайперы', 3, { allDone: true }),
-          makeMachine('row-dead', 'Хантер', { durability: 0 }),
           makeMachine('row-captured', 'Саламандра', { durability: 8, isCaptured: true }),
+          makeMachine('row-dead', 'Хантер', { durability: 0 }),
         ])}
         focusedUnitIdx={0}
         onSelectUnit={jest.fn()}
       />
     );
 
-    expect(screen.getByRole('region', { name: 'Активные юниты' })).toBeInTheDocument();
-    expect(screen.getByRole('region', { name: 'Походили юниты' })).toBeInTheDocument();
-    expect(screen.getByRole('region', { name: 'Убитые юниты' })).toBeInTheDocument();
-    expect(screen.getByRole('region', { name: 'Захвачены юниты' })).toBeInTheDocument();
+    // Плоский список: четыре строки, все видимы (захваченные больше не теряются)
+    expect(screen.getByTestId('expanded-unit-row-active')).toHaveAttribute('aria-label', 'Линейная клон-пехота, активный');
+    expect(screen.getByTestId('expanded-unit-row-done')).toHaveAttribute('aria-label', 'Снайперы, походил');
+    expect(screen.getByTestId('expanded-unit-row-dead')).toHaveAttribute('aria-label', 'Хантер, убит');
+    expect(screen.getByTestId('expanded-unit-row-captured')).toHaveAttribute('aria-label', 'Саламандра, захвачен');
+
+    // Убитые — в конце списка (порядок остальных = порядок армии)
+    const rows = screen.getAllByTestId(/^expanded-unit-/);
+    expect(rows.map((r) => r.dataset.testid)).toEqual([
+      'expanded-unit-row-active',
+      'expanded-unit-row-done',
+      'expanded-unit-row-captured',
+      'expanded-unit-row-dead',
+    ]);
+
+    // Убитая строка компактная (фото w-14), живая — крупная (w-24)
+    expect(screen.getByTestId('expanded-unit-row-dead').querySelector('.w-14')).toBeTruthy();
+    expect(screen.getByTestId('expanded-unit-row-active').querySelector('.w-24')).toBeTruthy();
   });
 
   it('полное имя юнита без обрезки до 7 символов', () => {
@@ -105,22 +119,6 @@ describe('ExpandedNavigator', () => {
 
     expect(screen.getByText('♥ 4/6 · 🛡 2 · 👣 5')).toBeInTheDocument();
     expect(screen.getByText('HP 8/16 · 👣 1')).toBeInTheDocument();
-  });
-
-  it('aria-label строки — имя + статус (включая «захвачен»)', () => {
-    render(
-      <ExpandedNavigator
-        army={makeArmy([
-          makeSquad('row-done', 'Снайперы', 3, { allDone: true }),
-          makeMachine('row-captured', 'Саламандра', { durability: 8, isCaptured: true }),
-        ])}
-        focusedUnitIdx={0}
-        onSelectUnit={jest.fn()}
-      />
-    );
-
-    expect(screen.getByTestId('expanded-unit-row-done')).toHaveAttribute('aria-label', 'Снайперы, походил');
-    expect(screen.getByTestId('expanded-unit-row-captured')).toHaveAttribute('aria-label', 'Саламандра, захвачен');
   });
 
   it('клик по строке выбирает юнит (индекс в армии)', () => {

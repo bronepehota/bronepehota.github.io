@@ -139,30 +139,22 @@ test.describe('Expanded Navigator', () => {
     await page.getByTestId('dock-open-navigator').click();
     await expect(expandedNav).toBeVisible();
 
-    // Verify all four sections render
-    await expect(page.locator('[role="region"][aria-label="Активные юниты"]')).toBeVisible();
-    await expect(page.locator('[role="region"][aria-label="Походили юниты"]')).toBeVisible();
-    await expect(page.locator('[role="region"][aria-label="Убитые юниты"]')).toBeVisible();
-    await expect(page.locator('[role="region"][aria-label="Захвачены юниты"]')).toBeVisible();
+    // Flat list: all four units in one list, status carried by the row
+    // (stripe + glyph) and its aria-label — no section groups
+    await expect(page.locator('[data-testid^="expanded-unit-"]')).toHaveCount(4);
+    await expect(page.getByTestId('expanded-unit-nav-active-unit')).toBeVisible();
+    await expect(page.getByTestId('expanded-unit-nav-done-unit')).toBeVisible();
+    await expect(page.getByTestId('expanded-unit-nav-dead-unit')).toBeVisible();
 
-    // Verify unit cards in correct sections
-    const activeSection = page.locator('[role="region"][aria-label="Активные юниты"]');
-    await expect(activeSection.getByTestId('expanded-unit-nav-active-unit')).toBeVisible();
-
-    const doneSection = page.locator('[role="region"][aria-label="Походили юниты"]');
-    await expect(doneSection.getByTestId('expanded-unit-nav-done-unit')).toBeVisible();
-
-    const deadSection = page.locator('[role="region"][aria-label="Убитые юниты"]');
-    await expect(deadSection.getByTestId('expanded-unit-nav-dead-unit')).toBeVisible();
-
-    // Captured machines finally render (regression: they were computed
-    // into the group but never had a section to appear in)
-    const capturedSection = page.locator('[role="region"][aria-label="Захвачены юниты"]');
-    const capturedRow = capturedSection.getByTestId('expanded-unit-nav-captured-unit');
+    // Captured machines finally render (regression: they used to vanish)
+    const capturedRow = page.getByTestId('expanded-unit-nav-captured-unit');
     await expect(capturedRow).toBeVisible();
     await expect(capturedRow).toHaveAttribute('aria-label', 'Лёгкий штурмовой экраноплан, захвачен');
 
-    // Click a unit card to close navigator
+    // Status marks: the done row carries the ✓ glyph
+    await expect(page.getByTestId('expanded-unit-nav-done-unit').locator('text=✓')).toBeVisible();
+
+    // Click a unit row to close navigator
     await page.getByTestId('expanded-unit-nav-active-unit').click();
     await expect(expandedNav).not.toBeVisible();
   });

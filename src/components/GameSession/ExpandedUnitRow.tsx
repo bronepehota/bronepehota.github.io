@@ -11,47 +11,60 @@ import type { UnitStatus } from '@/lib/unit-status';
 
 interface ExpandedUnitRowProps {
   unit: ArmyUnit;
-  /** focusedUnitIdx === idx (selection ring) */
+  /** focusedUnitIdx === idx (row tint) */
   isActive: boolean;
   section: UnitStatus;
   onClick: () => void;
   faction: FactionID;
 }
 
-const sectionStyles: Record<UnitStatus, {
-  cardBg: string;
-  cardBorder: string;
-  imageBg: string;
-  text: string;
-  opacity: string;
+/**
+ * Полноширинная строка юнита в развёрнутом навигаторе — главный способ
+ * навигации в бою. Без групп и рамок (плейтест: секции не нужны, двойные
+ * рамки мешали): статус — цветная полоса слева + метка-глиф справа,
+ * распознавание — крупное фото (плейтест: «кто есть кто» на мобиле).
+ */
+const statusMark: Record<UnitStatus, {
+  stripe: string;
+  glyph: string;
+  glyphClass: string;
+  dim: string;
+  nameClass: string;
+  statusWord: string;
 }> = {
+  // Активный — нейтральная полоса (цвет фракции не используем: красный
+  // должен означать только «убит», плейтест: «почему красный — активный?»)
   active: {
-    cardBg: 'bg-transparent',
-    cardBorder: '',
-    imageBg: 'bg-gradient-to-br from-[#1f1f2e] to-[#161625]',
-    text: 'text-slate-200',
-    opacity: '',
+    stripe: 'bg-slate-800',
+    glyph: '',
+    glyphClass: '',
+    dim: '',
+    nameClass: 'text-slate-100',
+    statusWord: 'активный',
   },
   done: {
-    cardBg: 'bg-gradient-to-b from-[#071a0d] to-[#051209]',
-    cardBorder: 'border-green-800',
-    imageBg: 'bg-gradient-to-br from-[#0a2a12] to-[#071a0d]',
-    text: 'text-green-300',
-    opacity: 'opacity-70',
+    stripe: 'bg-emerald-500',
+    glyph: '✓',
+    glyphClass: 'text-emerald-400',
+    dim: 'opacity-75',
+    nameClass: 'text-slate-300',
+    statusWord: 'походил',
   },
   dead: {
-    cardBg: 'bg-gradient-to-b from-[#1a0707] to-[#120505]',
-    cardBorder: 'border-red-900',
-    imageBg: 'bg-gradient-to-br from-[#2a0a0a] to-[#1a0707]',
-    text: 'text-red-300 line-through',
-    opacity: 'opacity-50',
+    stripe: 'bg-red-600',
+    glyph: '✕',
+    glyphClass: 'text-red-500',
+    dim: 'opacity-50',
+    nameClass: 'text-slate-400 line-through',
+    statusWord: 'убит',
   },
   captured: {
-    cardBg: 'bg-gradient-to-b from-[#1a1207] to-[#120a05]',
-    cardBorder: 'border-orange-700',
-    imageBg: 'bg-gradient-to-br from-[#2a1a0a] to-[#1a1207]',
-    text: 'text-orange-300',
-    opacity: 'opacity-50',
+    stripe: 'bg-orange-500',
+    glyph: '⚑',
+    glyphClass: 'text-orange-400',
+    dim: 'opacity-55',
+    nameClass: 'text-slate-400',
+    statusWord: 'захвачен',
   },
 };
 
@@ -74,18 +87,6 @@ function getRowStatsLine(unit: ArmyUnit): string {
   return parts.join(' · ');
 }
 
-const statusGlyph: Record<UnitStatus, { char: string; className: string }> = {
-  active: { char: '', className: '' },
-  done: { char: '✓', className: 'text-green-500' },
-  dead: { char: '✕', className: 'text-red-600' },
-  captured: { char: '⚑', className: 'text-orange-400' },
-};
-
-/**
- * Полноширинная строка юнита в развёрнутом навигаторе — главный способ
- * навигации в бою (плейтест: чипы 100px с обрезанным именем были нечитаемы).
- * Фото + полное имя + статы + статус-глиф справа.
- */
 export const ExpandedUnitRow = memo(function ExpandedUnitRow({
   unit,
   isActive,
@@ -93,9 +94,11 @@ export const ExpandedUnitRow = memo(function ExpandedUnitRow({
   onClick,
   faction,
 }: ExpandedUnitRowProps) {
-  const styles = sectionStyles[section];
-  const factionColors = section === 'active' ? getFactionColors(faction) : null;
+  const factionColors = getFactionColors(faction);
+  const mark = statusMark[section];
   const isMachine = unit.type === 'machine';
+  // Убитые — компактная строка (плейтест: «по сути не сильно нужны»)
+  const compact = section === 'dead';
 
   const imageUrl = isMachine
     ? unit.data.image!
@@ -104,40 +107,42 @@ export const ExpandedUnitRow = memo(function ExpandedUnitRow({
     ? `${BASE_PATH}${imageUrl}`
     : imageUrl;
 
-  const statusWord = section === 'active' ? 'активный' : section === 'done' ? 'походил' : section === 'dead' ? 'убит' : 'захвачен';
-  const glyph = statusGlyph[section];
-
   return (
     <button
       onClick={onClick}
-      aria-label={`${unit.data.name}, ${statusWord}`}
+      aria-label={`${unit.data.name}, ${mark.statusWord}`}
       className={cn(
-        'w-full flex items-center gap-2.5 min-h-[76px] px-2 py-1.5 rounded-md border text-left',
-        'transition-all duration-200 hover:brightness-125 active:scale-[0.99]',
-        styles.cardBg,
-        styles.opacity,
-        isActive && 'ring-2 ring-offset-2 ring-offset-slate-950',
-        section === 'active' && factionColors
-          ? cn('border', factionColors.borderSolid, isActive && factionColors.ring)
-          : styles.cardBorder
+        'w-full flex items-center text-left transition-colors',
+        compact ? 'gap-2 px-2 py-1' : 'gap-3 px-2 py-2',
+        'active:bg-slate-800/60',
+        // Focused row: единственный маркер — фракционный тинт фона
+        // (никаких border+ring пар — плейтест: «двойные рамки»)
+        isActive ? cn('bg-slate-800/40 hover:bg-slate-800/60', factionColors.bg) : 'hover:bg-slate-800/40',
+        mark.dim
       )}
       data-testid={`expanded-unit-${unit.instanceId}`}
     >
-      {/* Фото — узкий портрет, № инстанса в углу */}
-      <div className={cn('relative w-14 shrink-0 aspect-[3/4] rounded-sm overflow-hidden', styles.imageBg)}>
+      {/* Статусная полоса слева — цвет вместо группировки */}
+      <div aria-hidden="true" className={cn('self-stretch w-1 shrink-0 rounded-full', mark.stripe)} />
+
+      {/* Фото: крупное у живых (распознавание миниатюры), скромное у убитых */}
+      <div className={cn(
+        'relative shrink-0 aspect-[3/4] rounded-sm overflow-hidden bg-slate-900/80',
+        compact ? 'w-14' : 'w-24'
+      )}>
         {finalSrc ? (
           <img
             src={finalSrc}
             alt=""
             aria-hidden="true"
             className="w-full h-full object-cover"
-            style={{ objectPosition: '50% 20%' }}
+            style={{ objectPosition: '50% 15%' }}
           />
         ) : (
           <span className="text-slate-500 text-xs">IMG</span>
         )}
         <span className="absolute bottom-[2px] left-[2px] px-1 rounded-sm bg-black/70">
-          <span className="text-[9px] font-bold font-mono text-slate-300">
+          <span className={cn('font-bold font-mono text-slate-300', compact ? 'text-[9px]' : 'text-[10px]')}>
             #{unit.instanceNumber || ''}
           </span>
         </span>
@@ -145,27 +150,20 @@ export const ExpandedUnitRow = memo(function ExpandedUnitRow({
 
       {/* Полное имя + строка статов */}
       <div className="flex-1 min-w-0">
-        <div className={cn('text-xs font-bold font-mono uppercase tracking-wide truncate', styles.text)}>
+        <div className={cn('font-bold font-mono uppercase tracking-wide truncate', compact ? 'text-xs' : 'text-sm', mark.nameClass)}>
           {unit.data.name}
         </div>
-        <div className="mt-0.5 text-[10px] font-mono text-slate-400 truncate">
+        <div className={cn('font-mono text-slate-400 truncate', compact ? 'mt-0.5 text-[10px]' : 'mt-1 text-[11px]')}>
           {getRowStatsLine(unit)}
         </div>
       </div>
 
-      {/* Статус справа */}
-      <div className="shrink-0 w-7 flex items-center justify-center text-base">
-        {section === 'active' && factionColors && (
-          <div
-            className="w-2 h-2"
-            style={{
-              backgroundColor: factionColors.primary,
-              clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)',
-            }}
-          />
-        )}
-        {glyph.char && <span className={glyph.className} aria-hidden="true">{glyph.char}</span>}
-      </div>
+      {/* Статусная метка справа */}
+      {mark.glyph && (
+        <span className={cn('shrink-0 w-6 font-black text-center', compact ? 'text-sm' : 'text-lg', mark.glyphClass)} aria-hidden="true">
+          {mark.glyph}
+        </span>
+      )}
     </button>
   );
 }, (prev, next) => {
