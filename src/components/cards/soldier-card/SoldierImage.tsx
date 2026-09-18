@@ -23,7 +23,7 @@ export function SoldierImage({
   onImageClick,
 }: SoldierImageProps) {
   return (
-    <div className="relative w-16 md:w-20 aspect-[3/4] rounded-sm overflow-hidden flex-shrink-0 bg-slate-900 cursor-pointer shadow-md">
+    <div data-testid="soldier-photo" className="relative w-16 md:w-20 aspect-[3/4] rounded-sm overflow-hidden flex-shrink-0 bg-slate-900 cursor-pointer shadow-md">
       <div onClick={onImageClick} className="w-full h-full overflow-hidden">
         <Image
           src={imageUrl}
