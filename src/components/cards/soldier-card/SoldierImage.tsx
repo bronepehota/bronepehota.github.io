@@ -47,7 +47,8 @@ export function SoldierImage({
       )}
 
       {/* Soldier number HUD — flush top-right corner, ghost (playtest:
-          bordered chip was too heavy over the photo) */}
+          bordered chip was too heavy over the photo). The done button lives
+          in the opposite bottom-right corner. */}
       <div className="absolute top-0 right-0 z-10">
         <div className="px-1 py-0.5 bg-slate-950/30 rounded-bl-sm">
           <span className="font-mono text-[10px] font-bold text-white/70">
