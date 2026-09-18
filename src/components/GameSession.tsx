@@ -951,7 +951,7 @@ export default function GameSession({
               {/* Row 2 — stats + controls. flex-wrap: на 320px кластер
                   кнопок переносится строкой вместо обрезания (высота дока
                   авторастёт через ResizeObserver → bottomInset). */}
-              <div className="flex flex-wrap items-center gap-1.5">
+              <div className="flex flex-wrap items-center gap-1 md:gap-1.5">
                 {/* Armor badge - squads with uniform armor */}
                 {focusedUnit.type === 'squad' && squadUniformStats.isUniformArmor && squadUniformStats.commonArmor !== undefined && (() => {
                   const bonus = squadDockBonuses.armorBonus ? `+${squadDockBonuses.armorBonus}` : undefined;
@@ -960,7 +960,7 @@ export default function GameSession({
                     <div
                       data-testid="dock-armor-badge"
                       className={cn(
-                        'flex items-center justify-center gap-0.5 rounded-lg min-h-[40px] min-w-[48px] max-w-[72px] px-1 transition-colors shrink-0',
+                        'flex items-center justify-center gap-0.5 rounded-lg min-h-[40px] min-w-[44px] max-w-[72px] px-1 transition-colors shrink-0',
                         isActive ? 'border border-emerald-500/40 shadow-[inset_0_0_8px_rgba(16,185,129,0.06)]' : 'border border-slate-700/40 bg-slate-800/60'
                       )}
                     >
@@ -985,7 +985,7 @@ export default function GameSession({
                     <div
                       data-testid="dock-speed-badge"
                       className={cn(
-                        'flex items-center justify-center gap-0.5 rounded-lg min-h-[40px] min-w-[48px] max-w-[72px] px-1 transition-colors shrink-0',
+                        'flex items-center justify-center gap-0.5 rounded-lg min-h-[40px] min-w-[44px] max-w-[72px] px-1 transition-colors shrink-0',
                         isActive ? 'border border-emerald-500/40 shadow-[inset_0_0_8px_rgba(16,185,129,0.06)]' : 'border border-slate-700/40 bg-slate-800/60'
                       )}
                     >
@@ -1091,8 +1091,10 @@ export default function GameSession({
                     "border-slate-700/50 bg-slate-800/60 text-slate-300 hover:bg-slate-700/60 hover:text-slate-100"
                   )}
                 >
-                  <LayoutGrid className="w-3.5 h-3.5 shrink-0" />
-                  Список
+                  <LayoutGrid className="w-4 h-4 shrink-0" />
+                  {/* Подпись только на десктопе: на мобиле иконка+счётчик,
+                      иначе ⋮ переносится на вторую строку (плейтест) */}
+                  <span className="hidden md:inline">Список</span>
                   <span
                     data-testid="dock-nav-counter"
                     aria-hidden="true"
@@ -1135,7 +1137,7 @@ export default function GameSession({
                         ) : (
                           <CheckCircle2 className="w-4 h-4" />
                         )}
-                        {isDone ? "Отмена" : "Готов"}
+                        <span className="hidden md:inline">{isDone ? "Отмена" : "Готов"}</span>
                       </button>
                       {/* Dock menu — moved from the unit strip's far right
                           (playtest: undiscoverable there) */}
