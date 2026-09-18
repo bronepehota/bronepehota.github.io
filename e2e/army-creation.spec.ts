@@ -180,3 +180,41 @@ test.describe('Army Creation', () => {
     await expect(page.getByTestId('unit-search-input')).toHaveValue('');
   });
 });
+
+test.describe('Detailed view on mobile', () => {
+  test.use({ viewport: { width: 375, height: 667 } });
+
+  test('renders a two-column grid with contained portrait card art', async ({ page }) => {
+    // Mobile defaults to compact — switch to detailed explicitly
+    await setupToArmyBuilder(page, { faction: 'polaris', budget: 350 });
+    await page.getByTestId('display-mode-detailed').click();
+
+    const cards = page.locator('[data-testid^="unit-card-"]');
+    await expect(cards.first()).toBeVisible();
+    expect(await cards.count()).toBeGreaterThan(1);
+
+    // Two squad cards share a row, each narrower than half the viewport
+    const b1 = await cards.nth(0).boundingBox();
+    const b2 = await cards.nth(1).boundingBox();
+    expect(b1).toBeTruthy();
+    expect(b2).toBeTruthy();
+    expect(Math.abs(b1!.y - b2!.y)).toBeLessThan(4);
+    expect(b1!.width).toBeLessThan(375 / 2);
+
+    // Card art (300×400) shows in full inside a 3:4 portrait block
+    const cardWithImg = cards.filter({ has: page.locator('img') }).first();
+    await expect(cardWithImg).toBeVisible();
+    const img = cardWithImg.locator('img').first();
+    const fit = await img.evaluate((el) => getComputedStyle(el).objectFit);
+    expect(fit).toBe('contain');
+    const wrapper = await img.evaluate((el) => {
+      // The aspect box is the positioned parent of the filled image
+      const box = (el.parentElement as HTMLElement).closest('.aspect-\\[3\\/4\\]') as HTMLElement | null;
+      const r = box?.getBoundingClientRect();
+      return r ? { width: r.width, height: r.height } : null;
+    });
+    expect(wrapper).toBeTruthy();
+    const ratio = wrapper!.height / wrapper!.width;
+    expect(Math.abs(ratio - 4 / 3)).toBeLessThan(0.05);
+  });
+});

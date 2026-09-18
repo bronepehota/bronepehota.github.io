@@ -26,9 +26,15 @@ interface MachineCardProps {
    * 'Союзник' (default). Computed by UnitSelector from `relationTo(...)`.
    */
   allyLabel?: string;
+  /**
+   * Image block ratio: 'square' (default — army summary view) | 'portrait'
+   * (3:4 card art in the army-builder detailed grid — object-contain, no crop;
+   * machine renders are 300×400 like squad art).
+   */
+  imageAspectRatio?: 'square' | 'portrait';
 }
 
-export default function MachineCard({ machine, onAdd, onViewDetails, testId, allyFactionId, allyLabel }: MachineCardProps) {
+export default function MachineCard({ machine, onAdd, onViewDetails, testId, allyFactionId, allyLabel, imageAspectRatio = 'square' }: MachineCardProps) {
   const [imageError, setImageError] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
 
@@ -88,13 +94,19 @@ export default function MachineCard({ machine, onAdd, onViewDetails, testId, all
       )} />
 
       {/* Image */}
-      <div className="relative aspect-square bg-slate-900/50 overflow-hidden">
+      <div className={clsx(
+        'relative bg-slate-900/50 overflow-hidden',
+        imageAspectRatio === 'portrait' ? 'aspect-[3/4]' : 'aspect-square'
+      )}>
         {!imageError ? (
           <SafeImage
             src={machine.image}
             alt={machine.name}
             fill
-            className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
+            className={clsx(
+              'w-full h-full group-hover:scale-105 transition-transform duration-500',
+              imageAspectRatio === 'portrait' ? 'object-contain' : 'object-cover'
+            )}
             onError={() => setImageError(true)}
           />
         ) : (
