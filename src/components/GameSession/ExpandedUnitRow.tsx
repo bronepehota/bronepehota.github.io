@@ -153,7 +153,10 @@ export const ExpandedUnitRow = memo(function ExpandedUnitRow({
         <div className={cn('font-bold font-mono uppercase tracking-wide truncate', compact ? 'text-xs' : 'text-sm', mark.nameClass)}>
           {unit.data.name}
         </div>
-        <div className={cn('font-mono text-slate-400 truncate', compact ? 'mt-0.5 text-[10px]' : 'mt-1 text-[11px]')}>
+        <div className={cn(
+          'font-mono font-semibold truncate',
+          compact ? 'mt-0.5 text-[11px] text-slate-500' : 'mt-1.5 text-[13px] text-slate-300'
+        )}>
           {getRowStatsLine(unit)}
         </div>
       </div>
