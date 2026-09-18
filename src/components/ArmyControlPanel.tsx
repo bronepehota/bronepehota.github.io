@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ViewMode, FilterType, FactionID } from '@/lib/types';
-import { Users, Zap, Shield, Eye } from 'lucide-react';
+import { Users, Zap, Shield, Eye, Search, X } from 'lucide-react';
 import { getFactionColors } from '@/lib/faction-colors';
 import { DisplayModeToggle } from './controls/DisplayModeToggle';
 
@@ -19,6 +19,12 @@ interface ArmyControlPanelProps {
   armyCount: number;
   displayMode: 'detailed' | 'compact';
   onDisplayModeChange: (mode: 'detailed' | 'compact') => void;
+  /** Catalog name search (NOT persisted — unlike display mode). Filters the
+   *  available-units list in UnitSelector, ANDs with the type filter. */
+  searchQuery: string;
+  onSearchQueryChange: (query: string) => void;
+  /** Filtered catalog size to echo next to the input; optional. */
+  resultCount?: number;
 }
 
 export function ArmyControlPanel({
@@ -33,7 +39,10 @@ export function ArmyControlPanel({
   pointBudget,
   armyCount,
   displayMode,
-  onDisplayModeChange
+  onDisplayModeChange,
+  searchQuery,
+  onSearchQueryChange,
+  resultCount
 }: ArmyControlPanelProps) {
   const colors = getFactionColors(factionId);
 
@@ -170,6 +179,41 @@ export function ArmyControlPanel({
           </span>
         </button>
 
+      </div>
+
+      {/* Catalog search — filters available units by name/shortName/faction */}
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => onSearchQueryChange(e.target.value)}
+            placeholder="ПОИСК…"
+            aria-label="Поиск по названию"
+            data-testid="unit-search-input"
+            className="w-full min-h-[44px] rounded-lg border border-slate-700/50 bg-slate-900/60 py-2 pl-9 pr-10 font-mono text-xs tracking-wide text-slate-200 placeholder:text-slate-500 focus:border-slate-500 focus:outline-none touch-manipulation"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => onSearchQueryChange('')}
+              data-testid="unit-search-clear"
+              aria-label="Очистить поиск"
+              className="absolute inset-y-0 right-1 flex w-10 items-center justify-center text-slate-500 hover:text-slate-300 touch-manipulation"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+        {searchQuery.trim() && resultCount !== undefined && (
+          <span
+            data-testid="unit-search-count"
+            className="font-mono text-[10px] text-slate-500 tabular-nums shrink-0"
+          >
+            {resultCount}
+          </span>
+        )}
       </div>
 
       {/* Display mode toggle — switch between detailed cards and compact list */}

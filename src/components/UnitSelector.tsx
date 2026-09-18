@@ -13,6 +13,7 @@ import { clsx } from 'clsx';
 import { getFactionColors, factionDisplayNames } from '@/lib/faction-colors';
 import { FactionLogo } from '@/components/FactionLogo';
 import { relationTo } from '@/lib/faction-hierarchy';
+import { buildCatalogHaystack, matchesHaystack } from '@/lib/unit-search';
 
 
 interface UnitSelectorProps {
@@ -77,6 +78,8 @@ export function UnitSelector({
   sourceId,
 }: UnitSelectorProps) {
   const [filterType, setFilterType] = useState<FilterType>('all');
+  // Catalog name search (session-only, not persisted). ANDs with filterType.
+  const [searchQuery, setSearchQuery] = useState('');
 
   const [showWarning, setShowWarning] = useState(false);
   const [expandedUnitId, setExpandedUnitId] = useState<string | null>(null);
@@ -134,7 +137,18 @@ export function UnitSelector({
     [availableSquads, availableMachines, selectedFaction],
   );
 
-  // Apply type filter to available units
+  // Precomputed search haystacks for the catalog (name/shortName/faction) —
+  // build once per catalog change, then each keystroke is a cheap substring
+  // check. Composite key: squad and machine ids live in separate namespaces.
+  const catalogHaystacks = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const u of availableUnits) {
+      m.set(`${u.type}:${u.data.id}`, buildCatalogHaystack(u.data));
+    }
+    return m;
+  }, [availableUnits]);
+
+  // Apply type filter + text search to available units
   const filteredAvailableUnits = useMemo(() => {
     let units = availableUnits;
     if (filterType === 'selected') {
@@ -149,8 +163,18 @@ export function UnitSelector({
         units = units.filter(u => u.type === filterType);
       }
     }
+    // Text search ANDs with the type filter; applies to the available
+    // catalog only — the already-added army instances are not filtered.
+    if (searchQuery.trim()) {
+      units = units.filter((u) =>
+        matchesHaystack(
+          searchQuery,
+          catalogHaystacks.get(`${u.type}:${u.data.id}`) ?? buildCatalogHaystack(u.data),
+        ),
+      );
+    }
     return units;
-  }, [availableUnits, filterType, army]);
+  }, [availableUnits, filterType, army, searchQuery, catalogHaystacks]);
 
   // Get instance count for a unit
   const getInstanceCount = (unitId: string): number => {
@@ -271,6 +295,9 @@ export function UnitSelector({
         armyCount={army.length}
         displayMode={displayMode}
         onDisplayModeChange={onDisplayModeChange}
+        searchQuery={searchQuery}
+        onSearchQueryChange={setSearchQuery}
+        resultCount={filteredAvailableUnits.length}
       />
 
       {/* Warning toast */}
@@ -290,11 +317,29 @@ export function UnitSelector({
       {/* Available units */}
       <div className="space-y-4 pb-32">
         {filteredAvailableUnits.length === 0 ? (
-          <div className="text-center py-12 px-4 bg-slate-800/30 rounded-lg border border-slate-700/50">
-            <p className="text-slate-500 text-sm">
-              {filterType === 'selected' ? 'Нет выбранных юнитов' : 'Нет юнитов выбранного типа'}
-            </p>
-          </div>
+          searchQuery.trim() ? (
+            <div
+              data-testid="unit-search-empty"
+              className="text-center py-12 px-4 bg-slate-800/30 rounded-lg border border-slate-700/50 space-y-3"
+            >
+              <p className="font-mono text-sm uppercase tracking-wider text-slate-400">Ничего не найдено</p>
+              <p className="text-slate-500 text-xs">по запросу «{searchQuery.trim()}»</p>
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                data-testid="unit-search-empty-reset"
+                className="min-h-[44px] px-4 py-2 rounded-lg border border-slate-600/60 text-slate-300 font-mono text-xs uppercase tracking-wider hover:bg-slate-700/40 transition-colors touch-manipulation"
+              >
+                Сбросить поиск
+              </button>
+            </div>
+          ) : (
+            <div className="text-center py-12 px-4 bg-slate-800/30 rounded-lg border border-slate-700/50">
+              <p className="text-slate-500 text-sm">
+                {filterType === 'selected' ? 'Нет выбранных юнитов' : 'Нет юнитов выбранного типа'}
+              </p>
+            </div>
+          )
         ) : displayMode === 'compact' ? (
           /* Compact view - list of compact cards */
           <div className="space-y-2">

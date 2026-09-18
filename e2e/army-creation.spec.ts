@@ -143,4 +143,40 @@ test.describe('Army Creation', () => {
     await sheet.getByRole('button', { name: /добавить/i }).click();
     await expect(page.getByTestId('unit-detail-sheet')).toHaveCount(0);
   });
+
+  test('search filters the unit catalog by name', async ({ page }) => {
+    // Desktop viewport defaults to 'detailed' → squad cards carry unit-card-* testids
+    await setupToArmyBuilder(page, { faction: 'polaris', budget: 350 });
+
+    const cards = page.locator('[data-testid^="unit-card-"]');
+    await expect(cards.first()).toBeVisible();
+    const names = (await cards.locator('h3').allInnerTexts()).map((n) => n.toLowerCase());
+    expect(names.length).toBeGreaterThan(1);
+
+    // Distinctive probe: extend a prefix of the first card's name (spaces
+    // stripped) until exactly one catalog name contains it
+    const base = names[0].replace(/[^a-zа-я0-9]/gi, '');
+    let probe = '';
+    for (let len = 4; len <= base.length; len++) {
+      const candidate = base.slice(0, len);
+      if (names.filter((n) => n.includes(candidate)).length === 1) {
+        probe = candidate;
+        break;
+      }
+    }
+    expect(probe).toBeTruthy();
+
+    // Probe narrows the catalog to its single card
+    await page.getByTestId('unit-search-input').fill(probe);
+    await expect(page.locator('[data-testid^="unit-card-"]')).toHaveCount(1);
+
+    // Garbage query → dedicated empty state with a reset
+    await page.getByTestId('unit-search-input').fill('zzzzzz');
+    await expect(page.getByTestId('unit-search-empty')).toBeVisible();
+    await page.getByTestId('unit-search-empty-reset').click();
+
+    // Reset restores the full catalog and clears the input
+    await expect(page.locator('[data-testid^="unit-card-"]')).toHaveCount(names.length);
+    await expect(page.getByTestId('unit-search-input')).toHaveValue('');
+  });
 });

@@ -1,6 +1,8 @@
 import {
   buildSearchHaystack,
+  buildCatalogHaystack,
   matchesSearch,
+  matchesHaystack,
   matchLoreTitles,
   toSearchBody,
 } from '@/lib/unit-search';
@@ -168,5 +170,43 @@ title: Космография
     const noisyBody = toSearchBody(noisy, 0);
     expect(noisyBody).not.toContain('если');
     expect(noisyBody).toContain('вега');
+  });
+});
+
+describe('unit-search: каталог набора армии', () => {
+  const squadEntry = { name: 'Легкий штурм', shortName: 'ЛШ', faction: 'polaris' as const };
+  const machineEntry = { name: 'Хантер', faction: 'protectorate' as const };
+
+  it('buildCatalogHaystack: имя, shortName и фракция, нижним регистром', () => {
+    const h = buildCatalogHaystack(squadEntry);
+    expect(h).toContain('легкий штурм');
+    expect(h).toContain('лш');
+    expect(h).toContain('полярис');
+    // Без shortName — не падает, остальное на месте
+    expect(buildCatalogHaystack(machineEntry)).toContain('хантер');
+    expect(buildCatalogHaystack(machineEntry)).toContain('протекторат');
+  });
+
+  it('matchesHaystack: регистронезависимо, токен-AND, пустой запрос пропускает', () => {
+    const h = buildCatalogHaystack(squadEntry);
+    expect(matchesHaystack('ЛЕГКИЙ', h)).toBe(true);
+    expect(matchesHaystack('лш', h)).toBe(true);
+    // Оба токена есть (имя + shortName)
+    expect(matchesHaystack('легкий лш', h)).toBe(true);
+    // Одного токена нет → нет
+    expect(matchesHaystack('легкий танк', h)).toBe(false);
+    // Фракция тоже ищется
+    expect(matchesHaystack('полярис', h)).toBe(true);
+    expect(matchesHaystack('протекторат', h)).toBe(false);
+    // Пустой/пробельный запрос — все проходят
+    expect(matchesHaystack('', h)).toBe(true);
+    expect(matchesHaystack('   ', h)).toBe(true);
+  });
+
+  it('matchesSearch делегирует matchesHaystack — семантика не изменилась', () => {
+    // Тот же набор кейсов, что и у классических тестов выше, но через делегата
+    expect(matchesSearch(unit, 'РОБОГИР')).toBe(true);
+    expect(matchesSearch(unit, 'робогир тунгус')).toBe(false);
+    expect(matchesSearch(unit, '')).toBe(true);
   });
 });

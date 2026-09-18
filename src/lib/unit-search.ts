@@ -1,4 +1,5 @@
 import type { EncyclopediaUnit } from './encyclopedia-registry';
+import type { FactionID } from './types';
 import { factionDisplayNames } from './faction-colors';
 
 /** Lore page reference for search hints (chapters, campaigns, missions, unit
@@ -86,14 +87,39 @@ export function buildSearchHaystack(unit: EncyclopediaUnit): string {
     .toLowerCase();
 }
 
+/** Army-builder catalog entry (Squad | Machine share this shape) for
+ *  buildCatalogHaystack — catalog units carry no encyclopedia fields. */
+export type CatalogSearchUnit = { name: string; shortName?: string; faction: FactionID };
+
+/** Haystack for army-builder catalog entries: name, shortName and faction
+ *  display name, lowercased. Matching semantics are shared with
+ *  matchesSearch via matchesHaystack — one source of truth for token logic. */
+export function buildCatalogHaystack(unit: CatalogSearchUnit): string {
+  return [
+    unit.name,
+    unit.shortName,
+    factionDisplayNames[unit.faction],
+  ]
+    .filter((v): v is string => typeof v === 'string' && v.length > 0)
+    .join(' ')
+    .toLowerCase();
+}
+
+/** Case-insensitive token-AND substring match against a precomputed haystack:
+ *  the query is split on whitespace and EVERY token must be a substring.
+ *  Empty/whitespace query matches everything. Shared by the encyclopedia
+ *  search (matchesSearch) and the army-builder catalog filter. */
+export function matchesHaystack(query: string, haystack: string): boolean {
+  const tokens = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if (tokens.length === 0) return true;
+  return tokens.every((t) => haystack.includes(t));
+}
+
 /** Case-insensitive token-AND match against the (optional precomputed) haystack:
  *  the query is split on whitespace and EVERY token must be a substring
  *  («полярис герой» finds heroes of Polaris without an exact phrase). */
 export function matchesSearch(unit: EncyclopediaUnit, query: string, haystack?: string): boolean {
-  const tokens = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
-  if (tokens.length === 0) return true;
-  const h = haystack ?? buildSearchHaystack(unit);
-  return tokens.every((t) => h.includes(t));
+  return matchesHaystack(query, haystack ?? buildSearchHaystack(unit));
 }
 
 /** Lore pages matching the query (≥3 chars) by TITLE or BODY. Title matches
