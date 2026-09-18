@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CheckCircle2 } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface SoldierDoneButtonProps {
@@ -17,7 +17,10 @@ interface SoldierDoneButtonProps {
 }
 
 /**
- * «Готов» (завершить ход бойца) — живёт поверх фото бойца, угол снизу-слева.
+ * «Готов» (завершить ход бойца) — подписанный мини-чип поверх фото бойца,
+ * правый нижний угол. Построен той же конструкцией, что и бейдж № бойца
+ * (те же отступы/фон/шрифт) — иконка-квадрат в прошлой итерации не читалась
+ * как кнопка. Тап-зона расширена невидимым полем (::after) влево-вверх.
  * Short click marks done; long press (600ms) cancels when already done —
  * the wasLongPressTriggered guard travels with the button so the trailing
  * click after a completed long-press never double-fires.
@@ -61,20 +64,16 @@ export function SoldierDoneButton({
       onTouchEnd={onEndLongPress}
       onClick={handleClick}
       className={cn(
-        // Ghost chip the size of the #N badge, flush in the image's bottom-right
-        // corner (playtest iteration 2). The visible 28px is backed by a ~48px
-        // finger-friendly tap zone: ::after extends up and to the LEFT only (the
-        // corner sides touch the card edges) — no overflow-hidden, it would clip
-        // that zone.
-        "relative w-7 h-7 p-0.5 rounded-tl-sm transition-all flex items-center justify-center border",
+        // No overflow-hidden: it would clip the ::after tap zone.
+        // h-5 fixes the chip height — inline mono metrics otherwise inflate
+        // the line box (28px) beyond the visible text.
+        "relative h-5 px-1 rounded-tl-sm transition-all flex items-center gap-0.5 border font-mono text-[10px] font-bold",
         isDone
-          ? "bg-gradient-to-br from-emerald-600 to-emerald-800 hover:from-emerald-500 hover:to-emerald-700 shadow-[0_0_10px_rgba(16,185,129,0.5)] border-emerald-500 text-emerald-100"
-          // Rest: almost transparent — the photo shows through, only a faint
-          // check floats in the corner
-          : "bg-slate-950/30 border-transparent text-slate-400/70 hover:text-slate-200 hover:bg-slate-950/50",
+          ? "bg-emerald-700/90 border-emerald-500/70 text-white shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+          : "bg-slate-950/40 border-transparent text-white/75 hover:bg-slate-950/60 hover:text-white active:bg-slate-900/70",
         isLongPressing && "scale-90 opacity-80",
         "disabled:opacity-40 disabled:cursor-not-allowed",
-        "after:absolute after:content-[''] after:-left-5 after:-top-5 after:right-0 after:bottom-0",
+        "after:absolute after:content-[''] after:-left-4 after:-top-6 after:right-0 after:bottom-0",
         className
       )}
       type="button"
@@ -84,13 +83,8 @@ export function SoldierDoneButton({
       data-testid="soldier-done-button"
       data-soldier-index={soldierIndex}
     >
-      {isDone && (
-        <>
-          <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-emerald-400/60" aria-hidden="true" />
-          <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-emerald-400/60" aria-hidden="true" />
-        </>
-      )}
-      <CheckCircle2 className="w-4 h-4" />
+      {isDone && <Check className="w-2.5 h-2.5 shrink-0" strokeWidth={3} />}
+      ГОТОВ
     </button>
   );
 }
