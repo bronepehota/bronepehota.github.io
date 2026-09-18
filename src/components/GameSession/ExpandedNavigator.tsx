@@ -5,7 +5,7 @@ import { Army, ArmyUnit, FactionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { getFactionColors } from '@/lib/faction-colors';
 import { deriveUnitStatus, UnitStatus } from '@/lib/unit-status';
-import { ExpandedUnitCard } from './ExpandedUnitCard';
+import { ExpandedUnitRow } from './ExpandedUnitRow';
 
 interface ExpandedNavigatorProps {
   army: Army;
@@ -20,6 +20,7 @@ interface SectionConfig {
   borderColor: string;
   countBg: string;
   countText: string;
+  labelText: string;
 }
 
 const sections: SectionConfig[] = [
@@ -30,6 +31,7 @@ const sections: SectionConfig[] = [
     borderColor: '',
     countBg: '',
     countText: '',
+    labelText: 'text-slate-400',
   },
   {
     key: 'done',
@@ -38,6 +40,7 @@ const sections: SectionConfig[] = [
     borderColor: 'border-b-green-900',
     countBg: 'bg-green-500/15',
     countText: 'text-green-400',
+    labelText: 'text-green-300',
   },
   {
     key: 'dead',
@@ -46,6 +49,16 @@ const sections: SectionConfig[] = [
     borderColor: 'border-b-red-900',
     countBg: 'bg-red-500/15',
     countText: 'text-red-400',
+    labelText: 'text-red-300',
+  },
+  {
+    key: 'captured',
+    label: 'Захвачены',
+    indicatorColor: '#c2410c',
+    borderColor: 'border-b-orange-800',
+    countBg: 'bg-orange-500/15',
+    countText: 'text-orange-400',
+    labelText: 'text-orange-300',
   },
 ];
 
@@ -73,6 +86,15 @@ export function ExpandedNavigator({ army, focusedUnitIdx, onSelectUnit }: Expand
         <span className="text-slate-500 text-[10px] uppercase tracking-wider font-mono">
           Полевой обзор
         </span>
+        <span
+          className={cn(
+            'ml-2 text-[10px] font-bold font-mono px-1.5 py-0.5 rounded-sm bg-slate-500/15',
+            factionColors.text
+          )}
+          aria-label={`Активных юнитов: ${grouped.active.length}`}
+        >
+          активн. {grouped.active.length}
+        </span>
         <span className="ml-auto text-slate-600 text-[11px]">
           ⟷ свайп вниз
         </span>
@@ -90,7 +112,7 @@ export function ExpandedNavigator({ army, focusedUnitIdx, onSelectUnit }: Expand
             aria-label={`${sectionConfig.label} юниты`}
           >
             <div className={cn(
-              'flex items-center gap-2 mb-2.5 pb-1.5 border-b',
+              'flex items-center gap-2 mb-2 pb-1.5 border-b',
               isActiveSection ? 'border-b-slate-700' : sectionConfig.borderColor
             )}>
               <div
@@ -102,8 +124,7 @@ export function ExpandedNavigator({ army, focusedUnitIdx, onSelectUnit }: Expand
               />
               <span className={cn(
                 'text-[11px] uppercase tracking-[2px] font-semibold',
-                isActiveSection ? 'text-slate-400' :
-                sectionConfig.key === 'done' ? 'text-green-300' : 'text-red-300'
+                sectionConfig.labelText
               )}>
                 {sectionConfig.label}
               </span>
@@ -120,14 +141,13 @@ export function ExpandedNavigator({ army, focusedUnitIdx, onSelectUnit }: Expand
               </span>
             </div>
 
-            <div className="flex flex-wrap gap-2.5">
+            <div className="flex flex-col gap-1.5">
               {items.map(({ unit, idx }) => (
-                <ExpandedUnitCard
+                <ExpandedUnitRow
                   key={unit.instanceId}
                   unit={unit}
                   isActive={focusedUnitIdx === idx}
                   section={sectionConfig.key}
-                  isMachine={unit.type === 'machine'}
                   onClick={() => onSelectUnit(idx)}
                   faction={faction}
                 />

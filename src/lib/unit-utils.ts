@@ -7,7 +7,8 @@
  * @module unit-utils
  */
 
-import type { Army, ArmyUnit, Squad } from './types';
+import type { Army, ArmyUnit, Machine, Squad } from './types';
+import { deriveUnitStatus, type UnitStatus } from './unit-status';
 
 /**
  * Counts units by their template ID (Squad/Machine ID)
@@ -198,6 +199,31 @@ export function getAliveSoldiersCount(unit: ArmyUnit): number {
   if (unit.type !== 'squad') return 0;
   const squad = unit.data as Squad;
   return squad.soldiers.length - (unit.deadSoldiers?.length || 0);
+}
+
+/**
+ * Counts units per derived status. Feeds the dock «СПИСОК N/M» counter
+ * (N = done+dead+captured) and the navigator header's active count.
+ */
+export function countUnitsByStatus(units: ArmyUnit[]): Record<UnitStatus, number> {
+  const counts: Record<UnitStatus, number> = { active: 0, done: 0, dead: 0, captured: 0 };
+  units.forEach(u => {
+    counts[deriveUnitStatus(u)]++;
+  });
+  return counts;
+}
+
+/**
+ * Machine speed for its current durability sector; 0 for squads, destroyed
+ * machines, or when no sector matches. Mirrors useMachineStats' lookup.
+ */
+export function getMachineSpeed(unit: ArmyUnit): number {
+  if (unit.type !== 'machine' || !unit.currentDurability) return 0;
+  const machine = unit.data as Machine;
+  const sector = machine.speed_sectors.find(
+    s => unit.currentDurability! >= s.min_durability && unit.currentDurability! <= s.max_durability
+  );
+  return sector ? sector.speed : 0;
 }
 
 /**
