@@ -907,17 +907,6 @@ export default function GameSession({
 
             return elements;
           })()}
-          {/* Menu button at far right of navigation row */}
-          <div className="relative shrink-0 ml-auto">
-            <button
-              data-testid="dock-menu-toggle"
-              onClick={(e) => { e.stopPropagation(); setShowDockMenu(!showDockMenu); }}
-              className="p-1.5 hover:bg-slate-800 rounded-sm transition-colors text-slate-400 hover:text-slate-200 min-w-[44px] min-h-[44px] flex items-center justify-center"
-            >
-              <MoreVertical className="w-4 h-4" />
-            </button>
-
-          </div>
           </div>
           {/* Current unit info bar — two readable rows (playtest fix: the old
               single text-xs row was unreadable on phones).
@@ -1107,34 +1096,48 @@ export default function GameSession({
                 {/* Spacer */}
                 <div className="flex-1 min-w-0" />
 
-                {/* Unit done toggle — labeled filled primary (owner's HUD rule) */}
+                {/* Unit done toggle — labeled, faction-tinted (playtest: solid
+                    faction fill was too loud) + the dock menu right after it */}
                 {(() => {
                   const { isDead, isDone } = getUnitStatus(focusedUnit);
                   return (
-                    <button
-                      data-testid="dock-unit-done"
-                      onClick={isDead ? undefined : handleToggleUnitDone}
-                      disabled={isDead}
-                      aria-pressed={isDone}
-                      title={isDone ? "Отменить завершение" : "Завершить ход"}
-                      aria-label={isDone ? "Отменить завершение хода взвода" : "Завершить ход взвода"}
-                      className={cn(
-                        "shrink-0 min-h-[44px] px-3 flex items-center justify-center gap-1.5 rounded-sm border",
-                        "font-mono text-xs font-black uppercase tracking-wider transition-all hover:scale-[1.02] active:scale-95",
-                        isDead
-                          ? "bg-slate-900/50 border-slate-800/50 opacity-40 cursor-not-allowed"
-                          : isDone
-                            ? "bg-emerald-600 border-emerald-500 text-white hover:bg-emerald-500"
-                            : cn(factionColors.bgSolid, "border-transparent text-white hover:opacity-90")
-                      )}
-                    >
-                      {isDone ? (
-                        <X className="w-4 h-4" />
-                      ) : (
-                        <CheckCircle2 className="w-4 h-4" />
-                      )}
-                      {isDone ? "Отмена" : "Готов"}
-                    </button>
+                    <>
+                      <button
+                        data-testid="dock-unit-done"
+                        onClick={isDead ? undefined : handleToggleUnitDone}
+                        disabled={isDead}
+                        aria-pressed={isDone}
+                        title={isDone ? "Отменить завершение" : "Завершить ход"}
+                        aria-label={isDone ? "Отменить завершение хода взвода" : "Завершить ход взвода"}
+                        className={cn(
+                          "shrink-0 min-h-[44px] px-3 flex items-center justify-center gap-1.5 rounded-sm border",
+                          "font-mono text-xs font-black uppercase tracking-wider transition-all hover:scale-[1.02] active:scale-95",
+                          isDead
+                            ? "bg-slate-900/50 border-slate-800/50 opacity-40 cursor-not-allowed"
+                            : isDone
+                              ? "bg-emerald-900/50 border-emerald-600/50 text-emerald-300 hover:bg-emerald-900/60"
+                              : cn(factionColors.bg, factionColors.border, factionColors.text, "hover:brightness-125")
+                        )}
+                      >
+                        {isDone ? (
+                          <X className="w-4 h-4" />
+                        ) : (
+                          <CheckCircle2 className="w-4 h-4" />
+                        )}
+                        {isDone ? "Отмена" : "Готов"}
+                      </button>
+                      {/* Dock menu — moved from the unit strip's far right
+                          (playtest: undiscoverable there) */}
+                      <button
+                        data-testid="dock-menu-toggle"
+                        onClick={(e) => { e.stopPropagation(); setShowDockMenu(!showDockMenu); }}
+                        aria-label="Меню боя"
+                        title="Меню боя"
+                        className="shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-sm transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/70 active:scale-95"
+                      >
+                        <MoreVertical className="w-4 h-4" />
+                      </button>
+                    </>
                   );
                 })()}
               </div>
