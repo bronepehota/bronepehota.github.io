@@ -46,10 +46,11 @@ export function SoldierImage({
         </div>
       )}
 
-      {/* Soldier number HUD — top right (bottom left hosts the done button) */}
-      <div className="absolute top-1 right-1 z-10">
-        <div className="px-1.5 py-0.5 backdrop-blur-md bg-slate-900/70 border border-slate-600/50 rounded-sm">
-          <span className="font-mono text-[10px] font-bold text-white">
+      {/* Soldier number HUD — flush top-right corner, ghost (playtest:
+          bordered chip was too heavy over the photo) */}
+      <div className="absolute top-0 right-0 z-10">
+        <div className="px-1 py-0.5 bg-slate-950/30 rounded-bl-sm">
+          <span className="font-mono text-[10px] font-bold text-white/70">
             #{soldierIndex + 1}
           </span>
         </div>

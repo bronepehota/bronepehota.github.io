@@ -259,7 +259,7 @@ function SoldierCard({
             onStartLongPress={startLongPress}
             onEndLongPress={cancelLongPress}
             isLongPressing={isLongPressing}
-            className="absolute bottom-0 left-0 z-10 rounded-none rounded-tr-sm"
+            className="absolute bottom-0 left-0 z-10"
           />
         )}
       </div>
