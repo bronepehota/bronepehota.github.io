@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { clearStorage, dismissIntroIfShown } from './helpers/setup';
+import { clearStorage, dismissIntroIfShown, openNavigator } from './helpers/setup';
 
 /**
  * E2E tests for pilot functionality
@@ -76,11 +76,13 @@ test.describe('Pilot Functionality', () => {
       await confirmButton.click();
     }
 
-    // Verify we're in game session
-    await expect(page.locator('button[data-testid^="unit-nav-"]')).toHaveCount(2, { timeout: 5000 });
+    // Verify we're in game session: dock counter shows 0/2 finished units
+    await expect(page.getByTestId('dock-open-navigator')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByTestId('dock-nav-counter')).toHaveText('0/2');
 
-    // Click machine navigation card
-    await page.locator('button[data-testid^="unit-nav-"]').nth(1).click();
+    // Switch to the machine via the expanded navigator (army order: squad, machine)
+    await openNavigator(page);
+    await page.locator('[data-testid^="expanded-unit-"]').nth(1).click();
 
     // Verify machine view is visible (Урон button)
     await expect(page.locator('button:has-text("Урон")')).toBeVisible({ timeout: 3000 });
@@ -102,7 +104,8 @@ test.describe('Pilot Functionality', () => {
     await page.click('[data-testid="confirm-pilot-assignment"]');
 
     // Navigate back to squad to see pilot indicators
-    await page.locator('button[data-testid^="unit-nav-"]').nth(0).click();
+    await openNavigator(page);
+    await page.locator('[data-testid^="expanded-unit-"]').nth(0).click();
 
     // Check for pilot badge on first soldier
     const pilotBadge = page.locator('.relative.w-16.md\\:w-20').first()

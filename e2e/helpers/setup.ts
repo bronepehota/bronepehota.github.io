@@ -263,10 +263,26 @@ export async function setupGameSessionWithMachine(page: Page) {
   await expect(gameSession.first()).toBeVisible({ timeout: TIMEOUTS.load * 2 });
 }
 
-/** Expand the first unit card in game session */
-export async function expandFirstUnit(page: Page) {
-  await page.waitForSelector('[data-testid^="unit-nav-"]', { timeout: TIMEOUTS.load });
-  const unitCard = page.getByTestId(/^unit-nav-/).first();
-  await expect(unitCard).toBeVisible();
-  await unitCard.click({ force: true, timeout: TIMEOUTS.load });
+/**
+ * Wait for the compact battle dock. Unit 0 is focused by default — no click
+ * needed (the tiny-icon strip was removed; unit switching flows through the
+ * expanded navigator).
+ */
+export async function waitForBattleDock(page: Page) {
+  await page.waitForSelector('[data-testid="dock-info-bar"]', { timeout: TIMEOUTS.load });
+}
+
+/** @deprecated strip removed — alias of waitForBattleDock */
+export const expandFirstUnit = waitForBattleDock;
+
+/** Open the expanded unit navigator via the dock СПИСОК button. */
+export async function openNavigator(page: Page) {
+  await page.getByTestId('dock-open-navigator').click();
+  await page.getByTestId('expanded-navigator').waitFor({ state: 'visible', timeout: TIMEOUTS.load });
+}
+
+/** Select a unit by instanceId via the expanded navigator (order-independent). */
+export async function selectUnitInNavigator(page: Page, instanceId: string) {
+  await openNavigator(page);
+  await page.getByTestId(`expanded-unit-${instanceId}`).click();
 }

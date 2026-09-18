@@ -6,7 +6,7 @@ import { setupGameSessionWithSquad } from './helpers/setup';
  * appears in the shot modal. The gate value persists across reloads.
  *
  * Open sequence mirrors e2e/combat.spec.ts (which uses the same helper):
- * click the unit-nav card → "Выберите действие" → "выстрел".
+ * the squad is focused by default → "Выберите действие" → "выстрел".
  *
  * NOTE: setupGameSessionWithSquad calls localStorage.clear() in its initScript,
  * so we cannot set bronepehota_height_bonus_enabled via addInitScript BEFORE the
@@ -16,8 +16,7 @@ import { setupGameSessionWithSquad } from './helpers/setup';
  */
 test.describe('Height bonus (#164)', () => {
   async function openShotModal(page: Page) {
-    const unitCard = page.getByTestId('unit-nav-height-unit-1');
-    await unitCard.first().click({ force: true, timeout: 5000 });
+    await expect(page.getByTestId('dock-info-bar')).toBeVisible({ timeout: 5000 });
     const actionButton = page.getByRole('button', { name: 'Выберите действие' }).first();
     await expect(actionButton).toBeVisible({ timeout: 5000 });
     await actionButton.click({ force: true });

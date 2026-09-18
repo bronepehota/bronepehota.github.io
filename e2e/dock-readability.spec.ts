@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { setupGameSessionWithSquad, expandFirstUnit } from './helpers/setup';
+import { setupGameSessionWithSquad, waitForBattleDock } from './helpers/setup';
 
 /**
  * Battle dock readability (playtest fix): the current-unit info bar used to be
@@ -13,7 +13,7 @@ test.describe('Battle dock readability', () => {
     await setupGameSessionWithSquad(page, {
       unitOverrides: { instanceId: 'dock-readability-unit-1' },
     });
-    await expandFirstUnit(page);
+    await waitForBattleDock(page);
     await expect(page.getByTestId('unit-dock')).toBeVisible();
     await expect(page.getByTestId('dock-info-bar')).toBeVisible({ timeout: 5000 });
   });

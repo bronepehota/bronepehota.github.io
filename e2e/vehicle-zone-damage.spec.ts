@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { setupGameSessionWithSquad, expandFirstUnit, clearStorage } from './helpers/setup';
+import { setupGameSessionWithSquad, waitForBattleDock, clearStorage } from './helpers/setup';
 
 /**
  * #162 — vehicle zone damage: «цель — техника» toggle → zone-based damage;
@@ -20,7 +20,7 @@ test.describe('Vehicle zone damage (#162)', () => {
     await page.reload();
     await page.waitForLoadState('networkidle');
     await expect(page.getByTestId('game-session').first()).toBeVisible({ timeout: 10000 });
-    await expandFirstUnit(page);
+    await waitForBattleDock(page);
   }
 
   // Open the shot modal: click action button → select "выстрел"
@@ -35,7 +35,7 @@ test.describe('Vehicle zone damage (#162)', () => {
 
   test('«цель — техника» toggle shows «макс зоны» and yields vehicle damage', async ({ page }) => {
     await setupGameSessionWithSquad(page, { unitOverrides: { instanceId: 'vz-unit-1' } });
-    await expandFirstUnit(page);
+    await waitForBattleDock(page);
     await enableCommunity(page);
 
     // Open shot modal
@@ -70,7 +70,7 @@ test.describe('Vehicle zone damage (#162)', () => {
 
   test('toggle remembers vehicle target for the same attacker on re-open', async ({ page }) => {
     await setupGameSessionWithSquad(page, { unitOverrides: { instanceId: 'vz-unit-2' } });
-    await expandFirstUnit(page);
+    await waitForBattleDock(page);
     await enableCommunity(page);
 
     // Open shot modal, toggle on

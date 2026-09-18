@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { setupGameSessionWithSquad, expandFirstUnit, clearStorage } from './helpers/setup';
+import { setupGameSessionWithSquad, waitForBattleDock, clearStorage } from './helpers/setup';
 
 /**
  * Soldier State Management E2E tests
@@ -18,7 +18,7 @@ test.describe('Soldier State Management', () => {
     await setupGameSessionWithSquad(page, {
       unitOverrides: { instanceId: 'soldier-state-unit-1' },
     });
-    await expandFirstUnit(page);
+    await waitForBattleDock(page);
     await page.waitForSelector('[data-testid="soldier-kill-button"]', { timeout: 5000 });
     await page.waitForSelector('[data-testid="soldier-done-button"]', { timeout: 5000 });
   });

@@ -17,9 +17,8 @@ test.describe('Grenade target list (#165)', () => {
       unitOverrides: { instanceId: 'grenade-unit-1' },
     });
 
-    // Expand unit card to see action button
-    const unitCard = page.getByTestId('unit-nav-grenade-unit-1');
-    await unitCard.first().click({ force: true, timeout: 5000 });
+    // The squad is focused by default (unit 0) — the action button is up
+    await expect(page.getByTestId('dock-info-bar')).toBeVisible({ timeout: 5000 });
 
     // Open combat modal via action button
     const actionButton = page.getByRole('button', { name: 'Выберите действие' }).first();

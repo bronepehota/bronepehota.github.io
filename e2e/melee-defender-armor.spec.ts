@@ -15,9 +15,8 @@ test.describe('Melee defender armor (#160)', () => {
       unitOverrides: { instanceId: 'melee-armor-unit-1' },
     });
 
-    // Open combat modal (same path as combat.spec.ts)
-    const unitCard = page.getByTestId('unit-nav-melee-armor-unit-1');
-    await unitCard.first().click({ force: true, timeout: 5000 });
+    // Open combat modal (same path as combat.spec.ts) — squad focused by default
+    await expect(page.getByTestId('dock-info-bar')).toBeVisible({ timeout: 5000 });
 
     const actionButton = page.getByRole('button', { name: 'Выберите действие' }).first();
     await expect(actionButton).toBeVisible({ timeout: 5000 });

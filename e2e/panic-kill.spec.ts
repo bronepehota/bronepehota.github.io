@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { setupGameSessionWithSquad, expandFirstUnit, clearStorage } from './helpers/setup';
+import { setupGameSessionWithSquad, waitForBattleDock, clearStorage } from './helpers/setup';
 
 /**
  * #167 — a panicking soldier can be marked killed.
@@ -14,7 +14,7 @@ test.describe('Kill in panic (#167)', () => {
         panicState: [{ soldierIndex: 0, testRoll: 6, rank: 2, triggeredAtTurn: 1 }],
       },
     });
-    await expandFirstUnit(page);
+    await waitForBattleDock(page);
   });
 
   test('panicking soldier shows a working УБИТЬ button and no ГОТОВ button', async ({ page }) => {

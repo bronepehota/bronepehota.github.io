@@ -15,9 +15,8 @@ test.describe('Combat Mechanics', () => {
       unitOverrides: { instanceId: 'combat-unit-1' },
     });
 
-    const unitCard = page.getByTestId('unit-nav-combat-unit-1');
-    await unitCard.first().click({ force: true, timeout: 5000 });
-    await page.waitForTimeout(500);
+    // The squad is focused by default (unit 0)
+    await expect(page.getByTestId('dock-info-bar')).toBeVisible({ timeout: 5000 });
 
     const actionButton = page.getByRole('button', { name: /действие/i });
     const combatModal = page.getByTestId('bottom-sheet-combat-modal');
@@ -54,9 +53,8 @@ test.describe('Combat Mechanics', () => {
       unitOverrides: { instanceId: 'combat-unit-1' },
     });
 
-    // Expand unit card
-    const unitCard = page.getByTestId('unit-nav-combat-unit-1');
-    await unitCard.first().click({ force: true, timeout: 5000 });
+    // The squad is focused by default (unit 0)
+    await expect(page.getByTestId('dock-info-bar')).toBeVisible({ timeout: 5000 });
 
     // Click action button to open combat modal
     const actionButton = page.getByRole('button', { name: 'Выберите действие' }).first();
@@ -85,9 +83,8 @@ test.describe('Combat Mechanics', () => {
       unitOverrides: { instanceId: 'combat-unit-1' },
     });
 
-    // Expand unit card
-    const unitCard = page.getByTestId('unit-nav-combat-unit-1');
-    await unitCard.first().click({ force: true, timeout: 5000 });
+    // The squad is focused by default (unit 0)
+    await expect(page.getByTestId('dock-info-bar')).toBeVisible({ timeout: 5000 });
 
     // Click action button to open combat modal
     const actionButton = page.getByRole('button', { name: 'Выберите действие' }).first();

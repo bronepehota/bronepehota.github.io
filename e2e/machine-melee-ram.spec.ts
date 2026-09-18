@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { expandFirstUnit, clearStorage } from './helpers/setup';
+import { waitForBattleDock, clearStorage } from './helpers/setup';
 
 /**
  * #125 — Machine melee + ram E2E.
@@ -99,7 +99,7 @@ test.describe('Machine melee + ram (#125)', () => {
     await expect(gameSession.first()).toBeVisible({ timeout: 10000 });
 
     // Expand the machine card.
-    await expandFirstUnit(page);
+    await waitForBattleDock(page);
 
     // «Таран» is community-only — confirm it is absent under tehnolog rules.
     await expect(page.getByRole('button', { name: /^Таран$/ })).toHaveCount(0);
@@ -145,7 +145,7 @@ test.describe('Machine melee + ram (#125)', () => {
     await expect(gameSession.first()).toBeVisible({ timeout: 10000 });
 
     // Expand the machine card.
-    await expandFirstUnit(page);
+    await waitForBattleDock(page);
 
     // «Таран» is now visible.
     const ramButton = page.getByRole('button', { name: /^Таран$/ }).first();
