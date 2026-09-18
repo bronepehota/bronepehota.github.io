@@ -143,4 +143,83 @@ test.describe('Army Creation', () => {
     await sheet.getByRole('button', { name: /добавить/i }).click();
     await expect(page.getByTestId('unit-detail-sheet')).toHaveCount(0);
   });
+
+  test('search filters the unit catalog by name', async ({ page }) => {
+    // Desktop viewport defaults to 'detailed' → squad cards carry unit-card-* testids
+    await setupToArmyBuilder(page, { faction: 'polaris', budget: 350 });
+
+    const cards = page.locator('[data-testid^="unit-card-"]');
+    await expect(cards.first()).toBeVisible();
+    const names = (await cards.locator('h3').allInnerTexts()).map((n) => n.toLowerCase());
+    expect(names.length).toBeGreaterThan(1);
+
+    // Distinctive probe: extend a prefix of some catalog name (spaces
+    // stripped) until exactly one name contains it. NOT necessarily the
+    // first name — catalogs with allied units can contain lookalikes
+    // («линейная клон-пехота» vs «… fox.1»), whose full name is a prefix
+    // of another's and never yields a unique probe.
+    let probe = '';
+    for (let i = 0; i < names.length && !probe; i++) {
+      const base = names[i].replace(/[^a-zа-я0-9]/gi, '');
+      for (let len = 4; len <= base.length; len++) {
+        const candidate = base.slice(0, len);
+        if (names.filter((n) => n.includes(candidate)).length === 1) {
+          probe = candidate;
+          break;
+        }
+      }
+    }
+    expect(probe).toBeTruthy();
+
+    // Probe narrows the catalog to its single card
+    await page.getByTestId('unit-search-input').fill(probe);
+    await expect(page.locator('[data-testid^="unit-card-"]')).toHaveCount(1);
+
+    // Garbage query → dedicated empty state with a reset
+    await page.getByTestId('unit-search-input').fill('zzzzzz');
+    await expect(page.getByTestId('unit-search-empty')).toBeVisible();
+    await page.getByTestId('unit-search-empty-reset').click();
+
+    // Reset restores the full catalog and clears the input
+    await expect(page.locator('[data-testid^="unit-card-"]')).toHaveCount(names.length);
+    await expect(page.getByTestId('unit-search-input')).toHaveValue('');
+  });
+});
+
+test.describe('Detailed view on mobile', () => {
+  test.use({ viewport: { width: 375, height: 667 } });
+
+  test('renders a two-column grid with contained portrait card art', async ({ page }) => {
+    // Mobile defaults to compact — switch to detailed explicitly
+    await setupToArmyBuilder(page, { faction: 'polaris', budget: 350 });
+    await page.getByTestId('display-mode-detailed').click();
+
+    const cards = page.locator('[data-testid^="unit-card-"]');
+    await expect(cards.first()).toBeVisible();
+    expect(await cards.count()).toBeGreaterThan(1);
+
+    // Two squad cards share a row, each narrower than half the viewport
+    const b1 = await cards.nth(0).boundingBox();
+    const b2 = await cards.nth(1).boundingBox();
+    expect(b1).toBeTruthy();
+    expect(b2).toBeTruthy();
+    expect(Math.abs(b1!.y - b2!.y)).toBeLessThan(4);
+    expect(b1!.width).toBeLessThan(375 / 2);
+
+    // Card art (300×400) shows in full inside a 3:4 portrait block
+    const cardWithImg = cards.filter({ has: page.locator('img') }).first();
+    await expect(cardWithImg).toBeVisible();
+    const img = cardWithImg.locator('img').first();
+    const fit = await img.evaluate((el) => getComputedStyle(el).objectFit);
+    expect(fit).toBe('contain');
+    const wrapper = await img.evaluate((el) => {
+      // The aspect box is the positioned parent of the filled image
+      const box = (el.parentElement as HTMLElement).closest('.aspect-\\[3\\/4\\]') as HTMLElement | null;
+      const r = box?.getBoundingClientRect();
+      return r ? { width: r.width, height: r.height } : null;
+    });
+    expect(wrapper).toBeTruthy();
+    const ratio = wrapper!.height / wrapper!.width;
+    expect(Math.abs(ratio - 4 / 3)).toBeLessThan(0.05);
+  });
 });

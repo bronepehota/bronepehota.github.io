@@ -45,6 +45,7 @@ const mockSquads: Squad[] = [
   {
     id: 'polaris_light_assault',
     name: 'Легкий штурм',
+    shortName: 'ЛШ',
     faction: 'polaris' as FactionID,
     cost: 50,
     soldiers: [],
@@ -380,6 +381,95 @@ describe('UnitSelector', () => {
 
     // Should display machines (MachineCard shows uppercase names)
     expect(screen.getByText('ЛЕГКИЙ ТАНК')).toBeInTheDocument();
+  });
+
+  it('search narrows the catalog by name (case-insensitive)', () => {
+    render(
+      <UnitSelector
+        factions={mockFactions}
+        squads={mockSquads}
+        selectedFaction="polaris"
+        alliedFactionIds={new Set<FactionID>()}
+        pointBudget={500}
+        army={mockArmy}
+        onAddUnit={mockAdd}
+        onRemoveUnit={mockRemove}
+        onToBattle={mockToBattle}
+        displayMode="detailed"
+        onDisplayModeChange={mockDisplayModeChange}
+        sourceId="star_system"
+      />
+    );
+
+    // Both squads visible before search
+    expect(screen.getByText('ЛЕГКИЙ ШТУРМ')).toBeInTheDocument();
+    expect(screen.getByText('ТЯЖЕЛЫЙ ШТУРМ')).toBeInTheDocument();
+
+    fireEvent.change(screen.getByTestId('unit-search-input'), { target: { value: 'легкий' } });
+
+    expect(screen.getByText('ЛЕГКИЙ ШТУРМ')).toBeInTheDocument();
+    expect(screen.queryByText('ТЯЖЕЛЫЙ ШТУРМ')).not.toBeInTheDocument();
+  });
+
+  it('search matches shortName and clear restores the list', () => {
+    render(
+      <UnitSelector
+        factions={mockFactions}
+        squads={mockSquads}
+        selectedFaction="polaris"
+        alliedFactionIds={new Set<FactionID>()}
+        pointBudget={500}
+        army={mockArmy}
+        onAddUnit={mockAdd}
+        onRemoveUnit={mockRemove}
+        onToBattle={mockToBattle}
+        displayMode="detailed"
+        onDisplayModeChange={mockDisplayModeChange}
+        sourceId="star_system"
+      />
+    );
+
+    // shortName «ЛШ» находит только первый отряд
+    fireEvent.change(screen.getByTestId('unit-search-input'), { target: { value: 'ЛШ' } });
+    expect(screen.getByText('ЛЕГКИЙ ШТУРМ')).toBeInTheDocument();
+    expect(screen.queryByText('ТЯЖЕЛЫЙ ШТУРМ')).not.toBeInTheDocument();
+
+    // Кнопка очистки возвращает весь каталог
+    fireEvent.click(screen.getByTestId('unit-search-clear'));
+    expect(screen.getByText('ЛЕГКИЙ ШТУРМ')).toBeInTheDocument();
+    expect(screen.getByText('ТЯЖЕЛЫЙ ШТУРМ')).toBeInTheDocument();
+    expect(screen.getByTestId('unit-search-input')).toHaveValue('');
+  });
+
+  it('search shows empty state and reset; ANDs with the type filter', () => {
+    render(
+      <UnitSelector
+        factions={mockFactions}
+        squads={mockSquads}
+        machines={mockMachines}
+        selectedFaction="polaris"
+        alliedFactionIds={new Set<FactionID>()}
+        pointBudget={500}
+        army={mockArmy}
+        onAddUnit={mockAdd}
+        onRemoveUnit={mockRemove}
+        onToBattle={mockToBattle}
+        displayMode="detailed"
+        onDisplayModeChange={mockDisplayModeChange}
+        sourceId="star_system"
+      />
+    );
+
+    // Нет совпадений → пустое состояние поиска со сбросом
+    fireEvent.change(screen.getByTestId('unit-search-input'), { target: { value: 'zzzzzz' } });
+    expect(screen.getByTestId('unit-search-empty')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('unit-search-empty-reset'));
+    expect(screen.getByText('ЛЕГКИЙ ШТУРМ')).toBeInTheDocument();
+
+    // «штурм» есть только у отрядов: с фильтром «Машины» пересечение пусто
+    fireEvent.change(screen.getByTestId('unit-search-input'), { target: { value: 'штурм' } });
+    fireEvent.click(screen.getByText('Машины'));
+    expect(screen.getByTestId('unit-search-empty')).toBeInTheDocument();
   });
 
   it('opens weapon selector modal when machine add button is clicked', () => {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CheckCircle2, Skull, Footprints, ArrowRightCircle } from 'lucide-react';
+import { Skull, Footprints, ArrowRightCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface SoldierActionState {
@@ -17,7 +17,6 @@ interface SoldierActionsProps {
   isInPanic: boolean;
   actions: SoldierActionState;
   onActionClick: () => void;
-  onToggleDone: () => void;
   onToggleDead: () => void;
   soldierIndex: number;
   onStartLongPress: (callback: () => void) => void;
@@ -27,11 +26,14 @@ interface SoldierActionsProps {
   onNavigateToMachine?: () => void;
 }
 
+/**
+ * Right-edge action column. The «Готов» (done) button no longer lives here —
+ * it moved onto the soldier image (SoldierDoneButton); this column holds the
+ * kill button (and, in special states, the pilot nav / panic indicator).
+ */
 export function SoldierActions({
   isDead,
-  isDone,
   isInPanic,
-  onToggleDone,
   onToggleDead,
   onStartLongPress,
   onEndLongPress,
@@ -41,23 +43,6 @@ export function SoldierActions({
   onNavigateToMachine,
 }: SoldierActionsProps) {
   const [wasLongPressTriggered, setWasLongPressTriggered] = useState(false);
-
-  const handleDoneMouseDown = () => {
-    setWasLongPressTriggered(false);
-    if (isDone) {
-      onStartLongPress(() => {
-        setWasLongPressTriggered(true);
-        onToggleDone();
-      });
-    }
-  };
-
-  const handleDoneClick = () => {
-    if (wasLongPressTriggered) return;
-    if (!isDead) {
-      onToggleDone();
-    }
-  };
 
   const handleDeadMouseDown = () => {
     setWasLongPressTriggered(false);
@@ -109,10 +94,10 @@ export function SoldierActions({
     </button>
   );
 
-  // Pilot navigation replaces done/kill
+  // Pilot navigation replaces the kill button
   if (isPilot && onNavigateToMachine) {
     return (
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1 shrink-0">
         <button
           onClick={onNavigateToMachine}
           className={cn(
@@ -132,7 +117,7 @@ export function SoldierActions({
   // Panic state — can be destroyed (rules §10), but cannot act (no DONE)
   if (isInPanic) {
     return (
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1 shrink-0">
         {!isDead && (
           <div className="relative min-w-[44px] min-h-[44px] p-1.5 rounded-sm flex items-center justify-center border-2 bg-orange-950/30 border-orange-700/50 text-orange-400">
             <Footprints className="w-5 h-5" />
@@ -144,41 +129,8 @@ export function SoldierActions({
   }
 
   return (
-    <div className="flex flex-col gap-1">
-      {/* ГОТОВ button */}
-      <button
-        disabled={isDead}
-        onMouseDown={handleDoneMouseDown}
-        onMouseUp={onEndLongPress}
-        onMouseLeave={onEndLongPress}
-        onTouchStart={handleDoneMouseDown}
-        onTouchEnd={onEndLongPress}
-        onClick={handleDoneClick}
-        className={cn(
-          "relative min-w-[44px] min-h-[44px] p-1.5 rounded-sm transition-all flex items-center justify-center border-2 overflow-hidden",
-          isDone
-            ? "bg-gradient-to-br from-emerald-600 to-emerald-800 hover:from-emerald-500 hover:to-emerald-700 shadow-[0_0_12px_rgba(16,185,129,0.5)] border-emerald-500 text-emerald-100"
-            : "bg-gradient-to-br from-slate-700 to-slate-900 hover:from-slate-600 hover:to-slate-800 border-slate-600 text-slate-300",
-          isLongPressing && "scale-95 opacity-80",
-          "disabled:opacity-50 disabled:cursor-not-allowed"
-        )}
-        type="button"
-        title={isDone ? "Долгое нажатие для отмены" : "Завершить ход бойца"}
-        aria-label={isDone ? "Боевых действий завершён. Долгое нажатие для отмены." : "Завершить ход бойца"}
-        aria-pressed={isDone}
-        data-testid="soldier-done-button"
-        data-soldier-index={soldierIndex}
-      >
-        {isDone && (
-          <>
-            <div className="absolute top-0 left-0 w-1 h-1 border-l border-t border-emerald-400/60" aria-hidden="true" />
-            <div className="absolute bottom-0 right-0 w-1 h-1 border-r border-b border-emerald-400/60" aria-hidden="true" />
-          </>
-        )}
-        <CheckCircle2 className="w-5 h-5" />
-      </button>
-
-      {/* УБИТЬ button */}
+    <div className="flex flex-col gap-1 shrink-0">
+      {/* УБИТЬ button — «Готов» переехал на фото бойца (SoldierDoneButton) */}
       {renderKillButton()}
     </div>
   );

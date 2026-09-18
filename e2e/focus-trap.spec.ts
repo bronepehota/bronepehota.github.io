@@ -7,8 +7,8 @@ test.describe('Focus trap', () => {
   test('combat modal confines Tab within itself', async ({ page }) => {
     await setupGameSessionWithSquad(page, { unitOverrides: { instanceId: 'ft-unit' } });
 
-    // Open the unit + combat modal (ACTION_SELECT).
-    await page.getByTestId('unit-nav-ft-unit').first().click({ force: true });
+    // Open the combat modal (ACTION_SELECT) — the squad is focused by default.
+    await expect(page.getByTestId('dock-info-bar')).toBeVisible({ timeout: 5000 });
     const actionButton = page.getByRole('button', { name: 'Выберите действие' }).first();
     await expect(actionButton).toBeVisible({ timeout: 5000 });
     await actionButton.click({ force: true });

@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { setupGameSessionWithSquad, expandFirstUnit, clearStorage } from './helpers/setup';
+import { setupGameSessionWithSquad, waitForBattleDock, clearStorage } from './helpers/setup';
 
 /**
  * #166 — panic triggers when a squad's losses cross 50% via the centralized UnitCard effect.
@@ -21,14 +21,14 @@ test.describe('Panic on death (#166)', () => {
     await page.reload();
     await page.waitForLoadState('networkidle');
     await expect(page.getByTestId('game-session').first()).toBeVisible({ timeout: 10000 });
-    await expandFirstUnit(page);
+    await waitForBattleDock(page);
   }
 
   test('NOT-done squad: kill to threshold → panic modal', async ({ page }) => {
     await setupGameSessionWithSquad(page, {
       unitOverrides: { instanceId: 'panic-a', deadSoldiers: [0, 1] },
     });
-    await expandFirstUnit(page);
+    await waitForBattleDock(page);
     await enableCommunityPanic(page);
 
     await page.locator('[data-testid="soldier-kill-button"][data-soldier-index="2"]').click({ force: true });
@@ -43,7 +43,7 @@ test.describe('Panic on death (#166)', () => {
         actionsUsed: [0, 1, 2, 3, 4, 5].map(() => ({ moved: false, shot: false, melee: false, done: true })),
       },
     });
-    await expandFirstUnit(page);
+    await waitForBattleDock(page);
     await enableCommunityPanic(page);
 
     await page.locator('[data-testid="soldier-kill-button"][data-soldier-index="2"]').click({ force: true });
@@ -54,7 +54,7 @@ test.describe('Panic on death (#166)', () => {
     await setupGameSessionWithSquad(page, {
       unitOverrides: { instanceId: 'panic-c', deadSoldiers: [0] }, // 1 dead < threshold 3
     });
-    await expandFirstUnit(page);
+    await waitForBattleDock(page);
     await enableCommunityPanic(page);
 
     await page.locator('[data-testid="soldier-kill-button"][data-soldier-index="1"]').click({ force: true });

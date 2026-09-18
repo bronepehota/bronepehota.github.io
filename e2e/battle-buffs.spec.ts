@@ -103,18 +103,8 @@ test.describe('Battle buffs availability', () => {
   });
 
   test('should show game session with unit cards', async ({ page }) => {
-    // Game session should be visible
     const gameSession = page.getByTestId('game-session');
-    if (await gameSession.count() > 0) {
-      await expect(gameSession).toBeVisible();
-    } else {
-      // May need to click unit nav to expand
-      const unitNav = page.locator('[data-testid^="unit-nav-"]').first();
-      if (await unitNav.isVisible()) {
-        await unitNav.click();
-      }
-      await expect(page.getByTestId('game-session')).toBeVisible({ timeout: 5000 });
-    }
+    await expect(gameSession.first()).toBeVisible({ timeout: 5000 });
   });
 
   test('should show modifier indicator on soldier cards', async ({ page }) => {

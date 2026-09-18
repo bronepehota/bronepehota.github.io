@@ -78,9 +78,42 @@ test.describe('Expanded Navigator', () => {
             currentSoldiers: [],
             deadSoldiers: [0],
             actionsUsed: []
+          },
+          {
+            instanceId: 'nav-captured-unit',
+            type: 'machine',
+            data: {
+              id: 'polaris_legkiy_shturmovoy_ekranoplan',
+              name: 'Лёгкий штурмовой экраноплан',
+              shortName: 'Экраноплан',
+              faction: 'polaris',
+              cost: 150,
+              rank: 2,
+              fire_rate: 2,
+              ammo_max: 20,
+              durability_max: 16,
+              durability: 16,
+              ammo: 20,
+              image: '/images/machines/polaris/legkiy_shturmovoy_ekranoplan/1.png',
+              speed_sectors: [
+                { min_durability: 9, max_durability: 16, speed: 2 },
+                { min_durability: 1, max_durability: 8, speed: 1 },
+              ],
+              weapons: [{ name: 'Пушка', range: 'D12', power: '2D20', special: '' }],
+            },
+            instanceNumber: 4,
+            currentSoldiers: [],
+            deadSoldiers: [],
+            actionsUsed: [],
+            durability: 8,
+            currentDurability: 8,
+            ammo: 20,
+            currentAmmo: 20,
+            machineShotsUsed: 0,
+            isCaptured: true,
           }
         ],
-        totalCost: 180,
+        totalCost: 330,
         currentStep: 'battle',
         isInBattle: true,
         currentTurn: 1
@@ -97,32 +130,31 @@ test.describe('Expanded Navigator', () => {
     const gameSession = page.getByTestId('game-session');
     await expect(gameSession.first()).toBeVisible({ timeout: 10000 });
 
-    // Expand dock via JS dispatch (bypasses mouseDown drag detection)
+    // Dock counter before opening: done + dead + captured = 3 of 4
+    await expect(page.getByTestId('dock-nav-counter')).toHaveText('3/4');
+
+    // Open the navigator via the dock СПИСОК button
     const expandedNav = page.getByTestId('expanded-navigator');
     await expect(expandedNav).not.toBeVisible();
-
-    await page.evaluate(() => {
-      const handle = document.querySelector('.fixed.left-0.right-0.z-50 > .flex.justify-center');
-      if (handle) handle.dispatchEvent(new Event('click', { bubbles: true }));
-    });
+    await page.getByTestId('dock-open-navigator').click();
     await expect(expandedNav).toBeVisible();
 
-    // Verify all three sections render
-    await expect(page.locator('[role="region"][aria-label="Активные юниты"]')).toBeVisible();
-    await expect(page.locator('[role="region"][aria-label="Походили юниты"]')).toBeVisible();
-    await expect(page.locator('[role="region"][aria-label="Убитые юниты"]')).toBeVisible();
+    // Flat list: all four units in one list, status carried by the row
+    // (stripe + glyph) and its aria-label — no section groups
+    await expect(page.locator('[data-testid^="expanded-unit-"]')).toHaveCount(4);
+    await expect(page.getByTestId('expanded-unit-nav-active-unit')).toBeVisible();
+    await expect(page.getByTestId('expanded-unit-nav-done-unit')).toBeVisible();
+    await expect(page.getByTestId('expanded-unit-nav-dead-unit')).toBeVisible();
 
-    // Verify unit cards in correct sections
-    const activeSection = page.locator('[role="region"][aria-label="Активные юниты"]');
-    await expect(activeSection.getByTestId('expanded-unit-nav-active-unit')).toBeVisible();
+    // Captured machines finally render (regression: they used to vanish)
+    const capturedRow = page.getByTestId('expanded-unit-nav-captured-unit');
+    await expect(capturedRow).toBeVisible();
+    await expect(capturedRow).toHaveAttribute('aria-label', 'Лёгкий штурмовой экраноплан, захвачен');
 
-    const doneSection = page.locator('[role="region"][aria-label="Походили юниты"]');
-    await expect(doneSection.getByTestId('expanded-unit-nav-done-unit')).toBeVisible();
+    // Status marks: the done row carries the ✓ glyph
+    await expect(page.getByTestId('expanded-unit-nav-done-unit').locator('text=✓')).toBeVisible();
 
-    const deadSection = page.locator('[role="region"][aria-label="Убитые юниты"]');
-    await expect(deadSection.getByTestId('expanded-unit-nav-dead-unit')).toBeVisible();
-
-    // Click a unit card to close navigator
+    // Click a unit row to close navigator
     await page.getByTestId('expanded-unit-nav-active-unit').click();
     await expect(expandedNav).not.toBeVisible();
   });

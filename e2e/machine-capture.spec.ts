@@ -166,10 +166,8 @@ test.describe('Machine capture (#168)', () => {
     const gameSession = page.getByTestId('game-session');
     await expect(gameSession.first()).toBeVisible({ timeout: 10000 });
 
-    // Expand the squad card (first unit in the navigator).
-    const squadNav = page.getByTestId('unit-nav-capture-squad-1').first();
-    await expect(squadNav).toBeVisible({ timeout: 5000 });
-    await squadNav.click({ force: true, timeout: 5000 });
+    // The squad is units[0] — focused by default; the dock info bar is up.
+    await expect(page.getByTestId('dock-info-bar')).toBeVisible({ timeout: 5000 });
 
     // Open the combat modal via the first soldier's action button.
     const actionButton = page.getByRole('button', { name: 'Выберите действие' }).first();
@@ -196,15 +194,14 @@ test.describe('Machine capture (#168)', () => {
     await expect(confirmButton).toBeVisible({ timeout: 3000 });
     await confirmButton.click();
 
-    // A new machine unit appears in the navigator (squad + existing machine +
-    // the captured machine = 3 units). The captured machine instanceId is
-    // timestamp-based, so assert by navigator count growth and the pilot badge.
-    const navCards = page.locator('[data-testid^="unit-nav-"]');
-    await expect(navCards).toHaveCount(3, { timeout: 5000 });
+    // A new machine unit joins the army (squad + machine + captured = 3):
+    // the dock counter total grows to /3. The captured machine arrives
+    // WITHOUT isCaptured (crewed by our pilot → counts as active), so the
+    // finished N is not asserted exactly.
+    await expect(page.getByTestId('dock-nav-counter')).toHaveText(/\/3$/, { timeout: 5000 });
 
-    // Re-open the squad card and verify the first soldier now carries the
-    // «ПИЛОТ» pilot badge.
-    await squadNav.click({ force: true, timeout: 5000 });
+    // The squad card stayed focused — verify the first soldier now carries
+    // the «ПИЛОТ» pilot badge.
     await expect(page.getByText('ПИЛОТ').first()).toBeVisible({ timeout: 3000 });
   });
 
@@ -217,10 +214,8 @@ test.describe('Machine capture (#168)', () => {
     const gameSession = page.getByTestId('game-session');
     await expect(gameSession.first()).toBeVisible({ timeout: 10000 });
 
-    // Expand the machine card.
-    const machineNav = page.getByTestId('unit-nav-mark-machine-1').first();
-    await expect(machineNav).toBeVisible({ timeout: 5000 });
-    await machineNav.click({ force: true, timeout: 5000 });
+    // The machine is units[0] — focused by default.
+    await expect(page.getByTestId('dock-info-bar')).toBeVisible({ timeout: 5000 });
 
     // BEFORE capture: the banner is absent.
     await expect(page.getByText('ЗАХВАЧЕНА ПРОТИВНИКОМ')).toHaveCount(0);

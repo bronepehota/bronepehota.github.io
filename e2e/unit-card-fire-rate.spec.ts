@@ -1,5 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
-import { expandFirstUnit, clearStorage } from './helpers/setup';
+import { waitForBattleDock, clearStorage } from './helpers/setup';
 
 /**
  * Machine fire-rate — real coverage (replaces a former false-pass spec).
@@ -101,7 +101,7 @@ test.describe('Machine fire-rate (#187 follow-up)', () => {
     await page.waitForLoadState('networkidle');
     await expect(page.getByTestId('game-session').first()).toBeVisible({ timeout: 10000 });
 
-    await expandFirstUnit(page);
+    await waitForBattleDock(page);
 
     // Two ranged weapons render as tappable fire rows.
     const fireRows = page.locator(FIRE_ROWS);
@@ -124,7 +124,7 @@ test.describe('Machine fire-rate (#187 follow-up)', () => {
     await page.waitForLoadState('networkidle');
     await expect(page.getByTestId('game-session').first()).toBeVisible({ timeout: 10000 });
 
-    await expandFirstUnit(page);
+    await waitForBattleDock(page);
 
     // Both ranged weapons are now locked (shotsUsed 2 >= fire_rate 2).
     await expect(page.locator(FIRE_ROWS)).toHaveCount(0, { timeout: 3000 });

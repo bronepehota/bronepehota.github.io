@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { setupGameSessionWithSquad, expandFirstUnit, clearStorage } from './helpers/setup';
+import { setupGameSessionWithSquad, waitForBattleDock, clearStorage } from './helpers/setup';
 
 /**
  * Soldier State Management E2E tests
@@ -18,7 +18,7 @@ test.describe('Soldier State Management', () => {
     await setupGameSessionWithSquad(page, {
       unitOverrides: { instanceId: 'soldier-state-unit-1' },
     });
-    await expandFirstUnit(page);
+    await waitForBattleDock(page);
     await page.waitForSelector('[data-testid="soldier-kill-button"]', { timeout: 5000 });
     await page.waitForSelector('[data-testid="soldier-done-button"]', { timeout: 5000 });
   });
@@ -170,5 +170,47 @@ test.describe('Soldier State Management', () => {
 
     await expect(firstDoneButton).toHaveAttribute('aria-pressed', 'false');
     await expect(secondDoneButton).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  // Playtest fix: «Готов» moved onto the soldier image (bottom-left corner) —
+  // on narrow screens the right-edge column used to overflow the card and the
+  // done/kill buttons visually overlapped. Guards the geometry, not just clicks.
+  test('done button sits inside the soldier image and never crosses the kill button', async ({ page }) => {
+    const doneButton = page.getByTestId('soldier-done-button').nth(0);
+    const killButton = page.getByTestId('soldier-kill-button').nth(0);
+
+    const doneBox = await doneButton.boundingBox();
+    const killBox = await killButton.boundingBox();
+    expect(doneBox).toBeTruthy();
+    expect(killBox).toBeTruthy();
+
+    // The done button is overlaid on the soldier image: its box lies within
+    // the image block (image = the done button's positioned parent).
+    const imageBox = await doneButton.evaluate((el) => {
+      const overlayParent = el.parentElement!;            // relative shrink-0 wrapper
+      const imageBlock = overlayParent.firstElementChild!; // SoldierImage root
+      const r = imageBlock.getBoundingClientRect();
+      return { x: r.x, y: r.y, width: r.width, height: r.height };
+    });
+    expect(doneBox!.x).toBeGreaterThanOrEqual(imageBox.x - 0.5);
+    expect(doneBox!.y).toBeGreaterThanOrEqual(imageBox.y - 0.5);
+    expect(doneBox!.x + doneBox!.width).toBeLessThanOrEqual(imageBox.x + imageBox.width + 0.5);
+    expect(doneBox!.y + doneBox!.height).toBeLessThanOrEqual(imageBox.y + imageBox.height + 0.5);
+
+    // No intersection with the kill button (both axis-separated)
+    const noOverlap =
+      doneBox!.x + doneBox!.width <= killBox!.x + 0.5 ||
+      killBox!.x + killBox!.width <= doneBox!.x + 0.5 ||
+      doneBox!.y + doneBox!.height <= killBox!.y + 0.5 ||
+      killBox!.y + killBox!.height <= doneBox!.y + 0.5;
+    expect(noOverlap).toBe(true);
+
+    // The card row does not overflow horizontally (min-content fits)
+    const card = await doneButton.evaluate((el) => {
+      const row = el.closest('[class*="flex"][class*="items-center"]') as HTMLElement | null;
+      return row ? { scrollWidth: row.scrollWidth, clientWidth: row.clientWidth } : null;
+    });
+    expect(card).toBeTruthy();
+    expect(card!.scrollWidth).toBeLessThanOrEqual(card!.clientWidth + 1);
   });
 });

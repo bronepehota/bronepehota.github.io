@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { expandFirstUnit, clearStorage } from './helpers/setup';
+import { waitForBattleDock, clearStorage } from './helpers/setup';
 
 /**
  * #163 — Defender pilot test: damaging a machine (reducing durability)
@@ -85,7 +85,7 @@ test.describe('Defender pilot test (#163)', () => {
     await expect(gameSession.first()).toBeVisible({ timeout: 10000 });
 
     // Expand the machine card
-    await expandFirstUnit(page);
+    await waitForBattleDock(page);
 
     // BEFORE damage: pilot-survival-test-button must NOT be present (hidden)
     await expect(page.getByTestId('pilot-survival-test-button')).toHaveCount(0);

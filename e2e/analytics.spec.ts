@@ -92,11 +92,8 @@ test('первая смена хода: battle_turn(2) и battle_engaged', async
   await setupGameSessionWithSquad(page, {
     unitOverrides: { instanceId: 'analytics-unit-1' },
   });
-  await page.waitForTimeout(500);
-
-  // Паттерн из e2e/combat.spec.ts:39-50 — меню юнита → new-turn-button
-  const menuButton = page.locator('.ml-auto button:has(svg.lucide-more-vertical)').last();
-  await menuButton.click({ force: true });
+  // Паттерн из e2e/combat.spec.ts — меню дока (⋮) → new-turn-button
+  await page.getByTestId('dock-menu-toggle').click();
   await page.getByTestId('new-turn-button').click({ force: true });
 
   const turnConfirm = page.locator('text=ЗАВЕРШИТЬ ТУР').first();

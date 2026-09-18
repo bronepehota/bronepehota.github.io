@@ -13,6 +13,7 @@ import { clsx } from 'clsx';
 import { getFactionColors, factionDisplayNames } from '@/lib/faction-colors';
 import { FactionLogo } from '@/components/FactionLogo';
 import { relationTo } from '@/lib/faction-hierarchy';
+import { buildCatalogHaystack, matchesHaystack } from '@/lib/unit-search';
 
 
 interface UnitSelectorProps {
@@ -77,6 +78,8 @@ export function UnitSelector({
   sourceId,
 }: UnitSelectorProps) {
   const [filterType, setFilterType] = useState<FilterType>('all');
+  // Catalog name search (session-only, not persisted). ANDs with filterType.
+  const [searchQuery, setSearchQuery] = useState('');
 
   const [showWarning, setShowWarning] = useState(false);
   const [expandedUnitId, setExpandedUnitId] = useState<string | null>(null);
@@ -134,7 +137,18 @@ export function UnitSelector({
     [availableSquads, availableMachines, selectedFaction],
   );
 
-  // Apply type filter to available units
+  // Precomputed search haystacks for the catalog (name/shortName/faction) —
+  // build once per catalog change, then each keystroke is a cheap substring
+  // check. Composite key: squad and machine ids live in separate namespaces.
+  const catalogHaystacks = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const u of availableUnits) {
+      m.set(`${u.type}:${u.data.id}`, buildCatalogHaystack(u.data));
+    }
+    return m;
+  }, [availableUnits]);
+
+  // Apply type filter + text search to available units
   const filteredAvailableUnits = useMemo(() => {
     let units = availableUnits;
     if (filterType === 'selected') {
@@ -149,8 +163,18 @@ export function UnitSelector({
         units = units.filter(u => u.type === filterType);
       }
     }
+    // Text search ANDs with the type filter; applies to the available
+    // catalog only — the already-added army instances are not filtered.
+    if (searchQuery.trim()) {
+      units = units.filter((u) =>
+        matchesHaystack(
+          searchQuery,
+          catalogHaystacks.get(`${u.type}:${u.data.id}`) ?? buildCatalogHaystack(u.data),
+        ),
+      );
+    }
     return units;
-  }, [availableUnits, filterType, army]);
+  }, [availableUnits, filterType, army, searchQuery, catalogHaystacks]);
 
   // Get instance count for a unit
   const getInstanceCount = (unitId: string): number => {
@@ -271,6 +295,9 @@ export function UnitSelector({
         armyCount={army.length}
         displayMode={displayMode}
         onDisplayModeChange={onDisplayModeChange}
+        searchQuery={searchQuery}
+        onSearchQueryChange={setSearchQuery}
+        resultCount={filteredAvailableUnits.length}
       />
 
       {/* Warning toast */}
@@ -290,11 +317,29 @@ export function UnitSelector({
       {/* Available units */}
       <div className="space-y-4 pb-32">
         {filteredAvailableUnits.length === 0 ? (
-          <div className="text-center py-12 px-4 bg-slate-800/30 rounded-lg border border-slate-700/50">
-            <p className="text-slate-500 text-sm">
-              {filterType === 'selected' ? 'Нет выбранных юнитов' : 'Нет юнитов выбранного типа'}
-            </p>
-          </div>
+          searchQuery.trim() ? (
+            <div
+              data-testid="unit-search-empty"
+              className="text-center py-12 px-4 bg-slate-800/30 rounded-lg border border-slate-700/50 space-y-3"
+            >
+              <p className="font-mono text-sm uppercase tracking-wider text-slate-400">Ничего не найдено</p>
+              <p className="text-slate-500 text-xs">по запросу «{searchQuery.trim()}»</p>
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                data-testid="unit-search-empty-reset"
+                className="min-h-[44px] px-4 py-2 rounded-lg border border-slate-600/60 text-slate-300 font-mono text-xs uppercase tracking-wider hover:bg-slate-700/40 transition-colors touch-manipulation"
+              >
+                Сбросить поиск
+              </button>
+            </div>
+          ) : (
+            <div className="text-center py-12 px-4 bg-slate-800/30 rounded-lg border border-slate-700/50">
+              <p className="text-slate-500 text-sm">
+                {filterType === 'selected' ? 'Нет выбранных юнитов' : 'Нет юнитов выбранного типа'}
+              </p>
+            </div>
+          )
         ) : displayMode === 'compact' ? (
           /* Compact view - list of compact cards */
           <div className="space-y-2">
@@ -351,8 +396,10 @@ export function UnitSelector({
             })}
           </div>
         ) : (
-          /* Detailed view - grid of full cards */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          /* Detailed view - grid of full cards.
+             Mobile = 2 columns (full-width cards were oversized for phones);
+             card art is 300×400 (3:4), so portrait contain blocks show it uncropped. */
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4">
             {filteredAvailableUnits.map((unit) => {
               const affordable = canAffordUnit(unit.data.cost);
               const count = getInstanceCount(unit.data.id);
@@ -382,6 +429,7 @@ export function UnitSelector({
                       testId={`add-unit-${unit.data.id}`}
                       allyFactionId={allyFactionId}
                       allyLabel={allyLabel}
+                      imageAspectRatio="portrait"
                     />
 
                     {/* Count badge */}
@@ -446,14 +494,14 @@ export function UnitSelector({
                       affordable ? colors.borderSolid : 'border-slate-700'
                     )} />
 
-                    {/* Image container */}
-                    <div className="relative aspect-[4/3] bg-slate-900/50 overflow-hidden">
+                    {/* Image container — 3:4 portrait, contain (card art 300×400) */}
+                    <div className="relative aspect-[3/4] bg-slate-900/50 overflow-hidden">
                       {unit.data.image ? (
                         <Image
                           src={unit.data.image}
                           alt={unit.data.name}
                           fill
-                          className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
+                          className="object-contain w-full h-full group-hover:scale-105 transition-transform duration-500"
                           loading="lazy"
                           unoptimized
                         />
@@ -463,7 +511,7 @@ export function UnitSelector({
                           src={squad.soldiers[0].image}
                           alt={`${squad.name} - боец 1`}
                           fill
-                          className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
+                          className="object-contain w-full h-full group-hover:scale-105 transition-transform duration-500"
                           loading="lazy"
                           unoptimized
                         />
@@ -501,11 +549,11 @@ export function UnitSelector({
                     </div>
 
                     {/* Content */}
-                    <div className="p-3 space-y-2">
+                    <div className="p-2 md:p-3 space-y-2">
                       {/* Name row */}
                       <div className="flex items-start gap-2">
                           <h3 className={clsx(
-                            'font-bold text-sm font-mono tracking-wide truncate flex-1 min-w-0',
+                            'font-bold text-sm font-mono tracking-wide line-clamp-2 leading-tight flex-1 min-w-0',
                             affordable ? colors.text : 'text-slate-500'
                           )} title={squad.name}>
                             {squad.name.toUpperCase()}
@@ -534,8 +582,9 @@ export function UnitSelector({
                         </div>
                       </div>
 
-                      {/* Quick stats */}
-                      <div className="flex items-center gap-2 text-[10px] text-slate-500 font-mono">
+                      {/* Quick stats (wrap on half-width mobile cards; rank
+                          already lives in the on-image badge) */}
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-slate-500 font-mono">
                         <span className="px-1.5 py-0.5 rounded bg-slate-700/30">ОТРЯД</span>
                         <div className="flex items-center gap-1">
                           <Users className="w-3 h-3" />
@@ -544,9 +593,6 @@ export function UnitSelector({
                         <div className="flex items-center gap-1">
                           <Shield className="w-3 h-3" />
                           <span>Бр {getSquadArmorRange(squad)}</span>
-                        </div>
-                        <div className={clsx('ml-auto', affordable ? colors.text : 'text-slate-600')}>
-                          R{getSquadMaxRank(squad)}
                         </div>
                       </div>
 
@@ -561,7 +607,7 @@ export function UnitSelector({
                         aria-disabled={!affordable}
                         aria-label={`Добавить ${unit.data.name}`}
                         className={clsx(
-                          'w-full py-2 flex items-center justify-center gap-2',
+                          'w-full min-h-[44px] py-2 flex items-center justify-center gap-2',
                           'border font-mono text-xs font-bold uppercase tracking-wider',
                           'transition-all duration-200',
                           'touch-manipulation',
