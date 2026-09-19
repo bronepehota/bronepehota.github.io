@@ -1024,13 +1024,13 @@ export default function GameSession({
                           {squadUniformStats.commonSpeed * stepToCmFactor}
                         </span>
                       ) : (
-                        // Шаги + см мелким суффиксом — как в статах бойца
+                        // Шаги + см в скобках, читаемым кеглем — как в статах бойца
                         <>
                           <span className="text-base font-mono font-black text-cyan-300 leading-none">
                             {squadUniformStats.commonSpeed}
                           </span>
-                          <span className="text-[9px] font-mono font-bold text-slate-400 leading-none">
-                            {squadUniformStats.commonSpeed * stepToCmFactor}см
+                          <span className="text-xs font-mono font-bold text-slate-300 leading-none">
+                            ({squadUniformStats.commonSpeed * stepToCmFactor}см)
                           </span>
                         </>
                       )}
