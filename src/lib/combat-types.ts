@@ -96,7 +96,8 @@ export interface CombatResult {
   armorTestRoll?: number;     // Armor test roll (D12) for machines with pilots
   survivalTestRoll?: number;  // Pilot survival test roll (D6)
   // Grenade-specific fields
-  grenadeDistance?: number;   // D6 + rank = explosion distance
+  grenadeDistance?: number;   // Explosion distance in steps: best D6 (rank = dice count in community rules)
+  /** cm-поля — легаси с фиксированным ×4; UI пересчитывает см от stepToCmFactor игрока (тумблер 4/5) — не читать в новом коде */
   grenadeBlastZone?: { minSteps: number; maxSteps: number; minCm: number; maxCm: number };
   grenadeBlastChecks?: GrenadeBlastResult[]; // Multiple target checks
   soldierRank?: number;       // Soldier's army rank for grenade throw

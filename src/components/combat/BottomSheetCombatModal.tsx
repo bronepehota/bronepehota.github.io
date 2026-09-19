@@ -409,6 +409,7 @@ export function BottomSheetCombatModal({
               unitType={state.unitType}
               onGrenadeCheckTarget={onGrenadeCheckTarget}
               autoCompleteEnabled={autoCompleteEnabled}
+              stepToCmFactor={stepToCmFactor}
             />
           )}
         </div>

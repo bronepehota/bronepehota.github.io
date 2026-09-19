@@ -1038,7 +1038,8 @@ button, a, input, select, textarea {
   .animate-dice-land,
   .animate-bounce-subtle,
   .animate-pop-in,
-  .animate-dice-shake {
+  .animate-dice-shake,
+  .result-reveal {
     animation: none !important;
   }
 }

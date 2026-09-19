@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, Target, Sword, Bomb, SlidersHorizontal, X, EyeOff, Crosshair } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -8,6 +8,7 @@ import { useStandaloneCombatFlow } from '@/hooks/useStandaloneCombatFlow';
 import { ActionSelector } from '@/components/combat/ActionSelector';
 import { ParameterInputs } from '@/components/combat/ParameterInputs';
 import { CombatResults } from '@/components/combat/CombatResults';
+import { getStepToCmFactor } from '@/components/toggles/StepToCmFactorToggle';
 import { RulesSelector } from './RulesSelector';
 import { ModifiersSelector } from './ModifiersSelector';
 import { DiceInputPopup } from './DiceInputPopup';
@@ -81,6 +82,12 @@ export function CalculatorPage() {
 
   const [dicePopupField, setDicePopupField] = useState<DicePopupField>(null);
   const [showModifiers, setShowModifiers] = useState(false);
+  // Player's step→cm toggle (shared with /app settings). Read in an effect, not
+  // the initializer — server renders the default 5 (useStandaloneCombatFlow pattern).
+  const [stepToCmFactor, setStepToCmFactor] = useState(5);
+  useEffect(() => {
+    setStepToCmFactor(parseInt(getStepToCmFactor(), 10));
+  }, []);
 
   const handleDataNeeded = useCallback((field: 'range' | 'power' | 'melee' | 'rank') => {
     setDicePopupField(field);
@@ -351,6 +358,7 @@ export function CalculatorPage() {
             onGoBack={goBack}
             unitType={combatState.unitType}
             onGrenadeCheckTarget={checkGrenadeTarget}
+            stepToCmFactor={stepToCmFactor}
           />
         )}
 

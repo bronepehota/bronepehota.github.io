@@ -4,8 +4,9 @@ import { useState, useEffect, useRef } from 'react';
 import { CombatResult, CombatParameters } from '@/lib/combat-types';
 import { RulesVersionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { AlertTriangle, Skull, Shield, Footprints, Bomb } from 'lucide-react';
+import { AlertTriangle, Skull, Shield, Footprints, Bomb, Crosshair, X } from 'lucide-react';
 import { AnimatedDice } from './AnimatedDice';
+import { GrenadeBlastRuler } from './GrenadeBlastRuler';
 
 interface CombatResultsProps {
   result: CombatResult;
@@ -16,6 +17,7 @@ interface CombatResultsProps {
   unitType?: 'squad' | 'machine';
   onGrenadeCheckTarget?: (armor: number) => void;
   autoCompleteEnabled?: boolean;
+  stepToCmFactor?: number;
 }
 
 export function CombatResults({
@@ -27,6 +29,7 @@ export function CombatResults({
   unitType,
   onGrenadeCheckTarget,
   autoCompleteEnabled = true,
+  stepToCmFactor = 5,
 }: CombatResultsProps) {
   const isShot = result.actionType === 'shot';
   const isGrenade = result.actionType === 'grenade';
@@ -77,7 +80,7 @@ export function CombatResults({
   };
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-300">
+    <div className="space-y-4">
       {/* Attack modifiers display */}
       {isShot && (parameters.isSurpriseAttack || parameters.isAimedShot) && (
         <div className="flex justify-center gap-2">
@@ -99,6 +102,35 @@ export function CombatResults({
       {/* Shot Results */}
       {isShot && result.hitResult && (
         <>
+          {/* Verdict banner — instant, full-width, carries the hit/miss call */}
+          <div
+            key={result.timestamp}
+            data-testid="shot-verdict-banner"
+            role="status"
+            className={cn(
+              'result-reveal flex items-center justify-center gap-3 w-full px-4 py-3 rounded-lg border-2 shadow-lg',
+              result.hitResult.success
+                ? 'bg-emerald-950/80 border-emerald-500/70 shadow-emerald-900/30'
+                : 'bg-red-950/80 border-red-500/70 shadow-red-900/30'
+            )}
+          >
+            {result.hitResult.success
+              ? <Crosshair className="w-7 h-7 text-emerald-400 shrink-0" />
+              : <X className="w-7 h-7 text-red-400 shrink-0" />}
+            <span className={cn(
+              'font-mono text-2xl font-black uppercase tracking-wider',
+              result.hitResult.success ? 'text-emerald-400' : 'text-red-400'
+            )}>
+              {result.hitResult.success ? 'ПОПАДАНИЕ' : 'ПРОМАХ'}
+            </span>
+            <span className={cn(
+              'ml-auto font-mono text-sm font-black opacity-80 whitespace-nowrap',
+              result.hitResult.success ? 'text-emerald-300' : 'text-red-300'
+            )}>
+              {result.hitResult.total}:{getEffectiveDistance()}
+            </span>
+          </div>
+
           {/* Hit Comparison */}
           <div className="grid grid-cols-2 gap-3">
             {/* Your Roll */}
@@ -153,7 +185,7 @@ export function CombatResults({
                       bonus={result.hitResult.bonus}
                       total={result.hitResult.total}
                       targetValue={getEffectiveDistance()}
-                      resultLabel={result.hitResult.success ? 'hit' : 'miss'}
+                      resultLabel="none"
                     />
                   </div>
                 )}
@@ -385,11 +417,22 @@ export function CombatResults({
                   <Footprints className="w-4 h-4 text-amber-500/60" />
                 </div>
                 <div className="text-xs font-mono text-slate-500">
-                  [{result.grenadeBlastZone.minCm}-{result.grenadeBlastZone.maxCm} см]
+                  [{result.grenadeBlastZone.minSteps * stepToCmFactor}-{result.grenadeBlastZone.maxSteps * stepToCmFactor} см]
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Blast ruler — tape-measure view of the zone in cm (player's factor) */}
+          <GrenadeBlastRuler
+            grenadeDistance={result.grenadeDistance ?? (result.hitResult.roll ?? 0)}
+            blastZone={{
+              minSteps: result.grenadeBlastZone.minSteps,
+              maxSteps: result.grenadeBlastZone.maxSteps,
+            }}
+            factor={stepToCmFactor}
+            danger={isGrenadeDanger}
+          />
 
           {/* Result Label */}
           <div className="flex justify-center">
