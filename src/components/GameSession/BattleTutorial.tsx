@@ -136,6 +136,18 @@ export function BattleTutorial({ demoImageUrl, onFinish }: BattleTutorialProps) 
             <h3 className="font-mono font-bold uppercase tracking-wider text-slate-100 text-sm text-center">
               {stepMeta.title}
             </h3>
+
+            {/* Рекап жестов — последнее, что читают перед боем */}
+            <div className="flex items-center justify-center gap-3 rounded-sm border border-amber-700/40 bg-amber-950/20 px-3 py-2">
+              <span className="font-mono text-[11px] text-amber-200/90">
+                ← свайп: готов
+              </span>
+              <span className="h-3 w-px bg-amber-700/40" aria-hidden="true" />
+              <span className="font-mono text-[11px] text-amber-200/90">
+                убит: свайп →
+              </span>
+            </div>
+
             <div className="flex items-center gap-3 rounded-sm border border-slate-700/50 bg-slate-800/40 p-3">
               <span className="flex h-10 w-10 items-center justify-center rounded-sm border border-slate-700/50 bg-slate-800/60 shrink-0">
                 <LayoutGrid className="h-4 w-4 text-slate-300" />
