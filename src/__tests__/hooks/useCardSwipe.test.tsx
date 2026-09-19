@@ -82,6 +82,24 @@ describe('useCardSwipe', () => {
     expect(onLeft).toHaveBeenCalledTimes(3);
   });
 
+  it('второй палец не сбивает идущий жест', () => {
+    const onRight = jest.fn();
+    render(<Probe onLeft={jest.fn()} onRight={onRight} />);
+    const probe = screen.getByTestId('probe');
+    // первый палец ведёт горизонтальный жест
+    firePointer(probe, 'pointerdown', { pointerId: 1, clientX: 200, clientY: 50 });
+    firePointer(probe, 'pointermove', { pointerId: 1, clientX: 150, clientY: 50 });
+    // ладонь/второй палец приземлился — игнорируется
+    firePointer(probe, 'pointerdown', { pointerId: 2, clientX: 300, clientY: 60 });
+    // первый палесь довёл жест и отпустил
+    firePointer(probe, 'pointermove', { pointerId: 1, clientX: 290, clientY: 50 });
+    firePointer(probe, 'pointerup', { pointerId: 1, clientX: 290, clientY: 50 });
+    expect(onRight).toHaveBeenCalledTimes(1);
+    // чужой pointerup ничего не делает
+    firePointer(probe, 'pointerup', { pointerId: 2, clientX: 300, clientY: 60 });
+    expect(onRight).toHaveBeenCalledTimes(1);
+  });
+
   it('во время жеста карточка смещается transform-ом', () => {
     render(<Probe onLeft={jest.fn()} onRight={jest.fn()} />);
     const probe = screen.getByTestId('probe');

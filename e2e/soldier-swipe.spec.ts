@@ -16,7 +16,7 @@ test.describe('Soldier card swipes', () => {
 
   /** Горизонтальный свайп мышью по центру карточки бойца №index */
   async function swipeCard(page: Page, index: number, dir: 'left' | 'right') {
-    const card = page.locator('div.touch-pan-y').nth(index);
+    const card = page.getByTestId('soldier-card').nth(index);
     const box = await card.boundingBox();
     expect(box).toBeTruthy();
     const startX = box!.x + box!.width * 0.6; // центр-право: безопасно внутри карточки
@@ -40,7 +40,7 @@ test.describe('Soldier card swipes', () => {
   });
 
   test('недотянутый свайп ничего не меняет', async ({ page }) => {
-    const card = page.locator('div.touch-pan-y').nth(0);
+    const card = page.getByTestId('soldier-card').nth(0);
     const box = await card.boundingBox();
     const startX = box!.x + box!.width * 0.6;
     const y = box!.y + box!.height / 2;

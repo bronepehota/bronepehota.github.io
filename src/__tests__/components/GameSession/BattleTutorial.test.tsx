@@ -58,4 +58,14 @@ describe('BattleTutorial', () => {
     fireEvent.click(screen.getByTestId('battle-tutorial-skip'));
     expect(onFinish).toHaveBeenCalledTimes(1);
   });
+
+  it('Escape завершает туториал, фокус попадает в диалог (a11y)', () => {
+    const onFinish = jest.fn();
+    render(<BattleTutorial onFinish={onFinish} />);
+    const dialog = screen.getByRole('dialog');
+    const panel = dialog.firstElementChild as HTMLElement;
+    expect(document.activeElement).toBe(panel);
+    fireEvent.keyDown(panel, { key: 'Escape' });
+    expect(onFinish).toHaveBeenCalledTimes(1);
+  });
 });

@@ -171,9 +171,14 @@ function SoldierCard({
   // Check if this soldier is a pilot
   const isPilot = soldier.isPilot || false;
 
-  // Свайп по карточке (плейтест): влево — «готов», вправо — «убит»
+  // Свайп по карточке (плейтест): влево — «готов», вправо — «убит».
+  // Гейтинг как у кнопок: паникующий/мёртвый не может завершить ход
+  // (правила §10 — можно быть уничтоженным, но нельзя действовать);
+  // убить в панике можно, поэтому вправо не гейтим.
   const swipe = useCardSwipe({
-    onSwipeLeft: handleToggleAction,
+    onSwipeLeft: () => {
+      if (!isDead && !isInPanic) handleToggleAction();
+    },
     onSwipeRight: handleToggleDead,
   });
 
@@ -217,6 +222,8 @@ function SoldierCard({
 
   return (
     <div
+      data-testid="soldier-card"
+      data-soldier-index={soldierIndex}
       {...swipe.handlers}
       style={swipe.style}
       className={cn(

@@ -44,6 +44,9 @@ export function useCardSwipe({ onSwipeLeft, onSwipeRight }: UseCardSwipeOptions)
 
   const onPointerDown = useCallback((e: React.PointerEvent<HTMLElement>) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
+    // Второй палец/ладонь не перезаписывает идущий жест (иначе origin
+    // сбрасывается и карточка «мёртво» висит до отпускания)
+    if (pointerIdRef.current !== null) return;
     startRef.current = { x: e.clientX, y: e.clientY };
     axisRef.current = 'none';
     pointerIdRef.current = e.pointerId;
@@ -76,6 +79,8 @@ export function useCardSwipe({ onSwipeLeft, onSwipeRight }: UseCardSwipeOptions)
   }, []);
 
   const onPointerUp = useCallback((e: React.PointerEvent<HTMLElement>) => {
+    // Чужой pointer (второй палец) игнорируем — жест принадлежит первому
+    if (pointerIdRef.current === null || pointerIdRef.current !== e.pointerId) return;
     if (startRef.current) {
       if (axisRef.current === 'x') {
         if (Math.abs(dxRef.current) >= TRIGGER_PX) {
@@ -89,7 +94,17 @@ export function useCardSwipe({ onSwipeLeft, onSwipeRight }: UseCardSwipeOptions)
     reset();
   }, [onSwipeLeft, onSwipeRight, reset]);
 
-  const onPointerCancel = useCallback(() => reset(), [reset]);
+  const onPointerCancel = useCallback((e: React.PointerEvent<HTMLElement>) => {
+    if (pointerIdRef.current !== null && pointerIdRef.current !== e.pointerId) return;
+    reset();
+  }, [reset]);
+
+  // Страховка: если pointerup/cancel потерялись (краш вкладки, перехват
+  // системой), снятие capture сбрасывает жест — карточка не «залипает»
+  const onLostPointerCapture = useCallback((e: React.PointerEvent<HTMLElement>) => {
+    if (pointerIdRef.current !== null && pointerIdRef.current !== e.pointerId) return;
+    reset();
+  }, [reset]);
 
   /** Гасит click, оставшийся после жеста (capture-фаза — раньше цели) */
   const onClickCapture = useCallback((e: React.MouseEvent) => {
@@ -101,7 +116,7 @@ export function useCardSwipe({ onSwipeLeft, onSwipeRight }: UseCardSwipeOptions)
   }, []);
 
   return {
-    handlers: { onPointerDown, onPointerMove, onPointerUp, onPointerCancel, onClickCapture },
+    handlers: { onPointerDown, onPointerMove, onPointerUp, onPointerCancel, onLostPointerCapture, onClickCapture },
     style: (
       dragging
         ? { transform: `translateX(${dx}px)`, transition: 'none' }

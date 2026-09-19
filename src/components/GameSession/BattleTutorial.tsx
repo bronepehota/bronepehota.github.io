@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { LayoutGrid, MousePointerClick } from 'lucide-react';
 import { GitHubPagesImage as Image } from '@/components/GitHubPagesImage';
 import { useCardSwipe } from '@/hooks/useCardSwipe';
@@ -39,6 +39,37 @@ export function BattleTutorial({ demoImageUrl, onFinish }: BattleTutorialProps) 
     },
   });
 
+  // a11y (aria-modal): фокус в диалог при открытии, Tab не уходит за
+  // пределы, Esc — пропустить, фокус возвращается при закрытии
+  const panelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const prev = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    panelRef.current?.focus();
+    return () => prev?.focus();
+  }, []);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      onFinish();
+      return;
+    }
+    if (e.key !== 'Tab') return;
+    const focusables = panelRef.current?.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    if (!focusables || focusables.length === 0) return;
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  };
+
   const stepMeta = [
     { title: 'СВАЙП ВЛЕВО — ГОТОВ', hint: '← проведи карточку влево' },
     { title: 'СВАЙП ВПРАВО — УБИТ', hint: 'проведи карточку вправо →' },
@@ -53,7 +84,12 @@ export function BattleTutorial({ demoImageUrl, onFinish }: BattleTutorialProps) 
       aria-label="Боевой инструктаж"
       className="fixed inset-0 z-[70] bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4"
     >
-      <div className="w-full max-w-sm border-2 border-amber-700/50 bg-slate-900 rounded-lg p-4 space-y-4 shadow-2xl">
+      <div
+        ref={panelRef}
+        tabIndex={-1}
+        onKeyDown={handleKeyDown}
+        className="w-full max-w-sm border-2 border-amber-700/50 bg-slate-900 rounded-lg p-4 space-y-4 shadow-2xl outline-none"
+      >
         {/* Шапка + шаги */}
         <div className="flex items-center gap-2">
           <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-amber-400/90">

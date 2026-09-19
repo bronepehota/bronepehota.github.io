@@ -84,6 +84,9 @@ test.describe('Battle tutorial', () => {
     // Реальный взвод не затронут жестами туториала
     await expect(page.getByTestId('soldier-done-button').nth(0)).toHaveAttribute('aria-pressed', 'false');
     await expect(page.getByTestId('soldier-kill-button').nth(0)).toHaveAttribute('aria-pressed', 'false');
+
+    // Скорость в доке: шаги + сантиметры (сид: speed 5 × factor 5)
+    await expect(page.getByTestId('dock-speed-badge')).toContainText('(25см)');
   });
 
   test('«Пропустить» закрывает и выставляет флаг', async ({ page }) => {

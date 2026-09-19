@@ -82,7 +82,7 @@ export function SoldierDoneButton({
       type="button"
       title={isDead ? "Боец убит" : isDone ? "Долгое нажатие для отмены" : "Завершить ход бойца"}
       aria-label={isDead ? "Боец убит" : isDone ? "Боевых действий завершён. Долгое нажатие для отмены." : "Завершить ход бойца"}
-      aria-pressed={isDone}
+      aria-pressed={isDead ? false : isDone}
       data-testid="soldier-done-button"
       data-soldier-index={soldierIndex}
     >

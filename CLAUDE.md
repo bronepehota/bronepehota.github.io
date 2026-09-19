@@ -130,6 +130,9 @@ npm run test:e2e            # All E2E tests pass
 | Missions | `missions.spec.ts` | 16 |
 | Modifier display | `modifier-stat-display.spec.ts` | 7 |
 | Navigator | `expanded-navigator.spec.ts` | 1 |
+| Dock navigator | `dock-navigator.spec.ts` | 4 |
+| Soldier swipes | `soldier-swipe.spec.ts` | 3 |
+| Battle tutorial | `battle-tutorial.spec.ts` | 4 |
 | Panic kill | `panic-kill.spec.ts` | 1 |
 | Panic on death | `panic-on-death.spec.ts` | 3 |
 | Pilot | `pilot-functionality.spec.ts` | 1 |
@@ -251,6 +254,7 @@ Both `.md` files are machine-converted from their PDFs; the PDF is authoritative
 - `bronepehota_editor_show_base_units` - Editor base unit visibility toggle
 - `bronepehota_weapon_selections` - Weapon selector modal selections
 - `bronepehota_analytics_queue` - Offline buffer for analytics events (battles at tables with poor connectivity); flushed on load/online
+- `bronepehota_battle_tutorial_done` - Боевой инструктаж показан (пункт «Инструктаж» в меню ⋮ дока повторяет; e2e: storageState сеет флаг, battle-tutorial.spec снимает)
 
 The main app page (`src/app/app/page.tsx`) manages the `Army` state and passes it down to child components.
 
