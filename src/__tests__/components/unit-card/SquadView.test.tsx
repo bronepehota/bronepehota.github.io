@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import { SquadView } from '@/components/cards/unit-card/SquadView';
 import { ArmyUnit, Squad } from '@/lib/types';
 
@@ -57,5 +57,50 @@ describe('SquadView', () => {
     // SoldierCard отрендерен (статусная полоса)
     const statusStripes = container.querySelectorAll('[data-testid="soldier-status-stripe"]');
     expect(statusStripes.length).toBe(1);
+  });
+
+  // jsdom без PointerEvent — диспатчим сами (как в useCardSwipe.test.tsx)
+  const firePointer = (el: Element, type: string, init: Record<string, number>) => {
+    const ev = new Event(type, { bubbles: true });
+    Object.assign(ev, init);
+    fireEvent(el, ev);
+  };
+  const dragLeft = (el: Element) => {
+    firePointer(el, 'pointerdown', { pointerId: 1, clientX: 200, clientY: 50 });
+    firePointer(el, 'pointermove', { pointerId: 1, clientX: 100, clientY: 50 });
+    firePointer(el, 'pointerup', { pointerId: 1, clientX: 100, clientY: 50 });
+  };
+
+  it('свайп влево живому бойцу завершает ход', () => {
+    const updateUnit = jest.fn();
+    const { container } = render(<SquadView {...defaultProps} updateUnit={updateUnit} />);
+    dragLeft(container.querySelector('[data-testid="soldier-card"]')!);
+    expect(updateUnit).toHaveBeenCalledWith('test-1', expect.any(Function));
+  });
+
+  it('свайп влево не обходит гейтинг: паникующий и мёртвый не завершают ход', () => {
+    // Паника: можно быть уничтоженным, но нельзя действовать (правила §10)
+    const panicUpdate = jest.fn();
+    const { container: panicContainer, unmount: panicUnmount } = render(
+      <SquadView
+        {...defaultProps}
+        unit={{ ...mockUnit, panicState: [{ soldierIndex: 0 }] } as ArmyUnit}
+        updateUnit={panicUpdate}
+      />
+    );
+    dragLeft(panicContainer.querySelector('[data-testid="soldier-card"]')!);
+    expect(panicUpdate).not.toHaveBeenCalled();
+    panicUnmount();
+
+    const deadUpdate = jest.fn();
+    const { container: deadContainer } = render(
+      <SquadView
+        {...defaultProps}
+        unit={{ ...mockUnit, deadSoldiers: [0] } as ArmyUnit}
+        updateUnit={deadUpdate}
+      />
+    );
+    dragLeft(deadContainer.querySelector('[data-testid="soldier-card"]')!);
+    expect(deadUpdate).not.toHaveBeenCalled();
   });
 });

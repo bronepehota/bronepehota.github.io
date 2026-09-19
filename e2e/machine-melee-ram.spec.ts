@@ -75,6 +75,7 @@ function seedMachineArmy(rulesVersion: 'tehnolog' | 'community_star_system') {
         currentTurn: 1,
       };
       localStorage.clear();
+      localStorage.setItem('bronepehota_battle_tutorial_done', '1'); // инструктаж закрыт (см. playwright.config storageState)
       localStorage.setItem('bronepehota_army', JSON.stringify(army));
       localStorage.setItem('bronepehota_view', 'game');
       localStorage.setItem('bronepehota_display_mode', 'detailed');

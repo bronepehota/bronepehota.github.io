@@ -20,6 +20,17 @@ export default defineConfig({
   use: {
     /* Base URL to use in actions like `await page.goto('/')` */
     baseURL: 'http://localhost:3001',
+    /* Боевой инструктаж не должен перекрывать экран боя в e2e: сеем флаг
+       «пройден» в каждый контекст. Спеки, сидящие армию через собственный
+       localStorage.clear(), перепосевают флаг в своих скриптах;
+       battle-tutorial.spec снимает флаг явно. */
+    storageState: {
+      cookies: [],
+      origins: [{
+        origin: 'http://localhost:3001',
+        localStorage: [{ name: 'bronepehota_battle_tutorial_done', value: '1' }],
+      }],
+    },
     /* Collect trace when retrying the failed test */
     trace: 'on-first-retry',
     /* Screenshot on failure */

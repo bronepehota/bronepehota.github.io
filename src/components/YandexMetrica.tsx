@@ -11,6 +11,18 @@ import { YANDEX_METRICA_ID } from '@/lib/constants';
 export default function YandexMetrica() {
   if (!YANDEX_METRICA_ID) return null;
 
+  // Вне прода tag.js не грузим: дев/тесты не должны слать статистику
+  // (в т.ч. webvisor-сессии на реальный счётчик). Стаб держит транспорт
+  // «готовым» для фасада; analytics.spec перехватывает присваивание
+  // своей ловушкой и получает рекордер вместо noop.
+  if (process.env.NODE_ENV !== 'production') {
+    return (
+      <Script id="ym-e2e-stub" strategy="afterInteractive">
+        {`window.ym = window.ym || function(){};`}
+      </Script>
+    );
+  }
+
   return (
     <>
       <Script id="yandex-metrica-init" strategy="afterInteractive">

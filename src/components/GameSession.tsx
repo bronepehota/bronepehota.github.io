@@ -11,12 +11,13 @@ import { SoldierEffectsModal } from './modals/SoldierEffectsModal';
 import { getFactionColors } from '@/lib/faction-colors';
 import { trackEvent } from '@/lib/analytics';
 import UnitCard from './cards/UnitCard';
-import { History, X, Bomb, Heart, Shield, Footprints, CheckCircle2, MoreVertical, BookOpen, RotateCcw, MessageCircle, Target, Users, LayoutGrid } from 'lucide-react';
+import { History, X, Bomb, Heart, Shield, Footprints, CheckCircle2, MoreVertical, BookOpen, RotateCcw, MessageCircle, Target, Users, LayoutGrid, GraduationCap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CombatLogEntry } from '@/lib/combat-types';
 import { useCombatTargetContext } from '@/contexts/CombatTargetContext';
 import InitiativeModal from './modals/InitiativeModal';
-import { ExpandedNavigator } from './GameSession/index';
+import { ExpandedNavigator, BattleTutorial } from './GameSession/index';
+import { LOCAL_STORAGE_KEYS } from '@/lib/constants';
 import { checkSquadUniformStats, getAliveSoldiersCount, countUnitsByStatus } from '@/lib/unit-utils';
 import { deriveUnitStatus, UnitStatus } from '@/lib/unit-status';
 import { resolveModifierSummary } from '@/lib/modifier-utils';
@@ -583,6 +584,23 @@ export default function GameSession({
   }, [army.units, focusedUnitIdx]);
 
   const factionColors = getFactionColors(army.faction || 'polaris');
+
+  // «Боевой инструктаж» — однократно при первом заходе в бой со взводом
+  // (интерактивные свайпы на демо-карточке + подсказка про СПИСОК)
+  const [showBattleTutorial, setShowBattleTutorial] = useState(false);
+  const hasSquadUnit = army.units.some(u => u.type === 'squad');
+  useEffect(() => {
+    if (!hasSquadUnit) return;
+    if (localStorage.getItem(LOCAL_STORAGE_KEYS.BATTLE_TUTORIAL_DONE) === '1') return;
+    setShowBattleTutorial(true);
+  }, [hasSquadUnit]);
+  // GitHubPagesImage сам префиксует BASE_PATH для /images/
+  const tutorialImage = (() => {
+    if (!showBattleTutorial) return undefined;
+    const squadUnit = army.units.find(u => u.type === 'squad');
+    if (!squadUnit) return undefined;
+    return (squadUnit.data as Squad).soldiers[0]?.image || squadUnit.data.image || undefined;
+  })();
   const selectedMission = isFreePlay(army.missionId) ? null : getMission(army.missionId!) ?? null;
 
   // Compute uniform stats for focused squad unit
@@ -617,6 +635,17 @@ export default function GameSession({
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden" data-testid="game-session">
+      {/* Боевой инструктаж (первый заход) */}
+      {showBattleTutorial && (
+        <BattleTutorial
+          demoImageUrl={tutorialImage}
+          onFinish={() => {
+            localStorage.setItem(LOCAL_STORAGE_KEYS.BATTLE_TUTORIAL_DONE, '1');
+            setShowBattleTutorial(false);
+          }}
+        />
+      )}
+
       {/* Initiative Modal */}
       <InitiativeModal
         isOpen={showInitiativeModal}
@@ -926,15 +955,17 @@ export default function GameSession({
                   {focusedUnit.data.name}
                 </span>
 
-                {/* Alive soldiers aggregate — squads only */}
+                {/* Alive soldiers aggregate + граната взвода (плейтест: граната
+                    рядом с N/M) — squads only */}
                 {focusedUnit.type === 'squad' && (() => {
                   const squadData = focusedUnit.data as Squad;
                   const alive = getAliveSoldiersCount(focusedUnit);
+                  const grenadesUsed = focusedUnit.grenadesUsed;
                   return (
                     <span
                       data-testid="dock-soldiers-alive"
-                      className="shrink-0 flex items-center gap-1 px-1.5 min-h-[24px] rounded-sm bg-slate-800/60 border border-slate-700/40"
-                      title={`Живые бойцы: ${alive} из ${squadData.soldiers.length}`}
+                      className="shrink-0 flex items-center gap-1.5 px-1.5 min-h-[24px] rounded-sm bg-slate-800/60 border border-slate-700/40"
+                      title={`Живые бойцы: ${alive} из ${squadData.soldiers.length}. Гранаты: ${grenadesUsed ? 'использованы' : 'есть'}.`}
                     >
                       <Users className="w-3.5 h-3.5 text-emerald-400" />
                       <span className={cn(
@@ -943,6 +974,11 @@ export default function GameSession({
                       )}>
                         {alive}/{squadData.soldiers.length}
                       </span>
+                      <span className="w-px h-3.5 bg-slate-700/50" aria-hidden="true" />
+                      <Bomb
+                        data-testid="dock-grenade"
+                        className={cn("w-3.5 h-3.5", grenadesUsed ? "text-slate-500" : "text-amber-400")}
+                      />
                     </span>
                   );
                 })()}
@@ -951,7 +987,7 @@ export default function GameSession({
               {/* Row 2 — stats + controls. flex-wrap: на 320px кластер
                   кнопок переносится строкой вместо обрезания (высота дока
                   авторастёт через ResizeObserver → bottomInset). */}
-              <div className="flex flex-wrap items-center gap-1.5">
+              <div className="flex flex-wrap items-center gap-1 md:gap-1.5">
                 {/* Armor badge - squads with uniform armor */}
                 {focusedUnit.type === 'squad' && squadUniformStats.isUniformArmor && squadUniformStats.commonArmor !== undefined && (() => {
                   const bonus = squadDockBonuses.armorBonus ? `+${squadDockBonuses.armorBonus}` : undefined;
@@ -960,7 +996,7 @@ export default function GameSession({
                     <div
                       data-testid="dock-armor-badge"
                       className={cn(
-                        'flex items-center justify-center gap-0.5 rounded-lg min-h-[40px] min-w-[48px] max-w-[72px] px-1 transition-colors shrink-0',
+                        'flex items-center justify-center gap-0.5 rounded-lg min-h-[40px] min-w-[44px] max-w-[72px] px-1 transition-colors shrink-0',
                         isActive ? 'border border-emerald-500/40 shadow-[inset_0_0_8px_rgba(16,185,129,0.06)]' : 'border border-slate-700/40 bg-slate-800/60'
                       )}
                     >
@@ -985,36 +1021,32 @@ export default function GameSession({
                     <div
                       data-testid="dock-speed-badge"
                       className={cn(
-                        'flex items-center justify-center gap-0.5 rounded-lg min-h-[40px] min-w-[48px] max-w-[72px] px-1 transition-colors shrink-0',
+                        'flex items-center justify-center gap-0.5 rounded-lg min-h-[40px] min-w-[44px] max-w-[72px] px-1 transition-colors shrink-0',
                         isActive ? 'border border-emerald-500/40 shadow-[inset_0_0_8px_rgba(16,185,129,0.06)]' : 'border border-slate-700/40 bg-slate-800/60'
                       )}
                     >
                       <Footprints className="w-4 h-4 shrink-0 text-cyan-400" />
-                      <span className="text-base font-mono font-black text-cyan-300 leading-none">
-                        {distanceInputUnit === 'cm' ? `${squadUniformStats.commonSpeed * stepToCmFactor}` : squadUniformStats.commonSpeed}
-                      </span>
+                      {distanceInputUnit === 'cm' ? (
+                        <span className="text-base font-mono font-black text-cyan-300 leading-none">
+                          {squadUniformStats.commonSpeed * stepToCmFactor}
+                        </span>
+                      ) : (
+                        // Шаги + см в скобках, читаемым кеглем — как в статах бойца
+                        <>
+                          <span className="text-base font-mono font-black text-cyan-300 leading-none">
+                            {squadUniformStats.commonSpeed}
+                          </span>
+                          <span className="text-xs font-mono font-bold text-slate-300 leading-none">
+                            ({squadUniformStats.commonSpeed * stepToCmFactor}см)
+                          </span>
+                        </>
+                      )}
                       {bonus && (
                         <span className="text-[9px] font-mono font-extrabold text-emerald-400/90 leading-none translate-y-[-1px]">
                           {bonus}
                         </span>
                       )}
                     </div>
-                  );
-                })()}
-
-                {/* Grenade indicator - only for squads */}
-                {focusedUnit.type === 'squad' && (() => {
-                  const grenadesUsed = focusedUnit.grenadesUsed;
-                  return (
-                    <span className={cn(
-                      "flex items-center justify-center w-7 h-7 rounded-sm shrink-0",
-                      grenadesUsed ? "bg-slate-800" : "bg-amber-950/50"
-                    )}>
-                      <Bomb className={cn(
-                        "w-4 h-4",
-                        grenadesUsed ? "text-slate-500" : "text-amber-400"
-                      )} />
-                    </span>
                   );
                 })()}
 
@@ -1091,8 +1123,10 @@ export default function GameSession({
                     "border-slate-700/50 bg-slate-800/60 text-slate-300 hover:bg-slate-700/60 hover:text-slate-100"
                   )}
                 >
-                  <LayoutGrid className="w-3.5 h-3.5 shrink-0" />
-                  Список
+                  <LayoutGrid className="w-4 h-4 shrink-0" />
+                  {/* Подпись только на десктопе: на мобиле иконка+счётчик,
+                      иначе ⋮ переносится на вторую строку (плейтест) */}
+                  <span className="hidden md:inline">Список</span>
                   <span
                     data-testid="dock-nav-counter"
                     aria-hidden="true"
@@ -1135,7 +1169,7 @@ export default function GameSession({
                         ) : (
                           <CheckCircle2 className="w-4 h-4" />
                         )}
-                        {isDone ? "Отмена" : "Готов"}
+                        <span className="hidden md:inline">{isDone ? "Отмена" : "Готов"}</span>
                       </button>
                       {/* Dock menu — moved from the unit strip's far right
                           (playtest: undiscoverable there) */}
@@ -1206,6 +1240,14 @@ export default function GameSession({
             >
               <History className="w-3.5 h-3.5 text-blue-400" />
               История боя
+            </button>
+            <button
+              data-testid="battle-tutorial-replay"
+              onClick={() => { setShowBattleTutorial(true); setShowDockMenu(false); }}
+              className="w-full px-3 py-2 text-left text-xs text-slate-300 hover:bg-slate-700 flex items-center gap-2"
+            >
+              <GraduationCap className="w-3.5 h-3.5 text-amber-400" />
+              Инструктаж
             </button>
             {army.isInBattle && (
               <button
