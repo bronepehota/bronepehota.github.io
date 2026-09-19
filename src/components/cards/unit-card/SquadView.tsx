@@ -37,9 +37,9 @@ export function SquadView({
   const data = unit.data as Squad;
 
   return (
-    <div className="grid grid-cols-1 gap-1 md:gap-1.5 snap-y snap-mandatory">
+    <div data-testid="squad-list" className="flex flex-col min-h-full gap-1 md:gap-1.5 snap-y snap-mandatory">
       {data.soldiers.map((s, idx) => (
-        <div key={`soldier-snap-${unit.instanceId}-${idx}`} className="snap-start snap-always">
+        <div key={`soldier-snap-${unit.instanceId}-${idx}`} className="snap-start snap-always flex-1 flex">
           <SoldierCard
             key={`soldier-${unit.instanceId}-${idx}-${s.num}`}
             squad={data}
