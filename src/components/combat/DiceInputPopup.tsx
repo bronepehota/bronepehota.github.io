@@ -105,14 +105,22 @@ export function DiceInputPopup({
   const [count, setCount] = useState(initial.count);
   const [bonus, setBonus] = useState(initial.bonus);
 
-  // Number mode state
+  // Number mode state — numText holds what's typed ("" allowed), numValue the parsed number
   const [numValue, setNumValue] = useState(numericValue);
+  const [numText, setNumText] = useState(String(numericValue));
 
   // Animation state
   const [isVisible, setIsVisible] = useState(false);
   useEffect(() => {
     requestAnimationFrame(() => setIsVisible(true));
   }, []);
+
+  const clampNum = (n: number) => Math.max(min, Math.min(max, n));
+  const applyNum = (n: number) => {
+    const clamped = clampNum(n);
+    setNumValue(clamped);
+    setNumText(String(clamped));
+  };
 
   const buildNotation = useCallback(() => {
     const dicePart = count === 1 ? `D${sides}` : `${count}D${sides}`;
@@ -122,17 +130,21 @@ export function DiceInputPopup({
   }, [count, sides, bonus]);
 
   const handleSubmit = useCallback(() => {
-    const result = mode === 'number' ? String(numValue) : buildNotation();
+    // Manual input: parse what's actually typed, clamp on submit (see as typed → get clamped)
+    const parsed = parseInt(numText, 10);
+    const result = mode === 'number'
+      ? String(isNaN(parsed) ? min : clampNum(parsed))
+      : buildNotation();
     const raw = localStorage.getItem(HISTORY_KEY);
     const updated = saveEntry(raw, { value: result, field, timestamp: Date.now() });
     localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
     onSubmit(result);
-  }, [mode, numValue, buildNotation, field, onSubmit]);
+  }, [mode, numText, min, max, buildNotation, field, onSubmit]);
 
   const handleQuickSelect = useCallback((val: string) => {
     if (mode === 'number') {
       const n = parseInt(val, 10);
-      if (!isNaN(n)) setNumValue(n);
+      if (!isNaN(n)) applyNum(n);
     } else {
       // Parse dice notation and set state
       const match = val.match(/(?:(\d+))?D(\d+)(?:\+(-?\d+))?/);
@@ -142,7 +154,7 @@ export function DiceInputPopup({
         setBonus(parseInt(match[3] || '0'));
       }
     }
-  }, [mode]);
+  }, [mode, min, max]);
 
   const handleClose = useCallback(() => {
     setIsVisible(false);
@@ -252,26 +264,42 @@ export function DiceInputPopup({
 
                 <div className="flex items-center justify-center gap-5">
                   <button
-                    onClick={() => setNumValue(Math.max(min, numValue - 1))}
+                    onClick={() => applyNum(numValue - 1)}
                     disabled={numValue <= min}
                     className="w-12 h-12 rounded-lg bg-slate-800 border border-slate-600 flex items-center justify-center disabled:opacity-20 active:scale-90 transition-all hover:bg-slate-700"
                   >
                     <Minus className="w-5 h-5" />
                   </button>
                   <div className="relative">
-                    <span className={cn(
-                      "font-mono font-black text-5xl tabular-nums transition-colors",
-                      numValue > 0 ? colors.preview : "text-slate-300"
-                    )}>
-                      {numValue}
-                    </span>
-                    {/* Subtle background number for texture */}
-                    <span className={cn("absolute inset-0 font-mono font-black text-5xl tabular-nums select-none pointer-events-none", colors.tint)}>
-                      {numValue}
-                    </span>
+                    {/* Manual input: tap a quick value OR type your own */}
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      value={numText}
+                      onChange={(e) => {
+                        setNumText(e.target.value);
+                        const n = parseInt(e.target.value, 10);
+                        if (!isNaN(n)) setNumValue(clampNum(n));
+                      }}
+                      onBlur={() => {
+                        const n = parseInt(numText, 10);
+                        applyNum(isNaN(n) ? min : n);
+                      }}
+                      onFocus={(e) => e.currentTarget.select()}
+                      min={min}
+                      max={max}
+                      aria-label="Значение"
+                      className={cn(
+                        "w-32 bg-transparent font-mono font-black text-5xl tabular-nums text-center",
+                        "focus:outline-none border-b-2 border-transparent focus:border-slate-600 transition-colors",
+                        "appearance-none",
+                        "[&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
+                        numValue > 0 ? colors.preview : "text-slate-300"
+                      )}
+                    />
                   </div>
                   <button
-                    onClick={() => setNumValue(Math.min(max, numValue + 1))}
+                    onClick={() => applyNum(numValue + 1)}
                     disabled={numValue >= max}
                     className="w-12 h-12 rounded-lg bg-slate-800 border border-slate-600 flex items-center justify-center disabled:opacity-20 active:scale-90 transition-all hover:bg-slate-700"
                   >
@@ -285,7 +313,7 @@ export function DiceInputPopup({
                 {(quickValues ?? [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]).filter(v => v >= min && v <= max).map(v => (
                   <button
                     key={v}
-                    onClick={() => setNumValue(v)}
+                    onClick={() => applyNum(v)}
                     className={cn(
                       "py-2 rounded-md border font-mono text-sm font-bold transition-all active:scale-90",
                       numValue === v

@@ -64,4 +64,44 @@ describe('DiceInputPopup — quick values and field override', () => {
     expect(recentRow).toHaveTextContent('6');
     expect(recentRow).not.toHaveTextContent('D6+2');
   });
+
+  it('allows typing an arbitrary value not in the quick grid', async () => {
+    const onSubmit = jest.fn();
+    render(<DiceInputPopup {...baseProps} onSubmit={onSubmit} quickValues={[0, 2, 4, 8]} />);
+
+    const input = screen.getByLabelText('Значение');
+    await userEvent.click(input);
+    await userEvent.clear(input);
+    await userEvent.type(input, '13');
+    await userEvent.click(screen.getByRole('button', { name: 'Подтвердить' }));
+
+    expect(onSubmit).toHaveBeenCalledWith('13');
+  });
+
+  it('clamps manually typed values to max on submit', async () => {
+    const onSubmit = jest.fn();
+    render(<DiceInputPopup {...baseProps} onSubmit={onSubmit} quickValues={[0, 2]} />);
+
+    const input = screen.getByLabelText('Значение');
+    await userEvent.click(input);
+    await userEvent.clear(input);
+    await userEvent.type(input, '999');
+    await userEvent.click(screen.getByRole('button', { name: 'Подтвердить' }));
+
+    expect(onSubmit).toHaveBeenCalledWith('99');
+  });
+
+  it('typing overrides a previously selected quick value', async () => {
+    const onSubmit = jest.fn();
+    render(<DiceInputPopup {...baseProps} onSubmit={onSubmit} quickValues={[0, 2, 4, 8]} />);
+
+    await userEvent.click(screen.getByRole('button', { name: '4' }));
+    const input = screen.getByLabelText('Значение');
+    await userEvent.click(input);
+    await userEvent.clear(input);
+    await userEvent.type(input, '7');
+    await userEvent.click(screen.getByRole('button', { name: 'Подтвердить' }));
+
+    expect(onSubmit).toHaveBeenCalledWith('7');
+  });
 });
