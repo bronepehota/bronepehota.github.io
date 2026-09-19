@@ -35,8 +35,9 @@ type DistanceMode = 'steps' | 'cm';
  * - Input on right (flex-1)
  * - Same size="lg" and spacing
  *
- * The mode toggle is integrated into the label - tap to switch between steps/cm.
- * Now uses global stepToCmFactor instead of rules version for conversion.
+ * The unit (steps/cm) is controlled by the parent via defaultMode; the
+ * «ШАГИ|СМ» switch lives in the quick-input modal (DiceInputPopup.unitSwitch).
+ * Conversion uses the global stepToCmFactor, not the rules version.
  */
 export function DistanceConverter({
   steps,
@@ -48,13 +49,8 @@ export function DistanceConverter({
   defaultMode = 'steps',
   onInputActivate,
 }: DistanceConverterProps) {
-  const [mode, setMode] = useState<DistanceMode>(defaultMode);
+  const mode: DistanceMode = defaultMode;
   const [cmValue, setCmValue] = useState<number>(stepsToCm(steps, stepToCmFactor));
-
-  // Sync mode when defaultMode changes (user changed distance unit preference)
-  useEffect(() => {
-    setMode(defaultMode);
-  }, [defaultMode]);
 
   // Sync cm value when steps prop changes from parent.
   // In cm mode, typed values round-trip (cmToSteps(cmValue) === steps) and are

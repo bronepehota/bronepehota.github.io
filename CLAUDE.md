@@ -334,7 +334,7 @@ src/components/
 │   └── soldier-card/ - Soldier sub-components (ModifierIndicator, SoldierActions, SoldierStats)
 │   └── unit-card/   - Unit sub-components + hooks (useUnitCardState)
 ├── calculator/      - Standalone-calculator page chrome (CalculatorPage, RulesSelector, ModifiersSelector)
-├── combat/          - Shared combat components (BottomSheetCombatModal, ActionSelector, ParameterInputs, CombatResults, GrenadeBlastRuler, DiceInputPopup, HitProbabilityIndicator)
+├── combat/          - Shared combat components (BottomSheetCombatModal, ActionSelector, ParameterInputs, CombatResults, GrenadeBlastRuler, DiceInputPopup, DistanceConverter, HitProbabilityIndicator)
 ├── controls/        - Shared controls (FortificationSelector)
 ├── editor/          - Desktop-only unit editor (SourcesList, SquadEditor, MachineEditor, ModifiersEditor, UnifiedSaveArea, BuffSelector, ModifierIcons, UnitsList, FactionsList, CreateSourceModal)
 ├── encyclopedia/    - Encyclopedia page components (UnitDetailPage)

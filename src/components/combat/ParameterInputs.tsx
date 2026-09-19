@@ -34,7 +34,6 @@ interface ParameterInputsProps {
   targetMemory?: TargetMemory;
   onMemoryUpdate?: (params: Partial<TargetMemory>) => void;
   isAimedShot?: boolean;
-  distanceInputUnit?: 'steps' | 'cm';
   stepToCmFactor?: number;
   modifierSummary?: ModifierSummary;
   onDataNeeded?: (field: 'range' | 'power' | 'melee' | 'rank') => void;

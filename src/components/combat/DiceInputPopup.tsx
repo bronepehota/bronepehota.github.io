@@ -169,6 +169,19 @@ export function DiceInputPopup({
     setTimeout(onClose, 150);
   }, [onClose]);
 
+  // Escape closes the popup itself — it's a layer above the combat modal,
+  // which has its own Escape handler that would otherwise close the whole modal
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        handleClose();
+      }
+    };
+    window.addEventListener('keydown', handleEscape, true); // capture: runs before the modal's handler
+    return () => window.removeEventListener('keydown', handleEscape, true);
+  }, [handleClose]);
+
   const maxFreq = useMemo(() => Math.max(1, ...recentEntries.map(e => e.count)), [recentEntries]);
 
   // Unit switch: convert the current value in place when steps↔cm flips
@@ -190,7 +203,8 @@ export function DiceInputPopup({
       isVisible ? "bg-slate-950/90 backdrop-blur-sm" : "bg-slate-950/0"
     )}>
       <div className={cn(
-        "w-full max-w-[420px] bg-slate-900 border-2 rounded-xl overflow-hidden transition-all duration-300",
+        "w-full max-w-[420px] max-h-[calc(100dvh-2rem)] overflow-y-auto",
+        "bg-slate-900 border-2 rounded-xl transition-all duration-300",
         colors.accent,
         isVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
       )}>
@@ -341,7 +355,7 @@ export function DiceInputPopup({
                       max={max}
                       aria-label="Значение"
                       className={cn(
-                        "w-32 bg-transparent font-mono font-black text-5xl tabular-nums text-center",
+                        "w-28 bg-transparent font-mono font-black text-5xl tabular-nums text-center",
                         "focus:outline-none border-b-2 border-transparent focus:border-slate-600 transition-colors",
                         "appearance-none",
                         "[&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",

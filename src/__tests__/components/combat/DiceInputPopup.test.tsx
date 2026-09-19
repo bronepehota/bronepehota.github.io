@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, within, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DiceInputPopup } from '@/components/combat/DiceInputPopup';
 
@@ -136,5 +136,19 @@ describe('DiceInputPopup — quick values and field override', () => {
     expect(overlay).not.toBeNull();
     expect(overlay!.className).toContain('items-center');
     expect(overlay!.className).not.toContain('items-end');
+
+    // Tall/short viewports: the card scrolls instead of clipping the submit button
+    const card = overlay!.firstElementChild as HTMLElement;
+    expect(card.className).toContain('max-h-[calc(100dvh-2rem)]');
+    expect(card.className).toContain('overflow-y-auto');
+  });
+
+  it('Escape closes the popup itself, not the combat modal behind it', async () => {
+    const onClose = jest.fn();
+    render(<DiceInputPopup {...baseProps} onClose={onClose} />);
+
+    fireEvent.keyDown(window, { key: 'Escape' });
+
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
   });
 });

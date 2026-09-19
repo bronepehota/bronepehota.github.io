@@ -29,7 +29,6 @@ interface BottomSheetCombatModalProps {
   grenadesAvailable?: boolean;
   unitDisplayName?: string;
   autoCompleteEnabled?: boolean;
-  distanceInputUnit?: 'steps' | 'cm';
   stepToCmFactor?: number;
 }
 
@@ -87,7 +86,6 @@ export function BottomSheetCombatModal({
   grenadesAvailable = true,
   unitDisplayName: _unitDisplayName,
   autoCompleteEnabled = true,
-  distanceInputUnit = 'steps',
   stepToCmFactor = 5,
 }: BottomSheetCombatModalProps) {
   const heightBonusAvailable = getHeightBonusEnabled();
@@ -280,7 +278,6 @@ export function BottomSheetCombatModal({
                 targetMemory={targetMemory}
                 onMemoryUpdate={(params) => currentUnitId && updateTargetMemory(currentUnitId, params)}
                 isAimedShot={state.parameters.isAimedShot}
-                distanceInputUnit={distanceInputUnit}
                 stepToCmFactor={stepToCmFactor}
                 modifierSummary={modifierSummary}
               />

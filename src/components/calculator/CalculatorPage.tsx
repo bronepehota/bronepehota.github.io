@@ -259,6 +259,7 @@ export function CalculatorPage() {
               onDataNeeded={handleDataNeeded}
               isAimedShot={combatState.parameters.isAimedShot}
               modifierSummary={modifierSummary}
+              stepToCmFactor={stepToCmFactor}
             />
 
             {/* Execute button panel — matches BottomSheetCombatModal */}
