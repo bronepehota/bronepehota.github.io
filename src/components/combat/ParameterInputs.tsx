@@ -515,6 +515,7 @@ export function ParameterInputs({
                 size="md"
                 className="flex-1"
                 label="Броня цели"
+                showLabel={false}
                 onInputActivate={() => setActiveInput('armor')}
               />
               {effectiveTargetIsVehicle && rulesVersion === 'community_star_system' && actionType === 'shot' && (

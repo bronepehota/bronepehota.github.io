@@ -152,4 +152,35 @@ describe('ExpandedNavigator', () => {
 
     expect(screen.getByLabelText('Активных юнитов: 1')).toBeInTheDocument();
   });
+
+  it('от 5 живых юнитов — сетка в 2 колонки с плитками (плейтест: «мало помещается»)', () => {
+    render(
+      <ExpandedNavigator
+        army={makeArmy([
+          makeSquad('g-0', 'Первый отряд', 3),
+          makeSquad('g-1', 'Второй отряд', 3),
+          makeSquad('g-2', 'Третий отряд', 3),
+          makeSquad('g-3', 'Четвёртый отряд', 3),
+          makeSquad('g-4', 'Пятый отряд', 3),
+          makeMachine('g-5', 'Хантер', { durability: 0 }), // убитая — в сетке, но компактная
+        ])}
+        focusedUnitIdx={0}
+        onSelectUnit={jest.fn()}
+      />
+    );
+
+    // Контейнер — 2-колоночная сетка
+    const grid = document.querySelector('.grid.grid-cols-2');
+    expect(grid).toBeInTheDocument();
+
+    // Плитка живого: фото-блок h-24; убитой — компактная h-14
+    const aliveTile = screen.getByTestId('expanded-unit-g-0');
+    expect(aliveTile.querySelector('.h-24')).toBeTruthy();
+    const deadTile = screen.getByTestId('expanded-unit-g-5');
+    expect(deadTile.querySelector('.h-14')).toBeTruthy();
+
+    // Строки-плитки несут имя и статы (узнавание сохранено)
+    expect(aliveTile.textContent).toContain('Первый отряд');
+    expect(aliveTile.textContent).toContain('♥ 3/3');
+  });
 });

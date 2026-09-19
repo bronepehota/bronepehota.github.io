@@ -100,9 +100,19 @@ export function useCardSwipe({ onSwipeLeft, onSwipeRight }: UseCardSwipeOptions)
   }, [reset]);
 
   // Страховка: если pointerup/cancel потерялись (краш вкладки, перехват
-  // системой), снятие capture сбрасывает жест — карточка не «залипает»
+  // системой), снятие capture сбрасывает жест — карточка не «залипает».
+  //
+  // Тач-готча (плейтест на телефоне 2026-09-19: «свайп не работает по
+  // статам»): жест, начавшийся на потомке (статы/фото/кнопки), держит
+  // ИМПЛИЦИТНЫЙ capture на этом потомке. Осевой лок забирает capture на
+  // карточку → у потомка гаснет имплицитный capture → его
+  // lostpointercapture (не всплывает, но React доставляет его capture-фазой
+  // делегирования) прилетал сюда и сбрасывал ЖИВОЙ жест. Потеря capture
+  // потомком жест не теряет — capture уже у карточки; сбрасываем только
+  // настоящую потерю самим корнем (event.target === event.currentTarget).
   const onLostPointerCapture = useCallback((e: React.PointerEvent<HTMLElement>) => {
     if (pointerIdRef.current !== null && pointerIdRef.current !== e.pointerId) return;
+    if (e.target !== e.currentTarget) return;
     reset();
   }, [reset]);
 

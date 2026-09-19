@@ -99,6 +99,7 @@ export function DistanceConverter({
           disabled={disabled}
           className="flex-1"
           label="Дистанция"
+          showLabel={false}
           onInputActivate={onInputActivate}
         />
 

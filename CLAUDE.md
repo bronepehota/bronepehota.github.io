@@ -255,6 +255,7 @@ Both `.md` files are machine-converted from their PDFs; the PDF is authoritative
 - `bronepehota_weapon_selections` - Weapon selector modal selections
 - `bronepehota_analytics_queue` - Offline buffer for analytics events (battles at tables with poor connectivity); flushed on load/online
 - `bronepehota_battle_tutorial_done` - Боевой инструктаж показан (пункт «Инструктаж» в меню ⋮ дока повторяет; e2e: storageState сеет флаг, battle-tutorial.spec снимает)
+- `bronepehota_wake_lock_enabled` - «Не гаснуть» (screen Wake Lock на время боя; тумблер в меню ⋮; без API в браузере пункт скрыт)
 
 The main app page (`src/app/app/page.tsx`) manages the `Army` state and passes it down to child components.
 
@@ -406,6 +407,8 @@ Edit `squads.json` or `machines.json` in `src/data/sources/{source_id}/{faction}
   - Manages rules version, modifier summary, combatant data
   - Provides `switchAction()`, `newCalculation()`, `updateCombatantField()`
 - `useLongPress.ts` - Long-press gesture detection for undo actions
+- `useCardSwipe.ts` - Горизонтальный свайп карточки бойца (влево «готов», вправо «убит»): pointer-события, axis-lock, порог 56px, гашение клика после жеста; гочча: `lostpointercapture` потомка не должен сбрасывать живой жест (гард `target === currentTarget`)
+- `useWakeLock.ts` - Screen Wake Lock «Не гаснуть» (тумблер в ⋮): перезахват по visibilitychange; request-гонки лечатся cancelled-флагом + перепроверкой после await
 - `usePilotTestFlow.ts` - Pilot survival test state machine (D12 + D6 rolls)
 - `useEditorState.ts` - Editor form state management (desktop-only)
 

@@ -1,5 +1,5 @@
-import { test, expect } from '@playwright/test';
-import { setupGameSessionWithSquad, waitForBattleDock, clearStorage } from './helpers/setup';
+import { test, expect, type Page } from '@playwright/test';
+import { setupGameSessionWithSquad, waitForBattleDock, clearStorage, swipeSoldierCard } from './helpers/setup';
 
 /**
  * Soldier State Management E2E tests
@@ -11,6 +11,10 @@ import { setupGameSessionWithSquad, waitForBattleDock, clearStorage } from './he
  * component instance corresponds to which soldier when state changes.
  *
  * Fix: Changed from key={idx} to key={`${unit.instanceId}-${idx}`}
+ *
+ * Kill path: кнопки «череп» нет — убить/оживить можно свайпом вправо
+ * (swipeSoldierCard). Мёртвое состояние читается по чипу на фото:
+ * soldier-done-button aria-label «Боец убит» + текст «УБИТ».
  */
 test.describe('Soldier State Management', () => {
   test.beforeEach(async ({ page }) => {
@@ -19,31 +23,34 @@ test.describe('Soldier State Management', () => {
       unitOverrides: { instanceId: 'soldier-state-unit-1' },
     });
     await waitForBattleDock(page);
-    await page.waitForSelector('[data-testid="soldier-kill-button"]', { timeout: 5000 });
     await page.waitForSelector('[data-testid="soldier-done-button"]', { timeout: 5000 });
   });
 
+  /** Чип бойца №index (nth по DOM — выровнен с карточками, пока все обычные) */
+  const doneChip = (page: Page, index: number) =>
+    page.getByTestId('soldier-done-button').nth(index);
+
   test('should maintain soldier state when marking multiple soldiers as killed', async ({ page }) => {
-    const killButtons = page.getByTestId('soldier-kill-button');
-    const count = await killButtons.count();
+    const doneButtons = page.getByTestId('soldier-done-button');
+    const count = await doneButtons.count();
     expect(count).toBeGreaterThan(0);
 
-    const firstButton = killButtons.nth(0);
-    await firstButton.click({ force: true, timeout: 5000 });
-    await expect(firstButton).toHaveAttribute('aria-pressed', 'true');
+    await swipeSoldierCard(page, 0, 'right');
+    await expect(doneChip(page, 0)).toHaveAttribute('aria-label', 'Боец убит');
+    await expect(doneChip(page, 0)).toContainText('УБИТ');
 
-    const secondButton = killButtons.nth(1);
-    await secondButton.click({ force: true, timeout: 5000 });
-    await expect(secondButton).toHaveAttribute('aria-pressed', 'true');
+    await swipeSoldierCard(page, 1, 'right');
+    await expect(doneChip(page, 1)).toHaveAttribute('aria-label', 'Боец убит');
 
-    await expect(firstButton).toHaveAttribute('aria-pressed', 'true');
+    // First soldier stays dead (the React-key regression flipped it back)
+    await expect(doneChip(page, 0)).toHaveAttribute('aria-label', 'Боец убит');
 
-    const thirdButton = killButtons.nth(2);
-    await thirdButton.click({ force: true, timeout: 5000 });
-    await expect(thirdButton).toHaveAttribute('aria-pressed', 'true');
+    await swipeSoldierCard(page, 2, 'right');
+    await expect(doneChip(page, 2)).toHaveAttribute('aria-label', 'Боец убит');
 
-    await expect(firstButton).toHaveAttribute('aria-pressed', 'true');
-    await expect(secondButton).toHaveAttribute('aria-pressed', 'true');
+    await expect(doneChip(page, 0)).toHaveAttribute('aria-label', 'Боец убит');
+    await expect(doneChip(page, 1)).toHaveAttribute('aria-label', 'Боец убит');
+    await expect(page.getByTestId('dock-soldiers-alive')).toContainText('3/6');
   });
 
   test('should maintain soldier state when marking multiple soldiers as done', async ({ page }) => {
@@ -70,26 +77,21 @@ test.describe('Soldier State Management', () => {
   });
 
   test('should maintain mixed soldier states (killed and done)', async ({ page }) => {
-    const killButtons = page.getByTestId('soldier-kill-button');
-    const doneButtons = page.getByTestId('soldier-done-button');
+    await swipeSoldierCard(page, 0, 'right');
+    await expect(doneChip(page, 0)).toHaveAttribute('aria-label', 'Боец убит');
 
-    const firstKillButton = killButtons.nth(0);
-    await firstKillButton.click({ force: true, timeout: 5000 });
-    await expect(firstKillButton).toHaveAttribute('aria-pressed', 'true');
-
-    const secondDoneButton = doneButtons.nth(1);
+    const secondDoneButton = doneChip(page, 1);
     await secondDoneButton.click({ force: true, timeout: 5000 });
     await expect(secondDoneButton).toHaveAttribute('aria-pressed', 'true');
 
-    const thirdKillButton = killButtons.nth(2);
-    await thirdKillButton.click({ force: true, timeout: 5000 });
-    await expect(thirdKillButton).toHaveAttribute('aria-pressed', 'true');
+    await swipeSoldierCard(page, 2, 'right');
+    await expect(doneChip(page, 2)).toHaveAttribute('aria-label', 'Боец убит');
 
-    await expect(firstKillButton).toHaveAttribute('aria-pressed', 'true');
+    await expect(doneChip(page, 0)).toHaveAttribute('aria-label', 'Боец убит');
     await expect(secondDoneButton).toHaveAttribute('aria-pressed', 'true');
-    await expect(thirdKillButton).toHaveAttribute('aria-pressed', 'true');
+    await expect(doneChip(page, 2)).toHaveAttribute('aria-label', 'Боец убит');
 
-    const firstDoneButton = doneButtons.nth(0);
+    const firstDoneButton = doneChip(page, 0);
     await expect(firstDoneButton).toHaveAttribute('disabled');
   });
 
@@ -122,37 +124,32 @@ test.describe('Soldier State Management', () => {
 
     await page.reload();
     await page.waitForLoadState('networkidle');
+    await waitForBattleDock(page);
     await page.waitForTimeout(500);
 
-    const killButtons = page.getByTestId('soldier-kill-button');
-    const count = await killButtons.count();
+    const doneButtons = page.getByTestId('soldier-done-button');
+    const count = await doneButtons.count();
     expect(count).toBeGreaterThanOrEqual(6);
 
-    const firstKillButton = killButtons.nth(0);
-    await firstKillButton.click({ force: true, timeout: 5000 });
+    await swipeSoldierCard(page, 0, 'right');
+    await swipeSoldierCard(page, 3, 'right');
 
-    const fourthKillButton = killButtons.nth(3);
-    await fourthKillButton.click({ force: true, timeout: 5000 });
-
-    await expect(firstKillButton).toHaveAttribute('aria-pressed', 'true');
-    await expect(fourthKillButton).toHaveAttribute('aria-pressed', 'true');
+    await expect(doneChip(page, 0)).toHaveAttribute('aria-label', 'Боец убит');
+    await expect(doneChip(page, 3)).toHaveAttribute('aria-label', 'Боец убит');
   });
 
-  test('should handle state toggling correctly (untoggling killed soldiers)', async ({ page }) => {
-    const killButtons = page.getByTestId('soldier-kill-button');
+  test('should handle kill toggling correctly (swipe right resurrects)', async ({ page }) => {
+    await swipeSoldierCard(page, 0, 'right');
+    await expect(doneChip(page, 0)).toHaveAttribute('aria-label', 'Боец убит');
 
-    const firstKillButton = killButtons.nth(0);
-    await firstKillButton.click({ force: true, timeout: 5000 });
-    await expect(firstKillButton).toHaveAttribute('aria-pressed', 'true');
+    await swipeSoldierCard(page, 1, 'right');
+    await expect(doneChip(page, 1)).toHaveAttribute('aria-label', 'Боец убит');
 
-    const secondKillButton = killButtons.nth(1);
-    await secondKillButton.click({ force: true, timeout: 5000 });
-    await expect(secondKillButton).toHaveAttribute('aria-pressed', 'true');
-
-    await firstKillButton.click({ force: true, timeout: 5000 });
-
-    await expect(firstKillButton).toHaveAttribute('aria-pressed', 'true');
-    await expect(secondKillButton).toHaveAttribute('aria-pressed', 'true');
+    // Повторный свайп вправо оживляет (toggle) — только первый боец
+    await swipeSoldierCard(page, 0, 'right');
+    await expect(doneChip(page, 0)).toHaveAttribute('aria-label', 'Завершить ход бойца');
+    await expect(doneChip(page, 1)).toHaveAttribute('aria-label', 'Боец убит');
+    await expect(page.getByTestId('dock-soldiers-alive')).toContainText('5/6');
   });
 
   test('should handle done state toggling correctly', async ({ page }) => {
@@ -172,17 +169,16 @@ test.describe('Soldier State Management', () => {
     await expect(secondDoneButton).toHaveAttribute('aria-pressed', 'true');
   });
 
-  // Playtest fix: «Готов» moved onto the soldier image (bottom-left corner) —
-  // on narrow screens the right-edge column used to overflow the card and the
-  // done/kill buttons visually overlapped. Guards the geometry, not just clicks.
-  test('done button sits inside the soldier image and never crosses the kill button', async ({ page }) => {
-    const doneButton = page.getByTestId('soldier-done-button').nth(0);
-    const killButton = page.getByTestId('soldier-kill-button').nth(0);
+  // Playtest fix: «Готов» moved onto the soldier image (bottom-right corner) —
+  // the right-edge action column was removed with the skull button (its
+  // ~44px went to the stats). Guards the geometry and the removal itself.
+  test('done button sits inside the soldier image; no kill column remains', async ({ page }) => {
+    // The kill button is gone entirely — the right swipe is the only kill path
+    await expect(page.getByTestId('soldier-kill-button')).toHaveCount(0);
 
+    const doneButton = page.getByTestId('soldier-done-button').nth(0);
     const doneBox = await doneButton.boundingBox();
-    const killBox = await killButton.boundingBox();
     expect(doneBox).toBeTruthy();
-    expect(killBox).toBeTruthy();
 
     // The done button is overlaid on the soldier image: its box lies within
     // the image block (image = the done button's positioned parent).
@@ -196,14 +192,6 @@ test.describe('Soldier State Management', () => {
     expect(doneBox!.y).toBeGreaterThanOrEqual(imageBox.y - 0.5);
     expect(doneBox!.x + doneBox!.width).toBeLessThanOrEqual(imageBox.x + imageBox.width + 0.5);
     expect(doneBox!.y + doneBox!.height).toBeLessThanOrEqual(imageBox.y + imageBox.height + 0.5);
-
-    // No intersection with the kill button (both axis-separated)
-    const noOverlap =
-      doneBox!.x + doneBox!.width <= killBox!.x + 0.5 ||
-      killBox!.x + killBox!.width <= doneBox!.x + 0.5 ||
-      doneBox!.y + doneBox!.height <= killBox!.y + 0.5 ||
-      killBox!.y + killBox!.height <= doneBox!.y + 0.5;
-    expect(noOverlap).toBe(true);
 
     // The card row does not overflow horizontally (min-content fits)
     const card = await doneButton.evaluate((el) => {

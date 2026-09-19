@@ -1,20 +1,37 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { SoldierActions } from '@/components/cards/soldier-card/SoldierActions';
-import { SoldierActionState } from '@/components/cards/soldier-card/SoldierActions';
 
+/**
+ * Кнопка «череп» убрана (решение владельца 2026-09-19): убить/оживить —
+ * только свайп вправо по карточке (useCardSwipe). Колонка живёт лишь для
+ * особых состояний: пилот → навигация к машине, паника → индикатор.
+ */
 describe('SoldierActions', () => {
   const defaultProps = {
     isDead: false,
-    isDone: false,
     isInPanic: false,
-    actions: { moved: false, shot: false, melee: false, done: false } as SoldierActionState,
-    onActionClick: jest.fn(),
-    onToggleDead: jest.fn(),
-    soldierIndex: 0,
-    onStartLongPress: jest.fn(),
-    onEndLongPress: jest.fn(),
-    isLongPressing: false
   };
+
+  describe('Regular soldier rendering', () => {
+    it('renders nothing — the kill button is gone, right swipe is the only kill path', () => {
+      const { container } = render(<SoldierActions {...defaultProps} />);
+      // Никакой пустой колонки на 44px — компонент не занимает места
+      expect(container).toBeEmptyDOMElement();
+      expect(screen.queryByTestId('soldier-kill-button')).not.toBeInTheDocument();
+      // The done button lives on the image (SoldierDoneButton), not here
+      expect(screen.queryByTestId('soldier-done-button')).not.toBeInTheDocument();
+    });
+
+    it('renders nothing for a dead regular soldier either (resurrect is a swipe)', () => {
+      const { container } = render(<SoldierActions {...defaultProps} isDead={true} />);
+      expect(container).toBeEmptyDOMElement();
+    });
+
+    it('does not render the legacy action button', () => {
+      render(<SoldierActions {...defaultProps} />);
+      expect(screen.queryByText('ДЕЙСТВИЕ')).not.toBeInTheDocument();
+    });
+  });
 
   describe('Pilot soldier rendering', () => {
     it('should show navigation button for pilot', () => {
@@ -48,47 +65,14 @@ describe('SoldierActions', () => {
       expect(onNavigateToMachine).toHaveBeenCalledTimes(1);
     });
 
-    it('should not show action button for pilot', () => {
+    it('should not show kill button for pilot', () => {
       render(
-        <SoldierActions
-          {...defaultProps}
-          isPilot={true}
-          onNavigateToMachine={jest.fn()}
-        />
+        <SoldierActions {...defaultProps} isPilot={true} onNavigateToMachine={jest.fn()} />
       );
 
-      // Should NOT contain "ДЕЙСТВИЕ" text (button was removed)
-      const actionButton = screen.queryByText('ДЕЙСТВИЕ');
-      expect(actionButton).not.toBeInTheDocument();
-    });
-  });
-
-  describe('Regular soldier rendering', () => {
-    it('should show only УБИТЬ button — «Готов» moved onto the soldier image', () => {
-      render(<SoldierActions {...defaultProps} isPilot={false} />);
-
-      const killButton = screen.getByRole('button', { name: /Пометить бойца как убитого/i });
-      expect(killButton).toBeInTheDocument();
-      // The done button now lives on the image (SoldierDoneButton), not in this column
-      expect(screen.queryByTestId('soldier-done-button')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('soldier-kill-button')).not.toBeInTheDocument();
     });
 
-    it('should not show action button (removed)', () => {
-      render(<SoldierActions {...defaultProps} isPilot={false} />);
-
-      const actionButton = screen.queryByText('ДЕЙСТВИЕ');
-      expect(actionButton).not.toBeInTheDocument();
-    });
-
-    it('should not show navigation button for regular soldier', () => {
-      render(<SoldierActions {...defaultProps} isPilot={false} />);
-
-      const navigateButton = screen.queryByLabelText('Перейти к машине');
-      expect(navigateButton).not.toBeInTheDocument();
-    });
-  });
-
-  describe('Pilot with panic state', () => {
     it('should still show navigation button for pilot even in panic (navigation takes priority)', () => {
       render(
         <SoldierActions
@@ -120,10 +104,11 @@ describe('SoldierActions', () => {
   });
 
   describe('Panic state rendering', () => {
-    it('should show УБИТЬ button in panic state', () => {
+    it('should show the Footprints indicator in panic state (kill is a right swipe)', () => {
       render(<SoldierActions {...defaultProps} isInPanic={true} />);
 
-      expect(screen.getByTestId('soldier-kill-button')).toBeInTheDocument();
+      expect(screen.getByTestId('panic-indicator')).toBeInTheDocument();
+      expect(screen.queryByTestId('soldier-kill-button')).not.toBeInTheDocument();
     });
 
     it('should NOT show ГОТОВ button in panic state', () => {
@@ -132,23 +117,12 @@ describe('SoldierActions', () => {
       expect(screen.queryByTestId('soldier-done-button')).not.toBeInTheDocument();
     });
 
-    it('should call onToggleDead when clicking УБИТЬ in panic state', () => {
-      const onToggleDead = jest.fn();
-      render(
-        <SoldierActions {...defaultProps} isInPanic={true} onToggleDead={onToggleDead} />
+    it('should render nothing when panicking and dead (skull overlay on photo carries the status)', () => {
+      const { container } = render(
+        <SoldierActions {...defaultProps} isInPanic={true} isDead={true} />
       );
 
-      fireEvent.click(screen.getByTestId('soldier-kill-button'));
-
-      expect(onToggleDead).toHaveBeenCalledTimes(1);
-    });
-
-    it('should still render УБИТЬ (killed state) when panicking and dead', () => {
-      render(<SoldierActions {...defaultProps} isInPanic={true} isDead={true} />);
-
-      const killButton = screen.getByTestId('soldier-kill-button');
-      expect(killButton).toBeInTheDocument();
-      expect(killButton).toHaveAttribute('aria-pressed', 'true');
+      expect(container).toBeEmptyDOMElement();
     });
   });
 });

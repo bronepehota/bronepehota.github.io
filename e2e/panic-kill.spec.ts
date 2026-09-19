@@ -1,8 +1,10 @@
 import { test, expect } from '@playwright/test';
-import { setupGameSessionWithSquad, waitForBattleDock, clearStorage } from './helpers/setup';
+import { setupGameSessionWithSquad, waitForBattleDock, clearStorage, swipeSoldierCard } from './helpers/setup';
 
 /**
- * #167 — a panicking soldier can be marked killed.
+ * #167 — a panicking soldier can be marked killed (rules §10: можно
+ * уничтожить, нельзя действовать). Кнопки «череп» нет — убивает свайп
+ * вправо по карточке; статус убитого несёт череп поверх фото.
  */
 test.describe('Kill in panic (#167)', () => {
   test.beforeEach(async ({ page }) => {
@@ -17,11 +19,11 @@ test.describe('Kill in panic (#167)', () => {
     await waitForBattleDock(page);
   });
 
-  test('panicking soldier shows a working УБИТЬ button and no ГОТОВ button', async ({ page }) => {
-    const panickingKill = page.locator(
-      '[data-testid="soldier-kill-button"][data-soldier-index="0"]'
-    );
-    await expect(panickingKill).toBeVisible({ timeout: 5000 });
+  test('panicking soldier: индикатор паники вместо ГОТОВ, свайп вправо убивает', async ({ page }) => {
+    // Индикатор «Отступает» в правой колонке (кнопки «череп» больше нет);
+    // panic-indicator не несёт data-soldier-index — ищем внутри карточки бойца 0
+    const indicatorInCard = page.getByTestId('soldier-card').first().getByTestId('panic-indicator');
+    await expect(indicatorInCard).toBeVisible({ timeout: 5000 });
 
     // DONE stays hidden for a panicking soldier
     const panickingDone = page.locator(
@@ -29,8 +31,10 @@ test.describe('Kill in panic (#167)', () => {
     );
     await expect(panickingDone).toHaveCount(0);
 
-    // Killing the panicking soldier works
-    await panickingKill.click({ force: true, timeout: 5000 });
-    await expect(panickingKill).toHaveAttribute('aria-pressed', 'true');
+    // Killing the panicking soldier works — right swipe (the only kill path)
+    await swipeSoldierCard(page, 0, 'right');
+    await expect(page.getByTestId('dock-soldiers-alive')).toContainText('5/6');
+    // Индикатор паники скрыт у убитого (череп на фото — статус смерти)
+    await expect(indicatorInCard).toHaveCount(0);
   });
 });

@@ -19,7 +19,14 @@ interface ExpandedNavigatorProps {
  * достаточно») — статус несёт сама строка: цветная полоса + метка.
  * Порядок армии стабилен, кроме убитых: их список уводит вниз и делает
  * компактными (плейтест: «по сути не сильно нужны»).
+ *
+ * Адаптив по размеру армии (плейтест 2026-09-19: «мало помещается — давай
+ * в два ряда, можно поменьше изображение»): до 4 живых юнитов — крупные
+ * полноширинные строки; от 5 — сетка в 2 колонки с мини-плитками (фото
+ * сверху ~96px, имя+статы снизу; убитые — ещё компактнее в той же сетке).
  */
+const GRID_ALIVE_THRESHOLD = 5;
+
 export function ExpandedNavigator({ army, focusedUnitIdx, onSelectUnit }: ExpandedNavigatorProps) {
   const faction = (army.faction || 'polaris') as FactionID;
   const factionColors = getFactionColors(faction);
@@ -29,14 +36,19 @@ export function ExpandedNavigator({ army, focusedUnitIdx, onSelectUnit }: Expand
     [army.units]
   );
 
-  const ordered = useMemo(() => {
+  // Разом: порядок (живые, затем убитые) и число живых — один проход,
+  // чтобы порог сетки и разбивка не могли разъехаться
+  const { ordered, aliveCount } = useMemo(() => {
     const alive: Array<{ unit: Army['units'][number]; idx: number }> = [];
     const dead: Array<{ unit: Army['units'][number]; idx: number }> = [];
     army.units.forEach((unit, idx) =>
       (deriveUnitStatus(unit) === 'dead' ? dead : alive).push({ unit, idx })
     );
-    return [...alive, ...dead];
+    return { ordered: [...alive, ...dead], aliveCount: alive.length };
   }, [army.units]);
+
+  // Живых (вкл. походивших/захваченных) ≥5 — двухколоночная сетка плиток
+  const gridMode = aliveCount >= GRID_ALIVE_THRESHOLD;
 
   return (
     <div className="flex-1 overflow-y-auto custom-scrollbar" data-testid="expanded-navigator">
@@ -58,18 +70,34 @@ export function ExpandedNavigator({ army, focusedUnitIdx, onSelectUnit }: Expand
         </span>
       </div>
 
-      <div className="flex flex-col divide-y divide-slate-800/60 pb-2">
-        {ordered.map(({ unit, idx }) => (
-          <ExpandedUnitRow
-            key={unit.instanceId}
-            unit={unit}
-            isActive={focusedUnitIdx === idx}
-            section={deriveUnitStatus(unit)}
-            onClick={() => onSelectUnit(idx)}
-            faction={faction}
-          />
-        ))}
-      </div>
+      {gridMode ? (
+        <div className="grid grid-cols-2 gap-1.5 items-start p-2 pt-1.5">
+          {ordered.map(({ unit, idx }) => (
+            <ExpandedUnitRow
+              key={unit.instanceId}
+              unit={unit}
+              isActive={focusedUnitIdx === idx}
+              section={deriveUnitStatus(unit)}
+              onClick={() => onSelectUnit(idx)}
+              faction={faction}
+              layout="tile"
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col divide-y divide-slate-800/60 pb-2">
+          {ordered.map(({ unit, idx }) => (
+            <ExpandedUnitRow
+              key={unit.instanceId}
+              unit={unit}
+              isActive={focusedUnitIdx === idx}
+              section={deriveUnitStatus(unit)}
+              onClick={() => onSelectUnit(idx)}
+              faction={faction}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

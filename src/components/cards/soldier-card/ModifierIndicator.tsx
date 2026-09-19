@@ -2,7 +2,7 @@
 
 import { Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { SoldierModifier } from '@/lib/modifier-types';
+import type { SoldierModifier, BuffDefinition } from '@/lib/modifier-types';
 import { ModifierIcon } from '@/components/editor/ModifierIcons';
 import { getEffectStyles } from '@/lib/effect-colors';
 
@@ -11,6 +11,11 @@ interface ModifierIndicatorProps {
   debuffCount: number;
   soldierModifiers?: SoldierModifier[];
   availableCount?: number;
+  /** Статические способности взвода из его данных (Пр4, Рм — каталог
+   *  standard-modifiers): классические спец-свойства бойцов, показываем
+   *  иконками на кнопке (плейтест: «показывать классические спец свойства»).
+   *  Одноразовые уже использованные отфильтровывает caller. */
+  staticAbilities?: BuffDefinition[];
   onClick?: () => void;
   disabled?: boolean;
 }
@@ -20,10 +25,23 @@ export function ModifierIndicator({
   debuffCount,
   soldierModifiers = [],
   availableCount,
+  staticAbilities = [],
   onClick,
   disabled,
 }: ModifierIndicatorProps) {
   const totalCount = buffCount + debuffCount;
+
+  // Отрисовка статических спец-свойств (Пр4, Рм) — иконки каталога
+  const renderStaticAbilities = () =>
+    staticAbilities.map(b => (
+      <div
+        key={`static-${b.id}`}
+        title={`${b.name}: ${b.description}${b.oneTimeUse ? ' (раз за бой)' : ' (постоянная)'}`}
+        className="shrink-0"
+      >
+        <ModifierIcon name={b.icon} size={14} className="text-emerald-300" />
+      </div>
+    ));
 
   // If there are soldier-specific modifiers, show them as color-coded icons
   if (soldierModifiers.length > 0) {
@@ -50,6 +68,7 @@ export function ModifierIndicator({
         )}
         aria-label={`${soldierModifiers.length} модификаторов на солдата`}
       >
+        {renderStaticAbilities()}
         {soldierModifiers.map(mod => {
           const colorStyles = getEffectStyles(mod.id);
           return (
@@ -70,8 +89,38 @@ export function ModifierIndicator({
     );
   }
 
-  // No active modifiers: show available count or subtle placeholder
+  // Нет активных модификаторов, но есть спец-свойства взвода (Пр4, Рм) —
+  // они и есть содержимое кнопки (плейтест); клик открывает модал с деталями
   if (totalCount === 0) {
+    if (staticAbilities.length > 0) {
+      return (
+        <div
+          role="button"
+          tabIndex={disabled ? -1 : 0}
+          onClick={disabled ? undefined : (e) => { e.stopPropagation(); onClick?.(); }}
+          onKeyDown={
+            disabled
+              ? undefined
+              : (e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onClick?.();
+                  }
+                }
+          }
+          className={cn(
+            'flex flex-row items-center justify-center gap-1 rounded-lg bg-slate-800/60 border border-emerald-700/40 min-h-[40px] min-w-[44px] flex-1 px-1 transition-all select-none',
+            !disabled && 'cursor-pointer hover:bg-slate-700/30 active:scale-[0.97]',
+            disabled && 'opacity-30'
+          )}
+          aria-label={`Спец-свойства: ${staticAbilities.map(b => b.name).join(', ')}`}
+        >
+          {renderStaticAbilities()}
+        </div>
+      );
+    }
+
     if (availableCount && availableCount > 0) {
       return (
         <div

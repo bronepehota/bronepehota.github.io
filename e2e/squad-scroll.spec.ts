@@ -61,11 +61,14 @@ test.describe('Squad scroll in battle view', () => {
     //    because the bottom reserve didn't match the dock height (the dock
     //    loads after the army, so its height must be measured when it mounts).
     await page.waitForTimeout(150);
+    // Меряем фото последнего бойца (видимая часть карточки): корень карточки
+    // несёт паддинг и может закономерно нависать на пару px сверх допуска
+    // (раньше мерялась кнопка «череп» — она внутри паддинга).
     const clearance = await page.evaluate(() => {
-      const killButtons = Array.from(
-        document.querySelectorAll('[data-testid="soldier-kill-button"]'),
+      const photos = Array.from(
+        document.querySelectorAll('[data-testid="soldier-photo"]'),
       );
-      const lastSoldier = killButtons[killButtons.length - 1];
+      const lastSoldier = photos[photos.length - 1];
       const dock = document.querySelector('[data-testid="unit-dock"]');
       if (!lastSoldier || !dock) return null;
       return {
@@ -73,7 +76,7 @@ test.describe('Squad scroll in battle view', () => {
         dockTop: Math.round(dock.getBoundingClientRect().top),
       };
     });
-    expect(clearance, 'last soldier kill button and dock should both be present').not.toBeNull();
+    expect(clearance, 'last soldier photo and dock should both be present').not.toBeNull();
     expect(clearance!.soldierBottom).toBeLessThanOrEqual(clearance!.dockTop + 1);
   });
 });

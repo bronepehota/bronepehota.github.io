@@ -30,10 +30,15 @@ describe('BattleTutorial', () => {
     // финальный шаг — рекап жестов (плейтест: «там про свайп не сказано»)
     expect(screen.getByText('← свайп: готов')).toBeInTheDocument();
     expect(screen.getByText('убит: свайп →')).toBeInTheDocument();
-    // ...и нажатий: выстрелы, ГОТОВ, череп (плейтест: «про нажатия…»)
+    // ...и нажатий: выстрелы, ГОТОВ; убит — только свайп вправо
+    // (кнопки «череп» нет — свайп единственный путь убить/оживить)
     expect(screen.getByText(/Статы бойца/)).toBeInTheDocument();
     expect(screen.getByText(/ГОТОВ/)).toBeInTheDocument();
-    expect(screen.getByText(/черепа/)).toBeInTheDocument();
+    expect(screen.getByText(/убит — свайп вправо/)).toBeInTheDocument();
+    // цикл выстрела (плейтест: «про то как стрелять и делать действия»)
+    expect(screen.getByText(/Выстрел:/)).toBeInTheDocument();
+    expect(screen.getByText(/ПРИНЯТЬ/)).toBeInTheDocument();
+    expect(screen.queryByText(/череп/)).not.toBeInTheDocument();
     expect(screen.queryByTestId('battle-tutorial-demo-card')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('battle-tutorial-finish'));
