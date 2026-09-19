@@ -227,7 +227,7 @@ function SoldierCard({
       {...swipe.handlers}
       style={swipe.style}
       className={cn(
-        "relative p-1 md:p-1.5 rounded-sm border flex items-center gap-1.5 md:gap-2 transition-all overflow-hidden touch-pan-y",
+        "relative p-1 md:p-1.5 rounded-sm border flex items-center gap-1.5 md:gap-2 transition-all overflow-hidden flex-1 touch-pan-y",
         isDead ? "bg-slate-950/80 border-slate-800 opacity-40 grayscale" :
         isDone ? "bg-slate-900/40 border-slate-700/50 opacity-90" : "bg-slate-800/30 border-slate-700/50",
         isPilot && !isDead ? "border-cyan-700/40" : ""
@@ -256,7 +256,11 @@ function SoldierCard({
 
       {/* Soldier image (left side) with the «Готов» button overlaid bottom-left.
           Hidden for pilots (nav button replaces actions) and panic (no DONE). */}
-      <div className="relative shrink-0">
+      {/* self-stretch + кап: фото растёт с высотой строки (взвод заполняет
+          экран, пол — прежний размер), но не выше min(224px, 60vw) — иначе
+          на узком экране аспект 3:4 выдавит статы. Кап на обёртке, не на
+          фото: чип «ГОТОВ» (absolute bottom-0) остаётся у низа фото. */}
+      <div className="relative shrink-0 self-stretch max-h-[min(224px,60vw)]">
         <SoldierImage
           imageUrl={getSoldierImage(soldierIndex)}
           soldierIndex={soldierIndex}

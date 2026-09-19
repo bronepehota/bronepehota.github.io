@@ -108,8 +108,8 @@ test.describe('Pilot Functionality', () => {
     await openNavigator(page);
     await page.locator('[data-testid^="expanded-unit-"]').nth(0).click();
 
-    // Check for pilot badge on first soldier
-    const pilotBadge = page.locator('.relative.w-16.md\\:w-20').first()
+    // Check for pilot badge on first soldier (stable testid, not size classes)
+    const pilotBadge = page.getByTestId('soldier-photo').first()
       .locator('text=/ПИЛОТ/i');
     await expect(pilotBadge).toBeVisible();
 
