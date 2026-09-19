@@ -206,6 +206,10 @@ export function CombatResults({
                     {getEffectiveDistance()}
                   </span>
                 </div>
+                {/* cm equivalent from the player's step factor toggle */}
+                <div className="text-xs font-mono text-slate-500">
+                  {getEffectiveDistance() * stepToCmFactor} см
+                </div>
                 {getFortificationBonusDisplay() && (
                   <div className="text-xs opacity-70">{getFortificationBonusDisplay()}</div>
                 )}

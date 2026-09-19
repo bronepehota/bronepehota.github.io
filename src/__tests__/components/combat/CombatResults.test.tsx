@@ -650,5 +650,29 @@ describe('CombatResults - Grenade Display', () => {
       render(<CombatResults {...defaultProps} />);
       expect(screen.queryByTestId('shot-verdict-banner')).not.toBeInTheDocument();
     });
+
+    it('shows the target distance in cm per the default factor 5', () => {
+      render(
+        <CombatResults {...defaultProps} result={mockShotResult} parameters={shotParameters} />
+      );
+
+      // 12 steps × 5
+      expect(screen.getByText('60 см')).toBeInTheDocument();
+    });
+
+    it('distance cm follows the stepToCmFactor prop', () => {
+      render(
+        <CombatResults
+          {...defaultProps}
+          result={mockShotResult}
+          parameters={shotParameters}
+          stepToCmFactor={4}
+        />
+      );
+
+      // 12 steps × 4
+      expect(screen.getByText('48 см')).toBeInTheDocument();
+      expect(screen.queryByText('60 см')).not.toBeInTheDocument();
+    });
   });
 });
