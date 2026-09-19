@@ -441,7 +441,7 @@ export function ParameterInputs({
         )}
 
         <div className="grid grid-cols-1 gap-2 md:gap-3">
-          {/* Distance Input with Converter — tap the value for the quick-input modal */}
+          {/* Distance Input with Converter — the шаги/см switch lives in the quick-input modal */}
           {(actionType === 'shot' || actionType === 'grenade') && (
             <DistanceConverter
               steps={effectiveDistance}
@@ -452,7 +452,6 @@ export function ParameterInputs({
               rulesVersion={rulesVersion}
               stepToCmFactor={stepToCmFactor}
               defaultMode={distanceUnit}
-              onModeChange={handleDistanceUnitChange}
               onInputActivate={() => setActiveInput('distance')}
             />
           )}
@@ -558,7 +557,7 @@ export function ParameterInputs({
       {/* Quick-input modal for standard values — distance */}
       {activeInput === 'distance' && (actionType === 'shot' || actionType === 'grenade') && (
         <DiceInputPopup
-          title={distanceUnit === 'cm' ? 'ДИСТАНЦИЯ (СМ)' : 'ДИСТАНЦИЯ (ШАГИ)'}
+          title="ДИСТАНЦИЯ"
           field={distanceUnit === 'cm' ? 'distance_cm' : 'distance'}
           color="blue"
           mode="number"
@@ -568,6 +567,7 @@ export function ParameterInputs({
           quickValues={distanceUnit === 'cm'
             ? [5, 10, 15, 20, 25, 30, 40, 50, 60, 80, 100, 120, 150, 200]
             : [1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 15, 20, 30, 40]}
+          unitSwitch={{ value: distanceUnit, onChange: handleDistanceUnitChange, factor: stepToCmFactor }}
           onSubmit={handleDistanceSubmit}
           onClose={() => setActiveInput(null)}
         />

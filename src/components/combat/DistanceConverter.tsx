@@ -23,8 +23,6 @@ export interface DistanceConverterProps {
   defaultMode?: 'steps' | 'cm';
   /** When set, the value becomes a tappable button (modal input) instead of a number input */
   onInputActivate?: () => void;
-  /** When provided, renders the «шаги/см» switch in the label row; fires on flip */
-  onModeChange?: (mode: 'steps' | 'cm') => void;
 }
 
 type DistanceMode = 'steps' | 'cm';
@@ -49,7 +47,6 @@ export function DistanceConverter({
   stepToCmFactor = 5,
   defaultMode = 'steps',
   onInputActivate,
-  onModeChange,
 }: DistanceConverterProps) {
   const [mode, setMode] = useState<DistanceMode>(defaultMode);
   const [cmValue, setCmValue] = useState<number>(stepsToCm(steps, stepToCmFactor));
@@ -89,42 +86,9 @@ export function DistanceConverter({
 
   return (
     <div className={cn('flex flex-col gap-1.5', className)}>
-      {/* Label row + steps/cm switch */}
-      <div className="flex items-center justify-between">
-        <div className="text-[10px] md:text-xs opacity-50 uppercase font-bold">
-          Дистанция
-        </div>
-        {onModeChange && (
-          <div
-            data-testid="distance-unit-switch"
-            className="flex items-center gap-0.5 p-0.5 rounded-md bg-slate-800/60 border border-slate-700/50"
-            role="group"
-            aria-label="Единица ввода дистанции"
-          >
-            {(['steps', 'cm'] as const).map((u) => (
-              <button
-                key={u}
-                type="button"
-                aria-pressed={mode === u}
-                onClick={() => {
-                  if (mode !== u) {
-                    setMode(u);
-                    onModeChange(u);
-                  }
-                }}
-                className={cn(
-                  'px-2.5 py-1.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider',
-                  'min-h-[36px] transition-colors touch-manipulation active:scale-95',
-                  mode === u
-                    ? 'bg-cyan-600/30 text-cyan-200'
-                    : 'text-slate-500 hover:text-slate-300'
-                )}
-              >
-                {u === 'steps' ? 'шаги' : 'см'}
-              </button>
-            ))}
-          </div>
-        )}
+      {/* Label row */}
+      <div className="text-[10px] md:text-xs opacity-50 uppercase font-bold">
+        Дистанция
       </div>
 
       {/* Input row with inline hint */}

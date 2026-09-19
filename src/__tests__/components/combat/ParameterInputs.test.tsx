@@ -81,7 +81,9 @@ describe('ParameterInputs quick-input modals', () => {
 
     await openDistanceModal();
 
-    expect(screen.getByText('ДИСТАНЦИЯ (ШАГИ)')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'ДИСТАНЦИЯ' })).toBeInTheDocument();
+    const sw = screen.getByTestId('popup-unit-switch');
+    expect(within(sw).getByRole('button', { name: 'ШАГИ' })).toHaveAttribute('aria-pressed', 'true');
   });
 
   it('distance modal writes the picked steps', async () => {
@@ -99,13 +101,12 @@ describe('ParameterInputs quick-input modals', () => {
 
   it('distance modal converts cm entries back to steps (cm input unit)', async () => {
     const onChange = jest.fn();
-    // Unit preference is read from storage, not the prop chain
-    localStorage.setItem('bronepehota_distance_input_unit', 'cm');
     renderShot({ onChange, stepToCmFactor: 5 });
 
     await openDistanceModal();
 
-    expect(screen.getByText('ДИСТАНЦИЯ (СМ)')).toBeInTheDocument();
+    // Flip to cm INSIDE the modal
+    await userEvent.click(within(screen.getByTestId('popup-unit-switch')).getByRole('button', { name: 'СМ' }));
 
     await userEvent.click(screen.getByRole('button', { name: '50' }));
     await userEvent.click(screen.getByRole('button', { name: 'Подтвердить' }));
@@ -141,67 +142,67 @@ describe('ParameterInputs quick-input modals', () => {
   });
 });
 
-describe('ParameterInputs — шаги/см switch', () => {
+describe('ParameterInputs — шаги/см switch (inside the distance modal)', () => {
   beforeEach(() => {
     localStorage.clear();
   });
 
-  const getSwitch = () => screen.getByTestId('distance-unit-switch');
-
-  it('renders the switch with steps active by default', () => {
-    renderShot();
-
-    expect(within(getSwitch()).getByRole('button', { name: 'шаги' })).toHaveAttribute('aria-pressed', 'true');
-    expect(within(getSwitch()).getByRole('button', { name: 'см' })).toHaveAttribute('aria-pressed', 'false');
-  });
+  const getSwitch = () => screen.getByTestId('popup-unit-switch');
 
   it('flips to cm and persists the choice to the shared storage key', async () => {
     renderShot();
+    await openDistanceModal();
 
-    await userEvent.click(within(getSwitch()).getByRole('button', { name: 'см' }));
+    await userEvent.click(within(getSwitch()).getByRole('button', { name: 'СМ' }));
 
     expect(localStorage.getItem('bronepehota_distance_input_unit')).toBe('cm');
-    expect(within(getSwitch()).getByRole('button', { name: 'см' })).toHaveAttribute('aria-pressed', 'true');
+    expect(within(getSwitch()).getByRole('button', { name: 'СМ' })).toHaveAttribute('aria-pressed', 'true');
   });
 
   it('flipping fires the same-tab sync event (settings/page listeners)', async () => {
     const listener = jest.fn();
     window.addEventListener('bronepehota:distance-unit', listener);
     renderShot();
+    await openDistanceModal();
 
-    await userEvent.click(within(getSwitch()).getByRole('button', { name: 'см' }));
+    await userEvent.click(within(getSwitch()).getByRole('button', { name: 'СМ' }));
 
     expect(listener).toHaveBeenCalled();
     window.removeEventListener('bronepehota:distance-unit', listener);
   });
 
-  it('remembers the unit across mounts (storage is the source of truth)', () => {
-    localStorage.setItem('bronepehota_distance_input_unit', 'cm');
-
+  it('the quick grid follows the flipped unit', async () => {
     renderShot();
-
-    expect(within(getSwitch()).getByRole('button', { name: 'см' })).toHaveAttribute('aria-pressed', 'true');
-  });
-
-  it('the distance modal follows the flipped unit', async () => {
-    renderShot();
-
-    await userEvent.click(within(getSwitch()).getByRole('button', { name: 'см' }));
     await openDistanceModal();
 
-    expect(screen.getByText('ДИСТАНЦИЯ (СМ)')).toBeInTheDocument();
+    // steps-only value 7 present, cm-only value 50 absent
+    expect(screen.getByRole('button', { name: '7' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: '50' })).not.toBeInTheDocument();
+
+    await userEvent.click(within(getSwitch()).getByRole('button', { name: 'СМ' }));
+
+    expect(screen.getByRole('button', { name: '50' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: '7' })).not.toBeInTheDocument();
   });
 
-  it('the cm hint flips with the switch (input in cm, hint in steps)', async () => {
+  it('switching the unit converts the current value in place', async () => {
+    renderShot({ stepToCmFactor: 5 });
+    await openDistanceModal();
+
+    // 5 steps → flip to cm → 25 см
+    expect(screen.getByLabelText('Значение')).toHaveValue(5);
+    await userEvent.click(within(getSwitch()).getByRole('button', { name: 'СМ' }));
+    expect(screen.getByLabelText('Значение')).toHaveValue(25);
+  });
+
+  it('remembers the unit across mounts (storage is the source of truth)', async () => {
+    localStorage.setItem('bronepehota_distance_input_unit', 'cm');
     renderShot();
+    await openDistanceModal();
 
-    // steps mode: value 5, hint "(25 см)"
-    expect(screen.getByText('(25 см)')).toBeInTheDocument();
-
-    await userEvent.click(within(getSwitch()).getByRole('button', { name: 'см' }));
-
-    // cm mode: value 25, hint "(5шаг)"
-    expect(screen.getByText('(5шаг)')).toBeInTheDocument();
+    expect(within(getSwitch()).getByRole('button', { name: 'СМ' })).toHaveAttribute('aria-pressed', 'true');
+    // cm grid already active
+    expect(screen.getByRole('button', { name: '100' })).toBeInTheDocument();
   });
 
   it('cm-mode display follows a modal submit (external steps change) — review #2', async () => {

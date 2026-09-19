@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DiceInputPopup } from '@/components/combat/DiceInputPopup';
 
@@ -103,5 +103,38 @@ describe('DiceInputPopup — quick values and field override', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Подтвердить' }));
 
     expect(onSubmit).toHaveBeenCalledWith('7');
+  });
+
+  it('renders the unit switch when provided and fires onChange', async () => {
+    const onUnit = jest.fn();
+    render(
+      <DiceInputPopup {...baseProps} unitSwitch={{ value: 'steps', onChange: onUnit, factor: 5 }} quickValues={[0, 2, 4, 8]} />
+    );
+
+    await userEvent.click(within(screen.getByTestId('popup-unit-switch')).getByRole('button', { name: 'СМ' }));
+
+    expect(onUnit).toHaveBeenCalledWith('cm');
+  });
+
+  it('converts the current value when the unit prop flips (parent-driven)', () => {
+    const onUnit = jest.fn();
+    const props = { ...baseProps, unitSwitch: { value: 'steps' as const, onChange: onUnit, factor: 5 }, quickValues: [0, 2, 4, 8] };
+    const { rerender } = render(<DiceInputPopup {...props} />);
+
+    expect(screen.getByLabelText('Значение')).toHaveValue(2); // base numericValue
+
+    rerender(<DiceInputPopup {...props} unitSwitch={{ value: 'cm', onChange: onUnit, factor: 5 }} />);
+
+    // 2 шага × 5 = 10 см
+    expect(screen.getByLabelText('Значение')).toHaveValue(10);
+  });
+
+  it('renders centered (not a bottom sheet) on any viewport', () => {
+    render(<DiceInputPopup {...baseProps} />);
+
+    const overlay = screen.getByText('БРОНЯ ЦЕЛИ').closest('div.fixed');
+    expect(overlay).not.toBeNull();
+    expect(overlay!.className).toContain('items-center');
+    expect(overlay!.className).not.toContain('items-end');
   });
 });

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { X, Minus, Plus, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { HISTORY_KEY, fieldFromTitle, saveEntry, getRecentForField, loadHistory } from '@/lib/dice-history';
@@ -19,6 +19,13 @@ interface DiceInputPopupProps {
   field?: string;
   /** Number mode: quick-pick grid values (default 0–10 filtered by min/max) */
   quickValues?: number[];
+  /** Optional steps↔cm switch rendered inside the popup (distance modal) */
+  unitSwitch?: {
+    value: 'steps' | 'cm';
+    onChange: (unit: 'steps' | 'cm') => void;
+    /** cm per step — used to convert the current value when the unit flips */
+    factor?: number;
+  };
 }
 
 // --- Color configs ---
@@ -80,6 +87,7 @@ export function DiceInputPopup({
   max = 10,
   field: fieldOverride,
   quickValues,
+  unitSwitch,
 }: DiceInputPopupProps) {
   const colors = colorConfig[color];
   const field = fieldOverride ?? fieldFromTitle(title);
@@ -163,15 +171,28 @@ export function DiceInputPopup({
 
   const maxFreq = useMemo(() => Math.max(1, ...recentEntries.map(e => e.count)), [recentEntries]);
 
+  // Unit switch: convert the current value in place when steps↔cm flips
+  const prevUnitRef = useRef(unitSwitch?.value);
+  useEffect(() => {
+    if (!unitSwitch?.factor) return;
+    const prev = prevUnitRef.current;
+    prevUnitRef.current = unitSwitch.value;
+    if (prev === undefined || prev === unitSwitch.value) return;
+    const n = parseInt(numText, 10);
+    if (!isNaN(n)) {
+      applyNum(unitSwitch.value === 'cm' ? n * unitSwitch.factor : Math.round(n / unitSwitch.factor));
+    }
+  }, [unitSwitch?.value]);
+
   return (
     <div className={cn(
-      "fixed inset-0 z-[200] flex items-end md:items-center justify-center p-0 md:p-4 transition-all duration-200",
+      "fixed inset-0 z-[200] flex items-center justify-center p-4 transition-all duration-200",
       isVisible ? "bg-slate-950/90 backdrop-blur-sm" : "bg-slate-950/0"
     )}>
       <div className={cn(
-        "w-full max-w-[420px] bg-slate-900 border-2 rounded-t-2xl md:rounded-xl overflow-hidden transition-all duration-300",
+        "w-full max-w-[420px] bg-slate-900 border-2 rounded-xl overflow-hidden transition-all duration-300",
         colors.accent,
-        isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+        isVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
       )}>
         {/* Scanline overlay */}
         <div className="absolute inset-0 combat-scanlines pointer-events-none z-10 opacity-30" />
@@ -208,6 +229,36 @@ export function DiceInputPopup({
 
         {/* Content area */}
         <div className="px-4 pb-4 space-y-3 relative z-20">
+
+          {/* Steps↔cm switch (distance modal) — converts the current value on flip */}
+          {unitSwitch && (
+            <div className="flex justify-center">
+              <div
+                data-testid="popup-unit-switch"
+                role="group"
+                aria-label="Единица ввода дистанции"
+                className="flex items-center gap-0.5 p-0.5 rounded-md bg-slate-800/60 border border-slate-700/50"
+              >
+                {(['steps', 'cm'] as const).map((u) => (
+                  <button
+                    key={u}
+                    type="button"
+                    aria-pressed={unitSwitch.value === u}
+                    onClick={() => unitSwitch.onChange(u)}
+                    className={cn(
+                      'px-2.5 py-1.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider',
+                      'min-h-[36px] transition-colors touch-manipulation active:scale-95',
+                      unitSwitch.value === u
+                        ? 'bg-cyan-600/30 text-cyan-200'
+                        : 'text-slate-500 hover:text-slate-300'
+                    )}
+                  >
+                    {u === 'steps' ? 'ШАГИ' : 'СМ'}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Recent / Quick Select */}
           {recentEntries.length > 0 && (
