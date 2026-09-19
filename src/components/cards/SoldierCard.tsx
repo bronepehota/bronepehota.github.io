@@ -189,7 +189,14 @@ function SoldierCard({
     const shotBuffs = collectBuffsForUnit(unit, armyLike, 'shot');
     const meleeBuffs = collectBuffsForUnit(unit, armyLike, 'melee');
     const alwaysBuffs = collectBuffsForUnit(unit, armyLike, 'always');
-    const allBuffIds = new Set([...shotBuffs, ...meleeBuffs, ...alwaysBuffs].map(b => b.id));
+    // Спец-свойства (Пр4, Рм — target 'custom') в счётчик баффов кнопки не
+    // идут: это способности, они показываются отдельным чипом на кнопке
+    // (плейтест: «на кнопке 1 бафов — хочется Пр4»)
+    const allBuffIds = new Set(
+      [...shotBuffs, ...meleeBuffs, ...alwaysBuffs]
+        .filter(b => b.target !== 'custom')
+        .map(b => b.id)
+    );
     // Filter debuffs by expiry (includes unit-level debuffs + per-soldier debuffs from modal)
     const unitDebuffs = (unit.activeDebuffs || []).filter(d =>
       isModifierActive(d.appliedAtTurn, d.duration, currentTurn)

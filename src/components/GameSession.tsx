@@ -701,7 +701,10 @@ export default function GameSession({
         const alwaysBuffs = collectBuffsForUnit(unit, army, 'always');
         const allStaticBuffs = [...shotBuffs, ...meleeBuffs, ...alwaysBuffs];
         const seenBuffIds = new Set<string>();
+        // Спец-свойства (Пр4, Рм — target 'custom') в «статические баффы»
+        // не идут: им место во вкладке «Свойства» (иначе дубль в модале)
         const uniqueStaticBuffs = allStaticBuffs.filter(b => {
+          if (b.target === 'custom') return false;
           if (seenBuffIds.has(b.id)) return false;
           seenBuffIds.add(b.id);
           return true;
