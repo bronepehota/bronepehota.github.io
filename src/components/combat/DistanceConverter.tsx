@@ -59,12 +59,17 @@ export function DistanceConverter({
     setMode(defaultMode);
   }, [defaultMode]);
 
-  // Sync cm value when steps prop changes from parent
+  // Sync cm value when steps prop changes from parent.
+  // In cm mode, typed values round-trip (cmToSteps(cmValue) === steps) and are
+  // kept as typed; an external steps change (e.g. the quick-input modal) that
+  // does NOT match the current cm display resyncs it.
   useEffect(() => {
     if (mode === 'steps') {
       setCmValue(stepsToCm(steps, stepToCmFactor));
+    } else if (cmToSteps(cmValue, stepToCmFactor) !== steps) {
+      setCmValue(stepsToCm(steps, stepToCmFactor));
     }
-  }, [steps, stepToCmFactor, mode]);
+  }, [steps, stepToCmFactor, mode, cmValue]);
 
   const handleStepsChange = (newSteps: number) => {
     onChange(newSteps);
@@ -108,8 +113,8 @@ export function DistanceConverter({
                   }
                 }}
                 className={cn(
-                  'px-2.5 py-1 rounded text-[10px] font-mono font-bold uppercase tracking-wider',
-                  'min-h-[28px] transition-colors touch-manipulation active:scale-95',
+                  'px-2.5 py-1.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider',
+                  'min-h-[36px] transition-colors touch-manipulation active:scale-95',
                   mode === u
                     ? 'bg-cyan-600/30 text-cyan-200'
                     : 'text-slate-500 hover:text-slate-300'

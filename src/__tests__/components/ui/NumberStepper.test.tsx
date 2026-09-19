@@ -56,6 +56,34 @@ describe('NumberStepper', () => {
     jest.useRealTimers();
   });
 
+  it('sweeps through controlled updates — no stale-closure freeze (review #1)', () => {
+    jest.useFakeTimers();
+    // Simulate a controlled parent: feed every emitted value back via rerender
+    let current = 5;
+    const onChange = jest.fn((v: number) => { current = v; });
+    const view = render(
+      <NumberStepper value={current} onChange={onChange} min={1} max={40} label="Дистанция" />
+    );
+
+    const inc = screen.getByRole('button', { name: 'Increase Дистанция' });
+    fireEvent.pointerDown(inc);
+    act(() => { jest.advanceTimersByTime(450); });
+
+    // Tick 1 → 6; parent feeds it back
+    act(() => { jest.advanceTimersByTime(140); });
+    expect(current).toBe(6);
+    view.rerender(
+      <NumberStepper value={current} onChange={onChange} min={1} max={40} label="Дистанция" />
+    );
+
+    // Tick 2 must see the fresh value → 7 (a captured stale closure would re-emit 6)
+    act(() => { jest.advanceTimersByTime(140); });
+    expect(current).toBe(7);
+
+    fireEvent.pointerUp(inc);
+    jest.useRealTimers();
+  });
+
   it('a held sweep does not add an extra step from the trailing click', () => {
     jest.useFakeTimers();
     const onChange = jest.fn();

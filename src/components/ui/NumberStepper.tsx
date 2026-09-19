@@ -42,6 +42,10 @@ export function NumberStepper({
   // Whether repeats already fired for this press — suppresses the trailing
   // click so a held sweep doesn't jump one extra step on release
   const repeatFiredRef = useRef(false);
+  // Latest step functions — the interval calls through refs so each tick sees
+  // the CURRENT value prop (controlled parents re-render between ticks; a
+  // captured closure would freeze the sweep after one step)
+  const applyRef = useRef<{ inc: () => void; dec: () => void }>({ inc: () => {}, dec: () => {} });
 
   const stopRepeat = useCallback(() => {
     if (holdTimerRef.current !== null) {
@@ -56,12 +60,14 @@ export function NumberStepper({
 
   useEffect(() => stopRepeat, [stopRepeat]);
 
-  const startRepeat = useCallback((apply: () => void) => {
+  const startRepeat = useCallback((direction: 'inc' | 'dec') => {
     stopRepeat();
     repeatFiredRef.current = false;
     holdTimerRef.current = window.setTimeout(() => {
       repeatFiredRef.current = true;
-      repeatTimerRef.current = window.setInterval(apply, REPEAT_INTERVAL_MS);
+      repeatTimerRef.current = window.setInterval(() => {
+        direction === 'inc' ? applyRef.current.inc() : applyRef.current.dec();
+      }, REPEAT_INTERVAL_MS);
     }, HOLD_DELAY_MS);
   }, [stopRepeat]);
 
@@ -80,6 +86,8 @@ export function NumberStepper({
       setInputValue(newValue.toString());
     }
   };
+
+  applyRef.current = { inc: increment, dec: decrement };
 
   const handleDecrementClick = () => {
     if (repeatFiredRef.current) {
@@ -163,10 +171,11 @@ export function NumberStepper({
         <button
           type="button"
           onClick={handleDecrementClick}
-          onPointerDown={() => !disabled && canDecrement && startRepeat(decrement)}
+          onPointerDown={() => !disabled && canDecrement && startRepeat('dec')}
           onPointerUp={stopRepeat}
           onPointerLeave={stopRepeat}
           onPointerCancel={stopRepeat}
+          onFocus={() => { repeatFiredRef.current = false; }}
           disabled={!canDecrement || disabled}
           className={cn(
             buttonSizeClasses[size],
@@ -228,10 +237,11 @@ export function NumberStepper({
         <button
           type="button"
           onClick={handleIncrementClick}
-          onPointerDown={() => !disabled && canIncrement && startRepeat(increment)}
+          onPointerDown={() => !disabled && canIncrement && startRepeat('inc')}
           onPointerUp={stopRepeat}
           onPointerLeave={stopRepeat}
           onPointerCancel={stopRepeat}
+          onFocus={() => { repeatFiredRef.current = false; }}
           disabled={!canIncrement || disabled}
           className={cn(
             buttonSizeClasses[size],

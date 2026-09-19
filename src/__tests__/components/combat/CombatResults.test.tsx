@@ -600,14 +600,15 @@ describe('CombatResults - Grenade Display', () => {
       expect(banner).toHaveClass('border-red-500/70');
     });
 
-    it('summarizes hit with damage: emerald banner + «−N УРОНА» line', () => {
+    it('summarizes hit with damage: emerald banner + «-N УРОНА» line', () => {
       render(
         <CombatResults {...defaultProps} result={mockShotResult} parameters={shotParameters} />
       );
 
       const banner = screen.getByTestId('shot-verdict-banner');
       expect(banner).toHaveClass('border-emerald-500/70');
-      expect(screen.getByText('−1 УРОНА')).toBeInTheDocument();
+      // Same string as the legacy damage pill below — scope to the banner
+      expect(banner).toHaveTextContent('-1 УРОНА');
     });
 
     it('summarizes «попал, но броню не пробил» as its own amber outcome', () => {

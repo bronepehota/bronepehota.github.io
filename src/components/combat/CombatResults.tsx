@@ -135,7 +135,7 @@ export function CombatResults({
                 {hit && result.damageResult && (
                   <div className={cn('mt-2 pt-2 border-t text-center font-mono text-sm font-black uppercase tracking-wider', tone.detail)}>
                     {penetrated
-                      ? `−${result.damageResult.damage} ${result.unitType === 'machine' ? 'HP' : 'УРОНА'}`
+                      ? `-${result.damageResult.damage} ${result.unitType === 'machine' ? 'HP' : 'УРОНА'}`
                       : 'БРОНЯ НЕ ПРОБИТА'}
                   </div>
                 )}

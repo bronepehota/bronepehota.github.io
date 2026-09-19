@@ -203,4 +203,32 @@ describe('ParameterInputs — шаги/см switch', () => {
     // cm mode: value 25, hint "(5шаг)"
     expect(screen.getByText('(5шаг)')).toBeInTheDocument();
   });
+
+  it('cm-mode display follows a modal submit (external steps change) — review #2', async () => {
+    localStorage.setItem('bronepehota_distance_input_unit', 'cm');
+    const onChange = jest.fn();
+    const view = renderShot({ onChange });
+
+    // 5 steps × 5 = 25 см on the value button
+    expect(screen.getByLabelText('Дистанция input')).toHaveTextContent('25');
+
+    // Modal: pick 100 см → confirm → parent updates distance to 20 steps
+    await openDistanceModal();
+    await userEvent.click(screen.getByRole('button', { name: '100' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Подтвердить' }));
+    expect(onChange).toHaveBeenCalledWith({ distance: 20 });
+
+    // Controlled parent feeds the new steps back — the cm display must follow
+    view.rerender(
+      <ParameterInputs
+        actionType="shot"
+        parameters={{ ...baseParams, distance: 20 }}
+        onChange={onChange}
+        rulesVersion="tehnolog"
+      />
+    );
+
+    expect(screen.getByLabelText('Дистанция input')).toHaveTextContent('100');
+    expect(screen.getByText('(20шаг)')).toBeInTheDocument();
+  });
 });

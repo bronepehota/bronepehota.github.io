@@ -29,7 +29,8 @@ export function DistanceUnitToggle({ value, onValueChange }: DistanceUnitToggleP
   const handleToggle = () => {
     const newValue: DistanceUnit = value === 'steps' ? 'cm' : 'steps';
     onValueChange(newValue);
-    localStorage.setItem(DISTANCE_UNIT_STORAGE_KEY, newValue);
+    // Writes storage AND fires the sync event — same path as the in-battle switch
+    setDistanceUnit(newValue);
   };
 
   return (
