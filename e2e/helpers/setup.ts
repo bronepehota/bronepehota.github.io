@@ -12,7 +12,10 @@ const TIMEOUTS = {
   load: 5000,
 } as const;
 
-/** Clear all bronepehota localStorage keys via addInitScript (before page load) */
+/** Clear all bronepehota localStorage keys via addInitScript (before page load).
+ *  Также сеет флаг «боевой инструктаж пройден»: оверлей туториала не должен
+ *  перекрывать экран боя в спеках (гонка таймингов ловилась фулл-ранами).
+ *  Спека самого туториала снимает флаг в собственном beforeEach. */
 export async function clearStorage(page: Page) {
   await page.addInitScript(() => {
     const keys = Object.keys(localStorage).filter(k =>
@@ -23,6 +26,7 @@ export async function clearStorage(page: Page) {
       k === 'STRICT_PILOT_RANK_ENABLED'
     );
     keys.forEach(k => localStorage.removeItem(k));
+    localStorage.setItem('bronepehota_battle_tutorial_done', '1');
   });
 }
 
@@ -193,6 +197,7 @@ export async function setupGameSessionWithSquad(
       ...(cfg.missionId ? { missionId: cfg.missionId } : {}),
     };
     localStorage.clear();
+      localStorage.setItem('bronepehota_battle_tutorial_done', '1'); // инструктаж закрыт (см. playwright.config storageState)
     localStorage.setItem('bronepehota_army', JSON.stringify(army));
     localStorage.setItem('bronepehota_view', 'game');
     localStorage.setItem('bronepehota_display_mode', 'detailed');
@@ -272,6 +277,7 @@ export async function setupGameSessionWithMachine(page: Page) {
       currentTurn: 1,
     };
     localStorage.clear();
+      localStorage.setItem('bronepehota_battle_tutorial_done', '1'); // инструктаж закрыт (см. playwright.config storageState)
     localStorage.setItem('bronepehota_army', JSON.stringify(army));
     localStorage.setItem('bronepehota_view', 'game');
     localStorage.setItem('bronepehota_display_mode', 'detailed');

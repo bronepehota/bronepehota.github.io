@@ -12,6 +12,8 @@ test.describe('Battle tutorial', () => {
   test.beforeEach(async ({ page }) => {
     await clearStorage(page);
     await page.addInitScript(() => {
+      // clearStorage сеет флаг «туториал пройден» — этой спеке он нужен живым
+      localStorage.removeItem('bronepehota_battle_tutorial_done');
       const soldiers = Array.from({ length: 3 }, (_, i) => ({
         num: i + 1, rank: 2, speed: 5, range: 'D6', power: '2D6', melee: 3, props: [], armor: 2, image: '',
       }));
@@ -35,13 +37,24 @@ test.describe('Battle tutorial', () => {
 
   async function dragDemo(page: Page, dir: 'left' | 'right') {
     const card = page.getByTestId('battle-tutorial-demo-card');
-    const box = await card.boundingBox();
+    // После смены шага карточка ещё возвращается transform-ом (transition-all)
+    // — ждём, пока bbox перестанет плыть, иначе стартовая точка смещена
+    await card.waitFor({ state: 'visible' });
+    let box = await card.boundingBox();
+    for (let i = 0; i < 10; i++) {
+      await page.waitForTimeout(120);
+      const next = await card.boundingBox();
+      if (box && next && Math.abs(next.x - box.x) < 1 && Math.abs(next.width - box.width) < 1) break;
+      box = next;
+    }
     expect(box).toBeTruthy();
     const startX = box!.x + box!.width / 2;
     const y = box!.y + box!.height / 2;
     await page.mouse.move(startX, y);
     await page.mouse.down();
-    await page.mouse.move(startX + (dir === 'left' ? -90 : 90), y, { steps: 8 });
+    // 16 мелких шагов на 120px: под нагрузкой фулл-рана события крупными
+    // шагами слипались и жест не дотягивал до порога 56px
+    await page.mouse.move(startX + (dir === 'left' ? -120 : 120), y, { steps: 16 });
     await page.mouse.up();
   }
 
