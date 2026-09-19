@@ -24,6 +24,7 @@ import {
 import type { CombatantData } from '@/lib/combatant-data';
 import { isSquad, isMachine } from '@/lib/types';
 import { rulesRegistry, getDefaultRulesVersion, isValidRulesVersion } from '@/lib/rules-registry';
+import { HISTORY_KEY, saveEntry } from '@/lib/dice-history';
 
 /**
  * Initial combat flow state
@@ -372,6 +373,19 @@ export function useCombatFlow(_config?: Partial<CombatConfig>) {
       armorTestRoll: damageResult.armorTestRoll,
       survivalTestRoll: damageResult.survivalTestRoll,
     };
+
+    // Remember the confirmed distance for the quick-pick chips in ParameterInputs
+    try {
+      const raw = localStorage.getItem(HISTORY_KEY);
+      const updated = saveEntry(raw, {
+        value: String(state.parameters.distance),
+        field: 'distance',
+        timestamp: Date.now(),
+      });
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
+    } catch {
+      // Storage unavailable — quick-picks just won't persist
+    }
 
     dispatch({ type: 'ROLL_COMPLETE', result, diceDisplay: finalDisplay });
     return result;

@@ -89,9 +89,9 @@ export function DistanceConverter({
           value={stepperValue}
           onChange={isEditingSteps ? handleStepsChange : handleCmChange}
           min={1}
-          max={isEditingSteps ? 20 : 100}
+          max={isEditingSteps ? 40 : 200}
           step={1}
-          size="sm"
+          size="md"
           disabled={disabled}
           className="flex-1"
           label="Дистанция"

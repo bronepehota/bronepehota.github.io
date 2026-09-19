@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { AlertTriangle, Skull, Shield, Footprints, Bomb, Crosshair, X } from 'lucide-react';
 import { AnimatedDice } from './AnimatedDice';
 import { GrenadeBlastRuler } from './GrenadeBlastRuler';
+import { ValueChips } from '@/components/ui/ValueChips';
 
 interface CombatResultsProps {
   result: CombatResult;
@@ -39,7 +40,8 @@ export function CombatResults({
   const ramKilled = ramResults.filter(r => r.killed).length;
   // Auto-complete logic: mark as done if enabled and it's a squad (not a machine)
   const markAsDone = autoCompleteEnabled && unitType === 'squad';
-  const [grenadeTargetArmor, setGrenadeTargetArmor] = useState(2);
+  // Seeded from the armor already entered in PARAMETERS (was a hardcoded 2)
+  const [grenadeTargetArmor, setGrenadeTargetArmor] = useState(parameters.targetArmor ?? 2);
 
   // Grenade target-check derived state (Phase 2)
   const grenadeChecks = result.grenadeBlastChecks ?? [];
@@ -612,6 +614,15 @@ export function CombatResults({
                     </button>
                   </div>
                 </div>
+
+                {/* Quick-pick armor chips — one tap per target check */}
+                <ValueChips
+                  compact
+                  testId="grenade-armor-chips"
+                  values={[0, 1, 2, 3, 4, 5, 6, 7, 8]}
+                  selected={grenadeTargetArmor}
+                  onSelect={setGrenadeTargetArmor}
+                />
 
                 <button
                   data-testid="grenade-explode-button"

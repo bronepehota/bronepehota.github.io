@@ -1,7 +1,10 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { CombatParameters, CombatActionType } from '@/lib/combat-types';
 import { NumberStepper } from '@/components/ui/NumberStepper';
+import { ValueChips } from '@/components/ui/ValueChips';
+import { loadHistory, getRecentForField, HISTORY_KEY } from '@/lib/dice-history';
 import { FortificationSelector } from '@/components/controls/FortificationSelector';
 import type { ModifierSummary } from '@/lib/modifier-types';
 import { RulesVersionID } from '@/lib/types';
@@ -65,6 +68,15 @@ export function ParameterInputs({
   const effectiveTargetIsVehicle = targetMemory?.isDirty && targetMemory?.targetIsVehicle !== null
     ? !!targetMemory.targetIsVehicle
     : !!parameters.targetIsVehicle;
+
+  // Recent confirmed distances (quick-pick chips) — saved on «ВЫСТРЕЛИТЬ» in useCombatFlow
+  const [recentDistances, setRecentDistances] = useState<Array<{ value: string; count: number }>>([]);
+  useEffect(() => {
+    const history = loadHistory(localStorage.getItem(HISTORY_KEY));
+    setRecentDistances(getRecentForField(history, 'distance'));
+  }, []);
+  const recentDistanceValues = recentDistances.map((e) => parseInt(e.value, 10)).filter((v) => !isNaN(v));
+  const maxDistanceCount = Math.max(1, ...recentDistances.map((e) => e.count));
 
   // Get unit stats for preview — combatantData takes priority (calculator mode)
   const unitStats = combatantData
@@ -405,16 +417,37 @@ export function ParameterInputs({
         <div className="grid grid-cols-1 gap-2 md:gap-3">
           {/* Distance Input with Converter */}
           {(actionType === 'shot' || actionType === 'grenade') && (
-            <DistanceConverter
-              steps={effectiveDistance}
-              onChange={(steps) => {
-                onChange({ distance: steps });
-                onMemoryUpdate?.({ distance: steps });
-              }}
-              rulesVersion={rulesVersion}
-              stepToCmFactor={stepToCmFactor}
-              defaultMode={distanceInputUnit}
-            />
+            <>
+              <DistanceConverter
+                steps={effectiveDistance}
+                onChange={(steps) => {
+                  onChange({ distance: steps });
+                  onMemoryUpdate?.({ distance: steps });
+                }}
+                rulesVersion={rulesVersion}
+                stepToCmFactor={stepToCmFactor}
+                defaultMode={distanceInputUnit}
+              />
+              {/* Recent confirmed distances — one tap instead of a stepper sweep */}
+              {recentDistanceValues.length > 0 && (
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[9px] font-mono uppercase tracking-widest text-slate-600">
+                    Недавние
+                  </span>
+                  <ValueChips
+                    compact
+                    testId="distance-recent-chips"
+                    values={recentDistanceValues}
+                    selected={effectiveDistance}
+                    freq={recentDistances.map((e) => e.count / maxDistanceCount)}
+                    onSelect={(steps) => {
+                      onChange({ distance: steps });
+                      onMemoryUpdate?.({ distance: steps });
+                    }}
+                  />
+                </div>
+              )}
+            </>
           )}
 
           {/* Machine melee: defender type selector (#125, Таблица 6) */}
@@ -474,9 +507,19 @@ export function ParameterInputs({
                 min={0}
                 max={99}
                 step={1}
-                size="sm"
+                size="md"
                 className="flex-1"
                 label="Броня цели"
+              />
+              {/* Quick-pick armor chips — real armor range in the data is 0-8 */}
+              <ValueChips
+                testId="armor-quick-chips"
+                values={[0, 1, 2, 3, 4, 5, 6, 7, 8]}
+                selected={effectiveTargetArmor}
+                onSelect={(value) => {
+                  onChange({ targetArmor: value });
+                  onMemoryUpdate?.({ targetArmor: value });
+                }}
               />
               {effectiveTargetIsVehicle && rulesVersion === 'community_star_system' && actionType === 'shot' && (
                 <div className="text-[9px] md:text-[10px] font-mono text-cyan-400/70 leading-tight">

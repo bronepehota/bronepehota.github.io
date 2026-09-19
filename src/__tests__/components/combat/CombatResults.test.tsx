@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CombatResults } from '@/components/combat/CombatResults';
 import { CombatResult, CombatParameters } from '@/lib/combat-types';
@@ -402,6 +402,37 @@ describe('CombatResults - Grenade Display', () => {
         value: undefined,
         configurable: true,
       });
+    });
+
+    it('seeds the arming panel armor from parameters instead of a hardcoded 2', async () => {
+      const onGrenadeCheckTarget = jest.fn();
+      render(
+        <CombatResults
+          {...defaultProps}
+          parameters={{ ...mockParameters, targetArmor: 4 }}
+          onGrenadeCheckTarget={onGrenadeCheckTarget}
+        />
+      );
+
+      await userEvent.click(screen.getByTestId('grenade-explode-button'));
+
+      expect(onGrenadeCheckTarget).toHaveBeenCalledWith(4);
+    });
+
+    it('quick-pick chips set the arming armor in one tap', async () => {
+      const onGrenadeCheckTarget = jest.fn();
+      render(
+        <CombatResults
+          {...defaultProps}
+          onGrenadeCheckTarget={onGrenadeCheckTarget}
+        />
+      );
+
+      const chips = screen.getByTestId('grenade-armor-chips');
+      await userEvent.click(within(chips).getByText('6'));
+      await userEvent.click(screen.getByTestId('grenade-explode-button'));
+
+      expect(onGrenadeCheckTarget).toHaveBeenCalledWith(6);
     });
   });
 

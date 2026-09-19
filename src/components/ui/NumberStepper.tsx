@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Minus, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -16,6 +16,10 @@ interface NumberStepperProps {
   disabled?: boolean;
 }
 
+// Hold-to-repeat: a short tap is ±1; holding the button sweeps the range
+const HOLD_DELAY_MS = 450;
+const REPEAT_INTERVAL_MS = 140;
+
 export function NumberStepper({
   value,
   onChange,
@@ -30,6 +34,33 @@ export function NumberStepper({
   const [inputValue, setInputValue] = useState(value.toString());
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const holdTimerRef = useRef<number | null>(null);
+  const repeatTimerRef = useRef<number | null>(null);
+  // Whether repeats already fired for this press — suppresses the trailing
+  // click so a held sweep doesn't jump one extra step on release
+  const repeatFiredRef = useRef(false);
+
+  const stopRepeat = useCallback(() => {
+    if (holdTimerRef.current !== null) {
+      window.clearTimeout(holdTimerRef.current);
+      holdTimerRef.current = null;
+    }
+    if (repeatTimerRef.current !== null) {
+      window.clearInterval(repeatTimerRef.current);
+      repeatTimerRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => stopRepeat, [stopRepeat]);
+
+  const startRepeat = useCallback((apply: () => void) => {
+    stopRepeat();
+    repeatFiredRef.current = false;
+    holdTimerRef.current = window.setTimeout(() => {
+      repeatFiredRef.current = true;
+      repeatTimerRef.current = window.setInterval(apply, REPEAT_INTERVAL_MS);
+    }, HOLD_DELAY_MS);
+  }, [stopRepeat]);
 
   const decrement = () => {
     const newValue = Math.max(min, value - step);
@@ -45,6 +76,22 @@ export function NumberStepper({
       onChange(newValue);
       setInputValue(newValue.toString());
     }
+  };
+
+  const handleDecrementClick = () => {
+    if (repeatFiredRef.current) {
+      repeatFiredRef.current = false;
+      return;
+    }
+    decrement();
+  };
+
+  const handleIncrementClick = () => {
+    if (repeatFiredRef.current) {
+      repeatFiredRef.current = false;
+      return;
+    }
+    increment();
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -112,14 +159,19 @@ export function NumberStepper({
       <div className="flex items-center gap-1">
         <button
           type="button"
-          onClick={decrement}
+          onClick={handleDecrementClick}
+          onPointerDown={() => !disabled && canDecrement && startRepeat(decrement)}
+          onPointerUp={stopRepeat}
+          onPointerLeave={stopRepeat}
+          onPointerCancel={stopRepeat}
           disabled={!canDecrement || disabled}
           className={cn(
             buttonSizeClasses[size],
             'flex items-center justify-center rounded-lg transition-all active:scale-95',
             'bg-slate-700 hover:bg-slate-600 text-slate-300',
             'disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-slate-700',
-            'border border-slate-600'
+            'border border-slate-600',
+            'touch-manipulation select-none'
           )}
           aria-label={`Decrease ${label || 'value'}`}
         >
@@ -153,14 +205,19 @@ export function NumberStepper({
 
         <button
           type="button"
-          onClick={increment}
+          onClick={handleIncrementClick}
+          onPointerDown={() => !disabled && canIncrement && startRepeat(increment)}
+          onPointerUp={stopRepeat}
+          onPointerLeave={stopRepeat}
+          onPointerCancel={stopRepeat}
           disabled={!canIncrement || disabled}
           className={cn(
             buttonSizeClasses[size],
             'flex items-center justify-center rounded-lg transition-all active:scale-95',
             'bg-slate-700 hover:bg-slate-600 text-slate-300',
             'disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-slate-700',
-            'border border-slate-600'
+            'border border-slate-600',
+            'touch-manipulation select-none'
           )}
           aria-label={`Increase ${label || 'value'}`}
         >
