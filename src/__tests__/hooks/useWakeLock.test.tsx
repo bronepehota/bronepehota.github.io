@@ -70,13 +70,38 @@ describe('useWakeLock', () => {
   });
 
   it('enable при скрытой странице — лок после возврата видимости', async () => {
-    makeLockApi();
+    // request честно реджектит пока страница скрыта (браузерное поведение),
+    // на видимой — обычный сентинел из общего мока
+    const api = makeLockApi();
+    const origImpl = api.request.getMockImplementation()!;
+    api.request.mockImplementation(async (...args: Parameters<typeof origImpl>) => {
+      if (document.visibilityState === 'hidden') throw new DOMException('hidden', 'NotAllowedError');
+      return origImpl(...args);
+    });
     Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'hidden' });
     const { result } = renderHook(() => useWakeLock(true));
     await waitFor(() => expect(result.current.supported).toBe(true));
-    // request мог упасть (hidden) — после возврата берём
+    // первый acquire упал (hidden) — не активен
+    await waitFor(() => expect(result.current.active).toBe(false));
+    // страница снова видима — берём
     Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'visible' });
     act(() => { document.dispatchEvent(new Event('visibilitychange')); });
     await waitFor(() => expect(result.current.active).toBe(true));
+  });
+
+  it('request разрешился после unmount — сентинел сразу релизится (нет утечки лока)', async () => {
+    let resolveRequest: (s: unknown) => void = () => {};
+    const request = jest.fn(() => new Promise((res) => { resolveRequest = res; }));
+    (navigator as any).wakeLock = { request };
+    const { result, unmount } = renderHook(() => useWakeLock(true));
+    await waitFor(() => expect(result.current.supported).toBe(true));
+    expect(request).toHaveBeenCalled(); // запрос в полёте
+
+    unmount(); // cleanup выставил cancelled=true
+    const sentinel = { released: false, release: jest.fn(async () => {}), addEventListener: jest.fn() };
+    await act(async () => { resolveRequest(sentinel); });
+    await act(async () => { await Promise.resolve(); });
+    // Запоздавший сентинел никому не нужен — отпущен немедленно
+    expect(sentinel.release).toHaveBeenCalled();
   });
 });

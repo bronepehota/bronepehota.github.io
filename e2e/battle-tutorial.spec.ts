@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { clearStorage } from './helpers/setup';
+import { clearStorage, setupGameSessionWithSquad } from './helpers/setup';
 
 /**
  * «Боевой инструктаж» — интерактивный туториал при первом заходе в бой:
@@ -110,5 +110,30 @@ test.describe('Battle tutorial', () => {
     await page.getByTestId('battle-tutorial-replay').click();
     await expect(tutorial).toBeVisible();
     await expect(tutorial).toContainText('СВАЙП ВЛЕВО — ГОТОВ');
+  });
+});
+
+// «Не гаснуть» (wake lock): тумблер в ⋮ — переключение, персист флага,
+// меню остаётся открытым (внутренние клики его не закрывают)
+test.describe('Wake lock toggle', () => {
+  test.use({ viewport: { width: 375, height: 667 } });
+
+  test('переключается, флаг персистится, меню не закрывается', async ({ page }) => {
+    await clearStorage(page);
+    await setupGameSessionWithSquad(page, { unitOverrides: { instanceId: 'wake-unit-1' } });
+
+    await page.getByTestId('dock-menu-toggle').click();
+    const toggle = page.getByTestId('wake-lock-toggle');
+    await expect(toggle).toBeVisible();
+    await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+
+    await toggle.click();
+    await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+    await expect(toggle).toBeVisible(); // меню не закрылось
+    expect(await page.evaluate(() => localStorage.getItem('bronepehota_wake_lock_enabled'))).toBe('1');
+
+    await toggle.click();
+    await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+    expect(await page.evaluate(() => localStorage.getItem('bronepehota_wake_lock_enabled'))).toBe('0');
   });
 });

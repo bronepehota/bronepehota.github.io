@@ -32,6 +32,21 @@ interface SoldierStatsProps {
   hideSpeed?: boolean;
 }
 
+/**
+ * Кегль значения по длине (ревью PR #242: 19px не лезут длинным кубам —
+ * D12+2/1D20+2 вылезали из бейджа, на 320px даже 2D6). Короткие значения
+ * (цифры брони/ближнего боя, D6) остаются дистанционно крупными; длинные
+ * компактнее и без иконки — чтобы влезть, не обрезаясь.
+ */
+function statValueFit(v: string): { cls: string; icon: boolean; pad?: string } {
+  const len = v.length;
+  if (len <= 2) return { cls: 'text-[19px] md:text-[22px]', icon: true };
+  if (len <= 4) return { cls: 'text-[16px] md:text-[19px]', icon: true };
+  if (len === 5) return { cls: 'text-[15px] md:text-[18px]', icon: false };
+  // 6+ символов (1D20+2): на 320px без урезанного паддинга не влезает
+  return { cls: 'text-[13px] md:text-[15px]', icon: false, pad: 'px-0.5' };
+}
+
 function StatBadge({ icon: Icon, value, color, bonus, disabled, statKey }: {
   icon: React.ElementType;
   value: string | React.ReactNode;
@@ -42,6 +57,7 @@ function StatBadge({ icon: Icon, value, color, bonus, disabled, statKey }: {
 }) {
   const isDebuff = bonus?.startsWith('-');
   const isActive = !!bonus;
+  const fit = typeof value === 'string' ? statValueFit(value) : undefined;
 
   return (
     <div
@@ -50,7 +66,9 @@ function StatBadge({ icon: Icon, value, color, bonus, disabled, statKey }: {
       // min-w-0 (not min-w-[44px]): display badge, not a control — the whole
       // grid is the tap target. Lets the 3 columns compress on 320px screens
       // instead of pushing the action buttons out of the card.
-      'relative flex flex-row items-center justify-center gap-0.5 rounded-lg bg-slate-800/60 min-h-[40px] min-w-0 flex-1 px-1 transition-colors',
+      'relative flex flex-row items-center justify-center gap-0.5 rounded-lg bg-slate-800/60 min-h-[40px] min-w-0 flex-1 transition-colors',
+      // px единственным источником: каскадный конфликт px-1/px-0.5 не переопределяется надёжно
+      fit?.pad ?? 'px-1',
       isActive
         ? isDebuff
           ? 'border border-red-500/40 shadow-[inset_0_0_8px_rgba(239,68,68,0.06)]'
@@ -58,12 +76,12 @@ function StatBadge({ icon: Icon, value, color, bonus, disabled, statKey }: {
         : 'border border-slate-700/40',
       disabled && 'opacity-30'
     )}>
-      <Icon className={cn('w-3 h-3 shrink-0', color)} />
+      {(!fit || fit.icon) && <Icon className={cn('w-3 h-3 shrink-0', color)} />}
       {/* Значения крупные: карточку смотрят с расстояния (телефон лежит
-          на столе/полу) — 14px там не читались. Иконка ужата, чтобы цифра
-          влезала в узкий бейдж. */}
+          на столе/полу) — 14px там не читались. Длинные кубы (D12+2,
+          1D20+2) — компактнее и без иконки, чтобы не вылезать из бейджа. */}
       {typeof value === 'string' ? (
-        <span className={cn('text-[19px] md:text-[22px] font-mono font-black leading-none', color.replace('400', '300'))}>{value}</span>
+        <span className={cn('font-mono font-black leading-none', fit!.cls, color.replace('400', '300'))}>{value}</span>
       ) : value}
       {bonus && (
         <span className={cn(

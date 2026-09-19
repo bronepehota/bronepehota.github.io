@@ -257,11 +257,12 @@ function SoldierCard({
       {/* Soldier image (left side) with the «Готов» button overlaid bottom-left.
           Hidden for pilots (nav button replaces actions) and panic (no DONE). */}
       {/* self-stretch + кап: фото растёт с высотой строки (взвод заполняет
-          экран, пол — прежний размер). Потолок высоты min(224px, 40vw):
-          при аспекте 3:4 ширина = ¾ высоты, и на узком экране крупное фото
-          выдавливало крупные статы (19px, дистанционная читаемость).
-          Кап на обёртке, не на фото: чип «ГОТОВ» остаётся у низа фото. */}
-      <div className="relative shrink-0 self-stretch max-h-[min(224px,40vw)]">
+          экран, пол — прежний размер). Потолок высоты: на 375+ —
+          min(224px, 40vw); на узких (<375) — 34vw, иначе фото выдавливает
+          ячейку статов до 43px и длинные кубы (D12+2, 1D20+2) не влезают
+          даже в 13px (ревью PR #242). Кап на обёртке, не на фото: чип
+          «ГОТОВ» остаётся у низа фото. */}
+      <div className="relative shrink-0 self-stretch max-h-[min(176px,34vw)] min-[375px]:max-h-[min(224px,40vw)]">
         <SoldierImage
           imageUrl={getSoldierImage(soldierIndex)}
           soldierIndex={soldierIndex}

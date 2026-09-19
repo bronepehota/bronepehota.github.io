@@ -99,6 +99,7 @@ test.describe('Soldier card swipes — touch (CDP)', () => {
     await page.waitForTimeout(30);
     await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
     await page.waitForTimeout(60);
+    await session.detach();
   }
 
   /** Тап по бейджу стата без движения (touchStart → touchEnd, без touchMove).
@@ -116,6 +117,7 @@ test.describe('Soldier card swipes — touch (CDP)', () => {
     await page.waitForTimeout(60);
     await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
     await page.waitForTimeout(60);
+    await session.detach();
   }
 
   test('свайп влево по статам (тач) — боец готов, модалка боя не открылась', async ({ page }) => {

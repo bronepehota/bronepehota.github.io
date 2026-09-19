@@ -5,7 +5,8 @@ import { setupGameSessionWithSquad, setupGameSessionWithMachine, clearStorage, w
  * Squad photo fill (плейтест 2026-09-18: «фото мелкие, кто есть кто не
  * различить; снизу пусто»). Контракт раскладки:
  * - короткий взвод → колонка растягивается (min-h-full), строки делят
- *   остаток, фото растут (кап min(224px,60vw) на обёртке, аспект 3:4);
+ *   остаток, фото растут (кап min(224px,40vw) на обёртке, аспект 3:4;
+ *   на узких <375px кап ниже — 34vw, чтобы длинные кубы влезали);
  * - полный взвод (6) → остатка нет, фото на полу (~85px), скролл работает.
  * DOM-замеры (getBoundingClientRect/computed), не скриншоты.
  */
@@ -98,4 +99,53 @@ test.describe('Squad photo fill in battle view', () => {
     });
     expect(m.boxBottom).toBeLessThanOrEqual(m.dockTop + 1.5);
   });
+});
+
+/**
+ * Ревью PR #242: длинные кубы (D12+2, 1D20+2 — 168+2 бойцов в данных)
+ * при 19px вылезали из бейджей; на 320px даже 2D6. Регресс: адаптивный
+ * кегль + узкий фото-кап держат значения внутри бейджей на обоих вьюпортах.
+ */
+test.describe('long dice values fit', () => {
+  const longSquad = {
+    instanceId: 'long-dice-1', type: 'squad', instanceNumber: 1,
+    data: {
+      id: 'polaris_lineynaya_klon_pehota', name: 'Отряд с длинными кубами', shortName: 'Кубы',
+      faction: 'polaris', cost: 50,
+      image: '/images/squads/polaris/lineynaya_klon_pehota/1.png',
+      soldiers: [
+        { num: 1, rank: 2, speed: 5, range: 'D12+2', power: 'D12+2', melee: 3, props: [], armor: 2, image: '' },
+        { num: 2, rank: 2, speed: 5, range: '1D20+2', power: 'D12+2', melee: 3, props: [], armor: 2, image: '' },
+        { num: 3, rank: 2, speed: 5, range: 'D6', power: '2D6', melee: 3, props: [], armor: 2, image: '' },
+      ],
+    },
+    currentSoldiers: [0, 1, 2], deadSoldiers: [], actionsUsed: [],
+  };
+
+  for (const width of [375, 320]) {
+    test.describe(`viewport ${width}`, () => {
+      test.use({ viewport: { width, height: width === 375 ? 667 : 568 } });
+
+      test('значения D12+2 / 1D20+2 не вылезают из бейджей', async ({ page }) => {
+        await clearStorage(page);
+        await page.addInitScript((unit) => {
+          localStorage.setItem('bronepehota_army', JSON.stringify({
+            name: 'L', faction: 'polaris', sourceId: 'star_system', units: [unit],
+            totalCost: 50, currentStep: 'battle', isInBattle: true, currentTurn: 1,
+          }));
+          localStorage.setItem('bronepehota_view', 'game');
+          localStorage.setItem('bronepehota_display_mode', 'detailed');
+        }, longSquad);
+        await page.goto('/app');
+        await expect(page.getByTestId('game-session').first()).toBeVisible({ timeout: 10000 });
+
+        const overflowing = await page.evaluate(() =>
+          Array.from(document.querySelectorAll('[data-testid^="stat-badge-"]'))
+            .filter(b => b.scrollWidth > b.clientWidth + 1)
+            .map(b => `${b.getAttribute('data-testid')}:${b.textContent} ${b.scrollWidth}>${b.clientWidth}`)
+        );
+        expect(overflowing).toEqual([]);
+      });
+    });
+  }
 });

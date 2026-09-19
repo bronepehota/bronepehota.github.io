@@ -1282,7 +1282,10 @@ export default function GameSession({
               >
                 <Power className={cn('w-3.5 h-3.5', wakeLockEnabled ? 'text-emerald-400' : 'text-slate-400')} />
                 Не гаснуть
-                {wakeLockEnabled && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" aria-hidden="true" />}
+                {/* Точка — от ФАКТА (wakeLock.active), не от намерения: при
+                    отказе API (Low Power Mode и пр.) лок не держится, и
+                    светить «активен» нельзя (ревью PR #242) */}
+                {wakeLock.active && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" aria-hidden="true" />}
               </button>
             )}
             {army.isInBattle && (

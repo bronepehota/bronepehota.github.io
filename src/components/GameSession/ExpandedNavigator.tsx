@@ -36,17 +36,19 @@ export function ExpandedNavigator({ army, focusedUnitIdx, onSelectUnit }: Expand
     [army.units]
   );
 
-  const ordered = useMemo(() => {
+  // Разом: порядок (живые, затем убитые) и число живых — один проход,
+  // чтобы порог сетки и разбивка не могли разъехаться
+  const { ordered, aliveCount } = useMemo(() => {
     const alive: Array<{ unit: Army['units'][number]; idx: number }> = [];
     const dead: Array<{ unit: Army['units'][number]; idx: number }> = [];
     army.units.forEach((unit, idx) =>
       (deriveUnitStatus(unit) === 'dead' ? dead : alive).push({ unit, idx })
     );
-    return [...alive, ...dead];
+    return { ordered: [...alive, ...dead], aliveCount: alive.length };
   }, [army.units]);
 
   // Живых (вкл. походивших/захваченных) ≥5 — двухколоночная сетка плиток
-  const gridMode = ordered.length - ordered.filter(({ unit }) => deriveUnitStatus(unit) === 'dead').length >= GRID_ALIVE_THRESHOLD;
+  const gridMode = aliveCount >= GRID_ALIVE_THRESHOLD;
 
   return (
     <div className="flex-1 overflow-y-auto custom-scrollbar" data-testid="expanded-navigator">
