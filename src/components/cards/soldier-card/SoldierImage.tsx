@@ -61,7 +61,7 @@ export function SoldierImage({
       {isMounted && isDead && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/40">
           <Skull
-            className="w-8 h-8 md:w-10 md:h-10 text-red-500"
+            className="w-10 h-10 md:w-12 md:h-12 text-red-500"
             strokeWidth={2.5}
             style={{ filter: 'drop-shadow(0 0 12px rgba(239,68,68,1))' }}
           />
@@ -75,7 +75,7 @@ export function SoldierImage({
       {isMounted && isInPanic && !isDead && (
         <div className="absolute inset-0 flex items-center justify-center bg-orange-950/30">
           <Footprints
-            className="w-8 h-8 md:w-10 md:h-10 text-orange-400"
+            className="w-10 h-10 md:w-12 md:h-12 text-orange-400"
             strokeWidth={2}
             style={{ filter: 'drop-shadow(0 0 8px rgba(251,146,60,0.8))' }}
           />

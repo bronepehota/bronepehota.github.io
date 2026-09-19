@@ -58,9 +58,12 @@ function StatBadge({ icon: Icon, value, color, bonus, disabled, statKey }: {
         : 'border border-slate-700/40',
       disabled && 'opacity-30'
     )}>
-      <Icon className={cn('w-3.5 h-3.5 shrink-0', color)} />
+      <Icon className={cn('w-3 h-3 shrink-0', color)} />
+      {/* Значения крупные: карточку смотрят с расстояния (телефон лежит
+          на столе/полу) — 14px там не читались. Иконка ужата, чтобы цифра
+          влезала в узкий бейдж. */}
       {typeof value === 'string' ? (
-        <span className={cn('text-sm font-mono font-black leading-none', color.replace('400', '300'))}>{value}</span>
+        <span className={cn('text-[19px] md:text-[22px] font-mono font-black leading-none', color.replace('400', '300'))}>{value}</span>
       ) : value}
       {bonus && (
         <span className={cn(
@@ -128,10 +131,9 @@ export function SoldierStats({
           <StatBadge
             icon={Footprints}
             value={distanceInputUnit === 'cm' ? `${soldier.speed * stepToCmFactor}см` : (
-              // Шаги + сантиметры в скобках, читаемым кеглем (плейтест:
-              // «см крупнее должны быть видны, место есть»)
+              // Шаги крупно + сантиметры в скобках мелко
               <span className="flex items-baseline gap-1">
-                <span className="text-sm font-mono font-black leading-none text-cyan-300">{soldier.speed}</span>
+                <span className="text-[19px] md:text-[22px] font-mono font-black leading-none text-cyan-300">{soldier.speed}</span>
                 <span className="text-[11px] font-mono font-bold leading-none text-slate-300">({soldier.speed * stepToCmFactor}см)</span>
               </span>
             )}
