@@ -6,8 +6,18 @@ import { RulesVersionID } from '@/lib/types';
 
 // Mock AnimatedDice to simplify testing
 jest.mock('@/components/combat/AnimatedDice', () => ({
-  AnimatedDice: ({ value, color, isHit, bonus, className }: any) => (
-    <div data-testid="animated-dice" data-value={value} data-color={color} data-ishit={isHit} data-bonus={bonus} className={className}>
+  AnimatedDice: ({ value, color, isHit, bonus, className, resultLabel, total, targetValue }: any) => (
+    <div
+      data-testid="animated-dice"
+      data-value={value}
+      data-color={color}
+      data-ishit={isHit}
+      data-bonus={bonus}
+      data-resultlabel={resultLabel}
+      data-total={total}
+      data-targetvalue={targetValue}
+      className={className}
+    >
       D{value}
     </div>
   ),
@@ -82,7 +92,7 @@ describe('CombatResults - Grenade Display', () => {
 
       expect(screen.getByText('Зона взрыва')).toBeInTheDocument();
       expect(screen.getByText('3-5')).toBeInTheDocument(); // minSteps-maxSteps
-      expect(screen.getByText('[12-20 см]')).toBeInTheDocument(); // minCm-maxCm
+      expect(screen.getByText('[15-25 см]')).toBeInTheDocument(); // minCm-maxCm at default factor 5
     });
 
     it('should show danger warning when roll is 1', () => {
@@ -393,15 +403,48 @@ describe('CombatResults - Grenade Display', () => {
         configurable: true,
       });
     });
+
+    it('seeds the arming panel armor from parameters instead of a hardcoded 2', async () => {
+      const onGrenadeCheckTarget = jest.fn();
+      render(
+        <CombatResults
+          {...defaultProps}
+          parameters={{ ...mockParameters, targetArmor: 4 }}
+          onGrenadeCheckTarget={onGrenadeCheckTarget}
+        />
+      );
+
+      await userEvent.click(screen.getByTestId('grenade-explode-button'));
+
+      expect(onGrenadeCheckTarget).toHaveBeenCalledWith(4);
+    });
+
+    it('quick-input modal sets the arming armor in one tap', async () => {
+      const onGrenadeCheckTarget = jest.fn();
+      render(
+        <CombatResults
+          {...defaultProps}
+          onGrenadeCheckTarget={onGrenadeCheckTarget}
+        />
+      );
+
+      // Tap the armor value → modal → standard value 6 → confirm
+      await userEvent.click(screen.getByTestId('grenade-armor-input'));
+      await userEvent.click(screen.getByRole('button', { name: '6' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Подтвердить' }));
+      await userEvent.click(screen.getByTestId('grenade-explode-button'));
+
+      expect(onGrenadeCheckTarget).toHaveBeenCalledWith(6);
+    });
   });
 
   describe('Grenade distance calculation', () => {
     it('should calculate correct blast zone for distance 4', () => {
       render(<CombatResults {...defaultProps} />);
 
-      // Distance 4 → blast zone 3-5 steps, 12-20 cm
+      // Distance 4 → blast zone 3-5 steps, 15-25 cm at factor 5
       expect(screen.getByText('3-5')).toBeInTheDocument();
-      expect(screen.getByText('[12-20 см]')).toBeInTheDocument();
+      expect(screen.getByText('[15-25 см]')).toBeInTheDocument();
     });
 
     it('should handle distance 1 correctly', () => {
@@ -425,9 +468,9 @@ describe('CombatResults - Grenade Display', () => {
 
       render(<CombatResults {...defaultProps} result={distance1Result} />);
 
-      // Distance 1 → blast zone 1-2 steps (min is 1), 4-8 cm
+      // Distance 1 → blast zone 1-2 steps (min is 1), 5-10 cm at factor 5
       expect(screen.getByText('1-2')).toBeInTheDocument();
-      expect(screen.getByText('[4-8 см]')).toBeInTheDocument();
+      expect(screen.getByText('[5-10 см]')).toBeInTheDocument();
     });
 
     it('should handle high distance values', () => {
@@ -452,7 +495,213 @@ describe('CombatResults - Grenade Display', () => {
       render(<CombatResults {...defaultProps} result={highDistanceResult} />);
 
       expect(screen.getByText('5-7')).toBeInTheDocument();
-      expect(screen.getByText('[20-28 см]')).toBeInTheDocument();
+      expect(screen.getByText('[25-35 см]')).toBeInTheDocument();
+    });
+  });
+
+  describe('Grenade blast ruler', () => {
+    it('renders the ruler with band-edge cm labels at default factor 5', () => {
+      render(<CombatResults {...defaultProps} />);
+
+      expect(screen.getByTestId('grenade-blast-ruler')).toBeInTheDocument();
+      // Zone 3-5 steps × factor 5
+      expect(screen.getByTestId('grenade-blast-label-min')).toHaveTextContent('15 см');
+      expect(screen.getByTestId('grenade-blast-label-max')).toHaveTextContent('25 см');
+      // Impact readout: distance 4 × factor 5
+      expect(screen.getByTestId('grenade-blast-impact')).toHaveTextContent('20 см');
+    });
+
+    it('recomputes cm from the stepToCmFactor prop (factor 4)', () => {
+      render(<CombatResults {...defaultProps} stepToCmFactor={4} />);
+
+      expect(screen.getByTestId('grenade-blast-label-min')).toHaveTextContent('12 см');
+      expect(screen.getByTestId('grenade-blast-label-max')).toHaveTextContent('20 см');
+      expect(screen.getByTestId('grenade-blast-impact')).toHaveTextContent('16 см');
+    });
+
+    it('positions band and marker by steps along the 8-step track', () => {
+      render(<CombatResults {...defaultProps} />);
+
+      const band = screen.getByTestId('grenade-blast-band');
+      expect(band.style.left).toBe('37.5%'); // step 3 of 8
+      expect(band.style.width).toBe('25%');  // 3-5 = 2 steps of 8
+
+      const marker = screen.getByTestId('grenade-blast-marker');
+      expect(marker.style.left).toBe('50%'); // distance 4 of 8
+    });
+
+    it('marks danger state when the roll is 1', () => {
+      const dangerResult: CombatResult = {
+        ...mockGrenadeResult,
+        hitResult: {
+          success: true,
+          roll: 1,
+          total: 1,
+          bonus: 0,
+          isGrenade: true,
+        },
+        grenadeDistance: 1,
+        grenadeBlastZone: {
+          minSteps: 1,
+          maxSteps: 2,
+          minCm: 4,
+          maxCm: 8,
+        },
+      };
+
+      render(<CombatResults {...defaultProps} result={dangerResult} />);
+
+      const ruler = screen.getByTestId('grenade-blast-ruler');
+      expect(ruler).toHaveAttribute('data-danger', 'true');
+      // Zone 1-2 × factor 5
+      expect(screen.getByTestId('grenade-blast-label-min')).toHaveTextContent('5 см');
+      expect(screen.getByTestId('grenade-blast-label-max')).toHaveTextContent('10 см');
+    });
+  });
+
+  describe('Shot verdict banner', () => {
+    const shotParameters: CombatParameters = { ...mockParameters, distance: 12 };
+
+    const mockShotResult: CombatResult = {
+      actionType: 'shot',
+      unitType: 'squad',
+      parameters: shotParameters,
+      hitResult: { success: true, roll: 15, total: 15, bonus: 0 },
+      damageResult: { damage: 1, rolls: [16] },
+      timestamp: Date.now(),
+      unitName: 'Test Squad',
+      unitId: 'test-squad-1',
+    };
+
+    it('shows an instant ПОПАДАНИЕ banner with the total:target ratio on hit', () => {
+      render(
+        <CombatResults {...defaultProps} result={mockShotResult} parameters={shotParameters} />
+      );
+
+      const banner = screen.getByTestId('shot-verdict-banner');
+      expect(banner).toBeInTheDocument();
+      expect(screen.getByText('ПОПАДАНИЕ')).toBeInTheDocument();
+      expect(banner).toHaveTextContent('15:12');
+    });
+
+    it('shows a red ПРОМАХ banner on miss', () => {
+      const missResult: CombatResult = {
+        ...mockShotResult,
+        hitResult: { success: false, roll: 3, total: 3, bonus: 0 },
+        damageResult: undefined,
+      };
+
+      render(
+        <CombatResults {...defaultProps} result={missResult} parameters={shotParameters} />
+      );
+
+      const banner = screen.getByTestId('shot-verdict-banner');
+      expect(screen.getByText('ПРОМАХ')).toBeInTheDocument();
+      expect(banner).toHaveClass('border-red-500/70');
+    });
+
+    it('summarizes hit with damage: emerald banner + «-N УРОНА» line', () => {
+      render(
+        <CombatResults {...defaultProps} result={mockShotResult} parameters={shotParameters} />
+      );
+
+      const banner = screen.getByTestId('shot-verdict-banner');
+      expect(banner).toHaveClass('border-emerald-500/70');
+      // Same string as the legacy damage pill below — scope to the banner
+      expect(banner).toHaveTextContent('-1 УРОНА');
+    });
+
+    it('summarizes «попал, но броню не пробил» as its own amber outcome', () => {
+      const noPenetration: CombatResult = {
+        ...mockShotResult,
+        damageResult: { damage: 0, rolls: [2] },
+      };
+
+      render(
+        <CombatResults {...defaultProps} result={noPenetration} parameters={shotParameters} />
+      );
+
+      const banner = screen.getByTestId('shot-verdict-banner');
+      expect(banner).toHaveClass('border-amber-500/70');
+      expect(screen.getByText('ПОПАДАНИЕ')).toBeInTheDocument();
+      expect(screen.getByText('БРОНЯ НЕ ПРОБИТА')).toBeInTheDocument();
+    });
+
+    it('shows the banner in multi-roll mode (community rules)', () => {
+      const multiRollResult: CombatResult = {
+        ...mockShotResult,
+        hitResult: { success: true, roll: 17, total: 17, bonus: 0, rolls: [3, 17, 8] },
+      };
+
+      render(
+        <CombatResults
+          {...defaultProps}
+          result={multiRollResult}
+          parameters={shotParameters}
+          rulesVersion="community_star_system"
+        />
+      );
+
+      expect(screen.getByTestId('shot-verdict-banner')).toBeInTheDocument();
+      expect(screen.getByText('ПОПАДАНИЕ')).toBeInTheDocument();
+    });
+
+    it('suppresses the small verdict plate for shots (the banner carries it)', () => {
+      render(
+        <CombatResults {...defaultProps} result={mockShotResult} parameters={shotParameters} />
+      );
+
+      // [0] is the hit die (rendered before the damage dice); it must not label itself
+      const dice = screen.getAllByTestId('animated-dice');
+      expect(dice[0]).toHaveAttribute('data-resultlabel', 'none');
+    });
+
+    it('keeps the verdict plate for grenade target checks', () => {
+      const resultWithChecks: CombatResult = {
+        ...mockGrenadeResult,
+        grenadeBlastChecks: [
+          { armor: 2, roll: 15, hit: true },
+          { armor: 3, roll: 8, hit: false },
+        ],
+      };
+
+      render(<CombatResults {...defaultProps} result={resultWithChecks} />);
+
+      const dice = screen.getAllByTestId('animated-dice');
+      const labeled = dice.filter(d =>
+        d.getAttribute('data-resultlabel') === 'hit' ||
+        d.getAttribute('data-resultlabel') === 'miss'
+      );
+      expect(labeled).toHaveLength(2);
+    });
+
+    it('does not render the banner for grenade results', () => {
+      render(<CombatResults {...defaultProps} />);
+      expect(screen.queryByTestId('shot-verdict-banner')).not.toBeInTheDocument();
+    });
+
+    it('shows the target distance in cm per the default factor 5', () => {
+      render(
+        <CombatResults {...defaultProps} result={mockShotResult} parameters={shotParameters} />
+      );
+
+      // 12 steps × 5
+      expect(screen.getByText('60 см')).toBeInTheDocument();
+    });
+
+    it('distance cm follows the stepToCmFactor prop', () => {
+      render(
+        <CombatResults
+          {...defaultProps}
+          result={mockShotResult}
+          parameters={shotParameters}
+          stepToCmFactor={4}
+        />
+      );
+
+      // 12 steps × 4
+      expect(screen.getByText('48 см')).toBeInTheDocument();
+      expect(screen.queryByText('60 см')).not.toBeInTheDocument();
     });
   });
 });

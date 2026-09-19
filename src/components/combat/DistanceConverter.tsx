@@ -21,6 +21,8 @@ export interface DistanceConverterProps {
   stepToCmFactor?: number;
   /** Default mode (respects global distanceInputUnit setting) */
   defaultMode?: 'steps' | 'cm';
+  /** When set, the value becomes a tappable button (modal input) instead of a number input */
+  onInputActivate?: () => void;
 }
 
 type DistanceMode = 'steps' | 'cm';
@@ -33,8 +35,9 @@ type DistanceMode = 'steps' | 'cm';
  * - Input on right (flex-1)
  * - Same size="lg" and spacing
  *
- * The mode toggle is integrated into the label - tap to switch between steps/cm.
- * Now uses global stepToCmFactor instead of rules version for conversion.
+ * The unit (steps/cm) is controlled by the parent via defaultMode; the
+ * «ШАГИ|СМ» switch lives in the quick-input modal (DiceInputPopup.unitSwitch).
+ * Conversion uses the global stepToCmFactor, not the rules version.
  */
 export function DistanceConverter({
   steps,
@@ -44,21 +47,22 @@ export function DistanceConverter({
   disabled = false,
   stepToCmFactor = 5,
   defaultMode = 'steps',
+  onInputActivate,
 }: DistanceConverterProps) {
-  const [mode, setMode] = useState<DistanceMode>(defaultMode);
+  const mode: DistanceMode = defaultMode;
   const [cmValue, setCmValue] = useState<number>(stepsToCm(steps, stepToCmFactor));
 
-  // Sync mode when defaultMode changes (user changed distance unit preference)
-  useEffect(() => {
-    setMode(defaultMode);
-  }, [defaultMode]);
-
-  // Sync cm value when steps prop changes from parent
+  // Sync cm value when steps prop changes from parent.
+  // In cm mode, typed values round-trip (cmToSteps(cmValue) === steps) and are
+  // kept as typed; an external steps change (e.g. the quick-input modal) that
+  // does NOT match the current cm display resyncs it.
   useEffect(() => {
     if (mode === 'steps') {
       setCmValue(stepsToCm(steps, stepToCmFactor));
+    } else if (cmToSteps(cmValue, stepToCmFactor) !== steps) {
+      setCmValue(stepsToCm(steps, stepToCmFactor));
     }
-  }, [steps, stepToCmFactor, mode]);
+  }, [steps, stepToCmFactor, mode, cmValue]);
 
   const handleStepsChange = (newSteps: number) => {
     onChange(newSteps);
@@ -89,12 +93,13 @@ export function DistanceConverter({
           value={stepperValue}
           onChange={isEditingSteps ? handleStepsChange : handleCmChange}
           min={1}
-          max={isEditingSteps ? 20 : 100}
+          max={isEditingSteps ? 40 : 200}
           step={1}
-          size="sm"
+          size="md"
           disabled={disabled}
           className="flex-1"
           label="Дистанция"
+          onInputActivate={onInputActivate}
         />
 
         {/* Secondary value hint */}

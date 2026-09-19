@@ -39,8 +39,10 @@ test.describe.skip('Unit combat sandbox (encyclopedia)', () => {
     const sheet = await openSandbox(page);
     await page.getByTestId('sandbox-action-shot').click();
 
-    // Броня цели = 5 (статы бойца prefilled из досье)
-    await sheet.getByLabel('Броня цели input').fill('5');
+    // Броня цели = 5 через модал стандартных значений (статы бойца prefilled из досье)
+    await sheet.getByLabel('Броня цели input').click();
+    await page.getByRole('button', { name: '5', exact: true }).click();
+    await page.getByRole('button', { name: 'Подтвердить' }).click();
 
     await sheet.getByRole('button', { name: 'ВЫСТРЕЛИТЬ' }).click();
 

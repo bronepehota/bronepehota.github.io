@@ -109,8 +109,10 @@ test.describe('Standalone Calculator', () => {
     await page.getByRole('button', { name: 'D6', exact: true }).click();
     await page.getByRole('button', { name: 'Подтвердить' }).click();
 
-    // дистанция → 1 шаг
-    await page.getByRole('spinbutton').first().fill('1');
+    // дистанция → 1 шаг (модал стандартных значений)
+    await page.getByLabel('Дистанция input').click();
+    await page.getByRole('button', { name: '1', exact: true }).click();
+    await page.getByRole('button', { name: 'Подтвердить' }).click();
 
     await page.getByRole('button', { name: 'ВЫСТРЕЛИТЬ' }).click();
     await expect(page.getByText('ПОПАДАНИЕ')).toBeVisible({ timeout: 15000 });
@@ -147,6 +149,42 @@ test.describe('Standalone Calculator', () => {
     // Verify grenade view
     await expect(page.getByRole('heading', { name: 'ГРАНАТА' })).toBeVisible({ timeout: 5000 });
     await expect(page.getByText('БРОСИТЬ')).toBeVisible({ timeout: 5000 });
+  });
+
+  // Переключатель «ШАГИ|СМ» живёт ВНУТРИ модала дистанции: флип меняет сетку
+  // и конвертирует текущее значение; пишется в общий ключ
+  // bronepehota_distance_input_unit и переживает перезагрузку.
+  test('переключатель шаги/см внутри модала — конвертирует значение и запоминается', async ({ page }) => {
+    await page.getByTestId('calculator-tab-shot').click();
+
+    await page.getByLabel('Дистанция input').click();
+    const sw = page.getByTestId('popup-unit-switch');
+    await expect(sw).toBeVisible();
+    await expect(sw.getByRole('button', { name: 'ШАГИ' })).toHaveAttribute('aria-pressed', 'true');
+
+    // Флип на см: сетка меняется (50 появляется), значение конвертируется 5 → 25
+    await sw.getByRole('button', { name: 'СМ' }).click();
+    await expect(page.getByRole('button', { name: '50', exact: true })).toBeVisible();
+    await expect(page.getByLabel('Значение')).toHaveValue('25');
+
+    // 50 см → 10 шагов
+    await page.getByRole('button', { name: '50', exact: true }).click();
+    await page.getByRole('button', { name: 'Подтвердить' }).click();
+    await expect(page.getByText('(10шаг)')).toBeVisible();
+
+    // Ключ записан
+    expect(await page.evaluate(() => localStorage.getItem('bronepehota_distance_input_unit'))).toBe('cm');
+
+    // Свежая страница в том же контексте (clearStorage-инит здесь не действует) —
+    // выбор помнится между сессиями, storage как источник истины
+    const page2 = await page.context().newPage();
+    await page2.goto('/calculator');
+    await page2.waitForLoadState('networkidle');
+    await page2.getByTestId('calculator-tab-shot').click();
+    await page2.getByLabel('Дистанция input').click();
+    const sw2 = page2.getByTestId('popup-unit-switch');
+    await expect(sw2.getByRole('button', { name: 'СМ' })).toHaveAttribute('aria-pressed', 'true');
+    await page2.close();
   });
 });
 

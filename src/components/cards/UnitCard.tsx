@@ -636,7 +636,6 @@ export default function UnitCard({
           grenadesAvailable={isSquad && !unit.grenadesUsed}
           unitDisplayName={`${formatUnitNumber(unit)} - ${data.name}`}
           autoCompleteEnabled={autoCompleteEnabled}
-          distanceInputUnit={distanceInputUnit}
           stepToCmFactor={stepToCmFactor}
         />
       )}

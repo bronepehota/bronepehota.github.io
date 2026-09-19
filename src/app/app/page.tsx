@@ -9,6 +9,7 @@ import { isValidRulesVersion } from '@/lib/rules-registry';
 import { getDefaultSource, getSourceWithCustom } from '@/lib/sources-registry';
 import { factionParamToApply } from '@/lib/deep-link';
 import { LOCAL_STORAGE_KEYS } from '@/lib/constants';
+import { getDistanceUnit } from '@/components/toggles/DistanceUnitToggle';
 import { loadArmy, saveArmy } from '@/lib/army-storage';
 import { CombatTargetProvider } from '@/contexts/CombatTargetContext';
 
@@ -103,6 +104,18 @@ export default function Home() {
   useEffect(() => {
     localStorage.setItem('bronepehota_rules_version', rulesVersion);
   }, [rulesVersion]);
+
+  // Keep the unit state live when the «шаги/см» switch flips it in battle
+  // (setDistanceUnit writes localStorage + fires this event) or in another tab
+  useEffect(() => {
+    const syncDistanceUnit = () => setDistanceInputUnit(getDistanceUnit());
+    window.addEventListener('bronepehota:distance-unit', syncDistanceUnit);
+    window.addEventListener('storage', syncDistanceUnit);
+    return () => {
+      window.removeEventListener('bronepehota:distance-unit', syncDistanceUnit);
+      window.removeEventListener('storage', syncDistanceUnit);
+    };
+  }, []);
 
   // Initiative trigger function from GameSession - use ref to persist across remounts
   const triggerInitiativeRef = useRef<(() => void) | null>(null);
