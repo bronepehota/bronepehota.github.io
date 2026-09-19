@@ -24,10 +24,12 @@ test.describe('Squad photo fill in battle view', () => {
     const scroll = page.getByTestId('squad-scroll');
     expect(await scroll.evaluate((el) => el.scrollHeight <= el.clientHeight + 1)).toBe(true);
 
-    // Фото выросло далеко выше пола 85.33px, но не выше капа min(224px, 60vw=225)
+    // Фото выросло далеко выше пола 85.33px. Кап height min(224px,40vw):
+    // при 375 это 150px — согласованный потолок, чтобы крупные статы
+    // (19px, дистанционная читаемость) не выдавливались из строки
     const photo = page.getByTestId('soldier-photo').first();
     const h = await photo.evaluate((el) => el.getBoundingClientRect().height);
-    expect(h).toBeGreaterThan(150);
+    expect(h).toBeGreaterThan(140);
     expect(h).toBeLessThanOrEqual(224.5);
 
     // Аспект 3:4 держится — ширина не вылезает за 0.75×h (нет гор. переполнения)
