@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { LayoutGrid } from 'lucide-react';
+import { LayoutGrid, MousePointerClick } from 'lucide-react';
 import { GitHubPagesImage as Image } from '@/components/GitHubPagesImage';
 import { useCardSwipe } from '@/hooks/useCardSwipe';
 import { cn } from '@/lib/utils';
@@ -42,7 +42,7 @@ export function BattleTutorial({ demoImageUrl, onFinish }: BattleTutorialProps) 
   const stepMeta = [
     { title: 'СВАЙП ВЛЕВО — ГОТОВ', hint: '← проведи карточку влево' },
     { title: 'СВАЙП ВПРАВО — УБИТ', hint: 'проведи карточку вправо →' },
-    { title: 'СПИСОК В ДОКЕ', hint: '' },
+    { title: 'ШПАРГАЛКА БОЯ', hint: '' },
   ][step];
 
   return (
@@ -146,6 +146,20 @@ export function BattleTutorial({ demoImageUrl, onFinish }: BattleTutorialProps) 
               <span className="font-mono text-[11px] text-amber-200/90">
                 убит: свайп →
               </span>
+            </div>
+
+            {/* Нажатия — те же действия кнопками (плейтест: «про нажатия
+                на выстрелы и кнопки готов/убит») */}
+            <div className="flex items-center gap-3 rounded-sm border border-slate-700/50 bg-slate-800/40 p-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-sm border border-slate-700/50 bg-slate-800/60 shrink-0">
+                <MousePointerClick className="h-4 w-4 text-slate-300" />
+              </span>
+              <p className="text-[12px] leading-relaxed text-slate-300">
+                <span className="font-mono font-bold text-slate-100">Статы бойца</span> — выстрел
+                и действия; чип <span className="font-mono font-bold text-slate-100">ГОТОВ</span> на
+                фото — завершить ход (долгое нажатие — отмена); кнопка{' '}
+                <span className="font-mono font-bold text-slate-100">черепа</span> — убит.
+              </p>
             </div>
 
             <div className="flex items-center gap-3 rounded-sm border border-slate-700/50 bg-slate-800/40 p-3">

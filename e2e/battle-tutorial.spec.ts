@@ -58,7 +58,8 @@ test.describe('Battle tutorial', () => {
     await expect(tutorial).toContainText('СВАЙП ВПРАВО — УБИТ');
 
     await dragDemo(page, 'right');
-    await expect(tutorial).toContainText('СПИСОК В ДОКЕ');
+    await expect(tutorial).toContainText('ШПАРГАЛКА БОЯ');
+    await expect(tutorial).toContainText('Статы бойца');
 
     await page.getByTestId('battle-tutorial-finish').click();
     await expect(tutorial).not.toBeVisible();
