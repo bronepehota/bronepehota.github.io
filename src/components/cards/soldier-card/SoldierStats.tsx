@@ -127,7 +127,14 @@ export function SoldierStats({
           />
           <StatBadge
             icon={Footprints}
-            value={distanceInputUnit === 'cm' ? `${soldier.speed * stepToCmFactor}см` : soldier.speed.toString()}
+            value={distanceInputUnit === 'cm' ? `${soldier.speed * stepToCmFactor}см` : (
+              // Шаги + сантиметры в скобках, читаемым кеглем (плейтест:
+              // «см крупнее должны быть видны, место есть»)
+              <span className="flex items-baseline gap-1">
+                <span className="text-sm font-mono font-black leading-none text-cyan-300">{soldier.speed}</span>
+                <span className="text-[11px] font-mono font-bold leading-none text-slate-300">({soldier.speed * stepToCmFactor}см)</span>
+              </span>
+            )}
             color="text-cyan-400"
             bonus={formatMultiplier(statBonuses?.speedMultiplier)}
             statKey="speed"

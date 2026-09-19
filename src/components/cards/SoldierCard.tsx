@@ -6,6 +6,7 @@ import { SoldierStats } from './soldier-card/SoldierStats';
 import { SoldierImage } from './soldier-card/SoldierImage';
 import { SoldierDoneButton } from './soldier-card/SoldierDoneButton';
 import StatusStripe, { type SoldierState } from './soldier-card/StatusStripe';
+import { useCardSwipe } from '@/hooks/useCardSwipe';
 import { cn } from '@/lib/utils';
 import type { Squad, ArmyUnit, Army } from '@/lib/types';
 import { collectBuffsForUnit, getSoldierModifiers, resolveModifierSummary, isModifierActive } from '@/lib/modifier-utils';
@@ -170,6 +171,17 @@ function SoldierCard({
   // Check if this soldier is a pilot
   const isPilot = soldier.isPilot || false;
 
+  // Свайп по карточке (плейтест): влево — «готов», вправо — «убит».
+  // Гейтинг как у кнопок: паникующий/мёртвый не может завершить ход
+  // (правила §10 — можно быть уничтоженным, но нельзя действовать);
+  // убить в панике можно, поэтому вправо не гейтим.
+  const swipe = useCardSwipe({
+    onSwipeLeft: () => {
+      if (!isDead && !isInPanic) handleToggleAction();
+    },
+    onSwipeRight: handleToggleDead,
+  });
+
   // Compute modifier counts for the modifier indicator
   const { buffCount, debuffCount, soldierModifiers, availableBuffCount, statBonuses } = useMemo(() => {
     // Build a minimal army-like structure from allUnits for buff collection
@@ -210,8 +222,12 @@ function SoldierCard({
 
   return (
     <div
+      data-testid="soldier-card"
+      data-soldier-index={soldierIndex}
+      {...swipe.handlers}
+      style={swipe.style}
       className={cn(
-        "relative p-1 md:p-1.5 rounded-sm border flex items-center gap-1.5 md:gap-2 transition-all overflow-hidden",
+        "relative p-1 md:p-1.5 rounded-sm border flex items-center gap-1.5 md:gap-2 transition-all overflow-hidden touch-pan-y",
         isDead ? "bg-slate-950/80 border-slate-800 opacity-40 grayscale" :
         isDone ? "bg-slate-900/40 border-slate-700/50 opacity-90" : "bg-slate-800/30 border-slate-700/50",
         isPilot && !isDead ? "border-cyan-700/40" : ""

@@ -41,11 +41,19 @@ describe('SoldierDoneButton', () => {
     expect(defaultProps.onToggleDone).toHaveBeenCalledTimes(1);
   });
 
-  it('dead soldier: disabled, click is a no-op', () => {
+  it('dead soldier: disabled, red «УБИТ» chip of full brightness, click is a no-op', () => {
     render(<SoldierDoneButton {...defaultProps} isDead={true} />);
 
     const button = screen.getByTestId('soldier-done-button');
     expect(button).toBeDisabled();
+    // Плейтест: затемнённый «ГОТОВ» на трупе не читался как статус —
+    // убитый носит красный «УБИТ» полной яркости
+    expect(button).toHaveTextContent('УБИТ');
+    expect(button).not.toHaveTextContent('ГОТОВ');
+    expect(button).toHaveAccessibleName('Боец убит');
+    expect(button.className).toContain('bg-red-950/80');
+    expect(button.className).toContain('text-red-300');
+    expect(button.className).not.toContain('disabled:opacity-40');
     fireEvent.click(button);
     expect(defaultProps.onToggleDone).not.toHaveBeenCalled();
   });
