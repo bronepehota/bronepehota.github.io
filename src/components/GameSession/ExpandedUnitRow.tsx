@@ -131,7 +131,9 @@ export const ExpandedUnitRow = memo(function ExpandedUnitRow({
         data-testid={`expanded-unit-${unit.instanceId}`}
       >
         <div aria-hidden="true" className={cn('absolute inset-y-0 left-0 w-1', mark.stripe)} />
-        <div className={cn('relative w-full bg-slate-900/80 flex items-center justify-center', deadTile ? 'h-14' : 'h-24')}>
+        {/* Фото — портретный бокс по аспекту миниатюры (3:4), по центру:
+            полноширинный ландшафтный кроп показывал «кусок юнита» (плейтест) */}
+        <div className={cn('relative mx-auto aspect-[3/4] rounded-sm overflow-hidden bg-slate-900/80 flex items-center justify-center', deadTile ? 'h-14' : 'h-24')}>
           {finalSrc ? (
             <img
               src={finalSrc}
