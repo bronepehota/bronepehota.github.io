@@ -6,6 +6,20 @@ import { GA_MEASUREMENT_ID } from '@/lib/constants';
 export default function GoogleAnalytics() {
   if (!GA_MEASUREMENT_ID) return null;
 
+  // Вне прода реальный gtag.js не грузим: дев/тесты не должны слать
+  // статистику. Вместо загрузчика — no-op стаб, чтобы фасад (очередь,
+  // диспетчер, analytics.spec с его dataLayer-ловушкой) оставался жив.
+  if (process.env.NODE_ENV !== 'production') {
+    return (
+      <Script id="ga-e2e-stub" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          window.gtag = window.gtag || function(){ window.dataLayer.push(arguments); };
+        `}
+      </Script>
+    );
+  }
+
   return (
     <>
       <Script
