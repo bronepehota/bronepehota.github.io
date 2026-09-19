@@ -98,10 +98,14 @@ export function useBottomSheet({
         sheetRef.current.style.transition = 'transform 0.2s ease-out';
         sheetRef.current.style.transform = 'translateY(0)';
 
-        // Reset after animation
+        // Reset after animation. transform must be cleared too, not left as
+        // translateY(0): any non-none transform makes the sheet the containing
+        // block for its fixed descendants (the value-input popups), shrinking
+        // their inset-0 backdrop to the sheet's box.
         setTimeout(() => {
           if (sheetRef.current) {
             sheetRef.current.style.transition = '';
+            sheetRef.current.style.transform = '';
           }
         }, 200);
       }

@@ -4,8 +4,10 @@ import { useState, useEffect, useRef } from 'react';
 import { CombatResult, CombatParameters } from '@/lib/combat-types';
 import { RulesVersionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { AlertTriangle, Skull, Shield, Footprints, Bomb } from 'lucide-react';
+import { AlertTriangle, Skull, Shield, Footprints, Bomb, Crosshair, X } from 'lucide-react';
 import { AnimatedDice } from './AnimatedDice';
+import { GrenadeBlastRuler } from './GrenadeBlastRuler';
+import { DiceInputPopup } from './DiceInputPopup';
 
 interface CombatResultsProps {
   result: CombatResult;
@@ -16,6 +18,7 @@ interface CombatResultsProps {
   unitType?: 'squad' | 'machine';
   onGrenadeCheckTarget?: (armor: number) => void;
   autoCompleteEnabled?: boolean;
+  stepToCmFactor?: number;
 }
 
 export function CombatResults({
@@ -27,6 +30,7 @@ export function CombatResults({
   unitType,
   onGrenadeCheckTarget,
   autoCompleteEnabled = true,
+  stepToCmFactor = 5,
 }: CombatResultsProps) {
   const isShot = result.actionType === 'shot';
   const isGrenade = result.actionType === 'grenade';
@@ -36,7 +40,9 @@ export function CombatResults({
   const ramKilled = ramResults.filter(r => r.killed).length;
   // Auto-complete logic: mark as done if enabled and it's a squad (not a machine)
   const markAsDone = autoCompleteEnabled && unitType === 'squad';
-  const [grenadeTargetArmor, setGrenadeTargetArmor] = useState(2);
+  // Seeded from the armor already entered in PARAMETERS (was a hardcoded 2)
+  const [grenadeTargetArmor, setGrenadeTargetArmor] = useState(parameters.targetArmor ?? 2);
+  const [armorPopupOpen, setArmorPopupOpen] = useState(false);
 
   // Grenade target-check derived state (Phase 2)
   const grenadeChecks = result.grenadeBlastChecks ?? [];
@@ -77,7 +83,7 @@ export function CombatResults({
   };
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-300">
+    <div className="space-y-4">
       {/* Attack modifiers display */}
       {isShot && (parameters.isSurpriseAttack || parameters.isAimedShot) && (
         <div className="flex justify-center gap-2">
@@ -99,6 +105,44 @@ export function CombatResults({
       {/* Shot Results */}
       {isShot && result.hitResult && (
         <>
+          {/* Verdict summary — instant, full-width: hit/miss + armor outcome.
+              Three glanceable states: miss=red, hit with damage=emerald,
+              hit but armor held=amber («попал, но броню не пробил»). */}
+          {(() => {
+            const hit = result.hitResult.success;
+            const penetrated = hit && (result.damageResult?.damage ?? 0) > 0;
+            const tone = !hit
+              ? { box: 'bg-red-950/80 border-red-500/70 shadow-red-900/30', text: 'text-red-400', sub: 'text-red-300', detail: 'text-slate-300 border-red-500/30', Icon: X }
+              : penetrated
+              ? { box: 'bg-emerald-950/80 border-emerald-500/70 shadow-emerald-900/30', text: 'text-emerald-400', sub: 'text-emerald-300', detail: 'text-amber-300 border-emerald-500/30', Icon: Crosshair }
+              : { box: 'bg-amber-950/80 border-amber-500/70 shadow-amber-900/30', text: 'text-amber-400', sub: 'text-amber-300', detail: 'text-slate-300 border-amber-500/30', Icon: Crosshair };
+            return (
+              <div
+                key={result.timestamp}
+                data-testid="shot-verdict-banner"
+                role="status"
+                className={cn('result-reveal w-full px-4 py-3 rounded-lg border-2 shadow-lg', tone.box)}
+              >
+                <div className="flex items-center justify-center gap-3">
+                  <tone.Icon className={cn('w-7 h-7 shrink-0', tone.text)} />
+                  <span className={cn('font-mono text-2xl font-black uppercase tracking-wider', tone.text)}>
+                    {hit ? 'ПОПАДАНИЕ' : 'ПРОМАХ'}
+                  </span>
+                  <span className={cn('ml-auto font-mono text-sm font-black opacity-80 whitespace-nowrap', tone.sub)}>
+                    {result.hitResult.total}:{getEffectiveDistance()}
+                  </span>
+                </div>
+                {hit && result.damageResult && (
+                  <div className={cn('mt-2 pt-2 border-t text-center font-mono text-sm font-black uppercase tracking-wider', tone.detail)}>
+                    {penetrated
+                      ? `-${result.damageResult.damage} ${result.unitType === 'machine' ? 'HP' : 'УРОНА'}`
+                      : 'БРОНЯ НЕ ПРОБИТА'}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+
           {/* Hit Comparison */}
           <div className="grid grid-cols-2 gap-3">
             {/* Your Roll */}
@@ -153,7 +197,7 @@ export function CombatResults({
                       bonus={result.hitResult.bonus}
                       total={result.hitResult.total}
                       targetValue={getEffectiveDistance()}
-                      resultLabel={result.hitResult.success ? 'hit' : 'miss'}
+                      resultLabel="none"
                     />
                   </div>
                 )}
@@ -171,6 +215,10 @@ export function CombatResults({
                   <span className="text-3xl font-mono font-black text-amber-400">
                     {getEffectiveDistance()}
                   </span>
+                </div>
+                {/* cm equivalent from the player's step factor toggle */}
+                <div className="text-xs font-mono text-slate-500">
+                  {getEffectiveDistance() * stepToCmFactor} см
                 </div>
                 {getFortificationBonusDisplay() && (
                   <div className="text-xs opacity-70">{getFortificationBonusDisplay()}</div>
@@ -385,11 +433,22 @@ export function CombatResults({
                   <Footprints className="w-4 h-4 text-amber-500/60" />
                 </div>
                 <div className="text-xs font-mono text-slate-500">
-                  [{result.grenadeBlastZone.minCm}-{result.grenadeBlastZone.maxCm} см]
+                  [{result.grenadeBlastZone.minSteps * stepToCmFactor}-{result.grenadeBlastZone.maxSteps * stepToCmFactor} см]
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Blast ruler — tape-measure view of the zone in cm (player's factor) */}
+          <GrenadeBlastRuler
+            grenadeDistance={result.grenadeDistance ?? (result.hitResult.roll ?? 0)}
+            blastZone={{
+              minSteps: result.grenadeBlastZone.minSteps,
+              maxSteps: result.grenadeBlastZone.maxSteps,
+            }}
+            factor={stepToCmFactor}
+            danger={isGrenadeDanger}
+          />
 
           {/* Result Label */}
           <div className="flex justify-center">
@@ -544,22 +603,19 @@ export function CombatResults({
                     >
                       −
                     </button>
-                    <input
-                      type="number"
+                    <button
+                      type="button"
                       data-testid="grenade-armor-input"
-                      value={grenadeTargetArmor}
-                      onChange={(e) => setGrenadeTargetArmor(Math.max(0, parseInt(e.target.value) || 0))}
-                      min={0}
-                      max={99}
+                      onClick={() => setArmorPopupOpen(true)}
+                      aria-label="Броня цели input"
                       className={cn(
                         "flex-1 h-14 bg-slate-900 border-2 border-emerald-600/50 rounded-lg",
-                        "flex items-center justify-center font-mono font-bold text-white text-center",
-                        "focus:outline-none focus:border-emerald-500 transition-colors",
-                        '[&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none',
-                        '[&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none',
-                        '-moz-appearance:none appearance-none text-lg'
+                        "flex items-center justify-center font-mono font-bold text-white text-center text-lg",
+                        "hover:border-emerald-500 active:scale-[0.98] transition-all touch-manipulation"
                       )}
-                    />
+                    >
+                      {grenadeTargetArmor}
+                    </button>
                     <button
                       type="button"
                       onClick={() => setGrenadeTargetArmor(Math.min(99, grenadeTargetArmor + 1))}
@@ -736,6 +792,26 @@ export function CombatResults({
         </div>
         );
       })()}
+
+      {/* Quick armor input for the arming panel (standard values modal) */}
+      {isGrenade && armorPopupOpen && (
+        <DiceInputPopup
+          title="БРОНЯ ЦЕЛИ"
+          field="armor"
+          color="emerald"
+          mode="number"
+          numericValue={grenadeTargetArmor}
+          min={0}
+          max={99}
+          quickValues={[0, 1, 2, 3, 4, 5, 6, 7, 8, 10]}
+          onSubmit={(value) => {
+            const n = parseInt(value, 10);
+            if (!isNaN(n)) setGrenadeTargetArmor(n);
+            setArmorPopupOpen(false);
+          }}
+          onClose={() => setArmorPopupOpen(false)}
+        />
+      )}
 
       {/* Action Buttons */}
       <div className="flex gap-2 md:gap-3 pt-4">

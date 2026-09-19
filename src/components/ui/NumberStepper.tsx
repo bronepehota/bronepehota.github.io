@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Minus, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -14,7 +14,13 @@ interface NumberStepperProps {
   className?: string;
   size?: 'sm' | 'md' | 'lg';
   disabled?: boolean;
+  /** When set, the value becomes a tappable button (modal input) instead of a number input */
+  onInputActivate?: () => void;
 }
+
+// Hold-to-repeat: a short tap is ±1; holding the button sweeps the range
+const HOLD_DELAY_MS = 450;
+const REPEAT_INTERVAL_MS = 140;
 
 export function NumberStepper({
   value,
@@ -26,10 +32,44 @@ export function NumberStepper({
   className,
   size = 'md',
   disabled = false,
+  onInputActivate,
 }: NumberStepperProps) {
   const [inputValue, setInputValue] = useState(value.toString());
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const holdTimerRef = useRef<number | null>(null);
+  const repeatTimerRef = useRef<number | null>(null);
+  // Whether repeats already fired for this press — suppresses the trailing
+  // click so a held sweep doesn't jump one extra step on release
+  const repeatFiredRef = useRef(false);
+  // Latest step functions — the interval calls through refs so each tick sees
+  // the CURRENT value prop (controlled parents re-render between ticks; a
+  // captured closure would freeze the sweep after one step)
+  const applyRef = useRef<{ inc: () => void; dec: () => void }>({ inc: () => {}, dec: () => {} });
+
+  const stopRepeat = useCallback(() => {
+    if (holdTimerRef.current !== null) {
+      window.clearTimeout(holdTimerRef.current);
+      holdTimerRef.current = null;
+    }
+    if (repeatTimerRef.current !== null) {
+      window.clearInterval(repeatTimerRef.current);
+      repeatTimerRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => stopRepeat, [stopRepeat]);
+
+  const startRepeat = useCallback((direction: 'inc' | 'dec') => {
+    stopRepeat();
+    repeatFiredRef.current = false;
+    holdTimerRef.current = window.setTimeout(() => {
+      repeatFiredRef.current = true;
+      repeatTimerRef.current = window.setInterval(() => {
+        direction === 'inc' ? applyRef.current.inc() : applyRef.current.dec();
+      }, REPEAT_INTERVAL_MS);
+    }, HOLD_DELAY_MS);
+  }, [stopRepeat]);
 
   const decrement = () => {
     const newValue = Math.max(min, value - step);
@@ -45,6 +85,24 @@ export function NumberStepper({
       onChange(newValue);
       setInputValue(newValue.toString());
     }
+  };
+
+  applyRef.current = { inc: increment, dec: decrement };
+
+  const handleDecrementClick = () => {
+    if (repeatFiredRef.current) {
+      repeatFiredRef.current = false;
+      return;
+    }
+    decrement();
+  };
+
+  const handleIncrementClick = () => {
+    if (repeatFiredRef.current) {
+      repeatFiredRef.current = false;
+      return;
+    }
+    increment();
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -112,55 +170,86 @@ export function NumberStepper({
       <div className="flex items-center gap-1">
         <button
           type="button"
-          onClick={decrement}
+          onClick={handleDecrementClick}
+          onPointerDown={() => !disabled && canDecrement && startRepeat('dec')}
+          onPointerUp={stopRepeat}
+          onPointerLeave={stopRepeat}
+          onPointerCancel={stopRepeat}
+          onFocus={() => { repeatFiredRef.current = false; }}
           disabled={!canDecrement || disabled}
           className={cn(
             buttonSizeClasses[size],
             'flex items-center justify-center rounded-lg transition-all active:scale-95',
             'bg-slate-700 hover:bg-slate-600 text-slate-300',
             'disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-slate-700',
-            'border border-slate-600'
+            'border border-slate-600',
+            'touch-manipulation select-none'
           )}
           aria-label={`Decrease ${label || 'value'}`}
         >
           <Minus className={iconSizeClasses[size]} />
         </button>
 
-        <input
-          ref={inputRef}
-          type="number"
-          value={isFocused ? inputValue : value}
-          onChange={handleInputChange}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          disabled={disabled}
-          min={min}
-          max={max}
-          step={step}
-          className={cn(
-            inputSizeClasses[size],
-            'bg-slate-800 border-2 border-slate-600 rounded-lg',
-            'flex items-center justify-center font-mono font-bold text-white',
-            'text-center focus:outline-none focus:border-blue-500',
-            'disabled:opacity-50 disabled:cursor-not-allowed',
-            // Remove spinner buttons
-            '[&_::-webkit-inner-spin-button]:m-0 [&_::-webkit-inner-spin-button]:appearance-none',
-            '[&_::-webkit-outer-spin-button]:m-0 [&_::-webkit-outer-spin-button]:appearance-none',
-            '-moz-appearance-none appearance-none'
-          )}
-          aria-label={`${label || 'value'} input`}
-        />
+        {onInputActivate ? (
+          <button
+            type="button"
+            onClick={onInputActivate}
+            disabled={disabled}
+            className={cn(
+              inputSizeClasses[size],
+              'bg-slate-800 border-2 border-slate-600 rounded-lg',
+              'flex items-center justify-center font-mono font-bold text-white',
+              'text-center active:scale-95 transition-all touch-manipulation',
+              'hover:border-slate-500',
+              'disabled:opacity-50 disabled:cursor-not-allowed'
+            )}
+            aria-label={`${label || 'value'} input`}
+          >
+            {value}
+          </button>
+        ) : (
+          <input
+            ref={inputRef}
+            type="number"
+            value={isFocused ? inputValue : value}
+            onChange={handleInputChange}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            disabled={disabled}
+            min={min}
+            max={max}
+            step={step}
+            className={cn(
+              inputSizeClasses[size],
+              'bg-slate-800 border-2 border-slate-600 rounded-lg',
+              'flex items-center justify-center font-mono font-bold text-white',
+              'text-center focus:outline-none focus:border-blue-500',
+              'disabled:opacity-50 disabled:cursor-not-allowed',
+              // Remove spinner buttons
+              '[&_::-webkit-inner-spin-button]:m-0 [&_::-webkit-inner-spin-button]:appearance-none',
+              '[&_::-webkit-outer-spin-button]:m-0 [&_::-webkit-outer-spin-button]:appearance-none',
+              '-moz-appearance-none appearance-none'
+            )}
+            aria-label={`${label || 'value'} input`}
+          />
+        )}
 
         <button
           type="button"
-          onClick={increment}
+          onClick={handleIncrementClick}
+          onPointerDown={() => !disabled && canIncrement && startRepeat('inc')}
+          onPointerUp={stopRepeat}
+          onPointerLeave={stopRepeat}
+          onPointerCancel={stopRepeat}
+          onFocus={() => { repeatFiredRef.current = false; }}
           disabled={!canIncrement || disabled}
           className={cn(
             buttonSizeClasses[size],
             'flex items-center justify-center rounded-lg transition-all active:scale-95',
             'bg-slate-700 hover:bg-slate-600 text-slate-300',
             'disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-slate-700',
-            'border border-slate-600'
+            'border border-slate-600',
+            'touch-manipulation select-none'
           )}
           aria-label={`Increase ${label || 'value'}`}
         >
