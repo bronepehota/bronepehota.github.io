@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { clearStorage, dismissIntroIfShown, openNavigator } from './helpers/setup';
+import { clearStorage, dismissIntroIfShown, openNavigator, dismissBattleTutorialIfShown } from './helpers/setup';
 
 /**
  * E2E tests for pilot functionality
@@ -75,6 +75,7 @@ test.describe('Pilot Functionality', () => {
     if (await confirmButton.isVisible({ timeout: 2000 })) {
       await confirmButton.click();
     }
+    await dismissBattleTutorialIfShown(page);
 
     // Verify we're in game session: dock counter shows 0/2 finished units
     await expect(page.getByTestId('dock-open-navigator')).toBeVisible({ timeout: 5000 });

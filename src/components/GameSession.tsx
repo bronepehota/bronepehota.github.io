@@ -11,12 +11,13 @@ import { SoldierEffectsModal } from './modals/SoldierEffectsModal';
 import { getFactionColors } from '@/lib/faction-colors';
 import { trackEvent } from '@/lib/analytics';
 import UnitCard from './cards/UnitCard';
-import { History, X, Bomb, Heart, Shield, Footprints, CheckCircle2, MoreVertical, BookOpen, RotateCcw, MessageCircle, Target, Users, LayoutGrid } from 'lucide-react';
+import { History, X, Bomb, Heart, Shield, Footprints, CheckCircle2, MoreVertical, BookOpen, RotateCcw, MessageCircle, Target, Users, LayoutGrid, GraduationCap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CombatLogEntry } from '@/lib/combat-types';
 import { useCombatTargetContext } from '@/contexts/CombatTargetContext';
 import InitiativeModal from './modals/InitiativeModal';
-import { ExpandedNavigator } from './GameSession/index';
+import { ExpandedNavigator, BattleTutorial } from './GameSession/index';
+import { LOCAL_STORAGE_KEYS } from '@/lib/constants';
 import { checkSquadUniformStats, getAliveSoldiersCount, countUnitsByStatus } from '@/lib/unit-utils';
 import { deriveUnitStatus, UnitStatus } from '@/lib/unit-status';
 import { resolveModifierSummary } from '@/lib/modifier-utils';
@@ -583,6 +584,23 @@ export default function GameSession({
   }, [army.units, focusedUnitIdx]);
 
   const factionColors = getFactionColors(army.faction || 'polaris');
+
+  // «Боевой инструктаж» — однократно при первом заходе в бой со взводом
+  // (интерактивные свайпы на демо-карточке + подсказка про СПИСОК)
+  const [showBattleTutorial, setShowBattleTutorial] = useState(false);
+  const hasSquadUnit = army.units.some(u => u.type === 'squad');
+  useEffect(() => {
+    if (!hasSquadUnit) return;
+    if (localStorage.getItem(LOCAL_STORAGE_KEYS.BATTLE_TUTORIAL_DONE) === '1') return;
+    setShowBattleTutorial(true);
+  }, [hasSquadUnit]);
+  // GitHubPagesImage сам префиксует BASE_PATH для /images/
+  const tutorialImage = (() => {
+    if (!showBattleTutorial) return undefined;
+    const squadUnit = army.units.find(u => u.type === 'squad');
+    if (!squadUnit) return undefined;
+    return (squadUnit.data as Squad).soldiers[0]?.image || squadUnit.data.image || undefined;
+  })();
   const selectedMission = isFreePlay(army.missionId) ? null : getMission(army.missionId!) ?? null;
 
   // Compute uniform stats for focused squad unit
@@ -617,6 +635,17 @@ export default function GameSession({
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden" data-testid="game-session">
+      {/* Боевой инструктаж (первый заход) */}
+      {showBattleTutorial && (
+        <BattleTutorial
+          demoImageUrl={tutorialImage}
+          onFinish={() => {
+            localStorage.setItem(LOCAL_STORAGE_KEYS.BATTLE_TUTORIAL_DONE, '1');
+            setShowBattleTutorial(false);
+          }}
+        />
+      )}
+
       {/* Initiative Modal */}
       <InitiativeModal
         isOpen={showInitiativeModal}
@@ -1208,6 +1237,14 @@ export default function GameSession({
             >
               <History className="w-3.5 h-3.5 text-blue-400" />
               История боя
+            </button>
+            <button
+              data-testid="battle-tutorial-replay"
+              onClick={() => { setShowBattleTutorial(true); setShowDockMenu(false); }}
+              className="w-full px-3 py-2 text-left text-xs text-slate-300 hover:bg-slate-700 flex items-center gap-2"
+            >
+              <GraduationCap className="w-3.5 h-3.5 text-amber-400" />
+              Инструктаж
             </button>
             {army.isInBattle && (
               <button

@@ -110,7 +110,8 @@ describe('constants', () => {
       // as const ensures TypeScript treats these as readonly literals
       // Note: Runtime immutability would require Object.freeze()
       expect(typeof LOCAL_STORAGE_KEYS.ARMY).toBe('string');
-      expect(Object.keys(LOCAL_STORAGE_KEYS)).toHaveLength(16);
+      expect(LOCAL_STORAGE_KEYS.BATTLE_TUTORIAL_DONE).toBe('bronepehota_battle_tutorial_done');
+      expect(Object.keys(LOCAL_STORAGE_KEYS)).toHaveLength(17);
     });
   });
 

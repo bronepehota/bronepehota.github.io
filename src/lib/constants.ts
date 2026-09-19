@@ -34,6 +34,7 @@ export const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
 export const LOCAL_STORAGE_KEYS = {
   ARMY: 'bronepehota_army',
+  BATTLE_TUTORIAL_DONE: 'bronepehota_battle_tutorial_done',
   RULES_VERSION: 'bronepehota_rules_version',
   PANIC_ENABLED: 'bronepehota_panic_enabled',
   AIMED_SHOT_ENABLED: 'bronepehota_aimed_shot_enabled',
