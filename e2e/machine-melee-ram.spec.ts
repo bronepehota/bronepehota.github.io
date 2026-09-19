@@ -118,11 +118,10 @@ test.describe('Machine melee + ram (#125)', () => {
     await expect(infantryButton).toBeVisible({ timeout: 2000 });
     await infantryButton.click({ force: true });
 
-    // Set target armor (Бр цели) to 3 via the NumberStepper input.
-    const armorInput = modal.locator('input[type="number"]').last();
-    await expect(armorInput).toBeVisible({ timeout: 2000 });
-    await armorInput.click({ force: true });
-    await armorInput.fill('3');
+    // Set target armor (Бр цели) to 3 via the quick-input modal (tap value → chip 3 → confirm).
+    await modal.getByLabel('Броня цели input').click({ force: true });
+    await page.getByRole('button', { name: '3', exact: true }).click();
+    await page.getByRole('button', { name: 'Подтвердить' }).click();
 
     // Execute — melee button text is «АТАКОВАТЬ».
     const executeButton = page.getByRole('button', { name: /атаковать/i }).first();

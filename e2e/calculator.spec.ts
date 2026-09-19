@@ -109,8 +109,10 @@ test.describe('Standalone Calculator', () => {
     await page.getByRole('button', { name: 'D6', exact: true }).click();
     await page.getByRole('button', { name: 'Подтвердить' }).click();
 
-    // дистанция → 1 шаг
-    await page.getByRole('spinbutton').first().fill('1');
+    // дистанция → 1 шаг (модал стандартных значений)
+    await page.getByLabel('Дистанция input').click();
+    await page.getByRole('button', { name: '1', exact: true }).click();
+    await page.getByRole('button', { name: 'Подтвердить' }).click();
 
     await page.getByRole('button', { name: 'ВЫСТРЕЛИТЬ' }).click();
     await expect(page.getByText('ПОПАДАНИЕ')).toBeVisible({ timeout: 15000 });

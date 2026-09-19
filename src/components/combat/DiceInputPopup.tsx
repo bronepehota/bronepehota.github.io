@@ -15,6 +15,10 @@ interface DiceInputPopupProps {
   numericValue?: number;
   min?: number;
   max?: number;
+  /** History field key — overrides the title-derived one (for titles with units etc.) */
+  field?: string;
+  /** Number mode: quick-pick grid values (default 0–10 filtered by min/max) */
+  quickValues?: number[];
 }
 
 // --- Color configs ---
@@ -74,9 +78,11 @@ export function DiceInputPopup({
   numericValue = 0,
   min = 0,
   max = 10,
+  field: fieldOverride,
+  quickValues,
 }: DiceInputPopupProps) {
   const colors = colorConfig[color];
-  const field = fieldFromTitle(title);
+  const field = fieldOverride ?? fieldFromTitle(title);
   const recentEntries = useMemo(() => {
     const raw = typeof window !== 'undefined' ? localStorage.getItem(HISTORY_KEY) : null;
     return getRecentForField(loadHistory(raw), field);
@@ -180,6 +186,7 @@ export function DiceInputPopup({
             </div>
             <button
               onClick={handleClose}
+              aria-label="Закрыть"
               className="p-2 hover:bg-slate-800/80 rounded-lg border border-slate-700/80 min-w-[44px] min-h-[44px] flex items-center justify-center transition-all active:scale-95"
             >
               <X className="w-5 h-5 text-slate-500" />
@@ -275,7 +282,7 @@ export function DiceInputPopup({
 
               {/* Quick values grid */}
               <div className="grid grid-cols-7 gap-1.5">
-                {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].filter(v => v >= min && v <= max).map(v => (
+                {(quickValues ?? [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]).filter(v => v >= min && v <= max).map(v => (
                   <button
                     key={v}
                     onClick={() => setNumValue(v)}

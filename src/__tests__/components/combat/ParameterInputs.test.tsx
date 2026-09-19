@@ -1,10 +1,9 @@
 import type { ComponentProps } from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ParameterInputs } from '@/components/combat/ParameterInputs';
 import { CombatParameters } from '@/lib/combat-types';
 import { RulesVersionID } from '@/lib/types';
-import { HISTORY_KEY } from '@/lib/dice-history';
 
 const baseParams: CombatParameters = {
   distance: 5,
@@ -26,82 +25,116 @@ const renderShot = (props: Partial<ComponentProps<typeof ParameterInputs>> = {})
     />
   );
 
-describe('ParameterInputs quick-pick chips', () => {
+const openDistanceModal = async () => {
+  await userEvent.click(screen.getByLabelText('Дистанция input'));
+};
+
+const openArmorModal = async () => {
+  await userEvent.click(screen.getByLabelText('Броня цели input'));
+};
+
+describe('ParameterInputs quick-input modals', () => {
   beforeEach(() => {
     localStorage.clear();
   });
 
-  it('renders armor quick-pick chips 0-8 for shots', () => {
+  it('opens the armor modal with standard values on value tap', async () => {
     renderShot();
 
-    const chips = screen.getByTestId('armor-quick-chips');
-    for (const v of [0, 1, 2, 3, 4, 5, 6, 7, 8]) {
-      expect(within(chips).getByText(String(v))).toBeInTheDocument();
+    await openArmorModal();
+
+    expect(screen.getByText('БРОНЯ ЦЕЛИ')).toBeInTheDocument();
+    // Standard armor range chips 0-8 (+10 for custom builds)
+    for (const v of [0, 1, 2, 3, 4, 5, 6, 7, 8, 10]) {
+      expect(screen.getByRole('button', { name: String(v) })).toBeInTheDocument();
     }
   });
 
-  it('selecting an armor chip writes parameters and target memory', async () => {
+  it('selecting a standard armor value in the modal writes parameters and memory', async () => {
     const onChange = jest.fn();
     const onMemoryUpdate = jest.fn();
     renderShot({ onChange, onMemoryUpdate });
 
-    await userEvent.click(within(screen.getByTestId('armor-quick-chips')).getByText('4'));
+    await openArmorModal();
+    await userEvent.click(screen.getByRole('button', { name: '4' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Подтвердить' }));
 
     expect(onChange).toHaveBeenCalledWith({ targetArmor: 4 });
     expect(onMemoryUpdate).toHaveBeenCalledWith({ targetArmor: 4 });
+    // Modal closes after submit
+    expect(screen.queryByText('БРОНЯ ЦЕЛИ')).not.toBeInTheDocument();
   });
 
-  it('marks the current armor on the chips', () => {
+  it('armor modal starts from the current value', async () => {
+    const onChange = jest.fn();
+    renderShot({ onChange });
+
+    await openArmorModal();
+    await userEvent.click(screen.getByRole('button', { name: 'Подтвердить' }));
+
+    // Submitting without changes re-writes the current armor
+    expect(onChange).toHaveBeenCalledWith({ targetArmor: 2 });
+  });
+
+  it('opens the distance modal in steps by default', async () => {
     renderShot();
 
-    const chips = screen.getByTestId('armor-quick-chips');
-    expect(within(chips).getByText('2').closest('button')).toHaveClass('bg-cyan-950/50');
+    await openDistanceModal();
+
+    expect(screen.getByText('ДИСТАНЦИЯ (ШАГИ)')).toBeInTheDocument();
   });
 
-  it('renders recent distance chips from the dice history', async () => {
-    localStorage.setItem(HISTORY_KEY, JSON.stringify([
-      { value: '7', field: 'distance', timestamp: 1 },
-      { value: '7', field: 'distance', timestamp: 2 },
-      { value: '12', field: 'distance', timestamp: 3 },
-    ]));
-
-    renderShot();
-
-    const chips = await screen.findByTestId('distance-recent-chips');
-    expect(within(chips).getByText('7')).toBeInTheDocument();
-    expect(within(chips).getByText('12')).toBeInTheDocument();
-  });
-
-  it('hides recent distance chips when there is no history', () => {
-    renderShot();
-
-    expect(screen.queryByTestId('distance-recent-chips')).not.toBeInTheDocument();
-  });
-
-  it('clicking a recent distance chip writes the distance', async () => {
-    localStorage.setItem(HISTORY_KEY, JSON.stringify([
-      { value: '12', field: 'distance', timestamp: 1 },
-    ]));
+  it('distance modal writes the picked steps', async () => {
     const onChange = jest.fn();
     const onMemoryUpdate = jest.fn();
-
     renderShot({ onChange, onMemoryUpdate });
 
-    const chips = await screen.findByTestId('distance-recent-chips');
-    await userEvent.click(within(chips).getByText('12'));
+    await openDistanceModal();
+    await userEvent.click(screen.getByRole('button', { name: '12' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Подтвердить' }));
 
     expect(onChange).toHaveBeenCalledWith({ distance: 12 });
     expect(onMemoryUpdate).toHaveBeenCalledWith({ distance: 12 });
   });
 
-  it('ignores history entries of other fields', async () => {
-    localStorage.setItem(HISTORY_KEY, JSON.stringify([
-      { value: 'D6+2', field: 'range', timestamp: 1 },
-    ]));
+  it('distance modal converts cm entries back to steps (cm input unit)', async () => {
+    const onChange = jest.fn();
+    renderShot({ onChange, distanceInputUnit: 'cm', stepToCmFactor: 5 });
 
-    renderShot();
+    await openDistanceModal();
 
-    // Distance chips stay hidden — only 'distance' entries feed them
-    expect(screen.queryByTestId('distance-recent-chips')).not.toBeInTheDocument();
+    expect(screen.getByText('ДИСТАНЦИЯ (СМ)')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: '50' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Подтвердить' }));
+
+    // 50 см / 5 = 10 шагов
+    expect(onChange).toHaveBeenCalledWith({ distance: 10 });
+  });
+
+  it('closing the modal keeps the previous value', async () => {
+    const onChange = jest.fn();
+    renderShot({ onChange });
+
+    await openArmorModal();
+    await userEvent.click(screen.getByRole('button', { name: '7' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Закрыть' }));
+
+    // The popup closes asynchronously (150ms exit animation)
+    await waitFor(() =>
+      expect(screen.queryByRole('heading', { name: 'БРОНЯ ЦЕЛИ' })).not.toBeInTheDocument()
+    );
+
+    // Nothing written — only the modal closed
+    expect(onChange).not.toHaveBeenCalledWith({ targetArmor: 7 });
+  });
+
+  it('steppers still work alongside the modal trigger', async () => {
+    const onChange = jest.fn();
+    renderShot({ onChange });
+
+    await userEvent.click(screen.getByRole('button', { name: 'Increase Броня цели' }));
+
+    expect(onChange).toHaveBeenCalledWith({ targetArmor: 3 });
   });
 });

@@ -33,7 +33,7 @@ jest.mock('@/components/combat/CombatResults', () => ({
 // ВАЖНО: стаб БЕЗ stopPropagation — как настоящий DiceInputPopup. Если попап
 // окажется вложен в оверлей (onClick={onClose}), клик по нему всплывёт и
 // закроет песочницу — это и есть регрессия, которую ловит тест ниже.
-jest.mock('@/components/calculator/DiceInputPopup', () => ({
+jest.mock('@/components/combat/DiceInputPopup', () => ({
   DiceInputPopup: () => <div data-testid="dice-popup-stub" />,
 }));
 

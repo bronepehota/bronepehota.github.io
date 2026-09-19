@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 import { AlertTriangle, Skull, Shield, Footprints, Bomb, Crosshair, X } from 'lucide-react';
 import { AnimatedDice } from './AnimatedDice';
 import { GrenadeBlastRuler } from './GrenadeBlastRuler';
-import { ValueChips } from '@/components/ui/ValueChips';
+import { DiceInputPopup } from './DiceInputPopup';
 
 interface CombatResultsProps {
   result: CombatResult;
@@ -42,6 +42,7 @@ export function CombatResults({
   const markAsDone = autoCompleteEnabled && unitType === 'squad';
   // Seeded from the armor already entered in PARAMETERS (was a hardcoded 2)
   const [grenadeTargetArmor, setGrenadeTargetArmor] = useState(parameters.targetArmor ?? 2);
+  const [armorPopupOpen, setArmorPopupOpen] = useState(false);
 
   // Grenade target-check derived state (Phase 2)
   const grenadeChecks = result.grenadeBlastChecks ?? [];
@@ -104,34 +105,43 @@ export function CombatResults({
       {/* Shot Results */}
       {isShot && result.hitResult && (
         <>
-          {/* Verdict banner — instant, full-width, carries the hit/miss call */}
-          <div
-            key={result.timestamp}
-            data-testid="shot-verdict-banner"
-            role="status"
-            className={cn(
-              'result-reveal flex items-center justify-center gap-3 w-full px-4 py-3 rounded-lg border-2 shadow-lg',
-              result.hitResult.success
-                ? 'bg-emerald-950/80 border-emerald-500/70 shadow-emerald-900/30'
-                : 'bg-red-950/80 border-red-500/70 shadow-red-900/30'
-            )}
-          >
-            {result.hitResult.success
-              ? <Crosshair className="w-7 h-7 text-emerald-400 shrink-0" />
-              : <X className="w-7 h-7 text-red-400 shrink-0" />}
-            <span className={cn(
-              'font-mono text-2xl font-black uppercase tracking-wider',
-              result.hitResult.success ? 'text-emerald-400' : 'text-red-400'
-            )}>
-              {result.hitResult.success ? 'ПОПАДАНИЕ' : 'ПРОМАХ'}
-            </span>
-            <span className={cn(
-              'ml-auto font-mono text-sm font-black opacity-80 whitespace-nowrap',
-              result.hitResult.success ? 'text-emerald-300' : 'text-red-300'
-            )}>
-              {result.hitResult.total}:{getEffectiveDistance()}
-            </span>
-          </div>
+          {/* Verdict summary — instant, full-width: hit/miss + armor outcome.
+              Three glanceable states: miss=red, hit with damage=emerald,
+              hit but armor held=amber («попал, но броню не пробил»). */}
+          {(() => {
+            const hit = result.hitResult.success;
+            const penetrated = hit && (result.damageResult?.damage ?? 0) > 0;
+            const tone = !hit
+              ? { box: 'bg-red-950/80 border-red-500/70 shadow-red-900/30', text: 'text-red-400', sub: 'text-red-300', detail: 'text-slate-300 border-red-500/30', Icon: X }
+              : penetrated
+              ? { box: 'bg-emerald-950/80 border-emerald-500/70 shadow-emerald-900/30', text: 'text-emerald-400', sub: 'text-emerald-300', detail: 'text-amber-300 border-emerald-500/30', Icon: Crosshair }
+              : { box: 'bg-amber-950/80 border-amber-500/70 shadow-amber-900/30', text: 'text-amber-400', sub: 'text-amber-300', detail: 'text-slate-300 border-amber-500/30', Icon: Crosshair };
+            return (
+              <div
+                key={result.timestamp}
+                data-testid="shot-verdict-banner"
+                role="status"
+                className={cn('result-reveal w-full px-4 py-3 rounded-lg border-2 shadow-lg', tone.box)}
+              >
+                <div className="flex items-center justify-center gap-3">
+                  <tone.Icon className={cn('w-7 h-7 shrink-0', tone.text)} />
+                  <span className={cn('font-mono text-2xl font-black uppercase tracking-wider', tone.text)}>
+                    {hit ? 'ПОПАДАНИЕ' : 'ПРОМАХ'}
+                  </span>
+                  <span className={cn('ml-auto font-mono text-sm font-black opacity-80 whitespace-nowrap', tone.sub)}>
+                    {result.hitResult.total}:{getEffectiveDistance()}
+                  </span>
+                </div>
+                {hit && result.damageResult && (
+                  <div className={cn('mt-2 pt-2 border-t text-center font-mono text-sm font-black uppercase tracking-wider', tone.detail)}>
+                    {penetrated
+                      ? `−${result.damageResult.damage} ${result.unitType === 'machine' ? 'HP' : 'УРОНА'}`
+                      : 'БРОНЯ НЕ ПРОБИТА'}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {/* Hit Comparison */}
           <div className="grid grid-cols-2 gap-3">
@@ -593,22 +603,19 @@ export function CombatResults({
                     >
                       −
                     </button>
-                    <input
-                      type="number"
+                    <button
+                      type="button"
                       data-testid="grenade-armor-input"
-                      value={grenadeTargetArmor}
-                      onChange={(e) => setGrenadeTargetArmor(Math.max(0, parseInt(e.target.value) || 0))}
-                      min={0}
-                      max={99}
+                      onClick={() => setArmorPopupOpen(true)}
+                      aria-label="Броня цели input"
                       className={cn(
                         "flex-1 h-14 bg-slate-900 border-2 border-emerald-600/50 rounded-lg",
-                        "flex items-center justify-center font-mono font-bold text-white text-center",
-                        "focus:outline-none focus:border-emerald-500 transition-colors",
-                        '[&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none',
-                        '[&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none',
-                        '-moz-appearance:none appearance-none text-lg'
+                        "flex items-center justify-center font-mono font-bold text-white text-center text-lg",
+                        "hover:border-emerald-500 active:scale-[0.98] transition-all touch-manipulation"
                       )}
-                    />
+                    >
+                      {grenadeTargetArmor}
+                    </button>
                     <button
                       type="button"
                       onClick={() => setGrenadeTargetArmor(Math.min(99, grenadeTargetArmor + 1))}
@@ -618,15 +625,6 @@ export function CombatResults({
                     </button>
                   </div>
                 </div>
-
-                {/* Quick-pick armor chips — one tap per target check */}
-                <ValueChips
-                  compact
-                  testId="grenade-armor-chips"
-                  values={[0, 1, 2, 3, 4, 5, 6, 7, 8]}
-                  selected={grenadeTargetArmor}
-                  onSelect={setGrenadeTargetArmor}
-                />
 
                 <button
                   data-testid="grenade-explode-button"
@@ -794,6 +792,26 @@ export function CombatResults({
         </div>
         );
       })()}
+
+      {/* Quick armor input for the arming panel (standard values modal) */}
+      {isGrenade && armorPopupOpen && (
+        <DiceInputPopup
+          title="БРОНЯ ЦЕЛИ"
+          field="armor"
+          color="emerald"
+          mode="number"
+          numericValue={grenadeTargetArmor}
+          min={0}
+          max={99}
+          quickValues={[0, 1, 2, 3, 4, 5, 6, 7, 8, 10]}
+          onSubmit={(value) => {
+            const n = parseInt(value, 10);
+            if (!isNaN(n)) setGrenadeTargetArmor(n);
+            setArmorPopupOpen(false);
+          }}
+          onClose={() => setArmorPopupOpen(false)}
+        />
+      )}
 
       {/* Action Buttons */}
       <div className="flex gap-2 md:gap-3 pt-4">

@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { CombatParameters, CombatActionType } from '@/lib/combat-types';
 import { NumberStepper } from '@/components/ui/NumberStepper';
-import { ValueChips } from '@/components/ui/ValueChips';
-import { loadHistory, getRecentForField, HISTORY_KEY } from '@/lib/dice-history';
+import { DiceInputPopup } from './DiceInputPopup';
+import { stepsToCm, cmToSteps } from '@/lib/distance-utils';
 import { FortificationSelector } from '@/components/controls/FortificationSelector';
 import type { ModifierSummary } from '@/lib/modifier-types';
 import { RulesVersionID } from '@/lib/types';
@@ -69,14 +69,32 @@ export function ParameterInputs({
     ? !!targetMemory.targetIsVehicle
     : !!parameters.targetIsVehicle;
 
-  // Recent confirmed distances (quick-pick chips) — saved on «ВЫСТРЕЛИТЬ» in useCombatFlow
-  const [recentDistances, setRecentDistances] = useState<Array<{ value: string; count: number }>>([]);
-  useEffect(() => {
-    const history = loadHistory(localStorage.getItem(HISTORY_KEY));
-    setRecentDistances(getRecentForField(history, 'distance'));
-  }, []);
-  const recentDistanceValues = recentDistances.map((e) => parseInt(e.value, 10)).filter((v) => !isNaN(v));
-  const maxDistanceCount = Math.max(1, ...recentDistances.map((e) => e.count));
+  // Modal input for standard values (armor / distance) — tap the value to open
+  type ActiveInput = 'distance' | 'armor';
+  const [activeInput, setActiveInput] = useState<ActiveInput | null>(null);
+
+  const armorLabel = actionType === 'melee' && unit?.type === 'machine'
+    ? ((parameters.targetType || 'infantry') === 'infantry' ? 'БР ЦЕЛИ' : 'БРОНЯ ЦЕЛИ')
+    : (effectiveTargetIsVehicle ? 'МАКС ЗОНЫ' : 'БРОНЯ ЦЕЛИ');
+
+  const handleDistanceSubmit = (value: string) => {
+    const n = parseInt(value, 10);
+    if (!isNaN(n)) {
+      const steps = distanceInputUnit === 'cm' ? cmToSteps(n, stepToCmFactor) : n;
+      onChange({ distance: steps });
+      onMemoryUpdate?.({ distance: steps });
+    }
+    setActiveInput(null);
+  };
+
+  const handleArmorSubmit = (value: string) => {
+    const n = parseInt(value, 10);
+    if (!isNaN(n)) {
+      onChange({ targetArmor: n });
+      onMemoryUpdate?.({ targetArmor: n });
+    }
+    setActiveInput(null);
+  };
 
   // Get unit stats for preview — combatantData takes priority (calculator mode)
   const unitStats = combatantData
@@ -415,39 +433,19 @@ export function ParameterInputs({
         )}
 
         <div className="grid grid-cols-1 gap-2 md:gap-3">
-          {/* Distance Input with Converter */}
+          {/* Distance Input with Converter — tap the value for the quick-input modal */}
           {(actionType === 'shot' || actionType === 'grenade') && (
-            <>
-              <DistanceConverter
-                steps={effectiveDistance}
-                onChange={(steps) => {
-                  onChange({ distance: steps });
-                  onMemoryUpdate?.({ distance: steps });
-                }}
-                rulesVersion={rulesVersion}
-                stepToCmFactor={stepToCmFactor}
-                defaultMode={distanceInputUnit}
-              />
-              {/* Recent confirmed distances — one tap instead of a stepper sweep */}
-              {recentDistanceValues.length > 0 && (
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-[9px] font-mono uppercase tracking-widest text-slate-600">
-                    Недавние
-                  </span>
-                  <ValueChips
-                    compact
-                    testId="distance-recent-chips"
-                    values={recentDistanceValues}
-                    selected={effectiveDistance}
-                    freq={recentDistances.map((e) => e.count / maxDistanceCount)}
-                    onSelect={(steps) => {
-                      onChange({ distance: steps });
-                      onMemoryUpdate?.({ distance: steps });
-                    }}
-                  />
-                </div>
-              )}
-            </>
+            <DistanceConverter
+              steps={effectiveDistance}
+              onChange={(steps) => {
+                onChange({ distance: steps });
+                onMemoryUpdate?.({ distance: steps });
+              }}
+              rulesVersion={rulesVersion}
+              stepToCmFactor={stepToCmFactor}
+              defaultMode={distanceInputUnit}
+              onInputActivate={() => setActiveInput('distance')}
+            />
           )}
 
           {/* Machine melee: defender type selector (#125, Таблица 6) */}
@@ -490,7 +488,7 @@ export function ParameterInputs({
             </div>
           )}
 
-          {/* Target Armor Input */}
+          {/* Target Armor Input — tap the value for the quick-input modal */}
           {(actionType === 'shot' || actionType === 'grenade' || actionType === 'melee') && (
             <div className="flex flex-col gap-1.5">
               <label className="text-[10px] md:text-xs opacity-50 uppercase font-bold">
@@ -510,16 +508,7 @@ export function ParameterInputs({
                 size="md"
                 className="flex-1"
                 label="Броня цели"
-              />
-              {/* Quick-pick armor chips — real armor range in the data is 0-8 */}
-              <ValueChips
-                testId="armor-quick-chips"
-                values={[0, 1, 2, 3, 4, 5, 6, 7, 8]}
-                selected={effectiveTargetArmor}
-                onSelect={(value) => {
-                  onChange({ targetArmor: value });
-                  onMemoryUpdate?.({ targetArmor: value });
-                }}
+                onInputActivate={() => setActiveInput('armor')}
               />
               {effectiveTargetIsVehicle && rulesVersion === 'community_star_system' && actionType === 'shot' && (
                 <div className="text-[9px] md:text-[10px] font-mono text-cyan-400/70 leading-tight">
@@ -555,6 +544,40 @@ export function ParameterInputs({
             Укрытие: +{parameters.fortification === 'light' ? '1' : '2'} к {rulesVersion === 'community_star_system' ? 'дистанции' : 'броне'}
           </span>
         </div>
+      )}
+
+      {/* Quick-input modal for standard values — distance */}
+      {activeInput === 'distance' && (actionType === 'shot' || actionType === 'grenade') && (
+        <DiceInputPopup
+          title={distanceInputUnit === 'cm' ? 'ДИСТАНЦИЯ (СМ)' : 'ДИСТАНЦИЯ (ШАГИ)'}
+          field={distanceInputUnit === 'cm' ? 'distance_cm' : 'distance'}
+          color="blue"
+          mode="number"
+          numericValue={distanceInputUnit === 'cm' ? stepsToCm(effectiveDistance, stepToCmFactor) : effectiveDistance}
+          min={1}
+          max={distanceInputUnit === 'cm' ? 200 : 40}
+          quickValues={distanceInputUnit === 'cm'
+            ? [5, 10, 15, 20, 25, 30, 40, 50, 60, 80, 100, 120, 150, 200]
+            : [1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 15, 20, 30, 40]}
+          onSubmit={handleDistanceSubmit}
+          onClose={() => setActiveInput(null)}
+        />
+      )}
+
+      {/* Quick-input modal for standard values — armor */}
+      {activeInput === 'armor' && (
+        <DiceInputPopup
+          title={armorLabel}
+          field="armor"
+          color="orange"
+          mode="number"
+          numericValue={effectiveTargetArmor}
+          min={0}
+          max={99}
+          quickValues={[0, 1, 2, 3, 4, 5, 6, 7, 8, 10]}
+          onSubmit={handleArmorSubmit}
+          onClose={() => setActiveInput(null)}
+        />
       )}
     </div>
   );

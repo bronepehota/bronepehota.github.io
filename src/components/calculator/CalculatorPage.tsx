@@ -11,7 +11,7 @@ import { CombatResults } from '@/components/combat/CombatResults';
 import { getStepToCmFactor } from '@/components/toggles/StepToCmFactorToggle';
 import { RulesSelector } from './RulesSelector';
 import { ModifiersSelector } from './ModifiersSelector';
-import { DiceInputPopup } from './DiceInputPopup';
+import { DiceInputPopup } from '@/components/combat/DiceInputPopup';
 import type { CombatActionType } from '@/lib/combat-types';
 
 const ACTION_TABS: Array<{ type: CombatActionType; label: string; shortLabel: string; icon: typeof Target }> = [

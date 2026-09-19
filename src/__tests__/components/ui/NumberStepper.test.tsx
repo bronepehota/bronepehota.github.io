@@ -84,4 +84,21 @@ describe('NumberStepper', () => {
     expect(onChange).toHaveBeenCalledTimes(1);
     expect(onChange).toHaveBeenCalledWith(6);
   });
+
+  it('onInputActivate replaces the input with a tappable value button', () => {
+    const onInputActivate = jest.fn();
+    render(<NumberStepper value={7} onChange={jest.fn()} label="Броня цели" onInputActivate={onInputActivate} />);
+
+    // Same aria-label e2e relies on, but a button instead of a number input
+    const valueButton = screen.getByLabelText('Броня цели input');
+    expect(valueButton.tagName).toBe('BUTTON');
+    expect(valueButton).toHaveTextContent('7');
+    expect(screen.queryByRole('spinbutton')).not.toBeInTheDocument();
+
+    fireEvent.click(valueButton);
+    expect(onInputActivate).toHaveBeenCalledTimes(1);
+
+    // Steppers keep working
+    fireEvent.click(screen.getByRole('button', { name: 'Increase Броня цели' }));
+  });
 });

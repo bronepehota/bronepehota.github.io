@@ -21,6 +21,8 @@ export interface DistanceConverterProps {
   stepToCmFactor?: number;
   /** Default mode (respects global distanceInputUnit setting) */
   defaultMode?: 'steps' | 'cm';
+  /** When set, the value becomes a tappable button (modal input) instead of a number input */
+  onInputActivate?: () => void;
 }
 
 type DistanceMode = 'steps' | 'cm';
@@ -44,6 +46,7 @@ export function DistanceConverter({
   disabled = false,
   stepToCmFactor = 5,
   defaultMode = 'steps',
+  onInputActivate,
 }: DistanceConverterProps) {
   const [mode, setMode] = useState<DistanceMode>(defaultMode);
   const [cmValue, setCmValue] = useState<number>(stepsToCm(steps, stepToCmFactor));
@@ -95,6 +98,7 @@ export function DistanceConverter({
           disabled={disabled}
           className="flex-1"
           label="Дистанция"
+          onInputActivate={onInputActivate}
         />
 
         {/* Secondary value hint */}

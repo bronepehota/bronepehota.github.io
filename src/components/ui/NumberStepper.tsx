@@ -14,6 +14,8 @@ interface NumberStepperProps {
   className?: string;
   size?: 'sm' | 'md' | 'lg';
   disabled?: boolean;
+  /** When set, the value becomes a tappable button (modal input) instead of a number input */
+  onInputActivate?: () => void;
 }
 
 // Hold-to-repeat: a short tap is ±1; holding the button sweeps the range
@@ -30,6 +32,7 @@ export function NumberStepper({
   className,
   size = 'md',
   disabled = false,
+  onInputActivate,
 }: NumberStepperProps) {
   const [inputValue, setInputValue] = useState(value.toString());
   const [isFocused, setIsFocused] = useState(false);
@@ -178,30 +181,49 @@ export function NumberStepper({
           <Minus className={iconSizeClasses[size]} />
         </button>
 
-        <input
-          ref={inputRef}
-          type="number"
-          value={isFocused ? inputValue : value}
-          onChange={handleInputChange}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          disabled={disabled}
-          min={min}
-          max={max}
-          step={step}
-          className={cn(
-            inputSizeClasses[size],
-            'bg-slate-800 border-2 border-slate-600 rounded-lg',
-            'flex items-center justify-center font-mono font-bold text-white',
-            'text-center focus:outline-none focus:border-blue-500',
-            'disabled:opacity-50 disabled:cursor-not-allowed',
-            // Remove spinner buttons
-            '[&_::-webkit-inner-spin-button]:m-0 [&_::-webkit-inner-spin-button]:appearance-none',
-            '[&_::-webkit-outer-spin-button]:m-0 [&_::-webkit-outer-spin-button]:appearance-none',
-            '-moz-appearance-none appearance-none'
-          )}
-          aria-label={`${label || 'value'} input`}
-        />
+        {onInputActivate ? (
+          <button
+            type="button"
+            onClick={onInputActivate}
+            disabled={disabled}
+            className={cn(
+              inputSizeClasses[size],
+              'bg-slate-800 border-2 border-slate-600 rounded-lg',
+              'flex items-center justify-center font-mono font-bold text-white',
+              'text-center active:scale-95 transition-all touch-manipulation',
+              'hover:border-slate-500',
+              'disabled:opacity-50 disabled:cursor-not-allowed'
+            )}
+            aria-label={`${label || 'value'} input`}
+          >
+            {value}
+          </button>
+        ) : (
+          <input
+            ref={inputRef}
+            type="number"
+            value={isFocused ? inputValue : value}
+            onChange={handleInputChange}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            disabled={disabled}
+            min={min}
+            max={max}
+            step={step}
+            className={cn(
+              inputSizeClasses[size],
+              'bg-slate-800 border-2 border-slate-600 rounded-lg',
+              'flex items-center justify-center font-mono font-bold text-white',
+              'text-center focus:outline-none focus:border-blue-500',
+              'disabled:opacity-50 disabled:cursor-not-allowed',
+              // Remove spinner buttons
+              '[&_::-webkit-inner-spin-button]:m-0 [&_::-webkit-inner-spin-button]:appearance-none',
+              '[&_::-webkit-outer-spin-button]:m-0 [&_::-webkit-outer-spin-button]:appearance-none',
+              '-moz-appearance-none appearance-none'
+            )}
+            aria-label={`${label || 'value'} input`}
+          />
+        )}
 
         <button
           type="button"

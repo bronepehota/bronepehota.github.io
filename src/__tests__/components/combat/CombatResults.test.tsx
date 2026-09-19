@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CombatResults } from '@/components/combat/CombatResults';
 import { CombatResult, CombatParameters } from '@/lib/combat-types';
@@ -419,7 +419,7 @@ describe('CombatResults - Grenade Display', () => {
       expect(onGrenadeCheckTarget).toHaveBeenCalledWith(4);
     });
 
-    it('quick-pick chips set the arming armor in one tap', async () => {
+    it('quick-input modal sets the arming armor in one tap', async () => {
       const onGrenadeCheckTarget = jest.fn();
       render(
         <CombatResults
@@ -428,8 +428,10 @@ describe('CombatResults - Grenade Display', () => {
         />
       );
 
-      const chips = screen.getByTestId('grenade-armor-chips');
-      await userEvent.click(within(chips).getByText('6'));
+      // Tap the armor value → modal → standard value 6 → confirm
+      await userEvent.click(screen.getByTestId('grenade-armor-input'));
+      await userEvent.click(screen.getByRole('button', { name: '6' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Подтвердить' }));
       await userEvent.click(screen.getByTestId('grenade-explode-button'));
 
       expect(onGrenadeCheckTarget).toHaveBeenCalledWith(6);
@@ -596,6 +598,32 @@ describe('CombatResults - Grenade Display', () => {
       const banner = screen.getByTestId('shot-verdict-banner');
       expect(screen.getByText('ПРОМАХ')).toBeInTheDocument();
       expect(banner).toHaveClass('border-red-500/70');
+    });
+
+    it('summarizes hit with damage: emerald banner + «−N УРОНА» line', () => {
+      render(
+        <CombatResults {...defaultProps} result={mockShotResult} parameters={shotParameters} />
+      );
+
+      const banner = screen.getByTestId('shot-verdict-banner');
+      expect(banner).toHaveClass('border-emerald-500/70');
+      expect(screen.getByText('−1 УРОНА')).toBeInTheDocument();
+    });
+
+    it('summarizes «попал, но броню не пробил» as its own amber outcome', () => {
+      const noPenetration: CombatResult = {
+        ...mockShotResult,
+        damageResult: { damage: 0, rolls: [2] },
+      };
+
+      render(
+        <CombatResults {...defaultProps} result={noPenetration} parameters={shotParameters} />
+      );
+
+      const banner = screen.getByTestId('shot-verdict-banner');
+      expect(banner).toHaveClass('border-amber-500/70');
+      expect(screen.getByText('ПОПАДАНИЕ')).toBeInTheDocument();
+      expect(screen.getByText('БРОНЯ НЕ ПРОБИТА')).toBeInTheDocument();
     });
 
     it('shows the banner in multi-roll mode (community rules)', () => {

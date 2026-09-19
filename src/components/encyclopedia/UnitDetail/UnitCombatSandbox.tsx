@@ -9,7 +9,7 @@ import { useStandaloneCombatFlow } from '@/hooks/useStandaloneCombatFlow';
 import { soldierToCombatantData } from '@/lib/combatant-data';
 import { ParameterInputs } from '@/components/combat/ParameterInputs';
 import { CombatResults } from '@/components/combat/CombatResults';
-import { DiceInputPopup } from '@/components/calculator/DiceInputPopup';
+import { DiceInputPopup } from '@/components/combat/DiceInputPopup';
 import { RulesSelector } from '@/components/calculator/RulesSelector';
 import { trackEvent } from '@/lib/analytics';
 import type { CombatActionType } from '@/lib/combat-types';
