@@ -1,9 +1,9 @@
 import { test, expect, type Page } from '@playwright/test';
-import { setupGameSessionWithSquad, waitForBattleDock, clearStorage } from './helpers/setup';
+import { setupGameSessionWithSquad, waitForBattleDock, clearStorage, swipeSoldierCard } from './helpers/setup';
 
 /**
  * #166 — panic triggers when a squad's losses cross 50% via the centralized UnitCard effect.
- * Covers the manual-kill path (the pilot-death path shares the same mechanism).
+ * Covers the swipe-kill path (the pilot-death path shares the same mechanism).
  * 6-soldier squad → threshold = floor(6/2) = 3. Seed 2 dead → killing 1 more crosses it.
  */
 test.describe('Panic on death (#166)', () => {
@@ -31,7 +31,7 @@ test.describe('Panic on death (#166)', () => {
     await waitForBattleDock(page);
     await enableCommunityPanic(page);
 
-    await page.locator('[data-testid="soldier-kill-button"][data-soldier-index="2"]').click({ force: true });
+    await swipeSoldierCard(page, 2, 'right');
     await expect(page.getByTestId('panic-modal-title')).toBeVisible({ timeout: 3000 });
   });
 
@@ -46,7 +46,7 @@ test.describe('Panic on death (#166)', () => {
     await waitForBattleDock(page);
     await enableCommunityPanic(page);
 
-    await page.locator('[data-testid="soldier-kill-button"][data-soldier-index="2"]').click({ force: true });
+    await swipeSoldierCard(page, 2, 'right');
     await expect(page.getByTestId('panic-modal-title')).toBeVisible({ timeout: 3000 });
   });
 
@@ -57,7 +57,8 @@ test.describe('Panic on death (#166)', () => {
     await waitForBattleDock(page);
     await enableCommunityPanic(page);
 
-    await page.locator('[data-testid="soldier-kill-button"][data-soldier-index="1"]').click({ force: true });
+    await swipeSoldierCard(page, 1, 'right');
     await expect(page.getByTestId('panic-modal-title')).toHaveCount(0); // 2 dead, still < 3
+    await expect(page.getByTestId('dock-soldiers-alive')).toContainText('4/6');
   });
 });

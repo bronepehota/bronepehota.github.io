@@ -184,8 +184,8 @@ export function BattleTutorial({ demoImageUrl, onFinish }: BattleTutorialProps) 
               </span>
             </div>
 
-            {/* Нажатия — те же действия кнопками (плейтест: «про нажатия
-                на выстрелы и кнопки готов/убит») */}
+            {/* Нажатия — только статы и ГОТОВ; убит — свайп (кнопки «череп»
+                больше нет: свайп вправо — единственный путь убить/оживить) */}
             <div className="flex items-center gap-3 rounded-sm border border-slate-700/50 bg-slate-800/40 p-3">
               <span className="flex h-10 w-10 items-center justify-center rounded-sm border border-slate-700/50 bg-slate-800/60 shrink-0">
                 <MousePointerClick className="h-4 w-4 text-slate-300" />
@@ -193,8 +193,9 @@ export function BattleTutorial({ demoImageUrl, onFinish }: BattleTutorialProps) 
               <p className="text-[12px] leading-relaxed text-slate-300">
                 <span className="font-mono font-bold text-slate-100">Статы бойца</span> — выстрел
                 и действия; чип <span className="font-mono font-bold text-slate-100">ГОТОВ</span> на
-                фото — завершить ход (долгое нажатие — отмена); кнопка{' '}
-                <span className="font-mono font-bold text-slate-100">черепа</span> — убит.
+                фото — завершить ход (долгое нажатие — отмена);{' '}
+                <span className="font-mono font-bold text-slate-100">убит — свайп вправо</span>{' '}
+                (повторный — оживляет).
               </p>
             </div>
 

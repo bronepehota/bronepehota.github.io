@@ -63,20 +63,15 @@ export function SquadPreview({
               onImageClick={() => {}}
             />
 
-            {/* Stats - reusing battle component */}
+            {/* Stats - reusing battle component (fills the card: the battle
+                card's right-edge action column was removed with the skull
+                button — kill is a right swipe there) */}
             <SoldierStats
               soldier={soldier}
               distanceInputUnit="steps"
               stepToCmFactor={5}
               className="flex-1"
             />
-
-            {/* Action button placeholder - mirrors SoldierActions position */}
-            <div className="flex flex-col items-center gap-0.5 shrink-0">
-              <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-emerald-900/20 border border-emerald-700/30 flex items-center justify-center">
-                <span className="text-[8px] md:text-[9px] font-mono font-bold text-emerald-400/40 uppercase tracking-wider">ДЕЙСТВИЕ</span>
-              </div>
-            </div>
           </div>
         ))}
       </div>

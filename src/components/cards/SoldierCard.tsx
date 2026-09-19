@@ -62,8 +62,7 @@ function SoldierCard({
 
   const soldier = squad.soldiers[soldierIndex];
   const isDead = unit.deadSoldiers?.includes(soldierIndex) || false;
-  const actions = unit.actionsUsed?.[soldierIndex] || { moved: false, shot: false, melee: false, done: false };
-  const isDone = actions.done;
+  const isDone = unit.actionsUsed?.[soldierIndex]?.done || false;
   const isInPanic = unit.panicState?.some(p => p.soldierIndex === soldierIndex) || false;
 
   // Determine stripe state
@@ -257,12 +256,13 @@ function SoldierCard({
       {/* Soldier image (left side) with the «Готов» button overlaid bottom-left.
           Hidden for pilots (nav button replaces actions) and panic (no DONE). */}
       {/* self-stretch + кап: фото растёт с высотой строки (взвод заполняет
-          экран, пол — прежний размер). Потолок высоты: на 375+ —
-          min(224px, 40vw); на узких (<375) — 34vw, иначе фото выдавливает
-          ячейку статов до 43px и длинные кубы (D12+2, 1D20+2) не влезают
-          даже в 13px (ревью PR #242). Кап на обёртке, не на фото: чип
-          «ГОТОВ» остаётся у низа фото. */}
-      <div className="relative shrink-0 self-stretch max-h-[min(176px,34vw)] min-[375px]:max-h-[min(224px,40vw)]">
+          экран, пол — прежний размер). Потолок min(224px, 40vw) единый на
+          всех вьюпортах: после удаления кнопки «череп» (правая колонка
+          ~44px ушла статам) ячейка на 320px выросла до ~59px и длинные
+          кубы (D12+2, 1D20+2) влезают без узкого 34vw-кэпа (замер
+          320/375/390 — переполнений нет). Кап на обёртке, не на фото:
+          чип «ГОТОВ» остаётся у низа фото. */}
+      <div className="relative shrink-0 self-stretch max-h-[min(224px,40vw)]">
         <SoldierImage
           imageUrl={getSoldierImage(soldierIndex)}
           soldierIndex={soldierIndex}
@@ -304,18 +304,11 @@ function SoldierCard({
         hideSpeed={hideSpeed}
       />
 
-      {/* Action buttons (right edge — kill only; «Готов» lives on the image) */}
+      {/* Правая колонка — только особые состояния (пилот / паника); убить —
+          свайп вправо, кнопки «череп» больше нет (решение владельца) */}
       <SoldierActions
         isDead={isDead}
-        isDone={isDone}
         isInPanic={isInPanic}
-        actions={actions}
-        onActionClick={() => onSoldierAction(soldierIndex)}
-        onToggleDead={handleToggleDead}
-        soldierIndex={soldierIndex}
-        onStartLongPress={startLongPress}
-        onEndLongPress={cancelLongPress}
-        isLongPressing={isLongPressing}
         isPilot={soldier.isPilot || false}
         onNavigateToMachine={soldier.pilotOfInstanceId ? () => onNavigateToUnit?.(soldier.pilotOfInstanceId!) : undefined}
       />
