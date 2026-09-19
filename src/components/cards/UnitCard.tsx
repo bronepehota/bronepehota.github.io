@@ -787,7 +787,11 @@ export default function UnitCard({
       {/* Image Overlay - Fixed to viewport */}
       {showImage && data.image && (
         <div
+          data-testid="machine-image-overlay"
           className="fixed inset-0 z-[100] bg-slate-950 flex flex-col p-2 animate-in fade-in duration-200"
+          // Нижний резерв под фиксированный док (плейтест: зумированное фото
+          // заходило под панель) — тот же приём, что у squad-scroll
+          style={{ paddingBottom: bottomInset }}
           onClick={() => setShowImage(false)}
         >
           <div className="flex justify-between items-center mb-1 px-2 shrink-0">
@@ -804,7 +808,11 @@ export default function UnitCard({
       {/* Soldier Image Overlay - Fixed to viewport */}
       {showSoldierImage !== null && (
         <div
+          data-testid="soldier-image-overlay"
           className="fixed inset-0 z-[100] bg-slate-950 flex flex-col p-2 animate-in fade-in duration-200"
+          // Нижний резерв под фиксированный док — тот же приём, что у
+          // squad-scroll: фото целиком видно над панелью
+          style={{ paddingBottom: bottomInset }}
           onClick={() => setShowSoldierImage(null)}
         >
           <div className="flex justify-between items-center mb-1 px-2 shrink-0">

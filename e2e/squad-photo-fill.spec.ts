@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { setupGameSessionWithSquad, clearStorage, waitForBattleDock } from './helpers/setup';
+import { setupGameSessionWithSquad, setupGameSessionWithMachine, clearStorage, waitForBattleDock } from './helpers/setup';
 
 /**
  * Squad photo fill (плейтест 2026-09-18: «фото мелкие, кто есть кто не
@@ -59,5 +59,43 @@ test.describe('Squad photo fill in battle view', () => {
       .evaluate((el) => el.getBoundingClientRect().height);
     expect(h).toBeGreaterThanOrEqual(84);
     expect(h).toBeLessThanOrEqual(100);
+  });
+
+  // Полноэкранный просмотр фото (плейтест 2026-09-19: «изображения занимают
+  // пространство, однако не учитывают нижнюю панель»). Оверлей должен
+  // резервировать снизу высоту дока (bottomInset), как squad-scroll.
+  test('fullscreen фото бойца не заходит под нижний док', async ({ page }) => {
+    await setupGameSessionWithSquad(page, {});
+    await waitForBattleDock(page);
+
+    // Тап в верхний левый угол фото: центр перекрыт хитом-зоной чипа «ГОТОВ»
+    // (after:-left-4 after:-top-6 расширяет кнопку за её видимый угол)
+    await page.getByTestId('soldier-photo').first().click({ position: { x: 8, y: 8 } });
+    const overlay = page.getByTestId('soldier-image-overlay');
+    await expect(overlay).toBeVisible();
+
+    const m = await page.evaluate(() => {
+      const dock = document.querySelector('[data-testid="unit-dock"]')!;
+      const box = document.querySelector('[data-testid="soldier-image-overlay"] div.flex-1')!;
+      return { boxBottom: box.getBoundingClientRect().bottom, dockTop: dock.getBoundingClientRect().top };
+    });
+    // Низ контейнера фото — над верхом дока ( paddingBottom = высота дока)
+    expect(m.boxBottom).toBeLessThanOrEqual(m.dockTop + 1.5);
+  });
+
+  test('fullscreen фото техники не заходит под нижний док', async ({ page }) => {
+    await setupGameSessionWithMachine(page);
+    await waitForBattleDock(page);
+
+    await page.getByRole('button', { name: /Показать фото/ }).click();
+    const overlay = page.getByTestId('machine-image-overlay');
+    await expect(overlay).toBeVisible();
+
+    const m = await page.evaluate(() => {
+      const dock = document.querySelector('[data-testid="unit-dock"]')!;
+      const box = document.querySelector('[data-testid="machine-image-overlay"] div.flex-1')!;
+      return { boxBottom: box.getBoundingClientRect().bottom, dockTop: dock.getBoundingClientRect().top };
+    });
+    expect(m.boxBottom).toBeLessThanOrEqual(m.dockTop + 1.5);
   });
 });
