@@ -109,4 +109,40 @@ describe('useCardSwipe', () => {
     firePointer(probe, 'pointerup', { pointerId: 1, clientX: 120, clientY: 50 });
     expect(probe.style.transform).toBe('translateX(0)');
   });
+
+  it('тач: перенос capture с ребёнка (lostpointercapture на потомке) не убивает жест', () => {
+    // На тач-устройствах цель касания держит ИМПЛИЦИТНЫЙ capture. Осевой
+    // лок забирает capture на карточку → у ребёнка гаснет имплицитный
+    // capture → его lostpointercapture React доставляет на карточку
+    // (capture-фаза). Этот паразитный сброс ломал свайп по статам/фото
+    // на реальном телефоне (плейтест 2026-09-19).
+    const onLeft = jest.fn();
+    const onRight = jest.fn();
+    render(<Probe onLeft={onLeft} onRight={onRight} />);
+    const child = screen.getByTestId('child');
+    // палец коснулся ребёнка (жест принадлежит pointer 1)
+    firePointer(child, 'pointerdown', { pointerId: 1, clientX: 200, clientY: 50 });
+    // осевой лок: setPointerCapture на карточку → потеря имплицитного capture ребёнком
+    firePointer(child, 'pointermove', { pointerId: 1, clientX: 150, clientY: 50 });
+    firePointer(child, 'lostpointercapture', { pointerId: 1 });
+    // жест продолжается и доходит до порога
+    firePointer(child, 'pointermove', { pointerId: 1, clientX: 100, clientY: 50 });
+    firePointer(child, 'pointerup', { pointerId: 1, clientX: 100, clientY: 50 });
+    expect(onLeft).toHaveBeenCalledTimes(1);
+    expect(onRight).not.toHaveBeenCalled();
+  });
+
+  it('тач: потеря capture самим корнем жест сбрасывает (страховка работает)', () => {
+    const onLeft = jest.fn();
+    render(<Probe onLeft={onLeft} onRight={jest.fn()} />);
+    const probe = screen.getByTestId('probe');
+    firePointer(probe, 'pointerdown', { pointerId: 1, clientX: 200, clientY: 50 });
+    firePointer(probe, 'pointermove', { pointerId: 1, clientX: 150, clientY: 50 });
+    // система сорвала capture у самой карточки — жест сбрасывается,
+    // последующие move/up без нового down ничего не делают
+    firePointer(probe, 'lostpointercapture', { pointerId: 1 });
+    firePointer(probe, 'pointermove', { pointerId: 1, clientX: 100, clientY: 50 });
+    firePointer(probe, 'pointerup', { pointerId: 1, clientX: 100, clientY: 50 });
+    expect(onLeft).not.toHaveBeenCalled();
+  });
 });

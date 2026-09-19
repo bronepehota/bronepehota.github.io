@@ -55,3 +55,87 @@ test.describe('Soldier card swipes', () => {
       .toHaveAttribute('aria-pressed', 'false');
   });
 });
+
+/**
+ * Тач-репродукция (плейтест на реальном телефоне: «свайп не работает —
+ * кнопки статов перекрывают свайп»). Мышь Playwright не проходит через
+ * браузерный жестовый конвейер — тач эмулируем через CDP
+ * Input.dispatchTouchEvent: настоящие pointer-события с pointerType "touch"
+ * + имплицитный pointer capture цели касания (именно на нём ломался жест).
+ */
+test.describe('Soldier card swipes — touch (CDP)', () => {
+  test.use({ hasTouch: true, viewport: { width: 375, height: 667 } });
+
+  test.beforeEach(async ({ page }) => {
+    await clearStorage(page);
+    await setupGameSessionWithSquad(page, { unitOverrides: { instanceId: 'swipe-unit-1' } });
+  });
+
+  /**
+   * Тач-свайп, стартующий по сетке статов (та зона, на которую жалуется
+   * владелец): touchStart → touchMove ×N → touchEnd через CDP.
+   */
+  async function touchSwipeOnStats(page: Page, index: number, dir: 'left' | 'right') {
+    const card = page.getByTestId('soldier-card').nth(index);
+    const stats = card.getByRole('button', { name: 'Выберите действие бойца' });
+    const box = await stats.boundingBox();
+    expect(box).toBeTruthy();
+    const startX = box!.x + box!.width * 0.5;
+    const y = box!.y + box!.height * 0.5;
+    const session = await page.context().newCDPSession(page);
+    await session.send('Input.dispatchTouchEvent', {
+      type: 'touchStart',
+      touchPoints: [{ x: startX, y, id: 1 }],
+    });
+    await page.waitForTimeout(30);
+    const total = dir === 'left' ? -120 : 120;
+    for (let i = 1; i <= 10; i++) {
+      await session.send('Input.dispatchTouchEvent', {
+        type: 'touchMove',
+        touchPoints: [{ x: startX + (total * i) / 10, y, id: 1 }],
+      });
+      await page.waitForTimeout(16);
+    }
+    await page.waitForTimeout(30);
+    await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    await page.waitForTimeout(60);
+  }
+
+  /** Тап по бейджу стата без движения (touchStart → touchEnd, без touchMove).
+   *  Цель — конкретный бейдж, не центр сетки: при скрытых броне/скорости
+   *  в центре сетки лежит панель эффектов, открывающая свою модалку. */
+  async function touchTapOnStats(page: Page, index: number) {
+    const badge = page.getByTestId('soldier-card').nth(index).getByTestId('stat-badge-melee');
+    const box = await badge.boundingBox();
+    expect(box).toBeTruthy();
+    const session = await page.context().newCDPSession(page);
+    await session.send('Input.dispatchTouchEvent', {
+      type: 'touchStart',
+      touchPoints: [{ x: box!.x + box!.width * 0.5, y: box!.y + box!.height * 0.5, id: 1 }],
+    });
+    await page.waitForTimeout(60);
+    await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    await page.waitForTimeout(60);
+  }
+
+  test('свайп влево по статам (тач) — боец готов, модалка боя не открылась', async ({ page }) => {
+    await touchSwipeOnStats(page, 0, 'left');
+    await expect(page.getByTestId('soldier-done-button').nth(0))
+      .toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByTestId('soldier-kill-button').nth(0))
+      .toHaveAttribute('aria-pressed', 'false');
+    // Хвостовой клик после жеста гасится — модалку боя он не открывает
+    await expect(page.getByTestId('bottom-sheet-combat-modal')).not.toBeVisible();
+  });
+
+  test('свайп вправо по статам (тач) — боец убит', async ({ page }) => {
+    await touchSwipeOnStats(page, 1, 'right');
+    await expect(page.getByTestId('soldier-kill-button').nth(1))
+      .toHaveAttribute('aria-pressed', 'true');
+  });
+
+  test('тап по статам (тач) по-прежнему открывает модалку боя', async ({ page }) => {
+    await touchTapOnStats(page, 0);
+    await expect(page.getByTestId('bottom-sheet-combat-modal')).toBeVisible();
+  });
+});
