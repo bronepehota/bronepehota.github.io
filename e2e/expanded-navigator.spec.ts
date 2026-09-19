@@ -158,4 +158,62 @@ test.describe('Expanded Navigator', () => {
     await page.getByTestId('expanded-unit-nav-active-unit').click();
     await expect(expandedNav).not.toBeVisible();
   });
+
+  // Плейтест 2026-09-19: «мало помещается — давай в два ряда, можно
+  // поменьше изображение». От 5 живых юнитов — сетка 2 колонки плитками;
+  // армия из 6 помещается без скролла. Мобильный вьюпорт: ширина плитки
+  // ~177px, ассерты геометрии привязаны к нему.
+  test.describe('mobile grid', () => {
+    test.use({ viewport: { width: 375, height: 667 } });
+
+    test('big army (6 alive): two-column tile grid, no scrolling', async ({ page }) => {
+    await page.addInitScript(() => {
+      const sq = (id: string, num: number) => ({
+        instanceId: id, type: 'squad', instanceNumber: num,
+        data: {
+          id: 'polaris_lineynaya_klon_pehota', name: `Отряд ${num}`, shortName: `О${num}`,
+          faction: 'polaris', cost: 50,
+          image: '/images/squads/polaris/lineynaya_klon_pehota/1.png',
+          soldiers: Array.from({ length: 3 }, (_, i) => ({ num: i + 1, rank: 2, speed: 5, range: 'D6', power: '2D6', melee: 3, props: [], armor: 2, image: '' })),
+        },
+        currentSoldiers: [0, 1, 2], deadSoldiers: [],
+        actionsUsed: [{ moved: false, shot: false, melee: false, done: false }, { moved: false, shot: false, melee: false, done: false }, { moved: false, shot: false, melee: false, done: false }],
+      });
+      localStorage.setItem('bronepehota_army', JSON.stringify({
+        name: 'Big Army', faction: 'polaris', sourceId: 'star_system', totalCost: 300,
+        currentStep: 'battle', isInBattle: true, currentTurn: 1,
+        units: [1, 2, 3, 4, 5, 6].map(n => sq(`nav-grid-${n}`, n)),
+      }));
+      localStorage.setItem('bronepehota_view', 'game');
+      localStorage.setItem('bronepehota_display_mode', 'detailed');
+    });
+    await page.goto('/app');
+    await expect(page.getByTestId('game-session').first()).toBeVisible({ timeout: 10000 });
+
+    await page.getByTestId('dock-open-navigator').click();
+    const nav = page.getByTestId('expanded-navigator');
+    await expect(nav).toBeVisible();
+
+    // Плитки идут двумя колонками: у первой пары одинаковый Y, разные X
+    const boxes = await page.evaluate(() =>
+      Array.from(document.querySelectorAll('[data-testid^="expanded-unit-"]')).map(t => {
+        const r = t.getBoundingClientRect();
+        return { x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width) };
+      })
+    );
+    expect(boxes).toHaveLength(6);
+    expect(boxes[0].y).toBe(boxes[1].y);       // один ряд
+    expect(boxes[0].x).toBeLessThan(boxes[1].x); // две колонки
+    expect(boxes[0].w).toBeLessThan(200);      // плитка, не полноширинная строка
+
+    // Шесть юнитов — без внутреннего скролла
+    const fits = await nav.evaluate(el => el.scrollHeight <= el.clientHeight + 1);
+    expect(fits).toBe(true);
+
+      // Клик по плитке закрывает навигатор и выбирает юнит
+      await page.getByTestId('expanded-unit-nav-grid-4').click();
+      await expect(nav).not.toBeVisible();
+      await expect(page.getByTestId('dock-unit-name')).toHaveText(/Отряд 4/);
+    });
+  });
 });
