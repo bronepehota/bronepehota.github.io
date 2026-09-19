@@ -955,15 +955,17 @@ export default function GameSession({
                   {focusedUnit.data.name}
                 </span>
 
-                {/* Alive soldiers aggregate — squads only */}
+                {/* Alive soldiers aggregate + граната взвода (плейтест: граната
+                    рядом с N/M) — squads only */}
                 {focusedUnit.type === 'squad' && (() => {
                   const squadData = focusedUnit.data as Squad;
                   const alive = getAliveSoldiersCount(focusedUnit);
+                  const grenadesUsed = focusedUnit.grenadesUsed;
                   return (
                     <span
                       data-testid="dock-soldiers-alive"
-                      className="shrink-0 flex items-center gap-1 px-1.5 min-h-[24px] rounded-sm bg-slate-800/60 border border-slate-700/40"
-                      title={`Живые бойцы: ${alive} из ${squadData.soldiers.length}`}
+                      className="shrink-0 flex items-center gap-1.5 px-1.5 min-h-[24px] rounded-sm bg-slate-800/60 border border-slate-700/40"
+                      title={`Живые бойцы: ${alive} из ${squadData.soldiers.length}. Гранаты: ${grenadesUsed ? 'использованы' : 'есть'}.`}
                     >
                       <Users className="w-3.5 h-3.5 text-emerald-400" />
                       <span className={cn(
@@ -972,6 +974,11 @@ export default function GameSession({
                       )}>
                         {alive}/{squadData.soldiers.length}
                       </span>
+                      <span className="w-px h-3.5 bg-slate-700/50" aria-hidden="true" />
+                      <Bomb
+                        data-testid="dock-grenade"
+                        className={cn("w-3.5 h-3.5", grenadesUsed ? "text-slate-500" : "text-amber-400")}
+                      />
                     </span>
                   );
                 })()}
@@ -1040,22 +1047,6 @@ export default function GameSession({
                         </span>
                       )}
                     </div>
-                  );
-                })()}
-
-                {/* Grenade indicator - only for squads */}
-                {focusedUnit.type === 'squad' && (() => {
-                  const grenadesUsed = focusedUnit.grenadesUsed;
-                  return (
-                    <span className={cn(
-                      "flex items-center justify-center w-7 h-7 rounded-sm shrink-0",
-                      grenadesUsed ? "bg-slate-800" : "bg-amber-950/50"
-                    )}>
-                      <Bomb className={cn(
-                        "w-4 h-4",
-                        grenadesUsed ? "text-slate-500" : "text-amber-400"
-                      )} />
-                    </span>
                   );
                 })()}
 
