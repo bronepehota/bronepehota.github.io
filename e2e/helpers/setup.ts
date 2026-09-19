@@ -305,6 +305,23 @@ export async function waitForBattleDock(page: Page) {
 /** @deprecated strip removed — alias of waitForBattleDock */
 export const expandFirstUnit = waitForBattleDock;
 
+/** Мыш-свайп по карточке бойца №index (влево done / вправо dead-toggle —
+ *  свайп вправо единственный путь убить/оживить, кнопки «череп» нет).
+ *  16 мелких шагов на 120px: под нагрузкой фулл-рана события крупными
+ *  шагами слипались и жест не дотягивал до порога 56px (useCardSwipe). */
+export async function swipeSoldierCard(page: Page, index: number, dir: 'left' | 'right') {
+  const card = page.getByTestId('soldier-card').nth(index);
+  await card.scrollIntoViewIfNeeded();
+  const box = await card.boundingBox();
+  expect(box).toBeTruthy();
+  const startX = box!.x + box!.width / 2;
+  const y = box!.y + box!.height / 2;
+  await page.mouse.move(startX, y);
+  await page.mouse.down();
+  await page.mouse.move(startX + (dir === 'left' ? -120 : 120), y, { steps: 16 });
+  await page.mouse.up();
+}
+
 /** Open the expanded unit navigator via the dock СПИСОК button. */
 export async function openNavigator(page: Page) {
   await page.getByTestId('dock-open-navigator').click();

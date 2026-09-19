@@ -62,8 +62,7 @@ function SoldierCard({
 
   const soldier = squad.soldiers[soldierIndex];
   const isDead = unit.deadSoldiers?.includes(soldierIndex) || false;
-  const actions = unit.actionsUsed?.[soldierIndex] || { moved: false, shot: false, melee: false, done: false };
-  const isDone = actions.done;
+  const isDone = unit.actionsUsed?.[soldierIndex]?.done || false;
   const isInPanic = unit.panicState?.some(p => p.soldierIndex === soldierIndex) || false;
 
   // Determine stripe state
@@ -183,14 +182,21 @@ function SoldierCard({
   });
 
   // Compute modifier counts for the modifier indicator
-  const { buffCount, debuffCount, soldierModifiers, availableBuffCount, statBonuses } = useMemo(() => {
+  const { buffCount, debuffCount, soldierModifiers, staticAbilities, availableBuffCount, statBonuses } = useMemo(() => {
     // Build a minimal army-like structure from allUnits for buff collection
     const armyLike: Army = { name: '', totalCost: 0, units: _allUnits, currentTurn };
     // Count buffs across ALL phases (not just shot)
     const shotBuffs = collectBuffsForUnit(unit, armyLike, 'shot');
     const meleeBuffs = collectBuffsForUnit(unit, armyLike, 'melee');
     const alwaysBuffs = collectBuffsForUnit(unit, armyLike, 'always');
-    const allBuffIds = new Set([...shotBuffs, ...meleeBuffs, ...alwaysBuffs].map(b => b.id));
+    // Спец-свойства (Пр4, Рм — target 'custom') в счётчик баффов кнопки не
+    // идут: это способности, они показываются отдельным чипом на кнопке
+    // (плейтест: «на кнопке 1 бафов — хочется Пр4»)
+    const allBuffIds = new Set(
+      [...shotBuffs, ...meleeBuffs, ...alwaysBuffs]
+        .filter(b => b.target !== 'custom')
+        .map(b => b.id)
+    );
     // Filter debuffs by expiry (includes unit-level debuffs + per-soldier debuffs from modal)
     const unitDebuffs = (unit.activeDebuffs || []).filter(d =>
       isModifierActive(d.appliedAtTurn, d.duration, currentTurn)
@@ -203,6 +209,18 @@ function SoldierCard({
     const liveSquad = sourceData?.squads.find(s => s.id === squad.id);
     const available = (liveSquad?.buffs || squad.buffs || [])
       .filter((b: any) => b.applyTo?.includes('soldier')).length;
+
+    // Классические спец-свойства взвода (Пр4, Рм — каталог standard-modifiers):
+    // показываем на кнопке модификаторов. Разовые скрываем после траты —
+    // ЛЮБОЙ из двух путей: взводный buffsUsed ИЛИ по-бойцовый
+    // soldierAbilitiesUsed «<id>_<i>» (модал «Способности»). Иначе у бойца,
+    // использовавшего Пр4, иконка дублировалась (статическая + применённая).
+    const buffsUsed = new Set(unit.buffsUsed || []);
+    const abilitiesUsed = new Set(unit.soldierAbilitiesUsed || []);
+    const staticAbilities = (liveSquad?.buffs || squad.buffs || [])
+      .filter((b: any) => b.applyTo?.includes('soldier') && !(
+        b.oneTimeUse && (buffsUsed.has(b.id) || abilitiesUsed.has(`${b.id}_${soldierIndex}`))
+      ));
 
     // Compute stat bonuses for display (merge shot + melee + always phases)
     const shotSummary = resolveModifierSummary(unit, armyLike, 'shot', soldierIndex);
@@ -217,7 +235,7 @@ function SoldierCard({
       speedMultiplier: alwaysSummary.speedMultiplier !== 1 ? alwaysSummary.speedMultiplier : undefined,
     };
 
-    return { buffCount: allBuffIds.size, debuffCount: debuffs.length, soldierModifiers: soldierMods, availableBuffCount: available, statBonuses };
+    return { buffCount: allBuffIds.size, debuffCount: debuffs.length, soldierModifiers: soldierMods, staticAbilities, availableBuffCount: available, statBonuses };
   }, [unit, _allUnits, soldierIndex, squad.buffs, squad.id, sourceId, currentTurn]);
 
   return (
@@ -257,10 +275,13 @@ function SoldierCard({
       {/* Soldier image (left side) with the «Готов» button overlaid bottom-left.
           Hidden for pilots (nav button replaces actions) and panic (no DONE). */}
       {/* self-stretch + кап: фото растёт с высотой строки (взвод заполняет
-          экран, пол — прежний размер), но не выше min(224px, 60vw) — иначе
-          на узком экране аспект 3:4 выдавит статы. Кап на обёртке, не на
-          фото: чип «ГОТОВ» (absolute bottom-0) остаётся у низа фото. */}
-      <div className="relative shrink-0 self-stretch max-h-[min(224px,60vw)]">
+          экран, пол — прежний размер). Потолок min(224px, 40vw) единый на
+          всех вьюпортах: после удаления кнопки «череп» (правая колонка
+          ~44px ушла статам) ячейка на 320px выросла до ~59px и длинные
+          кубы (D12+2, 1D20+2) влезают без узкого 34vw-кэпа (замер
+          320/375/390 — переполнений нет). Кап на обёртке, не на фото:
+          чип «ГОТОВ» остаётся у низа фото. */}
+      <div className="relative shrink-0 self-stretch max-h-[min(224px,40vw)]">
         <SoldierImage
           imageUrl={getSoldierImage(soldierIndex)}
           soldierIndex={soldierIndex}
@@ -295,6 +316,7 @@ function SoldierCard({
         buffCount={buffCount}
         debuffCount={debuffCount}
         soldierModifiers={soldierModifiers}
+        staticAbilities={staticAbilities}
         availableBuffCount={availableBuffCount}
         onModifierClick={onSoldierModifierClick ? () => onSoldierModifierClick(unit.instanceId, soldierIndex, `#${soldier.num || soldierIndex + 1}`) : undefined}
         statBonuses={statBonuses}
@@ -302,18 +324,11 @@ function SoldierCard({
         hideSpeed={hideSpeed}
       />
 
-      {/* Action buttons (right edge — kill only; «Готов» lives on the image) */}
+      {/* Правая колонка — только особые состояния (пилот / паника); убить —
+          свайп вправо, кнопки «череп» больше нет (решение владельца) */}
       <SoldierActions
         isDead={isDead}
-        isDone={isDone}
         isInPanic={isInPanic}
-        actions={actions}
-        onActionClick={() => onSoldierAction(soldierIndex)}
-        onToggleDead={handleToggleDead}
-        soldierIndex={soldierIndex}
-        onStartLongPress={startLongPress}
-        onEndLongPress={cancelLongPress}
-        isLongPressing={isLongPressing}
         isPilot={soldier.isPilot || false}
         onNavigateToMachine={soldier.pilotOfInstanceId ? () => onNavigateToUnit?.(soldier.pilotOfInstanceId!) : undefined}
       />

@@ -71,6 +71,36 @@ describe('SquadView', () => {
     firePointer(el, 'pointerup', { pointerId: 1, clientX: 100, clientY: 50 });
   };
 
+  it('разовое спец-свойство скрывается у бойца, который его использовал', () => {
+    // Пр4 у взвода; боец 0 использовал (soldierAbilitiesUsed 'id_0') —
+    // у НЕГО чипа нет (осталась только применённая иконка модификатора),
+    // у бойца 1 — есть (плейтест: «два Пр4 у конкретного солдата»)
+    const squadWithProp = {
+      ...mockSquad,
+      soldiers: [
+        { rank: 2, speed: 4, range: 'D6', power: '1D6', melee: 0, armor: 2 },
+        { rank: 2, speed: 4, range: 'D6', power: '1D6', melee: 0, armor: 2 },
+      ],
+      buffs: [{
+        id: 'jump_boost_4', name: 'Пр4', description: 'Прыжковой ускоритель',
+        applyTo: ['soldier'], target: 'custom', value: 4, phase: 'always',
+        icon: 'ArrowUp', oneTimeUse: true,
+      }],
+    } as unknown as Squad;
+    const { container } = render(
+      <SquadView
+        {...defaultProps}
+        unit={{
+          ...mockUnit,
+          data: squadWithProp,
+          soldierAbilitiesUsed: ['jump_boost_4_0'],
+        } as ArmyUnit}
+      />
+    );
+    const indicators = Array.from(container.querySelectorAll('[aria-label^="Спец-свойства"]'));
+    expect(indicators).toHaveLength(1); // только боец 1
+  });
+
   it('свайп влево живому бойцу завершает ход', () => {
     const updateUnit = jest.fn();
     const { container } = render(<SquadView {...defaultProps} updateUnit={updateUnit} />);

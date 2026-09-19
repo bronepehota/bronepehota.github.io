@@ -65,9 +65,10 @@ export function SoldierDoneButton({
       onClick={handleClick}
       className={cn(
         // No overflow-hidden: it would clip the ::after tap zone.
-        // h-5 fixes the chip height — inline mono metrics otherwise inflate
-        // the line box (28px) beyond the visible text.
-        "relative h-5 px-1 rounded-tl-sm transition-all flex items-center gap-0.5 border font-mono text-[10px] font-bold",
+        // h-6 fixes the chip height — inline mono metrics otherwise inflate
+        // the line box beyond the visible text. 12px: статус читается
+        // с расстояния (телефон на столе), 10px был различим только вблизи.
+        "relative h-6 px-1.5 rounded-tl-sm transition-all flex items-center gap-0.5 border font-mono text-[12px] font-bold",
         // Убит — красный «УБИТ» полной яркости (плейтест: затемнённый
         // «ГОТОВ» на трупе не читался как статус)
         isDead

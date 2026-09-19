@@ -11,12 +11,13 @@ import { SoldierEffectsModal } from './modals/SoldierEffectsModal';
 import { getFactionColors } from '@/lib/faction-colors';
 import { trackEvent } from '@/lib/analytics';
 import UnitCard from './cards/UnitCard';
-import { History, X, Bomb, Heart, Shield, Footprints, CheckCircle2, MoreVertical, BookOpen, RotateCcw, MessageCircle, Target, Users, LayoutGrid, GraduationCap } from 'lucide-react';
+import { History, X, Bomb, Heart, Shield, Footprints, CheckCircle2, MoreVertical, BookOpen, RotateCcw, MessageCircle, Target, Users, LayoutGrid, GraduationCap, Power } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CombatLogEntry } from '@/lib/combat-types';
 import { useCombatTargetContext } from '@/contexts/CombatTargetContext';
 import InitiativeModal from './modals/InitiativeModal';
 import { ExpandedNavigator, BattleTutorial } from './GameSession/index';
+import { useWakeLock } from '@/hooks/useWakeLock';
 import { LOCAL_STORAGE_KEYS } from '@/lib/constants';
 import { checkSquadUniformStats, getAliveSoldiersCount, countUnitsByStatus } from '@/lib/unit-utils';
 import { deriveUnitStatus, UnitStatus } from '@/lib/unit-status';
@@ -70,10 +71,16 @@ export default function GameSession({
   } | null>(null);
   const [showDockMenu, setShowDockMenu] = useState(false);
 
-  // Close dock menu on outside click
+  // Close dock menu on outside click. Клик внутри меню (data-dock-menu-root —
+  // напр. тумблер «Не гаснуть») меню не закрывает: пункты, закрывающие меню,
+  // зовут setShowDockMenu(false) сами.
   useEffect(() => {
     if (!showDockMenu) return;
-    const handler = () => setShowDockMenu(false);
+    const handler = (e: MouseEvent) => {
+      const target = e.target as Element | null;
+      if (target?.closest?.('[data-dock-menu-root]')) return;
+      setShowDockMenu(false);
+    };
     document.addEventListener('click', handler);
     return () => document.removeEventListener('click', handler);
   }, [showDockMenu]);
@@ -585,6 +592,19 @@ export default function GameSession({
 
   const factionColors = getFactionColors(army.faction || 'polaris');
 
+  // «Не гаснуть» для игры за столом (плейтест: телефон лежит на столе,
+  // ход длятся минутами — лок между ходами мешает). Флаг персистится.
+  const [wakeLockEnabled, setWakeLockEnabled] = useState(false);
+  const wakeLock = useWakeLock(wakeLockEnabled);
+  useEffect(() => {
+    setWakeLockEnabled(localStorage.getItem(LOCAL_STORAGE_KEYS.WAKE_LOCK_ENABLED) === '1');
+  }, []);
+  const handleToggleWakeLock = () => {
+    const next = !wakeLockEnabled;
+    setWakeLockEnabled(next);
+    localStorage.setItem(LOCAL_STORAGE_KEYS.WAKE_LOCK_ENABLED, next ? '1' : '0');
+  };
+
   // «Боевой инструктаж» — однократно при первом заходе в бой со взводом
   // (интерактивные свайпы на демо-карточке + подсказка про СПИСОК)
   const [showBattleTutorial, setShowBattleTutorial] = useState(false);
@@ -681,7 +701,10 @@ export default function GameSession({
         const alwaysBuffs = collectBuffsForUnit(unit, army, 'always');
         const allStaticBuffs = [...shotBuffs, ...meleeBuffs, ...alwaysBuffs];
         const seenBuffIds = new Set<string>();
+        // Спец-свойства (Пр4, Рм — target 'custom') в «статические баффы»
+        // не идут: им место во вкладке «Свойства» (иначе дубль в модале)
         const uniqueStaticBuffs = allStaticBuffs.filter(b => {
+          if (b.target === 'custom') return false;
           if (seenBuffIds.has(b.id)) return false;
           seenBuffIds.add(b.id);
           return true;
@@ -947,7 +970,7 @@ export default function GameSession({
                 <span
                   data-testid="dock-unit-name"
                   className={cn(
-                    "min-w-0 flex-1 text-sm md:text-base font-mono font-bold uppercase tracking-wider truncate",
+                    "min-w-0 flex-1 text-base md:text-lg font-mono font-bold uppercase tracking-wider truncate",
                     factionColors.text
                   )}
                   title={focusedUnit.data.name}
@@ -967,9 +990,9 @@ export default function GameSession({
                       className="shrink-0 flex items-center gap-1.5 px-1.5 min-h-[24px] rounded-sm bg-slate-800/60 border border-slate-700/40"
                       title={`Живые бойцы: ${alive} из ${squadData.soldiers.length}. Гранаты: ${grenadesUsed ? 'использованы' : 'есть'}.`}
                     >
-                      <Users className="w-3.5 h-3.5 text-emerald-400" />
+                      <Users className="w-4 h-4 text-emerald-400" />
                       <span className={cn(
-                        "text-xs font-mono font-bold",
+                        "text-sm font-mono font-bold",
                         alive === 0 ? "text-slate-500" : "text-emerald-300"
                       )}>
                         {alive}/{squadData.soldiers.length}
@@ -1196,7 +1219,7 @@ export default function GameSession({
 
       {/* Dock Menu Dropdown - fixed position to escape dock overflow */}
       {showDockMenu && (
-        <div className="fixed right-2 z-[60] animate-in fade-in duration-150" style={{ bottom: `${dockHeight + 40}px` }}>
+        <div data-dock-menu-root className="fixed right-2 z-[60] animate-in fade-in duration-150" style={{ bottom: `${dockHeight + 40}px` }}>
           <div className="bg-slate-800 border border-slate-700 rounded-sm shadow-xl py-1 min-w-[150px]">
             <div className="px-3 py-1.5 border-b border-slate-700/50 flex items-center justify-between">
               <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-500">Тур</span>
@@ -1249,6 +1272,25 @@ export default function GameSession({
               <GraduationCap className="w-3.5 h-3.5 text-amber-400" />
               Инструктаж
             </button>
+            {wakeLock.supported && (
+              <button
+                data-testid="wake-lock-toggle"
+                onClick={(e) => { e.stopPropagation(); handleToggleWakeLock(); }}
+                aria-pressed={wakeLockEnabled}
+                title={wakeLockEnabled ? 'Экран не будет гаснуть во время боя' : 'Держать экран включённым во время боя'}
+                className={cn(
+                  'w-full px-3 py-2 text-left text-xs flex items-center gap-2 border-t border-slate-700/50',
+                  wakeLockEnabled ? 'text-emerald-300' : 'text-slate-300 hover:bg-slate-700'
+                )}
+              >
+                <Power className={cn('w-3.5 h-3.5', wakeLockEnabled ? 'text-emerald-400' : 'text-slate-400')} />
+                Не гаснуть
+                {/* Точка — от ФАКТА (wakeLock.active), не от намерения: при
+                    отказе API (Low Power Mode и пр.) лок не держится, и
+                    светить «активен» нельзя (ревью PR #242) */}
+                {wakeLock.active && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" aria-hidden="true" />}
+              </button>
+            )}
             {army.isInBattle && (
               <button
                 onClick={() => { onEndBattle?.(); setShowDockMenu(false); }}

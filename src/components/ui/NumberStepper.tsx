@@ -11,6 +11,10 @@ interface NumberStepperProps {
   max?: number;
   step?: number;
   label?: string;
+  /** Скрывает ВИДИМЫЙ label (aria-label'ы остаются), когда родительская
+   *  строка уже несёт свой заголовок — иначе двойные «Дистанция»/«Броня
+   *  цели» (плейтест после #241) */
+  showLabel?: boolean;
   className?: string;
   size?: 'sm' | 'md' | 'lg';
   disabled?: boolean;
@@ -29,6 +33,7 @@ export function NumberStepper({
   max = 99,
   step = 1,
   label,
+  showLabel = true,
   className,
   size = 'md',
   disabled = false,
@@ -164,7 +169,7 @@ export function NumberStepper({
 
   return (
     <div className={cn('flex items-center gap-2', className)}>
-      {label && (
+      {label && showLabel && (
         <label className="text-xs opacity-50 uppercase font-bold whitespace-nowrap min-w-fit">{label}</label>
       )}
       <div className="flex items-center gap-1">

@@ -111,7 +111,8 @@ describe('constants', () => {
       // Note: Runtime immutability would require Object.freeze()
       expect(typeof LOCAL_STORAGE_KEYS.ARMY).toBe('string');
       expect(LOCAL_STORAGE_KEYS.BATTLE_TUTORIAL_DONE).toBe('bronepehota_battle_tutorial_done');
-      expect(Object.keys(LOCAL_STORAGE_KEYS)).toHaveLength(17);
+      expect(LOCAL_STORAGE_KEYS.WAKE_LOCK_ENABLED).toBe('bronepehota_wake_lock_enabled');
+      expect(Object.keys(LOCAL_STORAGE_KEYS)).toHaveLength(18);
     });
   });
 

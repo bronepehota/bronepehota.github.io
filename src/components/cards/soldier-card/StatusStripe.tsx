@@ -16,7 +16,8 @@ const StatusStripe: React.FC<StatusStripeProps> = ({ state, className }) => {
     active: 'bg-transparent',
   };
 
-  const widthClass = state === 'active' ? 'w-1' : 'w-1.5';
+  // Широкая полоса: статус должен читаться с расстояния (телефон на столе)
+  const widthClass = state === 'active' ? 'w-1' : 'w-2';
 
   return (
     <div
