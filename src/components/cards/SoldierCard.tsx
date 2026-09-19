@@ -204,11 +204,16 @@ function SoldierCard({
       .filter((b: any) => b.applyTo?.includes('soldier')).length;
 
     // Классические спец-свойства взвода (Пр4, Рм — каталог standard-modifiers):
-    // показываем на кнопке модификаторов; разовые скрываем после траты
-    // (buffsUsed). Не путать с applied soldierModifiers.
+    // показываем на кнопке модификаторов. Разовые скрываем после траты —
+    // ЛЮБОЙ из двух путей: взводный buffsUsed ИЛИ по-бойцовый
+    // soldierAbilitiesUsed «<id>_<i>» (модал «Способности»). Иначе у бойца,
+    // использовавшего Пр4, иконка дублировалась (статическая + применённая).
     const buffsUsed = new Set(unit.buffsUsed || []);
+    const abilitiesUsed = new Set(unit.soldierAbilitiesUsed || []);
     const staticAbilities = (liveSquad?.buffs || squad.buffs || [])
-      .filter((b: any) => b.applyTo?.includes('soldier') && !(b.oneTimeUse && buffsUsed.has(b.id)));
+      .filter((b: any) => b.applyTo?.includes('soldier') && !(
+        b.oneTimeUse && (buffsUsed.has(b.id) || abilitiesUsed.has(`${b.id}_${soldierIndex}`))
+      ));
 
     // Compute stat bonuses for display (merge shot + melee + always phases)
     const shotSummary = resolveModifierSummary(unit, armyLike, 'shot', soldierIndex);

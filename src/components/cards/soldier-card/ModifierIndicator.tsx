@@ -31,15 +31,19 @@ export function ModifierIndicator({
 }: ModifierIndicatorProps) {
   const totalCount = buffCount + debuffCount;
 
-  // Отрисовка статических спец-свойств (Пр4, Рм) — иконки каталога
-  const renderStaticAbilities = () =>
+  // Отрисовка статических спец-свойств (Пр4, Рм) — иконка + НАЗВАНИЕ
+  // (плейтест: «показывать его название на кнопке»)
+  const renderStaticAbilities = (withName: boolean) =>
     staticAbilities.map(b => (
       <div
         key={`static-${b.id}`}
         title={`${b.name}: ${b.description}${b.oneTimeUse ? ' (раз за бой)' : ' (постоянная)'}`}
-        className="shrink-0"
+        className="flex items-center gap-0.5 shrink-0"
       >
         <ModifierIcon name={b.icon} size={14} className="text-emerald-300" />
+        {withName && (
+          <span className="text-[9px] font-mono font-bold leading-none text-emerald-300">{b.name}</span>
+        )}
       </div>
     ));
 
@@ -68,7 +72,7 @@ export function ModifierIndicator({
         )}
         aria-label={`${soldierModifiers.length} модификаторов на солдата`}
       >
-        {renderStaticAbilities()}
+        {renderStaticAbilities(false)}
         {soldierModifiers.map(mod => {
           const colorStyles = getEffectStyles(mod.id);
           return (
@@ -116,7 +120,7 @@ export function ModifierIndicator({
           )}
           aria-label={`Спец-свойства: ${staticAbilities.map(b => b.name).join(', ')}`}
         >
-          {renderStaticAbilities()}
+          {renderStaticAbilities(true)}
         </div>
       );
     }
