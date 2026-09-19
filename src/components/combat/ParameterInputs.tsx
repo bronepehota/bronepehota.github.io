@@ -5,6 +5,7 @@ import { CombatParameters, CombatActionType } from '@/lib/combat-types';
 import { NumberStepper } from '@/components/ui/NumberStepper';
 import { DiceInputPopup } from './DiceInputPopup';
 import { stepsToCm, cmToSteps } from '@/lib/distance-utils';
+import { getDistanceUnit, setDistanceUnit } from '@/components/toggles/DistanceUnitToggle';
 import { FortificationSelector } from '@/components/controls/FortificationSelector';
 import type { ModifierSummary } from '@/lib/modifier-types';
 import { RulesVersionID } from '@/lib/types';
@@ -51,7 +52,6 @@ export function ParameterInputs({
   targetMemory,
   onMemoryUpdate,
   isAimedShot,
-  distanceInputUnit = 'steps',
   stepToCmFactor = 5,
   modifierSummary,
   onDataNeeded,
@@ -73,6 +73,14 @@ export function ParameterInputs({
   type ActiveInput = 'distance' | 'armor';
   const [activeInput, setActiveInput] = useState<ActiveInput | null>(null);
 
+  // Distance unit — one shared persisted preference (settings toggle ↔ in-battle
+  // «шаги/см» switch); read from storage on mount, flips write through setDistanceUnit
+  const [distanceUnit, setDistanceUnitState] = useState<'steps' | 'cm'>(() => getDistanceUnit());
+  const handleDistanceUnitChange = (u: 'steps' | 'cm') => {
+    setDistanceUnitState(u);
+    setDistanceUnit(u); // localStorage + notify listeners (page state, settings)
+  };
+
   const armorLabel = actionType === 'melee' && unit?.type === 'machine'
     ? ((parameters.targetType || 'infantry') === 'infantry' ? 'БР ЦЕЛИ' : 'БРОНЯ ЦЕЛИ')
     : (effectiveTargetIsVehicle ? 'МАКС ЗОНЫ' : 'БРОНЯ ЦЕЛИ');
@@ -80,7 +88,7 @@ export function ParameterInputs({
   const handleDistanceSubmit = (value: string) => {
     const n = parseInt(value, 10);
     if (!isNaN(n)) {
-      const steps = distanceInputUnit === 'cm' ? cmToSteps(n, stepToCmFactor) : n;
+      const steps = distanceUnit === 'cm' ? cmToSteps(n, stepToCmFactor) : n;
       onChange({ distance: steps });
       onMemoryUpdate?.({ distance: steps });
     }
@@ -443,7 +451,8 @@ export function ParameterInputs({
               }}
               rulesVersion={rulesVersion}
               stepToCmFactor={stepToCmFactor}
-              defaultMode={distanceInputUnit}
+              defaultMode={distanceUnit}
+              onModeChange={handleDistanceUnitChange}
               onInputActivate={() => setActiveInput('distance')}
             />
           )}
@@ -549,14 +558,14 @@ export function ParameterInputs({
       {/* Quick-input modal for standard values — distance */}
       {activeInput === 'distance' && (actionType === 'shot' || actionType === 'grenade') && (
         <DiceInputPopup
-          title={distanceInputUnit === 'cm' ? 'ДИСТАНЦИЯ (СМ)' : 'ДИСТАНЦИЯ (ШАГИ)'}
-          field={distanceInputUnit === 'cm' ? 'distance_cm' : 'distance'}
+          title={distanceUnit === 'cm' ? 'ДИСТАНЦИЯ (СМ)' : 'ДИСТАНЦИЯ (ШАГИ)'}
+          field={distanceUnit === 'cm' ? 'distance_cm' : 'distance'}
           color="blue"
           mode="number"
-          numericValue={distanceInputUnit === 'cm' ? stepsToCm(effectiveDistance, stepToCmFactor) : effectiveDistance}
+          numericValue={distanceUnit === 'cm' ? stepsToCm(effectiveDistance, stepToCmFactor) : effectiveDistance}
           min={1}
-          max={distanceInputUnit === 'cm' ? 200 : 40}
-          quickValues={distanceInputUnit === 'cm'
+          max={distanceUnit === 'cm' ? 200 : 40}
+          quickValues={distanceUnit === 'cm'
             ? [5, 10, 15, 20, 25, 30, 40, 50, 60, 80, 100, 120, 150, 200]
             : [1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 15, 20, 30, 40]}
           onSubmit={handleDistanceSubmit}

@@ -173,3 +173,11 @@ export function getDistanceUnit(): 'steps' | 'cm' {
   const saved = localStorage.getItem(DISTANCE_UNIT_STORAGE_KEY);
   return saved === 'cm' ? 'cm' : 'steps';
 }
+
+// Write the distance unit and notify same-tab listeners (e.g. /app page state,
+// so the settings toggle and the in-battle «шаги/см» switch stay in sync live)
+export function setDistanceUnit(unit: 'steps' | 'cm') {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(DISTANCE_UNIT_STORAGE_KEY, unit);
+  window.dispatchEvent(new CustomEvent('bronepehota:distance-unit', { detail: unit }));
+}

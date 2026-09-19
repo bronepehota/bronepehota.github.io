@@ -150,6 +150,39 @@ test.describe('Standalone Calculator', () => {
     await expect(page.getByRole('heading', { name: 'ГРАНАТА' })).toBeVisible({ timeout: 5000 });
     await expect(page.getByText('БРОСИТЬ')).toBeVisible({ timeout: 5000 });
   });
+
+  // Переключатель «шаги/см» у поля Дистанция: пишется в общий ключ
+  // bronepehota_distance_input_unit и переживает перезагрузку.
+  test('переключатель шаги/см у дистанции — модал следует за ним и выбор запоминается', async ({ page }) => {
+    await page.getByTestId('calculator-tab-shot').click();
+
+    const sw = page.getByTestId('distance-unit-switch');
+    await expect(sw).toBeVisible();
+    await expect(sw.getByRole('button', { name: 'шаги' })).toHaveAttribute('aria-pressed', 'true');
+
+    // Переключаемся на сантиметры
+    await sw.getByRole('button', { name: 'см' }).click();
+    await expect(sw.getByRole('button', { name: 'см' })).toHaveAttribute('aria-pressed', 'true');
+
+    // Модал дистанции открывается в сантиметрах
+    await page.getByLabel('Дистанция input').click();
+    await expect(page.getByText('ДИСТАНЦИЯ (СМ)')).toBeVisible();
+    await page.getByRole('button', { name: 'Закрыть' }).click();
+    await page.waitForTimeout(300); // асинхронное закрытие попапа (150 мс анимация)
+
+    // Ключ записан
+    expect(await page.evaluate(() => localStorage.getItem('bronepehota_distance_input_unit'))).toBe('cm');
+
+    // Свежая страница в том же контексте (clearStorage-инит здесь не действует) —
+    // выбор помнится между сессиями, storage как источник истины
+    const page2 = await page.context().newPage();
+    await page2.goto('/calculator');
+    await page2.waitForLoadState('networkidle');
+    await page2.getByTestId('calculator-tab-shot').click();
+    const swAfter = page2.getByTestId('distance-unit-switch');
+    await expect(swAfter.getByRole('button', { name: 'см' })).toHaveAttribute('aria-pressed', 'true');
+    await page2.close();
+  });
 });
 
 // Мобильный вьюпорт: подписи табов видны и на телефоне (375px) — короткие
