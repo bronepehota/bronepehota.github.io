@@ -2,7 +2,7 @@
 
 import { Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { SoldierModifier } from '@/lib/modifier-types';
+import type { SoldierModifier, BuffDefinition } from '@/lib/modifier-types';
 import { ModifierIcon } from '@/components/editor/ModifierIcons';
 import { getEffectStyles } from '@/lib/effect-colors';
 
@@ -10,6 +10,8 @@ interface ExpandedEffectsPanelProps {
   buffCount: number;
   debuffCount: number;
   soldierModifiers?: SoldierModifier[];
+  /** Статические спец-свойства взвода (Пр4, Рм) — чипы (см. ModifierIndicator) */
+  staticAbilities?: BuffDefinition[];
   availableCount?: number;
   onClick?: () => void;
   disabled?: boolean;
@@ -19,11 +21,27 @@ export function ExpandedEffectsPanel({
   buffCount,
   debuffCount,
   soldierModifiers = [],
+  staticAbilities = [],
   availableCount,
   onClick,
   disabled,
 }: ExpandedEffectsPanelProps) {
   const totalCount = buffCount + debuffCount;
+
+  // Спец-свойства взвода (Пр4, Рм) — изумрудные чипы имя+иконка
+  const renderStatic = () =>
+    staticAbilities.map(b => (
+      <div
+        key={`static-${b.id}`}
+        title={`${b.name}: ${b.description}${b.oneTimeUse ? ' (раз за бой)' : ' (постоянная)'}`}
+        className="flex items-center gap-0.5 shrink-0 px-1 py-0.5 rounded border border-emerald-700/40 bg-emerald-950/20"
+      >
+        <ModifierIcon name={b.icon} size={12} className="text-emerald-400" />
+        <span className="text-[9px] font-mono font-bold leading-none text-emerald-300">
+          {b.name.length > 8 ? b.name.slice(0, 7) + '.' : b.name}
+        </span>
+      </div>
+    ));
 
   // If there are soldier-specific modifiers, show them as a row of icons with labels
   if (soldierModifiers.length > 0) {
@@ -50,6 +68,7 @@ export function ExpandedEffectsPanel({
         )}
         aria-label={`${soldierModifiers.length} модификаторов на бойца`}
       >
+        {renderStatic()}
         {soldierModifiers.map(mod => {
           const colorStyles = getEffectStyles(mod.id);
           return (
@@ -76,8 +95,37 @@ export function ExpandedEffectsPanel({
     );
   }
 
-  // No active modifiers: show available count or subtle placeholder
+  // Нет активных модификаторов, но есть спец-свойства — они и есть кнопка
   if (totalCount === 0) {
+    if (staticAbilities.length > 0) {
+      return (
+        <div
+          role="button"
+          tabIndex={disabled ? -1 : 0}
+          onClick={disabled ? undefined : (e) => { e.stopPropagation(); onClick?.(); }}
+          onKeyDown={
+            disabled
+              ? undefined
+              : (e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onClick?.();
+                  }
+                }
+          }
+          className={cn(
+            'col-span-3 flex flex-row items-center justify-center gap-1.5 rounded-lg bg-slate-800/60 border border-emerald-700/40 min-h-[40px] px-2 transition-all select-none',
+            !disabled && 'cursor-pointer hover:bg-slate-700/30 active:scale-[0.97]',
+            disabled && 'opacity-30'
+          )}
+          aria-label={`Спец-свойства: ${staticAbilities.map(b => b.name).join(', ')}`}
+        >
+          {renderStatic()}
+        </div>
+      );
+    }
+
     if (availableCount && availableCount > 0) {
       return (
         <div

@@ -182,7 +182,7 @@ function SoldierCard({
   });
 
   // Compute modifier counts for the modifier indicator
-  const { buffCount, debuffCount, soldierModifiers, availableBuffCount, statBonuses } = useMemo(() => {
+  const { buffCount, debuffCount, soldierModifiers, staticAbilities, availableBuffCount, statBonuses } = useMemo(() => {
     // Build a minimal army-like structure from allUnits for buff collection
     const armyLike: Army = { name: '', totalCost: 0, units: _allUnits, currentTurn };
     // Count buffs across ALL phases (not just shot)
@@ -203,6 +203,13 @@ function SoldierCard({
     const available = (liveSquad?.buffs || squad.buffs || [])
       .filter((b: any) => b.applyTo?.includes('soldier')).length;
 
+    // Классические спец-свойства взвода (Пр4, Рм — каталог standard-modifiers):
+    // показываем на кнопке модификаторов; разовые скрываем после траты
+    // (buffsUsed). Не путать с applied soldierModifiers.
+    const buffsUsed = new Set(unit.buffsUsed || []);
+    const staticAbilities = (liveSquad?.buffs || squad.buffs || [])
+      .filter((b: any) => b.applyTo?.includes('soldier') && !(b.oneTimeUse && buffsUsed.has(b.id)));
+
     // Compute stat bonuses for display (merge shot + melee + always phases)
     const shotSummary = resolveModifierSummary(unit, armyLike, 'shot', soldierIndex);
     const meleeSummary = resolveModifierSummary(unit, armyLike, 'melee', soldierIndex);
@@ -216,7 +223,7 @@ function SoldierCard({
       speedMultiplier: alwaysSummary.speedMultiplier !== 1 ? alwaysSummary.speedMultiplier : undefined,
     };
 
-    return { buffCount: allBuffIds.size, debuffCount: debuffs.length, soldierModifiers: soldierMods, availableBuffCount: available, statBonuses };
+    return { buffCount: allBuffIds.size, debuffCount: debuffs.length, soldierModifiers: soldierMods, staticAbilities, availableBuffCount: available, statBonuses };
   }, [unit, _allUnits, soldierIndex, squad.buffs, squad.id, sourceId, currentTurn]);
 
   return (
@@ -297,6 +304,7 @@ function SoldierCard({
         buffCount={buffCount}
         debuffCount={debuffCount}
         soldierModifiers={soldierModifiers}
+        staticAbilities={staticAbilities}
         availableBuffCount={availableBuffCount}
         onModifierClick={onSoldierModifierClick ? () => onSoldierModifierClick(unit.instanceId, soldierIndex, `#${soldier.num || soldierIndex + 1}`) : undefined}
         statBonuses={statBonuses}

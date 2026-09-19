@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { LayoutGrid, MousePointerClick } from 'lucide-react';
+import { LayoutGrid, MousePointerClick, Target } from 'lucide-react';
 import { GitHubPagesImage as Image } from '@/components/GitHubPagesImage';
 import { useCardSwipe } from '@/hooks/useCardSwipe';
 import { cn } from '@/lib/utils';
@@ -196,6 +196,20 @@ export function BattleTutorial({ demoImageUrl, onFinish }: BattleTutorialProps) 
                 фото — завершить ход (долгое нажатие — отмена);{' '}
                 <span className="font-mono font-bold text-slate-100">убит — свайп вправо</span>{' '}
                 (повторный — оживляет).
+              </p>
+            </div>
+
+            {/* Цикл боя (плейтест: «может про то как стрелять и делать
+                действия») — короткая трасса от тапа до принятия результата */}
+            <div className="flex items-center gap-3 rounded-sm border border-slate-700/50 bg-slate-800/40 p-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-sm border border-slate-700/50 bg-slate-800/60 shrink-0">
+                <Target className="h-4 w-4 text-amber-300" />
+              </span>
+              <p className="text-[12px] leading-relaxed text-slate-300">
+                <span className="font-mono font-bold text-slate-100">Выстрел:</span> нажми статы
+                бойца → выбери действие (выстрел / ближний бой / граната) → дистанция и броня
+                цели → бросок → <span className="font-mono font-bold text-slate-100">ПРИНЯТЬ</span>.
+                Промах — тоже результат: отметь его так же.
               </p>
             </div>
 

@@ -35,6 +35,9 @@ describe('BattleTutorial', () => {
     expect(screen.getByText(/Статы бойца/)).toBeInTheDocument();
     expect(screen.getByText(/ГОТОВ/)).toBeInTheDocument();
     expect(screen.getByText(/убит — свайп вправо/)).toBeInTheDocument();
+    // цикл выстрела (плейтест: «про то как стрелять и делать действия»)
+    expect(screen.getByText(/Выстрел:/)).toBeInTheDocument();
+    expect(screen.getByText(/ПРИНЯТЬ/)).toBeInTheDocument();
     expect(screen.queryByText(/череп/)).not.toBeInTheDocument();
     expect(screen.queryByTestId('battle-tutorial-demo-card')).not.toBeInTheDocument();
 

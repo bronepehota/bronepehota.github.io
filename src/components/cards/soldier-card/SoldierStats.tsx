@@ -3,7 +3,7 @@
 import { Shield, Footprints, Target, Flame, Sword } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Soldier } from '@/lib/types';
-import type { SoldierModifier } from '@/lib/modifier-types';
+import type { SoldierModifier, BuffDefinition } from '@/lib/modifier-types';
 import { ModifierIndicator } from './ModifierIndicator';
 import { ExpandedEffectsPanel } from './ExpandedEffectsPanel';
 
@@ -25,6 +25,8 @@ interface SoldierStatsProps {
   buffCount?: number;
   debuffCount?: number;
   soldierModifiers?: SoldierModifier[];
+  /** Статические спец-свойства взвода (Пр4, Рм) — на кнопку модификаторов */
+  staticAbilities?: BuffDefinition[];
   availableBuffCount?: number;
   onModifierClick?: () => void;
   statBonuses?: StatBonuses;
@@ -103,6 +105,7 @@ export function SoldierStats({
   buffCount,
   debuffCount,
   soldierModifiers = [],
+  staticAbilities = [],
   availableBuffCount,
   onModifierClick,
   statBonuses,
@@ -163,6 +166,7 @@ export function SoldierStats({
             buffCount={buffCount ?? 0}
             debuffCount={debuffCount ?? 0}
             soldierModifiers={soldierModifiers}
+            staticAbilities={staticAbilities}
             availableCount={availableBuffCount}
             onClick={onModifierClick}
             disabled={disabled}
@@ -201,6 +205,7 @@ export function SoldierStats({
           buffCount={buffCount ?? 0}
           debuffCount={debuffCount ?? 0}
           soldierModifiers={soldierModifiers}
+          staticAbilities={staticAbilities}
           availableCount={availableBuffCount}
           onClick={onModifierClick}
           disabled={disabled}
