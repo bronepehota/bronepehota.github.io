@@ -1019,9 +1019,21 @@ export default function GameSession({
                       )}
                     >
                       <Footprints className="w-4 h-4 shrink-0 text-cyan-400" />
-                      <span className="text-base font-mono font-black text-cyan-300 leading-none">
-                        {distanceInputUnit === 'cm' ? `${squadUniformStats.commonSpeed * stepToCmFactor}` : squadUniformStats.commonSpeed}
-                      </span>
+                      {distanceInputUnit === 'cm' ? (
+                        <span className="text-base font-mono font-black text-cyan-300 leading-none">
+                          {squadUniformStats.commonSpeed * stepToCmFactor}
+                        </span>
+                      ) : (
+                        // Шаги + см мелким суффиксом — как в статах бойца
+                        <>
+                          <span className="text-base font-mono font-black text-cyan-300 leading-none">
+                            {squadUniformStats.commonSpeed}
+                          </span>
+                          <span className="text-[9px] font-mono font-bold text-slate-400 leading-none">
+                            {squadUniformStats.commonSpeed * stepToCmFactor}см
+                          </span>
+                        </>
+                      )}
                       {bonus && (
                         <span className="text-[9px] font-mono font-extrabold text-emerald-400/90 leading-none translate-y-[-1px]">
                           {bonus}
