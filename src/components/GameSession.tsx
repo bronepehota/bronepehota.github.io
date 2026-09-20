@@ -414,19 +414,24 @@ export default function GameSession({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [nextUnit, prevUnit]);
 
-  // Жест «потянуть» для дока и листа навигатора: короткий свайп вверх в
-  // ЛЮБОМ месте дока открывает навигатор, потягивание вниз за ручку листа —
-  // закрывает (плейтест: «должно легко переключаться — паршиво работало»:
-  // старый порог читался из устаревшего замыкания и почти не срабатывал).
-  // Клик без движения жестом не считается; после настоявшегося жеста клик
-  // гасится — свайп, начатый на кнопке «Готов», не отмечает бойца.
-  const startDragGesture = useCallback((open: boolean, startY: number) => {
-    let up = 0, down = 0, moved = false;
+  // Гашение клика после жеста (общее для дока и листа навигатора): клик без
+  // движения жестом не считается, но после настоявшегося жеста тап,
+  // начавшийся на кнопке/строке, не должен срабатывать.
+  const swallowNextClick = useCallback(() => {
+    const swallow = (e: Event) => { e.stopPropagation(); e.preventDefault(); };
+    document.addEventListener('click', swallow, { capture: true, once: true });
+    setTimeout(() => document.removeEventListener('click', swallow, { capture: true }), 400);
+  }, []);
+
+  // Жест дока: короткий свайп вверх в ЛЮБОМ месте панели открывает навигатор
+  // (плейтест: «должно легко переключаться — паршиво работало»: старый порог
+  // читался из устаревшего замыкания и почти не срабатывал).
+  const startDockSwipe = useCallback((startY: number) => {
+    let up = 0, moved = false;
     const track = (y: number) => {
       const diff = startY - y; // вверх — плюс
       if (Math.abs(diff) > 8) moved = true;
       if (diff > up) up = diff;
-      if (-diff > down) down = -diff;
     };
     const mouseMove = (e: MouseEvent) => track(e.clientY);
     const touchMove = (e: TouchEvent) => { if (e.touches[0]) track(e.touches[0].clientY); };
@@ -435,19 +440,22 @@ export default function GameSession({
       document.removeEventListener('mouseup', end);
       document.removeEventListener('touchmove', touchMove);
       document.removeEventListener('touchend', end);
-      if (moved) {
-        const swallow = (e: Event) => { e.stopPropagation(); e.preventDefault(); };
-        document.addEventListener('click', swallow, { capture: true, once: true });
-        setTimeout(() => document.removeEventListener('click', swallow, { capture: true }), 400);
-      }
-      if (!open && up > 60) setIsDockExpanded(true);
-      if (open && down > 40) setIsDockExpanded(false);
+      // touchcancel — системный обрыв жеста (back-жест, шторка): без него
+      // листенеры утекали и стреляли в следующем жесте (ревью #246)
+      document.removeEventListener('touchcancel', end);
+      // dragstart — браузер начал нативный drag (напр., картинки): mouse-поток
+      // обрывается и mouseup не придёт — снимаем слушатели сразу
+      document.removeEventListener('dragstart', end);
+      if (moved) swallowNextClick();
+      if (up > 60) setIsDockExpanded(true);
     };
     document.addEventListener('mousemove', mouseMove);
     document.addEventListener('mouseup', end);
     document.addEventListener('touchmove', touchMove, { passive: true });
     document.addEventListener('touchend', end);
-  }, []);
+    document.addEventListener('touchcancel', end);
+    document.addEventListener('dragstart', end);
+  }, [swallowNextClick]);
 
   const toggleDockExpanded = useCallback(() => {
     setIsDockExpanded(prev => !prev);
@@ -463,34 +471,35 @@ export default function GameSession({
   const startSheetDrag = useCallback((startY: number, target: Element | null) => {
     const scroller = target?.closest('[data-testid="expanded-navigator"]') as HTMLElement | null;
     const dismissable = !scroller || scroller.scrollTop <= 0;
-    let down = 0;
+    let down = 0, moved = false;
+    const track = (y: number) => {
+      const d = startY - y; // вниз — плюс
+      if (Math.abs(d) > 8) moved = true;
+      if (-d > down) down = -d;
+    };
     const touchMove = (e: TouchEvent) => {
       if (!e.touches[0]) return;
-      const d = startY - e.touches[0].clientY;
-      if (-d > down) down = -d;
+      track(e.touches[0].clientY);
       if (dismissable && down > 6) e.preventDefault();
     };
-    const mouseMove = (e: MouseEvent) => {
-      const d = startY - e.clientY;
-      if (-d > down) down = -d;
-    };
+    const mouseMove = (e: MouseEvent) => track(e.clientY);
     const end = () => {
       document.removeEventListener('touchmove', touchMove);
       document.removeEventListener('touchend', end);
+      document.removeEventListener('touchcancel', end);
+      document.removeEventListener('dragstart', end);
       document.removeEventListener('mousemove', mouseMove);
       document.removeEventListener('mouseup', end);
-      if (!(dismissable && down > 44)) return;
-      setIsDockExpanded(false);
-      // глотаем клик после жеста — тап, начавшийся на строке, не выбирает юнита
-      const swallow = (ce: Event) => { ce.stopPropagation(); ce.preventDefault(); };
-      document.addEventListener('click', swallow, { capture: true, once: true });
-      setTimeout(() => document.removeEventListener('click', swallow, { capture: true }), 400);
+      if (moved) swallowNextClick();
+      if (dismissable && down > 44) setIsDockExpanded(false);
     };
     document.addEventListener('touchmove', touchMove, { passive: false });
     document.addEventListener('touchend', end);
+    document.addEventListener('touchcancel', end);
+    document.addEventListener('dragstart', end);
     document.addEventListener('mousemove', mouseMove);
     document.addEventListener('mouseup', end);
-  }, []);
+  }, [swallowNextClick]);
 
   // Handle toggle done for current unit - called from header button
   const handleToggleUnitDone = useCallback(() => {
@@ -925,8 +934,8 @@ export default function GameSession({
             // индикатор-бар iPhone/жестовая навигация не наезжает на кнопки
             "[padding-bottom:env(safe-area-inset-bottom)]"
           )}
-          onMouseDown={(e) => startDragGesture(false, e.clientY)}
-          onTouchStart={(e) => startDragGesture(false, e.touches[0].clientY)}
+          onMouseDown={(e) => startDockSwipe(e.clientY)}
+          onTouchStart={(e) => startDockSwipe(e.touches[0].clientY)}
         >
           {/* Ручка открытия навигатора — тап или свайп вверх по доку */}
           <div
@@ -1327,7 +1336,11 @@ export default function GameSession({
       {army.units.length > 0 && isDockExpanded && (
         <div
           data-testid="navigator-sheet"
-          className="fixed inset-x-0 top-16 bottom-0 z-[70] flex flex-col bg-slate-900 border-t-2 border-slate-700/70 shadow-[0_-8px_24px_rgba(0,0,0,0.45)] animate-in slide-in-from-bottom duration-200"
+          className={cn(
+            "fixed inset-x-0 top-16 bottom-0 z-[70] flex flex-col bg-slate-900 border-t-2 border-slate-700/70 shadow-[0_-8px_24px_rgba(0,0,0,0.45)] animate-in slide-in-from-bottom duration-200 select-none",
+            // симметрично доку: дом-бар iPhone не наезжает на последнюю строку
+            "[padding-bottom:env(safe-area-inset-bottom)]"
+          )}
           onMouseDown={(e) => startSheetDrag(e.clientY, e.target as Element)}
           onTouchStart={(e) => startSheetDrag(e.touches[0].clientY, e.target as Element)}
         >

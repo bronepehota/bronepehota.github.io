@@ -239,8 +239,9 @@ test.describe('Dock navigator (СПИСОК button + auto-open)', () => {
 
   // Плейтест 2026-09-20: «свайп вниз на навигаторе не работает» — жест
   // сидел только на 14px-ручке. Теперь потягивание вниз ловит весь лист
-  // (кроме прокрученного списка — там это скролл).
-  test('потягивание вниз по листу закрывает навигатор', async ({ page }) => {
+  // (кроме прокрученного списка — там это скролл). Драг начинается СО
+  // СТРОКИ списка: до фикса путь «строка → драг вниз» ничего не делал.
+  test('потягивание вниз со строки списка закрывает навигатор', async ({ page }) => {
     await seedBattleArmy(page, [
       squad('dn-close', 'Линейная клон-пехота', 1, [false, false]),
       squad('dn-other', 'Штурмовая клон-пехота', 2, [false, false]),
@@ -251,10 +252,9 @@ test.describe('Dock navigator (СПИСОК button + auto-open)', () => {
     const nav = page.getByTestId('expanded-navigator');
     await expect(nav).toBeVisible();
 
-    // Тянем вниз от ручки листа: 96px вниз → закрылся
-    const box = await page.getByTestId('navigator-sheet').boundingBox();
+    const box = await page.getByTestId('expanded-unit-dn-other').boundingBox();
     const cx = box!.x + box!.width / 2;
-    const cy = box!.y + 14;
+    const cy = box!.y + box!.height / 2;
     await page.mouse.move(cx, cy);
     await page.mouse.down();
     for (let i = 1; i <= 8; i++) {
@@ -263,7 +263,48 @@ test.describe('Dock navigator (СПИСОК button + auto-open)', () => {
     await page.mouse.up();
 
     await expect(nav).not.toBeVisible();
-    // Клик после жеста поглощён: юнит не перевыбран, счётчик цел
-    await expect(page.getByTestId('dock-nav-counter')).toHaveText('0/2');
+    // Клик после жеста поглощён: фокус не перевёлся на dn-other
+    await expect(page.getByTestId('dock-unit-name')).toHaveText('Линейная клон-пехота');
+  });
+
+  // Прокрученный список: потягивание вниз — это скролл, лист не закрывается
+  test('прокрученный список не закрывается потягиванием вниз', async ({ page }) => {
+    await seedBattleArmy(page, Array.from({ length: 10 }, (_, i) =>
+      squad(`dn-grid-${i + 1}`, `Отряд ${i + 1}`, i + 1, [false, false])
+    ), 500);
+    await gotoBattle(page);
+
+    await page.getByTestId('dock-open-navigator').click();
+    const nav = page.getByTestId('expanded-navigator');
+
+    // 10 юнитов → сетка скроллится; уводим от верха
+    await nav.evaluate((el) => { el.scrollTop = 40; });
+
+    // Средняя плитка гарантированно в зоне видимости при scrollTop=40
+    const box = await page.getByTestId('expanded-unit-dn-grid-5').boundingBox();
+    expect(box).toBeTruthy();
+    const cx = box!.x + box!.width / 2;
+    const cy = box!.y + box!.height / 2;
+    await page.mouse.move(cx, cy);
+    await page.mouse.down();
+    for (let i = 1; i <= 8; i++) {
+      await page.mouse.move(cx, cy + i * 12, { steps: 2 });
+    }
+    await page.mouse.up();
+
+    // Жест не трактован как закрытие: лист на месте
+    await expect(nav).toBeVisible();
+    // Возврат к верху — теперь тот же драг закрывает
+    await nav.evaluate((el) => { el.scrollTop = 0; });
+    const box2 = await page.getByTestId('expanded-unit-dn-grid-2').boundingBox();
+    const cx2 = box2!.x + box2!.width / 2;
+    const cy2 = box2!.y + box2!.height / 2;
+    await page.mouse.move(cx2, cy2);
+    await page.mouse.down();
+    for (let i = 1; i <= 8; i++) {
+      await page.mouse.move(cx2, cy2 + i * 12, { steps: 2 });
+    }
+    await page.mouse.up();
+    await expect(nav).not.toBeVisible();
   });
 });
