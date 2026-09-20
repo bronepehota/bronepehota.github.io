@@ -174,13 +174,17 @@ export function BattleTutorial({ demoImageUrl, onFinish }: BattleTutorialProps) 
             </h3>
 
             {/* Рекап жестов — последнее, что читают перед боем */}
-            <div className="flex items-center justify-center gap-3 rounded-sm border border-amber-700/40 bg-amber-950/20 px-3 py-2">
+            <div className="flex items-center justify-center gap-2 rounded-sm border border-amber-700/40 bg-amber-950/20 px-2 py-2">
               <span className="font-mono text-[11px] text-amber-200/90">
                 ← свайп: готов
               </span>
               <span className="h-3 w-px bg-amber-700/40" aria-hidden="true" />
               <span className="font-mono text-[11px] text-amber-200/90">
                 убит: свайп →
+              </span>
+              <span className="h-3 w-px bg-amber-700/40" aria-hidden="true" />
+              <span className="font-mono text-[11px] text-amber-200/90">
+                список: панель ↑
               </span>
             </div>
 
@@ -219,7 +223,9 @@ export function BattleTutorial({ demoImageUrl, onFinish }: BattleTutorialProps) 
               </span>
               <p className="text-[12px] leading-relaxed text-slate-300">
                 Кнопка <span className="font-mono font-bold text-slate-100">СПИСОК</span> в доке — все
-                взводы и счётчик «походили N/M». Ход юнита завершился — список откроется сам.
+                взводы и счётчик «походили N/M». <span className="font-mono font-bold text-slate-100">Свайп
+                вверх по панели</span> — то же самое, из любого её места. Ход юнита завершился —
+                список откроется сам.
                 Меню <span className="font-mono font-bold text-slate-100">⋮</span> — новый тур и история боя.
               </p>
             </div>

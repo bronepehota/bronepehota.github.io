@@ -27,9 +27,11 @@ describe('BattleTutorial', () => {
 
     drag(card, 100, 200); // вправо — финальный шаг
     expect(screen.getByText('ШПАРГАЛКА БОЯ')).toBeInTheDocument();
-    // финальный шаг — рекап жестов (плейтест: «там про свайп не сказано»)
+    // финальный шаг — рекап жестов (плейтест: «там про свайп не сказано»;
+    // 2026-09-20: + свайп вверх по панели = список юнитов)
     expect(screen.getByText('← свайп: готов')).toBeInTheDocument();
     expect(screen.getByText('убит: свайп →')).toBeInTheDocument();
+    expect(screen.getByText('список: панель ↑')).toBeInTheDocument();
     // ...и нажатий: выстрелы, ГОТОВ; убит — только свайп вправо
     // (кнопки «череп» нет — свайп единственный путь убить/оживить)
     expect(screen.getByText(/Статы бойца/)).toBeInTheDocument();

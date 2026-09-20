@@ -56,10 +56,9 @@ test.describe('Squad scroll in battle view', () => {
     expect(scrolled).toBe(true);
 
     // 3) After scrolling all the way down, the last soldier must sit fully
-    //    ABOVE the bottom dock — not half-hidden behind it. Regression for the
-    //    case where scroll worked but the last soldier was still clipped
-    //    because the bottom reserve didn't match the dock height (the dock
-    //    loads after the army, so its height must be measured when it mounts).
+    //    ABOVE the bottom dock — not half-hidden behind it. The dock is an
+    //    in-flow window now (2026-09-20): the scroll area ends at the dock's
+    //    top edge by construction, no measured bottom reserve involved.
     await page.waitForTimeout(150);
     // Меряем фото последнего бойца (видимая часть карточки): корень карточки
     // несёт паддинг и может закономерно нависать на пару px сверх допуска

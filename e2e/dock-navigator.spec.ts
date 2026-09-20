@@ -187,4 +187,53 @@ test.describe('Dock navigator (СПИСОК button + auto-open)', () => {
     await expect(page.getByTestId('floating-new-turn-button')).toBeVisible({ timeout: 3000 });
     await expect(page.getByTestId('expanded-navigator')).not.toBeVisible();
   });
+
+  // Плейтест 2026-09-20: «на навигатор должно легко переключаться — свайп
+  // вверх на всей нижней панели, сейчас паршиво работало». Старый порог
+  // читался из устаревшего замыкания и жест почти не срабатывал.
+  test('свайп вверх по панели (от кнопки «Готов») открывает навигатор, кнопка не срабатывает', async ({ page }) => {
+    await seedBattleArmy(page, [
+      squad('dn-swipe', 'Линейная клон-пехота', 1, [false, false]),
+      squad('dn-other', 'Штурмовая клон-пехота', 2, [false, false]),
+    ], 100);
+    await gotoBattle(page);
+
+    // Тянем вверх с 96px, начиная прямо на кнопке «Готов»: жест открывает
+    // навигатор, а клик по кнопке гасится — юнит не отмечается походившим
+    const box = await page.getByTestId('dock-unit-done').boundingBox();
+    const cx = box!.x + box!.width / 2;
+    const cy = box!.y + box!.height / 2;
+    await page.mouse.move(cx, cy);
+    await page.mouse.down();
+    for (let i = 1; i <= 8; i++) {
+      await page.mouse.move(cx, cy - i * 12, { steps: 2 });
+    }
+    await page.mouse.up();
+
+    await expect(page.getByTestId('expanded-navigator')).toBeVisible({ timeout: 3000 });
+
+    // Свайп не задел управление: счётчик походивших не двинулся
+    await page.getByTestId('expanded-unit-dn-swipe').click();
+    await expect(page.getByTestId('expanded-navigator')).not.toBeVisible();
+    await expect(page.getByTestId('dock-nav-counter')).toHaveText('0/2');
+  });
+
+  // Якорь меню ⋮ — absolute над доком (док в потоке): никаких вычисленных
+  // bottom-смещений, меню прижато к верхней кромке панели
+  test('меню ⋮ открывается над панелью дока', async ({ page }) => {
+    await seedBattleArmy(page, [
+      squad('dn-menu', 'Линейная клон-пехота', 1, [false, false]),
+    ], 50);
+    await gotoBattle(page);
+
+    await page.getByTestId('dock-menu-toggle').click();
+    const menu = page.locator('[data-dock-menu-root]');
+    await expect(menu).toBeVisible();
+
+    const m = await page.evaluate(() => ({
+      menuBottom: document.querySelector('[data-dock-menu-root]')!.getBoundingClientRect().bottom,
+      dockTop: document.querySelector('[data-testid="unit-dock"]')!.getBoundingClientRect().top,
+    }));
+    expect(m.menuBottom).toBeLessThanOrEqual(m.dockTop + 1);
+  });
 });
