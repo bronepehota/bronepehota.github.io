@@ -23,14 +23,16 @@ export function SquadSpecialProps({ squad, className }: {
   return (
     <span className={cn('flex items-center gap-1 min-w-0', className)}>
       {specials.map(b => (
-        // Плейтест 2026-09-20: «слишком ярко кричащее» — тихая аннотация:
-        // без заливки, тонкая рамка, приглушённый тон. Ярко — только бою.
+        // Плейтест 2026-09-20: «слишком ярко кричащее» — тихая аннотация;
+        // повторный плейтест: «слишком яркие и крупные» на карточках
+        // каталога (теперь у всех отрядов) — 9px как в бою, минимальные
+        // отступы, приглушённый тон. Ярко — только бою.
         <span
           key={b.id}
           title={`${b.name}: ${b.description}${b.oneTimeUse ? ' (раз за бой)' : ''}`}
-          className="flex items-center gap-0.5 px-1 py-0.5 rounded-sm border border-emerald-800/50 text-emerald-400/90 font-mono font-semibold leading-none"
+          className="flex items-center gap-px px-1 py-px rounded-sm border border-emerald-900/50 text-emerald-500/80 font-mono text-[9px] font-medium leading-none"
         >
-          <ModifierIcon name={b.icon} size={10} className="text-emerald-400/70" />
+          <ModifierIcon name={b.icon} size={9} className="text-emerald-500/60" />
           {b.name}
         </span>
       ))}

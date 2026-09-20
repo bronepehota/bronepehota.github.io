@@ -32,7 +32,8 @@ export function ModifierIndicator({
   const totalCount = buffCount + debuffCount;
 
   // Отрисовка статических спец-свойств (Пр4, Рм) — иконка + НАЗВАНИЕ
-  // (плейтест: «показывать его название на кнопке»)
+  // (плейтест: «показывать его название на кнопке»; повторный плейтест:
+  // «статы важнее намного» — свойства слева и приглушённо, не отвлекают)
   const renderStaticAbilities = (withName: boolean) =>
     staticAbilities.map(b => (
       <div
@@ -40,9 +41,9 @@ export function ModifierIndicator({
         title={`${b.name}: ${b.description}${b.oneTimeUse ? ' (раз за бой)' : ' (постоянная)'}`}
         className="flex items-center gap-0.5 shrink-0"
       >
-        <ModifierIcon name={b.icon} size={14} className="text-emerald-300" />
+        <ModifierIcon name={b.icon} size={12} className="text-emerald-500/60" />
         {withName && (
-          <span className="text-[9px] font-mono font-bold leading-none text-emerald-300">{b.name}</span>
+          <span className="text-[9px] font-mono font-medium leading-none text-emerald-500/80">{b.name}</span>
         )}
       </div>
     ));
@@ -66,7 +67,7 @@ export function ModifierIndicator({
               }
         }
         className={cn(
-          'flex flex-row flex-wrap items-center justify-center gap-0.5 rounded-lg bg-slate-800/60 border border-slate-700/50 min-h-[40px] min-w-[44px] flex-1 px-0.5 transition-all select-none',
+          'flex flex-row flex-wrap items-center justify-start gap-0.5 rounded-lg bg-slate-800/60 border border-slate-700/50 min-h-[40px] min-w-[44px] flex-1 px-1 transition-all select-none',
           !disabled && 'cursor-pointer hover:bg-slate-700/30 active:scale-[0.97]',
           disabled && 'opacity-30'
         )}
@@ -114,7 +115,7 @@ export function ModifierIndicator({
                 }
           }
           className={cn(
-            'flex flex-row items-center justify-center gap-1 rounded-lg bg-slate-800/60 border border-emerald-700/40 min-h-[40px] min-w-[44px] flex-1 px-1 transition-all select-none',
+            'flex flex-row items-center justify-start gap-1 rounded-lg bg-slate-800/60 border border-emerald-900/50 min-h-[40px] min-w-[44px] flex-1 px-1 transition-all select-none',
             !disabled && 'cursor-pointer hover:bg-slate-700/30 active:scale-[0.97]',
             disabled && 'opacity-30'
           )}
@@ -147,7 +148,7 @@ export function ModifierIndicator({
                 }
           }
           className={cn(
-            'flex flex-row items-center justify-center gap-1 rounded-lg bg-slate-800/60 border border-dashed border-slate-700/40 min-h-[40px] min-w-[44px] flex-1 px-1 transition-all select-none',
+            'flex flex-row items-center justify-start gap-1 rounded-lg bg-slate-800/60 border border-dashed border-slate-700/40 min-h-[40px] min-w-[44px] flex-1 px-1 transition-all select-none',
             !disabled && 'cursor-pointer hover:bg-slate-700/30 hover:border-amber-600/50 active:scale-[0.97]',
             disabled && 'opacity-30'
           )}
@@ -176,7 +177,7 @@ export function ModifierIndicator({
               }
         }
         className={cn(
-          'flex flex-row items-center justify-center gap-0.5 rounded-lg bg-slate-800/60 border border-dashed border-slate-700/40 min-h-[40px] min-w-[44px] flex-1 px-1 transition-all select-none',
+          'flex flex-row items-center justify-start gap-0.5 rounded-lg bg-slate-800/60 border border-dashed border-slate-700/40 min-h-[40px] min-w-[44px] flex-1 px-1 transition-all select-none',
           !disabled && 'cursor-pointer hover:bg-slate-700/30 hover:border-slate-600/60 active:scale-[0.97]',
           disabled && 'opacity-30'
         )}
@@ -221,7 +222,7 @@ export function ModifierIndicator({
             }
       }
       className={cn(
-        'flex flex-row flex-wrap items-center justify-center gap-1 rounded-lg bg-slate-800/60 border min-h-[40px] min-w-[44px] flex-1 px-1 transition-all select-none',
+        'flex flex-row flex-wrap items-center justify-start gap-1 rounded-lg bg-slate-800/60 border min-h-[40px] min-w-[44px] flex-1 px-1 transition-all select-none',
         colorClasses,
         !disabled && 'cursor-pointer hover:bg-slate-700/30 active:scale-[0.97]',
         disabled && 'opacity-30'
