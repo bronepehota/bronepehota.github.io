@@ -224,12 +224,14 @@ export function ExpandedEffectsPanel({
         !disabled && 'cursor-pointer hover:bg-slate-700/30 active:scale-[0.97]',
         disabled && 'opacity-30'
       )}
-      aria-label={`${buffCount} баффов, ${debuffCount} дебаффов`}
+      aria-label={`${buffCount} баффов, ${debuffCount} дебаффов${staticAbilities.length > 0 ? `, спец-свойства: ${staticAbilities.map(b => b.name).join(', ')}` : ''}`}
     >
       <Sparkles className={cn('w-3.5 h-3.5 shrink-0', iconColor)} />
       <span className="text-xs font-mono font-bold leading-none text-inherit">
         {totalCount} {hasBuffs && hasDebuffs ? 'эффектов' : hasDebuffs ? 'дебаффов' : 'баффов'}
       </span>
+      {/* Спец-свойства (Пр4, Рм) рядом со счётчиком — как в ModifierIndicator */}
+      {renderStatic()}
     </div>
   );
 }

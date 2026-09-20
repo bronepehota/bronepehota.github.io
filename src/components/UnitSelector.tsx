@@ -597,7 +597,7 @@ export function UnitSelector({
                         </div>
                         {/* Спец-свойства (Пр4, Рм) — именованные чипы
                             (плейтест 2026-09-20) */}
-                        <SquadSpecialProps buffs={squad.buffs} />
+                        <SquadSpecialProps squad={squad} />
                       </div>
 
                       {/* Add button */}

@@ -66,13 +66,13 @@ export function ModifierIndicator({
               }
         }
         className={cn(
-          'flex flex-row items-center justify-center gap-0.5 rounded-lg bg-slate-800/60 border border-slate-700/50 min-h-[40px] min-w-[44px] flex-1 px-0.5 transition-all select-none',
+          'flex flex-row flex-wrap items-center justify-center gap-0.5 rounded-lg bg-slate-800/60 border border-slate-700/50 min-h-[40px] min-w-[44px] flex-1 px-0.5 transition-all select-none',
           !disabled && 'cursor-pointer hover:bg-slate-700/30 active:scale-[0.97]',
           disabled && 'opacity-30'
         )}
         aria-label={`${soldierModifiers.length} модификаторов на солдата`}
       >
-        {renderStaticAbilities(false)}
+        {renderStaticAbilities(true)}
         {soldierModifiers.map(mod => {
           const colorStyles = getEffectStyles(mod.id);
           return (
@@ -221,17 +221,20 @@ export function ModifierIndicator({
             }
       }
       className={cn(
-        'flex flex-row items-center justify-center gap-1 rounded-lg bg-slate-800/60 border min-h-[40px] min-w-[44px] flex-1 px-1 transition-all select-none',
+        'flex flex-row flex-wrap items-center justify-center gap-1 rounded-lg bg-slate-800/60 border min-h-[40px] min-w-[44px] flex-1 px-1 transition-all select-none',
         colorClasses,
         !disabled && 'cursor-pointer hover:bg-slate-700/30 active:scale-[0.97]',
         disabled && 'opacity-30'
       )}
-      aria-label={`${buffCount} баффов, ${debuffCount} дебаффов`}
+      aria-label={`${buffCount} баффов, ${debuffCount} дебаффов${staticAbilities.length > 0 ? `, спец-свойства: ${staticAbilities.map(b => b.name).join(', ')}` : ''}`}
     >
       <Sparkles className={cn('w-3.5 h-3.5 shrink-0', iconColor)} />
       <span className="text-sm font-mono font-black leading-none text-inherit">
         {totalCount}
       </span>
+      {/* Спец-свойства (Пр4, Рм) рядом со счётчиком эффектов: не прячем
+          имена за модалом (плейтест 2026-09-20) */}
+      {renderStaticAbilities(true)}
     </div>
   );
 }

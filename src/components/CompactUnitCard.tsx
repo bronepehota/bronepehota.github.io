@@ -182,7 +182,7 @@ export function CompactUnitCard({
                 {quickStats}
               </span>
               {/* Спец-свойства (Пр4, Рм) — у техники их нет */}
-              <SquadSpecialProps buffs={isMachine ? undefined : (unit as Squad).buffs} />
+              <SquadSpecialProps squad={isMachine ? undefined : (unit as Squad)} />
             </div>
           </div>
           <div className="text-right flex-shrink-0">

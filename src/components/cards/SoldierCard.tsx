@@ -9,7 +9,7 @@ import StatusStripe, { type SoldierState } from './soldier-card/StatusStripe';
 import { useCardSwipe } from '@/hooks/useCardSwipe';
 import { cn } from '@/lib/utils';
 import type { Squad, ArmyUnit, Army } from '@/lib/types';
-import { collectBuffsForUnit, getSoldierModifiers, resolveModifierSummary, isModifierActive } from '@/lib/modifier-utils';
+import { collectBuffsForUnit, getSoldierModifiers, resolveModifierSummary, isModifierActive, resolveSoldierEffects } from '@/lib/modifier-utils';
 import { getSourceWithCustom } from '@/lib/sources-registry';
 
 interface SoldierCardProps {
@@ -210,15 +210,25 @@ function SoldierCard({
     const available = (liveSquad?.buffs || squad.buffs || [])
       .filter((b: any) => b.applyTo?.includes('soldier')).length;
 
-    // Классические спец-свойства взвода (Пр4, Рм — каталог standard-modifiers):
-    // показываем на кнопке модификаторов. Разовые скрываем после траты —
-    // ЛЮБОЙ из двух путей: взводный buffsUsed ИЛИ по-бойцовый
-    // soldierAbilitiesUsed «<id>_<i>» (модал «Способности»). Иначе у бойца,
-    // использовавшего Пр4, иконка дублировалась (статическая + применённая).
+    // Классические спец-свойства бойца (Пр4, Рм — каталог standard-modifiers):
+    // взводные buffs (редактор) + пер-солдатские modifiers[] (основная форма
+    // в данных — так хранится у ~200 бойцов), как в модале эффектов
+    // (GameSession). Разовые скрываем после траты — ЛЮБОЙ из двух путей:
+    // взводный buffsUsed ИЛИ по-бойцовый soldierAbilitiesUsed «<id>_<i>».
+    // Иначе у бойца, использовавшего Пр4, свойство дублировалось
+    // (статическое + применённое).
     const buffsUsed = new Set(unit.buffsUsed || []);
     const abilitiesUsed = new Set(unit.soldierAbilitiesUsed || []);
-    const staticAbilities = (liveSquad?.buffs || squad.buffs || [])
-      .filter((b: any) => b.applyTo?.includes('soldier') && !(
+    const { abilities: resolvedAbilities } = resolveSoldierEffects(
+      liveSquad?.buffs || squad.buffs || [],
+      soldier?.modifiers || []
+    );
+    const staticAbilities = resolvedAbilities
+      .filter(b => b.applyTo?.includes('soldier'))
+      // только спец-свойства (target 'custom'): обычные бафы идут в счётчик
+      // кнопки (см. фильтр выше) — иначе двойной показ (счётчик + имя)
+      .filter(b => b.target === 'custom')
+      .filter(b => !(
         b.oneTimeUse && (buffsUsed.has(b.id) || abilitiesUsed.has(`${b.id}_${soldierIndex}`))
       ));
 
@@ -236,7 +246,7 @@ function SoldierCard({
     };
 
     return { buffCount: allBuffIds.size, debuffCount: debuffs.length, soldierModifiers: soldierMods, staticAbilities, availableBuffCount: available, statBonuses };
-  }, [unit, _allUnits, soldierIndex, squad.buffs, squad.id, sourceId, currentTurn]);
+  }, [unit, _allUnits, soldierIndex, squad, soldier, sourceId, currentTurn]);
 
   return (
     <div
@@ -356,6 +366,9 @@ export default memo(SoldierCard, (prevProps, nextProps) => {
     prevProps.unit.activeDebuffs === nextProps.unit.activeDebuffs &&
     prevProps.unit.activeBuffs === nextProps.unit.activeBuffs &&
     prevProps.unit.soldierModifiers === nextProps.unit.soldierModifiers &&
+    // скрытие использованных разовых спец-свойств (Пр4) не должно протухать
+    prevProps.unit.buffsUsed === nextProps.unit.buffsUsed &&
+    prevProps.unit.soldierAbilitiesUsed === nextProps.unit.soldierAbilitiesUsed &&
     prevProps.onNavigateToUnit === nextProps.onNavigateToUnit &&
     prevProps.onSoldierModifierClick === nextProps.onSoldierModifierClick &&
     prevProps.currentTurn === nextProps.currentTurn &&

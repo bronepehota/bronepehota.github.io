@@ -1,4 +1,4 @@
-import { isSquad, type ArmyUnit, type Army, type Machine } from './types';
+import { isSquad, type ArmyUnit, type Army, type Machine, type Squad } from './types';
 import type {
   BuffDefinition,
   ActiveDebuff,
@@ -107,6 +107,34 @@ export function resolveSoldierEffects(
     buffs: deduped.filter(b => b.duration),
     abilities: deduped.filter(b => !b.duration),
   };
+}
+
+/**
+ * Классические спец-свойства отряда (Пр3/Пр4/Пр5, Рм — target 'custom'):
+ * объединение ДВУХ механизмов хранения — взводные buffs (редактор) и
+ * пер-солдатские modifiers[] (ID каталога, основная форма в данных),
+ * резолв через общий каталог, дедуп по id (взводные первыми — семантика
+ * «редактор переопределяет», как в getAllBuffs). Для чипов на карточках
+ * отрядов в построителе армии.
+ */
+export function collectSquadSpecialProps(squad: Squad): BuffDefinition[] {
+  const squadBuffs = squad.buffs || [];
+  const catalog = new Map(getAllBuffs().map(b => [b.id, b]));
+  const soldierProps: BuffDefinition[] = [];
+  for (const soldier of squad.soldiers) {
+    for (const id of soldier.modifiers || []) {
+      const resolved = catalog.get(id);
+      if (resolved?.applyTo?.includes('soldier')) soldierProps.push(resolved);
+    }
+  }
+  const seen = new Set<string>();
+  return [...squadBuffs, ...soldierProps]
+    .filter(b => b.target === 'custom')
+    .filter(b => {
+      if (seen.has(b.id)) return false;
+      seen.add(b.id);
+      return true;
+    });
 }
 
 // === Unit state helpers ===

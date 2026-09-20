@@ -1,22 +1,24 @@
 'use client';
 
-import type { BuffDefinition } from '@/lib/modifier-types';
+import type { Squad } from '@/lib/types';
 import { ModifierIcon } from '@/components/editor/ModifierIcons';
 import { cn } from '@/lib/utils';
+import { collectSquadSpecialProps } from '@/lib/modifier-utils';
 
 /**
- * Классические спец-свойства взвода (Пр4, Рм — каталог standard-modifiers,
- * target 'custom') именованными чипами на карточках армии: ростер
- * (CompactArmyCard), селектор и детальный вид (SquadCard). Плейтест
- * 2026-09-20: «постоянный баф — показывать его название, чтобы на отрядах
- * было его видно» — экран боя уже показывает их (ModifierIndicator).
- * Обычные бафы-модификаторы не показываем: им место в бою.
+ * Классические спец-свойства отряда (Пр3/4/5, Рм — каталог standard-modifiers,
+ * target 'custom') именованными чипами на карточках армии: селектор, компактная
+ * карточка и список перед боем. Оба механизма хранения объединяет
+ * collectSquadSpecialProps: взводные buffs (редактор) + пер-солдатские
+ * modifiers[] (основная форма в данных). Плейтест 2026-09-20: «постоянный баф
+ * — показывать его название, чтобы на отрядах было его видно». Обычные
+ * бафы-модификаторы не показываем: им место в бою.
  */
-export function SquadSpecialProps({ buffs, className }: {
-  buffs?: BuffDefinition[];
+export function SquadSpecialProps({ squad, className }: {
+  squad?: Squad;
   className?: string;
 }) {
-  const specials = (buffs || []).filter(b => b.target === 'custom');
+  const specials = squad ? collectSquadSpecialProps(squad) : [];
   if (specials.length === 0) return null;
   return (
     <span className={cn('flex items-center gap-1 min-w-0', className)}>

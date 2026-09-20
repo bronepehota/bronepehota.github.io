@@ -243,22 +243,7 @@
         "image": "/images/squads/polaris/lyogkaya_shturmovaya_klon_pehota/6.png"
       }
     ],
-    "image": "/images/squads/polaris/lyogkaya_shturmovaya_klon_pehota/5.png",
-    "buffs": [
-      {
-        "id": "jump_boost_4",
-        "name": "Пр4",
-        "description": "Прыжковой ускоритель на расстояние 4е, используется один раз за бой",
-        "applyTo": [
-          "soldier"
-        ],
-        "target": "custom",
-        "value": 4,
-        "phase": "always",
-        "icon": "ArrowUp",
-        "oneTimeUse": true
-      }
-    ]
+    "image": "/images/squads/polaris/lyogkaya_shturmovaya_klon_pehota/5.png"
   },
   {
     "id": "polaris_tyazhyolaya_klon_pehota",
