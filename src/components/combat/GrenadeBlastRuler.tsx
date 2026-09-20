@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertTriangle, Bomb, Footprints } from 'lucide-react';
+import { AlertTriangle, Bomb, Crosshair, Footprints } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AnimatedDice } from './AnimatedDice';
 
@@ -15,6 +15,8 @@ interface GrenadeBlastRulerProps {
   danger: boolean;
   /** Throw dice ( Tehnolog: one; community: one per rank, best precomputed upstream ) */
   throwRolls?: number[];
+  /** Where the player aimed (parameters.distance, steps) — cyan crosshair on the track */
+  aimSteps?: number;
 }
 
 // Fixed track scale: max possible maxSteps is 7 (D6 = 6 + 1), so 8 keeps every
@@ -36,6 +38,7 @@ export function GrenadeBlastRuler({
   factor,
   danger,
   throwRolls,
+  aimSteps,
 }: GrenadeBlastRulerProps) {
   const { minSteps, maxSteps } = blastZone;
   const minCm = minSteps * factor;
@@ -43,6 +46,9 @@ export function GrenadeBlastRuler({
   const impactCm = grenadeDistance * factor;
   const rolls = throwRolls ?? [];
   const bestRoll = rolls.length > 0 ? Math.max(...rolls) : undefined;
+  const hasAim = typeof aimSteps === 'number' && aimSteps > 0;
+  const aimCm = hasAim ? aimSteps! * factor : 0;
+  const missed = hasAim && aimSteps !== grenadeDistance;
 
   return (
     <div
@@ -81,12 +87,17 @@ export function GrenadeBlastRuler({
         })}
         <span
           data-testid="grenade-blast-impact"
-          className={cn(
-            'ml-auto font-mono font-black text-sm',
-            danger ? 'text-red-400' : 'text-amber-400'
-          )}
+          className="ml-auto font-mono font-black text-sm whitespace-nowrap"
         >
-          {impactCm} см
+          {missed ? (
+            <>
+              <span className="text-cyan-400">{aimCm}</span>
+              <span className="text-slate-500 font-bold"> → </span>
+              <span className={danger ? 'text-red-400' : 'text-amber-400'}>{impactCm} см</span>
+            </>
+          ) : (
+            <span className={danger ? 'text-red-400' : 'text-amber-400'}>{impactCm} см</span>
+          )}
         </span>
       </div>
 
@@ -98,12 +109,24 @@ export function GrenadeBlastRuler({
         </div>
       )}
 
-      {/* Ruler body: markers above, track, cm labels below */}
-      <div className="relative pt-6 mt-1">
+      {/* Ruler body: aim marker in the upper lane, impact + thrower in the lower, track, labels */}
+      <div className="relative pt-11 mt-1">
+        {/* Aim marker — where the player wanted the grenade (parameters.distance) */}
+        {hasAim && (
+          <div
+            data-testid="grenade-blast-aim"
+            className="absolute top-0 -translate-x-1/2 flex flex-col items-center"
+            style={{ left: `${pct(Math.min(aimSteps!, TOTAL_STEPS))}%` }}
+          >
+            <Crosshair className="w-3.5 h-3.5 text-cyan-400" />
+            <div className="w-0 h-2.5 border-l-2 border-dashed border-cyan-400/70" />
+          </div>
+        )}
+
         {/* Impact marker */}
         <div
           data-testid="grenade-blast-marker"
-          className="absolute top-0 -translate-x-1/2 flex flex-col items-center"
+          className="absolute top-5 -translate-x-1/2 flex flex-col items-center"
           style={{ left: `${pct(grenadeDistance)}%` }}
         >
           <Bomb className={cn('w-4 h-4', danger ? 'text-red-400' : 'text-amber-300')} />
@@ -111,7 +134,7 @@ export function GrenadeBlastRuler({
         </div>
 
         {/* Thrower at 0 */}
-        <div className="absolute top-0 left-0 flex flex-col items-center">
+        <div className="absolute top-5 left-0 flex flex-col items-center">
           <Footprints className={cn('w-4 h-4', danger ? 'text-red-400' : 'text-slate-400')} />
           <div className={cn('w-px h-2', danger ? 'bg-red-400/70' : 'bg-slate-600/70')} />
         </div>

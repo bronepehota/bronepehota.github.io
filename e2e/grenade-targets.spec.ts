@@ -38,8 +38,9 @@ test.describe('Grenade target list (#165)', () => {
     await expect(throwButton).toBeVisible({ timeout: 3000 });
     await throwButton.click();
 
-    // RESULTS: single throw block; no verdict banner before the first check
+    // RESULTS: single throw block; aim crosshair + no verdict banner before the first check
     await expect(page.getByTestId('grenade-blast-ruler')).toBeVisible({ timeout: 3000 });
+    await expect(page.getByTestId('grenade-blast-aim')).toBeVisible();
     await expect(page.getByTestId('grenade-target-check-section')).toBeVisible();
     await expect(page.getByTestId('grenade-verdict-banner')).toHaveCount(0);
 

@@ -404,6 +404,7 @@ export function CombatResults({
             }}
             factor={stepToCmFactor}
             danger={isGrenadeDanger}
+            aimSteps={parameters.distance > 0 ? parameters.distance : undefined}
             throwRolls={
               result.hitResult.rolls && result.hitResult.rolls.length > 0
                 ? result.hitResult.rolls

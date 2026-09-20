@@ -594,6 +594,39 @@ describe('CombatResults - Grenade Display', () => {
       const best = dice.find(d => d.getAttribute('data-value') === '5');
       expect(best).toHaveAttribute('data-ishit', 'true');
     });
+
+    it('shows the aim point (entered distance) as a cyan crosshair on the track', () => {
+      // default mockParameters.distance = 5, throw landed at 4
+      render(<CombatResults {...defaultProps} />);
+
+      const aim = screen.getByTestId('grenade-blast-aim');
+      expect(aim.style.left).toBe('62.5%'); // 5 of 8 steps
+
+      // Header readout tells the story: aimed 25 см → landed 20 см
+      expect(screen.getByTestId('grenade-blast-impact')).toHaveTextContent('25 → 20 см');
+    });
+
+    it('collapses the readout when the throw lands exactly on the aim', () => {
+      render(<CombatResults {...defaultProps} parameters={{ ...mockParameters, distance: 4 }} />);
+
+      const aim = screen.getByTestId('grenade-blast-aim');
+      expect(aim.style.left).toBe('50%'); // same point as the impact marker
+      expect(screen.getByTestId('grenade-blast-impact')).toHaveTextContent('20 см');
+      expect(screen.getByTestId('grenade-blast-impact')).not.toHaveTextContent('→');
+    });
+
+    it('hides the aim marker when no distance was entered', () => {
+      render(<CombatResults {...defaultProps} parameters={{ ...mockParameters, distance: 0 }} />);
+
+      expect(screen.queryByTestId('grenade-blast-aim')).not.toBeInTheDocument();
+      expect(screen.getByTestId('grenade-blast-impact')).toHaveTextContent('20 см');
+    });
+
+    it('clamps an aim beyond the track scale to the right edge', () => {
+      render(<CombatResults {...defaultProps} parameters={{ ...mockParameters, distance: 12 }} />);
+
+      expect(screen.getByTestId('grenade-blast-aim').style.left).toBe('100%');
+    });
   });
 
   describe('Grenade verdict banner (latest check)', () => {
