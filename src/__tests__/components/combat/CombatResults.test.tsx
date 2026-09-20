@@ -70,29 +70,29 @@ describe('CombatResults - Grenade Display', () => {
   };
 
   describe('Tehnolog rules (single dice, no bonus)', () => {
-    it('should display single D6 dice', () => {
+    it('should display single D6 dice in the throw block', () => {
       render(<CombatResults {...defaultProps} rulesVersion="tehnolog" />);
 
       const dice = screen.getByTestId('animated-dice');
       expect(dice).toBeInTheDocument();
       expect(dice).toHaveAttribute('data-value', '4');
-      expect(dice).toHaveAttribute('data-bonus', '0');
     });
 
     it('should not display rank bonus', () => {
       render(<CombatResults {...defaultProps} rulesVersion="tehnolog" />);
 
       const dice = screen.getByTestId('animated-dice');
-      // Bonus should be 0 for tehnolog rules
-      expect(dice).toHaveAttribute('data-bonus', '0');
+      // Tehnolog: no bonus attribute on the throw die
+      expect(dice.getAttribute('data-bonus')).toBeFalsy();
     });
 
-    it('should display blast zone correctly', () => {
+    it('should display blast zone as a steps reference line on the ruler', () => {
       render(<CombatResults {...defaultProps} rulesVersion="tehnolog" />);
 
-      expect(screen.getByText('Зона взрыва')).toBeInTheDocument();
-      expect(screen.getByText('3-5')).toBeInTheDocument(); // minSteps-maxSteps
-      expect(screen.getByText('[15-25 см]')).toBeInTheDocument(); // minCm-maxCm at default factor 5
+      expect(screen.getByTestId('grenade-blast-steps')).toHaveTextContent('3-5 ШАГ');
+      // Band-edge cm labels at default factor 5
+      expect(screen.getByTestId('grenade-blast-label-min')).toHaveTextContent('15 см');
+      expect(screen.getByTestId('grenade-blast-label-max')).toHaveTextContent('25 см');
     });
 
     it('should show danger warning when roll is 1', () => {
@@ -239,7 +239,6 @@ describe('CombatResults - Grenade Display', () => {
       const diceElements = screen.getAllByTestId('animated-dice');
       expect(diceElements).toHaveLength(1);
       expect(diceElements[0]).toHaveAttribute('data-value', '4');
-      expect(diceElements[0]).toHaveAttribute('data-bonus', '0');
     });
 
     it('should not display rank bonus for community_star_system', () => {
@@ -443,8 +442,9 @@ describe('CombatResults - Grenade Display', () => {
       render(<CombatResults {...defaultProps} />);
 
       // Distance 4 → blast zone 3-5 steps, 15-25 cm at factor 5
-      expect(screen.getByText('3-5')).toBeInTheDocument();
-      expect(screen.getByText('[15-25 см]')).toBeInTheDocument();
+      expect(screen.getByTestId('grenade-blast-steps')).toHaveTextContent('3-5 ШАГ');
+      expect(screen.getByTestId('grenade-blast-label-min')).toHaveTextContent('15 см');
+      expect(screen.getByTestId('grenade-blast-label-max')).toHaveTextContent('25 см');
     });
 
     it('should handle distance 1 correctly', () => {
@@ -469,8 +469,9 @@ describe('CombatResults - Grenade Display', () => {
       render(<CombatResults {...defaultProps} result={distance1Result} />);
 
       // Distance 1 → blast zone 1-2 steps (min is 1), 5-10 cm at factor 5
-      expect(screen.getByText('1-2')).toBeInTheDocument();
-      expect(screen.getByText('[5-10 см]')).toBeInTheDocument();
+      expect(screen.getByTestId('grenade-blast-steps')).toHaveTextContent('1-2 ШАГ');
+      expect(screen.getByTestId('grenade-blast-label-min')).toHaveTextContent('5 см');
+      expect(screen.getByTestId('grenade-blast-label-max')).toHaveTextContent('10 см');
     });
 
     it('should handle high distance values', () => {
@@ -494,8 +495,9 @@ describe('CombatResults - Grenade Display', () => {
 
       render(<CombatResults {...defaultProps} result={highDistanceResult} />);
 
-      expect(screen.getByText('5-7')).toBeInTheDocument();
-      expect(screen.getByText('[25-35 см]')).toBeInTheDocument();
+      expect(screen.getByTestId('grenade-blast-steps')).toHaveTextContent('5-7 ШАГ');
+      expect(screen.getByTestId('grenade-blast-label-min')).toHaveTextContent('25 см');
+      expect(screen.getByTestId('grenade-blast-label-max')).toHaveTextContent('35 см');
     });
   });
 
@@ -556,6 +558,180 @@ describe('CombatResults - Grenade Display', () => {
       // Zone 1-2 × factor 5
       expect(screen.getByTestId('grenade-blast-label-min')).toHaveTextContent('5 см');
       expect(screen.getByTestId('grenade-blast-label-max')).toHaveTextContent('10 см');
+    });
+
+    it('uses the verdict word as the throw block title (ВЗРЫВ / ОПАСНО)', () => {
+      render(<CombatResults {...defaultProps} />);
+      expect(screen.getByTestId('grenade-throw-verdict')).toHaveTextContent('ВЗРЫВ');
+
+      const dangerResult: CombatResult = {
+        ...mockGrenadeResult,
+        hitResult: { success: true, roll: 1, total: 1, bonus: 0, isGrenade: true },
+        grenadeDistance: 1,
+        grenadeBlastZone: { minSteps: 1, maxSteps: 2, minCm: 4, maxCm: 8 },
+      };
+      render(<CombatResults {...defaultProps} result={dangerResult} />);
+      expect(screen.getAllByTestId('grenade-throw-verdict').pop()).toHaveTextContent('ОПАСНО');
+    });
+
+    it('renders the throw dice inside the ruler block, best highlighted', () => {
+      const multiRollResult: CombatResult = {
+        ...mockGrenadeResult,
+        hitResult: {
+          success: true,
+          roll: 5,
+          total: 5,
+          bonus: 0,
+          rolls: [2, 5, 3],
+          isGrenade: true,
+        },
+      };
+
+      render(<CombatResults {...defaultProps} result={multiRollResult} />);
+
+      const dice = screen.getAllByTestId('animated-dice');
+      expect(dice).toHaveLength(3);
+      const best = dice.find(d => d.getAttribute('data-value') === '5');
+      expect(best).toHaveAttribute('data-ishit', 'true');
+    });
+
+    it('shows the aim point (entered distance) as a cyan crosshair on the track', () => {
+      // default mockParameters.distance = 5, throw landed at 4
+      render(<CombatResults {...defaultProps} />);
+
+      const aim = screen.getByTestId('grenade-blast-aim');
+      expect(aim.style.left).toBe('62.5%'); // 5 of 8 steps
+
+      // Header readout tells the story: aimed 25 см → landed 20 см
+      expect(screen.getByTestId('grenade-blast-impact')).toHaveTextContent('25 → 20 см');
+    });
+
+    it('collapses the readout when the throw lands exactly on the aim', () => {
+      render(<CombatResults {...defaultProps} parameters={{ ...mockParameters, distance: 4 }} />);
+
+      const aim = screen.getByTestId('grenade-blast-aim');
+      expect(aim.style.left).toBe('50%'); // same point as the impact marker
+      expect(screen.getByTestId('grenade-blast-impact')).toHaveTextContent('20 см');
+      expect(screen.getByTestId('grenade-blast-impact')).not.toHaveTextContent('→');
+    });
+
+    it('hides the aim marker when no distance was entered', () => {
+      render(<CombatResults {...defaultProps} parameters={{ ...mockParameters, distance: 0 }} />);
+
+      expect(screen.queryByTestId('grenade-blast-aim')).not.toBeInTheDocument();
+      expect(screen.getByTestId('grenade-blast-impact')).toHaveTextContent('20 см');
+    });
+
+    it('clamps an aim beyond the track scale to the right edge', () => {
+      render(<CombatResults {...defaultProps} parameters={{ ...mockParameters, distance: 12 }} />);
+
+      expect(screen.getByTestId('grenade-blast-aim').style.left).toBe('100%');
+    });
+  });
+
+  describe('Grenade verdict banner (latest check)', () => {
+    const resultWithChecks: CombatResult = {
+      ...mockGrenadeResult,
+      grenadeBlastChecks: [
+        { armor: 2, roll: 15, hit: true },
+        { armor: 3, roll: 8, hit: false },
+      ],
+    };
+
+    it('shows the latest check verdict with target number and comparison', () => {
+      render(<CombatResults {...defaultProps} result={resultWithChecks} />);
+
+      const banner = screen.getByTestId('grenade-verdict-banner');
+      expect(banner).toHaveTextContent('НЕ ПРОБИТО');
+      expect(banner).toHaveTextContent('ЦЕЛЬ 2');
+      expect(banner).toHaveTextContent('D20 8≤3');
+    });
+
+    it('uses the amber tone for armor-held and carries the running tally', () => {
+      render(<CombatResults {...defaultProps} result={resultWithChecks} />);
+
+      const banner = screen.getByTestId('grenade-verdict-banner');
+      expect(banner).toHaveClass('border-amber-500/70');
+      expect(screen.getByTestId('grenade-hit-tally')).toHaveTextContent('💥 1/2 пробито');
+    });
+
+    it('uses the orange tone when the latest check penetrates', () => {
+      const hitLast: CombatResult = {
+        ...mockGrenadeResult,
+        grenadeBlastChecks: [
+          { armor: 3, roll: 8, hit: false },
+          { armor: 2, roll: 15, hit: true },
+        ],
+      };
+
+      render(<CombatResults {...defaultProps} result={hitLast} />);
+
+      const banner = screen.getByTestId('grenade-verdict-banner');
+      expect(banner).toHaveTextContent('ПРОБИТО');
+      expect(banner).toHaveClass('border-orange-500/70');
+    });
+
+    it('is hidden before any check is made', () => {
+      render(<CombatResults {...defaultProps} />);
+
+      expect(screen.queryByTestId('grenade-verdict-banner')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('grenade-hit-tally')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Grenade target log rows', () => {
+    it('renders one compact row per check with roll, comparison and verdict', () => {
+      const resultWithChecks: CombatResult = {
+        ...mockGrenadeResult,
+        grenadeBlastChecks: [
+          { armor: 2, roll: 15, hit: true },
+          { armor: 3, roll: 8, hit: false },
+        ],
+      };
+
+      render(<CombatResults {...defaultProps} result={resultWithChecks} />);
+
+      const rows = screen.getAllByTestId('grenade-blast-check');
+      expect(rows).toHaveLength(2);
+      expect(rows[0]).toHaveAttribute('data-hit', 'true');
+      expect(rows[0]).toHaveTextContent('15');
+      expect(rows[0]).toHaveTextContent('> 2');
+      expect(rows[0]).toHaveTextContent('ПРОБИТО');
+      expect(rows[1]).toHaveAttribute('data-hit', 'false');
+      expect(rows[1]).toHaveTextContent('≤ 3');
+      expect(rows[1]).toHaveTextContent('НЕ ПРОБИТО');
+    });
+  });
+
+  describe('Scroll to top after each blast check', () => {
+    it('resets the combat scroll container when a check is added', () => {
+      const withOneCheck: CombatResult = {
+        ...mockGrenadeResult,
+        grenadeBlastChecks: [{ armor: 2, roll: 15, hit: true }],
+      };
+
+      const scroller = document.createElement('div');
+      scroller.setAttribute('data-combat-scroll', '');
+      document.body.appendChild(scroller);
+
+      const { rerender } = render(
+        <CombatResults {...defaultProps} result={withOneCheck} />,
+        { container: scroller as HTMLElement }
+      );
+      scroller.scrollTop = 300; // player scrolled down to the sticky panel
+
+      const withTwoChecks: CombatResult = {
+        ...withOneCheck,
+        grenadeBlastChecks: [
+          ...withOneCheck.grenadeBlastChecks!,
+          { armor: 3, roll: 8, hit: false },
+        ],
+      };
+      rerender(
+        <CombatResults {...defaultProps} result={withTwoChecks} />
+      );
+
+      expect(scroller.scrollTop).toBe(0);
     });
   });
 
@@ -656,7 +832,7 @@ describe('CombatResults - Grenade Display', () => {
       expect(dice[0]).toHaveAttribute('data-resultlabel', 'none');
     });
 
-    it('keeps the verdict plate for grenade target checks', () => {
+    it('does not label per-check dice for grenade target checks (rows are text)', () => {
       const resultWithChecks: CombatResult = {
         ...mockGrenadeResult,
         grenadeBlastChecks: [
@@ -667,12 +843,15 @@ describe('CombatResults - Grenade Display', () => {
 
       render(<CombatResults {...defaultProps} result={resultWithChecks} />);
 
+      // Only the throw die remains animated; target rows carry no dice
       const dice = screen.getAllByTestId('animated-dice');
       const labeled = dice.filter(d =>
         d.getAttribute('data-resultlabel') === 'hit' ||
         d.getAttribute('data-resultlabel') === 'miss'
       );
-      expect(labeled).toHaveLength(2);
+      expect(labeled).toHaveLength(0);
+      // The verdict lives in the grenade banner instead
+      expect(screen.getByTestId('grenade-verdict-banner')).toBeInTheDocument();
     });
 
     it('does not render the banner for grenade results', () => {
