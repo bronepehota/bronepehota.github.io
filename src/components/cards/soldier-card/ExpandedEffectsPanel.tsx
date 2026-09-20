@@ -220,7 +220,7 @@ export function ExpandedEffectsPanel({
             }
       }
       className={cn(
-        'col-span-3 flex flex-row items-center justify-start gap-1.5 rounded-lg bg-slate-800/60 border min-h-[40px] px-2 transition-all select-none',
+        'col-span-3 flex flex-row flex-wrap items-center justify-start gap-1.5 rounded-lg bg-slate-800/60 border min-h-[40px] px-2 transition-all select-none',
         colorClasses,
         !disabled && 'cursor-pointer hover:bg-slate-700/30 active:scale-[0.97]',
         disabled && 'opacity-30'

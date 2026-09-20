@@ -1006,11 +1006,21 @@ describe('collectSquadSpecialProps', () => {
   });
 
   test('не-custom модификаторы бойцов не попадают в спец-свойства', () => {
-    const squad = makeSquad({
-      soldiers: [soldierWithMods(['armor_up'])],
-    });
-    const result = collectSquadSpecialProps(squad);
-    expect(result).toHaveLength(0);
+    // Инжектим реальный не-custom баф в каталог (applyTo soldier), чтобы
+    // проверялся именно фильтр target === 'custom', а не пропуск unknown id
+    mockedStorage.__setCustomBuffs([{
+      id: 'armor_up', name: 'Бронеплиты', description: '+1 брони',
+      applyTo: ['soldier'], target: 'armor_bonus', value: 1, phase: 'always',
+    }]);
+    try {
+      const squad = makeSquad({
+        soldiers: [soldierWithMods(['armor_up', 'mechanic'])],
+      });
+      const result = collectSquadSpecialProps(squad);
+      expect(result.map(b => b.id)).toEqual(['mechanic']);
+    } finally {
+      mockedStorage.__resetCustom();
+    }
   });
 
   test('неизвестный id пропускается молча', () => {

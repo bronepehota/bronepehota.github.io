@@ -141,6 +141,27 @@ test.describe('Энциклопедия', () => {
     await expect(page.locator('h1')).toBeVisible();
   });
 
+  test('досье: секция «Свойства» — из пер-солдатских modifiers (Рм) и взводных buffs (Пр4)', async ({ page }) => {
+    const propsSection = (name: string) =>
+      page.locator('section').filter({ has: page.getByRole('heading', { name }) });
+
+    // Тяжёлая клон-пехота: mechanic у всех бойцов, взводных buffs нет —
+    // раньше такая секция не появлялась вовсе
+    await page.goto('/encyclopedia/unit/polaris_tyazhyolaya_klon_pehota');
+    await page.waitForLoadState('networkidle');
+    const rmSection = propsSection('Свойства');
+    await expect(rmSection).toBeVisible();
+    await expect(rmSection.getByText('Рм', { exact: true })).toBeVisible();
+
+    // Лёгкая штурмовая клон-пехота: после удаления инлайн-дубля buffs
+    // секция остаётся — Пр4 резолвится из modifiers бойцов
+    await page.goto('/encyclopedia/unit/polaris_lyogkaya_shturmovaya_klon_pehota');
+    await page.waitForLoadState('networkidle');
+    const pro4Section = propsSection('Свойства');
+    await expect(pro4Section).toBeVisible();
+    await expect(pro4Section.getByText('Пр4', { exact: true })).toBeVisible();
+  });
+
   test('детальная страница показывает источники', async ({ page }) => {
     await page.goto('/encyclopedia/unit/polaris_lineynaya_klon_pehota');
     await page.waitForLoadState('networkidle');

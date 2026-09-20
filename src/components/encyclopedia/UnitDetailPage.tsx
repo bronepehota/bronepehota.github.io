@@ -11,6 +11,7 @@ import { ModifierIcon } from '@/components/editor/ModifierIcons';
 import { SoldierImages } from './UnitDetail/SoldierImages';
 import { SQUAD_GROUP_IMAGE, getPhotoCredit, getCredit } from '@/lib/painted-images';
 import { resolveUnitProvenance } from '@/lib/provenance';
+import { collectSquadSpecialProps } from '@/lib/modifier-utils';
 import { UnitLore } from './UnitDetail/UnitLore';
 import { UnitSpecs } from './UnitDetail/UnitSpecs';
 import { UnitArmament } from './UnitDetail/UnitArmament';
@@ -71,6 +72,11 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc, c
   // Боевая песочница (bottom-sheet) — открывается кнопкой «ПРОВЕРИТЬ БОЕМ» в CTA-панели.
   const [sandboxOpen, setSandboxOpen] = useState(false);
   const activeUnit = bySource[activeSource] ?? unit;
+  // Спец-свойства отряда (Пр4, Рм): объединение взводных buffs и
+  // пер-солдатских modifiers (каталог) — по активному источнику
+  const specialProps = activeUnit.type === 'squad'
+    ? collectSquadSpecialProps(activeUnit as unknown as Squad)
+    : [];
   const factionColors = getFactionColors(unit.faction);
   const detailLogo = factionLogos[unit.faction];
   // Rank shown next to class — follows the active source (machine.rank / squad soldier ranks).
@@ -504,8 +510,8 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc, c
                 Renders nothing for units that fought in no chronicle. */}
             <UnitCampaigns campaigns={campaigns} />
 
-            {/* Buffs section */}
-            {unit.buffs && unit.buffs.length > 0 && (
+            {/* Спец-свойства отряда (Пр4, Рм) — активный источник */}
+            {specialProps.length > 0 && (
               <section
                 className={cn(
                   'folded-paper military-corners p-6',
@@ -516,10 +522,10 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc, c
               >
                 <h2 className="font-oswald text-lg text-military-sand mb-4 flex items-center gap-2">
                   <ModifierIcon size={20} className="text-emerald-500" />
-                  Бафы
+                  Свойства
                 </h2>
                 <div className="space-y-3">
-                  {unit.buffs.map(buff => (
+                  {specialProps.map(buff => (
                     <div key={buff.id} className="flex items-start gap-3 p-3 rounded-lg bg-military-dark/50 border border-military-steel/30">
                       <div className="shrink-0 w-9 h-9 rounded-lg flex items-center justify-center bg-emerald-900/30 text-emerald-500">
                         <ModifierIcon name={buff.icon} size={18} />
