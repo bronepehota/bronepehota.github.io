@@ -236,4 +236,34 @@ test.describe('Dock navigator (СПИСОК button + auto-open)', () => {
     }));
     expect(m.menuBottom).toBeLessThanOrEqual(m.dockTop + 1);
   });
+
+  // Плейтест 2026-09-20: «свайп вниз на навигаторе не работает» — жест
+  // сидел только на 14px-ручке. Теперь потягивание вниз ловит весь лист
+  // (кроме прокрученного списка — там это скролл).
+  test('потягивание вниз по листу закрывает навигатор', async ({ page }) => {
+    await seedBattleArmy(page, [
+      squad('dn-close', 'Линейная клон-пехота', 1, [false, false]),
+      squad('dn-other', 'Штурмовая клон-пехота', 2, [false, false]),
+    ], 100);
+    await gotoBattle(page);
+
+    await page.getByTestId('dock-open-navigator').click();
+    const nav = page.getByTestId('expanded-navigator');
+    await expect(nav).toBeVisible();
+
+    // Тянем вниз от ручки листа: 96px вниз → закрылся
+    const box = await page.getByTestId('navigator-sheet').boundingBox();
+    const cx = box!.x + box!.width / 2;
+    const cy = box!.y + 14;
+    await page.mouse.move(cx, cy);
+    await page.mouse.down();
+    for (let i = 1; i <= 8; i++) {
+      await page.mouse.move(cx, cy + i * 12, { steps: 2 });
+    }
+    await page.mouse.up();
+
+    await expect(nav).not.toBeVisible();
+    // Клик после жеста поглощён: юнит не перевыбран, счётчик цел
+    await expect(page.getByTestId('dock-nav-counter')).toHaveText('0/2');
+  });
 });

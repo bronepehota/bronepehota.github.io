@@ -453,6 +453,45 @@ export default function GameSession({
     setIsDockExpanded(prev => !prev);
   }, []);
 
+  // Закрытие листа навигатора потягиванием вниз (плейтест 2026-09-20: «свайп
+  // вниз не работает» — жест сидел только на 14px-ручке, в которую не попасть).
+  // Теперь жест ловится ВСЕМ листом, но уважает скролл: на списке закрывает
+  // только когда тот в самом верху (иначе потягивание вниз — это скролл);
+  // «хром» (ручка/шапка) закрывает всегда. TouchMove гасим (preventDefault),
+  // когда трактуем жест как закрытие — иначе браузер скроллит/pull-to-refresh
+  // и жест до порога не доживает.
+  const startSheetDrag = useCallback((startY: number, target: Element | null) => {
+    const scroller = target?.closest('[data-testid="expanded-navigator"]') as HTMLElement | null;
+    const dismissable = !scroller || scroller.scrollTop <= 0;
+    let down = 0;
+    const touchMove = (e: TouchEvent) => {
+      if (!e.touches[0]) return;
+      const d = startY - e.touches[0].clientY;
+      if (-d > down) down = -d;
+      if (dismissable && down > 6) e.preventDefault();
+    };
+    const mouseMove = (e: MouseEvent) => {
+      const d = startY - e.clientY;
+      if (-d > down) down = -d;
+    };
+    const end = () => {
+      document.removeEventListener('touchmove', touchMove);
+      document.removeEventListener('touchend', end);
+      document.removeEventListener('mousemove', mouseMove);
+      document.removeEventListener('mouseup', end);
+      if (!(dismissable && down > 44)) return;
+      setIsDockExpanded(false);
+      // глотаем клик после жеста — тап, начавшийся на строке, не выбирает юнита
+      const swallow = (ce: Event) => { ce.stopPropagation(); ce.preventDefault(); };
+      document.addEventListener('click', swallow, { capture: true, once: true });
+      setTimeout(() => document.removeEventListener('click', swallow, { capture: true }), 400);
+    };
+    document.addEventListener('touchmove', touchMove, { passive: false });
+    document.addEventListener('touchend', end);
+    document.addEventListener('mousemove', mouseMove);
+    document.addEventListener('mouseup', end);
+  }, []);
+
   // Handle toggle done for current unit - called from header button
   const handleToggleUnitDone = useCallback(() => {
     if (army.units.length === 0 || focusedUnitIdx >= army.units.length) return;
@@ -882,7 +921,9 @@ export default function GameSession({
           data-testid="unit-dock"
           className={cn(
             "relative z-50 shrink-0 bg-slate-900 border-t-2",
-            "border-slate-700/70 shadow-[0_-8px_24px_rgba(0,0,0,0.45)]"
+            "border-slate-700/70 shadow-[0_-8px_24px_rgba(0,0,0,0.45)]",
+            // индикатор-бар iPhone/жестовая навигация не наезжает на кнопки
+            "[padding-bottom:env(safe-area-inset-bottom)]"
           )}
           onMouseDown={(e) => startDragGesture(false, e.clientY)}
           onTouchStart={(e) => startDragGesture(false, e.touches[0].clientY)}
@@ -1287,12 +1328,12 @@ export default function GameSession({
         <div
           data-testid="navigator-sheet"
           className="fixed inset-x-0 top-16 bottom-0 z-[70] flex flex-col bg-slate-900 border-t-2 border-slate-700/70 shadow-[0_-8px_24px_rgba(0,0,0,0.45)] animate-in slide-in-from-bottom duration-200"
+          onMouseDown={(e) => startSheetDrag(e.clientY, e.target as Element)}
+          onTouchStart={(e) => startSheetDrag(e.touches[0].clientY, e.target as Element)}
         >
           <div
-            className="flex justify-center py-1.5 active:bg-slate-800/50 transition-colors cursor-pointer shrink-0"
+            className="flex justify-center py-2.5 active:bg-slate-800/50 transition-colors cursor-pointer shrink-0"
             onClick={() => setIsDockExpanded(false)}
-            onMouseDown={(e) => startDragGesture(true, e.clientY)}
-            onTouchStart={(e) => startDragGesture(true, e.touches[0].clientY)}
           >
             <div className="w-12 h-0.5 rounded-full bg-slate-600" />
           </div>
