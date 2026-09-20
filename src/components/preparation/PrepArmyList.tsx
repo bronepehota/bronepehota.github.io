@@ -2,6 +2,7 @@
 
 import { Army, Squad } from '@/lib/types';
 import SafeImage from '@/components/SafeImage';
+import { SquadSpecialProps } from '@/components/SquadSpecialProps';
 
 interface PrepArmyListProps {
   army: Army;
@@ -29,9 +30,14 @@ export function PrepArmyList({ army }: PrepArmyListProps) {
           const squad = unit.data as Squad;
           return (
             <div key={unit.instanceId} className="space-y-2">
-              <h3 className="text-lg font-mono font-bold text-white uppercase tracking-wider">
-                {title}
-              </h3>
+              {/* Спец-свойства (Пр4, Рм) рядом с названием — последняя
+                  проверка перед боем (плейтест 2026-09-20) */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="text-lg font-mono font-bold text-white uppercase tracking-wider">
+                  {title}
+                </h3>
+                <SquadSpecialProps buffs={squad.buffs} />
+              </div>
               <div className="grid grid-cols-3 gap-2">
                 {squad.soldiers.map((soldier) => (
                   <div

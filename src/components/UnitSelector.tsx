@@ -12,6 +12,7 @@ import { FloatingContinueButton } from './controls/FloatingContinueButton';
 import { clsx } from 'clsx';
 import { getFactionColors, factionDisplayNames } from '@/lib/faction-colors';
 import { FactionLogo } from '@/components/FactionLogo';
+import { SquadSpecialProps } from './SquadSpecialProps';
 import { relationTo } from '@/lib/faction-hierarchy';
 import { buildCatalogHaystack, matchesHaystack } from '@/lib/unit-search';
 
@@ -594,6 +595,9 @@ export function UnitSelector({
                           <Shield className="w-3 h-3" />
                           <span>Бр {getSquadArmorRange(squad)}</span>
                         </div>
+                        {/* Спец-свойства (Пр4, Рм) — именованные чипы
+                            (плейтест 2026-09-20) */}
+                        <SquadSpecialProps buffs={squad.buffs} />
                       </div>
 
                       {/* Add button */}
