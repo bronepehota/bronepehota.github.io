@@ -47,4 +47,27 @@ describe('ModifierIndicator — классические спец-свойств
     expect(btn.className).toContain('border-dashed');
     expect(btn.className).not.toContain('bg-amber-950');
   });
+
+  it('активные баффы не прячут спец-свойства: имя на кнопке рядом со счётчиком', () => {
+    // «О них можно узнать только нажав на кнопку модификаторов» — неудобно;
+    // счётчик И имена свойств на самой кнопке (плейтест 2026-09-20)
+    render(<ModifierIndicator buffCount={2} debuffCount={0} staticAbilities={[pro4]} />);
+    const btn = screen.getByRole('button', { name: /2 баффов/ });
+    expect(btn).toHaveTextContent('Пр4');
+    // тесная ячейка статов: имена переносятся, а не обрезаются
+    expect(btn.className).toContain('flex-wrap');
+  });
+
+  it('применённые модификаторы не прячут имён свойств', () => {
+    render(
+      <ModifierIndicator
+        buffCount={0}
+        debuffCount={0}
+        staticAbilities={[pro4]}
+        soldierModifiers={[applied]}
+      />
+    );
+    const btn = screen.getByRole('button', { name: /1 модификатор/ });
+    expect(btn).toHaveTextContent('Пр4');
+  });
 });

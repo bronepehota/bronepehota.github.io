@@ -28,16 +28,17 @@ export function ExpandedEffectsPanel({
 }: ExpandedEffectsPanelProps) {
   const totalCount = buffCount + debuffCount;
 
-  // Спец-свойства взвода (Пр4, Рм) — изумрудные чипы имя+иконка
+  // Спец-свойства взвода (Пр4, Рм) — тихие чипы имя+иконка (плейтест:
+  // «статы важнее намного» — слева, приглушённо)
   const renderStatic = () =>
     staticAbilities.map(b => (
       <div
         key={`static-${b.id}`}
         title={`${b.name}: ${b.description}${b.oneTimeUse ? ' (раз за бой)' : ' (постоянная)'}`}
-        className="flex items-center gap-0.5 shrink-0 px-1 py-0.5 rounded border border-emerald-700/40 bg-emerald-950/20"
+        className="flex items-center gap-0.5 shrink-0 px-1 py-0.5 rounded border border-emerald-900/50"
       >
-        <ModifierIcon name={b.icon} size={12} className="text-emerald-400" />
-        <span className="text-[9px] font-mono font-bold leading-none text-emerald-300">
+        <ModifierIcon name={b.icon} size={11} className="text-emerald-500/60" />
+        <span className="text-[9px] font-mono font-medium leading-none text-emerald-500/80">
           {b.name.length > 8 ? b.name.slice(0, 7) + '.' : b.name}
         </span>
       </div>
@@ -115,7 +116,7 @@ export function ExpandedEffectsPanel({
                 }
           }
           className={cn(
-            'col-span-3 flex flex-row items-center justify-center gap-1.5 rounded-lg bg-slate-800/60 border border-emerald-700/40 min-h-[40px] px-2 transition-all select-none',
+            'col-span-3 flex flex-row items-center justify-start gap-1.5 rounded-lg bg-slate-800/60 border border-emerald-900/50 min-h-[40px] px-2 transition-all select-none',
             !disabled && 'cursor-pointer hover:bg-slate-700/30 active:scale-[0.97]',
             disabled && 'opacity-30'
           )}
@@ -144,7 +145,7 @@ export function ExpandedEffectsPanel({
                 }
           }
           className={cn(
-            'col-span-3 flex flex-row items-center justify-center gap-1.5 rounded-lg bg-amber-950/20 border border-amber-700/50 min-h-[40px] px-2 transition-all select-none',
+            'col-span-3 flex flex-row items-center justify-start gap-1.5 rounded-lg bg-amber-950/20 border border-amber-700/50 min-h-[40px] px-2 transition-all select-none',
             !disabled && 'cursor-pointer hover:bg-amber-950/30 hover:border-amber-600/60 active:scale-[0.97]',
             disabled && 'opacity-30'
           )}
@@ -173,7 +174,7 @@ export function ExpandedEffectsPanel({
               }
         }
         className={cn(
-          'col-span-3 flex flex-row items-center justify-center gap-0.5 rounded-lg bg-slate-800/60 border border-dashed border-slate-700/40 min-h-[40px] px-2 transition-all select-none',
+          'col-span-3 flex flex-row items-center justify-start gap-0.5 rounded-lg bg-slate-800/60 border border-dashed border-slate-700/40 min-h-[40px] px-2 transition-all select-none',
           !disabled && 'cursor-pointer hover:bg-slate-700/30 hover:border-slate-600/60 active:scale-[0.97]',
           disabled && 'opacity-30'
         )}
@@ -219,17 +220,19 @@ export function ExpandedEffectsPanel({
             }
       }
       className={cn(
-        'col-span-3 flex flex-row items-center justify-center gap-1.5 rounded-lg bg-slate-800/60 border min-h-[40px] px-2 transition-all select-none',
+        'col-span-3 flex flex-row flex-wrap items-center justify-start gap-1.5 rounded-lg bg-slate-800/60 border min-h-[40px] px-2 transition-all select-none',
         colorClasses,
         !disabled && 'cursor-pointer hover:bg-slate-700/30 active:scale-[0.97]',
         disabled && 'opacity-30'
       )}
-      aria-label={`${buffCount} баффов, ${debuffCount} дебаффов`}
+      aria-label={`${buffCount} баффов, ${debuffCount} дебаффов${staticAbilities.length > 0 ? `, спец-свойства: ${staticAbilities.map(b => b.name).join(', ')}` : ''}`}
     >
       <Sparkles className={cn('w-3.5 h-3.5 shrink-0', iconColor)} />
       <span className="text-xs font-mono font-bold leading-none text-inherit">
         {totalCount} {hasBuffs && hasDebuffs ? 'эффектов' : hasDebuffs ? 'дебаффов' : 'баффов'}
       </span>
+      {/* Спец-свойства (Пр4, Рм) рядом со счётчиком — как в ModifierIndicator */}
+      {renderStatic()}
     </div>
   );
 }

@@ -36,7 +36,7 @@ export function PrepArmyList({ army }: PrepArmyListProps) {
                 <h3 className="text-lg font-mono font-bold text-white uppercase tracking-wider">
                   {title}
                 </h3>
-                <SquadSpecialProps buffs={squad.buffs} />
+                <SquadSpecialProps squad={squad} />
               </div>
               <div className="grid grid-cols-3 gap-2">
                 {squad.soldiers.map((soldier) => (

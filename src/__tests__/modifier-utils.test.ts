@@ -14,8 +14,10 @@ import {
   resolveSoldierEffects,
   cleanupExpiredModifiers,
   isModifierActive,
+  collectSquadSpecialProps,
 } from '@/lib/modifier-utils';
 import type { BuffDefinition, ActiveDebuff, SoldierModifier, DebuffTemplate } from '@/lib/modifier-types';
+import type { Squad } from '@/lib/types';
 
 // Mock getCustomModifiers to control custom catalog in tests
 jest.mock('@/lib/editor/modifier-storage', () => {
@@ -959,5 +961,99 @@ describe('collectBuffsForUnit phase coverage', () => {
 
     const shotBuffs = collectBuffsForUnit(unit, army as any, 'shot');
     expect(shotBuffs).toHaveLength(2);
+  });
+});
+
+// === collectSquadSpecialProps ===
+
+describe('collectSquadSpecialProps', () => {
+  const makeSquad = (overrides: Partial<Squad> = {}): Squad => ({
+    id: 'test-squad',
+    name: 'Test Squad',
+    faction: 'polaris',
+    cost: 50,
+    soldiers: [
+      { num: 1, rank: 2, speed: 5, range: 'D6', power: '1D6', melee: 5, armor: 2 },
+      { num: 2, rank: 2, speed: 5, range: 'D6', power: '1D6', melee: 5, armor: 2 },
+    ],
+    ...overrides,
+  });
+
+  const soldierWithMods = (mods: string[]) => ({
+    num: 1, rank: 2, speed: 5, range: 'D6', power: '1D6', melee: 5, armor: 2, modifiers: mods,
+  });
+
+  test('дедуп: взводный buffs + тот же id у бойцов → одна запись Пр4', () => {
+    // Форма клон-пехоты до нормализации данных: buffs-дубль каталога + modifiers у всех
+    const pro4 = getStandardBuffs().find(b => b.id === 'jump_boost_4')!;
+    const squad = makeSquad({
+      soldiers: [soldierWithMods(['jump_boost_4']), soldierWithMods(['jump_boost_4'])],
+      buffs: [pro4],
+    });
+    const result = collectSquadSpecialProps(squad);
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe('jump_boost_4');
+    expect(result[0].name).toBe('Пр4');
+  });
+
+  test('пер-солдатские modifiers резолвятся из каталога: mechanic → Рм', () => {
+    const squad = makeSquad({
+      soldiers: [soldierWithMods(['mechanic']), soldierWithMods(['mechanic'])],
+    });
+    const result = collectSquadSpecialProps(squad);
+    expect(result).toHaveLength(1);
+    expect(result[0].name).toBe('Рм');
+  });
+
+  test('не-custom модификаторы бойцов не попадают в спец-свойства', () => {
+    // Инжектим реальный не-custom баф в каталог (applyTo soldier), чтобы
+    // проверялся именно фильтр target === 'custom', а не пропуск unknown id
+    mockedStorage.__setCustomBuffs([{
+      id: 'armor_up', name: 'Бронеплиты', description: '+1 брони',
+      applyTo: ['soldier'], target: 'armor_bonus', value: 1, phase: 'always',
+    }]);
+    try {
+      const squad = makeSquad({
+        soldiers: [soldierWithMods(['armor_up', 'mechanic'])],
+      });
+      const result = collectSquadSpecialProps(squad);
+      expect(result.map(b => b.id)).toEqual(['mechanic']);
+    } finally {
+      mockedStorage.__resetCustom();
+    }
+  });
+
+  test('неизвестный id пропускается молча', () => {
+    const squad = makeSquad({
+      soldiers: [soldierWithMods(['no_such_modifier'])],
+    });
+    expect(collectSquadSpecialProps(squad)).toHaveLength(0);
+  });
+
+  test('пустой отряд → []', () => {
+    expect(collectSquadSpecialProps(makeSquad())).toEqual([]);
+  });
+
+  test('взводный buffs редактора с target custom проходит насквозь', () => {
+    const custom: BuffDefinition = {
+      id: 'editor_special', name: 'Своё', description: 'Кастом редактора',
+      applyTo: ['soldier'], target: 'custom', value: 0, phase: 'always',
+    };
+    const result = collectSquadSpecialProps(makeSquad({ buffs: [custom] }));
+    expect(result.map(b => b.id)).toEqual(['editor_special']);
+  });
+
+  test('порядок стабилен: взводные раньше бойцовских, дедуп по первому вхождению', () => {
+    const pro5 = getStandardBuffs().find(b => b.id === 'jump_boost_5')!;
+    const squad = makeSquad({
+      buffs: [pro5],
+      soldiers: [
+        soldierWithMods(['mechanic', 'jump_boost_5']),
+        soldierWithMods(['jump_boost_3']),
+      ],
+    });
+    expect(collectSquadSpecialProps(squad).map(b => b.id)).toEqual([
+      'jump_boost_5', 'mechanic', 'jump_boost_3',
+    ]);
   });
 });
