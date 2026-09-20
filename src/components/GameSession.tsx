@@ -1003,7 +1003,8 @@ export default function GameSession({
                     <div
                       data-testid="dock-speed-badge"
                       className={cn(
-                        'flex items-center justify-center gap-0.5 rounded-lg min-h-[40px] min-w-[44px] max-w-[72px] px-1 transition-colors shrink-0',
+                        // 88px: «5 (25см)» + чип xN не должен обрезаться на 320px
+                        'flex items-center justify-center gap-0.5 rounded-lg min-h-[40px] min-w-[44px] max-w-[88px] px-1 transition-colors shrink-0',
                         isActive ? 'border border-emerald-500/40 shadow-[inset_0_0_8px_rgba(16,185,129,0.06)]' : 'border border-slate-700/40 bg-slate-800/60'
                       )}
                     >
@@ -1013,14 +1014,19 @@ export default function GameSession({
                           {squadUniformStats.commonSpeed * stepToCmFactor}
                         </span>
                       ) : (
-                        // Шаги + см в скобках, читаемым кеглем — как в статах бойца
+                        // Шаги + см в скобках, читаемым кеглем — как в статах
+                        // бойца. При активном множителе скобки скрываем:
+                        // «5 x2» короче и не вылезает из бейджа на 320px
+                        // (множенное значение — в статам бойца)
                         <>
                           <span className="text-base font-mono font-black text-cyan-300 leading-none">
                             {squadUniformStats.commonSpeed}
                           </span>
-                          <span className="text-xs font-mono font-bold text-slate-300 leading-none">
-                            ({squadUniformStats.commonSpeed * stepToCmFactor}см)
-                          </span>
+                          {!bonus && (
+                            <span className="text-xs font-mono font-bold text-slate-300 leading-none">
+                              ({squadUniformStats.commonSpeed * stepToCmFactor}см)
+                            </span>
+                          )}
                         </>
                       )}
                       {bonus && (
@@ -1187,7 +1193,7 @@ export default function GameSession({
                     rel="noopener noreferrer"
                     data-testid="game-session-mission-link"
                     onClick={() => setShowDockMenu(false)}
-                    className="px-3 py-1.5 border-b border-slate-700/50 flex items-center justify-between hover:bg-slate-700"
+                    className="min-h-[44px] px-3 py-1.5 border-b border-slate-700/50 flex items-center justify-between hover:bg-slate-700"
                   >
                     <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1">
                       <Target className="w-3 h-3" /> Миссия
@@ -1200,21 +1206,21 @@ export default function GameSession({
                 <button
                   data-testid="new-turn-button"
                   onClick={() => { startNewTurn(); setShowDockMenu(false); }}
-                  className="w-full px-3 py-2 text-left text-xs text-slate-300 hover:bg-slate-700 flex items-center gap-2"
+                  className="w-full min-h-[44px] px-3 py-2 text-left text-xs text-slate-300 hover:bg-slate-700 flex items-center gap-2"
                 >
                   <RotateCcw className="w-3.5 h-3.5 text-emerald-400" />
                   Новый тур
                 </button>
                 <button
                   onClick={() => { setTriggerEncyclopediaOpen(true); setShowDockMenu(false); setTimeout(() => setTriggerEncyclopediaOpen(false), 100); }}
-                  className="w-full px-3 py-2 text-left text-xs text-slate-300 hover:bg-slate-700 flex items-center gap-2 border-t border-slate-700/50"
+                  className="w-full min-h-[44px] px-3 py-2 text-left text-xs text-slate-300 hover:bg-slate-700 flex items-center gap-2 border-t border-slate-700/50"
                 >
                   <BookOpen className="w-3.5 h-3.5 text-blue-400" />
                   Энциклопедия
                 </button>
                 <button
                   onClick={() => { setCombatLogVisible(true); setShowDockMenu(false); }}
-                  className="w-full px-3 py-2 text-left text-xs text-slate-300 hover:bg-slate-700 flex items-center gap-2 border-t border-slate-700/50"
+                  className="w-full min-h-[44px] px-3 py-2 text-left text-xs text-slate-300 hover:bg-slate-700 flex items-center gap-2 border-t border-slate-700/50"
                 >
                   <History className="w-3.5 h-3.5 text-blue-400" />
                   История боя
@@ -1222,7 +1228,7 @@ export default function GameSession({
                 <button
                   data-testid="battle-tutorial-replay"
                   onClick={() => { setShowBattleTutorial(true); setShowDockMenu(false); }}
-                  className="w-full px-3 py-2 text-left text-xs text-slate-300 hover:bg-slate-700 flex items-center gap-2"
+                  className="w-full min-h-[44px] px-3 py-2 text-left text-xs text-slate-300 hover:bg-slate-700 flex items-center gap-2"
                 >
                   <GraduationCap className="w-3.5 h-3.5 text-amber-400" />
                   Инструктаж
@@ -1234,7 +1240,7 @@ export default function GameSession({
                     aria-pressed={wakeLockEnabled}
                     title={wakeLockEnabled ? 'Экран не будет гаснуть во время боя' : 'Держать экран включённым во время боя'}
                     className={cn(
-                      'w-full px-3 py-2 text-left text-xs flex items-center gap-2 border-t border-slate-700/50',
+                      'w-full min-h-[44px] px-3 py-2 text-left text-xs flex items-center gap-2 border-t border-slate-700/50',
                       wakeLockEnabled ? 'text-emerald-300' : 'text-slate-300 hover:bg-slate-700'
                     )}
                   >
@@ -1249,7 +1255,7 @@ export default function GameSession({
                 {army.isInBattle && (
                   <button
                     onClick={() => { onEndBattle?.(); setShowDockMenu(false); }}
-                    className="w-full px-3 py-2 text-left text-xs text-red-400 hover:bg-red-950/30 flex items-center gap-2 border-t border-slate-700/50"
+                    className="w-full min-h-[44px] px-3 py-2 text-left text-xs text-red-400 hover:bg-red-950/30 flex items-center gap-2 border-t border-slate-700/50"
                   >
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     Завершить бой
@@ -1260,7 +1266,7 @@ export default function GameSession({
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => setShowDockMenu(false)}
-                  className="w-full px-3 py-2 text-left text-xs text-slate-400 hover:bg-slate-700 flex items-center gap-2 border-t border-slate-700/50"
+                  className="w-full min-h-[44px] px-3 py-2 text-left text-xs text-slate-400 hover:bg-slate-700 flex items-center gap-2 border-t border-slate-700/50"
                 >
                   <MessageCircle className="w-3.5 h-3.5 text-amber-400" />
                   Сообщить о проблеме

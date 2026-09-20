@@ -38,4 +38,13 @@ describe('ModifierIndicator — классические спец-свойств
     render(<ModifierIndicator buffCount={0} debuffCount={0} />);
     expect(screen.getByRole('button', { name: 'Добавить эффект' })).toBeInTheDocument();
   });
+
+  it('«доступно N» — тихая кнопка: пунктир, без янтарной заливки (плейтест)', () => {
+    // «Кнопка слишком видна, но на неё редко нажимают»: доступность —
+    // возможность, а не событие; янтарь остаётся только в иконке
+    render(<ModifierIndicator buffCount={0} debuffCount={0} availableCount={3} />);
+    const btn = screen.getByRole('button', { name: '3 эффектов доступно' });
+    expect(btn.className).toContain('border-dashed');
+    expect(btn.className).not.toContain('bg-amber-950');
+  });
 });

@@ -126,6 +126,10 @@ export function ModifierIndicator({
     }
 
     if (availableCount && availableCount > 0) {
+      // Плейтест 2026-09-20: «кнопка слишком видна, но на неё редко нажимают».
+      // «Доступно N» — не событие, а возможность: тихий пунктир в тон заглушки,
+      // янтарь только в иконке. Ярко — только реальному состоянию (баффы/
+      // дебаффы/спец-свойства).
       return (
         <div
           role="button"
@@ -143,14 +147,14 @@ export function ModifierIndicator({
                 }
           }
           className={cn(
-            'flex flex-row items-center justify-center gap-1 rounded-lg bg-amber-950/20 border border-amber-700/50 min-h-[40px] min-w-[44px] flex-1 px-1 transition-all select-none',
-            !disabled && 'cursor-pointer hover:bg-amber-950/30 hover:border-amber-600/60 active:scale-[0.97]',
+            'flex flex-row items-center justify-center gap-1 rounded-lg bg-slate-800/60 border border-dashed border-slate-700/40 min-h-[40px] min-w-[44px] flex-1 px-1 transition-all select-none',
+            !disabled && 'cursor-pointer hover:bg-slate-700/30 hover:border-amber-600/50 active:scale-[0.97]',
             disabled && 'opacity-30'
           )}
           aria-label={`${availableCount} эффектов доступно`}
         >
-          <Sparkles className="w-3 h-3 text-amber-400 shrink-0" />
-          <span className="text-xs font-mono font-black text-amber-400 leading-none">{availableCount}</span>
+          <Sparkles className="w-3 h-3 text-amber-400/70 shrink-0" />
+          <span className="text-[10px] font-mono font-bold text-slate-400 leading-none">{availableCount}</span>
         </div>
       );
     }
