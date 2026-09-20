@@ -181,8 +181,11 @@ export function CompactUnitCard({
               <span className="text-[10px] font-mono text-slate-600">
                 {quickStats}
               </span>
-              {/* Спец-свойства (Пр4, Рм) — у техники их нет */}
-              <SquadSpecialProps buffs={isMachine ? undefined : (unit as Squad).buffs} />
+              {/* Спец-свойства (Пр4/Пр5, Рм) — у техники их нет */}
+              <SquadSpecialProps
+                buffs={isMachine ? undefined : (unit as Squad).buffs}
+                name={isMachine ? undefined : (unit as Squad).name}
+              />
             </div>
           </div>
           <div className="text-right flex-shrink-0">

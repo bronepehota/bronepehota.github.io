@@ -30,13 +30,13 @@ export function PrepArmyList({ army }: PrepArmyListProps) {
           const squad = unit.data as Squad;
           return (
             <div key={unit.instanceId} className="space-y-2">
-              {/* Спец-свойства (Пр4, Рм) рядом с названием — последняя
+              {/* Спец-свойства (Пр4/Пр5, Рм) рядом с названием — последняя
                   проверка перед боем (плейтест 2026-09-20) */}
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="text-lg font-mono font-bold text-white uppercase tracking-wider">
                   {title}
                 </h3>
-                <SquadSpecialProps buffs={squad.buffs} />
+                <SquadSpecialProps buffs={squad.buffs} name={squad.name} />
               </div>
               <div className="grid grid-cols-3 gap-2">
                 {squad.soldiers.map((soldier) => (

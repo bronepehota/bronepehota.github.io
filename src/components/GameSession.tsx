@@ -22,6 +22,7 @@ import { LOCAL_STORAGE_KEYS } from '@/lib/constants';
 import { checkSquadUniformStats, getAliveSoldiersCount, countUnitsByStatus } from '@/lib/unit-utils';
 import { deriveUnitStatus, UnitStatus } from '@/lib/unit-status';
 import { resolveModifierSummary } from '@/lib/modifier-utils';
+import { withClassicProps } from '@/lib/classic-props';
 
 interface GameSessionProps {
   army: Army;
@@ -683,7 +684,9 @@ export default function GameSession({
         // Resolve buffs: squad-level + soldier-level modifiers from catalog
         const sourceData = army.sourceId ? getSourceWithCustom(army.sourceId) : null;
         const liveSquad = sourceData?.squads.find(s => s.id === unit.data.id);
-        const squadBuffs = (liveSquad?.buffs || unit.data.buffs || []);
+        // Классические спец-свойства (Пр4/Пр5/Рм) выводим из каталога по
+        // названию взвода — данные не дублируем (classic-props.ts)
+        const squadBuffs = withClassicProps(liveSquad?.buffs || unit.data.buffs, unit.data.name);
         const si = effectsModalState.soldierIndex;
         // Resolve per-soldier modifier IDs against catalog
         const soldier = (unit.data as Squad).soldiers[si];

@@ -30,6 +30,20 @@ describe('SquadSpecialProps — спец-свойства на карточка�
     expect(container).toBeEmptyDOMElement();
   });
 
+  it('выводит свойства из каталога по названию (без дублей с явными бафами)', () => {
+    // кибер → Пр5 из каталога, buffs в данных пусты
+    const { rerender } = render(<SquadSpecialProps buffs={[]} name="Киберпехота" />);
+    expect(screen.getByText('Пр5')).toBeInTheDocument();
+
+    // фелиц → Рм
+    rerender(<SquadSpecialProps buffs={[]} name="Фелицианская гвардия" />);
+    expect(screen.getByText('Рм')).toBeInTheDocument();
+
+    // явный Пр4 + совпадающее название: один чип, не два
+    rerender(<SquadSpecialProps buffs={[pro4]} name="Лёгкая штурмовая клон-пехота" />);
+    expect(screen.getAllByText('Пр4')).toHaveLength(1);
+  });
+
   it('CompactUnitCard: чип у отряда, у техники нет', () => {
     const squad = {
       id: 'polaris_shturmovaya', name: 'Штурмовая клон-пехота', shortName: 'ШКП',

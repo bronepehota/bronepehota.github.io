@@ -595,9 +595,9 @@ export function UnitSelector({
                           <Shield className="w-3 h-3" />
                           <span>Бр {getSquadArmorRange(squad)}</span>
                         </div>
-                        {/* Спец-свойства (Пр4, Рм) — именованные чипы
+                        {/* Спец-свойства (Пр4/Пр5, Рм) — именованные чипы
                             (плейтест 2026-09-20) */}
-                        <SquadSpecialProps buffs={squad.buffs} />
+                        <SquadSpecialProps buffs={squad.buffs} name={squad.name} />
                       </div>
 
                       {/* Add button */}

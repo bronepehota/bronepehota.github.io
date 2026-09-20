@@ -37,4 +37,19 @@ test.describe('Спец-свойства взвода в построителе 
     await expect(prep).toBeVisible();
     await expect(prep.getByText('Пр4')).toBeVisible();
   });
+
+  // Правило выводит свойства из каталога по названию взвода: кибер → Пр5,
+  // фелиц → Рм (данные взводов не несут копий каталога)
+  test('Киберпехота → Пр5, Фелицианская гвардия → Рм', async ({ page }) => {
+    await setupToArmyBuilder(page, { faction: 'protectorate', budget: 350 });
+
+    await page.getByTestId('unit-search-input').fill('киберпехота');
+    await expect(
+      page.locator('[data-testid^="unit-card-"]').getByText('Пр5').first()
+    ).toBeVisible();
+
+    await page.getByTestId('unit-search-input').fill('фелицианская');
+    const guardCard = page.locator('[data-testid^="unit-card-"]').first();
+    await expect(guardCard.getByText('Рм')).toBeVisible();
+  });
 });

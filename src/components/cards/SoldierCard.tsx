@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import type { Squad, ArmyUnit, Army } from '@/lib/types';
 import { collectBuffsForUnit, getSoldierModifiers, resolveModifierSummary, isModifierActive } from '@/lib/modifier-utils';
 import { getSourceWithCustom } from '@/lib/sources-registry';
+import { withClassicProps } from '@/lib/classic-props';
 
 interface SoldierCardProps {
   squad: Squad;
@@ -204,10 +205,13 @@ function SoldierCard({
     const soldierMods = getSoldierModifiers(unit, soldierIndex, armyLike);
     const soldierDebuffs = soldierMods.filter(m => m.value < 0);
     const debuffs = [...unitDebuffs, ...soldierDebuffs];
-    // Resolve buffs: only squad-level (set via editor), no catalog fallback
+    // Resolve buffs: only squad-level (set via editor), no catalog fallback.
+    // Классические спец-свойства (Пр4/Пр5/Рм) выводим из каталога по
+    // названию взвода — в данных не дублируем (classic-props.ts)
     const sourceData = sourceId ? getSourceWithCustom(sourceId) : null;
     const liveSquad = sourceData?.squads.find(s => s.id === squad.id);
-    const available = (liveSquad?.buffs || squad.buffs || [])
+    const templateBuffs = withClassicProps(liveSquad?.buffs || squad.buffs, squad.name);
+    const available = templateBuffs
       .filter((b: any) => b.applyTo?.includes('soldier')).length;
 
     // Классические спец-свойства взвода (Пр4, Рм — каталог standard-modifiers):
@@ -217,7 +221,7 @@ function SoldierCard({
     // использовавшего Пр4, иконка дублировалась (статическая + применённая).
     const buffsUsed = new Set(unit.buffsUsed || []);
     const abilitiesUsed = new Set(unit.soldierAbilitiesUsed || []);
-    const staticAbilities = (liveSquad?.buffs || squad.buffs || [])
+    const staticAbilities = templateBuffs
       .filter((b: any) => b.applyTo?.includes('soldier') && !(
         b.oneTimeUse && (buffsUsed.has(b.id) || abilitiesUsed.has(`${b.id}_${soldierIndex}`))
       ));

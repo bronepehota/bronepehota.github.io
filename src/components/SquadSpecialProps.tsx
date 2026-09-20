@@ -2,21 +2,26 @@
 
 import type { BuffDefinition } from '@/lib/modifier-types';
 import { ModifierIcon } from '@/components/editor/ModifierIcons';
+import { withClassicProps } from '@/lib/classic-props';
 import { cn } from '@/lib/utils';
 
 /**
- * Классические спец-свойства взвода (Пр4, Рм — каталог standard-modifiers,
- * target 'custom') именованными чипами на карточках армии: ростер
- * (CompactArmyCard), селектор и детальный вид (SquadCard). Плейтест
- * 2026-09-20: «постоянный баф — показывать его название, чтобы на отрядах
- * было его видно» — экран боя уже показывает их (ModifierIndicator).
- * Обычные бафы-модификаторы не показываем: им место в бою.
+ * Классические спец-свойства взвода (Пр4, Пр5, Рм) именованными чипами на
+ * карточках армии: ростер (CompactUnitCard), каталог (UnitSelector) и
+ * список на подготовке (PrepArmyList). Плейтест 2026-09-20: «постоянный
+ * баф — показывать его название, чтобы на отрядах было его видно».
+ *
+ * Сами свойства ВЫВОДЯТСЯ из каталога модификаторов по названию взвода
+ * (classic-props.ts) — плюс любые явные custom-бафы из данных. Обычные
+ * бафы-модификаторы не показываем: им место в бою.
  */
-export function SquadSpecialProps({ buffs, className }: {
+export function SquadSpecialProps({ buffs, name, className }: {
   buffs?: BuffDefinition[];
+  /** Название взвода — источник классических свойств (кибер→Пр5 и т.п.) */
+  name?: string;
   className?: string;
 }) {
-  const specials = (buffs || []).filter(b => b.target === 'custom');
+  const specials = withClassicProps(buffs, name).filter(b => b.target === 'custom');
   if (specials.length === 0) return null;
   return (
     <span className={cn('flex items-center gap-1 min-w-0', className)}>
