@@ -93,6 +93,51 @@ function getRowStatsLine(unit: ArmyUnit): string {
   return parts.join(' · ');
 }
 
+/**
+ * Общий блок фото строки и плитки навигатора: портретный бокс 3:4 по аспекту
+ * миниатюры, номер взвода в углу, опциональная метка статуса поверх фото
+ * (плитки; в строке метка справа от статов). boxClass задаёт размеры и
+ * позиционирование бокса (h-* у плитки / w-* у строки).
+ */
+function UnitPhoto({ src, instanceNumber, boxClass, small, glyph, glyphClass }: {
+  src?: string;
+  instanceNumber?: number;
+  boxClass: string;
+  /** компактный вариант (убитые): мельче номер и метка */
+  small: boolean;
+  glyph?: string;
+  glyphClass?: string;
+}) {
+  return (
+    <div className={cn('relative aspect-[3/4] rounded-sm overflow-hidden bg-slate-900/80', boxClass)}>
+      {src ? (
+        <img
+          src={src}
+          alt=""
+          aria-hidden="true"
+          className="w-full h-full object-cover"
+          style={{ objectPosition: '50% 15%' }}
+        />
+      ) : (
+        <span className="absolute inset-0 flex items-center justify-center text-slate-500 text-xs">IMG</span>
+      )}
+      <span className="absolute bottom-[2px] left-[2px] px-1 rounded-sm bg-black/70">
+        <span className={cn('font-bold font-mono text-slate-300', small ? 'text-[9px]' : 'text-[10px]')}>
+          #{instanceNumber || ''}
+        </span>
+      </span>
+      {glyph && (
+        <span
+          className={cn('absolute top-[2px] right-[2px] w-5 text-center font-black', small ? 'text-sm' : 'text-base', glyphClass)}
+          aria-hidden="true"
+        >
+          {glyph}
+        </span>
+      )}
+    </div>
+  );
+}
+
 export const ExpandedUnitRow = memo(function ExpandedUnitRow({
   unit,
   isActive,
@@ -133,29 +178,14 @@ export const ExpandedUnitRow = memo(function ExpandedUnitRow({
         <div aria-hidden="true" className={cn('absolute inset-y-0 left-0 w-1', mark.stripe)} />
         {/* Фото — портретный бокс по аспекту миниатюры (3:4), по центру:
             полноширинный ландшафтный кроп показывал «кусок юнита» (плейтест) */}
-        <div className={cn('relative mx-auto aspect-[3/4] rounded-sm overflow-hidden bg-slate-900/80 flex items-center justify-center', deadTile ? 'h-14' : 'h-24')}>
-          {finalSrc ? (
-            <img
-              src={finalSrc}
-              alt=""
-              aria-hidden="true"
-              className="w-full h-full object-cover"
-              style={{ objectPosition: '50% 15%' }}
-            />
-          ) : (
-            <span className="text-slate-500 text-xs">IMG</span>
-          )}
-          <span className="absolute bottom-[2px] left-[4px] px-1 rounded-sm bg-black/70">
-            <span className={cn('font-bold font-mono text-slate-300', deadTile ? 'text-[9px]' : 'text-[10px]')}>
-              #{unit.instanceNumber || ''}
-            </span>
-          </span>
-          {mark.glyph && (
-            <span className={cn('absolute top-[2px] right-[2px] w-5 text-center font-black', deadTile ? 'text-sm' : 'text-base', mark.glyphClass)} aria-hidden="true">
-              {mark.glyph}
-            </span>
-          )}
-        </div>
+        <UnitPhoto
+          src={finalSrc}
+          instanceNumber={unit.instanceNumber}
+          boxClass={cn('mx-auto', deadTile ? 'h-14' : 'h-24')}
+          small={deadTile}
+          glyph={mark.glyph}
+          glyphClass={mark.glyphClass}
+        />
         <div className="px-1.5 py-1 min-w-0">
           <div className={cn('font-bold font-mono uppercase tracking-wide truncate', deadTile ? 'text-[10px]' : 'text-[11px]', mark.nameClass)}>
             {unit.data.name}
@@ -187,27 +217,12 @@ export const ExpandedUnitRow = memo(function ExpandedUnitRow({
       <div aria-hidden="true" className={cn('self-stretch w-1 shrink-0 rounded-full', mark.stripe)} />
 
       {/* Фото: крупное у живых (распознавание миниатюры), скромное у убитых */}
-      <div className={cn(
-        'relative shrink-0 aspect-[3/4] rounded-sm overflow-hidden bg-slate-900/80',
-        compact ? 'w-14' : 'w-24'
-      )}>
-        {finalSrc ? (
-          <img
-            src={finalSrc}
-            alt=""
-            aria-hidden="true"
-            className="w-full h-full object-cover"
-            style={{ objectPosition: '50% 15%' }}
-          />
-        ) : (
-          <span className="text-slate-500 text-xs">IMG</span>
-        )}
-        <span className="absolute bottom-[2px] left-[2px] px-1 rounded-sm bg-black/70">
-          <span className={cn('font-bold font-mono text-slate-300', compact ? 'text-[9px]' : 'text-[10px]')}>
-            #{unit.instanceNumber || ''}
-          </span>
-        </span>
-      </div>
+      <UnitPhoto
+        src={finalSrc}
+        instanceNumber={unit.instanceNumber}
+        boxClass={cn('shrink-0', compact ? 'w-14' : 'w-24')}
+        small={compact}
+      />
 
       {/* Полное имя + строка статов */}
       <div className="flex-1 min-w-0">

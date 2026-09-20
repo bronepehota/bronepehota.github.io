@@ -50,6 +50,19 @@ export function ExpandedNavigator({ army, focusedUnitIdx, onSelectUnit }: Expand
   // Живых (вкл. походивших/захваченных) ≥5 — двухколоночная сетка плиток
   const gridMode = aliveCount >= GRID_ALIVE_THRESHOLD;
 
+  // Строки строятся один раз; отличается только обёртка (сетка/колонка)
+  const rows = ordered.map(({ unit, idx }) => (
+    <ExpandedUnitRow
+      key={unit.instanceId}
+      unit={unit}
+      isActive={focusedUnitIdx === idx}
+      section={deriveUnitStatus(unit)}
+      onClick={() => onSelectUnit(idx)}
+      faction={faction}
+      layout={gridMode ? 'tile' : 'row'}
+    />
+  ));
+
   return (
     <div className="flex-1 overflow-y-auto custom-scrollbar" data-testid="expanded-navigator">
       <div className="flex items-center px-3.5 py-2.5 bg-gradient-to-b from-[#0f1623] to-[#0a0e17] border-b border-slate-800 sticky top-0 z-10">
@@ -72,30 +85,11 @@ export function ExpandedNavigator({ army, focusedUnitIdx, onSelectUnit }: Expand
 
       {gridMode ? (
         <div className="grid grid-cols-2 gap-1.5 items-start p-2 pt-1.5">
-          {ordered.map(({ unit, idx }) => (
-            <ExpandedUnitRow
-              key={unit.instanceId}
-              unit={unit}
-              isActive={focusedUnitIdx === idx}
-              section={deriveUnitStatus(unit)}
-              onClick={() => onSelectUnit(idx)}
-              faction={faction}
-              layout="tile"
-            />
-          ))}
+          {rows}
         </div>
       ) : (
         <div className="flex flex-col divide-y divide-slate-800/60 pb-2">
-          {ordered.map(({ unit, idx }) => (
-            <ExpandedUnitRow
-              key={unit.instanceId}
-              unit={unit}
-              isActive={focusedUnitIdx === idx}
-              section={deriveUnitStatus(unit)}
-              onClick={() => onSelectUnit(idx)}
-              faction={faction}
-            />
-          ))}
+          {rows}
         </div>
       )}
     </div>

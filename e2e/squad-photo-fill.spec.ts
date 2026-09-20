@@ -3,12 +3,14 @@ import { setupGameSessionWithSquad, setupGameSessionWithMachine, clearStorage, w
 
 /**
  * Squad photo fill (плейтест 2026-09-18: «фото мелкие, кто есть кто не
- * различить; снизу пусто»). Контракт раскладки:
+ * различить; снизу пусто»). Контракт раскладки (2026-09-20: док — окно
+ * В ПОТОКЕ, контент физически не может зайти под панель):
  * - короткий взвод → колонка растягивается (min-h-full), строки делят
  *   остаток, фото растут (кап min(224px,40vw) на обёртке — единый на всех
  *   вьюпортах: правая колонка-«череп» убрана, статы на 320px достаточно
  *   широкие для длинных кубов; аспект 3:4);
- * - полный взвод (6) → остатка нет, фото на полу (~85px), скролл работает.
+ * - полный взвод (6) → остатка нет, фото на полу (~85px), скролл работает;
+ * - граница окон: низ скролл-области = верх дока (никаких paddingBottom-резервов).
  * DOM-замеры (getBoundingClientRect/computed), не скриншоты.
  */
 test.describe('Squad photo fill in battle view', () => {
@@ -20,7 +22,7 @@ test.describe('Squad photo fill in battle view', () => {
 
   test('short squad (2): photos grow past the floor and fill the space above the dock', async ({ page }) => {
     await setupGameSessionWithSquad(page, { soldierCount: 2 });
-    await waitForBattleDock(page); // док смонтирован → bottomInset применён
+    await waitForBattleDock(page);
 
     // Заполняет ровно: внутреннего скролла нет
     const scroll = page.getByTestId('squad-scroll');
@@ -38,15 +40,16 @@ test.describe('Squad photo fill in battle view', () => {
     const w = await photo.evaluate((el) => el.getBoundingClientRect().width);
     expect(w).toBeLessThanOrEqual(h * 0.75 + 1.5);
 
-    // Низ последней строки — над док-инсетом (paddingBottom скролла = высота дока)
+    // ГЛАВНЫЙ инвариант «фиксированных окон»: окно карточки кончается на
+    // верхней границе дока — ничего не заходит под панель
     const m = await page.evaluate(() => {
       const c = document.querySelector('[data-testid="squad-scroll"]')!;
       const photos = Array.from(c.querySelectorAll('[data-testid="soldier-photo"]'));
       const last = photos[photos.length - 1] as HTMLElement;
-      const pb = parseFloat(getComputedStyle(c).paddingBottom);
-      return { lastBottom: last.getBoundingClientRect().bottom, limit: c.getBoundingClientRect().bottom - pb };
+      const dock = document.querySelector('[data-testid="unit-dock"]')!;
+      return { lastBottom: last.getBoundingClientRect().bottom, dockTop: dock.getBoundingClientRect().top };
     });
-    expect(m.lastBottom).toBeLessThanOrEqual(m.limit + 1.5);
+    expect(m.lastBottom).toBeLessThanOrEqual(m.dockTop + 1.5);
   });
 
   test('full squad (6): photos stay at the floor and the area scrolls', async ({ page }) => {
@@ -63,10 +66,10 @@ test.describe('Squad photo fill in battle view', () => {
     expect(h).toBeLessThanOrEqual(100);
   });
 
-  // Полноэкранный просмотр фото (плейтест 2026-09-19: «изображения занимают
-  // пространство, однако не учитывают нижнюю панель»). Оверлей должен
-  // резервировать снизу высоту дока (bottomInset), как squad-scroll.
-  test('fullscreen фото бойца не заходит под нижний док', async ({ page }) => {
+  // Полноэкранный просмотр фото (плейтест 2026-09-19). С 2026-09-20 док —
+  // окно в потоке, оверлей z-100 накрывает его целиком: фото использует
+  // всю высоту экрана, тап в область дока закрывает просмотр.
+  test('fullscreen фото бойца накрывает док и использует всю высоту', async ({ page }) => {
     await setupGameSessionWithSquad(page, {});
     await waitForBattleDock(page);
 
@@ -78,14 +81,21 @@ test.describe('Squad photo fill in battle view', () => {
 
     const m = await page.evaluate(() => {
       const dock = document.querySelector('[data-testid="unit-dock"]')!;
+      const dockRect = dock.getBoundingClientRect();
+      const hit = document.elementFromPoint(dockRect.left + dockRect.width / 2, dockRect.top + dockRect.height / 2);
       const box = document.querySelector('[data-testid="soldier-image-overlay"] div.flex-1')!;
-      return { boxBottom: box.getBoundingClientRect().bottom, dockTop: dock.getBoundingClientRect().top };
+      return {
+        dockCovered: !!hit?.closest('[data-testid="soldier-image-overlay"]'),
+        boxBottom: box.getBoundingClientRect().bottom,
+        dockTop: dockRect.top,
+      };
     });
-    // Низ контейнера фото — над верхом дока ( paddingBottom = высота дока)
-    expect(m.boxBottom).toBeLessThanOrEqual(m.dockTop + 1.5);
+    expect(m.dockCovered, 'оверлей накрывает док — клики по панели закрывают фото').toBe(true);
+    // Контейнер фото занимает место, где раньше был резерв под док
+    expect(m.boxBottom).toBeGreaterThan(m.dockTop);
   });
 
-  test('fullscreen фото техники не заходит под нижний док', async ({ page }) => {
+  test('fullscreen фото техники накрывает док и использует всю высоту', async ({ page }) => {
     await setupGameSessionWithMachine(page);
     await waitForBattleDock(page);
 
@@ -95,10 +105,17 @@ test.describe('Squad photo fill in battle view', () => {
 
     const m = await page.evaluate(() => {
       const dock = document.querySelector('[data-testid="unit-dock"]')!;
+      const dockRect = dock.getBoundingClientRect();
+      const hit = document.elementFromPoint(dockRect.left + dockRect.width / 2, dockRect.top + dockRect.height / 2);
       const box = document.querySelector('[data-testid="machine-image-overlay"] div.flex-1')!;
-      return { boxBottom: box.getBoundingClientRect().bottom, dockTop: dock.getBoundingClientRect().top };
+      return {
+        dockCovered: !!hit?.closest('[data-testid="machine-image-overlay"]'),
+        boxBottom: box.getBoundingClientRect().bottom,
+        dockTop: dockRect.top,
+      };
     });
-    expect(m.boxBottom).toBeLessThanOrEqual(m.dockTop + 1.5);
+    expect(m.dockCovered).toBe(true);
+    expect(m.boxBottom).toBeGreaterThan(m.dockTop);
   });
 });
 

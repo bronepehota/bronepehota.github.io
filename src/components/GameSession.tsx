@@ -62,7 +62,6 @@ export default function GameSession({
   const [showTurnConfirmation, setShowTurnConfirmation] = useState(false);
   const [focusedUnitIdx, setFocusedUnitIdx] = useState(0);
   const [isDockExpanded, setIsDockExpanded] = useState(false);
-  const [dockDragProgress, setDockDragProgress] = useState(0);
   const [triggerEncyclopediaOpen, setTriggerEncyclopediaOpen] = useState(false);
   const [effectsModalState, setEffectsModalState] = useState<{
     unitId: string;
@@ -92,29 +91,6 @@ export default function GameSession({
     };
   }, []);
   const { clearAllMemory } = useCombatTargetContext();
-
-  // Ref for dock element to compute dynamic positions.
-  // The army loads asynchronously, so the dock is NOT present on first mount.
-  // A `useEffect([])` would run before the dock exists and never observe it,
-  // leaving dockHeight stuck at the initial value. A callback ref attaches the
-  // observer exactly when the dock element mounts (and re-attaches if it
-  // remounts), measuring its height reliably.
-  const dockObserverRef = useRef<ResizeObserver | null>(null);
-  const [dockHeight, setDockHeight] = useState(80);
-  const setDockRef = useCallback((node: HTMLDivElement | null) => {
-    dockObserverRef.current?.disconnect();
-    dockObserverRef.current = null;
-    if (!node) return;
-    // Measure immediately so the reserve is correct before the first callback.
-    setDockHeight(node.clientHeight);
-    const observer = new ResizeObserver(entries => {
-      for (const entry of entries) {
-        setDockHeight(entry.contentRect.height);
-      }
-    });
-    observer.observe(node);
-    dockObserverRef.current = observer;
-  }, []);
 
   // Keep ref to current army for immediate access in updateUnit
   const armyRef = useRef(army);
@@ -438,64 +414,40 @@ export default function GameSession({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [nextUnit, prevUnit]);
 
-  // Dock expand/collapse gesture handlers.
-  // Movement-gated: a press WITHOUT movement (a plain click) must NOT
-  // collapse the dock — collapsing on mouseup unmounts the expanded
-  // navigator between mouseup and click, swallowing the row's onClick
-  // (selection never lands). Zero-move press → no-op; the row/handle's own
-  // onClick acts. A real swipe still collapses (down) / expands (up >50%).
-  const dockDragMovedRef = useRef(false);
-  const handleDockMouseDown = useCallback((e: React.MouseEvent) => {
-    const startY = e.clientY;
-    dockDragMovedRef.current = false;
-    const handleMove = (moveEvent: MouseEvent) => {
-      const currentY = moveEvent.clientY;
-      const diff = startY - currentY; // Positive when swiping up
-      if (Math.abs(diff) > 4) dockDragMovedRef.current = true;
-      const progress = Math.max(0, Math.min(1, diff / 200));
-      setDockDragProgress(progress);
+  // Жест «потянуть» для дока и листа навигатора: короткий свайп вверх в
+  // ЛЮБОМ месте дока открывает навигатор, потягивание вниз за ручку листа —
+  // закрывает (плейтест: «должно легко переключаться — паршиво работало»:
+  // старый порог читался из устаревшего замыкания и почти не срабатывал).
+  // Клик без движения жестом не считается; после настоявшегося жеста клик
+  // гасится — свайп, начатый на кнопке «Готов», не отмечает бойца.
+  const startDragGesture = useCallback((open: boolean, startY: number) => {
+    let up = 0, down = 0, moved = false;
+    const track = (y: number) => {
+      const diff = startY - y; // вверх — плюс
+      if (Math.abs(diff) > 8) moved = true;
+      if (diff > up) up = diff;
+      if (-diff > down) down = -diff;
     };
-
-    const handleEnd = () => {
-      if (dockDragProgress > 0.5) {
-        setIsDockExpanded(true);
-      } else if (dockDragMovedRef.current) {
-        setIsDockExpanded(false);
+    const mouseMove = (e: MouseEvent) => track(e.clientY);
+    const touchMove = (e: TouchEvent) => { if (e.touches[0]) track(e.touches[0].clientY); };
+    const end = () => {
+      document.removeEventListener('mousemove', mouseMove);
+      document.removeEventListener('mouseup', end);
+      document.removeEventListener('touchmove', touchMove);
+      document.removeEventListener('touchend', end);
+      if (moved) {
+        const swallow = (e: Event) => { e.stopPropagation(); e.preventDefault(); };
+        document.addEventListener('click', swallow, { capture: true, once: true });
+        setTimeout(() => document.removeEventListener('click', swallow, { capture: true }), 400);
       }
-      setDockDragProgress(0);
-      document.removeEventListener('mousemove', handleMove);
-      document.removeEventListener('mouseup', handleEnd);
+      if (!open && up > 60) setIsDockExpanded(true);
+      if (open && down > 40) setIsDockExpanded(false);
     };
-
-    document.addEventListener('mousemove', handleMove);
-    document.addEventListener('mouseup', handleEnd);
-  }, [dockDragProgress]);
-
-  const handleDockTouchStart = useCallback((e: React.TouchEvent) => {
-    const startY = e.touches[0].clientY;
-    dockDragMovedRef.current = false;
-    const handleMove = (moveEvent: TouchEvent) => {
-      const currentY = moveEvent.touches[0].clientY;
-      const diff = startY - currentY; // Positive when swiping up
-      if (Math.abs(diff) > 4) dockDragMovedRef.current = true;
-      const progress = Math.max(0, Math.min(1, diff / 200));
-      setDockDragProgress(progress);
-    };
-
-    const handleEnd = () => {
-      if (dockDragProgress > 0.5) {
-        setIsDockExpanded(true);
-      } else if (dockDragMovedRef.current) {
-        setIsDockExpanded(false);
-      }
-      setDockDragProgress(0);
-      document.removeEventListener('touchmove', handleMove);
-      document.removeEventListener('touchend', handleEnd);
-    };
-
-    document.addEventListener('touchmove', handleMove);
-    document.addEventListener('touchend', handleEnd);
-  }, [dockDragProgress]);
+    document.addEventListener('mousemove', mouseMove);
+    document.addEventListener('mouseup', end);
+    document.addEventListener('touchmove', touchMove, { passive: true });
+    document.addEventListener('touchend', end);
+  }, []);
 
   const toggleDockExpanded = useCallback(() => {
     setIsDockExpanded(prev => !prev);
@@ -865,8 +817,9 @@ export default function GameSession({
         </div>
       )}
 
-      {/* Main Content - Full viewport height utilization */}
-      <div className="flex-1 min-h-0 overflow-hidden">
+      {/* Main Content — окно карточки. Док ниже в потоке: контент физически
+          не может зайти под панель, никаких bottomInset-замеров не нужно. */}
+      <div className="flex-1 min-h-0 overflow-hidden relative">
         {army.units.length > 0 && (
           <div className={cn(
             "w-full h-full flex flex-col min-h-0",
@@ -893,52 +846,58 @@ export default function GameSession({
               }}
               hideArmor={hideArmorForUnit}
               hideSpeed={hideSpeedForUnit}
-              bottomInset={dockHeight}
             />
+          </div>
+        )}
+
+        {/* Floating "End Turn" button - appears when all units are done.
+            NB: testid intentionally differs from the dock-menu «Новый тур» item
+            (new-turn-button) — the old duplicate testid was a strict-mode hazard
+            when both rendered. E2E targets the menu item. */}
+        {army.units.length > 0 && getIncompleteUnits().length === 0 && !isDockExpanded && (
+          <div className="absolute inset-x-2 bottom-2 z-40 animate-in slide-in-from-bottom-4 duration-300">
+            <button
+              data-testid="floating-new-turn-button"
+              onClick={startNewTurn}
+              className={cn(
+                "w-full flex items-center justify-center gap-2 py-3.5 rounded-xl border-2 font-mono font-bold text-base uppercase tracking-wider transition-all min-h-[48px]",
+                "cursor-pointer active:scale-[0.97] hover:scale-[1.01]",
+                factionColors.border, factionColors.bg, factionColors.primary,
+                "shadow-lg backdrop-blur-sm"
+              )}
+            >
+              <RotateCcw className="w-4 h-4" />
+              Завершить тур {army.currentTurn || 1}
+            </button>
           </div>
         )}
       </div>
 
-      {/* Compact Unit Dock - Technical HUD styling */}
+      {/* Dock — окно панели В ПОТОКЕ раскладки (shrink-0): карточка кончается
+          на его верхней границе, зайти под панель невозможно — никаких
+          bottomInset-замеров. slate-900 + stronger edge + shadow: док
+          читается отдельной консолью (bg совпадает с корнем страницы) */}
       {army.units.length > 0 && (
         <div
-          ref={setDockRef}
           data-testid="unit-dock"
           className={cn(
-            // slate-900 + stronger edge + shadow: the dock must read as a
-            // distinct console panel over the battlefield (bg matches the
-            // page root otherwise — playtest: "не видно что это панель")
-            "fixed left-0 right-0 z-50 bg-slate-900 border-t-2 transition-all duration-200 ease-out",
-            "border-slate-700/70 shadow-[0_-8px_24px_rgba(0,0,0,0.45)]",
-            isDockExpanded ? "top-16 bottom-0" : "bottom-0"
+            "relative z-50 shrink-0 bg-slate-900 border-t-2",
+            "border-slate-700/70 shadow-[0_-8px_24px_rgba(0,0,0,0.45)]"
           )}
-          onMouseDown={handleDockMouseDown}
-          onTouchStart={handleDockTouchStart}
+          onMouseDown={(e) => startDragGesture(false, e.clientY)}
+          onTouchStart={(e) => startDragGesture(false, e.touches[0].clientY)}
         >
-          {/* Expand/collapse handle - minimal */}
+          {/* Ручка открытия навигатора — тап или свайп вверх по доку */}
           <div
             className="flex justify-center py-1 active:bg-slate-800/50 transition-colors cursor-pointer"
             onClick={toggleDockExpanded}
           >
             <div className={cn(
               "w-8 h-0.5 rounded-full transition-all duration-200",
-              isDockExpanded ? "bg-slate-600 w-12" : factionColors.bgSolid
+              factionColors.bgSolid
             )} />
           </div>
 
-          {/* Content based on expanded state */}
-          {isDockExpanded ? (
-            <ExpandedNavigator
-              army={army}
-              focusedUnitIdx={focusedUnitIdx}
-              onSelectUnit={(idx) => { setFocusedUnitIdx(idx); setIsDockExpanded(false); }}
-            />
-          ) : (
-            /* Compact view — info bar only (playtest 2026-09-18: лента
-               мелких иконок была нечитаемой; навигация между юнитами —
-               через развёрнутый навигатор: кнопка СПИСОК, свайп вверх и
-               авто-открытие при завершении хода юнита) */
-            <>
           {/* Current unit info bar — two readable rows (playtest fix: the old
               single text-xs row was unreadable on phones).
               Row 1: identity (number + name + живые бойцы). Row 2: stats + done.
@@ -1044,7 +1003,8 @@ export default function GameSession({
                     <div
                       data-testid="dock-speed-badge"
                       className={cn(
-                        'flex items-center justify-center gap-0.5 rounded-lg min-h-[40px] min-w-[44px] max-w-[72px] px-1 transition-colors shrink-0',
+                        // 88px: «5 (25см)» + чип xN не должен обрезаться на 320px
+                        'flex items-center justify-center gap-0.5 rounded-lg min-h-[40px] min-w-[44px] max-w-[88px] px-1 transition-colors shrink-0',
                         isActive ? 'border border-emerald-500/40 shadow-[inset_0_0_8px_rgba(16,185,129,0.06)]' : 'border border-slate-700/40 bg-slate-800/60'
                       )}
                     >
@@ -1054,14 +1014,19 @@ export default function GameSession({
                           {squadUniformStats.commonSpeed * stepToCmFactor}
                         </span>
                       ) : (
-                        // Шаги + см в скобках, читаемым кеглем — как в статах бойца
+                        // Шаги + см в скобках, читаемым кеглем — как в статах
+                        // бойца. При активном множителе скобки скрываем:
+                        // «5 x2» короче и не вылезает из бейджа на 320px
+                        // (множенное значение — в статам бойца)
                         <>
                           <span className="text-base font-mono font-black text-cyan-300 leading-none">
                             {squadUniformStats.commonSpeed}
                           </span>
-                          <span className="text-xs font-mono font-bold text-slate-300 leading-none">
-                            ({squadUniformStats.commonSpeed * stepToCmFactor}см)
-                          </span>
+                          {!bonus && (
+                            <span className="text-xs font-mono font-bold text-slate-300 leading-none">
+                              ({squadUniformStats.commonSpeed * stepToCmFactor}см)
+                            </span>
+                          )}
                         </>
                       )}
                       {bonus && (
@@ -1211,128 +1176,131 @@ export default function GameSession({
               </div>
             </div>
           )}
-            </>
+
+          {/* Dock Menu Dropdown — absolute над доком: док в потоке и
+              relative, смещение bottom-full не требует замеров высоты */}
+          {showDockMenu && (
+            <div data-dock-menu-root className="absolute bottom-full right-2 mb-1 z-[60] animate-in fade-in duration-150">
+              <div className="bg-slate-800 border border-slate-700 rounded-sm shadow-xl py-1 min-w-[150px]">
+                <div className="px-3 py-1.5 border-b border-slate-700/50 flex items-center justify-between">
+                  <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-500">Тур</span>
+                  <span className={cn("text-sm font-mono font-black", factionColors.primary)}>{army.currentTurn || 1}</span>
+                </div>
+                {selectedMission && (
+                  <Link
+                    href={`/encyclopedia/mission/${selectedMission.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-testid="game-session-mission-link"
+                    onClick={() => setShowDockMenu(false)}
+                    className="min-h-[44px] px-3 py-1.5 border-b border-slate-700/50 flex items-center justify-between hover:bg-slate-700"
+                  >
+                    <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1">
+                      <Target className="w-3 h-3" /> Миссия
+                    </span>
+                    <span className={cn("text-xs font-mono font-bold truncate ml-2 max-w-[90px]", factionColors.primary)}>
+                      {selectedMission.name}
+                    </span>
+                  </Link>
+                )}
+                <button
+                  data-testid="new-turn-button"
+                  onClick={() => { startNewTurn(); setShowDockMenu(false); }}
+                  className="w-full min-h-[44px] px-3 py-2 text-left text-xs text-slate-300 hover:bg-slate-700 flex items-center gap-2"
+                >
+                  <RotateCcw className="w-3.5 h-3.5 text-emerald-400" />
+                  Новый тур
+                </button>
+                <button
+                  onClick={() => { setTriggerEncyclopediaOpen(true); setShowDockMenu(false); setTimeout(() => setTriggerEncyclopediaOpen(false), 100); }}
+                  className="w-full min-h-[44px] px-3 py-2 text-left text-xs text-slate-300 hover:bg-slate-700 flex items-center gap-2 border-t border-slate-700/50"
+                >
+                  <BookOpen className="w-3.5 h-3.5 text-blue-400" />
+                  Энциклопедия
+                </button>
+                <button
+                  onClick={() => { setCombatLogVisible(true); setShowDockMenu(false); }}
+                  className="w-full min-h-[44px] px-3 py-2 text-left text-xs text-slate-300 hover:bg-slate-700 flex items-center gap-2 border-t border-slate-700/50"
+                >
+                  <History className="w-3.5 h-3.5 text-blue-400" />
+                  История боя
+                </button>
+                <button
+                  data-testid="battle-tutorial-replay"
+                  onClick={() => { setShowBattleTutorial(true); setShowDockMenu(false); }}
+                  className="w-full min-h-[44px] px-3 py-2 text-left text-xs text-slate-300 hover:bg-slate-700 flex items-center gap-2"
+                >
+                  <GraduationCap className="w-3.5 h-3.5 text-amber-400" />
+                  Инструктаж
+                </button>
+                {wakeLock.supported && (
+                  <button
+                    data-testid="wake-lock-toggle"
+                    onClick={(e) => { e.stopPropagation(); handleToggleWakeLock(); }}
+                    aria-pressed={wakeLockEnabled}
+                    title={wakeLockEnabled ? 'Экран не будет гаснуть во время боя' : 'Держать экран включённым во время боя'}
+                    className={cn(
+                      'w-full min-h-[44px] px-3 py-2 text-left text-xs flex items-center gap-2 border-t border-slate-700/50',
+                      wakeLockEnabled ? 'text-emerald-300' : 'text-slate-300 hover:bg-slate-700'
+                    )}
+                  >
+                    <Power className={cn('w-3.5 h-3.5', wakeLockEnabled ? 'text-emerald-400' : 'text-slate-400')} />
+                    Не гаснуть
+                    {/* Точка — от ФАКТА (wakeLock.active), не от намерения: при
+                        отказе API (Low Power Mode и пр.) лок не держится, и
+                        светить «активен» нельзя (ревью PR #242) */}
+                    {wakeLock.active && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" aria-hidden="true" />}
+                  </button>
+                )}
+                {army.isInBattle && (
+                  <button
+                    onClick={() => { onEndBattle?.(); setShowDockMenu(false); }}
+                    className="w-full min-h-[44px] px-3 py-2 text-left text-xs text-red-400 hover:bg-red-950/30 flex items-center gap-2 border-t border-slate-700/50"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    Завершить бой
+                  </button>
+                )}
+                <a
+                  href="https://vk.com/lastbpcoder"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setShowDockMenu(false)}
+                  className="w-full min-h-[44px] px-3 py-2 text-left text-xs text-slate-400 hover:bg-slate-700 flex items-center gap-2 border-t border-slate-700/50"
+                >
+                  <MessageCircle className="w-3.5 h-3.5 text-amber-400" />
+                  Сообщить о проблеме
+                </a>
+              </div>
+            </div>
           )}
         </div>
       )}
 
-
-      {/* Dock Menu Dropdown - fixed position to escape dock overflow */}
-      {showDockMenu && (
-        <div data-dock-menu-root className="fixed right-2 z-[60] animate-in fade-in duration-150" style={{ bottom: `${dockHeight + 40}px` }}>
-          <div className="bg-slate-800 border border-slate-700 rounded-sm shadow-xl py-1 min-w-[150px]">
-            <div className="px-3 py-1.5 border-b border-slate-700/50 flex items-center justify-between">
-              <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-500">Тур</span>
-              <span className={cn("text-sm font-mono font-black", factionColors.primary)}>{army.currentTurn || 1}</span>
-            </div>
-            {selectedMission && (
-              <Link
-                href={`/encyclopedia/mission/${selectedMission.id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                data-testid="game-session-mission-link"
-                onClick={() => setShowDockMenu(false)}
-                className="px-3 py-1.5 border-b border-slate-700/50 flex items-center justify-between hover:bg-slate-700"
-              >
-                <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1">
-                  <Target className="w-3 h-3" /> Миссия
-                </span>
-                <span className={cn("text-xs font-mono font-bold truncate ml-2 max-w-[90px]", factionColors.primary)}>
-                  {selectedMission.name}
-                </span>
-              </Link>
-            )}
-            <button
-              data-testid="new-turn-button"
-              onClick={() => { startNewTurn(); setShowDockMenu(false); }}
-              className="w-full px-3 py-2 text-left text-xs text-slate-300 hover:bg-slate-700 flex items-center gap-2"
-            >
-              <RotateCcw className="w-3.5 h-3.5 text-emerald-400" />
-              Новый тур
-            </button>
-            <button
-              onClick={() => { setTriggerEncyclopediaOpen(true); setShowDockMenu(false); setTimeout(() => setTriggerEncyclopediaOpen(false), 100); }}
-              className="w-full px-3 py-2 text-left text-xs text-slate-300 hover:bg-slate-700 flex items-center gap-2 border-t border-slate-700/50"
-            >
-              <BookOpen className="w-3.5 h-3.5 text-blue-400" />
-              Энциклопедия
-            </button>
-            <button
-              onClick={() => { setCombatLogVisible(true); setShowDockMenu(false); }}
-              className="w-full px-3 py-2 text-left text-xs text-slate-300 hover:bg-slate-700 flex items-center gap-2 border-t border-slate-700/50"
-            >
-              <History className="w-3.5 h-3.5 text-blue-400" />
-              История боя
-            </button>
-            <button
-              data-testid="battle-tutorial-replay"
-              onClick={() => { setShowBattleTutorial(true); setShowDockMenu(false); }}
-              className="w-full px-3 py-2 text-left text-xs text-slate-300 hover:bg-slate-700 flex items-center gap-2"
-            >
-              <GraduationCap className="w-3.5 h-3.5 text-amber-400" />
-              Инструктаж
-            </button>
-            {wakeLock.supported && (
-              <button
-                data-testid="wake-lock-toggle"
-                onClick={(e) => { e.stopPropagation(); handleToggleWakeLock(); }}
-                aria-pressed={wakeLockEnabled}
-                title={wakeLockEnabled ? 'Экран не будет гаснуть во время боя' : 'Держать экран включённым во время боя'}
-                className={cn(
-                  'w-full px-3 py-2 text-left text-xs flex items-center gap-2 border-t border-slate-700/50',
-                  wakeLockEnabled ? 'text-emerald-300' : 'text-slate-300 hover:bg-slate-700'
-                )}
-              >
-                <Power className={cn('w-3.5 h-3.5', wakeLockEnabled ? 'text-emerald-400' : 'text-slate-400')} />
-                Не гаснуть
-                {/* Точка — от ФАКТА (wakeLock.active), не от намерения: при
-                    отказе API (Low Power Mode и пр.) лок не держится, и
-                    светить «активен» нельзя (ревью PR #242) */}
-                {wakeLock.active && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" aria-hidden="true" />}
-              </button>
-            )}
-            {army.isInBattle && (
-              <button
-                onClick={() => { onEndBattle?.(); setShowDockMenu(false); }}
-                className="w-full px-3 py-2 text-left text-xs text-red-400 hover:bg-red-950/30 flex items-center gap-2 border-t border-slate-700/50"
-              >
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                Завершить бой
-              </button>
-            )}
-            <a
-              href="https://vk.com/lastbpcoder"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => setShowDockMenu(false)}
-              className="w-full px-3 py-2 text-left text-xs text-slate-400 hover:bg-slate-700 flex items-center gap-2 border-t border-slate-700/50"
-            >
-              <MessageCircle className="w-3.5 h-3.5 text-amber-400" />
-              Сообщить о проблеме
-            </a>
-          </div>
-        </div>
-      )}
-
-      {/* Floating "End Turn" button - appears when all units are done.
-          NB: testid intentionally differs from the dock-menu «Новый тур» item
-          (new-turn-button) — the old duplicate testid was a strict-mode hazard
-          when both rendered. E2E targets the menu item. */}
-      {army.units.length > 0 && getIncompleteUnits().length === 0 && !isDockExpanded && (
-        <div className="fixed left-2 right-2 z-[55] animate-in slide-in-from-bottom-4 duration-300" style={{ bottom: `${dockHeight + 12}px` }}>
-          <button
-            data-testid="floating-new-turn-button"
-            onClick={startNewTurn}
-            className={cn(
-              "w-full flex items-center justify-center gap-2 py-3.5 rounded-xl border-2 font-mono font-bold text-base uppercase tracking-wider transition-all min-h-[48px]",
-              "cursor-pointer active:scale-[0.97] hover:scale-[1.01]",
-              factionColors.border, factionColors.bg, factionColors.primary,
-              "shadow-lg backdrop-blur-sm"
-            )}
+      {/* Navigator sheet — отдельное фиксированное окно, а не «растущий док»
+          (плейтест 2026-09-20: расширяющийся док требовал замеров высоты и
+          всё равно пропускал контент под панель). Триггеры прежние: кнопка
+          СПИСОК, свайп вверх по доку, авто-открытие после хода юнита.
+          Закрытие: выбор строки, ручка (тап/потянуть вниз). Раскладку дока
+          и карточки не трогает. */}
+      {army.units.length > 0 && isDockExpanded && (
+        <div
+          data-testid="navigator-sheet"
+          className="fixed inset-x-0 top-16 bottom-0 z-[70] flex flex-col bg-slate-900 border-t-2 border-slate-700/70 shadow-[0_-8px_24px_rgba(0,0,0,0.45)] animate-in slide-in-from-bottom duration-200"
+        >
+          <div
+            className="flex justify-center py-1.5 active:bg-slate-800/50 transition-colors cursor-pointer shrink-0"
+            onClick={() => setIsDockExpanded(false)}
+            onMouseDown={(e) => startDragGesture(true, e.clientY)}
+            onTouchStart={(e) => startDragGesture(true, e.touches[0].clientY)}
           >
-            <RotateCcw className="w-4 h-4" />
-            Завершить тур {army.currentTurn || 1}
-          </button>
+            <div className="w-12 h-0.5 rounded-full bg-slate-600" />
+          </div>
+          <ExpandedNavigator
+            army={army}
+            focusedUnitIdx={focusedUnitIdx}
+            onSelectUnit={(idx) => { setFocusedUnitIdx(idx); setIsDockExpanded(false); }}
+          />
         </div>
       )}
 

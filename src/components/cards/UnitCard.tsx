@@ -72,8 +72,6 @@ interface UnitCardProps {
   army?: Army;
   hideArmor?: boolean;
   hideSpeed?: boolean;
-  /** Bottom space to reserve so content clears the fixed bottom dock (battle view). */
-  bottomInset?: number;
 }
 
 
@@ -97,7 +95,6 @@ export default function UnitCard({
   army,
   hideArmor = false,
   hideSpeed = false,
-  bottomInset = 0,
 }: UnitCardProps) {
   // Custom hooks for state management
   const {
@@ -783,14 +780,12 @@ export default function UnitCard({
         </div>
       )}
 
-      {/* Image Overlay - Fixed to viewport */}
+      {/* Image Overlay - Fixed to viewport; накрывает всё, включая док —
+          фото максимально, закрывается тапом */}
       {showImage && data.image && (
         <div
           data-testid="machine-image-overlay"
           className="fixed inset-0 z-[100] bg-slate-950 flex flex-col p-2 animate-in fade-in duration-200"
-          // Нижний резерв под фиксированный док (плейтест: зумированное фото
-          // заходило под панель) — тот же приём, что у squad-scroll
-          style={{ paddingBottom: bottomInset }}
           onClick={() => setShowImage(false)}
         >
           <div className="flex justify-between items-center mb-1 px-2 shrink-0">
@@ -804,14 +799,12 @@ export default function UnitCard({
         </div>
       )}
 
-      {/* Soldier Image Overlay - Fixed to viewport */}
+      {/* Soldier Image Overlay - Fixed to viewport; накрывает всё, включая
+          док — фото максимально, закрывается тапом */}
       {showSoldierImage !== null && (
         <div
           data-testid="soldier-image-overlay"
           className="fixed inset-0 z-[100] bg-slate-950 flex flex-col p-2 animate-in fade-in duration-200"
-          // Нижний резерв под фиксированный док — тот же приём, что у
-          // squad-scroll: фото целиком видно над панелью
-          style={{ paddingBottom: bottomInset }}
           onClick={() => setShowSoldierImage(null)}
         >
           <div className="flex justify-between items-center mb-1 px-2 shrink-0">
@@ -834,14 +827,15 @@ export default function UnitCard({
         </div>
       )}
 
-      {/* Unit Content - Full height utilization */}
+      {/* Unit Content - Full height utilization. Окно карточки кончается на
+          верхней границе дока (док в потоке в GameSession) — скроллу не нужен
+          нижний резерв под панель */}
       <div
         data-testid={isSquad ? 'squad-scroll' : undefined}
         className={cn(
           "px-1 md:px-2 py-1 md:py-2 relative z-10 min-h-0",
           isSquad ? "overflow-y-auto flex-1" : "pb-2 overflow-hidden"
         )}
-        style={isSquad ? { paddingBottom: bottomInset } : undefined}
       >
         {isSquad ? (
           <SquadView
