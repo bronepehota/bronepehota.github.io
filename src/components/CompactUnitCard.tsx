@@ -8,6 +8,7 @@ import type { Squad, Machine, FactionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { getFactionColors, factionDisplayNames } from '@/lib/faction-colors';
 import { FactionLogo } from '@/components/FactionLogo';
+import { SquadSpecialProps } from './SquadSpecialProps';
 
 interface CompactUnitCardProps {
   unit: Squad | Machine;
@@ -180,6 +181,8 @@ export function CompactUnitCard({
               <span className="text-[10px] font-mono text-slate-600">
                 {quickStats}
               </span>
+              {/* Спец-свойства (Пр4, Рм) — у техники их нет */}
+              <SquadSpecialProps buffs={isMachine ? undefined : (unit as Squad).buffs} />
             </div>
           </div>
           <div className="text-right flex-shrink-0">
