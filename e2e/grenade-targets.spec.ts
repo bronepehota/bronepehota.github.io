@@ -2,17 +2,20 @@ import { test, expect } from '@playwright/test';
 import { setupGameSessionWithSquad, clearStorage } from './helpers/setup';
 
 /**
- * #165 — grenade target list must scroll and keep ВЗРЫВ reachable for many targets.
+ * #165 + blast-rework — grenade target log stays compact for many targets:
+ * one-line rows, the fresh verdict banner lands at the top, and the modal
+ * content snaps back to the top after every ВЗРЫВ (thumb taps at the bottom,
+ * eyes read the result at the top).
  *
  * Flow: expand unit card -> "Выберите действие" -> ГРАНАТА -> PARAMETERS (БРОСИТЬ)
- *       -> RESULTS phase with sticky arming panel -> click ВЗРЫВ 6x -> verify scroll/labels/ПРИНЯТЬ
+ *       -> RESULTS (throw block + sticky arming strip) -> click ВЗРЫВ 6x
  */
 test.describe('Grenade target list (#165)', () => {
   test.beforeEach(async ({ page }) => {
     await clearStorage(page);
   });
 
-  test('scrolls and keeps ВЗРЫВ reachable for 6+ targets', async ({ page }) => {
+  test('compact log, verdict banner on top, scroll-to-top after each ВЗРЫВ', async ({ page }) => {
     await setupGameSessionWithSquad(page, {
       unitOverrides: { instanceId: 'grenade-unit-1' },
     });
@@ -35,27 +38,31 @@ test.describe('Grenade target list (#165)', () => {
     await expect(throwButton).toBeVisible({ timeout: 3000 });
     await throwButton.click();
 
-    // Arming panel (sticky target-check section) visible
-    const section = page.getByTestId('grenade-target-check-section');
-    await expect(section).toBeVisible({ timeout: 3000 });
+    // RESULTS: single throw block; no verdict banner before the first check
+    await expect(page.getByTestId('grenade-blast-ruler')).toBeVisible({ timeout: 3000 });
+    await expect(page.getByTestId('grenade-target-check-section')).toBeVisible();
+    await expect(page.getByTestId('grenade-verdict-banner')).toHaveCount(0);
 
-    // Add 6 targets via ВЗРЫВ button; verify sticky panel stays reachable after each
+    // Add 6 targets via ВЗРЫВ; after each: row count, banner names the fresh
+    // target, and the modal content is snapped back to the top
     const explode = page.getByTestId('grenade-explode-button');
+    const scrollEl = page.getByTestId('combat-modal-scroll');
     for (let i = 1; i <= 6; i++) {
       await expect(explode).toBeVisible();
       await explode.click();
       await expect(page.getByTestId('grenade-blast-check')).toHaveCount(i);
+      await expect(page.getByTestId('grenade-verdict-banner')).toContainText(`ЦЕЛЬ ${i}`);
+      await expect
+        .poll(() => scrollEl.evaluate((el) => el.scrollTop))
+        .toBe(0);
     }
 
-    // All six target checks present
+    // All six target rows present, tally counts the whole log
     await expect(page.getByTestId('grenade-blast-check')).toHaveCount(6);
+    await expect(page.getByTestId('grenade-hit-tally')).toContainText('/6 пробито');
 
-    // "ЦЕЛЬ 6" label renders and is reachable via scroll
-    const target6 = page.getByText('ЦЕЛЬ 6');
-    await target6.scrollIntoViewIfNeeded();
-    await expect(target6).toBeVisible();
-
-    // ПРИНЯТЬ button reachable at the bottom
+    // Sticky arming strip keeps ВЗРЫВ reachable; ПРИНЯТЬ closes the flow
+    await expect(page.getByTestId('grenade-target-check-section')).toBeVisible();
     const applyButton = page.getByRole('button', { name: /принять/i });
     await applyButton.scrollIntoViewIfNeeded();
     await expect(applyButton).toBeVisible();

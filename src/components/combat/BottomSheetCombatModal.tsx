@@ -248,6 +248,8 @@ export function BottomSheetCombatModal({
 
         {/* Content - Scrollable */}
         <div
+          data-combat-scroll
+          data-testid="combat-modal-scroll"
           className="flex-1 min-h-0 overflow-y-auto custom-scrollbar p-2 md:p-3"
           onScroll={(e) => setContentScrolled(e.currentTarget.scrollTop > 4)}
         >

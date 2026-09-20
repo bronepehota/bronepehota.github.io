@@ -1,7 +1,8 @@
 'use client';
 
-import { Bomb, Footprints } from 'lucide-react';
+import { AlertTriangle, Bomb, Footprints } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { AnimatedDice } from './AnimatedDice';
 
 interface GrenadeBlastRulerProps {
   /** Impact point in steps from the thrower (best D6 roll) */
@@ -12,6 +13,8 @@ interface GrenadeBlastRulerProps {
   factor: number;
   /** D6 === 1: the thrower is inside the blast zone */
   danger: boolean;
+  /** Throw dice ( Tehnolog: one; community: one per rank, best precomputed upstream ) */
+  throwRolls?: number[];
 }
 
 // Fixed track scale: max possible maxSteps is 7 (D6 = 6 + 1), so 8 keeps every
@@ -20,61 +23,97 @@ const TOTAL_STEPS = 8;
 const pct = (steps: number) => (steps / TOTAL_STEPS) * 100;
 
 /**
- * GrenadeBlastRuler — tape-measure visualization of the blast zone.
+ * GrenadeBlastRuler — the single throw block of the grenade results.
  *
- * Shows the thrower at 0, the impact marker at the rolled distance and the
- * ±1-step blast band, labeled in cm computed from the player's step→cm toggle
- * (NOT the legacy ×4 minCm/maxCm fields on the result — see combat-types).
+ * Folds the old four blocks (danger banner, throw grid, verdict pill, ruler)
+ * into one: verdict word as the title, throw dice beside it, impact readout in
+ * cm on the right, tape-measure track below. cm comes from the player's
+ * step→cm toggle (NOT the legacy ×4 minCm/maxCm fields — see combat-types).
  */
 export function GrenadeBlastRuler({
   grenadeDistance,
   blastZone,
   factor,
   danger,
+  throwRolls,
 }: GrenadeBlastRulerProps) {
   const { minSteps, maxSteps } = blastZone;
   const minCm = minSteps * factor;
   const maxCm = maxSteps * factor;
   const impactCm = grenadeDistance * factor;
+  const rolls = throwRolls ?? [];
+  const bestRoll = rolls.length > 0 ? Math.max(...rolls) : undefined;
 
   return (
     <div
       data-testid="grenade-blast-ruler"
       data-danger={danger ? 'true' : undefined}
-      className="bg-slate-900/80 p-3 rounded-lg border-2 border-amber-600/40"
+      className={cn(
+        'bg-slate-900/80 p-3 rounded-lg border-2',
+        danger ? 'border-red-600/50' : 'border-amber-600/40'
+      )}
     >
-      {/* Header: label + impact readout in cm */}
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-[10px] font-mono uppercase tracking-wider text-amber-400/60">
-          Линейка взрыва
+      {/* Title row: verdict word + throw dice + impact readout */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <span
+          data-testid="grenade-throw-verdict"
+          className={cn(
+            'text-[10px] font-mono uppercase tracking-wider',
+            danger ? 'text-red-400 font-black' : 'text-amber-400/60 font-bold'
+          )}
+        >
+          {danger ? 'ОПАСНО' : 'ВЗРЫВ'}
         </span>
+        {rolls.map((roll, i) => {
+          const isBest = roll === bestRoll;
+          return (
+            <AnimatedDice
+              key={i}
+              value={roll}
+              maxSide={6}
+              color={isBest ? (danger ? 'red' : 'emerald') : 'blue'}
+              size="sm"
+              delay={i * 100}
+              isHit={isBest}
+              className={cn(!isBest && 'opacity-40')}
+            />
+          );
+        })}
         <span
           data-testid="grenade-blast-impact"
           className={cn(
-            "font-mono font-black text-sm",
-            danger ? "text-red-400" : "text-amber-400"
+            'ml-auto font-mono font-black text-sm',
+            danger ? 'text-red-400' : 'text-amber-400'
           )}
         >
           {impactCm} см
         </span>
       </div>
 
+      {/* Danger: the thrower is inside their own blast */}
+      {danger && (
+        <div className="flex items-center gap-1.5 mt-1.5 text-red-400 font-mono text-[11px] uppercase tracking-wider animate-pulse">
+          <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+          <span>Опасно! Вы в зоне взрыва!</span>
+        </div>
+      )}
+
       {/* Ruler body: markers above, track, cm labels below */}
-      <div className="relative pt-6">
+      <div className="relative pt-6 mt-1">
         {/* Impact marker */}
         <div
           data-testid="grenade-blast-marker"
           className="absolute top-0 -translate-x-1/2 flex flex-col items-center"
           style={{ left: `${pct(grenadeDistance)}%` }}
         >
-          <Bomb className={cn("w-4 h-4", danger ? "text-red-400" : "text-amber-300")} />
-          <div className={cn("w-px h-2", danger ? "bg-red-400/70" : "bg-amber-400/70")} />
+          <Bomb className={cn('w-4 h-4', danger ? 'text-red-400' : 'text-amber-300')} />
+          <div className={cn('w-px h-2', danger ? 'bg-red-400/70' : 'bg-amber-400/70')} />
         </div>
 
         {/* Thrower at 0 */}
         <div className="absolute top-0 left-0 flex flex-col items-center">
-          <Footprints className={cn("w-4 h-4", danger ? "text-red-400" : "text-slate-400")} />
-          <div className={cn("w-px h-2", danger ? "bg-red-400/70" : "bg-slate-600/70")} />
+          <Footprints className={cn('w-4 h-4', danger ? 'text-red-400' : 'text-slate-400')} />
+          <div className={cn('w-px h-2', danger ? 'bg-red-400/70' : 'bg-slate-600/70')} />
         </div>
 
         {/* Track with per-step ticks */}
@@ -99,10 +138,10 @@ export function GrenadeBlastRuler({
           <div
             data-testid="grenade-blast-band"
             className={cn(
-              "absolute inset-y-0 rounded-sm border-x animate-pop-in",
+              'absolute inset-y-0 rounded-sm border-x animate-pop-in',
               danger
-                ? "bg-red-500/80 border-red-300/50"
-                : "bg-amber-500/80 border-amber-300/50"
+                ? 'bg-red-500/80 border-red-300/50'
+                : 'bg-amber-500/80 border-amber-300/50'
             )}
             style={{
               left: `${pct(minSteps)}%`,
@@ -111,7 +150,7 @@ export function GrenadeBlastRuler({
           />
         </div>
 
-        {/* cm labels at the band edges */}
+        {/* cm labels at the band edges + steps reference on the right */}
         <div className="relative mt-1.5 h-4">
           <span className="absolute left-0 text-[10px] font-mono text-slate-500 leading-none">
             0
@@ -129,6 +168,12 @@ export function GrenadeBlastRuler({
             style={{ left: `${pct(maxSteps)}%` }}
           >
             {maxCm} см
+          </span>
+          <span
+            data-testid="grenade-blast-steps"
+            className="absolute right-0 text-[10px] font-mono text-slate-500 leading-none whitespace-nowrap"
+          >
+            {minSteps}-{maxSteps} ШАГ
           </span>
         </div>
       </div>

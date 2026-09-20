@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { CombatResult, CombatParameters } from '@/lib/combat-types';
 import { RulesVersionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { AlertTriangle, Skull, Shield, Footprints, Bomb, Crosshair, X } from 'lucide-react';
+import { Skull, Shield, Footprints, Crosshair, X } from 'lucide-react';
 import { AnimatedDice } from './AnimatedDice';
 import { GrenadeBlastRuler } from './GrenadeBlastRuler';
 import { DiceInputPopup } from './DiceInputPopup';
@@ -50,10 +50,17 @@ export function CombatResults({
   const grenadeTotal = grenadeChecks.length;
   const isGrenadeDanger = isGrenade && (result.hitResult?.roll ?? 0) === 1;
 
-  // Auto-scroll the newest blast check into view above the sticky arming panel
-  const lastCheckRef = useRef<HTMLDivElement>(null);
+  // After each blast check, snap the modal content back to the top where the
+  // fresh verdict banner and the blast zone live: on mobile the thumb taps
+  // ВЗРЫВ on the sticky strip at the bottom, the answer lands at the top.
+  const rootRef = useRef<HTMLDivElement>(null);
+  const prevChecksRef = useRef(grenadeTotal);
   useEffect(() => {
-    lastCheckRef.current?.scrollIntoView?.({ block: 'nearest' });
+    if (grenadeTotal > prevChecksRef.current) {
+      const scroller = rootRef.current?.closest('[data-combat-scroll]');
+      if (scroller) scroller.scrollTop = 0;
+    }
+    prevChecksRef.current = grenadeTotal;
   }, [grenadeTotal]);
 
   const getEffectiveDistance = () => {
@@ -83,7 +90,7 @@ export function CombatResults({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" ref={rootRef}>
       {/* Attack modifiers display */}
       {isShot && (parameters.isSurpriseAttack || parameters.isAimedShot) && (
         <div className="flex justify-center gap-2">
@@ -353,93 +360,42 @@ export function CombatResults({
         </>
       )}
 
-      {/* Grenade Results */}
+      {/* Grenade Results — verdict banner + one throw block + compact target log */}
       {isGrenade && result.hitResult && result.grenadeBlastZone && (
         <>
-          {/* Danger Warning */}
-          {(result.hitResult.roll ?? 0) === 1 && (
-            <div className="flex items-center justify-center gap-2 p-3 bg-red-950/30 rounded-lg border-2 border-red-600/50">
-              <AlertTriangle className="w-5 h-5 text-red-400 shrink-0 animate-pulse" />
-              <span className="text-red-400 font-bold font-mono text-sm uppercase tracking-wider">
-                Опасно! Вы в зоне взрыва!
-              </span>
-            </div>
-          )}
-
-          {/* Hit Comparison - same style as shot */}
-          <div className="grid grid-cols-2 gap-3">
-            {/* Your Roll */}
-            <div className={cn(
-              "relative bg-slate-900/80 p-4 rounded-lg border-2",
-              (result.hitResult.roll ?? 0) === 1
-                ? "border-red-600/50"
-                : "border-emerald-600/50"
-            )}>
-              <div className={cn(
-                "text-xs font-mono opacity-60 mb-3 text-center",
-                (result.hitResult.roll ?? 0) === 1 ? "text-red-400" : "text-emerald-400"
-              )}>
-                Ваш бросок
-              </div>
-              <div className="flex flex-col items-center">
-                {result.hitResult?.rolls && result.hitResult.rolls.length > 1 ? (
-                  // Community Star System: Show all rolls, highlight best
-                  <div className="flex items-center gap-2 mb-2">
-                    {result.hitResult.rolls.map((roll, i) => {
-                      const rolls = result.hitResult?.rolls ?? [];
-                      const maxRoll = Math.max(...rolls);
-                      const isMax = roll === maxRoll;
-                      return (
-                        <AnimatedDice
-                          key={i}
-                          value={roll}
-                          maxSide={6}
-                          color={isMax ? "emerald" : "blue"}
-                          size="sm"
-                          delay={i * 100}
-                          isHit={isMax}
-                          className={cn(!isMax && "opacity-40")}
-                        />
-                      );
-                    })}
-                  </div>
-                ) : (
-                  // Tehnolog rules: Single dice, no bonus
-                  <AnimatedDice
-                    value={result.hitResult.roll ?? 0}
-                    maxSide={6}
-                    color={(result.hitResult.roll ?? 0) === 1 ? "red" : "emerald"}
-                    size="md"
-                    delay={0}
-                    isHit={(result.hitResult.roll ?? 0) !== 1}
-                    bonus={0}
-                    total={result.grenadeDistance}
-                  />
-                )}
-              </div>
-            </div>
-
-            {/* Blast Zone */}
-            <div className="relative bg-slate-900/80 p-4 rounded-lg border-2 border-amber-600/50">
-              <div className="text-xs font-mono opacity-60 text-amber-400 mb-3 text-center">
-                Зона взрыва
-              </div>
-              <div className="flex flex-col items-center gap-1">
-                <div className="flex items-center gap-2">
-                  <Bomb className="w-5 h-5 text-amber-500" />
-                  <span className="text-2xl font-mono font-black text-amber-400">
-                    {result.grenadeBlastZone.minSteps}-{result.grenadeBlastZone.maxSteps}
+          {/* Latest check verdict — the banner language of shots, carries the running tally */}
+          {grenadeTotal > 0 && (() => {
+            const last = grenadeChecks[grenadeTotal - 1];
+            const tone = last.hit
+              ? { box: 'bg-orange-950/80 border-orange-500/70 shadow-orange-900/30', text: 'text-orange-400', sub: 'text-orange-300', Icon: Skull }
+              : { box: 'bg-amber-950/80 border-amber-500/70 shadow-amber-900/30', text: 'text-amber-400', sub: 'text-amber-300', Icon: Shield };
+            return (
+              <div
+                key={grenadeTotal}
+                data-testid="grenade-verdict-banner"
+                role="status"
+                className={cn('result-reveal w-full px-3 py-2.5 rounded-lg border-2 shadow-lg', tone.box)}
+              >
+                <div className="flex items-center justify-center gap-2.5 flex-wrap">
+                  <tone.Icon className={cn('w-6 h-6 shrink-0', tone.text)} />
+                  <span className={cn('font-mono text-xl md:text-2xl font-black uppercase tracking-wider', tone.text)}>
+                    {last.hit ? 'ПРОБИТО' : 'НЕ ПРОБИТО'}
                   </span>
-                  <Footprints className="w-4 h-4 text-amber-500/60" />
+                  <span className={cn('ml-auto font-mono text-xs font-black whitespace-nowrap', tone.sub)}>
+                    ЦЕЛЬ {grenadeTotal} · D20 {last.roll}{last.hit ? '>' : '≤'}{last.armor}
+                  </span>
                 </div>
-                <div className="text-xs font-mono text-slate-500">
-                  [{result.grenadeBlastZone.minSteps * stepToCmFactor}-{result.grenadeBlastZone.maxSteps * stepToCmFactor} см]
+                <div
+                  data-testid="grenade-hit-tally"
+                  className="mt-1.5 pt-1.5 border-t border-white/10 text-center font-mono text-[11px] font-black uppercase tracking-wider text-slate-300"
+                >
+                  💥 {grenadeHits}/{grenadeTotal} пробито
                 </div>
               </div>
-            </div>
-          </div>
+            );
+          })()}
 
-          {/* Blast ruler — tape-measure view of the zone in cm (player's factor) */}
+          {/* Throw block: verdict + dice + tape ruler in a single box */}
           <GrenadeBlastRuler
             grenadeDistance={result.grenadeDistance ?? (result.hitResult.roll ?? 0)}
             blastZone={{
@@ -448,185 +404,109 @@ export function CombatResults({
             }}
             factor={stepToCmFactor}
             danger={isGrenadeDanger}
+            throwRolls={
+              result.hitResult.rolls && result.hitResult.rolls.length > 0
+                ? result.hitResult.rolls
+                : [result.hitResult.roll ?? 0]
+            }
           />
 
-          {/* Result Label */}
-          <div className="flex justify-center">
-            <div className={cn(
-              "px-3 py-1.5 rounded-lg border-2 font-mono text-xs font-black uppercase tracking-wider animate-pop-in",
-              (result.hitResult.roll ?? 0) === 1
-                ? "bg-red-950/80 border-red-500/50 text-red-400"
-                : "bg-emerald-950/80 border-emerald-500/50 text-emerald-400"
-            )}>
-              {(result.hitResult.roll ?? 0) === 1 ? 'ОПАСНО' : 'ВЗРЫВ'}
-            </div>
-          </div>
-
-          {/* Target Checks Section */}
-          {result.grenadeBlastChecks && result.grenadeBlastChecks.length > 0 && (
-            <div data-testid="grenade-blast-checks" className="space-y-3">
-              {result.grenadeBlastChecks.map((check, idx) => {
-                const isLast = idx === result.grenadeBlastChecks!.length - 1;
+          {/* Target log — one line per check, newest ringed */}
+          {grenadeTotal > 0 && (
+            <div data-testid="grenade-blast-checks" className="space-y-1.5">
+              {result.grenadeBlastChecks!.map((check, idx) => {
+                const isLast = idx === grenadeTotal - 1;
                 return (
-                <div
-                  key={idx}
-                  ref={isLast ? lastCheckRef : undefined}
-                  data-testid="grenade-blast-check"
-                  className={cn(
-                    "space-y-3 rounded-lg",
-                    isLast && "ring-2 ring-emerald-400/50 ring-offset-0"
-                  )}
-                  style={{ animationDelay: `${idx * 100}ms` }}
-                >
-                  {/* Per-target label */}
-                  <div className="flex items-center">
-                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-400/80 bg-emerald-950/40 border border-emerald-700/40 rounded px-1.5 py-0.5">
+                  <div
+                    key={idx}
+                    data-testid="grenade-blast-check"
+                    data-hit={check.hit ? 'true' : 'false'}
+                    className={cn(
+                      'flex items-center gap-2 px-2.5 py-1.5 rounded-lg border',
+                      isLast && 'ring-2 ring-emerald-400/50',
+                      check.hit
+                        ? 'bg-orange-950/30 border-orange-700/40'
+                        : 'bg-slate-900/60 border-slate-700/50'
+                    )}
+                  >
+                    <span className="min-w-[52px] text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-400/80">
                       ЦЕЛЬ {idx + 1}
                     </span>
-                  </div>
-                  {/* Grid layout - same as shot */}
-                  <div className="grid grid-cols-2 gap-3">
-                    {/* D20 Roll */}
-                    <div className={cn(
-                      "relative bg-slate-900/80 p-3 rounded-lg border-2",
-                      check.hit
-                        ? "border-orange-600/50"
-                        : "border-slate-600/50"
-                    )}>
-                      <div className={cn(
-                        "text-xs font-mono opacity-60 mb-3 text-center",
-                        check.hit ? "text-orange-400" : "text-slate-400"
-                      )}>
-                        Бросок D20
-                      </div>
-                      <div className="flex flex-col items-center">
-                        <AnimatedDice
-                          value={check.roll}
-                          maxSide={20}
-                          color={check.hit ? "orange" : "blue"}
-                          size="md"
-                          delay={idx * 200}
-                          isHit={check.hit}
-                          targetValue={check.armor}
-                          total={check.roll}
-                          resultLabel={check.hit ? 'hit' : 'miss'}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Armor */}
-                    <div className="relative bg-slate-900/80 p-3 rounded-lg border-2 border-slate-600/50">
-                      <div className="text-xs font-mono opacity-60 text-slate-400 mb-3 text-center">
-                        Броня цели
-                      </div>
-                      <div className="flex flex-col items-center gap-2">
-                        <div className="flex items-center gap-2">
-                          <Shield className="w-6 h-6 text-slate-500" />
-                          <span className="text-3xl font-mono font-black text-slate-400">
-                            {check.armor}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Result Label */}
-                  <div className="flex justify-center">
-                    <div className={cn(
-                      "px-3 py-1.5 rounded-lg border-2 font-mono text-xs font-black uppercase tracking-wider animate-pop-in",
-                      check.hit
-                        ? "bg-orange-950/80 border-orange-500/50 text-orange-400"
-                        : "bg-slate-800/80 border-slate-600/50 text-slate-500"
-                    )}>
-                      {check.hit ? (
-                        <>
-                          <Skull className="w-4 h-4 inline mr-1" />
-                          ПРОБИТО {check.roll}:{check.armor}
-                        </>
-                      ) : (
-                        <>
-                          <Shield className="w-4 h-4 inline mr-1" />
-                          НЕ ПРОБИТО {check.roll}:{check.armor}
-                        </>
+                    <span
+                      className={cn(
+                        'w-8 h-8 shrink-0 rounded border flex items-center justify-center font-mono font-black text-sm',
+                        check.hit
+                          ? 'bg-orange-950/60 border-orange-500/50 text-orange-300'
+                          : 'bg-slate-800/60 border-slate-600 text-slate-400'
                       )}
-                    </div>
+                    >
+                      {check.roll}
+                    </span>
+                    <span className="font-mono text-xs text-slate-400 whitespace-nowrap">
+                      {check.hit ? '>' : '≤'} {check.armor}
+                    </span>
+                    <span
+                      className={cn(
+                        'ml-auto flex items-center gap-1 text-[10px] font-mono font-black uppercase tracking-wider',
+                        check.hit ? 'text-orange-400' : 'text-slate-500'
+                      )}
+                    >
+                      {check.hit
+                        ? <Skull className="w-3.5 h-3.5 shrink-0" />
+                        : <Shield className="w-3.5 h-3.5 shrink-0" />}
+                      {check.hit ? 'ПРОБИТО' : 'НЕ ПРОБИТО'}
+                    </span>
                   </div>
-                </div>
                 );
               })}
             </div>
           )}
 
-          {/* Grenade Target Check Input Section — sticky arming panel */}
+          {/* Arming panel — sticky single strip: armor stepper + ВЗРЫВ side by side */}
           {isGrenade && onGrenadeCheckTarget && (
             <div
               data-testid="grenade-target-check-section"
               className={cn(
-                "sticky bottom-0 z-10 bg-slate-800 p-4 rounded-lg border border-slate-700 border-t-2 shadow-[0_-10px_20px_rgba(0,0,0,0.45)]",
-                isGrenadeDanger ? "border-t-red-500 animate-pulse" : "border-t-emerald-600/70"
+                'sticky bottom-0 z-10 bg-slate-800/95 backdrop-blur-sm p-2.5 rounded-lg border border-slate-700 border-t-2 shadow-[0_-10px_20px_rgba(0,0,0,0.45)]',
+                isGrenadeDanger ? 'border-t-red-500 animate-pulse' : 'border-t-emerald-600/70'
               )}
             >
-              <div className="flex items-center justify-between mb-3">
-                <div className="text-xs opacity-60 uppercase font-bold tracking-wider">
-                  ПРОВЕРИТЬ ЦЕЛЬ В ЗОНЕ ВЗРЫВА
-                </div>
-                {grenadeTotal > 0 ? (
-                  <span
-                    data-testid="grenade-hit-tally"
-                    className={cn(
-                      "font-mono font-black text-xs whitespace-nowrap",
-                      grenadeHits > 0 ? "text-emerald-400" : "text-slate-500"
-                    )}
-                  >
-                    💥 {grenadeHits}/{grenadeTotal} пробито
-                  </span>
-                ) : null}
-              </div>
-
-              {grenadeTotal === 0 && (
-                <div className="text-center text-[11px] text-slate-500 font-mono uppercase tracking-wider mb-3">
-                  <Bomb className="inline w-3.5 h-3.5 mr-1 align-middle" />
-                  Цели в зоне взрыва не проверены
-                </div>
-              )}
-
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <label className="text-sm opacity-70 uppercase font-bold whitespace-nowrap min-w-[90px]">
-                    Броня цели
-                  </label>
-                  <div className="flex-1 flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setGrenadeTargetArmor(Math.max(0, grenadeTargetArmor - 1))}
-                      className="w-14 h-14 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg border border-slate-600 flex items-center justify-center text-2xl font-bold transition-all active:scale-95"
-                    >
-                      −
-                    </button>
-                    <button
-                      type="button"
-                      data-testid="grenade-armor-input"
-                      onClick={() => setArmorPopupOpen(true)}
-                      aria-label="Броня цели input"
-                      className={cn(
-                        "flex-1 h-14 bg-slate-900 border-2 border-emerald-600/50 rounded-lg",
-                        "flex items-center justify-center font-mono font-bold text-white text-center text-lg",
-                        "hover:border-emerald-500 active:scale-[0.98] transition-all touch-manipulation"
-                      )}
-                    >
-                      {grenadeTargetArmor}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setGrenadeTargetArmor(Math.min(99, grenadeTargetArmor + 1))}
-                      className="w-14 h-14 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg border border-slate-600 flex items-center justify-center text-2xl font-bold transition-all active:scale-95"
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-
+              <div className="flex items-center gap-1">
+                <Shield
+                  className="w-4 h-4 text-slate-400 shrink-0"
+                  aria-label="Броня цели"
+                />
                 <button
+                  type="button"
+                  onClick={() => setGrenadeTargetArmor(Math.max(0, grenadeTargetArmor - 1))}
+                  aria-label="Уменьшить броню цели"
+                  className="w-11 h-12 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg border border-slate-600 flex items-center justify-center text-xl font-bold transition-all active:scale-95 shrink-0"
+                >
+                  −
+                </button>
+                <button
+                  type="button"
+                  data-testid="grenade-armor-input"
+                  onClick={() => setArmorPopupOpen(true)}
+                  aria-label="Броня цели input"
+                  className={cn(
+                    'w-11 h-12 shrink-0 bg-slate-900 border-2 border-emerald-600/50 rounded-lg',
+                    'flex items-center justify-center font-mono font-black text-white text-center text-lg',
+                    'hover:border-emerald-500 active:scale-[0.98] transition-all touch-manipulation'
+                  )}
+                >
+                  {grenadeTargetArmor}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setGrenadeTargetArmor(Math.min(99, grenadeTargetArmor + 1))}
+                  aria-label="Увеличить броню цели"
+                  className="w-11 h-12 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg border border-slate-600 flex items-center justify-center text-xl font-bold transition-all active:scale-95 shrink-0"
+                >
+                  +
+                </button>
+                <button
+                  type="button"
                   data-testid="grenade-explode-button"
                   onClick={() => {
                     if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
@@ -634,17 +514,13 @@ export function CombatResults({
                     }
                     onGrenadeCheckTarget(grenadeTargetArmor);
                   }}
-                  className={cn(
-                    "relative w-full py-2 md:py-3 rounded-lg font-mono text-base font-bold uppercase tracking-wider border-2 transition-all min-h-[48px] md:min-h-[52px]",
-                    "active:scale-95",
-                    "bg-emerald-950/20 border-emerald-600/50 text-emerald-400 hover:bg-emerald-950/40"
-                  )}
+                  className="flex-1 min-w-[92px] h-12 rounded-lg font-mono text-sm font-bold uppercase tracking-wider border-2 transition-all active:scale-95 bg-emerald-950/20 border-emerald-600/50 text-emerald-400 hover:bg-emerald-950/40"
                 >
-                  <div className="flex items-center justify-center gap-3">
-                    <span className="text-xl md:text-2xl">💣</span>
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="text-lg">💣</span>
                     <span>ВЗРЫВ</span>
-                    <span className="text-emerald-500/60 text-sm font-mono hidden md:inline">1D20</span>
-                  </div>
+                    <span className="text-emerald-500/60 text-[10px] font-mono hidden md:inline">1D20</span>
+                  </span>
                 </button>
               </div>
             </div>
