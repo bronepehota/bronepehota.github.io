@@ -115,6 +115,9 @@ function UnitPhoto({ src, instanceNumber, boxClass, small, glyph, glyphClass }: 
           src={src}
           alt=""
           aria-hidden="true"
+          // Нативный drag картинки рвёт mouse-поток жеста закрытия листа
+          // (mouseup не приходит, жест не завершается) — ревью #246
+          draggable={false}
           className="w-full h-full object-cover"
           style={{ objectPosition: '50% 15%' }}
         />

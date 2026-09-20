@@ -21,12 +21,14 @@ export function SquadSpecialProps({ buffs, className }: {
   return (
     <span className={cn('flex items-center gap-1 min-w-0', className)}>
       {specials.map(b => (
+        // Плейтест 2026-09-20: «слишком ярко кричащее» — тихая аннотация:
+        // без заливки, тонкая рамка, приглушённый тон. Ярко — только бою.
         <span
           key={b.id}
           title={`${b.name}: ${b.description}${b.oneTimeUse ? ' (раз за бой)' : ''}`}
-          className="flex items-center gap-0.5 px-1 py-0.5 rounded-sm border border-emerald-700/40 bg-emerald-950/30 text-emerald-300 font-mono font-bold leading-none"
+          className="flex items-center gap-0.5 px-1 py-0.5 rounded-sm border border-emerald-800/50 text-emerald-400/90 font-mono font-semibold leading-none"
         >
-          <ModifierIcon name={b.icon} size={10} className="text-emerald-300" />
+          <ModifierIcon name={b.icon} size={10} className="text-emerald-400/70" />
           {b.name}
         </span>
       ))}

@@ -232,7 +232,11 @@ export default function Home() {
 
   return (
     <CombatTargetProvider>
-      <main className="h-screen flex flex-col bg-slate-900 text-slate-100 overflow-hidden">
+      {/* h-screen — фолбэк; инлайновый 100dvh перекрывает его в браузерах с
+          поддержкой: 100vh на телефоне = «большой» вьюпорт (с шапкой), окно
+          боя выше видимой области на высоту URL-бара — нижняя строка дока
+          уходит под край (плейтест 2026-09-20). dvh дышит вместе с шапкой. */}
+      <main className="h-screen flex flex-col bg-slate-900 text-slate-100 overflow-hidden" style={{ height: '100dvh' }}>
         {/* Scrollable wrapper containing both header and content */}
         <div className="flex-1 overflow-auto min-h-0">
           {/* Content - loading or builder/game */}
