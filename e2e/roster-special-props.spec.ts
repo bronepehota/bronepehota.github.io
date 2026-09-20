@@ -50,6 +50,6 @@ test.describe('Спец-свойства взвода в построителе 
 
     await page.getByTestId('unit-search-input').fill('фелицианская');
     const guardCard = page.locator('[data-testid^="unit-card-"]').first();
-    await expect(guardCard.getByText('Рм')).toBeVisible();
+    await expect(guardCard.getByText('Рм').first()).toBeVisible();
   });
 });
