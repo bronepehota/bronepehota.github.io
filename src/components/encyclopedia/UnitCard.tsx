@@ -162,7 +162,7 @@ export function UnitCard({ unit }: UnitCardProps) {
         </div>
 
         {/* Info section */}
-        <div className="absolute bottom-0 left-0 right-0 p-3 pt-10 bg-gradient-to-t from-military-dark via-military-dark/95 to-transparent">
+        <div className="absolute bottom-0 left-0 right-0 p-3 pt-10 pb-10 bg-gradient-to-t from-military-dark via-military-dark/95 to-transparent">
           {/* Unit name */}
           <h3 className="font-russo font-bold text-white text-sm mb-1 line-clamp-2 group-hover:text-military-amber transition-colors">
             {unit.name}
