@@ -61,7 +61,7 @@ test.describe('Миссии', () => {
   test('мастер: выбор миссии сохраняется в army.missionId', async ({ page }) => {
     await confirmRulesAndSource(page);
     await selectFaction(page, 'polaris');
-    await selectMission(page, 'osvobozhdenie'); // auto-fills, skips budget
+    await selectMission(page, 'osvobozhdenie', { autoFill: true }); // auto-fills, skips budget
 
     const armyRaw = await page.evaluate(() => localStorage.getItem('bronepehota_army'));
     expect(armyRaw).toBeTruthy();
@@ -73,7 +73,7 @@ test.describe('Миссии', () => {
   test('мастер: выбор миссии авто-заполняет армию участниками фракции', async ({ page }) => {
     await confirmRulesAndSource(page);
     await selectFaction(page, 'polaris');
-    await selectMission(page, 'osvobozhdenie');
+    await selectMission(page, 'osvobozhdenie', { autoFill: true });
 
     const armyRaw = await page.evaluate(() => localStorage.getItem('bronepehota_army'));
     const parsed = JSON.parse(armyRaw!);
@@ -90,7 +90,7 @@ test.describe('Миссии', () => {
   test('подготовка: баннер выбранной миссии отображается', async ({ page }) => {
     await confirmRulesAndSource(page);
     await selectFaction(page, 'polaris');
-    await selectMission(page, 'osvobozhdenie'); // army auto-filled
+    await selectMission(page, 'osvobozhdenie', { autoFill: true }); // army auto-filled
     await goToPreparation(page);
 
     const banner = page.getByTestId('mission-reference-banner');

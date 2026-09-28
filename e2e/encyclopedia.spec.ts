@@ -162,6 +162,20 @@ test.describe('Энциклопедия', () => {
     await expect(pro4Section.getByText('Пр4', { exact: true })).toBeVisible();
   });
 
+  test('длинный лор рендерится абзацами', async ({ page }) => {
+    // «Бронеход»: описание — один абзац, «// ИСТОРИЯ СОЗДАНИЯ» — три.
+    // LoreText делит текст по \n\n на отдельные <p> внутри секции #lore
+    // (после корпусного прогона длинные тексты не моно-литом, а абзацами).
+    await page.goto('/encyclopedia/unit/bronekhod');
+    const loreParagraphs = page.locator('#lore p');
+    await expect(loreParagraphs.first()).toBeVisible();
+    const count = await loreParagraphs.count();
+    expect(count).toBeGreaterThan(1);
+
+    // Секция тактики — тот же абзацный рендер (свой <p> в #tactics).
+    await expect(page.locator('#tactics p').first()).toBeVisible();
+  });
+
   test('детальная страница показывает источники', async ({ page }) => {
     await page.goto('/encyclopedia/unit/polaris_lineynaya_klon_pehota');
     await page.waitForLoadState('networkidle');
