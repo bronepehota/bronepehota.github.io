@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { GitHubPagesImage } from '@/components/GitHubPagesImage';
 import { FactionLogo } from '@/components/FactionLogo';
+import { LoreText } from '@/components/ui/LoreText';
 import { factionDisplayNames, getFactionColors } from '@/lib/faction-colors';
 import type { Mission, Campaign } from '@/lib/mission-types';
 import type { FactionID } from '@/lib/types';
@@ -164,9 +165,7 @@ export default function MissionDetailPage({ mission, campaign }: MissionDetailPa
             {/* Setup */}
             {mission.setup && (
               <Section title="Подготовка поля боя" icon={Ruler} delay="0.4s" isLoaded={isLoaded}>
-                <p className="text-military-sand/80 leading-relaxed text-sm whitespace-pre-line">
-                  {mission.setup}
-                </p>
+                <LoreText text={mission.setup} className="text-military-sand/80 leading-relaxed text-sm" />
               </Section>
             )}
 
@@ -214,7 +213,7 @@ export default function MissionDetailPage({ mission, campaign }: MissionDetailPa
                           Задача: {factionDisplayNames[faction] ?? faction}
                         </h3>
                       </div>
-                      <p className="text-military-sand/90 text-sm leading-relaxed mb-2">{obj.text}</p>
+                      <LoreText text={obj.text} className="text-military-sand/90 text-sm leading-relaxed mb-2" />
                       {obj.victoryConditions && obj.victoryConditions.length > 0 && (
                         <ul className="space-y-1 mt-2">
                           {obj.victoryConditions.map((vc, i) => (
@@ -388,7 +387,7 @@ function BriefingBlock({ label, text }: { label: string; text?: string }) {
       <div className="font-ibm-mono text-[10px] text-military-rust/70 uppercase tracking-wider mb-1">
         {label}
       </div>
-      <p className="text-military-sand/85 leading-relaxed text-sm whitespace-pre-line">{text}</p>
+      <LoreText text={text} className="text-military-sand/85 leading-relaxed text-sm" />
     </div>
   );
 }

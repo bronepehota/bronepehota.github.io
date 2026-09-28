@@ -26,7 +26,7 @@ describe('лор штурмовых отрядов Протектората', ()
 
   it('фракция дополнена структурой ВКС (флот / гвардия / киберпехота / наёмники)', () => {
     const d = getEncyclopediaFaction('protectorate')?.description ?? '';
-    for (const fragment of ['флот', 'планетарная гвардия', 'киберпехот', 'наёмные отряды']) {
+    for (const fragment of ['флот', 'планетарная гвардия', 'киберпехот', 'наёмным отрядам']) {
       expect(d).toContain(fragment);
     }
   });

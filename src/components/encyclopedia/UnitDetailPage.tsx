@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Shield, Zap, Skull, Star, Anchor, Target, AlertTriangle } from 'lucide-react';
 import { GitHubPagesImage } from '@/components/GitHubPagesImage';
+import { LoreText } from '@/components/ui/LoreText';
 import { EnrichedUnit } from '@/lib/encyclopedia-utils';
 import { getEncyclopediaFaction } from '@/lib/encyclopedia-registry';
 import { cn } from '@/lib/utils';
@@ -494,9 +495,10 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc, c
                 <h2 className="font-oswald text-lg text-military-sand mb-3 flex items-center gap-2">
                   <Target className="w-5 h-5 text-military-rust" /> Тактика применения
                 </h2>
-                <p className="text-military-sand/80 leading-relaxed text-sm">
-                  {activeUnit.encyclopedia.tactics}
-                </p>
+                <LoreText
+                  text={activeUnit.encyclopedia.tactics}
+                  className="text-military-sand/90 leading-7 text-[15px]"
+                />
               </section>
             )}
 

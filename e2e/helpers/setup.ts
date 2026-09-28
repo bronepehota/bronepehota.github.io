@@ -87,8 +87,16 @@ export async function selectBudget(page: Page, budget = 350) {
 /**
  * Advance through the optional Mission step. Defaults to free play
  * (Свободная игра, pre-selected). Pass a mission id to select a specific mission.
+ * Pass `{ autoFill: true }` for missions whose roster auto-fills the army:
+ * the persist is debounced, and the click on the card already writes
+ * missionId alone — waiting only for missionId can resolve on that
+ * intermediate write, before the auto-filled units land.
  */
-export async function selectMission(page: Page, missionId?: string) {
+export async function selectMission(
+  page: Page,
+  missionId?: string,
+  opts?: { autoFill?: boolean },
+) {
   const confirmButton = page.getByTestId('mission-confirm-button');
   await expect(confirmButton).toBeVisible({ timeout: TIMEOUTS.load });
 
@@ -104,12 +112,20 @@ export async function selectMission(page: Page, missionId?: string) {
     // The auto-fill (buildMissionArmy) is an async React effect that fires
     // AFTER the step transition renders — budget-next-button alone doesn't
     // guarantee the army write completed.
-    await page.waitForFunction((mid: string) => {
-      try {
-        const raw = localStorage.getItem('bronepehota_army');
-        return !!raw && JSON.parse(raw).army?.missionId === mid;
-      } catch { return false; }
-    }, missionId, { timeout: TIMEOUTS.load });
+    await page.waitForFunction(
+      ({ mid, needUnits }: { mid: string; needUnits: boolean }) => {
+        try {
+          const raw = localStorage.getItem('bronepehota_army');
+          if (!raw) return false;
+          const army = JSON.parse(raw).army ?? JSON.parse(raw);
+          if (army.missionId !== mid) return false;
+          // auto-fill: the same debounced persist must carry the roster too
+          return !needUnits || (army.units?.length ?? 0) > 0;
+        } catch { return false; }
+      },
+      { mid: missionId, needUnits: !!opts?.autoFill },
+      { timeout: TIMEOUTS.load },
+    );
   } else {
     // Free play: wait for the budget step to render.
     await expect(page.getByTestId('budget-next-button')).toBeVisible({ timeout: TIMEOUTS.load });

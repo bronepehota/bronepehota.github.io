@@ -12,6 +12,7 @@ import { trackEvent } from '@/lib/analytics';
 import { orderedFactions, getParent, getSubFactions } from '@/lib/faction-hierarchy';
 import { EncyclopediaTabs } from './EncyclopediaTabs';
 import { ProvenanceRow } from './AttributionLabel';
+import { LoreText } from '@/components/ui/LoreText';
 import { cn } from '@/lib/utils';
 
 interface FactionsListPageProps {
@@ -226,9 +227,10 @@ export default function FactionsListPage({ factions }: FactionsListPageProps) {
                       </div>
 
                       {faction.description && (
-                        <p className={cn('text-military-sand/75 leading-relaxed', isSub ? 'text-xs md:text-sm' : 'text-sm md:text-base')}>
-                          {faction.description}
-                        </p>
+                        <LoreText
+                          text={faction.description}
+                          className={cn('text-military-sand/85 leading-relaxed', isSub ? 'text-xs md:text-sm' : 'text-sm md:text-base')}
+                        />
                       )}
 
                       {/* Parent card: list the sub-factions it contains */}

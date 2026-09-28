@@ -1,4 +1,5 @@
 import { EncyclopediaUnit } from '@/lib/encyclopedia-registry';
+import { LoreText } from '@/components/ui/LoreText';
 import { BookOpen } from 'lucide-react';
 import { getLocationIcon } from '@/lib/lore-utils';
 import { resolveUnitProvenance } from '@/lib/provenance';
@@ -32,7 +33,7 @@ export function UnitLore({ unit }: UnitLoreProps) {
           <h3 className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider mb-2">
             {'// ОПИСАНИЕ'}
           </h3>
-          <p className="text-military-sand/90 leading-relaxed">{unit.encyclopedia.lore}</p>
+          <LoreText text={unit.encyclopedia.lore} className="text-military-sand/95 leading-7 md:max-w-[65ch]" />
         </div>
       )}
 
@@ -41,7 +42,7 @@ export function UnitLore({ unit }: UnitLoreProps) {
           <h3 className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider mb-2">
             {'// ИСТОРИЯ СОЗДАНИЯ'}
           </h3>
-          <p className="text-military-sand/80 leading-relaxed">{unit.encyclopedia.history}</p>
+          <LoreText text={unit.encyclopedia.history} className="text-military-sand/90 leading-7 md:max-w-[65ch]" />
         </div>
       )}
 
@@ -68,7 +69,7 @@ export function UnitLore({ unit }: UnitLoreProps) {
                   <h4 className="font-oswald text-military-sand">{battle.name}</h4>
                   <span className="font-ibm-mono text-xs text-military-amber">{battle.year}</span>
                 </div>
-                <p className="text-sm text-military-sand/70 mb-1">{battle.description}</p>
+                <LoreText text={battle.description} className="text-sm text-military-sand/70 mb-1" />
                 <p className="text-xs text-military-taupe italic">{battle.outcome}</p>
               </div>
             ))}
@@ -87,7 +88,7 @@ export function UnitLore({ unit }: UnitLoreProps) {
                 <span className="text-lg">{getLocationIcon(location.type)}</span>
                 <div>
                   <h4 className="font-oswald text-military-sand">{location.name}</h4>
-                  <p className="text-sm text-military-sand/70">{location.description}</p>
+                  <LoreText text={location.description} className="text-sm text-military-sand/70" />
                 </div>
               </div>
             ))}

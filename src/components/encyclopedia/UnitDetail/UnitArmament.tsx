@@ -1,4 +1,5 @@
 import { EncyclopediaUnit } from '@/lib/encyclopedia-registry';
+import { LoreText } from '@/components/ui/LoreText';
 import { Crosshair } from 'lucide-react';
 
 /**
@@ -39,7 +40,7 @@ export function UnitArmament({ unit }: UnitArmamentProps) {
               </div>
             )}
             {w.notes && (
-              <p className="mt-1 text-military-sand/70 text-sm leading-relaxed">{w.notes}</p>
+              <LoreText text={w.notes} className="mt-1 text-military-sand/70 text-sm leading-relaxed" />
             )}
           </li>
         ))}
