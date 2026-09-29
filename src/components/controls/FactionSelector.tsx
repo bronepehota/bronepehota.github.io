@@ -23,6 +23,10 @@ interface FactionSelectorProps {
 // Fallback glyphs (when a faction has no logo image)
 const SYMBOL_ICON: Record<string, typeof Shield> = { Shield, Zap, Skull, Flag: Shield, Star, Anchor };
 
+/** Title-тултип браузера однострочный: \n-абзацы описания схлопываются в пробелы. */
+const singleLine = (text: string | null | undefined): string | undefined =>
+  text?.replace(/\s*\n+\s*/g, ' ') || undefined;
+
 /**
  * FactionSelector — pick a faction (or one of its sub-factions) for the army.
  *
@@ -139,7 +143,7 @@ export function FactionSelector({
                     </p>
                   )}
                   {(parent.shortDescription ?? parent.description) && (
-                    <p className="mt-1.5 text-xs md:text-sm text-slate-400 leading-snug truncate" title={parent.shortDescription ?? parent.description}>
+                    <p className="mt-1.5 text-xs md:text-sm text-slate-400 leading-snug truncate" title={singleLine(parent.shortDescription ?? parent.description)}>
                       {parent.shortDescription ?? parent.description}
                     </p>
                   )}
