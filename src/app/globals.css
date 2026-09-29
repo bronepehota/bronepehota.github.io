@@ -50,6 +50,33 @@ body {
   background-color: rgb(71 85 105);
 }
 
+/* Лента «Разделы» досье (UnitSectionNav): тонкий кастомный скроллбар — ТОЛЬКО
+   на мобильном, где лента реально скроллится. На md+ чипы помещаются целиком,
+   а сочетание scrollbar-width/scrollbar-color с ::-webkit-scrollbar заставляет
+   Chromium рисовать артефакт полосы прокрутки у правого края даже без
+   переполнения — на десктопе оставляем нативное поведение (полоса появляется
+   только при реальном overflow). (W2-8c, решение владельца 2026-09-29) */
+@media (max-width: 767.98px) {
+  .custom-scrollbar-mobile {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(51 65 85) transparent;
+  }
+  .custom-scrollbar-mobile::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .custom-scrollbar-mobile::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar-mobile::-webkit-scrollbar-thumb {
+    background-color: rgb(51 65 85);
+    border-radius: 3px;
+  }
+  .custom-scrollbar-mobile::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(71 85 105);
+  }
+}
+
 /* Glassmorphism utilities */
 .glass {
   background: rgba(30, 41, 59, 0.7);
@@ -1219,14 +1246,4 @@ button, a, input, select, textarea {
   .era-tick--sd {
     animation: none !important;
   }
-}
-
-/* Кроссфейд периодов «// ТЕАТРОВ ВОЙН»: новая карта/текст проявляются
-   поверх прежних (гасится глобальным prefers-reduced-motion ниже). */
-@keyframes map-crossfade {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-.map-crossfade {
-  animation: map-crossfade 0.7s ease both;
 }

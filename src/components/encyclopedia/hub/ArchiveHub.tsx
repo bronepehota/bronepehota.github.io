@@ -16,7 +16,6 @@ import { HubCover } from './HubCover';
 import { HubSearch } from './HubSearch';
 import { EraStrip } from './EraStrip';
 import { HubSections } from './HubSections';
-import { HubFresh } from './HubFresh';
 
 /** Ledger counts for the cover/folders — computed from the data at build time. */
 export interface HubCounts {
@@ -265,14 +264,6 @@ export default function ArchiveHub({ lorePages, counts, era }: ArchiveHubProps) 
               style={{ animationFillMode: 'forwards', animationDelay: '0.36s' }}
             >
               <HubSections counts={counts} factionDots={factionDots} />
-            </div>
-
-            {/* Рукописная витрина пополнений */}
-            <div
-              className={cn('fade-in-up opacity-0', isLoaded && 'opacity-100')}
-              style={{ animationFillMode: 'forwards', animationDelay: '0.38s' }}
-            >
-              <HubFresh />
             </div>
 
             {/* Футер-гид для новичков (переехал со страницы юнитов) */}
