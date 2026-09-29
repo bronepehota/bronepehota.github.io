@@ -9,6 +9,7 @@ import { useEscapeToClose } from '@/hooks/useEscapeToClose';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { SoldierImages } from '@/components/encyclopedia/UnitDetail/SoldierImages';
 import { MachineImages } from '@/components/encyclopedia/UnitDetail/MachineImages';
+import { LoreText } from '@/components/ui/LoreText';
 import Image from 'next/image';
 import { Shield, Zap, Skull, Star, Anchor } from 'lucide-react';
 import { getFactionColors, factionDisplayNames } from '@/lib/faction-colors';
@@ -208,9 +209,10 @@ export function EncyclopediaModal({
                   DATA_LORE
                 </span>
               </div>
-              <p className="font-oswald text-military-sand leading-relaxed italic border-l-4 border-military-rust/60 pl-4">
-                {unit.encyclopedia.lore}
-              </p>
+              <LoreText
+                text={unit.encyclopedia.lore}
+                className="font-oswald text-military-sand leading-relaxed italic border-l-4 border-military-rust/60 pl-4"
+              />
             </section>
           )}
 
@@ -222,9 +224,10 @@ export function EncyclopediaModal({
                   DATA_TACTICS
                 </span>
               </div>
-              <p className="font-oswald text-military-sand leading-relaxed">
-                {unit.encyclopedia.tactics}
-              </p>
+              <LoreText
+                text={unit.encyclopedia.tactics}
+                className="font-oswald text-military-sand leading-relaxed"
+              />
             </section>
           )}
 
@@ -236,9 +239,10 @@ export function EncyclopediaModal({
                   DATA_HISTORY
                 </span>
               </div>
-              <p className="font-oswald text-military-sand leading-relaxed">
-                {unit.encyclopedia.history}
-              </p>
+              <LoreText
+                text={unit.encyclopedia.history}
+                className="font-oswald text-military-sand leading-relaxed"
+              />
             </section>
           )}
 

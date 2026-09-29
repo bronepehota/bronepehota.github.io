@@ -13,7 +13,16 @@ import { EnrichedUnit } from '@/lib/encyclopedia-utils';
  *
  * Hidden when fewer than 2 sections exist: one chip is noise, not navigation.
  * Mobile-first: the row is `overflow-x-auto` with `whitespace-nowrap` chips —
- * it scrolls sideways instead of wrapping to a second line on 320px.
+ * it scrolls sideways instead of wrapping to a second line on 320px. The thin
+ * custom scrollbar is mobile-only (`custom-scrollbar-mobile`); on md+ the
+ * scrollbar is hidden entirely (W2-8c.1): the chips fit and Chromium kept
+ * painting a scrollbar/buttons artifact at the right edge even without
+ * overflow — hidden it is, exotic overflow still scrolls (owner 2026-09-29).
+ *
+ * The lead `// РАЗДЕЛЫ` label was REMOVED by owner decision (2026-09-29): on a
+ * 320px screen it ate ~90px of the scroll ribbon before the first useful chip.
+ * Nav semantics live on `aria-label="Разделы досье"` — sighted users see chips
+ * only, screen readers still get the labelled landmark.
  */
 interface UnitSectionNavProps {
   /** Base unit — spec/armament/lore are constants of the machine. */
@@ -72,15 +81,9 @@ export function UnitSectionNav({ unit, activeUnit, hasLoreDoc }: UnitSectionNavP
     <nav
       aria-label="Разделы досье"
       data-testid="unit-section-nav"
-      className="-mx-1 overflow-x-auto custom-scrollbar px-1"
+      className="-mx-1 overflow-x-auto custom-scrollbar-mobile px-1 md:border-b md:border-military-steel/20 md:pb-2.5 md:[scrollbar-width:none] md:[&::-webkit-scrollbar]:hidden"
     >
       <ul className="flex w-max items-center gap-1.5">
-        <li
-          aria-hidden
-          className="shrink-0 whitespace-nowrap pr-0.5 font-ibm-mono text-[10px] uppercase tracking-wider text-military-rust"
-        >
-          {'// РАЗДЕЛЫ'}
-        </li>
         {sections.map((s) => (
           <li key={s.id}>
             <a

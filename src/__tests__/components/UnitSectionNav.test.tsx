@@ -95,4 +95,15 @@ describe('UnitSectionNav — якорная навигация по секция
     render(<UnitSectionNav unit={withBattles} activeUnit={withBattles} hasLoreDoc={false} />);
     expect(CHIP('lore')).toBeInTheDocument();
   });
+
+  it('has no «// РАЗДЕЛЫ» lead label (owner decision 2026-09-29) — nav stays labelled for a11y', () => {
+    const machine = unit({ encyclopedia: { lore: 'л', tactics: 'т' } });
+    render(<UnitSectionNav unit={machine} activeUnit={machine} hasLoreDoc={false} />);
+    // Label removed: it ate ~90px of the 320px scroll ribbon. Semantics live on aria-label.
+    expect(screen.queryByText('// РАЗДЕЛЫ')).toBeNull();
+    expect(screen.getByRole('navigation', { name: 'Разделы досье' })).toBeInTheDocument();
+    // First child of the ribbon is a chip, not the label
+    const chips = screen.getAllByTestId(/^unit-section-chip-/);
+    expect(chips.length).toBeGreaterThan(0);
+  });
 });

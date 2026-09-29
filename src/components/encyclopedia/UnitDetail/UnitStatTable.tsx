@@ -23,26 +23,34 @@ function modifierMeta(id: string): { name: string; icon?: string } | undefined {
 interface UnitStatTableProps {
   unit: Squad | Machine;
   type: 'squad' | 'machine' | 'орудие';
+  /** Compact toolbar row inside the section (e.g. the army-list switcher) —
+      rendered between the section header and the table, above a thin divider. */
+  toolbar?: React.ReactNode;
 }
 
-export function UnitStatTable({ unit, type }: UnitStatTableProps) {
+export function UnitStatTable({ unit, type, toolbar }: UnitStatTableProps) {
   // Орудия имеют ту же структуру данных, что и машины (прочность, вооружение)
   if (type === 'machine' || type === 'орудие') {
-    return <MachineStats machine={unit as Machine} />;
+    return <MachineStats machine={unit as Machine} toolbar={toolbar} />;
   }
-  return <SquadStats squad={unit as Squad} />;
+  return <SquadStats squad={unit as Squad} toolbar={toolbar} />;
 }
 
 function isSpecial(s: Soldier): boolean {
   return Boolean(s.modifiers?.length) || s.rank >= 3;
 }
 
-function SquadStats({ squad }: { squad: Squad }) {
+function SquadStats({ squad, toolbar }: { squad: Squad; toolbar?: React.ReactNode }) {
   return (
     <section id="stats" className="folded-paper military-corners p-3 scroll-mt-4" data-testid="unit-stat-table" aria-label="Боевой расчёт">
       <div className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider mb-2">
         {'// БОЕВОЙ РАСЧЁТ'}
       </div>
+      {toolbar && (
+        <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-military-steel/20 pb-2">
+          {toolbar}
+        </div>
+      )}
       <div className="overflow-x-auto custom-scrollbar">
         <table className="w-full text-sm font-ibm-mono">
           <thead>
@@ -93,7 +101,7 @@ function SquadStats({ squad }: { squad: Squad }) {
   );
 }
 
-function MachineStats({ machine }: { machine: Machine }) {
+function MachineStats({ machine, toolbar }: { machine: Machine; toolbar?: React.ReactNode }) {
   const speeds = Array.from(new Set(machine.speed_sectors.map((s) => s.speed))).join(' / ');
   const tiles = [
     { label: 'Ранг', value: String(machine.rank), cls: STAT_TEXT.rank },
@@ -107,6 +115,11 @@ function MachineStats({ machine }: { machine: Machine }) {
       <div className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider mb-2">
         {'// БОЕВОЙ РАСЧЁТ'}
       </div>
+      {toolbar && (
+        <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-military-steel/20 pb-2">
+          {toolbar}
+        </div>
+      )}
       <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-3">
         {tiles.map((t) => (
           <div key={t.label} className="text-center p-2 bg-military-charcoal/50 rounded">

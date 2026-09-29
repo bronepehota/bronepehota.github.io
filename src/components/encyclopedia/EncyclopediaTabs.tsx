@@ -72,9 +72,15 @@ const TABS: TabDef[] = [
  * `dense` trims the segment padding for the sticky console on /encyclopedia/units,
  * where the bar shares the screen with search + filters while scrolling.
  *
- * Mobile fit with 5 segments: below 400px the icons hide AND the indexes stay
- * hidden up to md; labels drop to 10px with no letter-spacing so «ВСЕЛЕННАЯ»
- * doesn't push its siblings out of the bar.
+ * ONE DOM, layout switched by breakpoints (no JS hook, no duplicated testids):
+ * below md the bar is a 5-column grid of vertical cells — icon on top, label
+ * under it, everything centred, both always visible (the old inline-flex row
+ * had a ~739px min-content and below 400px resorted to hiding icons and
+ * squeezing labels — the grid ends those compromises). From md up it is the
+ * classic segmented row, unchanged. The active LED exists on the row only (it
+ * reads as noise on the grid); the bottom accent bar spans the full cell on
+ * mobile. `dense` on mobile becomes an icon strip where only the ACTIVE cell
+ * keeps its label (inactive labels are `hidden md:inline`).
  */
 export function EncyclopediaTabs({ className, dense = false }: { className?: string; dense?: boolean }) {
   const pathname = usePathname();
@@ -83,10 +89,12 @@ export function EncyclopediaTabs({ className, dense = false }: { className?: str
     <div className={cn('flex justify-center', className)}>
       <div
         className={cn(
-          // 5 segments measure ~739px of min-content with icons+indexes+text-sm
-          // — the old max-w-2xl (672px) cap clipped «Фракции», so the cap is
-          // 3xl (768px) now. Below md the max-w-md cap keeps the mobile fit.
-          'relative inline-flex items-stretch w-full max-w-md md:max-w-3xl',
+          // One DOM, two layouts: a 5-column grid of vertical cells on phones
+          // (grid-cols-5 — nothing hides, nothing squeezes), the segmented row
+          // from md up. On the row 5 segments measure ~739px of min-content
+          // with icons+indexes+text-sm — the old max-w-2xl (672px) cap clipped
+          // «Фракции», so the cap is 3xl (768px).
+          'relative grid grid-cols-5 md:flex md:items-stretch w-full md:max-w-3xl',
           'rounded-xl overflow-hidden',
           'border border-military-steel/40 bg-military-charcoal/70 backdrop-blur-md',
           'shadow-[0_8px_30px_-12px_rgba(0,0,0,0.8)]',
@@ -114,11 +122,15 @@ export function EncyclopediaTabs({ className, dense = false }: { className?: str
               aria-current={active ? 'page' : undefined}
               data-testid={`encyclopedia-tab-${tab.id}`}
               className={cn(
-                'group relative flex-1 flex items-center justify-center',
-                'gap-0.5 min-[400px]:gap-1.5 md:gap-2',
-                dense ? 'py-2 px-0.5 min-[400px]:px-2 md:py-2.5 md:px-3' : 'py-3 px-0.5 min-[400px]:px-2 md:py-3.5 md:px-3',
-                'font-russo uppercase tracking-normal min-[400px]:tracking-wide md:tracking-wider',
-                'text-[10px] min-[400px]:text-xs md:text-sm',
+                // Mobile: vertical cell — icon over label, both centred, always
+                // rendered. Desktop: the segmented row (padding unchanged).
+                'group relative flex flex-col items-center justify-center text-center',
+                !dense && 'gap-1 px-1 py-2.5 min-h-[56px]',
+                dense && 'gap-0.5 px-1 py-1.5 min-h-[44px]',
+                'md:flex-1 md:flex-row md:gap-2 md:px-3 md:min-h-0',
+                dense ? 'md:py-2.5' : 'md:py-3.5',
+                'font-russo uppercase tracking-normal md:tracking-wider',
+                'text-[10px] md:text-sm',
                 'transition-all duration-300',
                 active
                   ? 'text-white'
@@ -133,47 +145,51 @@ export function EncyclopediaTabs({ className, dense = false }: { className?: str
                   : undefined
               }
             >
-              {/* Divider between segments */}
+              {/* Divider between segments — row layout only; the grid separates
+                  cells on its own */}
               {i > 0 && (
-                <span className="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 h-2/3 w-px bg-military-steel/40" />
+                <span className="pointer-events-none hidden md:block absolute left-0 top-1/2 -translate-y-1/2 h-2/3 w-px bg-military-steel/40" />
               )}
 
-              {/* Index + icon */}
-              <span className="flex items-center gap-0.5 min-[400px]:gap-1.5 md:gap-2">
-                <span
-                  className={cn(
-                    // Indexes only from lg: at md the 5-segment min-content
-                    // (measured 739px) would overflow the 2xl bar cap and clip
-                    // the last label.
-                    'hidden lg:inline font-ibm-mono text-[9px] tracking-widest',
-                    active ? 'text-military-amber' : 'text-military-taupe/80',
-                  )}
-                >
-                  {tab.index}
-                </span>
-                {/* Icon hidden below 400px: 5 segments don't fit with icons on
-                    narrow phones — labels take priority (scrollWidth check). */}
-                <Icon
-                  className={cn(
-                    'hidden min-[400px]:block w-4 h-4 md:w-5 md:h-5 transition-transform duration-300',
-                    active ? 'text-military-amber' : 'group-hover:scale-110',
-                  )}
-                  strokeWidth={active ? 2.4 : 2}
-                />
-                <span>{tab.label}</span>
+              {/* Indexes only from lg (unchanged) */}
+              <span
+                className={cn(
+                  'hidden lg:inline font-ibm-mono text-[9px] tracking-widest',
+                  active ? 'text-military-amber' : 'text-military-taupe/80',
+                )}
+              >
+                {tab.index}
               </span>
 
-              {/* Active status LED */}
+              <Icon
+                className={cn(
+                  'w-5 h-5 transition-transform duration-300',
+                  active ? 'text-military-amber' : 'group-hover:scale-110',
+                )}
+                strokeWidth={active ? 2.4 : 2}
+              />
+
+              <span
+                className={cn(
+                  'leading-tight md:leading-normal',
+                  // dense on mobile: only the active cell keeps its label
+                  dense && !active && 'hidden md:inline',
+                )}
+              >
+                {tab.label}
+              </span>
+
+              {/* Active status LED — row layout only (noise on the mobile grid) */}
               {active && (
-                <span className="pointer-events-none absolute top-1.5 right-2 flex h-1.5 w-1.5">
+                <span className="pointer-events-none hidden md:flex absolute top-1.5 right-2 h-1.5 w-1.5">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-military-amber opacity-75" />
                   <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-military-amber" />
                 </span>
               )}
 
-              {/* Bottom accent bar on active */}
+              {/* Bottom accent bar on active — full cell width on mobile */}
               {active && (
-                <span className="pointer-events-none absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 w-2/3 rounded-full bg-gradient-to-r from-transparent via-military-amber to-transparent" />
+                <span className="pointer-events-none absolute bottom-0 left-0 h-0.5 w-full rounded-full bg-gradient-to-r from-transparent via-military-amber to-transparent md:left-1/2 md:w-2/3 md:-translate-x-1/2" />
               )}
             </Link>
           );

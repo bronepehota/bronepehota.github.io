@@ -121,8 +121,8 @@ export function UnitCard({ unit }: UnitCardProps) {
             </div>
           </div>
 
-          {/* Cost badge - bottom left */}
-          <div className="absolute bottom-2 left-2">
+          {/* Cost badge - bottom left (z-10: выше градиента каптиона, как у АВБ-чипа справа) */}
+          <div className="absolute bottom-2 left-2 z-10">
             <div className="flex items-center gap-1 backdrop-blur-sm bg-military-dark/80 px-2 py-1 rounded border border-military-rust/30">
               <span className="text-military-amber text-sm">⬡</span>
               <span className="font-ibm-mono text-xs font-bold text-white">
