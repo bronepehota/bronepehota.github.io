@@ -27,15 +27,21 @@
   python3 tools/normalize_lore_typography.py --dry-run FILE...  # показать план правок, не писать
   python3 tools/normalize_lore_typography.py --check-serialization FILE...
         # round-trip проверка сериализации: json.dump(indent=2, ensure_ascii=False)+\\n.
-        # Пустой `git diff` после прогона на файле = сериализация совпадает.
+        # READ-ONLY: при расхождении печатается статистика и код 1 — файл НЕ переписывается.
 
-Выход: 0 — ок; 2 — ошибка разбора/несовпадение структуры (запись не выполняется).
+Гвард путей: нормализация принимается ТОЛЬКО для lore-корпуса — путей под
+src/data/encyclopedia/ или src/data/missions/. Всё прочее (например игровые
+данные src/data/sources/**/factions.json с тем же basename) — ОШИБКА и код 2.
+
+Выход: 0 — ок; 1 — check-serialization: сериализация расходится (файл не тронут);
+2 — вне lore-корпуса / ошибка разбора / несовпадение структуры (запись не выполняется).
 """
 
 from __future__ import annotations
 
 import argparse
 import copy
+import difflib
 import json
 import re
 import sys
@@ -121,7 +127,30 @@ def match_missions(path: tuple) -> bool:
     return False
 
 
+# Гвард путей: basename-матч разрешён только внутри lore-корпуса. Без него
+# игровой JSON с тем же именем (src/data/sources/**/factions.json) получил бы
+# белый список фракций и был бы перезаписан как лор.
+LORE_PATH_PREFIXES = ("src/data/encyclopedia/", "src/data/missions/")
+
+
+class PathGuardError(ValueError):
+    """Путь вне lore-корпуса — нормализация/матчинг полей запрещены."""
+
+
 def matcher_for(path: Path):
+    """Возвращает матчер белого списка для пути.
+
+    Гвард: путь обязан указывать внутрь src/data/encyclopedia/ или
+    src/data/missions/ — иначе PathGuardError (проверяется substring по
+    as_posix(), абсолютные и относительные пути равноправны).
+    """
+    posix = path.as_posix()
+    if not any(prefix in posix for prefix in LORE_PATH_PREFIXES):
+        raise PathGuardError(
+            f"{path}: вне lore-корпуса — ожидался путь под "
+            f"src/data/encyclopedia/ или src/data/missions/; "
+            f"игровые данные (src/data/sources/…) этим тулом не правятся"
+        )
     resolved = path.name
     if resolved == "factions.json":
         return match_factions
@@ -298,9 +327,15 @@ def apply_edits(raw: str, edits) -> str:
 
 
 def process(path: Path, dry_run: bool, stats: dict) -> bool:
+    try:
+        matcher = matcher_for(path)
+    except PathGuardError as exc:
+        print(f"ОШИБКА {exc}", file=sys.stderr)
+        return False
+
     raw = path.read_text(encoding="utf-8")
     try:
-        data, edits, strings = plan_edits(raw, matcher_for(path))
+        data, edits, strings = plan_edits(raw, matcher)
     except ScanError as exc:
         print(f"ОШИБКА {path}: {exc}", file=sys.stderr)
         return False
@@ -343,15 +378,42 @@ def process(path: Path, dry_run: bool, stats: dict) -> bool:
 
 
 def check_serialization(path: Path) -> bool:
-    """Round-trip проверка: json.dump(indent=2, ensure_ascii=False) + \\n совпадает с файлом."""
+    """Round-trip проверка (READ-ONLY): json.dump(indent=2, ensure_ascii=False) + \\n.
+
+    Check-режим не мутирует файл: при расхождении печатается краткая статистика
+    (сколько строк разошлось бы) и ограниченный превью diff; возвращается False
+    → exit 1. Превью полного объёма шума — `diff <(python3 - <<… ) FILE`.
+    """
     raw = path.read_text(encoding="utf-8")
     data = json.loads(raw)
     dumped = json.dumps(data, ensure_ascii=False, indent=2) + "\n"
     if dumped == raw:
         print(f"{path}: сериализация совпадает")
         return True
-    path.write_text(dumped, encoding="utf-8")
-    print(f"{path}: сериализация ОТЛИЧАЕТСЯ — файл переписан (git diff покажет объём шума)")
+
+    raw_lines = raw.split("\n")
+    dumped_lines = dumped.split("\n")
+    diff = list(
+        difflib.unified_diff(
+            raw_lines,
+            dumped_lines,
+            fromfile=str(path),
+            tofile="<json.dump indent=2>",
+            lineterm="",
+        )
+    )
+    removed = sum(1 for line in diff if line.startswith("-") and not line.startswith("---"))
+    added = sum(1 for line in diff if line.startswith("+") and not line.startswith("+++"))
+    print(
+        f"{path}: сериализация ОТЛИЧАЕТСЯ — файл НЕ изменён (check-режим только читает); "
+        f"строк в файле: {len(raw_lines) - 1}, в каноничной сериализации: {len(dumped_lines) - 1}, "
+        f"строк было бы изменено: {removed} (−{removed}/+{added})"
+    )
+    preview = 10
+    for line in diff[:preview]:
+        print(f"    {line}")
+    if len(diff) > preview:
+        print(f"    … ещё {len(diff) - preview} строк diff")
     return False
 
 
@@ -362,7 +424,8 @@ def main(argv=None) -> int:
     ap.add_argument(
         "--check-serialization",
         action="store_true",
-        help="round-trip проверка сериализации (json.dump indent=2) вместо нормализации",
+        help="round-trip проверка сериализации (json.dump indent=2) вместо нормализации; "
+        "read-only — при расхождении статистика и exit 1, файл не пишется",
     )
     args = ap.parse_args(argv)
 
