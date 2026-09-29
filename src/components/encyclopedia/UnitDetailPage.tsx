@@ -355,64 +355,72 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc, c
                     </div>
                   )}
 
-                  {/* Attribution: ONE metadata strip (shared header + chips in a single
-                      flex-wrap row), mirroring the ProvenanceRow idiom. Painted squads
-                      with a separate painter + sculptor previously stacked two
-                      double-header blocks — which looked broken under a wide group photo. */}
-                  <div className="mb-4 md:mb-6 flex flex-wrap items-center gap-x-3 gap-y-2">
+                  {/* Attribution: ONE metadata strip laid out as an ALIGNED grid of
+                      «лейбл → чип» rows (same idiom as the UnitSpecs dl-grid): labels
+                      share a mono auto-column, so every chip starts on one axis —
+                      flex-wrap used to interleave labels and chips into a ragged
+                      cluster. Painted squads with a separate painter + sculptor
+                      previously stacked two double-header blocks — which looked
+                      broken under a wide group photo. */}
+                  <div className="mb-4 md:mb-6 grid w-fit max-w-full grid-cols-[auto_1fr] items-center gap-x-3 gap-y-1.5">
                     <span className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider">
                       {attributionHeader}
                     </span>
-                    {photoCredit ? (
-                      // PAINTED squad → the painter is the salient attribution.
-                      <PainterChip
-                        name={photoCredit.name}
-                        logo={photoCredit.logo}
-                        url={photoCredit.url}
-                        withHeader={false}
-                        withContribute={!hasLore}
-                      />
-                    ) : sculptorDiffers ? (
-                      // UNPAINTED, distinct render + sculpt artists.
-                      <ImageSourceChip source={imageSourceCredit} withHeader={false} />
-                    ) : (
-                      // UNPAINTED, single creator for both render & sculpt → one merged chip.
-                      miniatureSourceCredit && (
-                        <MiniatureChip
-                          name={miniatureSourceCredit.name}
-                          logo={miniatureSourceCredit.logo}
-                          url={miniatureSourceCredit.url}
+                    <div className="justify-self-start">
+                      {photoCredit ? (
+                        // PAINTED squad → the painter is the salient attribution.
+                        <PainterChip
+                          name={photoCredit.name}
+                          logo={photoCredit.logo}
+                          url={photoCredit.url}
                           withHeader={false}
-                          role=""
+                          withContribute={!hasLore}
                         />
-                      )
-                    )}
+                      ) : sculptorDiffers ? (
+                        // UNPAINTED, distinct render + sculpt artists.
+                        <ImageSourceChip source={imageSourceCredit} withHeader={false} />
+                      ) : (
+                        // UNPAINTED, single creator for both render & sculpt → one merged chip.
+                        miniatureSourceCredit && (
+                          <MiniatureChip
+                            name={miniatureSourceCredit.name}
+                            logo={miniatureSourceCredit.logo}
+                            url={miniatureSourceCredit.url}
+                            withHeader={false}
+                            role=""
+                          />
+                        )
+                      )}
+                    </div>
                     {/* Sculptor — only when it differs from the image/paint creator. Gets its own
-                        `// МИНИАТЮРЫ` prefix so it reads as the physical-sculpt credit, NOT part
-                        of the paint/image line (otherwise "· модель" was lost under `// ПОКРАС`).
-                        Label + chip grouped so they don't split when the strip wraps on mobile. */}
+                        `// МИНИАТЮРЫ` row so it reads as the physical-sculpt credit, NOT part
+                        of the paint/image line (otherwise "· модель" was lost under `// ПОКРАС`). */}
                     {sculptorDiffers && miniatureSourceCredit && (
-                      <span className="inline-flex items-center gap-1.5">
+                      <>
                         <span className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider">
                           {'// МИНИАТЮРЫ'}
                         </span>
-                        <MiniatureChip
-                          name={miniatureSourceCredit.name}
-                          logo={miniatureSourceCredit.logo}
-                          url={miniatureSourceCredit.url}
-                          withHeader={false}
-                          role=""
-                        />
-                      </span>
+                        <div className="justify-self-start">
+                          <MiniatureChip
+                            name={miniatureSourceCredit.name}
+                            logo={miniatureSourceCredit.logo}
+                            url={miniatureSourceCredit.url}
+                            withHeader={false}
+                            role=""
+                          />
+                        </div>
+                      </>
                     )}
                     {/* Squad sponsor — who funded/commissioned the squad (miniatures/lore). */}
                     {unit.sponsor && (
-                      <span className="inline-flex items-center gap-1.5">
+                      <>
                         <span className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider">
                           {'// СПОНСОР'}
                         </span>
-                        <SponsorChip name={unit.sponsor.name} url={unit.sponsor.url} withHeader={false} />
-                      </span>
+                        <div className="justify-self-start">
+                          <SponsorChip name={unit.sponsor.name} url={unit.sponsor.url} withHeader={false} />
+                        </div>
+                      </>
                     )}
                   </div>
 
@@ -427,11 +435,23 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc, c
                     </div>
                   )}
 
-                  {/* Divider */}
-                  <div className="military-divider max-w-xs mb-4 md:mb-6" />
+                  {/* Divider — только мобильный (на md+ общий full-width
+                      разделитель ниже, над лентой «Разделы») */}
+                  <div className="military-divider max-w-xs mb-4 md:hidden" />
                 </div>
               </div>
             </div>
+
+            {/* Полный разделитель над меню (md+): отсекает двухколоночный блок
+                (картинка|титул) от ленты «Разделы» — на десктопе читается как
+                единая строка-подчерк на всю ширину контейнера. (W2-8c) */}
+            <div className="military-divider hidden md:block my-5 md:my-6" />
+
+            {/* Меню страницы под шапкой (решение владельца 2026-09-29): лента чипов —
+                якоря на секции досье (только существующие для этого юнита; зеркалит
+                null-условия секций). Читается как меню сразу под изображением/
+                заголовком — main начинается с ТТХ. */}
+            <UnitSectionNav unit={unit} activeUnit={activeUnit} hasLoreDoc={!!loreDoc} />
           </div>
         </header>
 
@@ -460,21 +480,6 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc, c
               </section>
             )}
 
-            {/* Common army-list switcher — always shows the source list (a single
-                pill for one-source units; clickable pills when 2+). Controls the
-                combat stats and personnel below. Grouped with the characteristics so
-                switching is adjacent to what it changes. */}
-            <SourceAvailability
-              unit={unit}
-              variant="detail"
-              activeSource={activeSource}
-              onSourceChange={unit.sources.length > 1 ? setActiveSource : undefined}
-            />
-
-            {/* Anchor chips — jump to the sections below (only the ones that
-                render for THIS unit; mirrors each section's null-condition). */}
-            <UnitSectionNav unit={unit} activeUnit={activeUnit} hasLoreDoc={!!loreDoc} />
-
             {/* Характеристики — spec plate (ТТХ): physical specs (mass, crew, моноблок,
                 разработчик). Constants of the machine, so base `unit` (not source-switched). */}
             <UnitSpecs unit={unit} />
@@ -483,8 +488,21 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc, c
                 Constants of the machine, so base `unit` (not source-switched). */}
             <UnitArmament unit={unit} />
 
-            {/* Боевой расчёт — full stat table, follows the active source */}
-            <UnitStatTable unit={activeUnit as unknown as Squad | Machine} type={unit.type} />
+            {/* Боевой расчёт — full stat table, follows the active source.
+                Армлист-переключатель живёт здесь же (toolbar внутри #stats):
+                он управляет именно статами расчёта, так что им место в одном блоке. */}
+            <UnitStatTable
+              unit={activeUnit as unknown as Squad | Machine}
+              type={unit.type}
+              toolbar={
+                <SourceAvailability
+                  unit={unit}
+                  variant="detail"
+                  activeSource={activeSource}
+                  onSourceChange={unit.sources.length > 1 ? setActiveSource : undefined}
+                />
+              }
+            />
 
             {/* Личный состав — personnel portraits, follows the active source */}
             <SoldierImages unit={activeUnit} />
