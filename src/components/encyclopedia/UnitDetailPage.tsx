@@ -363,7 +363,7 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc, c
                       previously stacked two double-header blocks — which looked
                       broken under a wide group photo. */}
                   <div className="mb-4 md:mb-6 grid w-fit max-w-full grid-cols-[auto_1fr] items-center gap-x-3 gap-y-1.5">
-                    <span className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider">
+                    <span className="flex min-h-[26px] items-center font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider">
                       {attributionHeader}
                     </span>
                     <div className="justify-self-start">
@@ -397,7 +397,7 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc, c
                         of the paint/image line (otherwise "· модель" was lost under `// ПОКРАС`). */}
                     {sculptorDiffers && miniatureSourceCredit && (
                       <>
-                        <span className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider">
+                        <span className="flex min-h-[26px] items-center font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider">
                           {'// МИНИАТЮРЫ'}
                         </span>
                         <div className="justify-self-start">
@@ -414,7 +414,7 @@ export default function UnitDetailPage({ unit, bySource, sourceOrder, loreDoc, c
                     {/* Squad sponsor — who funded/commissioned the squad (miniatures/lore). */}
                     {unit.sponsor && (
                       <>
-                        <span className="font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider">
+                        <span className="flex min-h-[26px] items-center font-ibm-mono text-[10px] text-military-rust uppercase tracking-wider">
                           {'// СПОНСОР'}
                         </span>
                         <div className="justify-self-start">

@@ -81,7 +81,7 @@ export function UnitSectionNav({ unit, activeUnit, hasLoreDoc }: UnitSectionNavP
     <nav
       aria-label="Разделы досье"
       data-testid="unit-section-nav"
-      className="-mx-1 overflow-x-auto custom-scrollbar-mobile px-1 md:[scrollbar-width:none] md:[&::-webkit-scrollbar]:hidden"
+      className="-mx-1 overflow-x-auto custom-scrollbar-mobile px-1 md:border-b md:border-military-steel/20 md:pb-2.5 md:[scrollbar-width:none] md:[&::-webkit-scrollbar]:hidden"
     >
       <ul className="flex w-max items-center gap-1.5">
         {sections.map((s) => (
