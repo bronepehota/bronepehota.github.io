@@ -184,4 +184,50 @@ describe('ExpandedNavigator', () => {
     expect(aliveTile.textContent).toContain('Первый отряд');
     expect(aliveTile.textContent).toContain('♥ 3/3');
   });
+
+  // Плейтест 2026-10-15: в списке отрядов должно быть видно, есть граната
+  // или уже потрачена (она одна на бой) — без захода в карточку.
+  describe('маркер гранаты', () => {
+    it('у отряда с гранатой — 💣 «Граната доступна»', () => {
+      render(
+        <ExpandedNavigator
+          army={makeArmy([makeSquad('gr-1', 'Гранатомётчики', 3)])}
+          focusedUnitIdx={0}
+          onSelectUnit={jest.fn()}
+        />
+      );
+
+      const marker = screen.getByTestId('nav-grenade-gr-1');
+      expect(marker).toHaveAttribute('aria-label', 'Граната доступна');
+      expect(marker.textContent).toContain('💣');
+    });
+
+    it('потраченная граната — приглушённый перечёркнутый 💣 «Граната потрачена»', () => {
+      const unit = { ...makeSquad('gr-2', 'Без гранаты', 3), grenadesUsed: true } as ArmyUnit;
+      render(
+        <ExpandedNavigator
+          army={makeArmy([unit])}
+          focusedUnitIdx={0}
+          onSelectUnit={jest.fn()}
+        />
+      );
+
+      const marker = screen.getByTestId('nav-grenade-gr-2');
+      expect(marker).toHaveAttribute('aria-label', 'Граната потрачена');
+      expect(marker.className).toContain('opacity-35');
+      expect(marker.className).toContain('line-through');
+    });
+
+    it('у машины гранаты нет — маркера нет', () => {
+      render(
+        <ExpandedNavigator
+          army={makeArmy([makeMachine('gr-m', 'Саламандра')])}
+          focusedUnitIdx={0}
+          onSelectUnit={jest.fn()}
+        />
+      );
+
+      expect(screen.queryByTestId('nav-grenade-gr-m')).not.toBeInTheDocument();
+    });
+  });
 });

@@ -48,4 +48,17 @@ test.describe('Навигатор: сантиметры и «весь юнит �
     await expect(page.getByTestId('expanded-navigator')).not.toBeVisible();
     await expect(page.getByTestId('soldier-card').first()).toBeVisible();
   });
+
+  test('в строке видно, есть граната или потрачена', async ({ page }) => {
+    await openNavigator(page);
+    await expect(page.getByTestId('nav-grenade-squad-test-1')).toHaveAttribute('aria-label', 'Граната доступна');
+  });
+
+  test('потраченная граната помечена как потраченная', async ({ page }) => {
+    await setupGameSessionWithSquad(page, { unitOverrides: { instanceId: 'squad-test-1', grenadesUsed: true } });
+    await waitForBattleDock(page);
+    await openNavigator(page);
+
+    await expect(page.getByTestId('nav-grenade-squad-test-1')).toHaveAttribute('aria-label', 'Граната потрачена');
+  });
 });

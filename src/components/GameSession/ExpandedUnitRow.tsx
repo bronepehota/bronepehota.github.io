@@ -157,6 +157,20 @@ export const ExpandedUnitRow = memo(function ExpandedUnitRow({
 
   const statsLine = formatUnitStatsLine(unit, stepToCmFactor);
 
+  // Маркер гранаты (раз на бой): яркая 💣 — доступна, приглушённая с
+  // перечёркиванием — потрачена (плейтест: в списке отрядов должно быть
+  // видно). У мёртвых и машин смысла нет.
+  const grenadeMarker = unit.type === 'squad' && !compact ? (
+    <span
+      data-testid={`nav-grenade-${unit.instanceId}`}
+      aria-label={unit.grenadesUsed ? 'Граната потрачена' : 'Граната доступна'}
+      title={unit.grenadesUsed ? 'Граната потрачена' : 'Граната доступна'}
+      className={cn('shrink-0 text-[13px] leading-none', unit.grenadesUsed && 'opacity-35 line-through')}
+    >
+      💣
+    </span>
+  ) : null;
+
   // Корень — div[role=button], а не <button>: внутри живая кнопка ✓
   // (вложенные <button> невалидны). ✓ гасит всплытие — тап по нему
   // не открывает карточку юнита.
@@ -211,13 +225,16 @@ export const ExpandedUnitRow = memo(function ExpandedUnitRow({
           glyph={showDoneToggle ? undefined : mark.glyph}
           glyphClass={mark.glyphClass}
         />
-        <div className="px-1.5 py-1 min-w-0">
-          <div className={cn('font-bold font-mono uppercase tracking-wide truncate', deadTile ? 'text-[10px]' : 'text-[11px]', mark.nameClass)}>
-            {unit.data.name}
+        <div className="px-1.5 py-1 min-w-0 flex items-center gap-1">
+          <div className="min-w-0 flex-1">
+            <div className={cn('font-bold font-mono uppercase tracking-wide truncate', deadTile ? 'text-[10px]' : 'text-[11px]', mark.nameClass)}>
+              {unit.data.name}
+            </div>
+            <div className={cn('font-mono font-semibold truncate', deadTile ? 'mt-0.5 text-[9px] text-slate-600' : 'mt-0.5 text-[10px] text-slate-400')}>
+              {statsLine}
+            </div>
           </div>
-          <div className={cn('font-mono font-semibold truncate', deadTile ? 'mt-0.5 text-[9px] text-slate-600' : 'mt-0.5 text-[10px] text-slate-400')}>
-            {statsLine}
-          </div>
+          {grenadeMarker}
         </div>
         {/* ✓ поверх правого верхнего угла фото (кнопке 44px — плитка переносит) */}
         {doneToggleButton && (
@@ -271,7 +288,9 @@ export const ExpandedUnitRow = memo(function ExpandedUnitRow({
         </div>
       </div>
 
-      {/* Справа: ✓-переключатель всего юнита либо статусная метка (✕ убит, ⚑ захвачен) */}
+      {/* Справа: 💣 (есть/потрачена), затем ✓-переключатель всего юнита
+          либо статусная метка (✕ убит, ⚑ захвачен) */}
+      {grenadeMarker}
       {doneToggleButton ?? (
         mark.glyph ? (
           <span className={cn('shrink-0 w-6 font-black text-center', compact ? 'text-sm' : 'text-lg', mark.glyphClass)} aria-hidden="true">
@@ -295,6 +314,7 @@ export const ExpandedUnitRow = memo(function ExpandedUnitRow({
     prev.onToggleDone === next.onToggleDone &&
     // «походил» держится на actionsUsed (done-флаги) — длина не меняется
     prev.unit.actionsUsed === next.unit.actionsUsed &&
-    prev.unit.isMachineDone === next.unit.isMachineDone
+    prev.unit.isMachineDone === next.unit.isMachineDone &&
+    prev.unit.grenadesUsed === next.unit.grenadesUsed
   );
 });
