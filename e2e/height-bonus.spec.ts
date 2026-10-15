@@ -1,12 +1,12 @@
 import { test, expect, type Page } from '@playwright/test';
-import { setupGameSessionWithSquad } from './helpers/setup';
+import { setupGameSessionWithSquad, openShotModal as openShotModalShared } from './helpers/setup';
 
 /**
  * #164 — height bonus: a config toggle gates whether the per-shot "с высоты" chip
  * appears in the shot modal. The gate value persists across reloads.
  *
  * Open sequence mirrors e2e/combat.spec.ts (which uses the same helper):
- * the squad is focused by default → "Выберите действие" → "выстрел".
+ * the squad is focused by default → тап по стату мощности (прямой выстрел).
  *
  * NOTE: setupGameSessionWithSquad calls localStorage.clear() in its initScript,
  * so we cannot set bronepehota_height_bonus_enabled via addInitScript BEFORE the
@@ -17,12 +17,8 @@ import { setupGameSessionWithSquad } from './helpers/setup';
 test.describe('Height bonus (#164)', () => {
   async function openShotModal(page: Page) {
     await expect(page.getByTestId('dock-info-bar')).toBeVisible({ timeout: 5000 });
-    const actionButton = page.getByRole('button', { name: 'Выберите действие' }).first();
-    await expect(actionButton).toBeVisible({ timeout: 5000 });
-    await actionButton.click({ force: true });
-    const shotButton = page.getByRole('button', { name: /выстрел/i }).first();
-    await expect(shotButton).toBeVisible({ timeout: 3000 });
-    await shotButton.click();
+    // Тап по стату мощности — прямой пуск выстрела (без экрана выбора)
+    await openShotModalShared(page);
     await page.waitForTimeout(300);
   }
 

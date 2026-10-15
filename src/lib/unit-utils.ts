@@ -227,6 +227,100 @@ export function getMachineSpeed(unit: ArmyUnit): number {
 }
 
 /**
+ * Сводка юнита для навигатора (мобильный плейтест 2026-10-15): lives —
+ * «жизни» чипом в левом нижнем углу фото (в стиле номера отряда, ♥ для
+ * отрядов, HP прочности для машин), stats — короткая строка рядом с именем
+ * (🛡 броня и 👣 шаги с сантиметрами; фактор передаёт вызывающий).
+ * Пустая строка → вызывающий её не рисует.
+ */
+export function formatUnitStatsParts(unit: ArmyUnit, stepToCmFactor: number): { lives: string; stats: string } {
+  if (unit.type === 'machine') {
+    const machine = unit.data as Machine;
+    const speed = getMachineSpeed(unit);
+    return {
+      lives: `HP ${unit.currentDurability ?? 0}/${machine.durability_max}`,
+      stats: `👣 ${speed} (${speed * stepToCmFactor}см)`,
+    };
+  }
+  const squad = unit.data as Squad;
+  const lives = `♥ ${getAliveSoldiersCount(unit)}/${squad.soldiers.length}`;
+  const uniform = checkSquadUniformStats(unit);
+  const statsParts: string[] = [];
+  if (uniform.isUniformArmor && uniform.commonArmor !== undefined) {
+    statsParts.push(`🛡 ${uniform.commonArmor}`);
+  }
+  if (uniform.isUniformSpeed && uniform.commonSpeed !== undefined) {
+    statsParts.push(`👣 ${uniform.commonSpeed} (${uniform.commonSpeed * stepToCmFactor}см)`);
+  }
+  return { lives, stats: statsParts.join(' · ') };
+}
+
+/**
+ * Прогресс хода отряда для навигатора: сколько живых бойцов и сколько из них
+ * уже походили (done). Мёртвые не считаются; паникующие считаются живыми
+ * не-походившими (§10 — они блокируют «отряд походил»). Машины и пустые
+ * отряды → null (у них нет внутренней динамики хода).
+ */
+export function getUnitTurnProgress(unit: ArmyUnit): { alive: number; acted: number; all: boolean } | null {
+  if (unit.type !== 'squad') return null;
+  const squad = unit.data as Squad;
+  let alive = 0;
+  let acted = 0;
+  squad.soldiers.forEach((_, idx) => {
+    if (unit.deadSoldiers?.includes(idx)) return;
+    alive++;
+    if (unit.actionsUsed?.[idx]?.done) acted++;
+  });
+  if (alive === 0) return null;
+  return { alive, acted, all: acted === alive };
+}
+
+/**
+ * Прогресс хода АРМИИ целиком — для кнопки «Завершить тур» (плейтест
+ * 2026-10-15: прогресс виден у кнопки, не в строках навигатора). Отряды
+ * складываются бойцами (живые, acted = done), машина — за единицу
+ * (isMachineDone). X=Y ⇔ нет неполных юнитов (getIncompleteUnits-гейт).
+ */
+export function getArmyTurnProgress(units: ArmyUnit[]): { acted: number; total: number } {
+  let acted = 0;
+  let total = 0;
+  units.forEach(unit => {
+    if (unit.type === 'machine') {
+      total++;
+      if (unit.isMachineDone) acted++;
+      return;
+    }
+    const p = getUnitTurnProgress(unit);
+    if (p) {
+      total += p.alive;
+      acted += p.acted;
+    }
+  });
+  return { acted, total };
+}
+
+/**
+ * Переключение «весь юнит походил» из навигатора. Отряд: если ещё активен —
+ * все живые бойцы получают done; если уже «походил» — снять у всех. Мёртвые
+ * и паникующие (§10 — не действуют) не трогаются. Машина — флаг isMachineDone.
+ * Иммутабельно.
+ */
+export function toggleUnitDone(unit: ArmyUnit): ArmyUnit {
+  if (unit.type === 'machine') {
+    return { ...unit, isMachineDone: !unit.isMachineDone };
+  }
+  const squad = unit.data as Squad;
+  const alreadyDone = deriveUnitStatus(unit) === 'done';
+  const panicked = new Set((unit.panicState || []).map(p => p.soldierIndex));
+  const actions = squad.soldiers.map((_, idx) => {
+    const current = unit.actionsUsed?.[idx] ?? { moved: false, shot: false, melee: false, done: false };
+    if (unit.deadSoldiers?.includes(idx) || panicked.has(idx)) return current;
+    return { ...current, done: !alreadyDone };
+  });
+  return { ...unit, actionsUsed: actions };
+}
+
+/**
  * Shortens weapon names for mobile display by replacing long Russian words with abbreviations
  */
 export function shortenWeaponName(name: string): string {

@@ -9,6 +9,7 @@ import { isValidRulesVersion } from '@/lib/rules-registry';
 import { getDefaultSource, getSourceWithCustom } from '@/lib/sources-registry';
 import { factionParamToApply } from '@/lib/deep-link';
 import { LOCAL_STORAGE_KEYS } from '@/lib/constants';
+import { stepFactorForRules } from '@/lib/distance-utils';
 import { getDistanceUnit } from '@/components/toggles/DistanceUnitToggle';
 import { loadArmy, saveArmy } from '@/lib/army-storage';
 import { CombatTargetProvider } from '@/contexts/CombatTargetContext';
@@ -104,6 +105,16 @@ export default function Home() {
   useEffect(() => {
     localStorage.setItem('bronepehota_rules_version', rulesVersion);
   }, [rulesVersion]);
+
+  // Смена правил подтягивает масштаб: Сообщество SS меряет шаг = 4см,
+  // Технолог = 5см (distance-utils.stepFactorForRules). Ручной тумблер
+  // «Шаг = см» после этого работает как раньше — до следующей смены правил.
+  const handleRulesVersionChange = (version: RulesVersionID) => {
+    setRulesVersion(version);
+    const factor = stepFactorForRules(version) === 4 ? '4' : '5';
+    setStepToCmFactor(factor);
+    localStorage.setItem(LOCAL_STORAGE_KEYS.STEP_TO_CM_FACTOR, factor);
+  };
 
   // Keep the unit state live when the «шаги/см» switch flips it in battle
   // (setDistanceUnit writes localStorage + fires this event) or in another tab
@@ -250,7 +261,7 @@ export default function Home() {
           army={army}
           setArmy={setArmy}
           rulesVersion={rulesVersion}
-          onRulesVersionChange={setRulesVersion}
+          onRulesVersionChange={handleRulesVersionChange}
           displayMode={displayMode}
           onDisplayModeChange={setDisplayMode}
           onStartBattle={() => setView('game')}

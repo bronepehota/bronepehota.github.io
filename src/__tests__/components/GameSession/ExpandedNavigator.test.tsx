@@ -88,9 +88,9 @@ describe('ExpandedNavigator', () => {
       'expanded-unit-row-dead',
     ]);
 
-    // Убитая строка компактная (фото w-14), живая — крупная (w-24)
+    // Убитая строка компактная (фото w-14), живая — адаптивная (72px → w-24 с 375px)
     expect(screen.getByTestId('expanded-unit-row-dead').querySelector('.w-14')).toBeTruthy();
-    expect(screen.getByTestId('expanded-unit-row-active').querySelector('.w-24')).toBeTruthy();
+    expect(screen.getByTestId('expanded-unit-row-active').querySelector('[class*="w-24"]')).toBeTruthy();
   });
 
   it('полное имя юнита без обрезки до 7 символов', () => {
@@ -105,7 +105,7 @@ describe('ExpandedNavigator', () => {
     expect(screen.getByText('Линейная клон-пехота')).toBeInTheDocument();
   });
 
-  it('строка статов: отряд — живые/броня/скорость, машина — HP/скорость', () => {
+  it('жизни — чип на фото (♥/HP), броня+движение — строкой у имени', () => {
     render(
       <ExpandedNavigator
         army={makeArmy([
@@ -117,8 +117,11 @@ describe('ExpandedNavigator', () => {
       />
     );
 
-    expect(screen.getByText('♥ 4/6 · 🛡 2 · 👣 5')).toBeInTheDocument();
-    expect(screen.getByText('HP 8/16 · 👣 1')).toBeInTheDocument();
+    // Скорость дублируется в сантиметрах (фактор по умолчанию 5): 5×5, 1×5
+    expect(screen.getByText('♥ 4/6')).toBeInTheDocument();
+    expect(screen.getByText('HP 8/16')).toBeInTheDocument();
+    expect(screen.getByText('🛡 2 · 👣 5 (25см)')).toBeInTheDocument();
+    expect(screen.getByText('👣 1 (5см)')).toBeInTheDocument();
   });
 
   it('клик по строке выбирает юнит (индекс в армии)', () => {
@@ -173,14 +176,124 @@ describe('ExpandedNavigator', () => {
     const grid = document.querySelector('.grid.grid-cols-2');
     expect(grid).toBeInTheDocument();
 
-    // Плитка живого: фото-блок h-24; убитой — компактная h-14
+    // Плитки одного размера (плейтест 2026-10-15: уменьшение убитой в сетке
+    // смысла не имеет) — статус несут полоса, ✕ и притенение
     const aliveTile = screen.getByTestId('expanded-unit-g-0');
     expect(aliveTile.querySelector('.h-24')).toBeTruthy();
     const deadTile = screen.getByTestId('expanded-unit-g-5');
-    expect(deadTile.querySelector('.h-14')).toBeTruthy();
+    expect(deadTile.querySelector('.h-24')).toBeTruthy();
 
     // Строки-плитки несут имя и статы (узнавание сохранено)
     expect(aliveTile.textContent).toContain('Первый отряд');
     expect(aliveTile.textContent).toContain('♥ 3/3');
+  });
+
+  // Плейтест 2026-10-15: в списке отрядов должно быть видно, есть граната
+  // или уже потрачена (она одна на бой) — без захода в карточку.
+  describe('маркер гранаты', () => {
+    it('у отряда с гранатой — 💣 «Граната доступна»', () => {
+      render(
+        <ExpandedNavigator
+          army={makeArmy([makeSquad('gr-1', 'Гранатомётчики', 3)])}
+          focusedUnitIdx={0}
+          onSelectUnit={jest.fn()}
+        />
+      );
+
+      const marker = screen.getByTestId('nav-grenade-gr-1');
+      expect(marker).toHaveAttribute('aria-label', 'Граната доступна');
+      expect(marker.textContent).toContain('💣');
+    });
+
+    it('потраченная граната — приглушённый перечёркнутый 💣 «Граната потрачена»', () => {
+      const unit = { ...makeSquad('gr-2', 'Без гранаты', 3), grenadesUsed: true } as ArmyUnit;
+      render(
+        <ExpandedNavigator
+          army={makeArmy([unit])}
+          focusedUnitIdx={0}
+          onSelectUnit={jest.fn()}
+        />
+      );
+
+      const marker = screen.getByTestId('nav-grenade-gr-2');
+      expect(marker).toHaveAttribute('aria-label', 'Граната потрачена');
+      expect(marker.className).toContain('opacity-35');
+      expect(marker.className).toContain('line-through');
+    });
+
+    it('у машины гранаты нет — маркера нет', () => {
+      render(
+        <ExpandedNavigator
+          army={makeArmy([makeMachine('gr-m', 'Саламандра')])}
+          focusedUnitIdx={0}
+          onSelectUnit={jest.fn()}
+        />
+      );
+
+      expect(screen.queryByTestId('nav-grenade-gr-m')).not.toBeInTheDocument();
+    });
+  });
+
+  // Плейтест 2026-10-15: прогресс хода — в навигаторе: шапка (✓ X/Y армии)
+  // и строка частично походившего отряда (✓ x/y бойцов).
+  describe('прогресс хода в навигаторе', () => {
+    const makePartial = (instanceId: string, doneCount: number, soldiers = 3) => ({
+      ...makeSquad(instanceId, `Отряд ${instanceId}`, soldiers),
+      actionsUsed: Array.from({ length: soldiers }, (_, i) => ({
+        moved: false, shot: false, melee: false, done: i < doneCount,
+      })),
+    }) as ArmyUnit;
+
+    it('шапка: ✓ X/Y по всей армии (бойцы отрядов)', () => {
+      render(
+        <ExpandedNavigator
+          army={makeArmy([makePartial('p-1', 1), makeSquad('p-2', 'Свежий', 2)])}
+          focusedUnitIdx={0}
+          onSelectUnit={jest.fn()}
+        />
+      );
+
+      // 1 походил из 5 живых
+      expect(screen.getByTestId('nav-turn-progress')).toHaveTextContent('✓ 1/5');
+    });
+
+    it('все походили — счётчик шапки зелёный', () => {
+      render(
+        <ExpandedNavigator
+          army={makeArmy([makePartial('p-3', 3)])}
+          focusedUnitIdx={0}
+          onSelectUnit={jest.fn()}
+        />
+      );
+
+      const chip = screen.getByTestId('nav-turn-progress');
+      expect(chip).toHaveTextContent('✓ 3/3');
+      expect(chip.className).toContain('text-emerald-300');
+    });
+
+    it('строка частично походившего отряда — ✓ x/y бойцов', () => {
+      render(
+        <ExpandedNavigator
+          army={makeArmy([makePartial('p-4', 1)])}
+          focusedUnitIdx={0}
+          onSelectUnit={jest.fn()}
+        />
+      );
+
+      expect(screen.getByTestId('nav-turn-p-4')).toHaveTextContent('1/3');
+    });
+
+    it('никто не походил — строки у отряда нет (шапка показывает ✓ 0/N)', () => {
+      render(
+        <ExpandedNavigator
+          army={makeArmy([makeSquad('p-5', 'Свежий', 3)])}
+          focusedUnitIdx={0}
+          onSelectUnit={jest.fn()}
+        />
+      );
+
+      expect(screen.queryByTestId('nav-turn-p-5')).not.toBeInTheDocument();
+      expect(screen.getByTestId('nav-turn-progress')).toHaveTextContent('✓ 0/3');
+    });
   });
 });

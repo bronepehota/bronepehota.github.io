@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { clearStorage, dismissIntroIfShown } from './helpers/setup';
+import { clearStorage, dismissIntroIfShown, openShotModal } from './helpers/setup';
 
 /**
  * Aimed Shot E2E tests
@@ -55,14 +55,8 @@ test.describe('Aimed Shot - Combat Modal', () => {
     await expect(gameSession.first()).toBeVisible({ timeout: 10000 });
 
     // Click the "ДЕЙСТВИЕ" button for the first soldier to open combat modal
-    const actionButton = page.getByRole('button', { name: 'Выберите действие' }).first();
-    await expect(actionButton).toBeVisible({ timeout: 5000 });
-    await actionButton.click({ force: true });
-
-    // Select shot action (ВЫСТРЕЛ)
-    const shotButton = page.getByRole('button', { name: /выстрел/i });
-    await expect(shotButton).toBeVisible({ timeout: 3000 });
-    await shotButton.click();
+    // Тап по стату мощности — прямой пуск выстрела (без экрана выбора)
+    await openShotModal(page);
 
     // Check aimed shot button is visible (uses aria-label)
     const aimedShotButton = page.locator('button[aria-label*="Прицельный"]');
@@ -198,14 +192,8 @@ test.describe('Aimed Shot - Combat Modal', () => {
     await expect(gameSession.first()).toBeVisible({ timeout: 10000 });
 
     // Click the "ДЕЙСТВИЕ" button for the first soldier
-    const actionButton = page.getByRole('button', { name: 'Выберите действие' }).first();
-    await expect(actionButton).toBeVisible({ timeout: 5000 });
-    await actionButton.click({ force: true });
-
-    // Select shot action
-    const shotButton = page.getByRole('button', { name: /выстрел/i });
-    await expect(shotButton).toBeVisible({ timeout: 3000 });
-    await shotButton.click();
+    // Тап по стату мощности — прямой пуск выстрела (без экрана выбора)
+    await openShotModal(page);
 
     // Get aimed shot button and verify it exists
     const aimedShotButton = page.locator('button[aria-label*="Прицельный"]');

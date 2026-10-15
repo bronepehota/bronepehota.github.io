@@ -9,6 +9,7 @@ import { ActionSelector } from '@/components/combat/ActionSelector';
 import { ParameterInputs } from '@/components/combat/ParameterInputs';
 import { CombatResults } from '@/components/combat/CombatResults';
 import { getStepToCmFactor } from '@/components/toggles/StepToCmFactorToggle';
+import { stepFactorForRules } from '@/lib/distance-utils';
 import { RulesSelector } from './RulesSelector';
 import { ModifiersSelector } from './ModifiersSelector';
 import { DiceInputPopup } from '@/components/combat/DiceInputPopup';
@@ -205,7 +206,15 @@ export function CalculatorPage() {
 
       {/* Свод правил — отдельной строкой под табами (в хедере не влезает на мобиле) */}
       <div className="max-w-[600px] mx-auto px-4 pt-3" data-testid="calculator-rules">
-        <RulesSelector value={rulesVersion} onChange={updateRulesVersion} />
+        <RulesSelector
+          value={rulesVersion}
+          onChange={(version) => {
+            updateRulesVersion(version);
+            // Правила меряют шаг по-своему (SS — 4см, Технолог — 5см);
+            // живой стейт калькулятора, общий localStorage не трогаем
+            setStepToCmFactor(stepFactorForRules(version));
+          }}
+        />
       </div>
 
       {/* Main content */}

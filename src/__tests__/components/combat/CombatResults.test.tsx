@@ -883,4 +883,17 @@ describe('CombatResults - Grenade Display', () => {
       expect(screen.queryByText('60 см')).not.toBeInTheDocument();
     });
   });
+
+  // Плейтест: «ПРИНЯТЬ» мелковата для мобилы — телефон лежит на столе,
+  // кнопка финализирует бросок и должна попадаться пальцу уверенно.
+  describe('Применить (ПРИНЯТЬ) — мобильный размер', () => {
+    it('кнопка высокая (56px) с крупным кеглем на мобиле', () => {
+      render(<CombatResults {...defaultProps} />);
+
+      const apply = screen.getByRole('button', { name: 'ПРИНЯТЬ' });
+      expect(apply).toHaveClass('min-h-[56px]');
+      expect(apply).toHaveClass('text-base');
+      expect(apply).toHaveClass('py-3');
+    });
+  });
 });

@@ -5,12 +5,17 @@ import { Army, FactionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { getFactionColors } from '@/lib/faction-colors';
 import { deriveUnitStatus } from '@/lib/unit-status';
+import { getArmyTurnProgress } from '@/lib/unit-utils';
 import { ExpandedUnitRow } from './ExpandedUnitRow';
 
 interface ExpandedNavigatorProps {
   army: Army;
   focusedUnitIdx: number;
   onSelectUnit: (idx: number) => void;
+  /** Фактор шаг/см для строки статов (👣 5 (25см)) */
+  stepToCmFactor?: number;
+  /** Переключить «весь юнит походил» по instanceId */
+  onToggleUnitDone?: (instanceId: string) => void;
 }
 
 /**
@@ -27,7 +32,7 @@ interface ExpandedNavigatorProps {
  */
 const GRID_ALIVE_THRESHOLD = 5;
 
-export function ExpandedNavigator({ army, focusedUnitIdx, onSelectUnit }: ExpandedNavigatorProps) {
+export function ExpandedNavigator({ army, focusedUnitIdx, onSelectUnit, stepToCmFactor = 5, onToggleUnitDone }: ExpandedNavigatorProps) {
   const faction = (army.faction || 'polaris') as FactionID;
   const factionColors = getFactionColors(faction);
 
@@ -35,6 +40,10 @@ export function ExpandedNavigator({ army, focusedUnitIdx, onSelectUnit }: Expand
     () => army.units.filter(u => deriveUnitStatus(u) === 'active').length,
     [army.units]
   );
+
+  // Прогресс хода армии (плейтест 2026-10-15: «есть ли не походившие» —
+  // видно в шапке списка): бойцы отрядов + машины (за единицу)
+  const turnProgress = useMemo(() => getArmyTurnProgress(army.units), [army.units]);
 
   // Разом: порядок (живые, затем убитые) и число живых — один проход,
   // чтобы порог сетки и разбивка не могли разъехаться
@@ -60,6 +69,8 @@ export function ExpandedNavigator({ army, focusedUnitIdx, onSelectUnit }: Expand
       onClick={() => onSelectUnit(idx)}
       faction={faction}
       layout={gridMode ? 'tile' : 'row'}
+      stepToCmFactor={stepToCmFactor}
+      onToggleDone={onToggleUnitDone ? () => onToggleUnitDone(unit.instanceId) : undefined}
     />
   ));
 
@@ -78,6 +89,20 @@ export function ExpandedNavigator({ army, focusedUnitIdx, onSelectUnit }: Expand
         >
           активн. {activeCount}
         </span>
+        {turnProgress.total > 0 && (
+          <span
+            data-testid="nav-turn-progress"
+            className={cn(
+              'ml-1.5 text-[10px] font-bold font-mono px-1.5 py-0.5 rounded-sm',
+              turnProgress.acted === turnProgress.total
+                ? 'bg-emerald-500/15 text-emerald-300'
+                : 'bg-slate-500/15 text-slate-300'
+            )}
+            aria-label={`Походили: ${turnProgress.acted} из ${turnProgress.total}`}
+          >
+            ✓ {turnProgress.acted}/{turnProgress.total}
+          </span>
+        )}
         <span className="ml-auto text-slate-600 text-[11px]">
           ⟷ свайп вниз
         </span>

@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { setupGameSessionWithSquad, clearStorage } from './helpers/setup';
+import { setupGameSessionWithSquad, clearStorage, openActionMenu } from './helpers/setup';
 
 /**
  * #165 + blast-rework — grenade target log stays compact for many targets:
@@ -7,7 +7,7 @@ import { setupGameSessionWithSquad, clearStorage } from './helpers/setup';
  * content snaps back to the top after every ВЗРЫВ (thumb taps at the bottom,
  * eyes read the result at the top).
  *
- * Flow: expand unit card -> "Выберите действие" -> ГРАНАТА -> PARAMETERS (БРОСИТЬ)
+ * Flow: ⋯ (все действия) -> ГРАНАТА -> PARAMETERS (БРОСИТЬ)
  *       -> RESULTS (throw block + sticky arming strip) -> click ВЗРЫВ 6x
  */
 test.describe('Grenade target list (#165)', () => {
@@ -24,12 +24,12 @@ test.describe('Grenade target list (#165)', () => {
     await expect(page.getByTestId('dock-info-bar')).toBeVisible({ timeout: 5000 });
 
     // Open combat modal via action button
-    const actionButton = page.getByRole('button', { name: 'Выберите действие' }).first();
-    await expect(actionButton).toBeVisible({ timeout: 5000 });
-    await actionButton.click({ force: true });
+    // ⋯ — меню всех действий, там «ГРАНАТА»
+    await openActionMenu(page);
 
-    // Select grenade action
-    const grenadeButton = page.getByRole('button', { name: /граната/i });
+    // Select grenade action (скоуп в модал: за ним остались ⋯-кнопки бойцов
+    // с «граната» в aria-метке)
+    const grenadeButton = page.getByTestId('bottom-sheet-combat-modal').getByRole('button', { name: /граната/i });
     await expect(grenadeButton).toBeVisible({ timeout: 3000 });
     await grenadeButton.click();
 

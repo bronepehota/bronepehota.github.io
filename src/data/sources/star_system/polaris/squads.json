@@ -1500,7 +1500,10 @@
         "power": "2D6",
         "melee": 2,
         "armor": 3,
-        "image": "/images/squads/polaris/inzhenernyy_otryad_dolgorukogo/1.png"
+        "image": "/images/squads/polaris/inzhenernyy_otryad_dolgorukogo/1.png",
+        "modifiers": [
+          "mechanic"
+        ]
       },
       {
         "num": 2,
@@ -1510,7 +1513,10 @@
         "power": "2D12",
         "melee": 0,
         "armor": 3,
-        "image": "/images/squads/polaris/inzhenernyy_otryad_dolgorukogo/2.png"
+        "image": "/images/squads/polaris/inzhenernyy_otryad_dolgorukogo/2.png",
+        "modifiers": [
+          "mechanic"
+        ]
       },
       {
         "num": 3,
@@ -1533,7 +1539,10 @@
         "power": "2D6",
         "melee": 2,
         "armor": 3,
-        "image": "/images/squads/polaris/inzhenernyy_otryad_dolgorukogo/4.png"
+        "image": "/images/squads/polaris/inzhenernyy_otryad_dolgorukogo/4.png",
+        "modifiers": [
+          "mechanic"
+        ]
       },
       {
         "num": 5,
@@ -1543,7 +1552,10 @@
         "power": "2D6",
         "melee": 2,
         "armor": 3,
-        "image": "/images/squads/polaris/inzhenernyy_otryad_dolgorukogo/5.png"
+        "image": "/images/squads/polaris/inzhenernyy_otryad_dolgorukogo/5.png",
+        "modifiers": [
+          "mechanic"
+        ]
       },
       {
         "num": 6,
@@ -1553,7 +1565,10 @@
         "power": "2D6",
         "melee": 2,
         "armor": 3,
-        "image": "/images/squads/polaris/inzhenernyy_otryad_dolgorukogo/6.png"
+        "image": "/images/squads/polaris/inzhenernyy_otryad_dolgorukogo/6.png",
+        "modifiers": [
+          "mechanic"
+        ]
       }
     ],
     "image": "/images/squads/polaris/inzhenernyy_otryad_dolgorukogo/1.png"

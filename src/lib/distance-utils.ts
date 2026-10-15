@@ -2,6 +2,17 @@
  * Distance utility functions for converting between dice notation and centimeters
  */
 
+import type { RulesVersionID } from './types';
+
+/**
+ * Фактор шаг/см по версии правил: Сообщество Star System меряет шаг = 4 см,
+ * Технолог = 5 см. Вызывается при смене правил (визард, смена в бою,
+ * /calculator) — ручной тумблер «Шаг = см» после этого остаётся при себе.
+ */
+export function stepFactorForRules(rulesVersion: RulesVersionID): number {
+  return rulesVersion === 'community_star_system' ? 4 : 5;
+}
+
 /**
  * Parse a dice notation string to extract the maximum range value
  * Handles formats: "D6", "D12", "D6+2", "2D6" (though range is typically single die)

@@ -4,6 +4,7 @@ import {
   formatRange,
   stepsToCm,
   cmToSteps,
+  stepFactorForRules,
 } from '@/lib/distance-utils';
 
 describe('distance-utils', () => {
@@ -206,6 +207,22 @@ describe('distance-utils', () => {
       const cm = stepsToCm(original, 4);
       const back = cmToSteps(cm, 4);
       expect(back).toBe(original);
+    });
+  });
+
+  // Правила Сообщества Star System меряют шаг = 4 см, Технолог = 5 см
+  // (решение владельца 2026-10-15: смена правил подтягивает фактор шаг/см).
+  describe('stepFactorForRules', () => {
+    it('returns 4 for community_star_system', () => {
+      expect(stepFactorForRules('community_star_system')).toBe(4);
+    });
+
+    it('returns 5 for tehnolog', () => {
+      expect(stepFactorForRules('tehnolog')).toBe(5);
+    });
+
+    it('falls back to 5 for unknown ids', () => {
+      expect(stepFactorForRules('unknown_rules' as never)).toBe(5);
     });
   });
 });

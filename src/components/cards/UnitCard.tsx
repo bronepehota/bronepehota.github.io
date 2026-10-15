@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { formatRange } from '@/lib/distance-utils';
 import { BottomSheetCombatModal } from '../combat/BottomSheetCombatModal';
 import { useCombatFlowController } from '../combat/CombatFlowController';
+import { canSoldierShoot, canSoldierMelee } from '../combat/ActionSelector';
 import { CombatActionType, CombatLogEntry } from '@/lib/combat-types';
 import { PilotAssignmentModal } from '../modals/PilotAssignmentModal';
 import { PilotTestModal } from '../combat/PilotTestModal';
@@ -267,9 +268,18 @@ export default function UnitCard({
     }
   }, [triggerEncyclopediaOpen, setShowDetailsModal]);
 
-  // Handle combat actions
-  const _handleSoldierAction = useCallback((soldierIndex: number) => {
-    combatController.startCombat(unit, soldierIndex);
+  // Handle combat actions. Без action — экран выбора (⋯ в углу карточки);
+  // с action — прямой пуск из тапа по стату: валидное действие идёт сразу
+  // в ПАРАМЕТРЫ, невалидное (стрелок без дальности и т.п.) — в меню.
+  const _handleSoldierAction = useCallback((soldierIndex: number, action?: 'shot' | 'melee') => {
+    if (!action) {
+      combatController.startCombat(unit, soldierIndex);
+      return;
+    }
+    const valid = action === 'shot'
+      ? canSoldierShoot(unit, soldierIndex)
+      : canSoldierMelee(unit, soldierIndex);
+    combatController.startCombat(unit, soldierIndex, undefined, valid ? action : undefined);
   }, [unit, combatController]);
 
   const handleVehicleAttack = (weaponIndex: number) => {

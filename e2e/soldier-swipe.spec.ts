@@ -80,7 +80,8 @@ test.describe('Soldier card swipes — touch (CDP)', () => {
    */
   async function touchSwipeOnStats(page: Page, index: number, dir: 'left' | 'right') {
     const card = page.getByTestId('soldier-card').nth(index);
-    const stats = card.getByRole('button', { name: 'Выберите действие бойца' });
+    // Жест стартует на клетке стата (та зона, на которую жаловался владелец)
+    const stats = card.getByTestId('stat-badge-power');
     const box = await stats.boundingBox();
     expect(box).toBeTruthy();
     const startX = box!.x + box!.width * 0.5;
@@ -141,8 +142,10 @@ test.describe('Soldier card swipes — touch (CDP)', () => {
     await expect(page.getByTestId('dock-soldiers-alive')).toContainText('5/6');
   });
 
-  test('тап по статам (тач) по-прежнему открывает модалку боя', async ({ page }) => {
+  test('тап по стату ББ (тач) открывает модал боя сразу в ближнем бою', async ({ page }) => {
     await touchTapOnStats(page, 0);
     await expect(page.getByTestId('bottom-sheet-combat-modal')).toBeVisible();
+    // Прямой пуск: ПАРАМЕТРЫ ближнего боя (кнопка АТАКОВАТЬ), а не экран выбора
+    await expect(page.getByRole('button', { name: 'АТАКОВАТЬ' })).toBeVisible({ timeout: 3000 });
   });
 });

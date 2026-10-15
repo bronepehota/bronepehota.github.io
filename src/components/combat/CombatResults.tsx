@@ -695,7 +695,9 @@ export function CombatResults({
         <button
           onClick={() => onApply(markAsDone || undefined)}
           className={cn(
-            "flex-1 px-2 md:px-6 py-2 md:py-3 rounded-lg font-mono text-sm font-bold uppercase tracking-wider border-2 transition-all min-h-[44px] md:min-h-[48px]",
+            // Мобильная эргономика: телефон лежит на столе, финализирующая
+            // кнопка должна попадаться пальцу (плейтест: «мелковата»)
+            "flex-1 px-3 md:px-6 py-3 md:py-3 rounded-lg font-mono text-base font-bold uppercase tracking-wider border-2 transition-all min-h-[56px]",
             (isShot || isGrenade) && result.hitResult?.success
               ? "bg-emerald-600 hover:bg-emerald-500 border-emerald-500 text-white"
               : isMelee && result.meleeResult?.winner === 'attacker'

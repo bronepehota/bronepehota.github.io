@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { setupGameSessionWithSquad, clearStorage } from './helpers/setup';
+import { setupGameSessionWithSquad, clearStorage, openShotModal as openShotModalShared } from './helpers/setup';
 
 /**
  * #174 — surprise attack («с тыла») preview:
@@ -12,12 +12,8 @@ test.describe('Surprise-attack preview (#174)', () => {
 
   async function openShotModal(page: Page) {
     await expect(page.getByTestId('dock-info-bar')).toBeVisible({ timeout: 5000 });
-    const actionButton = page.getByRole('button', { name: 'Выберите действие' }).first();
-    await expect(actionButton).toBeVisible({ timeout: 5000 });
-    await actionButton.click({ force: true });
-    const shotButton = page.getByRole('button', { name: /выстрел/i }).first();
-    await expect(shotButton).toBeVisible({ timeout: 3000 });
-    await shotButton.click();
+    // Тап по стату мощности — прямой пуск выстрела (без экрана выбора)
+    await openShotModalShared(page);
     await page.waitForTimeout(300);
   }
 

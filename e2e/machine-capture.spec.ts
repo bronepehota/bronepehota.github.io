@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { clearStorage } from './helpers/setup';
+import { clearStorage, openActionMenu } from './helpers/setup';
 
 /**
  * #168 — Machine capture E2E.
@@ -172,9 +172,8 @@ test.describe('Machine capture (#168)', () => {
     await expect(page.getByTestId('dock-info-bar')).toBeVisible({ timeout: 5000 });
 
     // Open the combat modal via the first soldier's action button.
-    const actionButton = page.getByRole('button', { name: 'Выберите действие' }).first();
-    await expect(actionButton).toBeVisible({ timeout: 5000 });
-    await actionButton.click({ force: true });
+    // ⋯ — меню всех действий, там «ЗАХВАТ»
+    await openActionMenu(page);
 
     // Select the «ЗАХВАТ» action.
     const captureAction = page.getByRole('button', { name: /захват/i }).first();
