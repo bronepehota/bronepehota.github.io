@@ -105,7 +105,7 @@ describe('ExpandedNavigator', () => {
     expect(screen.getByText('Линейная клон-пехота')).toBeInTheDocument();
   });
 
-  it('строки статов: живучесть (♥/🛡 · HP) и движение (👣+см) раздельно', () => {
+  it('жизни — чип на фото (♥/HP), броня+движение — строкой у имени', () => {
     render(
       <ExpandedNavigator
         army={makeArmy([
@@ -118,9 +118,9 @@ describe('ExpandedNavigator', () => {
     );
 
     // Скорость дублируется в сантиметрах (фактор по умолчанию 5): 5×5, 1×5
-    expect(screen.getByText('♥ 4/6 · 🛡 2')).toBeInTheDocument();
-    expect(screen.getByText('👣 5 (25см)')).toBeInTheDocument();
+    expect(screen.getByText('♥ 4/6')).toBeInTheDocument();
     expect(screen.getByText('HP 8/16')).toBeInTheDocument();
+    expect(screen.getByText('🛡 2 · 👣 5 (25см)')).toBeInTheDocument();
     expect(screen.getByText('👣 1 (5см)')).toBeInTheDocument();
   });
 
@@ -176,11 +176,12 @@ describe('ExpandedNavigator', () => {
     const grid = document.querySelector('.grid.grid-cols-2');
     expect(grid).toBeInTheDocument();
 
-    // Плитка живого: фото-блок h-24; убитой — компактная h-14
+    // Плитки одного размера (плейтест 2026-10-15: уменьшение убитой в сетке
+    // смысла не имеет) — статус несут полоса, ✕ и притенение
     const aliveTile = screen.getByTestId('expanded-unit-g-0');
     expect(aliveTile.querySelector('.h-24')).toBeTruthy();
     const deadTile = screen.getByTestId('expanded-unit-g-5');
-    expect(deadTile.querySelector('.h-14')).toBeTruthy();
+    expect(deadTile.querySelector('.h-24')).toBeTruthy();
 
     // Строки-плитки несут имя и статы (узнавание сохранено)
     expect(aliveTile.textContent).toContain('Первый отряд');
@@ -233,10 +234,9 @@ describe('ExpandedNavigator', () => {
     });
   });
 
-  // Плейтест 2026-10-15: видно, есть ли в отряде не походившие бойцы —
-  // тихая строка «✓ X/Y» только на частичном прогрессе (0/N — просто
-  // активный, N/N — отряд и так «походил»).
-  describe('прогресс хода отряда', () => {
+  // Плейтест 2026-10-15: прогресс хода — в навигаторе: шапка (✓ X/Y армии)
+  // и строка частично походившего отряда (✓ x/y бойцов).
+  describe('прогресс хода в навигаторе', () => {
     const makePartial = (instanceId: string, doneCount: number, soldiers = 3) => ({
       ...makeSquad(instanceId, `Отряд ${instanceId}`, soldiers),
       actionsUsed: Array.from({ length: soldiers }, (_, i) => ({
@@ -244,31 +244,20 @@ describe('ExpandedNavigator', () => {
       })),
     }) as ArmyUnit;
 
-    it('частичный прогресс — ✓ X/Y виден', () => {
+    it('шапка: ✓ X/Y по всей армии (бойцы отрядов)', () => {
       render(
         <ExpandedNavigator
-          army={makeArmy([makePartial('p-1', 1)])}
+          army={makeArmy([makePartial('p-1', 1), makeSquad('p-2', 'Свежий', 2)])}
           focusedUnitIdx={0}
           onSelectUnit={jest.fn()}
         />
       );
 
-      expect(screen.getByTestId('nav-turn-p-1')).toHaveTextContent('1/3');
+      // 1 походил из 5 живых
+      expect(screen.getByTestId('nav-turn-progress')).toHaveTextContent('✓ 1/5');
     });
 
-    it('никто не походил — строки нет (отряд просто активный)', () => {
-      render(
-        <ExpandedNavigator
-          army={makeArmy([makeSquad('p-2', 'Свежий отряд', 3)])}
-          focusedUnitIdx={0}
-          onSelectUnit={jest.fn()}
-        />
-      );
-
-      expect(screen.queryByTestId('nav-turn-p-2')).not.toBeInTheDocument();
-    });
-
-    it('все походили — строки нет (статус несёт полоса и ✓-кнопка)', () => {
+    it('все походили — счётчик шапки зелёный', () => {
       render(
         <ExpandedNavigator
           army={makeArmy([makePartial('p-3', 3)])}
@@ -277,19 +266,34 @@ describe('ExpandedNavigator', () => {
         />
       );
 
-      expect(screen.queryByTestId('nav-turn-p-3')).not.toBeInTheDocument();
+      const chip = screen.getByTestId('nav-turn-progress');
+      expect(chip).toHaveTextContent('✓ 3/3');
+      expect(chip.className).toContain('text-emerald-300');
     });
 
-    it('машина — строки прогресса нет', () => {
+    it('строка частично походившего отряда — ✓ x/y бойцов', () => {
       render(
         <ExpandedNavigator
-          army={makeArmy([makeMachine('p-m', 'Саламандра')])}
+          army={makeArmy([makePartial('p-4', 1)])}
           focusedUnitIdx={0}
           onSelectUnit={jest.fn()}
         />
       );
 
-      expect(screen.queryByTestId('nav-turn-p-m')).not.toBeInTheDocument();
+      expect(screen.getByTestId('nav-turn-p-4')).toHaveTextContent('1/3');
+    });
+
+    it('никто не походил — строки у отряда нет (шапка показывает ✓ 0/N)', () => {
+      render(
+        <ExpandedNavigator
+          army={makeArmy([makeSquad('p-5', 'Свежий', 3)])}
+          focusedUnitIdx={0}
+          onSelectUnit={jest.fn()}
+        />
+      );
+
+      expect(screen.queryByTestId('nav-turn-p-5')).not.toBeInTheDocument();
+      expect(screen.getByTestId('nav-turn-progress')).toHaveTextContent('✓ 0/3');
     });
   });
 });

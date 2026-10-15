@@ -898,7 +898,9 @@ export default function GameSession({
           </div>
         )}
 
-        {/* Floating "End Turn" button - appears when all units are done.
+        {/* Floating "End Turn" button - appears when all units are done
+            (само появляется, плейтест 2026-10-15: постоянной кнопкой —
+            «как попап»; прогресс хода живёт в навигаторе).
             NB: testid intentionally differs from the dock-menu «Новый тур» item
             (new-turn-button) — the old duplicate testid was a strict-mode hazard
             when both rendered. E2E targets the menu item. */}

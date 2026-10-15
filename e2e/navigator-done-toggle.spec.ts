@@ -62,8 +62,8 @@ test.describe('Навигатор: сантиметры и «весь юнит �
     await expect(page.getByTestId('nav-grenade-squad-test-1')).toHaveAttribute('aria-label', 'Граната потрачена');
   });
 
-  test('в строке видно, сколько бойцов ещё не походили (✓ X/Y)', async ({ page }) => {
-    // 2 из 6 бойцов походили — строка хода ✓ 2/6
+  test('прогресс хода в навигаторе: шапка ✓ X/Y и строка отряда ✓ x/y', async ({ page }) => {
+    // 2 из 6 бойцов походили
     await setupGameSessionWithSquad(page, {
       unitOverrides: {
         instanceId: 'squad-test-1',
@@ -74,17 +74,57 @@ test.describe('Навигатор: сантиметры и «весь юнит �
       },
     });
     await waitForBattleDock(page);
-    await openNavigator(page);
 
+    // Кнопка «Завершить тур» НЕ висит постоянно (плейтест: как попап)
+    await expect(page.getByTestId('floating-new-turn-button')).toHaveCount(0);
+
+    await openNavigator(page);
+    // Шапка: 2 походили из 6 живых; строка отряда: ✓ 2/6 бойцов
+    await expect(page.getByTestId('nav-turn-progress')).toHaveText(/2\/6/);
     await expect(page.getByTestId('nav-turn-squad-test-1')).toHaveText(/2\/6/);
+
+    // Весь отряд походил одним тапом ✓ → шапка зелёная, кнопка появилась
+    await page.getByTestId('unit-done-toggle-squad-test-1').click();
+    await expect(page.getByTestId('nav-turn-progress')).toHaveText(/6\/6/);
+    // Лист перекрывает док — закрываем за ручку (сама кнопка под листом)
+    await page.getByTestId('navigator-sheet').locator('div').first().click();
+    await expect(page.getByTestId('floating-new-turn-button')).toBeVisible();
   });
 
-  test('статы разбиты на две короткие строки: живучесть и движение', async ({ page }) => {
+  test('статы разбиты на короткие строки: живучесть и движение', async ({ page }) => {
     await openNavigator(page);
 
     const row = page.getByTestId('expanded-unit-squad-test-1');
     await expect(row).toContainText('♥ 6/6');
     await expect(row).toContainText('🛡 2');
     await expect(row).toContainText('👣 5 (25см)');
+  });
+
+  test('убитая плитка в сетке того же размера, что и живая', async ({ page }) => {
+    // 5 живых + 1 убитый юнит → плиточная сетка
+    const mkSquad = (n: number) => ({
+      instanceId: `extra-${n}`, type: 'squad', instanceNumber: n + 1,
+      data: { id: 'polaris_lineynaya_klon_pehota', name: `Отряд ${n}`, shortName: `О${n}`, faction: 'polaris', cost: 50, image: '', soldiers: [{ num: 1, rank: 2, speed: 5, range: 'D6', power: '2D6', melee: 3, props: [], armor: 2, image: '' }] },
+      currentSoldiers: [0], deadSoldiers: [], actionsUsed: [],
+    });
+    const deadSquad = {
+      instanceId: 'dead-1', type: 'squad', instanceNumber: 9,
+      data: { id: 'polaris_lineynaya_klon_pehota', name: 'Погибший отряд', shortName: 'Погибшие', faction: 'polaris', cost: 50, image: '', soldiers: [{ num: 1, rank: 2, speed: 5, range: 'D6', power: '2D6', melee: 3, props: [], armor: 2, image: '' }] },
+      currentSoldiers: [], deadSoldiers: [0], actionsUsed: [],
+    };
+    await setupGameSessionWithSquad(page, {
+      extraUnits: [mkSquad(1), mkSquad(2), mkSquad(3), mkSquad(4), deadSquad],
+    });
+    await waitForBattleDock(page);
+    await openNavigator(page);
+
+    // Сетка; убитая плитка — то же фото h-24 (96px), что у живой
+    const aliveTile = page.getByTestId('expanded-unit-squad-test-1');
+    const deadTile = page.getByTestId('expanded-unit-dead-1');
+    const aliveBox = await aliveTile.locator('.h-24').first().boundingBox();
+    const deadBox = await deadTile.locator('.h-24').first().boundingBox();
+    expect(aliveBox).toBeTruthy();
+    expect(deadBox).toBeTruthy();
+    expect(Math.round(deadBox!.height)).toBe(Math.round(aliveBox!.height));
   });
 });

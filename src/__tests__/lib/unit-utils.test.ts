@@ -1,4 +1,4 @@
-import { getAliveSoldiersCount, countUnitsByStatus, getMachineSpeed, formatUnitStatsParts, toggleUnitDone, getUnitTurnProgress } from '@/lib/unit-utils';
+import { getAliveSoldiersCount, countUnitsByStatus, getMachineSpeed, formatUnitStatsParts, toggleUnitDone, getUnitTurnProgress, getArmyTurnProgress } from '@/lib/unit-utils';
 import type { ArmyUnit, Squad, Machine } from '@/lib/types';
 
 const makeSquadUnit = (soldierCount: number, dead: number[]): ArmyUnit => {
@@ -132,38 +132,38 @@ describe('getMachineSpeed', () => {
 });
 
 describe('formatUnitStatsParts', () => {
-  it('отряд: живучесть (живые+броня) и движение (шаги+см) отдельными строками', () => {
+  it('отряд: жизни (♥) — на фото-чип, броня+движение — строкой', () => {
     const parts = formatUnitStatsParts(makeSquadUnit(6, []), 5);
-    expect(parts.vitality).toBe('♥ 6/6 · 🛡 2');
-    expect(parts.movement).toBe('👣 5 (25см)');
+    expect(parts.lives).toBe('♥ 6/6');
+    expect(parts.stats).toBe('🛡 2 · 👣 5 (25см)');
   });
 
   it('отряд: фактор 4 — сантиметры считаются по 4', () => {
     const parts = formatUnitStatsParts(makeSquadUnit(6, []), 4);
-    expect(parts.movement).toBe('👣 5 (20см)');
+    expect(parts.stats).toBe('🛡 2 · 👣 5 (20см)');
   });
 
   it('отряд: живые с учётом убитых', () => {
     const parts = formatUnitStatsParts(makeSquadUnit(6, [1, 3]), 5);
-    expect(parts.vitality).toBe('♥ 4/6 · 🛡 2');
+    expect(parts.lives).toBe('♥ 4/6');
   });
 
-  it('отряд: непостоянная скорость — movement пуст (как раньше без 👣)', () => {
+  it('отряд: непостоянная скорость — без 👣 в строке', () => {
     const unit = makeSquadUnit(3, []);
     (unit.data as Squad).soldiers[1].speed = 3;
-    expect(formatUnitStatsParts(unit, 5).movement).toBe('');
+    expect(formatUnitStatsParts(unit, 5).stats).toBe('🛡 2');
   });
 
-  it('отряд: непостоянная броня — броня не показывается', () => {
+  it('отряд: непостоянная броня — без 🛡 в строке', () => {
     const unit = makeSquadUnit(3, []);
     (unit.data as Squad).soldiers[1].armor = 5;
-    expect(formatUnitStatsParts(unit, 5).vitality).toBe('♥ 3/3');
+    expect(formatUnitStatsParts(unit, 5).stats).toBe('👣 5 (25см)');
   });
 
-  it('машина: HP в живучести, скорость сектора в движении', () => {
+  it('машина: HP — чипом, скорость сектора — строкой', () => {
     const parts = formatUnitStatsParts(makeMachineUnit({ currentDurability: 16 }), 5);
-    expect(parts.vitality).toBe('HP 16/16');
-    expect(parts.movement).toBe('👣 2 (10см)');
+    expect(parts.lives).toBe('HP 16/16');
+    expect(parts.stats).toBe('👣 2 (10см)');
   });
 });
 
@@ -269,5 +269,34 @@ describe('getUnitTurnProgress', () => {
 
   it('машина — null (у неё нет бойцов)', () => {
     expect(getUnitTurnProgress(makeMachineUnit())).toBeNull();
+  });
+});
+
+// Прогресс хода АРМИИ целиком — для кнопки «Завершить тур» (плейтест
+// 2026-10-15: прогресс виден у кнопки, не в строках навигатора).
+describe('getArmyTurnProgress', () => {
+  it('складывает бойцов отрядов', () => {
+    const a = {
+      ...makeSquadUnit(3, []),
+      actionsUsed: [
+        { moved: false, shot: false, melee: false, done: true },
+        { moved: false, shot: false, melee: false, done: true },
+        { moved: false, shot: false, melee: false, done: false },
+      ],
+    } as ArmyUnit;
+    const b = makeSquadUnit(2, [0]); // 1 живой, не походил
+
+    expect(getArmyTurnProgress([a, b])).toEqual({ acted: 2, total: 4 });
+  });
+
+  it('машина считается за единицу (isMachineDone)', () => {
+    const done = makeMachineUnit({ isMachineDone: true });
+    const notDone = makeMachineUnit();
+
+    expect(getArmyTurnProgress([done, notDone])).toEqual({ acted: 1, total: 2 });
+  });
+
+  it('пустая армия — нули (кнопка без счётчика)', () => {
+    expect(getArmyTurnProgress([])).toEqual({ acted: 0, total: 0 });
   });
 });

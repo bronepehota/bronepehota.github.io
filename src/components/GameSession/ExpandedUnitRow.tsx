@@ -83,16 +83,19 @@ const statusMark: Record<UnitStatus, {
 
 /**
  * Общий блок фото строки и плитки навигатора: портретный бокс 3:4 по аспекту
- * миниатюры, номер взвода в углу, опциональная метка статуса поверх фото
- * (плитки; в строке метка справа от статов). boxClass задаёт размеры и
- * позиционирование бокса (h-* у плитки / w-* у строки).
+ * миниатюры, «жизни» чипом в левом нижнем углу (в стиле номера — плейтест
+ * 2026-10-15), номер взвода в левом верхнем, опциональная метка статуса
+ * поверх фото (плитки; в строке метка справа от статов). boxClass задаёт
+ * размеры и позиционирование бокса (h-* у плитки / w-* у строки).
  */
-function UnitPhoto({ src, instanceNumber, boxClass, small, glyph, glyphClass }: {
+function UnitPhoto({ src, instanceNumber, boxClass, small, lives, glyph, glyphClass }: {
   src?: string;
   instanceNumber?: number;
   boxClass: string;
-  /** компактный вариант (убитые): мельче номер и метка */
+  /** компактный вариант (убитые строки): мельче номер и метка */
   small: boolean;
+  /** «Жизни» — чип в левом нижнем углу фото (♥ отряда / HP машины) */
+  lives?: string;
   glyph?: string;
   glyphClass?: string;
 }) {
@@ -112,11 +115,18 @@ function UnitPhoto({ src, instanceNumber, boxClass, small, glyph, glyphClass }: 
       ) : (
         <span className="absolute inset-0 flex items-center justify-center text-slate-500 text-xs">IMG</span>
       )}
-      <span className="absolute bottom-[2px] left-[2px] px-1 rounded-sm bg-black/70">
+      <span className="absolute top-[2px] left-[2px] px-1 rounded-sm bg-black/70">
         <span className={cn('font-bold font-mono text-slate-300', small ? 'text-[9px]' : 'text-[10px]')}>
           #{instanceNumber || ''}
         </span>
       </span>
+      {lives && (
+        <span className="absolute bottom-[2px] left-[2px] px-1 rounded-sm bg-black/70">
+          <span className={cn('font-bold font-mono text-slate-100', small ? 'text-[9px]' : 'text-[10px]')}>
+            {lives}
+          </span>
+        </span>
+      )}
       {glyph && (
         <span
           className={cn('absolute top-[2px] right-[2px] w-5 text-center font-black', small ? 'text-sm' : 'text-base', glyphClass)}
@@ -155,13 +165,13 @@ export const ExpandedUnitRow = memo(function ExpandedUnitRow({
     ? `${BASE_PATH}${imageUrl}`
     : imageUrl;
 
-  // Две короткие строки по смыслу (мобильный: одна длинная обрезалась
-  // на 320px): живучесть + движение/ход
-  const { vitality, movement } = formatUnitStatsParts(unit, stepToCmFactor);
+  // Жизни — чип на фото (левый нижний угол, стиль номера), броня/движение —
+  // короткой строкой у имени (мобильный: каждая строка целиком на 320px)
+  const { lives, stats } = formatUnitStatsParts(unit, stepToCmFactor);
 
-  // Строка хода — только на частичном прогрессе: 0/N — отряд просто
-  // активный, N/N — статус несёт полоса и ✓-кнопка (плейтест: должно быть
-  // видно, есть ли не походившие бойцы)
+  // Строка хода — только на частичном прогрессе: 0/N — отряд просто активный,
+  // N/N — статус несёт полоса и ✓-кнопка (плейтест: видно, есть ли не
+  // походившие бойцы)
   const progress = getUnitTurnProgress(unit);
   const showTurnLine = !!progress && progress.acted > 0 && !progress.all;
 
@@ -205,7 +215,6 @@ export const ExpandedUnitRow = memo(function ExpandedUnitRow({
   };
 
   if (layout === 'tile') {
-    const deadTile = section === 'dead';
     return (
       <div
         role="button"
@@ -224,35 +233,26 @@ export const ExpandedUnitRow = memo(function ExpandedUnitRow({
         <div aria-hidden="true" className={cn('absolute inset-y-0 left-0 w-1', mark.stripe)} />
         {/* Фото — портретный бокс по аспекту миниатюры (3:4), по центру:
             полноширинный ландшафтный кроп показывал «кусок юнита» (плейтест).
+            Убитая плитка того же размера — статус несёт полоса, ✕ и притенение
+            (плейтест 2026-10-15: уменьшение в сетке смысла не имеет).
             Метку статуса на фото прячем, когда правый угол занимает кнопка ✓. */}
         <UnitPhoto
           src={finalSrc}
           instanceNumber={unit.instanceNumber}
-          boxClass={cn('mx-auto', deadTile ? 'h-14' : 'h-24')}
-          small={deadTile}
+          boxClass="mx-auto h-24"
+          small={false}
+          lives={lives}
           glyph={showDoneToggle ? undefined : mark.glyph}
           glyphClass={mark.glyphClass}
         />
         <div className="px-1.5 py-1 min-w-0 flex items-center gap-1">
           <div className="min-w-0 flex-1">
-            <div className={cn('font-bold font-mono uppercase tracking-wide truncate', deadTile ? 'text-[10px]' : 'text-[11px]', mark.nameClass)}>
+            <div className={cn('font-bold font-mono uppercase tracking-wide truncate text-[11px]', mark.nameClass)}>
               {unit.data.name}
             </div>
-            {!deadTile && (
-              <>
-                <div className="mt-0.5 text-[10px] font-mono font-semibold text-slate-400 truncate">
-                  {vitality}
-                </div>
-                {movement && (
-                  <div className="mt-0.5 text-[10px] font-mono font-semibold text-slate-500 truncate">
-                    {movement}
-                  </div>
-                )}
-              </>
-            )}
-            {deadTile && (
-              <div className="mt-0.5 text-[9px] font-mono font-semibold text-slate-600 truncate">
-                {vitality}
+            {stats && (
+              <div className="mt-0.5 text-[10px] font-mono font-semibold text-slate-400 truncate">
+                {stats}
               </div>
             )}
             {showTurnLine && progress && (
@@ -295,35 +295,29 @@ export const ExpandedUnitRow = memo(function ExpandedUnitRow({
       <div aria-hidden="true" className={cn('self-stretch w-1 shrink-0 rounded-full', mark.stripe)} />
 
       {/* Фото: крупное у живых (распознавание миниатюры), скромное у убитых.
-          72px на узких экранах (320) — освобождает место статам, с 375px — 96px. */}
+          72px на узких экранах (320) — освобождает место статам, с 375px — 96px.
+          Жизни — чипом в левом нижнем углу (стиль номера). */}
       <UnitPhoto
         src={finalSrc}
         instanceNumber={unit.instanceNumber}
         boxClass={cn('shrink-0', compact ? 'w-14' : 'w-[72px] min-[375px]:w-24')}
         small={compact}
+        lives={lives}
       />
 
-      {/* Полное имя + короткие строки по смыслу (мобильный: каждая строка
-          помещается целиком даже на 320px — замер e2e tmp-measure) */}
+      {/* Имя + строка брони/движения; жизни — на фото-чипе, прогресс хода —
+          у кнопки «Завершить тур» */}
       <div className="flex-1 min-w-0">
         <div className={cn('font-bold font-mono uppercase tracking-wide truncate', compact ? 'text-xs' : 'text-sm', mark.nameClass)}>
           {unit.data.name}
         </div>
-        {compact ? (
-          <div className="mt-0.5 text-[11px] font-mono font-semibold text-slate-500 truncate">
-            {vitality}
+        {stats && (
+          <div className={cn(
+            'font-mono font-semibold truncate',
+            compact ? 'mt-0.5 text-[11px] text-slate-500' : 'mt-1.5 text-[11px] min-[375px]:text-[12px] text-slate-300'
+          )}>
+            {stats}
           </div>
-        ) : (
-          <>
-            <div className="mt-0.5 text-[12px] font-mono font-semibold text-slate-300 truncate">
-              {vitality}
-            </div>
-            {movement && (
-              <div className="mt-0.5 text-[12px] font-mono font-semibold text-slate-400 truncate">
-                {movement}
-              </div>
-            )}
-          </>
         )}
         {showTurnLine && progress && (
           <div data-testid={`nav-turn-${unit.instanceId}`} className="mt-0.5 text-[12px] font-mono font-semibold text-slate-500 truncate">
