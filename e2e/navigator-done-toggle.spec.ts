@@ -61,4 +61,30 @@ test.describe('Навигатор: сантиметры и «весь юнит �
 
     await expect(page.getByTestId('nav-grenade-squad-test-1')).toHaveAttribute('aria-label', 'Граната потрачена');
   });
+
+  test('в строке видно, сколько бойцов ещё не походили (✓ X/Y)', async ({ page }) => {
+    // 2 из 6 бойцов походили — строка хода ✓ 2/6
+    await setupGameSessionWithSquad(page, {
+      unitOverrides: {
+        instanceId: 'squad-test-1',
+        actionsUsed: [
+          { moved: false, shot: false, melee: false, done: true },
+          { moved: false, shot: false, melee: false, done: true },
+        ],
+      },
+    });
+    await waitForBattleDock(page);
+    await openNavigator(page);
+
+    await expect(page.getByTestId('nav-turn-squad-test-1')).toHaveText(/2\/6/);
+  });
+
+  test('статы разбиты на две короткие строки: живучесть и движение', async ({ page }) => {
+    await openNavigator(page);
+
+    const row = page.getByTestId('expanded-unit-squad-test-1');
+    await expect(row).toContainText('♥ 6/6');
+    await expect(row).toContainText('🛡 2');
+    await expect(row).toContainText('👣 5 (25см)');
+  });
 });

@@ -1,4 +1,4 @@
-import { getAliveSoldiersCount, countUnitsByStatus, getMachineSpeed, formatUnitStatsLine, toggleUnitDone } from '@/lib/unit-utils';
+import { getAliveSoldiersCount, countUnitsByStatus, getMachineSpeed, formatUnitStatsParts, toggleUnitDone, getUnitTurnProgress } from '@/lib/unit-utils';
 import type { ArmyUnit, Squad, Machine } from '@/lib/types';
 
 const makeSquadUnit = (soldierCount: number, dead: number[]): ArmyUnit => {
@@ -131,34 +131,39 @@ describe('getMachineSpeed', () => {
   });
 });
 
-describe('formatUnitStatsLine', () => {
-  it('отряд: скорость в шагах и сантиметрах (×5)', () => {
-    const line = formatUnitStatsLine(makeSquadUnit(6, []), 5);
-    expect(line).toContain('👣 5 (25см)');
+describe('formatUnitStatsParts', () => {
+  it('отряд: живучесть (живые+броня) и движение (шаги+см) отдельными строками', () => {
+    const parts = formatUnitStatsParts(makeSquadUnit(6, []), 5);
+    expect(parts.vitality).toBe('♥ 6/6 · 🛡 2');
+    expect(parts.movement).toBe('👣 5 (25см)');
   });
 
   it('отряд: фактор 4 — сантиметры считаются по 4', () => {
-    const line = formatUnitStatsLine(makeSquadUnit(6, []), 4);
-    expect(line).toContain('👣 5 (20см)');
-    expect(line).not.toContain('25');
+    const parts = formatUnitStatsParts(makeSquadUnit(6, []), 4);
+    expect(parts.movement).toBe('👣 5 (20см)');
   });
 
-  it('отряд: живые/броня на месте', () => {
-    const line = formatUnitStatsLine(makeSquadUnit(6, [1, 3]), 5);
-    expect(line).toContain('♥ 4/6');
-    expect(line).toContain('🛡 2');
+  it('отряд: живые с учётом убитых', () => {
+    const parts = formatUnitStatsParts(makeSquadUnit(6, [1, 3]), 5);
+    expect(parts.vitality).toBe('♥ 4/6 · 🛡 2');
   });
 
-  it('отряд: непостоянная скорость — без блока 👣 (как раньше)', () => {
+  it('отряд: непостоянная скорость — movement пуст (как раньше без 👣)', () => {
     const unit = makeSquadUnit(3, []);
     (unit.data as Squad).soldiers[1].speed = 3;
-    expect(formatUnitStatsLine(unit, 5)).not.toContain('👣');
+    expect(formatUnitStatsParts(unit, 5).movement).toBe('');
   });
 
-  it('машина: скорость сектора в шагах и сантиметрах', () => {
-    const line = formatUnitStatsLine(makeMachineUnit({ currentDurability: 16 }), 5);
-    expect(line).toContain('HP 16/16');
-    expect(line).toContain('👣 2 (10см)');
+  it('отряд: непостоянная броня — броня не показывается', () => {
+    const unit = makeSquadUnit(3, []);
+    (unit.data as Squad).soldiers[1].armor = 5;
+    expect(formatUnitStatsParts(unit, 5).vitality).toBe('♥ 3/3');
+  });
+
+  it('машина: HP в живучести, скорость сектора в движении', () => {
+    const parts = formatUnitStatsParts(makeMachineUnit({ currentDurability: 16 }), 5);
+    expect(parts.vitality).toBe('HP 16/16');
+    expect(parts.movement).toBe('👣 2 (10см)');
   });
 });
 
@@ -227,5 +232,42 @@ describe('toggleUnitDone', () => {
 
     toggleUnitDone(unit);
     expect(JSON.stringify(unit.actionsUsed)).toBe(snapshot);
+  });
+});
+
+describe('getUnitTurnProgress', () => {
+  it('считает живых и походивших (мёртвые не в счёт)', () => {
+    const unit = {
+      ...makeSquadUnit(4, [3]),
+      actionsUsed: [
+        { moved: false, shot: false, melee: false, done: true },
+        { moved: false, shot: false, melee: false, done: false },
+        { moved: false, shot: false, melee: false, done: true },
+        { moved: false, shot: false, melee: false, done: false },
+      ],
+    } as ArmyUnit;
+
+    // живых 3, походили 2 (мёртвый №4 с done-флагом не считается)
+    expect(getUnitTurnProgress(unit)).toEqual({ alive: 3, acted: 2, all: false });
+  });
+
+  it('все живые походили — all: true', () => {
+    const unit = {
+      ...makeSquadUnit(2, [1]),
+      actionsUsed: [
+        { moved: false, shot: false, melee: false, done: true },
+        { moved: false, shot: false, melee: false, done: true },
+      ],
+    } as ArmyUnit;
+
+    expect(getUnitTurnProgress(unit)).toEqual({ alive: 1, acted: 1, all: true });
+  });
+
+  it('без actionsUsed — acted: 0', () => {
+    expect(getUnitTurnProgress(makeSquadUnit(3, []))).toEqual({ alive: 3, acted: 0, all: false });
+  });
+
+  it('машина — null (у неё нет бойцов)', () => {
+    expect(getUnitTurnProgress(makeMachineUnit())).toBeNull();
   });
 });

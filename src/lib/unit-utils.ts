@@ -227,28 +227,52 @@ export function getMachineSpeed(unit: ArmyUnit): number {
 }
 
 /**
- * Однострочная сводка юнита для навигатора: отряд — живые/броня/скорость,
- * машина — HP/скорость. Скорость дублируется в сантиметрах (фактор шаг/см
- * передаёт вызывающий) — дистанции по линейке можно прикидывать не выходя
- * из списка отрядов.
+ * Сводка юнита для навигатора, разбитая по смыслу на две короткие строки
+ * (мобильный плейтест 2026-10-15: одна длинная строка обрезалась уже на
+ * 320px): vitality — «как жив юнит» (♥ численность, 🛡 броня), movement —
+ * «движение и ход» (👣 шаги с сантиметрами; фактор передаёт вызывающий).
+ * Пустая строка → вызывающий её не рисует.
  */
-export function formatUnitStatsLine(unit: ArmyUnit, stepToCmFactor: number): string {
+export function formatUnitStatsParts(unit: ArmyUnit, stepToCmFactor: number): { vitality: string; movement: string } {
   if (unit.type === 'machine') {
     const machine = unit.data as Machine;
     const hp = `${unit.currentDurability ?? 0}/${machine.durability_max}`;
     const speed = getMachineSpeed(unit);
-    return `HP ${hp} · 👣 ${speed} (${speed * stepToCmFactor}см)`;
+    return {
+      vitality: `HP ${hp}`,
+      movement: `👣 ${speed} (${speed * stepToCmFactor}см)`,
+    };
   }
   const squad = unit.data as Squad;
-  const parts = [`♥ ${getAliveSoldiersCount(unit)}/${squad.soldiers.length}`];
+  const vitalityParts = [`♥ ${getAliveSoldiersCount(unit)}/${squad.soldiers.length}`];
   const uniform = checkSquadUniformStats(unit);
   if (uniform.isUniformArmor && uniform.commonArmor !== undefined) {
-    parts.push(`🛡 ${uniform.commonArmor}`);
+    vitalityParts.push(`🛡 ${uniform.commonArmor}`);
   }
-  if (uniform.isUniformSpeed && uniform.commonSpeed !== undefined) {
-    parts.push(`👣 ${uniform.commonSpeed} (${uniform.commonSpeed * stepToCmFactor}см)`);
-  }
-  return parts.join(' · ');
+  const movement = uniform.isUniformSpeed && uniform.commonSpeed !== undefined
+    ? `👣 ${uniform.commonSpeed} (${uniform.commonSpeed * stepToCmFactor}см)`
+    : '';
+  return { vitality: vitalityParts.join(' · '), movement };
+}
+
+/**
+ * Прогресс хода отряда для навигатора: сколько живых бойцов и сколько из них
+ * уже походили (done). Мёртвые не считаются; паникующие считаются живыми
+ * не-походившими (§10 — они блокируют «отряд походил»). Машины и пустые
+ * отряды → null (у них нет внутренней динамики хода).
+ */
+export function getUnitTurnProgress(unit: ArmyUnit): { alive: number; acted: number; all: boolean } | null {
+  if (unit.type !== 'squad') return null;
+  const squad = unit.data as Squad;
+  let alive = 0;
+  let acted = 0;
+  squad.soldiers.forEach((_, idx) => {
+    if (unit.deadSoldiers?.includes(idx)) return;
+    alive++;
+    if (unit.actionsUsed?.[idx]?.done) acted++;
+  });
+  if (alive === 0) return null;
+  return { alive, acted, all: acted === alive };
 }
 
 /**

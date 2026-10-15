@@ -88,9 +88,9 @@ describe('ExpandedNavigator', () => {
       'expanded-unit-row-dead',
     ]);
 
-    // Убитая строка компактная (фото w-14), живая — крупная (w-24)
+    // Убитая строка компактная (фото w-14), живая — адаптивная (72px → w-24 с 375px)
     expect(screen.getByTestId('expanded-unit-row-dead').querySelector('.w-14')).toBeTruthy();
-    expect(screen.getByTestId('expanded-unit-row-active').querySelector('.w-24')).toBeTruthy();
+    expect(screen.getByTestId('expanded-unit-row-active').querySelector('[class*="w-24"]')).toBeTruthy();
   });
 
   it('полное имя юнита без обрезки до 7 символов', () => {
@@ -105,7 +105,7 @@ describe('ExpandedNavigator', () => {
     expect(screen.getByText('Линейная клон-пехота')).toBeInTheDocument();
   });
 
-  it('строка статов: отряд — живые/броня/скорость(+см), машина — HP/скорость(+см)', () => {
+  it('строки статов: живучесть (♥/🛡 · HP) и движение (👣+см) раздельно', () => {
     render(
       <ExpandedNavigator
         army={makeArmy([
@@ -118,8 +118,10 @@ describe('ExpandedNavigator', () => {
     );
 
     // Скорость дублируется в сантиметрах (фактор по умолчанию 5): 5×5, 1×5
-    expect(screen.getByText('♥ 4/6 · 🛡 2 · 👣 5 (25см)')).toBeInTheDocument();
-    expect(screen.getByText('HP 8/16 · 👣 1 (5см)')).toBeInTheDocument();
+    expect(screen.getByText('♥ 4/6 · 🛡 2')).toBeInTheDocument();
+    expect(screen.getByText('👣 5 (25см)')).toBeInTheDocument();
+    expect(screen.getByText('HP 8/16')).toBeInTheDocument();
+    expect(screen.getByText('👣 1 (5см)')).toBeInTheDocument();
   });
 
   it('клик по строке выбирает юнит (индекс в армии)', () => {
@@ -228,6 +230,66 @@ describe('ExpandedNavigator', () => {
       );
 
       expect(screen.queryByTestId('nav-grenade-gr-m')).not.toBeInTheDocument();
+    });
+  });
+
+  // Плейтест 2026-10-15: видно, есть ли в отряде не походившие бойцы —
+  // тихая строка «✓ X/Y» только на частичном прогрессе (0/N — просто
+  // активный, N/N — отряд и так «походил»).
+  describe('прогресс хода отряда', () => {
+    const makePartial = (instanceId: string, doneCount: number, soldiers = 3) => ({
+      ...makeSquad(instanceId, `Отряд ${instanceId}`, soldiers),
+      actionsUsed: Array.from({ length: soldiers }, (_, i) => ({
+        moved: false, shot: false, melee: false, done: i < doneCount,
+      })),
+    }) as ArmyUnit;
+
+    it('частичный прогресс — ✓ X/Y виден', () => {
+      render(
+        <ExpandedNavigator
+          army={makeArmy([makePartial('p-1', 1)])}
+          focusedUnitIdx={0}
+          onSelectUnit={jest.fn()}
+        />
+      );
+
+      expect(screen.getByTestId('nav-turn-p-1')).toHaveTextContent('1/3');
+    });
+
+    it('никто не походил — строки нет (отряд просто активный)', () => {
+      render(
+        <ExpandedNavigator
+          army={makeArmy([makeSquad('p-2', 'Свежий отряд', 3)])}
+          focusedUnitIdx={0}
+          onSelectUnit={jest.fn()}
+        />
+      );
+
+      expect(screen.queryByTestId('nav-turn-p-2')).not.toBeInTheDocument();
+    });
+
+    it('все походили — строки нет (статус несёт полоса и ✓-кнопка)', () => {
+      render(
+        <ExpandedNavigator
+          army={makeArmy([makePartial('p-3', 3)])}
+          focusedUnitIdx={0}
+          onSelectUnit={jest.fn()}
+        />
+      );
+
+      expect(screen.queryByTestId('nav-turn-p-3')).not.toBeInTheDocument();
+    });
+
+    it('машина — строки прогресса нет', () => {
+      render(
+        <ExpandedNavigator
+          army={makeArmy([makeMachine('p-m', 'Саламандра')])}
+          focusedUnitIdx={0}
+          onSelectUnit={jest.fn()}
+        />
+      );
+
+      expect(screen.queryByTestId('nav-turn-p-m')).not.toBeInTheDocument();
     });
   });
 });

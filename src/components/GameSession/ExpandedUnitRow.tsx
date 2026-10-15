@@ -6,7 +6,7 @@ import { ArmyUnit, Squad, FactionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { getFactionColors } from '@/lib/faction-colors';
 import { BASE_PATH } from '@/lib/constants';
-import { formatUnitStatsLine } from '@/lib/unit-utils';
+import { formatUnitStatsParts, getUnitTurnProgress } from '@/lib/unit-utils';
 import type { UnitStatus } from '@/lib/unit-status';
 
 interface ExpandedUnitRowProps {
@@ -155,7 +155,15 @@ export const ExpandedUnitRow = memo(function ExpandedUnitRow({
     ? `${BASE_PATH}${imageUrl}`
     : imageUrl;
 
-  const statsLine = formatUnitStatsLine(unit, stepToCmFactor);
+  // Две короткие строки по смыслу (мобильный: одна длинная обрезалась
+  // на 320px): живучесть + движение/ход
+  const { vitality, movement } = formatUnitStatsParts(unit, stepToCmFactor);
+
+  // Строка хода — только на частичном прогрессе: 0/N — отряд просто
+  // активный, N/N — статус несёт полоса и ✓-кнопка (плейтест: должно быть
+  // видно, есть ли не походившие бойцы)
+  const progress = getUnitTurnProgress(unit);
+  const showTurnLine = !!progress && progress.acted > 0 && !progress.all;
 
   // Маркер гранаты (раз на бой): яркая 💣 — доступна, приглушённая с
   // перечёркиванием — потрачена (плейтест: в списке отрядов должно быть
@@ -230,9 +238,28 @@ export const ExpandedUnitRow = memo(function ExpandedUnitRow({
             <div className={cn('font-bold font-mono uppercase tracking-wide truncate', deadTile ? 'text-[10px]' : 'text-[11px]', mark.nameClass)}>
               {unit.data.name}
             </div>
-            <div className={cn('font-mono font-semibold truncate', deadTile ? 'mt-0.5 text-[9px] text-slate-600' : 'mt-0.5 text-[10px] text-slate-400')}>
-              {statsLine}
-            </div>
+            {!deadTile && (
+              <>
+                <div className="mt-0.5 text-[10px] font-mono font-semibold text-slate-400 truncate">
+                  {vitality}
+                </div>
+                {movement && (
+                  <div className="mt-0.5 text-[10px] font-mono font-semibold text-slate-500 truncate">
+                    {movement}
+                  </div>
+                )}
+              </>
+            )}
+            {deadTile && (
+              <div className="mt-0.5 text-[9px] font-mono font-semibold text-slate-600 truncate">
+                {vitality}
+              </div>
+            )}
+            {showTurnLine && progress && (
+              <div data-testid={`nav-turn-${unit.instanceId}`} className="mt-0.5 text-[10px] font-mono font-semibold text-slate-500 truncate">
+                <span className="text-emerald-400">✓</span> {progress.acted}/{progress.alive}
+              </div>
+            )}
           </div>
           {grenadeMarker}
         </div>
@@ -267,25 +294,42 @@ export const ExpandedUnitRow = memo(function ExpandedUnitRow({
       {/* Статусная полоса слева — цвет вместо группировки */}
       <div aria-hidden="true" className={cn('self-stretch w-1 shrink-0 rounded-full', mark.stripe)} />
 
-      {/* Фото: крупное у живых (распознавание миниатюры), скромное у убитых */}
+      {/* Фото: крупное у живых (распознавание миниатюры), скромное у убитых.
+          72px на узких экранах (320) — освобождает место статам, с 375px — 96px. */}
       <UnitPhoto
         src={finalSrc}
         instanceNumber={unit.instanceNumber}
-        boxClass={cn('shrink-0', compact ? 'w-14' : 'w-24')}
+        boxClass={cn('shrink-0', compact ? 'w-14' : 'w-[72px] min-[375px]:w-24')}
         small={compact}
       />
 
-      {/* Полное имя + строка статов */}
+      {/* Полное имя + короткие строки по смыслу (мобильный: каждая строка
+          помещается целиком даже на 320px — замер e2e tmp-measure) */}
       <div className="flex-1 min-w-0">
         <div className={cn('font-bold font-mono uppercase tracking-wide truncate', compact ? 'text-xs' : 'text-sm', mark.nameClass)}>
           {unit.data.name}
         </div>
-        <div className={cn(
-          'font-mono font-semibold truncate',
-          compact ? 'mt-0.5 text-[11px] text-slate-500' : 'mt-1.5 text-[13px] text-slate-300'
-        )}>
-          {statsLine}
-        </div>
+        {compact ? (
+          <div className="mt-0.5 text-[11px] font-mono font-semibold text-slate-500 truncate">
+            {vitality}
+          </div>
+        ) : (
+          <>
+            <div className="mt-0.5 text-[12px] font-mono font-semibold text-slate-300 truncate">
+              {vitality}
+            </div>
+            {movement && (
+              <div className="mt-0.5 text-[12px] font-mono font-semibold text-slate-400 truncate">
+                {movement}
+              </div>
+            )}
+          </>
+        )}
+        {showTurnLine && progress && (
+          <div data-testid={`nav-turn-${unit.instanceId}`} className="mt-0.5 text-[12px] font-mono font-semibold text-slate-500 truncate">
+            <span className="text-emerald-400">✓</span> {progress.acted}/{progress.alive}
+          </div>
+        )}
       </div>
 
       {/* Справа: 💣 (есть/потрачена), затем ✓-переключатель всего юнита
