@@ -463,26 +463,41 @@ export default function GameSession({
 
   // Закрытие листа навигатора потягиванием вниз (плейтест 2026-09-20: «свайп
   // вниз не работает» — жест сидел только на 14px-ручке, в которую не попасть).
-  // Теперь жест ловится ВСЕМ листом, но уважает скролл: на списке закрывает
-  // только когда тот в самом верху (иначе потягивание вниз — это скролл);
-  // «хром» (ручка/шапка) закрывает всегда. TouchMove гасим (preventDefault),
-  // когда трактуем жест как закрытие — иначе браузер скроллит/pull-to-refresh
-  // и жест до порога не доживает.
+  // Жест ловится ВСЕМ листом и ЛИСТ ТЯНЕТСЯ за пальцем (плейтест 2026-10-15:
+  // «тянется плохо, двигая весь экран» — стоял бревном без визуального хода):
+  // transform через ref, без ре-рендеров; уважает скролл списка (закрывает
+  // только когда тот в самом верху), нативный скролл гасится с первого кадра
+  // тяги вниз — иначе браузер скроллит страницу под листом. Отпустил >44px —
+  // уехал вниз и закрылся; недотянул — пружина назад.
   const startSheetDrag = useCallback((startY: number, target: Element | null) => {
+    const sheetEl = target?.closest('[data-testid="navigator-sheet"]') as HTMLElement | null;
     const scroller = target?.closest('[data-testid="expanded-navigator"]') as HTMLElement | null;
     const dismissable = !scroller || scroller.scrollTop <= 0;
-    let down = 0, moved = false;
+    let pulled = 0, moved = false;
     const track = (y: number) => {
-      const d = startY - y; // вниз — плюс
-      if (Math.abs(d) > 8) moved = true;
-      if (-d > down) down = -d;
+      const down = -(startY - y); // вниз — плюс (y растёт)
+      if (Math.abs(down) > 8) moved = true;
+      pulled = dismissable && down > 0 ? (down > 120 ? 120 + (down - 120) * 0.25 : down) : 0;
+      if (sheetEl) {
+        sheetEl.style.transition = 'none';
+        sheetEl.style.transform = `translateY(${pulled}px)`;
+      }
     };
     const touchMove = (e: TouchEvent) => {
       if (!e.touches[0]) return;
       track(e.touches[0].clientY);
-      if (dismissable && down > 6) e.preventDefault();
+      if (dismissable && pulled > 0) e.preventDefault();
     };
     const mouseMove = (e: MouseEvent) => track(e.clientY);
+    const settle = (close: boolean) => {
+      if (!sheetEl) return;
+      sheetEl.style.transition = 'transform 180ms cubic-bezier(0.22, 1, 0.36, 1)';
+      sheetEl.style.transform = close ? 'translateY(100%)' : 'translateY(0)';
+      window.setTimeout(() => {
+        sheetEl.style.transition = '';
+        sheetEl.style.transform = '';
+      }, close ? 190 : 220);
+    };
     const end = () => {
       document.removeEventListener('touchmove', touchMove);
       document.removeEventListener('touchend', end);
@@ -491,7 +506,9 @@ export default function GameSession({
       document.removeEventListener('mousemove', mouseMove);
       document.removeEventListener('mouseup', end);
       if (moved) swallowNextClick();
-      if (dismissable && down > 44) setIsDockExpanded(false);
+      const close = dismissable && pulled > 44;
+      settle(close);
+      if (close) window.setTimeout(() => setIsDockExpanded(false), 170);
     };
     document.addEventListener('touchmove', touchMove, { passive: false });
     document.addEventListener('touchend', end);

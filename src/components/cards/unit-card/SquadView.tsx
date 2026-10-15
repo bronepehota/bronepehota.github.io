@@ -39,7 +39,12 @@ export function SquadView({
   return (
     <div data-testid="squad-list" className="flex flex-col min-h-full gap-1 md:gap-1.5 snap-y snap-mandatory">
       {data.soldiers.map((s, idx) => (
-        <div key={`soldier-snap-${unit.instanceId}-${idx}`} className="snap-start snap-always flex-1 flex">
+        // overflow-x-clip: сдвинутая свайпом карточка (translateX до 96px)
+        // раздувает scrollable-область скролл-предка → горизонтальный
+        // скролл-бар внизу + дёргание раскладки на его появлении (плейтест
+        // 2026-10-15). Клип на ближайшей границе — сдвиг никогда не выходит
+        // за строку.
+        <div key={`soldier-snap-${unit.instanceId}-${idx}`} className="snap-start snap-always flex-1 flex overflow-x-clip">
           <SoldierCard
             key={`soldier-${unit.instanceId}-${idx}-${s.num}`}
             squad={data}
