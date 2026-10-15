@@ -349,3 +349,30 @@ export async function selectUnitInNavigator(page: Page, instanceId: string) {
   await openNavigator(page);
   await page.getByTestId(`expanded-unit-${instanceId}`).click();
 }
+
+/**
+ * Редизайн карточки бойца 2026-10-15: тап по стату дальности/мощности —
+ * прямой пуск ВЫСТРЕЛА (мимо экрана выбора действия); тап по ББ — сразу
+ * БЛИЖНИЙ БОЙ; ⋯ в углу — прежнее меню всех действий.
+ */
+export async function openShotModal(page: Page, soldierIndex = 0) {
+  const badge = page.getByTestId('soldier-card').nth(soldierIndex).getByTestId('stat-badge-power');
+  await expect(badge).toBeVisible({ timeout: TIMEOUTS.load });
+  await badge.click();
+  await expect(page.getByTestId('bottom-sheet-combat-modal')).toBeVisible();
+}
+
+export async function openMeleeModal(page: Page, soldierIndex = 0) {
+  const badge = page.getByTestId('soldier-card').nth(soldierIndex).getByTestId('stat-badge-melee');
+  await expect(badge).toBeVisible({ timeout: TIMEOUTS.load });
+  await badge.click();
+  await expect(page.getByTestId('bottom-sheet-combat-modal')).toBeVisible();
+}
+
+/** ⋯ — экран выбора действия (ACTION_SELECT): граната, захват и т.д. */
+export async function openActionMenu(page: Page, soldierIndex = 0) {
+  const btn = page.getByTestId('soldier-card').nth(soldierIndex).getByTestId('action-menu-button');
+  await expect(btn).toBeVisible({ timeout: TIMEOUTS.load });
+  await btn.click();
+  await expect(page.getByTestId('bottom-sheet-combat-modal')).toBeVisible();
+}

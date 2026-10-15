@@ -4,7 +4,7 @@ import SoldierCard from '../SoldierCard';
 interface SquadViewProps {
   unit: ArmyUnit;
   updateUnit: (instanceId: string, updateFn: (currentUnit: ArmyUnit) => ArmyUnit) => void;
-  onSoldierAction: (soldierIndex: number) => void;
+  onSoldierAction: (soldierIndex: number, action?: 'shot' | 'melee') => void;
   setShowSoldierImage: (idx: number | null) => void;
   distanceInputUnit: 'steps' | 'cm';
   stepToCmFactor: number;

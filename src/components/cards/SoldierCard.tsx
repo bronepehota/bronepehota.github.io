@@ -18,7 +18,7 @@ interface SoldierCardProps {
   soldierIndex: number;
   allUnits: ArmyUnit[];
   updateUnit: (instanceId: string, updateFn: (currentUnit: ArmyUnit) => ArmyUnit) => void;
-  onSoldierAction: (soldierIndex: number) => void;
+  onSoldierAction: (soldierIndex: number, action?: 'shot' | 'melee') => void;
   setShowSoldierImage: (idx: number | null) => void;
   getSoldierImage: (idx: number) => string;
   distanceInputUnit?: 'steps' | 'cm';
@@ -315,13 +315,15 @@ function SoldierCard({
         )}
       </div>
 
-      {/* Stats (center - clickable for action) */}
+      {/* Stats: тап по дальности/мощности = сразу выстрел, по ББ = сразу
+          ближний бой; ⋯ в углу — меню всех действий (граната, захват) */}
       <SoldierStats
         soldier={soldier}
         distanceInputUnit={distanceInputUnit}
         stepToCmFactor={stepToCmFactor}
         disabled={isDone || isDead || isInPanic}
-        onClick={() => onSoldierAction(soldierIndex)}
+        onStatAction={(action) => onSoldierAction(soldierIndex, action)}
+        onOpenActionMenu={() => onSoldierAction(soldierIndex)}
         className="flex-1 min-w-0"
         buffCount={buffCount}
         debuffCount={debuffCount}

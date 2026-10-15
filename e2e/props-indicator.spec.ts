@@ -47,7 +47,9 @@ test.describe('Squad special props on modifier button', () => {
     const indicator = page.locator('[aria-label^="Спец-свойства"]').first();
     await expect(indicator).toBeVisible();
     await expect(indicator).toHaveAttribute('aria-label', 'Спец-свойства: Пр4');
-    expect(await indicator.locator('svg').count()).toBeGreaterThanOrEqual(1);
+    // Редизайн 2026-10-15: свойство видно ИМЕНЕМ (текст в угловой кнопке),
+    // не иконкой
+    await expect(indicator).toContainText('Пр4');
   });
 
   test('Рм из пер-солдатских modifiers — без взводных buffs', async ({ page }) => {
@@ -81,7 +83,7 @@ test.describe('Squad special props on modifier button', () => {
     const indicator = page.locator('[aria-label^="Спец-свойства"]').first();
     await expect(indicator).toBeVisible();
     await expect(indicator).toHaveAttribute('aria-label', 'Спец-свойства: Рм');
-    expect(await indicator.locator('svg').count()).toBeGreaterThanOrEqual(1);
+    await expect(indicator).toContainText('Рм');
   });
 });
 

@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { setupGameSessionWithSquad, waitForBattleDock, clearStorage } from './helpers/setup';
+import { setupGameSessionWithSquad, waitForBattleDock, clearStorage, openShotModal as openShotModalShared } from './helpers/setup';
 
 /**
  * #162 — vehicle zone damage: «цель — техника» toggle → zone-based damage;
@@ -23,12 +23,9 @@ test.describe('Vehicle zone damage (#162)', () => {
     await waitForBattleDock(page);
   }
 
-  // Open the shot modal: click action button → select "выстрел"
+  // Open the shot modal: тап по стату мощности — прямой пуск выстрела
   async function openShotModal(page: Page) {
-    const actionButton = page.getByRole('button', { name: 'Выберите действие' }).first();
-    await expect(actionButton).toBeVisible({ timeout: 5000 });
-    await actionButton.click({ force: true });
-    await page.getByRole('button', { name: /выстрел/i }).first().click();
+    await openShotModalShared(page);
     // Wait for parameters phase to render (distance label is always present for shots)
     await expect(page.getByText('Дистанция').first()).toBeVisible({ timeout: 3000 });
   }

@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { setupGameSessionWithSquad, clearStorage } from './helpers/setup';
+import { setupGameSessionWithSquad, clearStorage, openShotModal, openMeleeModal } from './helpers/setup';
 
 /**
  * Combat E2E tests
@@ -18,11 +18,12 @@ test.describe('Combat Mechanics', () => {
     // The squad is focused by default (unit 0)
     await expect(page.getByTestId('dock-info-bar')).toBeVisible({ timeout: 5000 });
 
-    const actionButton = page.getByRole('button', { name: /действие/i });
-    const combatModal = page.getByTestId('bottom-sheet-combat-modal');
-    const hasAction = await actionButton.count() > 0;
-    const hasModal = await combatModal.count() > 0;
-    expect(hasAction || hasModal).toBeTruthy();
+    // Вход в бой: статовые кнопки-действия (тап по стату) и ⋯ меню в углу
+    const card = page.getByTestId('soldier-card').first();
+    const hasStatAction = await card.getByTestId('stat-badge-range').count() > 0;
+    const hasActionMenu = await card.getByTestId('action-menu-button').count() > 0;
+    const hasModal = await page.getByTestId('bottom-sheet-combat-modal').count() > 0;
+    expect(hasStatAction || hasActionMenu || hasModal).toBeTruthy();
   });
 
   test('should execute initiative roll', async ({ page }) => {
@@ -55,14 +56,8 @@ test.describe('Combat Mechanics', () => {
     await expect(page.getByTestId('dock-info-bar')).toBeVisible({ timeout: 5000 });
 
     // Click action button to open combat modal
-    const actionButton = page.getByRole('button', { name: 'Выберите действие' }).first();
-    await expect(actionButton).toBeVisible({ timeout: 5000 });
-    await actionButton.click({ force: true });
-
-    // Select shot action
-    const shotButton = page.getByRole('button', { name: /выстрел/i });
-    await expect(shotButton).toBeVisible({ timeout: 3000 });
-    await shotButton.click();
+    // Тап по стату мощности — прямой пуск выстрела (без экрана выбора)
+    await openShotModal(page);
 
     // Verify combat modal is showing (title "БОЕВАЯ СИСТЕМА" visible)
     await expect(page.getByText('БОЕВАЯ СИСТЕМА')).toBeVisible({ timeout: 3000 });
@@ -85,14 +80,8 @@ test.describe('Combat Mechanics', () => {
     await expect(page.getByTestId('dock-info-bar')).toBeVisible({ timeout: 5000 });
 
     // Click action button to open combat modal
-    const actionButton = page.getByRole('button', { name: 'Выберите действие' }).first();
-    await expect(actionButton).toBeVisible({ timeout: 5000 });
-    await actionButton.click({ force: true });
-
-    // Select melee action (БЛИЖНИЙ БОЙ)
-    const meleeButton = page.getByRole('button', { name: /ближний бой|бб/i });
-    await expect(meleeButton).toBeVisible({ timeout: 3000 });
-    await meleeButton.click();
+    // Тап по стату ББ — прямой пуск ближнего боя (без экрана выбора)
+    await openMeleeModal(page);
 
     // Verify combat modal is showing
     await expect(page.getByText('БОЕВАЯ СИСТЕМА')).toBeVisible({ timeout: 3000 });

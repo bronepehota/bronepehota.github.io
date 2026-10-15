@@ -1,5 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
-import { clearStorage } from './helpers/setup';
+import { clearStorage, openShotModal } from './helpers/setup';
 
 /**
  * Battle dock navigation (playtest 2026-09-18):
@@ -154,13 +154,8 @@ test.describe('Dock navigator (СПИСОК button + auto-open)', () => {
 
     // Full shot flow with auto-complete (default on): the acting soldier
     // gets done on ПРИНЯТЬ → the squad completes → navigator auto-opens.
-    const actionButton = page.getByRole('button', { name: 'Выберите действие' }).first();
-    await expect(actionButton).toBeVisible({ timeout: 5000 });
-    await actionButton.click({ force: true });
-
-    const shotButton = page.getByRole('button', { name: /выстрел/i });
-    await expect(shotButton).toBeVisible({ timeout: 3000 });
-    await shotButton.click();
+    // Тап по стату мощности — прямой пуск выстрела
+    await openShotModal(page);
 
     const fireButton = page.getByRole('button', { name: /выстрелить/i });
     await expect(fireButton).toBeVisible({ timeout: 3000 });

@@ -105,7 +105,7 @@ describe('ExpandedNavigator', () => {
     expect(screen.getByText('Линейная клон-пехота')).toBeInTheDocument();
   });
 
-  it('строка статов: отряд — живые/броня/скорость, машина — HP/скорость', () => {
+  it('строка статов: отряд — живые/броня/скорость(+см), машина — HP/скорость(+см)', () => {
     render(
       <ExpandedNavigator
         army={makeArmy([
@@ -117,8 +117,9 @@ describe('ExpandedNavigator', () => {
       />
     );
 
-    expect(screen.getByText('♥ 4/6 · 🛡 2 · 👣 5')).toBeInTheDocument();
-    expect(screen.getByText('HP 8/16 · 👣 1')).toBeInTheDocument();
+    // Скорость дублируется в сантиметрах (фактор по умолчанию 5): 5×5, 1×5
+    expect(screen.getByText('♥ 4/6 · 🛡 2 · 👣 5 (25см)')).toBeInTheDocument();
+    expect(screen.getByText('HP 8/16 · 👣 1 (5см)')).toBeInTheDocument();
   });
 
   it('клик по строке выбирает юнит (индекс в армии)', () => {

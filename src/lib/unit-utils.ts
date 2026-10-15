@@ -227,6 +227,52 @@ export function getMachineSpeed(unit: ArmyUnit): number {
 }
 
 /**
+ * Однострочная сводка юнита для навигатора: отряд — живые/броня/скорость,
+ * машина — HP/скорость. Скорость дублируется в сантиметрах (фактор шаг/см
+ * передаёт вызывающий) — дистанции по линейке можно прикидывать не выходя
+ * из списка отрядов.
+ */
+export function formatUnitStatsLine(unit: ArmyUnit, stepToCmFactor: number): string {
+  if (unit.type === 'machine') {
+    const machine = unit.data as Machine;
+    const hp = `${unit.currentDurability ?? 0}/${machine.durability_max}`;
+    const speed = getMachineSpeed(unit);
+    return `HP ${hp} · 👣 ${speed} (${speed * stepToCmFactor}см)`;
+  }
+  const squad = unit.data as Squad;
+  const parts = [`♥ ${getAliveSoldiersCount(unit)}/${squad.soldiers.length}`];
+  const uniform = checkSquadUniformStats(unit);
+  if (uniform.isUniformArmor && uniform.commonArmor !== undefined) {
+    parts.push(`🛡 ${uniform.commonArmor}`);
+  }
+  if (uniform.isUniformSpeed && uniform.commonSpeed !== undefined) {
+    parts.push(`👣 ${uniform.commonSpeed} (${uniform.commonSpeed * stepToCmFactor}см)`);
+  }
+  return parts.join(' · ');
+}
+
+/**
+ * Переключение «весь юнит походил» из навигатора. Отряд: если ещё активен —
+ * все живые бойцы получают done; если уже «походил» — снять у всех. Мёртвые
+ * и паникующие (§10 — не действуют) не трогаются. Машина — флаг isMachineDone.
+ * Иммутабельно.
+ */
+export function toggleUnitDone(unit: ArmyUnit): ArmyUnit {
+  if (unit.type === 'machine') {
+    return { ...unit, isMachineDone: !unit.isMachineDone };
+  }
+  const squad = unit.data as Squad;
+  const alreadyDone = deriveUnitStatus(unit) === 'done';
+  const panicked = new Set((unit.panicState || []).map(p => p.soldierIndex));
+  const actions = squad.soldiers.map((_, idx) => {
+    const current = unit.actionsUsed?.[idx] ?? { moved: false, shot: false, melee: false, done: false };
+    if (unit.deadSoldiers?.includes(idx) || panicked.has(idx)) return current;
+    return { ...current, done: !alreadyDone };
+  });
+  return { ...unit, actionsUsed: actions };
+}
+
+/**
  * Shortens weapon names for mobile display by replacing long Russian words with abbreviations
  */
 export function shortenWeaponName(name: string): string {

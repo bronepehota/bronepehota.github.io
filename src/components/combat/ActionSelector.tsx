@@ -57,7 +57,7 @@ const getActionStyle = (actionType: CombatActionType) => {
 };
 
 // Check if soldier has shot capability
-const canSoldierShoot = (unit?: ArmyUnit, soldierIndex?: number | null): boolean => {
+export const canSoldierShoot = (unit?: ArmyUnit, soldierIndex?: number | null): boolean => {
   if (!unit || soldierIndex === null || soldierIndex === undefined) {
     return true; // For machines, always allow
   }
@@ -197,7 +197,9 @@ export function ActionSelector({
                 disabled={disabled}
                 className={cn(
                   "relative w-full overflow-hidden group",
-                  "transition-all duration-200 ease-out",
+                  // Мобильная эргономика (плейтест: «мелкие, не попасть»):
+                  // высокая строка, крупный кегль значения
+                  "min-h-[60px] transition-all duration-200 ease-out",
                   "active:scale-[0.98]",
                   disabled
                     ? "opacity-40 cursor-not-allowed"
@@ -205,7 +207,7 @@ export function ActionSelector({
                 )}
               >
                 <div className={cn(
-                  "relative p-2 md:p-3 rounded-lg border-2",
+                  "relative p-3 rounded-lg border-2",
                   "bg-slate-900/80 backdrop-blur-sm",
                   disabled
                     ? "border-slate-700/50"
@@ -217,7 +219,7 @@ export function ActionSelector({
                   <div className="relative flex items-center gap-2 md:gap-3">
                     {/* Icon */}
                     <div className={cn(
-                      "relative p-1.5 md:p-2 rounded-lg border shrink-0",
+                      "relative p-2 rounded-lg border shrink-0",
                       disabled
                         ? "bg-slate-800/50 border-slate-700"
                         : `${style.bg} ${style.border}`
@@ -233,7 +235,7 @@ export function ActionSelector({
                     {/* Text content */}
                     <div className="text-left flex-1 min-w-0">
                       <div className={cn(
-                        "font-mono font-black text-sm md:text-base uppercase tracking-wider",
+                        "font-mono font-black text-base uppercase tracking-wider",
                         disabled ? "text-slate-600" : style.primary
                       )}>
                         {action.label}

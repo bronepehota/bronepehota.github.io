@@ -19,7 +19,7 @@ import InitiativeModal from './modals/InitiativeModal';
 import { ExpandedNavigator, BattleTutorial } from './GameSession/index';
 import { useWakeLock } from '@/hooks/useWakeLock';
 import { LOCAL_STORAGE_KEYS } from '@/lib/constants';
-import { checkSquadUniformStats, getAliveSoldiersCount, countUnitsByStatus } from '@/lib/unit-utils';
+import { checkSquadUniformStats, getAliveSoldiersCount, countUnitsByStatus, toggleUnitDone } from '@/lib/unit-utils';
 import { deriveUnitStatus, UnitStatus } from '@/lib/unit-status';
 import { resolveModifierSummary } from '@/lib/modifier-utils';
 
@@ -1354,6 +1354,8 @@ export default function GameSession({
             army={army}
             focusedUnitIdx={focusedUnitIdx}
             onSelectUnit={(idx) => { setFocusedUnitIdx(idx); setIsDockExpanded(false); }}
+            stepToCmFactor={stepToCmFactor}
+            onToggleUnitDone={(instanceId) => updateUnit(instanceId, toggleUnitDone)}
           />
         </div>
       )}

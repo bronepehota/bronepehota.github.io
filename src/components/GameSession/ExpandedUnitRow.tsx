@@ -2,11 +2,11 @@
 'use client';
 
 import { memo } from 'react';
-import { ArmyUnit, Squad, Machine, FactionID } from '@/lib/types';
+import { ArmyUnit, Squad, FactionID } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { getFactionColors } from '@/lib/faction-colors';
 import { BASE_PATH } from '@/lib/constants';
-import { getAliveSoldiersCount, checkSquadUniformStats, getMachineSpeed } from '@/lib/unit-utils';
+import { formatUnitStatsLine } from '@/lib/unit-utils';
 import type { UnitStatus } from '@/lib/unit-status';
 
 interface ExpandedUnitRowProps {
@@ -22,6 +22,10 @@ interface ExpandedUnitRowProps {
    * помещается — давай в два ряда, можно поменьше изображение»).
    */
   layout?: 'row' | 'tile';
+  /** Фактор шаг/см для строки статов (👣 5 (25см)) */
+  stepToCmFactor?: number;
+  /** Тап по ✓ — весь юнит походил / снять отметку (активные и походившие) */
+  onToggleDone?: () => void;
 }
 
 /**
@@ -74,24 +78,8 @@ const statusMark: Record<UnitStatus, {
   },
 };
 
-/** Однострочная сводка статов: отряд — живые/броня/скорость, машина — HP/скорость. */
-function getRowStatsLine(unit: ArmyUnit): string {
-  if (unit.type === 'machine') {
-    const machine = unit.data as Machine;
-    const hp = `${unit.currentDurability ?? 0}/${machine.durability_max}`;
-    return `HP ${hp} · 👣 ${getMachineSpeed(unit)}`;
-  }
-  const squad = unit.data as Squad;
-  const parts = [`♥ ${getAliveSoldiersCount(unit)}/${squad.soldiers.length}`];
-  const uniform = checkSquadUniformStats(unit);
-  if (uniform.isUniformArmor && uniform.commonArmor !== undefined) {
-    parts.push(`🛡 ${uniform.commonArmor}`);
-  }
-  if (uniform.isUniformSpeed && uniform.commonSpeed !== undefined) {
-    parts.push(`👣 ${uniform.commonSpeed}`);
-  }
-  return parts.join(' · ');
-}
+/** Однострочная сводка статов — формат в unit-utils.formatUnitStatsLine
+ *  (скорость дублируется в сантиметрах: 👣 5 (25см)). */
 
 /**
  * Общий блок фото строки и плитки навигатора: портретный бокс 3:4 по аспекту
@@ -148,12 +136,17 @@ export const ExpandedUnitRow = memo(function ExpandedUnitRow({
   onClick,
   faction,
   layout = 'row',
+  stepToCmFactor = 5,
+  onToggleDone,
 }: ExpandedUnitRowProps) {
   const factionColors = getFactionColors(faction);
   const mark = statusMark[section];
   const isMachine = unit.type === 'machine';
   // Убитые — компактная строка (плейтест: «по сути не сильно нужны»)
   const compact = section === 'dead';
+  // ✓-переключатель «весь юнит походил» — на живых (активных) и походивших;
+  // у походивших кнопка залита и повторный тап снимает отметку
+  const showDoneToggle = !!onToggleDone && (section === 'active' || section === 'done');
 
   const imageUrl = isMachine
     ? unit.data.image!
@@ -162,16 +155,44 @@ export const ExpandedUnitRow = memo(function ExpandedUnitRow({
     ? `${BASE_PATH}${imageUrl}`
     : imageUrl;
 
-  const statsLine = getRowStatsLine(unit);
+  const statsLine = formatUnitStatsLine(unit, stepToCmFactor);
+
+  // Корень — div[role=button], а не <button>: внутри живая кнопка ✓
+  // (вложенные <button> невалидны). ✓ гасит всплытие — тап по нему
+  // не открывает карточку юнита.
+  const doneToggleButton = showDoneToggle ? (
+    <button
+      type="button"
+      data-testid={`unit-done-toggle-${unit.instanceId}`}
+      aria-pressed={section === 'done'}
+      aria-label={section === 'done' ? `Снять «походил»: ${unit.data.name}` : `Весь юнит походил: ${unit.data.name}`}
+      onClick={(e) => { e.stopPropagation(); onToggleDone!(); }}
+      className={cn(
+        'shrink-0 min-w-[44px] min-h-[44px] rounded-lg border-2 flex items-center justify-center font-black text-xl leading-none transition-colors',
+        section === 'done'
+          ? 'bg-emerald-950/50 border-emerald-500 text-emerald-300'
+          : 'border-slate-600/50 text-slate-500 hover:border-emerald-600/60 hover:text-emerald-400 active:bg-slate-800/60'
+      )}
+    >
+      ✓
+    </button>
+  ) : null;
+
+  const keyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); }
+  };
 
   if (layout === 'tile') {
     const deadTile = section === 'dead';
     return (
-      <button
+      <div
+        role="button"
+        tabIndex={0}
         onClick={onClick}
+        onKeyDown={keyDown}
         aria-label={`${unit.data.name}, ${mark.statusWord}`}
         className={cn(
-          'relative overflow-hidden rounded-sm text-left transition-colors',
+          'relative overflow-hidden rounded-sm text-left cursor-pointer transition-colors',
           'active:bg-slate-800/60',
           isActive ? cn('bg-slate-800/40 hover:bg-slate-800/60', factionColors.bg) : 'hover:bg-slate-800/40',
           mark.dim
@@ -180,13 +201,14 @@ export const ExpandedUnitRow = memo(function ExpandedUnitRow({
       >
         <div aria-hidden="true" className={cn('absolute inset-y-0 left-0 w-1', mark.stripe)} />
         {/* Фото — портретный бокс по аспекту миниатюры (3:4), по центру:
-            полноширинный ландшафтный кроп показывал «кусок юнита» (плейтест) */}
+            полноширинный ландшафтный кроп показывал «кусок юнита» (плейтест).
+            Метку статуса на фото прячем, когда правый угол занимает кнопка ✓. */}
         <UnitPhoto
           src={finalSrc}
           instanceNumber={unit.instanceNumber}
           boxClass={cn('mx-auto', deadTile ? 'h-14' : 'h-24')}
           small={deadTile}
-          glyph={mark.glyph}
+          glyph={showDoneToggle ? undefined : mark.glyph}
           glyphClass={mark.glyphClass}
         />
         <div className="px-1.5 py-1 min-w-0">
@@ -197,16 +219,25 @@ export const ExpandedUnitRow = memo(function ExpandedUnitRow({
             {statsLine}
           </div>
         </div>
-      </button>
+        {/* ✓ поверх правого верхнего угла фото (кнопке 44px — плитка переносит) */}
+        {doneToggleButton && (
+          <div className="absolute top-0 right-0">
+            {doneToggleButton}
+          </div>
+        )}
+      </div>
     );
   }
 
   return (
-    <button
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onClick}
+      onKeyDown={keyDown}
       aria-label={`${unit.data.name}, ${mark.statusWord}`}
       className={cn(
-        'w-full flex items-center text-left transition-colors',
+        'w-full flex items-center text-left cursor-pointer transition-colors',
         compact ? 'gap-2 px-2 py-1' : 'gap-3 px-2 py-2',
         'active:bg-slate-800/60',
         // Focused row: единственный маркер — фракционный тинт фона
@@ -240,13 +271,15 @@ export const ExpandedUnitRow = memo(function ExpandedUnitRow({
         </div>
       </div>
 
-      {/* Статусная метка справа */}
-      {mark.glyph && (
-        <span className={cn('shrink-0 w-6 font-black text-center', compact ? 'text-sm' : 'text-lg', mark.glyphClass)} aria-hidden="true">
-          {mark.glyph}
-        </span>
+      {/* Справа: ✓-переключатель всего юнита либо статусная метка (✕ убит, ⚑ захвачен) */}
+      {doneToggleButton ?? (
+        mark.glyph ? (
+          <span className={cn('shrink-0 w-6 font-black text-center', compact ? 'text-sm' : 'text-lg', mark.glyphClass)} aria-hidden="true">
+            {mark.glyph}
+          </span>
+        ) : null
       )}
-    </button>
+    </div>
   );
 }, (prev, next) => {
   return (
@@ -257,6 +290,11 @@ export const ExpandedUnitRow = memo(function ExpandedUnitRow({
     prev.unit.type === next.unit.type &&
     prev.unit.currentDurability === next.unit.currentDurability &&
     prev.unit.deadSoldiers?.length === next.unit.deadSoldiers?.length &&
-    prev.layout === next.layout
+    prev.layout === next.layout &&
+    prev.stepToCmFactor === next.stepToCmFactor &&
+    prev.onToggleDone === next.onToggleDone &&
+    // «походил» держится на actionsUsed (done-флаги) — длина не меняется
+    prev.unit.actionsUsed === next.unit.actionsUsed &&
+    prev.unit.isMachineDone === next.unit.isMachineDone
   );
 });

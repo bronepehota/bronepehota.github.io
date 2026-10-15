@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { setupGameSessionWithSquad, clearStorage } from './helpers/setup';
+import { setupGameSessionWithSquad, clearStorage, openMeleeModal } from './helpers/setup';
 
 /**
  * #160 — melee defender uses armor (Бр): the parameters show «Броня цели»
@@ -18,14 +18,8 @@ test.describe('Melee defender armor (#160)', () => {
     // Open combat modal (same path as combat.spec.ts) — squad focused by default
     await expect(page.getByTestId('dock-info-bar')).toBeVisible({ timeout: 5000 });
 
-    const actionButton = page.getByRole('button', { name: 'Выберите действие' }).first();
-    await expect(actionButton).toBeVisible({ timeout: 5000 });
-    await actionButton.click({ force: true });
-
-    // Select melee (БЛИЖНИЙ БОЙ)
-    const meleeButton = page.getByRole('button', { name: /ближний бой|бб/i });
-    await expect(meleeButton).toBeVisible({ timeout: 3000 });
-    await meleeButton.click();
+    // Тап по стату ББ — прямой пуск ближнего боя
+    await openMeleeModal(page);
     await page.waitForTimeout(300);
 
     // Parameters: «Броня цели» present, «ББ цели» absent

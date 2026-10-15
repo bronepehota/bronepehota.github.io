@@ -11,6 +11,10 @@ interface ExpandedNavigatorProps {
   army: Army;
   focusedUnitIdx: number;
   onSelectUnit: (idx: number) => void;
+  /** Фактор шаг/см для строки статов (👣 5 (25см)) */
+  stepToCmFactor?: number;
+  /** Переключить «весь юнит походил» по instanceId */
+  onToggleUnitDone?: (instanceId: string) => void;
 }
 
 /**
@@ -27,7 +31,7 @@ interface ExpandedNavigatorProps {
  */
 const GRID_ALIVE_THRESHOLD = 5;
 
-export function ExpandedNavigator({ army, focusedUnitIdx, onSelectUnit }: ExpandedNavigatorProps) {
+export function ExpandedNavigator({ army, focusedUnitIdx, onSelectUnit, stepToCmFactor = 5, onToggleUnitDone }: ExpandedNavigatorProps) {
   const faction = (army.faction || 'polaris') as FactionID;
   const factionColors = getFactionColors(faction);
 
@@ -60,6 +64,8 @@ export function ExpandedNavigator({ army, focusedUnitIdx, onSelectUnit }: Expand
       onClick={() => onSelectUnit(idx)}
       faction={faction}
       layout={gridMode ? 'tile' : 'row'}
+      stepToCmFactor={stepToCmFactor}
+      onToggleDone={onToggleUnitDone ? () => onToggleUnitDone(unit.instanceId) : undefined}
     />
   ));
 
