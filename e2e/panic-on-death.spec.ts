@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { setupGameSessionWithSquad, waitForBattleDock, clearStorage, swipeSoldierCard } from './helpers/setup';
+import { setupGameSessionWithSquad, waitForBattleDock, clearStorage, swipeSoldierCard, expectAliveInNavigator } from './helpers/setup';
 
 /**
  * #166 — panic triggers when a squad's losses cross 50% via the centralized UnitCard effect.
@@ -59,6 +59,6 @@ test.describe('Panic on death (#166)', () => {
 
     await swipeSoldierCard(page, 1, 'right');
     await expect(page.getByTestId('panic-modal-title')).toHaveCount(0); // 2 dead, still < 3
-    await expect(page.getByTestId('dock-soldiers-alive')).toContainText('4/6');
+    await expectAliveInNavigator(page, 'panic-c', '4/6');
   });
 });

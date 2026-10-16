@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { setupGameSessionWithSquad, waitForBattleDock, clearStorage, swipeSoldierCard } from './helpers/setup';
+import { setupGameSessionWithSquad, waitForBattleDock, clearStorage, swipeSoldierCard, expectAliveInNavigator } from './helpers/setup';
 
 /**
  * #167 — a panicking soldier can be marked killed (rules §10: можно
@@ -33,7 +33,7 @@ test.describe('Kill in panic (#167)', () => {
 
     // Killing the panicking soldier works — right swipe (the only kill path)
     await swipeSoldierCard(page, 0, 'right');
-    await expect(page.getByTestId('dock-soldiers-alive')).toContainText('5/6');
+    await expectAliveInNavigator(page, 'panic-kill-unit-1', '5/6');
     // Индикатор паники скрыт у убитого (череп на фото — статус смерти)
     await expect(indicatorInCard).toHaveCount(0);
   });
