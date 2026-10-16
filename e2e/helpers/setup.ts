@@ -376,3 +376,13 @@ export async function openActionMenu(page: Page, soldierIndex = 0) {
   await btn.click();
   await expect(page.getByTestId('bottom-sheet-combat-modal')).toBeVisible();
 }
+
+/** Живых N/M — ♥-чип на фото юнита в навигаторе (плейтест 2026-10-15:
+ *  чип живых убран из дока, имя заняло всю строку). Открывает список,
+ *  проверяет и закрывает за ручку. */
+export async function expectAliveInNavigator(page: Page, instanceId: string, alive: string) {
+  await openNavigator(page);
+  await expect(page.getByTestId(`expanded-unit-${instanceId}`)).toContainText(`♥ ${alive}`);
+  await page.getByTestId('navigator-sheet').locator('div').first().click();
+  await expect(page.getByTestId('expanded-navigator')).not.toBeVisible();
+}

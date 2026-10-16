@@ -177,13 +177,14 @@ export const ExpandedUnitRow = memo(function ExpandedUnitRow({
 
   // Маркер гранаты (раз на бой): яркая 💣 — доступна, приглушённая с
   // перечёркиванием — потрачена (плейтест: в списке отрядов должно быть
-  // видно). У мёртвых и машин смысла нет.
+  // видно). У мёртвых и машин смысла нет. Живёт в конце строки статов —
+  // правый столбец отдан кнопке хода, имя — во всю ширину.
   const grenadeMarker = unit.type === 'squad' && !compact ? (
     <span
       data-testid={`nav-grenade-${unit.instanceId}`}
       aria-label={unit.grenadesUsed ? 'Граната потрачена' : 'Граната доступна'}
       title={unit.grenadesUsed ? 'Граната потрачена' : 'Граната доступна'}
-      className={cn('shrink-0 text-[13px] leading-none', unit.grenadesUsed && 'opacity-35 line-through')}
+      className={cn('shrink-0 text-[12px] leading-none', unit.grenadesUsed && 'opacity-35 line-through')}
     >
       💣
     </span>
@@ -281,7 +282,7 @@ export const ExpandedUnitRow = memo(function ExpandedUnitRow({
       onKeyDown={keyDown}
       aria-label={`${unit.data.name}, ${mark.statusWord}`}
       className={cn(
-        'w-full flex items-center text-left cursor-pointer transition-colors',
+        'relative w-full flex items-center text-left cursor-pointer transition-colors',
         compact ? 'gap-2 px-2 py-1' : 'gap-3 px-2 py-2',
         'active:bg-slate-800/60',
         // Focused row: единственный маркер — фракционный тинт фона
@@ -305,37 +306,41 @@ export const ExpandedUnitRow = memo(function ExpandedUnitRow({
         lives={lives}
       />
 
-      {/* Имя + строка брони/движения; жизни — на фото-чипе, прогресс хода —
-          у кнопки «Завершить тур» */}
+      {/* Полное имя — во всю ширину строки до двух строк (плейтест 2026-10-15:
+          «больше места для названия, можно выше кнопки хода полное название»).
+          Кнопка хода по центру справа, статам — её столбец (pr). */}
       <div className="flex-1 min-w-0">
-        <div className={cn('font-bold font-mono uppercase tracking-wide truncate', compact ? 'text-xs' : 'text-sm', mark.nameClass)}>
+        <div className={cn(
+          'font-bold font-mono uppercase tracking-wide leading-tight',
+          compact ? 'text-xs truncate' : 'text-sm line-clamp-2',
+          mark.nameClass
+        )}>
           {unit.data.name}
         </div>
-        {stats && (
-          <div className={cn(
-            'font-mono font-semibold truncate',
-            compact ? 'mt-0.5 text-[11px] text-slate-500' : 'mt-1.5 text-[11px] min-[375px]:text-[12px] text-slate-300'
-          )}>
-            {stats}
+        {!compact && (stats || grenadeMarker) && (
+          <div className="mt-1 pr-[52px] flex items-center gap-1.5 text-[11px] min-[375px]:text-[12px] font-mono font-semibold text-slate-300">
+            {stats && <span className="truncate">{stats}</span>}
+            {grenadeMarker}
           </div>
         )}
         {showTurnLine && progress && (
-          <div data-testid={`nav-turn-${unit.instanceId}`} className="mt-0.5 text-[12px] font-mono font-semibold text-slate-500 truncate">
+          <div data-testid={`nav-turn-${unit.instanceId}`} className="mt-0.5 pr-[52px] text-[12px] font-mono font-semibold text-slate-500 truncate">
             <span className="text-emerald-400">✓</span> {progress.acted}/{progress.alive}
           </div>
         )}
       </div>
 
-      {/* Справа: 💣 (есть/потрачена), затем ✓-переключатель всего юнита
+      {/* Правый столбец, по центру строки: ✓-переключатель всего юнита
           либо статусная метка (✕ убит, ⚑ захвачен) */}
-      {grenadeMarker}
-      {doneToggleButton ?? (
-        mark.glyph ? (
-          <span className={cn('shrink-0 w-6 font-black text-center', compact ? 'text-sm' : 'text-lg', mark.glyphClass)} aria-hidden="true">
-            {mark.glyph}
-          </span>
-        ) : null
-      )}
+      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col items-center">
+        {doneToggleButton ?? (
+          mark.glyph ? (
+            <span className={cn('w-6 font-black text-center', compact ? 'text-sm' : 'text-lg', mark.glyphClass)} aria-hidden="true">
+              {mark.glyph}
+            </span>
+          ) : null
+        )}
+      </div>
     </div>
   );
 }, (prev, next) => {

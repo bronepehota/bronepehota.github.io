@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { setupGameSessionWithSquad, waitForBattleDock } from './helpers/setup';
+import { setupGameSessionWithSquad, waitForBattleDock, expectAliveInNavigator } from './helpers/setup';
 
 /**
  * Battle dock readability (playtest fix): the current-unit info bar used to be
@@ -34,10 +34,10 @@ test.describe('Battle dock readability', () => {
     expect(nameBox!.y + nameBox!.height).toBeLessThanOrEqual(doneBox!.y + 0.5);
   });
 
-  test('alive-soldiers aggregate shows живые/все for the squad', async ({ page }) => {
-    const badge = page.getByTestId('dock-soldiers-alive');
-    await expect(badge).toBeVisible();
-    await expect(badge).toHaveText('6/6');
+  test('живые бойцы — ♥-чип на фото юнита в навигаторе (чип убран из дока)', async ({ page }) => {
+    // Чип живых убран из дока (плейтест 2026-10-15: имя заняло всю строку);
+    // счёт живёт на фото юнита в списке отрядов
+    await expectAliveInNavigator(page, 'dock-readability-unit-1', '6/6');
   });
 
   test('labeled filled done button toggles the squad state', async ({ page }) => {

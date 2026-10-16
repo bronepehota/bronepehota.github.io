@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { setupGameSessionWithSquad, clearStorage, swipeSoldierCard } from './helpers/setup';
+import { setupGameSessionWithSquad, clearStorage, swipeSoldierCard, expectAliveInNavigator } from './helpers/setup';
 
 /**
  * Свайпы по карточке бойца (плейтест 2026-09-18):
@@ -29,7 +29,7 @@ test.describe('Soldier card swipes', () => {
     await expect(doneChip).toHaveAttribute('aria-label', 'Боец убит');
     await expect(doneChip).toContainText('УБИТ');
     // Живых в доке стало меньше
-    await expect(page.getByTestId('dock-soldiers-alive')).toContainText('5/6');
+    await expectAliveInNavigator(page, 'swipe-unit-1', '5/6');
   });
 
   test('повторный свайп вправо оживляет (toggle)', async ({ page }) => {
@@ -39,7 +39,7 @@ test.describe('Soldier card swipes', () => {
     await swipeSoldierCard(page, 1, 'right');
     await expect(page.getByTestId('soldier-done-button').nth(1))
       .toHaveAttribute('aria-label', 'Завершить ход бойца');
-    await expect(page.getByTestId('dock-soldiers-alive')).toContainText('6/6');
+    await expectAliveInNavigator(page, 'swipe-unit-1', '6/6');
   });
 
   test('недотянутый свайп ничего не меняет', async ({ page }) => {
@@ -139,7 +139,7 @@ test.describe('Soldier card swipes — touch (CDP)', () => {
     await touchSwipeOnStats(page, 1, 'right');
     await expect(page.getByTestId('soldier-done-button').nth(1))
       .toHaveAttribute('aria-label', 'Боец убит');
-    await expect(page.getByTestId('dock-soldiers-alive')).toContainText('5/6');
+    await expectAliveInNavigator(page, 'swipe-unit-1', '5/6');
   });
 
   test('тап по стату ББ (тач) открывает модал боя сразу в ближнем бою', async ({ page }) => {

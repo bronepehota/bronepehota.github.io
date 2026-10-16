@@ -11,7 +11,7 @@ import { SoldierEffectsModal } from './modals/SoldierEffectsModal';
 import { getFactionColors } from '@/lib/faction-colors';
 import { trackEvent } from '@/lib/analytics';
 import UnitCard from './cards/UnitCard';
-import { History, X, Bomb, Heart, Shield, Footprints, CheckCircle2, MoreVertical, BookOpen, RotateCcw, MessageCircle, Target, Users, LayoutGrid, GraduationCap, Power } from 'lucide-react';
+import { History, X, Bomb, Heart, Shield, Footprints, CheckCircle2, MoreVertical, BookOpen, RotateCcw, MessageCircle, Target, LayoutGrid, GraduationCap, Power } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CombatLogEntry } from '@/lib/combat-types';
 import { useCombatTargetContext } from '@/contexts/CombatTargetContext';
@@ -19,7 +19,7 @@ import InitiativeModal from './modals/InitiativeModal';
 import { ExpandedNavigator, BattleTutorial } from './GameSession/index';
 import { useWakeLock } from '@/hooks/useWakeLock';
 import { LOCAL_STORAGE_KEYS } from '@/lib/constants';
-import { checkSquadUniformStats, getAliveSoldiersCount, countUnitsByStatus, toggleUnitDone } from '@/lib/unit-utils';
+import { checkSquadUniformStats, countUnitsByStatus, toggleUnitDone } from '@/lib/unit-utils';
 import { deriveUnitStatus, UnitStatus } from '@/lib/unit-status';
 import { resolveModifierSummary } from '@/lib/modifier-utils';
 
@@ -994,7 +994,9 @@ export default function GameSession({
                   );
                 })()}
 
-                {/* Unit name — own line, larger */}
+                {/* Unit name — own line, larger. Кол-во солдат и граната
+                    убраны из дока (плейтест 2026-10-15: «больше места для
+                    текста») — они живут в навигаторе: ♥-чип на фото и 💣. */}
                 <span
                   data-testid="dock-unit-name"
                   className={cn(
@@ -1005,34 +1007,6 @@ export default function GameSession({
                 >
                   {focusedUnit.data.name}
                 </span>
-
-                {/* Alive soldiers aggregate + граната взвода (плейтест: граната
-                    рядом с N/M) — squads only */}
-                {focusedUnit.type === 'squad' && (() => {
-                  const squadData = focusedUnit.data as Squad;
-                  const alive = getAliveSoldiersCount(focusedUnit);
-                  const grenadesUsed = focusedUnit.grenadesUsed;
-                  return (
-                    <span
-                      data-testid="dock-soldiers-alive"
-                      className="shrink-0 flex items-center gap-1.5 px-1.5 min-h-[24px] rounded-sm bg-slate-800/60 border border-slate-700/40"
-                      title={`Живые бойцы: ${alive} из ${squadData.soldiers.length}. Гранаты: ${grenadesUsed ? 'использованы' : 'есть'}.`}
-                    >
-                      <Users className="w-4 h-4 text-emerald-400" />
-                      <span className={cn(
-                        "text-sm font-mono font-bold",
-                        alive === 0 ? "text-slate-500" : "text-emerald-300"
-                      )}>
-                        {alive}/{squadData.soldiers.length}
-                      </span>
-                      <span className="w-px h-3.5 bg-slate-700/50" aria-hidden="true" />
-                      <Bomb
-                        data-testid="dock-grenade"
-                        className={cn("w-3.5 h-3.5", grenadesUsed ? "text-slate-500" : "text-amber-400")}
-                      />
-                    </span>
-                  );
-                })()}
               </div>
 
               {/* Row 2 — stats + controls. flex-wrap: на 320px кластер
