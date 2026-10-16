@@ -47,4 +47,13 @@ test.describe('Карточка бойца: тап по стату = прямо�
     expect(box).toBeTruthy();
     expect(box!.height).toBeGreaterThanOrEqual(56);
   });
+
+  test('кнопка пуска (ВЫСТРЕЛИТЬ) крупная — под мобильник', async ({ page }) => {
+    await page.getByTestId('soldier-card').nth(0).getByTestId('stat-badge-power').click();
+    const fire = page.getByRole('button', { name: 'ВЫСТРЕЛИТЬ' });
+    await expect(fire).toBeVisible({ timeout: 3000 });
+    const box = await fire.boundingBox();
+    expect(box).toBeTruthy();
+    expect(box!.height).toBeGreaterThanOrEqual(56);
+  });
 });

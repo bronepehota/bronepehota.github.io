@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { setupGameSessionWithSquad, waitForBattleDock, clearStorage, swipeSoldierCard } from './helpers/setup';
+import { setupGameSessionWithSquad, waitForBattleDock, clearStorage, swipeSoldierCard, expectAliveInNavigator } from './helpers/setup';
 
 /**
  * Soldier State Management E2E tests
@@ -50,7 +50,7 @@ test.describe('Soldier State Management', () => {
 
     await expect(doneChip(page, 0)).toHaveAttribute('aria-label', 'Боец убит');
     await expect(doneChip(page, 1)).toHaveAttribute('aria-label', 'Боец убит');
-    await expect(page.getByTestId('dock-soldiers-alive')).toContainText('3/6');
+    await expectAliveInNavigator(page, 'soldier-state-unit-1', '3/6');
   });
 
   test('should maintain soldier state when marking multiple soldiers as done', async ({ page }) => {
@@ -149,7 +149,7 @@ test.describe('Soldier State Management', () => {
     await swipeSoldierCard(page, 0, 'right');
     await expect(doneChip(page, 0)).toHaveAttribute('aria-label', 'Завершить ход бойца');
     await expect(doneChip(page, 1)).toHaveAttribute('aria-label', 'Боец убит');
-    await expect(page.getByTestId('dock-soldiers-alive')).toContainText('5/6');
+    await expectAliveInNavigator(page, 'soldier-state-unit-1', '5/6');
   });
 
   test('should handle done state toggling correctly', async ({ page }) => {

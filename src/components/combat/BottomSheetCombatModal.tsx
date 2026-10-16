@@ -366,7 +366,9 @@ export function BottomSheetCombatModal({
               <button
                 onClick={onExecuteAction}
                 className={cn(
-                  "relative w-full font-mono text-xs md:text-sm font-bold uppercase tracking-wider border-2 transition-all min-h-[44px] md:min-h-[48px] mt-2",
+                  // Под мобильник (плейтест 2026-10-15): пуск — главное действие
+                  // модала, палец должен попадать уверенно
+                  "relative w-full font-mono text-base font-bold uppercase tracking-wider border-2 transition-all min-h-[60px] mt-2",
                   "hover:scale-[1.01] active:scale-95 overflow-hidden shimmer-effect",
                   "shadow-lg",
                   actionColors.button
@@ -378,7 +380,7 @@ export function BottomSheetCombatModal({
                 <div className={cn("absolute bottom-0 left-0 w-2 h-2 border-l-2 border-b-2 opacity-40", actionColors.accent)} />
                 <div className={cn("absolute bottom-0 right-0 w-2 h-2 border-r-2 border-b-2 opacity-40", actionColors.accent)} />
                 <div className="absolute inset-0 shadow-inner pointer-events-none" />
-                <div className="relative flex items-center justify-center gap-2 px-2 md:px-6 py-2 md:py-3">
+                <div className="relative flex items-center justify-center gap-2 px-2 md:px-6 py-2">
                   <span>
                     {state.actionType === 'shot' ? 'ВЫСТРЕЛИТЬ' :
                      state.actionType === 'melee' ? 'АТАКОВАТЬ' : 'БРОСИТЬ'}
