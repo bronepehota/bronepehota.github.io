@@ -61,6 +61,24 @@ function CalculatorTelegraph() {
   );
 }
 
+/** Терциарный вход: телеграфная строка турниров — рейтинг сообщества. */
+function TournamentsTelegraph() {
+  return (
+    <Link
+      href="/tournaments"
+      data-testid="landing-tournaments-link"
+      className="group inline-flex items-baseline justify-center gap-2 w-full py-2 no-underline"
+    >
+      <span className="font-ibm-mono text-[10px] uppercase tracking-[0.25em] text-military-rust/80 group-hover:text-military-amber transition-colors">
+        {'// ТУРНИРЫ'}
+      </span>
+      <span className="font-ibm-mono text-[9px] text-military-sand/50 group-hover:text-military-sand/80 transition-colors">
+        рейтинг игроков
+      </span>
+    </Link>
+  );
+}
+
 /** Модульная строка первого экрана: ШТАБ (primary) + широкая ЭНЦИКЛОПЕДИЯ.
  *  Единая разметка для SSR и свежего состояния клиента. */
 function ModuleRow({ className }: { className?: string }) {
@@ -110,6 +128,7 @@ function ModuleRow({ className }: { className?: string }) {
 
       {/* Tertiary: телеграфная строка калькулятора */}
       <CalculatorTelegraph />
+      <TournamentsTelegraph />
     </div>
   );
 }
@@ -235,6 +254,7 @@ export default function CTAButton({ className }: CTAButtonProps) {
 
         {/* Tertiary: телеграфная строка калькулятора */}
         <CalculatorTelegraph />
+        <TournamentsTelegraph />
       </div>
     );
   }
