@@ -77,24 +77,24 @@ describe('tournaments-registry: турниры', () => {
 });
 
 describe('tournaments-registry: рейтинг по сиду', () => {
-  it('порядок: Семён 100%, четвёрка 66,7% по никам, Ахе, замыкают Андрей/Эдик', () => {
+  it('порядок: совпадает с подиумом (тайбрейки очков), Ахе, замыкают Эдик/Андрей', () => {
     const rows = getRating();
     expect(rows.map((r) => r.player.nick)).toEqual([
       'Семён',
-      'Валера',
-      'Костя',
       'Павел',
+      'Валера',
       'Шнайдер',
+      'Костя',
       'Ахе',
-      'Андрей',
       'Эдик',
+      'Андрей',
     ]);
     expect(rows[0].winRateDisplay).toBe('100');
     expect(rows[1].winRateDisplay).toBe('66,7');
-    expect(rows[0].gold).toBe(1);
-    expect(rows[1].bronze).toBe(1); // Валера — 3-е место
-    expect(rows[3].silver).toBe(1); // Павел — 2-е место
-    expect(rows[4].games).toBe(3); // Шнайдер
-    expect(rows[4].wins).toBe(2);
+    expect(rows[0].gold).toBe(1); // Семён
+    expect(rows[1].silver).toBe(1); // Павел — 2-е место
+    expect(rows[2].bronze).toBe(1); // Валера — 3-е место
+    expect(rows[3].games).toBe(3); // Шнайдер
+    expect(rows[3].wins).toBe(2);
   });
 });

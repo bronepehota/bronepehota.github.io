@@ -14,12 +14,12 @@ test.describe('Турниры: хаб', () => {
     const rows = page.getByTestId(/^rating-row-/);
     await expect(rows.first()).toContainText('Семён');
     await expect(rows.first()).toContainText('100');
-    // четвёрка 66,7% отсортирована по никам (тайбрейк «больше игр» тут равный)
+    // четвёрка 66,7% отсортирована тайбрейками очков (режим↓): как на подиуме
     const texts = await rows.allTextContents();
     const idx = (n: string) => texts.findIndex((t) => t.includes(n));
-    expect(idx('Валера')).toBeLessThan(idx('Костя'));
-    expect(idx('Костя')).toBeLessThan(idx('Павел'));
-    expect(idx('Павел')).toBeLessThan(idx('Шнайдер'));
+    expect(idx('Павел')).toBeLessThan(idx('Валера'));
+    expect(idx('Валера')).toBeLessThan(idx('Шнайдер'));
+    expect(idx('Шнайдер')).toBeLessThan(idx('Костя'));
     await expect(
       page.getByTestId('rating-row-semen_kashapov').getByTestId('cup-gold'),
     ).toBeVisible();

@@ -14,6 +14,8 @@ export function formatWinRate(rate: number): string {
 interface PlayerStats {
   games: number;
   wins: number;
+  modePoints: number;
+  armyPoints: number;
   gold: number;
   silver: number;
   bronze: number;
@@ -31,7 +33,7 @@ export function computeRating(players: TournamentPlayer[], tournaments: Tourname
   const ensure = (id: string): PlayerStats => {
     let s = stats.get(id);
     if (!s) {
-      s = { games: 0, wins: 0, gold: 0, silver: 0, bronze: 0, participations: 0 };
+      s = { games: 0, wins: 0, modePoints: 0, armyPoints: 0, gold: 0, silver: 0, bronze: 0, participations: 0 };
       stats.set(id, s);
     }
     return s;
@@ -44,6 +46,8 @@ export function computeRating(players: TournamentPlayer[], tournaments: Tourname
       const s = ensure(m.playerId);
       s.games += 1;
       if (m.win) s.wins += 1;
+      s.modePoints += m.modePoints;
+      s.armyPoints += m.armyPoints;
     }
     for (const r of t.results) {
       const s = ensure(r.playerId);
@@ -65,6 +69,8 @@ export function computeRating(players: TournamentPlayer[], tournaments: Tourname
       wins: s.wins,
       winRate,
       winRateDisplay: formatWinRate(winRate),
+      modePoints: s.modePoints,
+      armyPoints: s.armyPoints,
       gold: s.gold,
       silver: s.silver,
       bronze: s.bronze,
@@ -72,10 +78,14 @@ export function computeRating(players: TournamentPlayer[], tournaments: Tourname
     });
   });
 
+  // Формула (уточнена владельцем 2026-10-30): % ↓ → партии ↓ → очки режима ↓
+  // → очки армии ↓ → ник. С одним турниром рейтинг совпадает с подиумом.
   rows.sort(
     (a, b) =>
       b.winRate - a.winRate ||
       b.games - a.games ||
+      b.modePoints - a.modePoints ||
+      b.armyPoints - a.armyPoints ||
       a.player.nick.localeCompare(b.player.nick, 'ru'),
   );
   return rows;
