@@ -58,7 +58,7 @@ test.describe('Турниры: протокол', () => {
     await expect(page.getByTestId('roster-item').first()).toBeVisible();
   });
 
-  test('неизвестный id — 404', async ({ page }) => {
+  test('неизвестный id — 500 (статический экспорт)', async ({ page }) => {
     // Note: With Next.js static export, non-existent dynamic routes return 500 instead of 404
     // This is a known limitation of static export with dynamic routes
     const resp = await page.goto('/tournaments/nope');
@@ -92,7 +92,7 @@ test.describe('Турниры: профиль игрока', () => {
     await expect(page).toHaveURL(/\/players\/shnayder$/);
   });
 
-  test('неизвестный игрок — 404', async ({ page }) => {
+  test('неизвестный игрок — 500 (статический экспорт)', async ({ page }) => {
     // Note: With Next.js static export, non-existent dynamic routes return 500 instead of 404
     // This is a known limitation of static export with dynamic routes
     const resp = await page.goto('/players/nonexistent');
