@@ -66,6 +66,8 @@ export interface RatingRow {
   wins: number;
   winRate: number; // точная дробь [0..1] — по ней сортировка
   winRateDisplay: string; // '66,7' / '100' — отображение
+  modePoints: number; // суммарные очки режима — 3-й уровень тайбрейка
+  armyPoints: number; // суммарные очки армии — 4-й уровень тайбрейка
   gold: number;
   silver: number;
   bronze: number;

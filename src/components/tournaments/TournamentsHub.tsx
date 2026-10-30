@@ -26,7 +26,8 @@ export default function TournamentsHub({ rating, tournaments }: TournamentsHubPr
             Рейтинг игроков
           </h1>
           <p className="font-ibm-mono text-xs text-military-taupe mt-2">
-            процент побед · при равенстве — больше партий
+            рейтинг: % побед → партии → очки режима → очки армии;
+            итоги конкретного турнира — на его странице
           </p>
         </TacticalFrame>
 

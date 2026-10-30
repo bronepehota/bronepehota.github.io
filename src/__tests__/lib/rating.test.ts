@@ -100,6 +100,38 @@ describe('computeRating', () => {
     expect(rows.map((r) => r.player.nick)).toEqual(['Андрей', 'Эдик']);
   });
 
+  it('после игр тайбрейк — суммарные очки режима', () => {
+    const t = makeTournament({
+      players: ['a', 'b', 'c'],
+      matches: [
+        { round: 1, table: 1, playerId: 'a', opponentId: 'b', win: true, modePoints: 2, armyPoints: 100 },
+        { round: 1, table: 1, playerId: 'b', opponentId: 'a', win: false, modePoints: 5, armyPoints: 50 },
+        { round: 2, table: 1, playerId: 'a', opponentId: 'b', win: false, modePoints: 2, armyPoints: 100 },
+        { round: 2, table: 1, playerId: 'b', opponentId: 'a', win: true, modePoints: 5, armyPoints: 50 },
+        { round: 1, table: 2, playerId: 'c', opponentId: 'a', win: false, modePoints: 9, armyPoints: 900 },
+      ],
+    });
+    // a и b: по 50% из 2 игр; режим: b 10 > a 4 → b выше (армия не важна пока режим разный)
+    const rows = computeRating([P('a', 'Аня'), P('b', 'Боря'), P('c', 'Вера')], [t]);
+    expect(rows.map((r) => r.player.id)).toEqual(['b', 'a', 'c']);
+  });
+
+  it('при равных очках режима — суммарные очки армии', () => {
+    const t = makeTournament({
+      players: ['a', 'b'],
+      matches: [
+        { round: 1, table: 1, playerId: 'a', opponentId: 'b', win: false, modePoints: 3, armyPoints: 200 },
+        { round: 1, table: 1, playerId: 'b', opponentId: 'a', win: true, modePoints: 3, armyPoints: 100 },
+        { round: 2, table: 1, playerId: 'a', opponentId: 'b', win: true, modePoints: 3, armyPoints: 200 },
+        { round: 2, table: 1, playerId: 'b', opponentId: 'a', win: false, modePoints: 3, armyPoints: 200 },
+      ],
+    });
+    // оба 1/2 (50%), режим по 6; армия: a 400 > b 300 → a выше,
+    // хотя по нику ('Аня' у b) алфавит дал бы обратный порядок
+    const rows = computeRating([P('a', 'Боря'), P('b', 'Аня')], [t]);
+    expect(rows.map((r) => r.player.id)).toEqual(['a', 'b']);
+  });
+
   it('кубки из мест 1-3 и участия считаются по всем турнирам', () => {
     const res = (place: number, playerId: string) => ({ place, playerId });
     const baseMatches = [
