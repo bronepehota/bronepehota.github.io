@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Sword } from 'lucide-react';
+import { ArrowRight, Sword, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { trackEvent } from '@/lib/analytics';
 
@@ -61,6 +61,30 @@ function CalculatorTelegraph() {
   );
 }
 
+/** Вторичный модуль: ТУРНИРЫ — рейтинг и протоколы сообщества (явный вход,
+ *  первым в secondary-группе, под primary ШТАБом). */
+function TournamentsModule() {
+  return (
+    <Link
+      href="/tournaments"
+      data-testid="landing-tournaments-link"
+      className="group relative inline-flex items-center bg-military-dark/75 backdrop-blur-sm border-2 border-military-rust/50 hover:border-military-amber transition-all duration-300 overflow-hidden touch-manipulation min-h-[44px] no-underline"
+    >
+      <span className="relative flex items-center justify-between leading-tight w-full px-4 py-2">
+        <span className="flex flex-col items-start text-left">
+          <span className="font-russo font-bold text-[10px] sm:text-xs uppercase tracking-wider text-military-sand/90 group-hover:text-white">
+            ТУРНИРЫ
+          </span>
+          <span className="font-ibm-mono text-[9px] sm:text-[10px] text-military-sand/60">
+            рейтинг игроков и протоколы
+          </span>
+        </span>
+        <Trophy className="w-4 h-4 text-military-rust group-hover:text-military-amber group-hover:translate-x-0.5 transition-all" />
+      </span>
+    </Link>
+  );
+}
+
 /** Модульная строка первого экрана: ШТАБ (primary) + широкая ЭНЦИКЛОПЕДИЯ.
  *  Единая разметка для SSR и свежего состояния клиента. */
 function ModuleRow({ className }: { className?: string }) {
@@ -89,7 +113,8 @@ function ModuleRow({ className }: { className?: string }) {
         </span>
       </Link>
 
-      {/* Secondary: широкая ЭНЦИКЛОПЕДИЯ */}
+      {/* Secondary-группа: ТУРНИРЫ (явный вход) + широкая ЭНЦИКЛОПЕДИЯ */}
+      <TournamentsModule />
       <Link
         href="/encyclopedia"
         data-testid="landing-encyclopedia-button"
@@ -200,7 +225,8 @@ export default function CTAButton({ className }: CTAButtonProps) {
           </span>
         </Link>
 
-        {/* Secondary: Начать заново + Энциклопедия */}
+        {/* Secondary: ТУРНИРЫ + Начать заново/Энциклопедия */}
+        <TournamentsModule />
         <div className="grid grid-cols-2 gap-2.5">
           <Link
             href="/app"

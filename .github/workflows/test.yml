@@ -11,7 +11,7 @@ jobs:
   # Быстрые проверки - всегда запускаются
   quality:
     name: Code Quality
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -43,7 +43,7 @@ jobs:
   # E2E тесты - только для PR в main и push в main/develop
   e2e:
     name: E2E Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     if: |
       github.event_name == 'push' ||

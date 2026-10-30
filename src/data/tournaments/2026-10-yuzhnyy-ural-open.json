@@ -1,0 +1,445 @@
+{
+  "id": "2026-10-yuzhnyy-ural-open",
+  "name": "Открытый турнир Южного Урала",
+  "date": "2026-10-15",
+  "region": null,
+  "rulesVersion": "community_star_system",
+  "rosterPoints": 700,
+  "format": "swiss",
+  "rounds": 3,
+  "organizers": [
+    "Андрей Андреев"
+  ],
+  "players": [
+    "semen_kashapov",
+    "pavel_boev",
+    "valera_zhilin",
+    "shnayder",
+    "kostya_vasilev",
+    "ahe_aks",
+    "edik_agievich",
+    "andrey_sukov"
+  ],
+  "results": [
+    {
+      "place": 1,
+      "playerId": "semen_kashapov"
+    },
+    {
+      "place": 2,
+      "playerId": "pavel_boev"
+    },
+    {
+      "place": 3,
+      "playerId": "valera_zhilin"
+    },
+    {
+      "place": 4,
+      "playerId": "shnayder"
+    },
+    {
+      "place": 5,
+      "playerId": "kostya_vasilev"
+    },
+    {
+      "place": 6,
+      "playerId": "ahe_aks"
+    },
+    {
+      "place": 7,
+      "playerId": "edik_agievich"
+    },
+    {
+      "place": 8,
+      "playerId": "andrey_sukov"
+    }
+  ],
+  "matches": [
+    {
+      "round": 1,
+      "table": 1,
+      "playerId": "andrey_sukov",
+      "opponentId": "pavel_boev",
+      "win": false,
+      "modePoints": 1,
+      "armyPoints": 292
+    },
+    {
+      "round": 1,
+      "table": 1,
+      "playerId": "pavel_boev",
+      "opponentId": "andrey_sukov",
+      "win": true,
+      "modePoints": 3,
+      "armyPoints": 591
+    },
+    {
+      "round": 1,
+      "table": 2,
+      "playerId": "semen_kashapov",
+      "opponentId": "kostya_vasilev",
+      "win": true,
+      "modePoints": 0,
+      "armyPoints": 454
+    },
+    {
+      "round": 1,
+      "table": 2,
+      "playerId": "kostya_vasilev",
+      "opponentId": "semen_kashapov",
+      "win": false,
+      "modePoints": 0,
+      "armyPoints": 428
+    },
+    {
+      "round": 1,
+      "table": 3,
+      "playerId": "edik_agievich",
+      "opponentId": "valera_zhilin",
+      "win": false,
+      "modePoints": 1,
+      "armyPoints": 191
+    },
+    {
+      "round": 1,
+      "table": 3,
+      "playerId": "valera_zhilin",
+      "opponentId": "edik_agievich",
+      "win": true,
+      "modePoints": 1,
+      "armyPoints": 420
+    },
+    {
+      "round": 1,
+      "table": 4,
+      "playerId": "ahe_aks",
+      "opponentId": "shnayder",
+      "win": false,
+      "modePoints": 1,
+      "armyPoints": 122
+    },
+    {
+      "round": 1,
+      "table": 4,
+      "playerId": "shnayder",
+      "opponentId": "ahe_aks",
+      "win": true,
+      "modePoints": 2,
+      "armyPoints": 142
+    },
+    {
+      "round": 2,
+      "table": 1,
+      "playerId": "semen_kashapov",
+      "opponentId": "edik_agievich",
+      "win": true,
+      "modePoints": 4,
+      "armyPoints": 592
+    },
+    {
+      "round": 2,
+      "table": 1,
+      "playerId": "edik_agievich",
+      "opponentId": "semen_kashapov",
+      "win": false,
+      "modePoints": 2,
+      "armyPoints": 477
+    },
+    {
+      "round": 2,
+      "table": 2,
+      "playerId": "andrey_sukov",
+      "opponentId": "valera_zhilin",
+      "win": false,
+      "modePoints": 2,
+      "armyPoints": 497
+    },
+    {
+      "round": 2,
+      "table": 2,
+      "playerId": "valera_zhilin",
+      "opponentId": "andrey_sukov",
+      "win": true,
+      "modePoints": 5,
+      "armyPoints": 223
+    },
+    {
+      "round": 2,
+      "table": 3,
+      "playerId": "pavel_boev",
+      "opponentId": "ahe_aks",
+      "win": true,
+      "modePoints": 5,
+      "armyPoints": 322
+    },
+    {
+      "round": 2,
+      "table": 3,
+      "playerId": "ahe_aks",
+      "opponentId": "pavel_boev",
+      "win": false,
+      "modePoints": 3,
+      "armyPoints": 156
+    },
+    {
+      "round": 2,
+      "table": 5,
+      "playerId": "kostya_vasilev",
+      "opponentId": "shnayder",
+      "win": true,
+      "modePoints": 1,
+      "armyPoints": 395
+    },
+    {
+      "round": 2,
+      "table": 5,
+      "playerId": "shnayder",
+      "opponentId": "kostya_vasilev",
+      "win": false,
+      "modePoints": 0,
+      "armyPoints": 186
+    },
+    {
+      "round": 3,
+      "table": 1,
+      "playerId": "kostya_vasilev",
+      "opponentId": "valera_zhilin",
+      "win": true,
+      "modePoints": 4,
+      "armyPoints": 480
+    },
+    {
+      "round": 3,
+      "table": 1,
+      "playerId": "valera_zhilin",
+      "opponentId": "kostya_vasilev",
+      "win": false,
+      "modePoints": 2,
+      "armyPoints": 20
+    },
+    {
+      "round": 3,
+      "table": 2,
+      "playerId": "pavel_boev",
+      "opponentId": "shnayder",
+      "win": false,
+      "modePoints": 5,
+      "armyPoints": 125
+    },
+    {
+      "round": 3,
+      "table": 2,
+      "playerId": "shnayder",
+      "opponentId": "pavel_boev",
+      "win": true,
+      "modePoints": 5,
+      "armyPoints": 347
+    },
+    {
+      "round": 3,
+      "table": 4,
+      "playerId": "andrey_sukov",
+      "opponentId": "semen_kashapov",
+      "win": false,
+      "modePoints": 0,
+      "armyPoints": 80
+    },
+    {
+      "round": 3,
+      "table": 4,
+      "playerId": "semen_kashapov",
+      "opponentId": "andrey_sukov",
+      "win": true,
+      "modePoints": 3,
+      "armyPoints": 547
+    },
+    {
+      "round": 3,
+      "table": 5,
+      "playerId": "edik_agievich",
+      "opponentId": "ahe_aks",
+      "win": false,
+      "modePoints": 0,
+      "armyPoints": 375
+    },
+    {
+      "round": 3,
+      "table": 5,
+      "playerId": "ahe_aks",
+      "opponentId": "edik_agievich",
+      "win": true,
+      "modePoints": 5,
+      "armyPoints": 222
+    }
+  ],
+  "rosters": [
+    {
+      "playerId": "shnayder",
+      "round": 1,
+      "faction": "ИМПЕРИЯ",
+      "points": 680,
+      "composition": "Линейная КП(Т), Линейная КП(Л)*2, Линейная КП(Л), Красные молнии, ЛНТ, Трибунаторы(Т), тяжелая КП(Т)"
+    },
+    {
+      "playerId": "shnayder",
+      "round": 2,
+      "faction": "ПРОТЕКТОРАТ",
+      "points": 700,
+      "composition": "Спецназ Фелиция(Л), Родезия, КП(Л), Легкая КП(Т), Грифон, ополчение велиана(Т)"
+    },
+    {
+      "playerId": "shnayder",
+      "round": 3,
+      "faction": "Волки",
+      "points": 700,
+      "composition": "Йотун, Хускарлы, Хирманы1, Хирдманы2, Ульфхиднары*2, Валькирии"
+    },
+    {
+      "playerId": "semen_kashapov",
+      "round": 1,
+      "faction": "ИМПЕРИЯ",
+      "points": null,
+      "composition": "Линейная клон пехота*4; Шидуанский спецназ 2 отряда 180 очков; Тяжелая клон пехота 80 очков; МСТ 230 очков"
+    },
+    {
+      "playerId": "semen_kashapov",
+      "round": 2,
+      "faction": "ПРОТЕКТОРАТ",
+      "points": null,
+      "composition": "Штурмовой спецназ(нов)(Т)*4, Карнивор"
+    },
+    {
+      "playerId": "semen_kashapov",
+      "round": 3,
+      "faction": "Наемники",
+      "points": 695,
+      "composition": "Пираты Маркуса(стар.)(Т)*4, Рейдеры*3, Найтсталкеры, Аборигены ростков*2, Карнивор"
+    },
+    {
+      "playerId": "ahe_aks",
+      "round": 1,
+      "faction": "ИМПЕРИЯ",
+      "points": 695,
+      "composition": "ЛНТ, Хантер, Трибунаторы(Л), Десант(Л), линейная КП(Т), Линейная КП(Л)"
+    },
+    {
+      "playerId": "ahe_aks",
+      "round": 2,
+      "faction": "ПРОТЕКТОРАТ",
+      "points": 690,
+      "composition": "Грифон, Спецназ Фелиции(Л), Штурмовая КП, шт"
+    },
+    {
+      "playerId": "ahe_aks",
+      "round": 3,
+      "faction": "Наемники",
+      "points": 700,
+      "composition": "Бронеход*2, Саламандра, Скерные парни, Мутанты, Рейдеры пыльной зоны"
+    },
+    {
+      "playerId": "valera_zhilin",
+      "round": 1,
+      "faction": "ИМПЕРИЯ",
+      "points": 680,
+      "composition": "Тяжелая КП(Т), Легкая штурм КП(Т), Легкий штурм десант(Т), Локуст-М, Раптор*2"
+    },
+    {
+      "playerId": "valera_zhilin",
+      "round": 2,
+      "faction": "ПРОТЕКТОРАТ",
+      "points": 700,
+      "composition": "Штурм спецназ нов(Т), КП(Т), Регуляры Велиан(Т), Бронеход, Ти-Рекс"
+    },
+    {
+      "playerId": "valera_zhilin",
+      "round": 3,
+      "faction": "Наемники",
+      "points": 695,
+      "composition": "Мутанты, Пираты МаркусаНОВ(Т), Рейдеры(Т), Локуст-М, Раптор, Бронеход, Саламандер"
+    },
+    {
+      "playerId": "kostya_vasilev",
+      "round": 1,
+      "faction": "ИМПЕРИЯ",
+      "points": 690,
+      "composition": "Арбитры, Легкая штурм КП(Т), Тяжелая КП(Т)*2, Тяжелый Штурм десант(Т), Раптор"
+    },
+    {
+      "playerId": "kostya_vasilev",
+      "round": 2,
+      "faction": "ПРОТЕКТОРАТ",
+      "points": 700,
+      "composition": "Стервятники, Бронеход, регуляры велиан(Т), спецназ планеты Фелиция(Т)*2"
+    },
+    {
+      "playerId": "kostya_vasilev",
+      "round": 3,
+      "faction": "Наемники",
+      "points": 690,
+      "composition": "Аборигены ростков*20, Мутанты*3, Рейдеры*3"
+    },
+    {
+      "playerId": "edik_agievich",
+      "round": 1,
+      "faction": "ИМПЕРИЯ",
+      "points": 700,
+      "composition": "Тяжелый Штурм Десант(Т)*2, Арбитры, Спайдер, Хеликс"
+    },
+    {
+      "playerId": "edik_agievich",
+      "round": 2,
+      "faction": "ПРОТЕКТОРАТ",
+      "points": 690,
+      "composition": "ТИ-Рэкс, Стервятники, Регуляры Велиан(Т)*2, Саламандер"
+    },
+    {
+      "playerId": "edik_agievich",
+      "round": 3,
+      "faction": "ИМПЕРИЯ",
+      "points": 695,
+      "composition": "Демолишер, Легкий штурм десант(Т)*2, Арбиторы, Режимная КП(Т)"
+    },
+    {
+      "playerId": "andrey_sukov",
+      "round": 1,
+      "faction": "ИМПЕРИЯ",
+      "points": 690,
+      "composition": "Арбиторы(Т), Трибунаторы(Т), Т600, Локуст"
+    },
+    {
+      "playerId": "andrey_sukov",
+      "round": 2,
+      "faction": "ПРОТЕКТОРАТ",
+      "points": 695,
+      "composition": "Спецназ фелиция(Т), Штурмовой Спецназ(Т), Штурмовой спецназ(Л), Грифон, Саламандра"
+    },
+    {
+      "playerId": "andrey_sukov",
+      "round": 3,
+      "faction": "Наемники",
+      "points": 700,
+      "composition": "МЗСТ, Супер Локуст, Пираты тортуги, Найтсталкеры, Рейдеры, мутанты, Аборигены Ростков, Косари"
+    },
+    {
+      "playerId": "pavel_boev",
+      "round": 1,
+      "faction": "ИМПЕРИЯ",
+      "points": 700,
+      "composition": "Спайдер, Хантер, Линейная КП(Т), ТяжелаяКП(Т), Спецназ Шиду, ТрибунаторыСТАР(Т)"
+    },
+    {
+      "playerId": "pavel_boev",
+      "round": 2,
+      "faction": "ПРОТЕКТОРАТ",
+      "points": 690,
+      "composition": "Карнивор, ТИ-Рекс, Спецназ Фелиции(Т), Штурмовой спецназНОВ(Т)"
+    },
+    {
+      "playerId": "pavel_boev",
+      "round": 3,
+      "faction": "Наемники",
+      "points": 690,
+      "composition": "Спайдер, ТИ-Рекс, Мутанты, Скверные парни-2, Шахматисты"
+    }
+  ]
+}

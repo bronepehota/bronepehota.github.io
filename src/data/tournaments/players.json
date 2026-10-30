@@ -1,0 +1,12 @@
+{
+  "players": [
+    { "id": "semen_kashapov", "nick": "Семён", "name": "Семён Кашапов", "vkUrl": null, "region": null },
+    { "id": "pavel_boev", "nick": "Павел", "name": "Павел Боев", "vkUrl": null, "region": null },
+    { "id": "valera_zhilin", "nick": "Валера", "name": "Валера Жилин", "vkUrl": null, "region": null },
+    { "id": "shnayder", "nick": "Шнайдер", "name": "Денис Шнайдер", "vkUrl": null, "region": null },
+    { "id": "kostya_vasilev", "nick": "Костя", "name": "Константин Васильев", "vkUrl": null, "region": null },
+    { "id": "ahe_aks", "nick": "Ахе", "name": "Алесандр Акс", "vkUrl": null, "region": null },
+    { "id": "edik_agievich", "nick": "Эдик", "name": "Эдуард Агиевич", "vkUrl": null, "region": null },
+    { "id": "andrey_sukov", "nick": "Андрей", "name": "Андрей Суков", "vkUrl": null, "region": null }
+  ]
+}
