@@ -4,6 +4,7 @@ import { getAllMissions } from '@/lib/missions-registry';
 import { getAllCampaigns } from '@/lib/campaigns';
 import { getAllHistoryChapters } from '@/lib/history';
 import { getAllWorldEntries } from '@/lib/world';
+import { getAllTournaments, getAllPlayers } from '@/lib/tournaments-registry';
 import { absoluteUrl } from '@/lib/seo';
 
 type ChangeFreq = MetadataRoute.Sitemap[number]['changeFrequency'];
@@ -37,6 +38,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/encyclopedia/history', freq: 'monthly', priority: 0.8 },
     { path: '/encyclopedia/world', freq: 'monthly', priority: 0.7 },
     { path: '/encyclopedia/sources', freq: 'yearly', priority: 0.3 },
+    // Турнирный раздел: рейтинг игроков и протоколы.
+    { path: '/tournaments', freq: 'weekly', priority: 0.8 },
   ];
 
   return [
@@ -76,6 +79,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: absoluteUrl(`/encyclopedia/world/${entry.slug}`),
       changeFrequency: 'monthly' as ChangeFreq,
       priority: 0.6,
+    })),
+    // Турниры: протоколы и профили игроков.
+    ...getAllTournaments().map((t) => ({
+      url: absoluteUrl(`/tournaments/${t.id}`),
+      changeFrequency: 'monthly' as ChangeFreq,
+      priority: 0.6,
+    })),
+    ...getAllPlayers().map((p) => ({
+      url: absoluteUrl(`/players/${p.id}`),
+      changeFrequency: 'monthly' as ChangeFreq,
+      priority: 0.5,
     })),
   ];
 }

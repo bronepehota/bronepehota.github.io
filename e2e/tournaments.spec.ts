@@ -63,3 +63,35 @@ test.describe('Турниры: протокол', () => {
     expect(resp?.status()).toBe(404);
   });
 });
+
+test.describe('Турниры: профиль игрока', () => {
+  test.beforeEach(async ({ page }) => {
+    await clearStorage(page);
+  });
+
+  test('сводка, кубки и история матчей Павла', async ({ page }) => {
+    await page.goto('/players/pavel_boev');
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.getByTestId('profile-nick')).toHaveText('Павел');
+    const summary = page.getByTestId('profile-summary');
+    await expect(summary).toContainText('игры: 3');
+    await expect(summary).toContainText('победы: 2');
+    await expect(summary).toContainText('66,7');
+    await expect(page.getByTestId('cup-silver')).toBeVisible();
+    await expect(page.getByTestId('history-row')).toHaveCount(3);
+    await expect(page.getByTestId('profile-participations')).toContainText('Открытый турнир');
+  });
+
+  test('переход из рейтинга по клику на ник', async ({ page }) => {
+    await page.goto('/tournaments');
+    await page.waitForLoadState('networkidle');
+    await page.getByTestId('rating-row-shnayder').getByRole('link').click();
+    await expect(page).toHaveURL(/\/players\/shnayder$/);
+  });
+
+  test('неизвестный игрок — 404', async ({ page }) => {
+    const resp = await page.goto('/players/nonexistent');
+    expect(resp?.status()).toBe(404);
+  });
+});
