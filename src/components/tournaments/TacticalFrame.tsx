@@ -27,19 +27,12 @@ export default function TacticalFrame({ children, className, stripes }: Tactical
   );
 }
 
-/** Метка тура армлиста: «ТУР N» когда протокол фиксирует лист за тур,
- *  «ВСЕ ТУРЫ» когда лист заявлен на турнир целиком. */
-export function RoundChip({ round }: { round: number | null }) {
+/** Метка тура армлиста: «ТУР N» — когда привязка листа к туру есть в данных. */
+export function TourChip({ round }: { round: number | null }) {
+  if (round == null) return null;
   return (
-    <span
-      className={cn(
-        'shrink-0 font-ibm-mono text-[9px] uppercase tracking-[0.15em] px-1.5 py-0.5 border',
-        round != null
-          ? 'border-military-rust/50 text-military-rust'
-          : 'border-military-steel/50 text-military-taupe',
-      )}
-    >
-      {round != null ? `ТУР ${round}` : 'ВСЕ ТУРЫ'}
+    <span className="font-ibm-mono text-[9px] uppercase tracking-[0.15em] px-1.5 py-0.5 border border-military-rust/50 text-military-rust shrink-0">
+      ТУР {round}
     </span>
   );
 }

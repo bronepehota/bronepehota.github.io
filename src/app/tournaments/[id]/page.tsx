@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getAllTournaments, getTournament } from '@/lib/tournaments-registry';
+import { getAllTournaments, getTournament, resolveResults } from '@/lib/tournaments-registry';
 import TournamentDetailPage from '@/components/tournaments/TournamentDetailPage';
 import JsonLd from '@/components/JsonLd';
 import { absoluteUrl, breadcrumbJsonLd, pageOpenGraph } from '@/lib/seo';
@@ -41,6 +41,20 @@ export default function Page({ params }: PageProps) {
           { name: 'Турниры', path: '/tournaments' },
           { name: tournament.name, path: `/tournaments/${tournament.id}` },
         ])}
+      />
+      {/* Итоговая ведомость как ItemList: позиции и профили игроков для краулеров. */}
+      <JsonLd
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'ItemList',
+          name: `Итоги — ${tournament.name}`,
+          itemListElement: resolveResults(tournament).map(({ place, player }) => ({
+            '@type': 'ListItem',
+            position: place,
+            name: player.nick,
+            url: absoluteUrl(`/players/${player.id}`),
+          })),
+        }}
       />
       <TournamentDetailPage tournament={tournament} />
     </>

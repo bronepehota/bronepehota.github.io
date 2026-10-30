@@ -1,8 +1,11 @@
 import Link from 'next/link';
 import type { RatingRow, Tournament, TournamentPlayer } from '@/lib/tournament-types';
 import { getPlayer, groupGames } from '@/lib/tournaments-registry';
+import { getAllUnits } from '@/lib/encyclopedia-registry';
+import { buildUnitIndex } from '@/lib/roster-links';
 import CupBadges from './CupBadges';
-import TacticalFrame, { RoundChip } from './TacticalFrame';
+import TacticalFrame, { TourChip } from './TacticalFrame';
+import { CompositionText, FactionLabel } from './RosterLinks';
 
 interface PlayerProfilePageProps {
   player: TournamentPlayer;
@@ -46,13 +49,24 @@ function buildHistory(player: TournamentPlayer, tournaments: Tournament[]): Hist
 }
 
 /** Ячейка сводки: моно-число на стальной рамке, у % — янтарная. */
-function StatCell({ label, value, amber }: { label: string; value: string; amber?: boolean }) {
+function StatCell({
+  label,
+  value,
+  amber,
+  testId,
+}: {
+  label: string;
+  value: string;
+  amber?: boolean;
+  testId?: string;
+}) {
   return (
     <div className="border border-military-steel/40 px-3 py-2">
       <div className="font-ibm-mono text-[9px] uppercase tracking-[0.2em] text-military-taupe">
         {label}
       </div>
       <div
+        data-testid={testId}
         className={`font-russo text-xl leading-tight mt-0.5 ${amber ? 'text-military-amber' : 'text-military-sand'}`}
       >
         {value}
@@ -64,11 +78,12 @@ function StatCell({ label, value, amber }: { label: string; value: string; amber
 /** Профиль игрока: ачивки, сводка, история матчей, ростеры. */
 export default function PlayerProfilePage({ player, rating, tournaments }: PlayerProfilePageProps) {
   const history = buildHistory(player, tournaments);
-  const rosters = tournaments.flatMap((t) =>
-    t.rosters
+  const unitIdx = buildUnitIndex(getAllUnits());
+  const rosters = tournaments.flatMap((t) => {
+    return t.rosters
       .filter((r) => r.playerId === player.id)
-      .map((r) => ({ tournament: t, roster: r })),
-  );
+      .map((roster) => ({ tournament: t, roster }));
+  });
 
   return (
     <div className="min-h-screen bg-military-dark text-military-sand">
@@ -101,10 +116,10 @@ export default function PlayerProfilePage({ player, rating, tournaments }: Playe
               data-testid="profile-summary"
               className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-4"
             >
-              <StatCell label="игры" value={String(rating.games)} />
-              <StatCell label="победы" value={String(rating.wins)} />
-              <StatCell label="% побед" value={`${rating.winRateDisplay}%`} amber />
-              <StatCell label="турниров" value={String(rating.participations)} />
+              <StatCell label="игры" value={String(rating.games)} testId="stat-games" />
+              <StatCell label="победы" value={String(rating.wins)} testId="stat-wins" />
+              <StatCell label="% побед" value={`${rating.winRateDisplay}%`} amber testId="stat-winrate" />
+              <StatCell label="турниров" value={String(rating.participations)} testId="stat-tournaments" />
             </div>
           )}
         </TacticalFrame>
@@ -168,10 +183,8 @@ export default function PlayerProfilePage({ player, rating, tournaments }: Playe
               {rosters.map(({ tournament, roster }, i) => (
                 <div key={i} className="border border-military-steel/40 bg-military-charcoal/40 p-3">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <RoundChip round={roster.round} />
-                    <span className="font-ibm-mono text-[10px] uppercase tracking-[0.2em] text-military-rust">
-                      {roster.faction}
-                    </span>
+                    <TourChip round={roster.round} />
+                    <FactionLabel faction={roster.faction} />
                     {roster.points != null && (
                       <span className="font-ibm-mono text-xs text-military-sand">
                         {roster.points} очк.
@@ -185,7 +198,7 @@ export default function PlayerProfilePage({ player, rating, tournaments }: Playe
                     </Link>
                   </div>
                   <p className="font-ibm-mono text-xs text-military-taupe mt-1.5">
-                    {roster.composition}
+                    <CompositionText composition={roster.composition} unitIdx={unitIdx} />
                   </p>
                 </div>
               ))}

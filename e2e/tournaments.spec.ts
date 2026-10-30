@@ -77,9 +77,9 @@ test.describe('Турниры: профиль игрока', () => {
 
     await expect(page.getByTestId('profile-nick')).toHaveText('Павел');
     const summary = page.getByTestId('profile-summary');
-    await expect(summary).toContainText('игры: 3');
-    await expect(summary).toContainText('победы: 2');
-    await expect(summary).toContainText('66,7');
+    await expect(summary.getByTestId('stat-games')).toHaveText('3');
+    await expect(summary.getByTestId('stat-wins')).toHaveText('2');
+    await expect(summary.getByTestId('stat-winrate')).toHaveText('66,7%');
     await expect(page.getByTestId('cup-silver')).toBeVisible();
     await expect(page.getByTestId('history-row')).toHaveCount(3);
     await expect(page.getByTestId('profile-participations')).toContainText('Открытый турнир');

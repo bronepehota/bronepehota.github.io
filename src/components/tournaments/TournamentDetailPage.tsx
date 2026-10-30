@@ -1,8 +1,12 @@
 import Link from 'next/link';
 import type { Tournament, TournamentPlayer, TournamentRoster } from '@/lib/tournament-types';
 import { groupGames, getPlayer, resolveResults } from '@/lib/tournaments-registry';
+import { getAllUnits } from '@/lib/encyclopedia-registry';
+import { buildUnitIndex } from '@/lib/roster-links';
+import { cn } from '@/lib/utils';
 import CupBadges from './CupBadges';
-import TacticalFrame, { RoundChip } from './TacticalFrame';
+import TacticalFrame, { TourChip } from './TacticalFrame';
+import { CompositionText, FactionLabel } from './RosterLinks';
 
 const RULE_LABELS: Record<string, string> = {
   tehnolog: 'Технолог',
@@ -23,6 +27,24 @@ const PLACE_RAIL: Record<number, string> = {
 function nickOf(id: string | null): string {
   if (!id) return '—';
   return getPlayer(id)?.nick ?? id;
+}
+
+/** Имя игрока в туре: с ростером — якорь на лист этого тура, без — текст. */
+function GamePlayerName({ id, win, anchor }: { id: string; win: boolean; anchor?: string }) {
+  const tone = cn(win && 'text-military-amber');
+  if (!anchor) return <span className={tone}>{nickOf(id)}</span>;
+  return (
+    <a
+      href={`#${anchor}`}
+      title="к листу этого тура"
+      className={cn(
+        tone,
+        'hover:text-military-amber underline decoration-dotted decoration-military-steel/60 underline-offset-4 transition-colors',
+      )}
+    >
+      {nickOf(id)}
+    </a>
+  );
 }
 
 /** Ростеры, сгруппированные по игроку (в порядке итоговых мест; игроки без
@@ -57,6 +79,24 @@ function groupRostersByPlayer(tournament: Tournament): Array<{
 export default function TournamentDetailPage({ tournament }: { tournament: Tournament }) {
   const results = resolveResults(tournament);
   const rounds = Array.from(new Set(tournament.matches.map((m) => m.round))).sort((a, b) => a - b);
+  const rosterRows = groupRostersByPlayer(tournament);
+  const rosterIds = new Set(
+    rosterRows.map((r) => r.player?.id).filter((id): id is string => !!id),
+  );
+  const unitIdx = buildUnitIndex(getAllUnits());
+  // Номер листа игрока для тура («1 лист = 1 тур» и т.п. — из данных протокола).
+  const listNoByRound = new Map<string, number>();
+  rosterRows.forEach(({ player, rosters }) => {
+    if (!player) return;
+    rosters.forEach((r, j) => {
+      if (r.round != null) listNoByRound.set(`${player.id}:${r.round}`, j + 1);
+    });
+  });
+  const gameAnchor = (playerId: string, round: number): string | undefined => {
+    if (!rosterIds.has(playerId)) return undefined;
+    const listNo = listNoByRound.get(`${playerId}:${round}`);
+    return listNo ? `roster-${playerId}-${listNo}` : `roster-${playerId}`;
+  };
 
   return (
     <div className="min-h-screen bg-military-dark text-military-sand">
@@ -155,13 +195,13 @@ export default function TournamentDetailPage({ tournament }: { tournament: Tourn
                       <div className="flex items-baseline justify-between gap-2">
                         <span className="text-military-taupe shrink-0">стол {g.table ?? '—'}</span>
                         <span className="text-right">
-                          <span className={g.p1.win ? 'text-military-amber' : ''}>
-                            {nickOf(g.p1.playerId)}
-                          </span>
+                          <GamePlayerName id={g.p1.playerId} win={g.p1.win} anchor={gameAnchor(g.p1.playerId, round)} />
                           {' — '}
-                          <span className={g.p2?.win ? 'text-military-amber' : ''}>
-                            {nickOf(g.p2?.playerId ?? null)}
-                          </span>
+                          {g.p2 ? (
+                            <GamePlayerName id={g.p2.playerId} win={g.p2.win} anchor={gameAnchor(g.p2.playerId, round)} />
+                          ) : (
+                            <span>—</span>
+                          )}
                         </span>
                       </div>
                       <div className="text-military-taupe text-[10px] text-right">
@@ -178,15 +218,19 @@ export default function TournamentDetailPage({ tournament }: { tournament: Tourn
 
         <section className="mt-8" data-testid="tournament-rosters">
           <h2 className="font-russo uppercase tracking-wider text-lg">Ростеры</h2>
-          <p className="font-ibm-mono text-[10px] text-military-taupe mt-1">
-            листы игроков; метка показывает тур («ВСЕ ТУРЫ» — заявлен на турнир)
-          </p>
+          {tournament.rosters.some((r) => r.round == null) && (
+            <p className="font-ibm-mono text-[10px] text-military-taupe mt-1">
+              каким листом игрок играл в каком туре — в протоколе не зафиксировано (уточняется);
+              номера листов — порядок заявки
+            </p>
+          )}
           <div className="mt-3 space-y-4">
-            {groupRostersByPlayer(tournament).map(({ player, rosters }, i) => (
+            {rosterRows.map(({ player, rosters }, i) => (
               <div
                 key={player?.id ?? `unknown-${i}`}
                 data-testid="roster-player"
-                className={`border border-military-steel/40 bg-military-charcoal/40 ${PLACE_RAIL[rosters[0] ? placeOf(results, player?.id) : 0] ?? ''}`}
+                id={player ? `roster-${player.id}` : undefined}
+                className={`border border-military-steel/40 bg-military-charcoal/40 scroll-mt-6 ${PLACE_RAIL[rosters[0] ? placeOf(results, player?.id) : 0] ?? ''}`}
               >
                 <div className="flex items-center gap-3 px-3 py-2 border-b border-military-steel/30">
                   {player ? (
@@ -212,19 +256,24 @@ export default function TournamentDetailPage({ tournament }: { tournament: Tourn
                 </div>
                 <div className="divide-y divide-military-steel/20">
                   {rosters.map((r, j) => (
-                    <div key={j} data-testid="roster-item" className="px-3 py-2">
+                    <div
+                      key={j}
+                      data-testid="roster-item"
+                      id={player ? `roster-${player.id}-${j + 1}` : undefined}
+                      className="px-3 py-2 scroll-mt-6"
+                    >
                       <div className="flex items-center gap-2 flex-wrap">
-                        <RoundChip round={r.round} />
-                        <span className="font-ibm-mono text-[10px] uppercase tracking-[0.2em] text-military-rust">
-                          {r.faction}
-                        </span>
+                        <TourChip round={r.round} />
+                        <FactionLabel faction={r.faction} />
                         {r.points != null && (
                           <span className="font-ibm-mono text-xs text-military-sand">
                             {r.points} очк.
                           </span>
                         )}
                       </div>
-                      <p className="font-ibm-mono text-xs text-military-taupe mt-1">{r.composition}</p>
+                      <p className="font-ibm-mono text-xs text-military-taupe mt-1">
+                        <CompositionText composition={r.composition} unitIdx={unitIdx} />
+                      </p>
                     </div>
                   ))}
                 </div>

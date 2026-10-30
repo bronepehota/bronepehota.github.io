@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Sword } from 'lucide-react';
+import { ArrowRight, Sword, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { trackEvent } from '@/lib/analytics';
 
@@ -61,19 +61,25 @@ function CalculatorTelegraph() {
   );
 }
 
-/** Терциарный вход: телеграфная строка турниров — рейтинг сообщества. */
-function TournamentsTelegraph() {
+/** Вторичный модуль: ТУРНИРЫ — рейтинг и протоколы сообщества (явный вход,
+ *  первым в secondary-группе, под primary ШТАБом). */
+function TournamentsModule() {
   return (
     <Link
       href="/tournaments"
       data-testid="landing-tournaments-link"
-      className="group inline-flex items-baseline justify-center gap-2 w-full py-2 no-underline"
+      className="group relative inline-flex items-center bg-military-dark/75 backdrop-blur-sm border-2 border-military-rust/50 hover:border-military-amber transition-all duration-300 overflow-hidden touch-manipulation min-h-[44px] no-underline"
     >
-      <span className="font-ibm-mono text-[10px] uppercase tracking-[0.25em] text-military-rust/80 group-hover:text-military-amber transition-colors">
-        {'// ТУРНИРЫ'}
-      </span>
-      <span className="font-ibm-mono text-[9px] text-military-sand/50 group-hover:text-military-sand/80 transition-colors">
-        рейтинг игроков
+      <span className="relative flex items-center justify-between leading-tight w-full px-4 py-2">
+        <span className="flex flex-col items-start text-left">
+          <span className="font-russo font-bold text-[10px] sm:text-xs uppercase tracking-wider text-military-sand/90 group-hover:text-white">
+            ТУРНИРЫ
+          </span>
+          <span className="font-ibm-mono text-[9px] sm:text-[10px] text-military-sand/60">
+            рейтинг игроков и протоколы
+          </span>
+        </span>
+        <Trophy className="w-4 h-4 text-military-rust group-hover:text-military-amber group-hover:translate-x-0.5 transition-all" />
       </span>
     </Link>
   );
@@ -107,7 +113,8 @@ function ModuleRow({ className }: { className?: string }) {
         </span>
       </Link>
 
-      {/* Secondary: широкая ЭНЦИКЛОПЕДИЯ */}
+      {/* Secondary-группа: ТУРНИРЫ (явный вход) + широкая ЭНЦИКЛОПЕДИЯ */}
+      <TournamentsModule />
       <Link
         href="/encyclopedia"
         data-testid="landing-encyclopedia-button"
@@ -128,7 +135,6 @@ function ModuleRow({ className }: { className?: string }) {
 
       {/* Tertiary: телеграфная строка калькулятора */}
       <CalculatorTelegraph />
-      <TournamentsTelegraph />
     </div>
   );
 }
@@ -219,7 +225,8 @@ export default function CTAButton({ className }: CTAButtonProps) {
           </span>
         </Link>
 
-        {/* Secondary: Начать заново + Энциклопедия */}
+        {/* Secondary: ТУРНИРЫ + Начать заново/Энциклопедия */}
+        <TournamentsModule />
         <div className="grid grid-cols-2 gap-2.5">
           <Link
             href="/app"
@@ -254,7 +261,6 @@ export default function CTAButton({ className }: CTAButtonProps) {
 
         {/* Tertiary: телеграфная строка калькулятора */}
         <CalculatorTelegraph />
-        <TournamentsTelegraph />
       </div>
     );
   }
