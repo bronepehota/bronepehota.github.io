@@ -36,3 +36,30 @@ test.describe('Турниры: хаб', () => {
     await expect(page).toHaveURL(/\/tournaments\/2026-10-yuzhnyy-ural-open$/);
   });
 });
+
+test.describe('Турниры: протокол', () => {
+  test.beforeEach(async ({ page }) => {
+    await clearStorage(page);
+  });
+
+  test('места с кубками, туры и ростеры рендерятся', async ({ page }) => {
+    await page.goto('/tournaments/2026-10-yuzhnyy-ural-open');
+    await page.waitForLoadState('networkidle');
+
+    await expect(
+      page.getByRole('heading', { name: 'Открытый турнир Южного Урала' }),
+    ).toBeVisible();
+    const places = page.getByTestId('place-row');
+    await expect(places).toHaveCount(8);
+    await expect(places.first()).toContainText('Семён');
+    await expect(places.first().getByTestId('cup-gold')).toBeVisible();
+    await expect(page.getByTestId('round-card')).toHaveCount(3);
+    await expect(page.getByTestId('game-row').first()).toBeVisible();
+    await expect(page.getByTestId('roster-item').first()).toBeVisible();
+  });
+
+  test('неизвестный id — 404', async ({ page }) => {
+    const resp = await page.goto('/tournaments/nope');
+    expect(resp?.status()).toBe(404);
+  });
+});
