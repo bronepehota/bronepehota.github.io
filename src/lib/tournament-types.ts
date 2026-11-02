@@ -12,6 +12,12 @@ export interface TournamentPlayer {
   region?: string | null;
 }
 
+/** Организаторское сообщество турнира (VK-ссылка) — кто вёл событие. */
+export interface TournamentCommunity {
+  name: string;
+  url: string;
+}
+
 export interface TournamentResultRow {
   place: number;
   playerId: string;
@@ -53,6 +59,7 @@ export interface Tournament {
   format: string; // 'swiss' | 'round_robin' | ...
   rounds: number;
   organizers: string[];
+  communities?: TournamentCommunity[];
   players: string[]; // playerId участников
   results: TournamentResultRow[];
   matches: TournamentMatch[];

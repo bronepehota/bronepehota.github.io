@@ -17,6 +17,7 @@
 import { Fragment, useState } from 'react';
 import { Megaphone, Check, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { CONTRIBUTION_VK_URL } from '@/lib/constants';
 import { GitHubPagesImage } from '@/components/GitHubPagesImage';
 import {
   isProvenanceUniform,
@@ -36,7 +37,7 @@ import {
 export { LoreSourceRow, CreditAvbMark, SourceChip, ALTERNATIVE_VERSION_HINT } from './LoreSourceRow';
 
 /** VK channel for data contributions / error reports (lore, painters, provenance). */
-export const CONTRIBUTION_VK_URL = 'https://vk.ru/lastbpcoder';
+export { CONTRIBUTION_VK_URL };
 
 /** Prefilled message template copied to the clipboard when «Дополнить» is pressed,
  *  so the user can paste it straight into VK (VK has no prefilled-message URL). */

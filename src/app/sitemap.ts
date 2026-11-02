@@ -40,6 +40,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/encyclopedia/sources', freq: 'yearly', priority: 0.3 },
     // Турнирный раздел: рейтинг игроков и протоколы.
     { path: '/tournaments', freq: 'weekly', priority: 0.8 },
+    { path: '/tournaments/organizers', freq: 'monthly', priority: 0.6 },
   ];
 
   return [

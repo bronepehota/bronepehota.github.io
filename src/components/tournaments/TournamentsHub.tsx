@@ -29,6 +29,13 @@ export default function TournamentsHub({ rating, tournaments }: TournamentsHubPr
             рейтинг: % побед → партии → очки режима → очки армии;
             итоги конкретного турнира — на его странице
           </p>
+          <Link
+            href="/tournaments/organizers"
+            data-testid="organizers-guide-link"
+            className="font-ibm-mono text-[10px] uppercase tracking-[0.25em] text-military-rust hover:text-military-amber transition-colors no-underline inline-block mt-1 min-h-[44px] leading-[44px]"
+          >
+            {'// ОРГАНИЗАТОРАМ — КРИТЕРИИ РЕЙТИНГА'}
+          </Link>
         </TacticalFrame>
 
         <RatingTable rating={rating} />

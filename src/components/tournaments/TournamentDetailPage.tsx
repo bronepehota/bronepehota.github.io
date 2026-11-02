@@ -120,13 +120,30 @@ export default function TournamentDetailPage({ tournament }: { tournament: Tourn
             {tournament.name}
           </h1>
           <div className="font-ibm-mono text-xs text-military-taupe mt-3 flex flex-wrap gap-x-4 gap-y-1">
-            <span>{RULE_LABELS[tournament.rulesVersion] ?? tournament.rulesVersion}</span>
+            {/* «правила:» — чтобы метку правил не читали как сообщество-организатор */}
+            <span>правила: {RULE_LABELS[tournament.rulesVersion] ?? tournament.rulesVersion}</span>
             <span>{tournament.rosterPoints} очков</span>
             <span>{FORMAT_LABELS[tournament.format] ?? tournament.format}</span>
             {tournament.organizers.length > 0 && (
-              <span>организатор: {tournament.organizers.join(', ')}</span>
+              <span>организаторы: {tournament.organizers.join(', ')}</span>
             )}
           </div>
+          {tournament.communities && tournament.communities.length > 0 && (
+            <div className="font-ibm-mono text-xs text-military-taupe mt-2 flex flex-wrap items-baseline gap-x-4 gap-y-1">
+              <span className="text-military-rust/80">сообщества:</span>
+              {tournament.communities.map((c) => (
+                <a
+                  key={c.url}
+                  href={c.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-military-sand/80 hover:text-military-amber transition-colors underline decoration-dotted decoration-military-steel/60 underline-offset-4 py-1"
+                >
+                  {c.name}
+                </a>
+              ))}
+            </div>
+          )}
         </TacticalFrame>
 
         <section className="mt-8">
