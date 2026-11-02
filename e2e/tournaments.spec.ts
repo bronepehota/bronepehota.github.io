@@ -58,6 +58,24 @@ test.describe('Турниры: протокол', () => {
     await expect(page.getByTestId('roster-item').first()).toBeVisible();
   });
 
+  test('шапка: дата 25.10, оба организатора, сообщества-ссылки', async ({ page }) => {
+    // Фидбек со-организатора (Денис Шнайдер, 2026-11-02): дата 25.10.2026,
+    // он — равный со-организатор, турнир вели два сообщества.
+    await page.goto('/tournaments/2026-10-yuzhnyy-ural-open');
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.getByTestId('tournament-title')).toBeVisible();
+    await expect(page.getByText('2026-10-25')).toBeVisible();
+    await expect(page.getByText(/организаторы:/)).toContainText('Андрей Андреев, Денис Шнайдер');
+    const ural = page.getByRole('link', { name: 'Битвы Fantasy на Урале' });
+    await expect(ural).toBeVisible();
+    await expect(ural).toHaveAttribute('href', 'https://vk.ru/battle_fantasy_ural');
+    await expect(page.getByRole('link', { name: 'Студия Покраса Шнайдера' })).toHaveAttribute(
+      'href',
+      'https://vk.ru/shnayder_brush',
+    );
+  });
+
   test('неизвестный id — 500 (статический экспорт)', async ({ page }) => {
     // Note: With Next.js static export, non-existent dynamic routes return 500 instead of 404
     // This is a known limitation of static export with dynamic routes
@@ -118,5 +136,15 @@ test.describe('Турниры: входы', () => {
     await page.waitForLoadState('networkidle');
     await page.getByTestId('encyclopedia-tournaments-link').click();
     await expect(page).toHaveURL(/\/tournaments$/);
+  });
+
+  test('хаб турниров: строка «организаторам» ведёт на критерии рейтинга', async ({ page }) => {
+    await page.goto('/tournaments');
+    await page.waitForLoadState('networkidle');
+    await page.getByTestId('organizers-guide-link').click();
+    await expect(page).toHaveURL(/\/tournaments\/organizers$/);
+    await expect(page.getByTestId('criterion')).toHaveCount(4);
+    await expect(page.getByTestId('criterion').first()).toContainText('Система подсчёта');
+    await expect(page.getByRole('heading', { name: 'Как попасть в рейтинг' })).toBeVisible();
   });
 });

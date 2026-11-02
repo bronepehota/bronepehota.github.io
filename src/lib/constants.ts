@@ -60,4 +60,10 @@ export const FACTIONS: FactionID[] = ['polaris', 'protectorate', 'mercenaries', 
 export const MAX_SOLDIERS_PER_SQUAD = 6;
 export const MAX_WEAPONS_PER_MACHINE = 4;
 
+/** VK-контакт для пополнения данных приложения: лор, покрасы, итоги турниров.
+ *  Серверобезопасный источник правды — AttributionLabel.tsx реэкспортирует
+ *  для совместимости (сам он клиентский: useState), из Server Components
+ *  импортировать константу отсюда. */
+export const CONTRIBUTION_VK_URL = 'https://vk.ru/lastbpcoder';
+
 export const DICE_TYPES = ['D6', 'D12', 'D20'] as const;

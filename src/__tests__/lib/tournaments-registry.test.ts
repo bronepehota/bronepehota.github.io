@@ -46,6 +46,19 @@ describe('tournaments-registry: турниры', () => {
     expect(getTournament('nope')).toBeUndefined();
   });
 
+  it('сид: дата 25.10.2026, организаторы — Андреев и Шнайдер, сообщества с VK-ссылками', () => {
+    // Фидбек со-организатора Дениса Шнайдера (2026-11-02): дата 25.10, он —
+    // равный со-организатор, турнир вели сообщества «Битвы Fantasy на Урале»
+    // и «Студия Покраса Шнайдера».
+    const t = getTournament('2026-10-yuzhnyy-ural-open')!;
+    expect(t.date).toBe('2026-10-25');
+    expect(t.organizers).toEqual(['Андрей Андреев', 'Денис Шнайдер']);
+    expect(t.communities).toEqual([
+      { name: 'Битвы Fantasy на Урале', url: 'https://vk.ru/battle_fantasy_ural' },
+      { name: 'Студия Покраса Шнайдера', url: 'https://vk.ru/shnayder_brush' },
+    ]);
+  });
+
   it('целостность сида: места 1-8 уникальны, ссылки матчей на участников, ровно одна победа на игру', () => {
     const t = getTournament('2026-10-yuzhnyy-ural-open')!;
     const ids = new Set(t.players);

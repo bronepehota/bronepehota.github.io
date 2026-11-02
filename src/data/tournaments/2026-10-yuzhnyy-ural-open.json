@@ -1,14 +1,19 @@
 {
   "id": "2026-10-yuzhnyy-ural-open",
   "name": "Открытый турнир Южного Урала",
-  "date": "2026-10-15",
+  "date": "2026-10-25",
   "region": null,
   "rulesVersion": "community_star_system",
   "rosterPoints": 700,
   "format": "swiss",
   "rounds": 3,
   "organizers": [
-    "Андрей Андреев"
+    "Андрей Андреев",
+    "Денис Шнайдер"
+  ],
+  "communities": [
+    { "name": "Битвы Fantasy на Урале", "url": "https://vk.ru/battle_fantasy_ural" },
+    { "name": "Студия Покраса Шнайдера", "url": "https://vk.ru/shnayder_brush" }
   ],
   "players": [
     "semen_kashapov",
