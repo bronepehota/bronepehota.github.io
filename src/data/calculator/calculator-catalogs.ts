@@ -79,7 +79,7 @@ export const ARMOR_TYPES: ArmorDef[] = [
 
 export const WEAPONS: WeaponDef[] = [
   { id: 'pistol',          name: 'Пистолет',               range: 'Д6',   power: 'Д6',   price: 15,  isHeavy: false, macedonianRange: 'Д6-1',  macedonianPower: '2Д6'   },
-  { id: 'smg',             name: 'Пистолет-пулемёт',       range: 'Д6',   power: '2Д6',  price: 25,  isHeavy: false, macedonianRange: '2Д6-1', macedonianPower: '3Д6'   },
+  { id: 'smg',             name: 'Пистолет-пулемёт',       range: 'Д6',   power: '2Д6',  price: 25,  isHeavy: false, macedonianRange: 'Д6-1',  macedonianPower: '3Д6'   },
   { id: 'shotgun',         name: 'Дробовик',               range: 'Д6',   power: '3Д6',  price: 35,  isHeavy: false },
   { id: 'assault_rifle',   name: 'Автомат',                range: 'Д12',  power: '2Д6',  price: 40,  isHeavy: false },
   { id: 'carbine',         name: 'Штурмовой карабин',      range: 'Д6',   power: 'Д12',  price: 45,  isHeavy: false },
@@ -88,13 +88,13 @@ export const WEAPONS: WeaponDef[] = [
   { id: 'rocket_launcher', name: 'Гранатомёт/ракетница',   range: 'Д12',  power: 'Д20',  price: 100, isHeavy: true  },
   { id: 'atr',             name: 'Противотанокое ружьё',   range: 'Д20',  power: 'Д12',  price: 80,  isHeavy: true  },
   { id: 'flamethrower',    name: 'Огнемёт',                range: 'Д6',   power: 'Д20',  price: 85,  isHeavy: true  },
-  { id: 'laser_pistol',    name: 'ЛазПистолет',            range: '2Д6',  power: 'Д6+1', price: 30,  isHeavy: false, macedonianRange: '2Д6-1', macedonianPower: 'Д6+1'  },
+  { id: 'laser_pistol',    name: 'ЛазПистолет',            range: '2Д6',  power: 'Д6+1', price: 30,  isHeavy: false, macedonianRange: '2Д6-1', macedonianPower: '2Д6+1' },
   { id: 'laser_rifle',     name: 'ЛазГан',                 range: '2Д12', power: 'Д6+1', price: 60,  isHeavy: false },
   { id: 'laser_cannon',    name: 'ЛазПушка',               range: '2Д12', power: 'Д20',  price: 120, isHeavy: true  },
-  { id: 'plasma_pistol',   name: 'ПлазПистолет',           range: 'Д6',   power: 'Д6+3', price: 45,  isHeavy: false, macedonianRange: 'Д6-1',  macedonianPower: 'Д6+3'  },
+  { id: 'plasma_pistol',   name: 'ПлазПистолет',           range: 'Д6',   power: 'Д6+3', price: 45,  isHeavy: false, macedonianRange: 'Д6-1',  macedonianPower: '2Д6+3' },
   { id: 'plasma_rifle',    name: 'ПлазГан',                range: 'Д12',  power: 'Д6+3', price: 60,  isHeavy: false },
   { id: 'plasma_cannon',   name: 'ПлазПушка',              range: 'Д12',  power: 'Д20+2',price: 120, isHeavy: true  },
-  { id: 'gluon_pistol',    name: 'Глюонный пистолет',      range: 'Д6',   power: '2Д6+3',price: 55,  isHeavy: false, macedonianRange: 'Д6-1',  macedonianPower: '2Д6+3' },
+  { id: 'gluon_pistol',    name: 'Глюонный пистолет',      range: 'Д6',   power: '2Д6+3',price: 55,  isHeavy: false, macedonianRange: 'Д6-1',  macedonianPower: '3Д6+3' },
   { id: 'gluon_rifle',     name: 'Глюонная винтовка',      range: 'Д12',  power: '3Д6+3',price: 80,  isHeavy: false },
   { id: 'gluon_cannon',    name: 'Глюонная пушка',         range: 'Д12',  power: 'Д12+2',price: 80,  isHeavy: true  },
 ];

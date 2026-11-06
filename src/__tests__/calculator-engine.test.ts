@@ -86,9 +86,41 @@ describe('calculateSoldier', () => {
   });
 
   test('SMG with macedonian mode changes range/power', () => {
+    // xlsx «АвтоРасчёт»: ПП + два оружия → дальность $M$37 = «Д6-1», мощность $N$38 = «3Д6»
     const result = calculateSoldier({ ...baseParams, weapon: 'smg', twoWeapons: true });
-    expect(result.range).toBe('2Д6-1');
+    expect(result.range).toBe('Д6-1');
     expect(result.power).toBe('3Д6');
+  });
+
+  test('laser pistol with macedonian mode adds a power die', () => {
+    // xlsx «АвтоРасчёт»: ЛазПистолет + два оружия → дальность $M$38, мощность $N$39
+    const result = calculateSoldier({ ...baseParams, weapon: 'laser_pistol', twoWeapons: true });
+    expect(result.range).toBe('2Д6-1');
+    expect(result.power).toBe('2Д6+1');
+  });
+
+  test('plasma pistol with macedonian mode adds a power die', () => {
+    // xlsx «АвтоРасчёт»: ПлазПистолет + два оружия → дальность $M$37, мощность $N$40
+    const result = calculateSoldier({ ...baseParams, weapon: 'plasma_pistol', twoWeapons: true });
+    expect(result.range).toBe('Д6-1');
+    expect(result.power).toBe('2Д6+3');
+  });
+
+  test('gluon pistol with macedonian mode adds a power die', () => {
+    // xlsx «АвтоРасчёт»: Глюонный пистолет + два оружия → дальность $M$37, мощность $N$41
+    const result = calculateSoldier({ ...baseParams, weapon: 'gluon_pistol', twoWeapons: true });
+    expect(result.range).toBe('Д6-1');
+    expect(result.power).toBe('3Д6+3');
+  });
+
+  test('macedonian mode leaves non-pistol weapons unchanged', () => {
+    // У дробовика/автомата/карабина и тяжёлого оружия ветки «два оружия» нет — статы без изменений
+    for (const weapon of ['shotgun', 'assault_rifle', 'carbine', 'sniper', 'lmg']) {
+      const two = calculateSoldier({ ...baseParams, weapon, twoWeapons: true });
+      const one = calculateSoldier({ ...baseParams, weapon, twoWeapons: false });
+      expect(two.range).toBe(one.range);
+      expect(two.power).toBe(one.power);
+    }
   });
 
   test('no property gives 0 property price', () => {
