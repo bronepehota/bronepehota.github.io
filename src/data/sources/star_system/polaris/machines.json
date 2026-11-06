@@ -47,7 +47,8 @@
     "rank": 3,
     "fire_rate": 2,
     "ammo_max": 5,
-    "durability_max": 16
+    "durability_max": 16,
+    "weaponsCost": 180
   },
   {
     "id": "helix",
@@ -89,7 +90,8 @@
     "rank": 2,
     "fire_rate": 2,
     "ammo_max": 16,
-    "durability_max": 12
+    "durability_max": 12,
+    "weaponsCost": 26
   },
   {
     "id": "locust",
@@ -126,7 +128,8 @@
     "rank": 3,
     "fire_rate": 2,
     "ammo_max": 16,
-    "durability_max": 12
+    "durability_max": 12,
+    "weaponsCost": 46
   },
   {
     "id": "madbull",
@@ -181,7 +184,8 @@
     "rank": 3,
     "fire_rate": 2,
     "ammo_max": 20,
-    "durability_max": 15
+    "durability_max": 15,
+    "weaponsCost": 137
   },
   {
     "id": "raptor",
@@ -219,7 +223,8 @@
     "rank": 2,
     "fire_rate": 1,
     "ammo_max": 10,
-    "durability_max": 8
+    "durability_max": 8,
+    "weaponsCost": 46
   },
   {
     "id": "wildbear",
@@ -263,7 +268,8 @@
     "rank": 2,
     "fire_rate": 2,
     "ammo_max": 18,
-    "durability_max": 14
+    "durability_max": 14,
+    "weaponsCost": 184
   },
   {
     "id": "ravingbeast",
@@ -307,7 +313,8 @@
     "rank": 2,
     "fire_rate": 2,
     "ammo_max": 16,
-    "durability_max": 13
+    "durability_max": 13,
+    "weaponsCost": 179
   },
   {
     "id": "thunder",
@@ -352,7 +359,8 @@
     "rank": 2,
     "fire_rate": 2,
     "ammo_max": 16,
-    "durability_max": 10
+    "durability_max": 10,
+    "weaponsCost": 220
   },
   {
     "id": "eraser",
@@ -396,7 +404,8 @@
     "rank": 3,
     "fire_rate": 2,
     "ammo_max": 18,
-    "durability_max": 14
+    "durability_max": 14,
+    "weaponsCost": 267
   },
   {
     "id": "devastator",
@@ -440,7 +449,8 @@
     "rank": 3,
     "fire_rate": 2,
     "ammo_max": 18,
-    "durability_max": 15
+    "durability_max": 15,
+    "weaponsCost": 186
   },
   {
     "id": "spider",
@@ -478,7 +488,8 @@
     "rank": 3,
     "fire_rate": 2,
     "ammo_max": 14,
-    "durability_max": 11
+    "durability_max": 11,
+    "weaponsCost": 46
   },
   {
     "id": "superlocust",
@@ -510,7 +521,8 @@
     "rank": 3,
     "fire_rate": 2,
     "ammo_max": 16,
-    "durability_max": 14
+    "durability_max": 14,
+    "weaponsCost": 28
   },
   {
     "id": "hunter",
@@ -542,7 +554,8 @@
     "rank": 2,
     "fire_rate": 1,
     "ammo_max": 14,
-    "durability_max": 10
+    "durability_max": 10,
+    "weaponsCost": 24
   },
   {
     "id": "hornet",
@@ -587,6 +600,7 @@
     "rank": 2,
     "fire_rate": 2,
     "ammo_max": 16,
-    "durability_max": 14
+    "durability_max": 14,
+    "weaponsCost": 67
   }
 ]

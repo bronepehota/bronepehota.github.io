@@ -351,19 +351,33 @@ describe('Machine cost — Star System beta discount (-30%)', () => {
   });
 
   describe('getMachineCost', () => {
-    it('applies 30% discount when active', () => {
-      expect(getMachineCost(100, true)).toBe(70);
-      expect(getMachineCost(120, true)).toBe(84);
+    it('discounts only the chassis, weapons stay full price (monoblok split)', () => {
+      // Хеликс: 220 = орудия 26 + шасси 194; итог ceil10(26 + 194×0.7 = 161.8) = 170
+      expect(getMachineCost(220, true, 26)).toBe(170);
+      // Демолишер: 400 = орудия 180 + шасси 220; итог ceil10(180 + 154 = 334) = 340
+      expect(getMachineCost(400, true, 180)).toBe(340);
     });
 
-    it('rounds mathematically (95 → 66.5 → 67)', () => {
-      expect(getMachineCost(95, true)).toBe(67);
-      expect(getMachineCost(155, true)).toBe(109); // 108.5 → 109
+    it('rounds the final price UP to a multiple of 10', () => {
+      // Гриффин: 305 = орудия 111 + шасси 194; ceil10(111 + 135.8 = 246.8) = 250
+      expect(getMachineCost(305, true, 111)).toBe(250);
+    });
+
+    it('falls back to whole-cost discount without the split (custom machines)', () => {
+      expect(getMachineCost(220, true, undefined)).toBe(160); // ceil10(154)
+      expect(getMachineCost(95, true, undefined)).toBe(70);   // ceil10(66.5)
+      expect(getMachineCost(100, true, undefined)).toBe(70);  // ceil10(70)
+    });
+
+    it('guards against bad split data (weaponsCost >= cost)', () => {
+      expect(getMachineCost(220, true, 220)).toBe(160);
+      expect(getMachineCost(220, true, 300)).toBe(160);
+      expect(getMachineCost(220, true, 0)).toBe(160);
     });
 
     it('returns cost unchanged when discount is inactive', () => {
       expect(getMachineCost(95, false)).toBe(95);
-      expect(getMachineCost(100, false)).toBe(100);
+      expect(getMachineCost(220, false, 26)).toBe(220);
     });
   });
 
@@ -373,6 +387,11 @@ describe('Machine cost — Star System beta discount (-30%)', () => {
       const machineUnit: ArmyUnit = { instanceId: 'm1', type: 'machine', data: makeMachine(100), instanceNumber: 1 };
 
       expect(recalculateArmyCost([squadUnit, machineUnit], { machineDiscountActive: true })).toBe(170);
+    });
+
+    it('uses the weapons/chassis split when the machine has it', () => {
+      const machineUnit: ArmyUnit = { instanceId: 'm1', type: 'machine', data: { ...makeMachine(220), weaponsCost: 26 }, instanceNumber: 1 };
+      expect(recalculateArmyCost([machineUnit], { machineDiscountActive: true })).toBe(170);
     });
 
     it('sums full prices when discount inactive', () => {

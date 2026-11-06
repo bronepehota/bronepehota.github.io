@@ -138,7 +138,8 @@ export function MachineDiscountToggle({ enabled, onEnabledChange }: MachineDisco
               <div className="p-3 rounded-lg bg-emerald-950/30 border border-emerald-800/30">
                 <h4 className="text-xs font-mono font-bold text-emerald-400 mb-2">Правило</h4>
                 <p className="text-sm text-slate-300 leading-relaxed">
-                  Стоимость всей техники в армии уменьшается на 30% — в бюджет помещается больше машин.
+                  «Шасси» машин (корпус и ходовая) дешевеет на 30% — орудия остаются по полной цене.
+                  Итог округляется вверх до кратного 10. В бюджет помещается больше техники.
                 </p>
               </div>
 
@@ -146,7 +147,8 @@ export function MachineDiscountToggle({ enabled, onEnabledChange }: MachineDisco
                 <h4 className="text-xs font-mono font-bold text-slate-400 mb-2">Применение</h4>
                 <ul className="text-sm text-slate-400 space-y-1">
                   <li>• Только машины (отряды — полная цена)</li>
-                  <li>• Цены и бюджет пересчитываются сразу, включая уже набранные машины</li>
+                  <li>• Орудия — полная цена (разбивка из моноблочной модели Star System)</li>
+                  <li>• Пример: Хеликс 220 → 170</li>
                   <li>• Только для правил Star System</li>
                   <li className="text-amber-400/80">• БЕТА: нет в правилах v0.3 — удобство по решению игрока</li>
                 </ul>

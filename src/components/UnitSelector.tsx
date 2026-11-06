@@ -233,7 +233,7 @@ export function UnitSelector({
   // while add-removal keeps the base (canonical) cost in army storage.
   const displayData = (unit: UnitDisplay): Squad | Machine =>
     unit.type === 'machine' && machineDiscountActive
-      ? { ...unit.data, cost: getMachineCost(unit.data.cost, true) }
+      ? { ...unit.data, cost: getMachineCost(unit.data.cost, true, (unit.data as Machine).weaponsCost) }
       : unit.data;
 
   // Handle unit card click

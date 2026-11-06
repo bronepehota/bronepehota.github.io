@@ -10,11 +10,12 @@ import { clearStorage, dismissIntroIfShown } from './helpers/setup';
  * totalCost в хранилище остаётся канонической Σ базовых цен — потому набор
  * армии «уже со скидкой» и её отключение не требуют пересчёта.
  *
- * Поларис, источник star_system: helix = 220 → со скидкой Math.round(154) = 154.
+ * Поларис, источник star_system: helix = 220 (орудия 26 + шасси 194) →
+ * со скидкой ceil10(26 + 194×0.7 = 161.8) = 170.
  */
 
 const HELIX_BASE = 220;
-const HELIX_DISCOUNTED = Math.round(HELIX_BASE * 0.7); // 154
+const HELIX_DISCOUNTED = 170; // ceil10(weapons 26 + chassis 194×0.7)
 
 /** Пройти визард до конструктора армии: rules → source → faction → mission → budget. */
 async function walkWizardToBuilder(page: Page) {
