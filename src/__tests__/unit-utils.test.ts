@@ -1,4 +1,4 @@
-import { Army, ArmyUnit, Squad } from '../lib/types';
+import { Army, ArmyUnit, Machine, Squad } from '../lib/types';
 import {
   countByUnitType,
   getNextInstanceNumber,
@@ -7,7 +7,9 @@ import {
   validateAddUnit,
   formatUnitNumber,
   formatCountBadge,
-  checkSquadUniformStats
+  checkSquadUniformStats,
+  getMachineCost,
+  recalculateArmyCost
 } from '../lib/unit-utils';
 
 const mockSquad: Squad = {
@@ -330,6 +332,58 @@ describe('Unit Utilities', () => {
     it('should return false when only one soldier alive (others dead)', () => {
       const unit = makeUnit([{ armor: 2, speed: 5 }, { armor: 2, speed: 5 }], [1]);
       expect(checkSquadUniformStats(unit)).toEqual({ isUniformArmor: false, isUniformSpeed: false });
+    });
+  });
+});
+
+describe('Machine cost — Star System beta discount (-30%)', () => {
+  const makeMachine = (cost: number): Machine => ({
+    id: 'test-machine',
+    name: 'Test Machine',
+    faction: 'polaris',
+    cost,
+    rank: 3,
+    fire_rate: 1,
+    ammo_max: 10,
+    durability_max: 4,
+    speed_sectors: [],
+    weapons: [],
+  });
+
+  describe('getMachineCost', () => {
+    it('applies 30% discount when active', () => {
+      expect(getMachineCost(100, true)).toBe(70);
+      expect(getMachineCost(120, true)).toBe(84);
+    });
+
+    it('rounds mathematically (95 → 66.5 → 67)', () => {
+      expect(getMachineCost(95, true)).toBe(67);
+      expect(getMachineCost(155, true)).toBe(109); // 108.5 → 109
+    });
+
+    it('returns cost unchanged when discount is inactive', () => {
+      expect(getMachineCost(95, false)).toBe(95);
+      expect(getMachineCost(100, false)).toBe(100);
+    });
+  });
+
+  describe('recalculateArmyCost', () => {
+    it('discounts only machines, squads stay full price', () => {
+      const squadUnit: ArmyUnit = { instanceId: 's1', type: 'squad', data: mockSquad, instanceNumber: 1 };
+      const machineUnit: ArmyUnit = { instanceId: 'm1', type: 'machine', data: makeMachine(100), instanceNumber: 1 };
+
+      expect(recalculateArmyCost([squadUnit, machineUnit], { machineDiscountActive: true })).toBe(170);
+    });
+
+    it('sums full prices when discount inactive', () => {
+      const squadUnit: ArmyUnit = { instanceId: 's1', type: 'squad', data: mockSquad, instanceNumber: 1 };
+      const machineUnit: ArmyUnit = { instanceId: 'm1', type: 'machine', data: makeMachine(100), instanceNumber: 1 };
+
+      expect(recalculateArmyCost([squadUnit, machineUnit], { machineDiscountActive: false })).toBe(200);
+    });
+
+    it('handles empty army', () => {
+      expect(recalculateArmyCost([], { machineDiscountActive: true })).toBe(0);
     });
   });
 });

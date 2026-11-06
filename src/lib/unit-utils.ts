@@ -342,3 +342,41 @@ export function shortenWeaponName(name: string): string {
     .replace(/\s+/g, ' ')
     .trim();
 }
+
+/**
+ * Effective cost of a machine with the Star System beta discount applied.
+ *
+ * The discount («Техника −30%», БЕТА) is a player convenience, not a rules
+ * feature: machines cost 30% less so more of them fit a point budget.
+ * Squads are never discounted (use {@link getUnitEffectiveCost} to route by type).
+ *
+ * @param cost - Base machine cost from the army list
+ * @param discountActive - Discount toggle AND Star System rules both active
+ * @returns Discounted cost, mathematically rounded (95 → 66.5 → 67)
+ */
+export function getMachineCost(cost: number, discountActive: boolean): number {
+  return discountActive ? Math.round(cost * 0.7) : cost;
+}
+
+/**
+ * Effective cost of an army unit (squad or machine). Only machines are
+ * discounted; squads always cost full price.
+ */
+export function getUnitEffectiveCost(
+  unit: Pick<ArmyUnit, 'type' | 'data'>,
+  discountActive: boolean,
+): number {
+  return unit.type === 'machine' ? getMachineCost(unit.data.cost, discountActive) : unit.data.cost;
+}
+
+/**
+ * Recomputes army totalCost from its units at current discount state.
+ * Used when the discount toggle flips so already-added machines re-price
+ * without re-adding them.
+ */
+export function recalculateArmyCost(
+  units: Pick<ArmyUnit, 'type' | 'data'>[],
+  options: { machineDiscountActive: boolean },
+): number {
+  return units.reduce((sum, unit) => sum + getUnitEffectiveCost(unit, options.machineDiscountActive), 0);
+}

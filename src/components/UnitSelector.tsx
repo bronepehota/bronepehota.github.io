@@ -15,6 +15,7 @@ import { FactionLogo } from '@/components/FactionLogo';
 import { SquadSpecialProps } from './SquadSpecialProps';
 import { relationTo } from '@/lib/faction-hierarchy';
 import { buildCatalogHaystack, matchesHaystack } from '@/lib/unit-search';
+import { getMachineCost, getUnitEffectiveCost } from '@/lib/unit-utils';
 
 
 interface UnitSelectorProps {
@@ -40,6 +41,8 @@ interface UnitSelectorProps {
   displayMode: 'detailed' | 'compact';
   onDisplayModeChange: (mode: 'detailed' | 'compact') => void;
   sourceId: SourceID;
+  /** БЕТА-скидка −30% на технику (Star System): цены, бюджет и итог армии. */
+  machineDiscountActive?: boolean;
 }
 
 type UnitDisplay = {
@@ -77,6 +80,7 @@ export function UnitSelector({
   displayMode,
   onDisplayModeChange,
   sourceId,
+  machineDiscountActive = false,
 }: UnitSelectorProps) {
   const [filterType, setFilterType] = useState<FilterType>('all');
   // Catalog name search (session-only, not persisted). ANDs with filterType.
@@ -91,7 +95,7 @@ export function UnitSelector({
 
   // Calculate remaining points
   const totalCost = army.reduce((sum, unit) => {
-    return sum + unit.data.cost;
+    return sum + getUnitEffectiveCost(unit, machineDiscountActive);
   }, 0);
 
   // A unit (squad or machine) is available when it belongs to the selected
@@ -212,7 +216,7 @@ export function UnitSelector({
 
   // Handle add unit with budget check
   const handleAddUnit = (unit: UnitDisplay) => {
-    if (!canAffordUnit(unit.data.cost)) {
+    if (!canAffordUnit(getUnitEffectiveCost(unit, machineDiscountActive))) {
       setShowWarning(true);
       setTimeout(() => setShowWarning(false), 3000);
       return;
@@ -225,10 +229,17 @@ export function UnitSelector({
     }
   };
 
+  // Display clone: with the beta discount machines show the reduced price,
+  // while add-removal keeps the base (canonical) cost in army storage.
+  const displayData = (unit: UnitDisplay): Squad | Machine =>
+    unit.type === 'machine' && machineDiscountActive
+      ? { ...unit.data, cost: getMachineCost(unit.data.cost, true) }
+      : unit.data;
+
   // Handle unit card click
   const handleUnitClick = (unit: UnitDisplay) => {
     setExpandedUnitId(unit.data.id === expandedUnitId ? null : unit.data.id);
-    setSelectedUnit(unit);
+    setSelectedUnit({ type: unit.type, data: displayData(unit) });
     setIsModalOpen(true);
   };
 
@@ -345,7 +356,7 @@ export function UnitSelector({
           /* Compact view - list of compact cards */
           <div className="space-y-2">
             {filteredAvailableUnits.map((unit) => {
-              const affordable = canAffordUnit(unit.data.cost);
+              const affordable = canAffordUnit(getUnitEffectiveCost(unit, machineDiscountActive));
               const count = getInstanceCount(unit.data.id);
               const instance = getLatestInstance(unit.data.id);
               const isInArmy = count > 0;
@@ -361,7 +372,7 @@ export function UnitSelector({
               return (
                 <div key={unit.data.id} className={clsx('relative', isInArmy && 'ring-2 ring-offset-2 ring-offset-slate-900', isInArmy && getFactionColors(unitFaction).ring)}>
                   <CompactUnitCard
-                    unit={unit.data}
+                    unit={displayData(unit)}
                     type={unit.type}
                     onAdd={() => handleAddUnit(unit)}
                     onClick={() => handleUnitClick(unit)}
@@ -402,7 +413,7 @@ export function UnitSelector({
              card art is 300×400 (3:4), so portrait contain blocks show it uncropped. */
           <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4">
             {filteredAvailableUnits.map((unit) => {
-              const affordable = canAffordUnit(unit.data.cost);
+              const affordable = canAffordUnit(getUnitEffectiveCost(unit, machineDiscountActive));
               const count = getInstanceCount(unit.data.id);
               const instance = getLatestInstance(unit.data.id);
               const isInArmy = count > 0;
@@ -421,7 +432,7 @@ export function UnitSelector({
                 return (
                   <div key={unit.data.id} className={clsx('relative', isInArmy && 'ring-2 ring-offset-2 ring-offset-slate-900', isInArmy && colors.ring)}>
                     <MachineCard
-                      machine={unit.data as Machine}
+                      machine={displayData(unit) as Machine}
                       onAdd={(_machine) => handleAddUnit(unit)}
                       onViewDetails={(machine) => {
                         setSelectedUnit({ type: 'machine', data: machine });
