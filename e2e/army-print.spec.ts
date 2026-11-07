@@ -50,4 +50,25 @@ test.describe('Army print sheet (A4)', () => {
     const called = await page.evaluate(() => (window as unknown as Record<string, unknown>).__printCalled);
     expect(called).toBe(true);
   });
+
+  test('колонки листа конфигурируются: 1/2/3 с запоминанием', async ({ page }) => {
+    await setupToPreparation(page);
+
+    // Дефолт — 2 колонки
+    await expect(page.getByTestId('print-columns-2')).toHaveAttribute('aria-pressed', 'true');
+
+    // Переключение на 3 — aria + localStorage
+    await page.getByTestId('print-columns-3').click();
+    await expect(page.getByTestId('print-columns-3')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByTestId('print-columns-2')).toHaveAttribute('aria-pressed', 'false');
+    expect(await page.evaluate(() => localStorage.getItem('bronepehota_print_columns'))).toBe('3');
+
+    // В print-медиа лист рендерит 3 колонки
+    await page.emulateMedia({ media: 'print' });
+    const columnCount = await page.evaluate(() => {
+      const el = document.querySelector('[data-testid="print-columns"]') as HTMLElement | null;
+      return el ? el.style.columnCount : null;
+    });
+    expect(columnCount).toBe('3');
+  });
 });

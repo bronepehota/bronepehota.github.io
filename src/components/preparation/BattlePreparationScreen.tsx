@@ -11,6 +11,7 @@ import { getFactionColors, factionDisplayNames } from '@/lib/faction-colors';
 import { getMission, getCampaign, getObjectiveForFaction, isFreePlay } from '@/lib/missions-registry';
 import { recalculateArmyCost } from '@/lib/unit-utils';
 import { getAllRulesVersions } from '@/lib/rules-registry';
+import { LOCAL_STORAGE_KEYS } from '@/lib/constants';
 import { ArmyPrintSheet } from './ArmyPrintSheet';
 
 interface BattlePreparationScreenProps {
@@ -34,6 +35,14 @@ export function BattlePreparationScreen({
 }: BattlePreparationScreenProps) {
   const [showInitiativeModal, setShowInitiativeModal] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  // Колонок на печатном листе: 1 / 2 / 3 (выбор запоминается)
+  const [printColumns, setPrintColumns] = useState<1 | 2 | 3>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.PRINT_COLUMNS);
+      return saved === '1' || saved === '3' ? (Number(saved) as 1 | 3) : 2;
+    }
+    return 2;
+  });
 
   const colors = getFactionColors(army.faction || 'polaris');
 
@@ -83,6 +92,7 @@ export function BattlePreparationScreen({
       army={army}
       rulesLabel={getAllRulesVersions().find((v) => v.id === rulesVersion)?.name ?? ''}
       machineDiscountActive={machineDiscountActive}
+      columns={printColumns}
     />
     <div className="relative min-h-screen pb-36 overflow-hidden bg-slate-950 print:hidden">
       {/* Animated tactical grid background */}
@@ -184,9 +194,39 @@ export function BattlePreparationScreen({
               </div>
             )}
 
-            {/* Печать арм-листа на A4 */}
+            {/* Печать арм-листа на A4: колонки + кнопка */}
             {hasUnits && (
-              <div className="flex justify-center pt-3 print:hidden">
+              <div className="flex items-center justify-center gap-2 pt-3 print:hidden">
+                <div
+                  className="flex items-center rounded-lg border border-slate-700/60 bg-slate-900/40 overflow-hidden"
+                  role="group"
+                  aria-label="Колонок на листе"
+                >
+                  <span className="px-2 text-[10px] font-mono uppercase tracking-wider text-slate-500">
+                    Колонок
+                  </span>
+                  {[1, 2, 3].map((n) => (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => {
+                        setPrintColumns(n as 1 | 2 | 3);
+                        localStorage.setItem(LOCAL_STORAGE_KEYS.PRINT_COLUMNS, String(n));
+                      }}
+                      aria-pressed={printColumns === n}
+                      aria-label={`Колонок: ${n}`}
+                      data-testid={`print-columns-${n}`}
+                      className={cn(
+                        'w-8 h-8 text-xs font-mono font-bold transition-colors touch-manipulation',
+                        printColumns === n
+                          ? 'bg-emerald-600/30 text-emerald-300'
+                          : 'text-slate-400 hover:bg-slate-800/60'
+                      )}
+                    >
+                      {n}
+                    </button>
+                  ))}
+                </div>
                 <button
                   type="button"
                   onClick={() => window.print()}

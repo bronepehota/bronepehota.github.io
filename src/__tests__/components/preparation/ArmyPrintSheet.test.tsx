@@ -85,4 +85,21 @@ describe('ArmyPrintSheet', () => {
     expect(screen.getByTestId('print-header').textContent).toMatch(/140/);
     expect(screen.getByTestId('print-header').textContent).toMatch(/−30%/);
   });
+
+  it('renders configurable column count (default 2)', () => {
+    const units = army([{ instanceId: 'a', type: 'squad', data: squad, instanceNumber: 1 }]);
+    const { rerender } = render(<ArmyPrintSheet army={units} rulesLabel="Star System" />);
+    const sheet = screen.getByTestId('army-print-sheet');
+    expect(sheet.textContent).toMatch(/Штурмовая группа/);
+
+    const colsEl = sheet.querySelector('[data-testid="print-columns"]');
+    expect(colsEl).not.toBeNull();
+    expect((colsEl as HTMLElement).style.columnCount).toBe('2');
+
+    rerender(<ArmyPrintSheet army={units} rulesLabel="Star System" columns={3} />);
+    expect((sheet.querySelector('[data-testid="print-columns"]') as HTMLElement).style.columnCount).toBe('3');
+
+    rerender(<ArmyPrintSheet army={units} rulesLabel="Star System" columns={1} />);
+    expect((sheet.querySelector('[data-testid="print-columns"]') as HTMLElement).style.columnCount).toBe('1');
+  });
 });

@@ -10,6 +10,8 @@ interface ArmyPrintSheetProps {
   army: Army;
   rulesLabel: string;
   machineDiscountActive?: boolean;
+  /** Колонок карточек на листе: 1 / 2 / 3 (по умолчанию 2). */
+  columns?: 1 | 2 | 3;
 }
 
 /**
@@ -19,7 +21,7 @@ interface ArmyPrintSheetProps {
  * типографикой (~7.5pt) в двух колонках; юнит не рвётся между страницами.
  * Светлая тема и ноль цвета — печать в основном чёрно-белая.
  */
-export function ArmyPrintSheet({ army, rulesLabel, machineDiscountActive = false }: ArmyPrintSheetProps) {
+export function ArmyPrintSheet({ army, rulesLabel, machineDiscountActive = false, columns = 2 }: ArmyPrintSheetProps) {
   if (!army.units.length) return null;
 
   const total = recalculateArmyCost(army.units, { machineDiscountActive });
@@ -52,8 +54,12 @@ export function ArmyPrintSheet({ army, rulesLabel, machineDiscountActive = false
         </div>
       </div>
 
-      {/* Юниты в две колонки; блок юнита не рвётся между страницами */}
-      <div className="columns-2 column-gap-4 [column-fill:balance]">
+      {/* Юниты в колонки (конфигурируется); блок юнита не рвётся между страницами */}
+      <div
+        data-testid="print-columns"
+        className="[column-fill:balance]"
+        style={{ columnCount: columns, columnGap: '0.75rem' }}
+      >
         {army.units.map((unit) => {
           const isSquad = unit.type === 'squad';
           const title = unit.instanceNumber && unit.instanceNumber > 1
@@ -83,7 +89,7 @@ export function ArmyPrintSheet({ army, rulesLabel, machineDiscountActive = false
               {isSquad ? (
                 <ArmyPrintSquad squad={unit.data as Squad} />
               ) : (
-                <ArmyPrintMachine machine={unit.data as Machine} />
+                <ArmyPrintMachine machine={unit.data as Machine} compact={columns === 3} />
               )}
             </div>
           );
@@ -140,20 +146,24 @@ function ArmyPrintSquad({ squad }: { squad: Squad }) {
   );
 }
 
-/** Машина: миниатюра + ключевые статы + таблица орудий. */
-function ArmyPrintMachine({ machine }: { machine: Machine }) {
+/** Машина: миниатюра + ключевые статы + таблица орудий.
+ *  compact (3 колонки): блок строится вертикально, миниатюра меньше —
+ *  иначе таблица орудий обрезается справа. */
+function ArmyPrintMachine({ machine, compact = false }: { machine: Machine; compact?: boolean }) {
   const topSpeed = Math.max(...machine.speed_sectors.map((s) => s.speed), 0);
 
   return (
-    <div className="mt-1 flex gap-1.5">
+    <div className={compact ? 'mt-1' : 'mt-1 flex gap-1.5'}>
       {machine.image && (
         <GitHubPagesImage
           src={machine.image}
           alt={machine.name}
-          width={58}
-          height={58}
+          width={compact ? 36 : 58}
+          height={compact ? 36 : 58}
           unoptimized
-          className="w-[20mm] h-[20mm] object-contain object-center border border-neutral-400 shrink-0"
+          className={compact
+            ? 'w-[12mm] h-[12mm] object-contain object-center border border-neutral-400 mb-0.5'
+            : 'w-[20mm] h-[20mm] object-contain object-center border border-neutral-400 shrink-0'}
         />
       )}
       <div className="flex-1 min-w-0">

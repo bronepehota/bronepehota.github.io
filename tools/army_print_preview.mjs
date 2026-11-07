@@ -97,6 +97,12 @@ await page.addInitScript((a) => {
 await page.goto(`${BASE_URL}/app`);
 await page.waitForSelector('[data-testid="battle-preparation-screen"]', { timeout: 60000 });
 
+// Колонок на листе (1/2/3; дефолт 2) — выбирается селектором на экране
+const COLS = process.env.COLS === '1' || process.env.COLS === '3' ? process.env.COLS : null;
+if (COLS) {
+  await page.getByTestId(`print-columns-${COLS}`).click();
+}
+
 await page.emulateMedia({ media: 'print' });
 await page.pdf({
   path: '/tmp/army-print-a4.pdf',
@@ -106,7 +112,8 @@ await page.pdf({
 });
 
 execSync('pdfinfo /tmp/army-print-a4.pdf | grep -E "Pages|Page size" || true', { stdio: 'inherit' });
-execSync('pdftoppm -png -r 110 /tmp/army-print-a4.pdf /tmp/army-print-page', { stdio: 'inherit' });
-console.log('PNG preview: /tmp/army-print-page-1.png');
+const suffix = COLS ? `-cols${COLS}` : '';
+execSync(`pdftoppm -png -r 110 /tmp/army-print-a4.pdf /tmp/army-print-page${suffix}`, { stdio: 'inherit' });
+console.log(`PNG preview: /tmp/army-print-page${suffix}-1.png`);
 
 await browser.close();
