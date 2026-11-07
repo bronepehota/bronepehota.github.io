@@ -53,7 +53,8 @@
     "rank": 3,
     "fire_rate": 2,
     "ammo_max": 14,
-    "durability_max": 11
+    "durability_max": 11,
+    "weaponsCost": 111
   },
   {
     "id": "trex",
@@ -96,7 +97,8 @@
     "rank": 3,
     "fire_rate": 2,
     "ammo_max": 16,
-    "durability_max": 15
+    "durability_max": 15,
+    "weaponsCost": 72
   },
   {
     "id": "bronekhod",
@@ -133,7 +135,8 @@
     "rank": 2,
     "fire_rate": 1,
     "ammo_max": 6,
-    "durability_max": 10
+    "durability_max": 10,
+    "weaponsCost": 26
   },
   {
     "id": "werewolf",
@@ -182,7 +185,8 @@
     "rank": 2,
     "fire_rate": 1,
     "ammo_max": 14,
-    "durability_max": 14
+    "durability_max": 14,
+    "weaponsCost": 60
   },
   {
     "id": "tornado",
@@ -231,7 +235,8 @@
     "rank": 3,
     "fire_rate": 2,
     "ammo_max": 16,
-    "durability_max": 15
+    "durability_max": 15,
+    "weaponsCost": 65
   },
   {
     "id": "salamander",
@@ -263,7 +268,8 @@
     "rank": 2,
     "fire_rate": 1,
     "ammo_max": 6,
-    "durability_max": 7
+    "durability_max": 7,
+    "weaponsCost": 26
   },
   {
     "id": "hurricane",
@@ -312,7 +318,8 @@
     "rank": 3,
     "fire_rate": 2,
     "ammo_max": 18,
-    "durability_max": 15
+    "durability_max": 15,
+    "weaponsCost": 141
   },
   {
     "id": "predator",
@@ -361,7 +368,8 @@
     "rank": 3,
     "fire_rate": 2,
     "ammo_max": 14,
-    "durability_max": 14
+    "durability_max": 14,
+    "weaponsCost": 136
   },
   {
     "id": "varan",
@@ -393,7 +401,8 @@
     "rank": 2,
     "fire_rate": 2,
     "ammo_max": 16,
-    "durability_max": 16
+    "durability_max": 16,
+    "weaponsCost": 77
   },
   {
     "id": "carnivore",
@@ -442,7 +451,8 @@
     "rank": 3,
     "fire_rate": 2,
     "ammo_max": 14,
-    "durability_max": 14
+    "durability_max": 14,
+    "weaponsCost": 85
   },
   {
     "id": "octopus",
@@ -487,7 +497,8 @@
     "rank": 4,
     "fire_rate": 2,
     "ammo_max": 16,
-    "durability_max": 10
+    "durability_max": 10,
+    "weaponsCost": 188
   },
   {
     "id": "condor",
@@ -526,7 +537,8 @@
     "rank": 4,
     "fire_rate": 2,
     "ammo_max": 14,
-    "durability_max": 14
+    "durability_max": 14,
+    "weaponsCost": 106
   },
   {
     "id": "puma",
@@ -563,7 +575,8 @@
     "rank": 2,
     "fire_rate": 2,
     "ammo_max": 6,
-    "durability_max": 10
+    "durability_max": 10,
+    "weaponsCost": 26
   },
   {
     "id": "viper",
@@ -600,7 +613,8 @@
     "rank": 2,
     "fire_rate": 1,
     "ammo_max": 10,
-    "durability_max": 8
+    "durability_max": 8,
+    "weaponsCost": 26
   },
   {
     "id": "t1000",
@@ -643,6 +657,7 @@
     "rank": 3,
     "fire_rate": 2,
     "ammo_max": 7,
-    "durability_max": 15
+    "durability_max": 15,
+    "weaponsCost": 127
   }
 ]

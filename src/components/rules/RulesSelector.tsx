@@ -9,6 +9,7 @@ import { PanicToggle } from '../toggles/PanicToggle';
 import { AimedShotToggle } from '../toggles/AimedShotToggle';
 import { SurpriseAttackToggle } from '../toggles/SurpriseAttackToggle';
 import { HeightBonusToggle } from '../toggles/HeightBonusToggle';
+import { MachineDiscountToggle } from '../toggles/MachineDiscountToggle';
 import { StrictPilotRankToggle } from '../toggles/StrictPilotRankToggle';
 import { DistanceUnitToggle } from '../toggles/DistanceUnitToggle';
 import { StepToCmFactorToggle } from '../toggles/StepToCmFactorToggle';
@@ -27,6 +28,8 @@ interface RulesSelectorProps {
   onSurpriseAttackEnabledChange?: (enabled: boolean) => void;
   heightBonusEnabled?: boolean;
   onHeightBonusEnabledChange?: (enabled: boolean) => void;
+  machineDiscountEnabled?: boolean;
+  onMachineDiscountEnabledChange?: (enabled: boolean) => void;
   strictPilotRankEnabled?: boolean;
   onStrictPilotRankEnabledChange?: (enabled: boolean) => void;
   distanceInputUnit?: 'steps' | 'cm';
@@ -50,6 +53,8 @@ export function RulesSelector({
   onSurpriseAttackEnabledChange,
   heightBonusEnabled = false,
   onHeightBonusEnabledChange,
+  machineDiscountEnabled = false,
+  onMachineDiscountEnabledChange,
   strictPilotRankEnabled = true,
   onStrictPilotRankEnabledChange,
   distanceInputUnit = 'steps',
@@ -244,6 +249,13 @@ export function RulesSelector({
               <HeightBonusToggle
                 enabled={heightBonusEnabled}
                 onEnabledChange={onHeightBonusEnabledChange}
+              />
+            )}
+            {/* БЕТА-скидка на технику — только для правил Star System */}
+            {selectedVersion === 'community_star_system' && onMachineDiscountEnabledChange && (
+              <MachineDiscountToggle
+                enabled={machineDiscountEnabled}
+                onEnabledChange={onMachineDiscountEnabledChange}
               />
             )}
             {onStrictPilotRankEnabledChange && (

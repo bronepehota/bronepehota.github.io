@@ -9,12 +9,15 @@ import { PrepArmyList } from './PrepArmyList';
 import InitiativeModal from '../modals/InitiativeModal';
 import { getFactionColors, factionDisplayNames } from '@/lib/faction-colors';
 import { getMission, getCampaign, getObjectiveForFaction, isFreePlay } from '@/lib/missions-registry';
+import { recalculateArmyCost } from '@/lib/unit-utils';
 
 interface BattlePreparationScreenProps {
   army: Army;
   setArmy: (army: Army) => void;
   onStartBattle: () => void;
   onBackToBuilder: () => void;
+  /** БЕТА-скидка −30% на технику (Star System): чип «очков» показывает Σ со скидкой. */
+  machineDiscountActive?: boolean;
 }
 
 export function BattlePreparationScreen({
@@ -22,6 +25,7 @@ export function BattlePreparationScreen({
   setArmy,
   onStartBattle,
   onBackToBuilder: _onBackToBuilder,
+  machineDiscountActive = false,
 }: BattlePreparationScreenProps) {
   const [showInitiativeModal, setShowInitiativeModal] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -164,7 +168,7 @@ export function BattlePreparationScreen({
                 <StatChip icon={<Users className="w-3.5 h-3.5" />} value={squadCount} label="отряд" />
                 <StatChip icon={<Zap className="w-3.5 h-3.5" />} value={machineCount} label="машина" />
                 <StatChip icon={<Shield className="w-3.5 h-3.5" />} value={totalSoldiers} label="боец" />
-                <StatChip icon={<Target className="w-3.5 h-3.5" />} value={army.totalCost} label="очков" />
+                <StatChip icon={<Target className="w-3.5 h-3.5" />} value={machineDiscountActive ? recalculateArmyCost(army.units, { machineDiscountActive }) : army.totalCost} label="очков" />
               </div>
             )}
 

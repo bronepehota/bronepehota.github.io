@@ -1,4 +1,4 @@
-import { Army, ArmyUnit, Squad } from '../lib/types';
+import { Army, ArmyUnit, Machine, Squad } from '../lib/types';
 import {
   countByUnitType,
   getNextInstanceNumber,
@@ -7,7 +7,9 @@ import {
   validateAddUnit,
   formatUnitNumber,
   formatCountBadge,
-  checkSquadUniformStats
+  checkSquadUniformStats,
+  getMachineCost,
+  recalculateArmyCost
 } from '../lib/unit-utils';
 
 const mockSquad: Squad = {
@@ -330,6 +332,77 @@ describe('Unit Utilities', () => {
     it('should return false when only one soldier alive (others dead)', () => {
       const unit = makeUnit([{ armor: 2, speed: 5 }, { armor: 2, speed: 5 }], [1]);
       expect(checkSquadUniformStats(unit)).toEqual({ isUniformArmor: false, isUniformSpeed: false });
+    });
+  });
+});
+
+describe('Machine cost — Star System beta discount (-30%)', () => {
+  const makeMachine = (cost: number): Machine => ({
+    id: 'test-machine',
+    name: 'Test Machine',
+    faction: 'polaris',
+    cost,
+    rank: 3,
+    fire_rate: 1,
+    ammo_max: 10,
+    durability_max: 4,
+    speed_sectors: [],
+    weapons: [],
+  });
+
+  describe('getMachineCost', () => {
+    it('discounts only the chassis, weapons stay full price (monoblok split)', () => {
+      // Хеликс: 220 = орудия 26 + шасси 194; итог ceil10(26 + 194×0.7 = 161.8) = 170
+      expect(getMachineCost(220, true, 26)).toBe(170);
+      // Демолишер: 400 = орудия 180 + шасси 220; итог ceil10(180 + 154 = 334) = 340
+      expect(getMachineCost(400, true, 180)).toBe(340);
+    });
+
+    it('rounds the final price UP to a multiple of 10', () => {
+      // Гриффин: 305 = орудия 111 + шасси 194; ceil10(111 + 135.8 = 246.8) = 250
+      expect(getMachineCost(305, true, 111)).toBe(250);
+    });
+
+    it('falls back to whole-cost discount without the split (custom machines)', () => {
+      expect(getMachineCost(220, true, undefined)).toBe(160); // ceil10(154)
+      expect(getMachineCost(95, true, undefined)).toBe(70);   // ceil10(66.5)
+      expect(getMachineCost(100, true, undefined)).toBe(70);  // ceil10(70)
+    });
+
+    it('guards against bad split data (weaponsCost >= cost)', () => {
+      expect(getMachineCost(220, true, 220)).toBe(160);
+      expect(getMachineCost(220, true, 300)).toBe(160);
+      expect(getMachineCost(220, true, 0)).toBe(160);
+    });
+
+    it('returns cost unchanged when discount is inactive', () => {
+      expect(getMachineCost(95, false)).toBe(95);
+      expect(getMachineCost(220, false, 26)).toBe(220);
+    });
+  });
+
+  describe('recalculateArmyCost', () => {
+    it('discounts only machines, squads stay full price', () => {
+      const squadUnit: ArmyUnit = { instanceId: 's1', type: 'squad', data: mockSquad, instanceNumber: 1 };
+      const machineUnit: ArmyUnit = { instanceId: 'm1', type: 'machine', data: makeMachine(100), instanceNumber: 1 };
+
+      expect(recalculateArmyCost([squadUnit, machineUnit], { machineDiscountActive: true })).toBe(170);
+    });
+
+    it('uses the weapons/chassis split when the machine has it', () => {
+      const machineUnit: ArmyUnit = { instanceId: 'm1', type: 'machine', data: { ...makeMachine(220), weaponsCost: 26 }, instanceNumber: 1 };
+      expect(recalculateArmyCost([machineUnit], { machineDiscountActive: true })).toBe(170);
+    });
+
+    it('sums full prices when discount inactive', () => {
+      const squadUnit: ArmyUnit = { instanceId: 's1', type: 'squad', data: mockSquad, instanceNumber: 1 };
+      const machineUnit: ArmyUnit = { instanceId: 'm1', type: 'machine', data: makeMachine(100), instanceNumber: 1 };
+
+      expect(recalculateArmyCost([squadUnit, machineUnit], { machineDiscountActive: false })).toBe(200);
+    });
+
+    it('handles empty army', () => {
+      expect(recalculateArmyCost([], { machineDiscountActive: true })).toBe(0);
     });
   });
 });

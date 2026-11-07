@@ -18,6 +18,7 @@ import { getEncyclopediaFaction } from '@/lib/encyclopedia-registry';
 import { getAlliedFactions } from '@/lib/faction-allies';
 import { BattlePreparationScreen } from './preparation';
 import { LOCAL_STORAGE_KEYS } from '@/lib/constants';
+import { recalculateArmyCost } from '@/lib/unit-utils';
 import { trackEvent } from '@/lib/analytics';
 import type { SourceID, FactionID } from '@/lib/types';
 
@@ -109,6 +110,15 @@ export default function ArmyBuilder({
     return false;
   });
 
+  // Machine discount (Star System beta, −30%) - persisted in localStorage
+  const [machineDiscountEnabled, setMachineDiscountEnabled] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.MACHINE_DISCOUNT_ENABLED);
+      return saved !== null ? saved === 'true' : false; // Default to disabled
+    }
+    return false;
+  });
+
   // Source selection state - persisted in localStorage
   const [selectedSource, setSelectedSource] = useState<SourceID>(() => {
     if (typeof window !== 'undefined') {
@@ -171,6 +181,14 @@ export default function ArmyBuilder({
       : new Set<FactionID>(),
     [army.faction, availableFactions],
   );
+
+  // БЕТА-скидка на технику действует только под правилами Star System: тумблер
+  // может остаться включённым в localStorage, но при смене версии правил
+  // эффективный флаг гаснет. totalCost в хранилище — каноническая Σ базовых цен;
+  // скидка применяется на чтении (UnitSelector, подготовка, аналитика) — потому
+  // пересчёт «уже набранной армии» происходит сам, без эффектов и гонок с
+  // загрузкой армии в page.tsx.
+  const machineDiscountActive = machineDiscountEnabled && rulesVersion === 'community_star_system';
 
   // Warn if source data is not found (shouldn't happen with fallback)
   useEffect(() => {
@@ -317,6 +335,8 @@ export default function ArmyBuilder({
                 onSurpriseAttackEnabledChange={setSurpriseAttackEnabled}
                 heightBonusEnabled={heightBonusEnabled}
                 onHeightBonusEnabledChange={setHeightBonusEnabled}
+                machineDiscountEnabled={machineDiscountEnabled}
+                onMachineDiscountEnabledChange={setMachineDiscountEnabled}
                 strictPilotRankEnabled={strictPilotRankEnabled}
                 onStrictPilotRankEnabledChange={onStrictPilotRankEnabledChange}
                 distanceInputUnit={distanceInputUnit}
@@ -495,6 +515,7 @@ export default function ArmyBuilder({
             displayMode={displayMode}
             onDisplayModeChange={onDisplayModeChange}
             sourceId={selectedSource}
+            machineDiscountActive={machineDiscountActive}
           />
           </>
         )}
@@ -510,12 +531,13 @@ export default function ArmyBuilder({
             <BattlePreparationScreen
               army={army}
               setArmy={setArmy}
+              machineDiscountActive={machineDiscountActive}
               onStartBattle={() => {
                 trackEvent('battle_start', {
                   faction: army.faction,
                   rules: rulesVersion,
                   units: army.units.length,
-                  cost: army.totalCost,
+                  cost: recalculateArmyCost(army.units, { machineDiscountActive }),
                 });
                 setArmy({
                   ...army,

@@ -8,6 +8,7 @@
  */
 
 import type { Army, ArmyUnit, Machine, Squad } from './types';
+
 import { deriveUnitStatus, type UnitStatus } from './unit-status';
 
 /**
@@ -341,4 +342,50 @@ export function shortenWeaponName(name: string): string {
     // Clean up extra spaces
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+/**
+ * Effective cost of a machine with the Star System beta discount applied.
+ *
+ * The discount («Техника −30%», БЕТА) is a player convenience, not a rules
+ * feature. По решению владельца скидка бьёт только в «шасси» (корпус+ходовая
+ * из моноблочной модели стоимости), орудия (`weaponsCost`) остаются по полной
+ * цене; итог округляется ВВЕРХ до кратного 10. Без разбивки (кастомные машины
+ * из редактора, техника Технолога) скидка применяется ко всей цене.
+ *
+ * @param cost - Base machine cost from the army list
+ * @param discountActive - Discount toggle AND Star System rules both active
+ * @param weaponsCost - Σ цен орудий (моноблочная модель); undefined → фолбэк
+ * @returns Discounted cost, rounded up to a multiple of 10
+ */
+export function getMachineCost(cost: number, discountActive: boolean, weaponsCost?: number): number {
+  if (!discountActive) return cost;
+  const hasSplit = weaponsCost !== undefined && weaponsCost > 0 && weaponsCost < cost;
+  const base = hasSplit ? weaponsCost + (cost - weaponsCost) * 0.7 : cost * 0.7;
+  return Math.ceil(base / 10) * 10;
+}
+
+/**
+ * Effective cost of an army unit (squad or machine). Only machines are
+ * discounted; squads always cost full price.
+ */
+export function getUnitEffectiveCost(
+  unit: Pick<ArmyUnit, 'type' | 'data'>,
+  discountActive: boolean,
+): number {
+  return unit.type === 'machine'
+    ? getMachineCost(unit.data.cost, discountActive, (unit.data as Machine).weaponsCost)
+    : unit.data.cost;
+}
+
+/**
+ * Recomputes army totalCost from its units at current discount state.
+ * Used when the discount toggle flips so already-added machines re-price
+ * without re-adding them.
+ */
+export function recalculateArmyCost(
+  units: Pick<ArmyUnit, 'type' | 'data'>[],
+  options: { machineDiscountActive: boolean },
+): number {
+  return units.reduce((sum, unit) => sum + getUnitEffectiveCost(unit, options.machineDiscountActive), 0);
 }
