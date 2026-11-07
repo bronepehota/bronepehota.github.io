@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Sword, ChevronUp, Shield, Users, Zap, Target, Timer, Flag, Clock, Crosshair, ArrowRight } from 'lucide-react';
+import { Sword, ChevronUp, Shield, Users, Zap, Target, Timer, Flag, Clock, Crosshair, ArrowRight, Printer } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Army, isSquad } from '@/lib/types';
 import { PrepArmyList } from './PrepArmyList';
@@ -10,6 +10,8 @@ import InitiativeModal from '../modals/InitiativeModal';
 import { getFactionColors, factionDisplayNames } from '@/lib/faction-colors';
 import { getMission, getCampaign, getObjectiveForFaction, isFreePlay } from '@/lib/missions-registry';
 import { recalculateArmyCost } from '@/lib/unit-utils';
+import { getAllRulesVersions } from '@/lib/rules-registry';
+import { ArmyPrintSheet } from './ArmyPrintSheet';
 
 interface BattlePreparationScreenProps {
   army: Army;
@@ -18,6 +20,8 @@ interface BattlePreparationScreenProps {
   onBackToBuilder: () => void;
   /** БЕТА-скидка −30% на технику (Star System): чип «очков» показывает Σ со скидкой. */
   machineDiscountActive?: boolean;
+  /** Версия правил — подпись в печатном арм-листе. */
+  rulesVersion?: string;
 }
 
 export function BattlePreparationScreen({
@@ -26,6 +30,7 @@ export function BattlePreparationScreen({
   onStartBattle,
   onBackToBuilder: _onBackToBuilder,
   machineDiscountActive = false,
+  rulesVersion,
 }: BattlePreparationScreenProps) {
   const [showInitiativeModal, setShowInitiativeModal] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -72,7 +77,14 @@ export function BattlePreparationScreen({
     : undefined;
 
   return (
-    <div className="relative min-h-screen pb-36 overflow-hidden bg-slate-950">
+    <>
+    {/* Печатный арм-лист: невидим на экране, виден только в @media print */}
+    <ArmyPrintSheet
+      army={army}
+      rulesLabel={getAllRulesVersions().find((v) => v.id === rulesVersion)?.name ?? ''}
+      machineDiscountActive={machineDiscountActive}
+    />
+    <div className="relative min-h-screen pb-36 overflow-hidden bg-slate-950 print:hidden">
       {/* Animated tactical grid background */}
       <div className="absolute inset-0 opacity-[0.04]">
         <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
@@ -169,6 +181,22 @@ export function BattlePreparationScreen({
                 <StatChip icon={<Zap className="w-3.5 h-3.5" />} value={machineCount} label="машина" />
                 <StatChip icon={<Shield className="w-3.5 h-3.5" />} value={totalSoldiers} label="боец" />
                 <StatChip icon={<Target className="w-3.5 h-3.5" />} value={machineDiscountActive ? recalculateArmyCost(army.units, { machineDiscountActive }) : army.totalCost} label="очков" />
+              </div>
+            )}
+
+            {/* Печать арм-листа на A4 */}
+            {hasUnits && (
+              <div className="flex justify-center pt-3 print:hidden">
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  data-testid="print-army-button"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700/60 bg-slate-900/40 text-slate-400 hover:text-slate-200 hover:border-slate-500 text-xs font-mono uppercase tracking-wider transition-colors touch-manipulation"
+                  aria-label="Распечатать арм-лист (A4)"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  Печать A4
+                </button>
               </div>
             )}
 
@@ -340,6 +368,7 @@ export function BattlePreparationScreen({
         />
       </div>
     </div>
+    </>
   );
 }
 

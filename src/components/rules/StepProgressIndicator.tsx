@@ -71,7 +71,7 @@ export function StepProgressIndicator({
   const activeColor = factionColors?.primary || '#64748b';
 
   return (
-    <div className="w-full mb-8">
+    <div className="w-full mb-8 print:hidden">
       {/* Progress bar container */}
       <div className="flex items-center justify-center gap-1 md:gap-3">
         {steps.map((step, index) => {
