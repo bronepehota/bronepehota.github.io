@@ -543,6 +543,7 @@ export default function ArmyBuilder({
               army={army}
               setArmy={setArmy}
               machineDiscountActive={machineDiscountActive}
+              rulesVersion={rulesVersion}
               onStartBattle={() => {
                 trackEvent('battle_start', {
                   faction: army.faction,
