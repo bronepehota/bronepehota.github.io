@@ -64,6 +64,15 @@ describe('ArmyPrintSheet', () => {
     expect(screen.getByTestId('print-unit-a').textContent).toMatch(/Д12/);
     expect(screen.getByTestId('print-unit-a').textContent).toMatch(/2Д6/);
     expect(screen.getAllByAltText(/Боец/).length).toBe(2);
+
+    // Миниатюра напротив СВОИХ статов: img живёт в той же строке таблицы,
+    // что и статы бойца (фидбек владельца: «статы напротив солдата»)
+    const row1 = screen.getByAltText('Боец 1').closest('tr');
+    expect(row1?.textContent).toMatch(/Д12/);
+    expect(row1?.textContent).toMatch(/2Д6/);
+
+    // Юнит — закрытая рамка (блоки не должны сливаться)
+    expect(screen.getByTestId('print-unit-a').className).toMatch(/border/);
   });
 
   it('renders machine unit with stats and weapons table', () => {

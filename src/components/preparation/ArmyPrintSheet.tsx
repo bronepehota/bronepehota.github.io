@@ -71,10 +71,10 @@ export function ArmyPrintSheet({ army, rulesLabel, machineDiscountActive = false
             <div
               key={unit.instanceId}
               data-testid={`print-unit-${unit.instanceId}`}
-              className="break-inside-avoid mb-2"
+              className="break-inside-avoid mb-2 border border-neutral-500"
             >
               {/* Заголовок юнита */}
-              <div className="flex items-baseline justify-between bg-neutral-100 border border-neutral-300 px-1 py-0.5">
+              <div className="flex items-baseline justify-between bg-neutral-100 border-b border-neutral-400 px-1 py-0.5">
                 <span className="font-russo text-[9pt] uppercase tracking-wide truncate">
                   {title}
                   {isSquad && collectSquadSpecialProps(unit.data as Squad).length > 0 && (
@@ -87,9 +87,13 @@ export function ArmyPrintSheet({ army, rulesLabel, machineDiscountActive = false
               </div>
 
               {isSquad ? (
-                <ArmyPrintSquad squad={unit.data as Squad} />
+                <div className="px-1 pb-1">
+                  <ArmyPrintSquad squad={unit.data as Squad} />
+                </div>
               ) : (
-                <ArmyPrintMachine machine={unit.data as Machine} compact={columns === 3} />
+                <div className="px-1 pb-1">
+                  <ArmyPrintMachine machine={unit.data as Machine} compact={columns === 3} />
+                </div>
               )}
             </div>
           );
@@ -99,50 +103,47 @@ export function ArmyPrintSheet({ army, rulesLabel, machineDiscountActive = false
   );
 }
 
-/** Отряд: миниатюры бойцов + таблица статов. */
+/** Отряд: таблица «миниатюра напротив своих статов» — фото приклеено
+ *  к строке бойца, чтобы на столе мгновенно соотносилось «кто есть кто». */
 function ArmyPrintSquad({ squad }: { squad: Squad }) {
   return (
-    <div className="mt-1">
-      <div className="flex gap-1 mb-1 flex-wrap">
+    <table className="w-full border-collapse text-[7.5pt] leading-tight mt-0.5">
+      <thead>
+        <tr className="border-b border-neutral-400 text-neutral-600 text-[6.5pt]">
+          <th className="py-px pr-1 font-normal w-[10mm]"></th>
+          <th className="text-left py-px pr-1 font-normal">№</th>
+          <th className="text-right py-px px-1 font-normal">Рг</th>
+          <th className="text-right py-px px-1 font-normal">Ск</th>
+          <th className="text-right py-px px-1 font-normal">Даль</th>
+          <th className="text-right py-px px-1 font-normal">Мощ</th>
+          <th className="text-right py-px px-1 font-normal">ББ</th>
+          <th className="text-right py-px pl-1 font-normal">Бр</th>
+        </tr>
+      </thead>
+      <tbody>
         {squad.soldiers.map((soldier) => (
-          <GitHubPagesImage
-            key={soldier.num}
-            src={soldier.image || squad.image || '/images/placeholder.png'}
-            alt={`Боец ${soldier.num}`}
-            width={44}
-            height={58}
-            unoptimized
-            className="w-[15mm] h-[20mm] object-cover object-top border border-neutral-400"
-          />
-        ))}
-      </div>
-      <table className="w-full border-collapse text-[7.5pt] leading-tight">
-        <thead>
-          <tr className="border-b border-neutral-400 text-neutral-600 text-[6.5pt]">
-            <th className="text-left py-px pr-1 font-normal">№</th>
-            <th className="text-right py-px px-1 font-normal">Рг</th>
-            <th className="text-right py-px px-1 font-normal">Ск</th>
-            <th className="text-right py-px px-1 font-normal">Даль</th>
-            <th className="text-right py-px px-1 font-normal">Мощ</th>
-            <th className="text-right py-px px-1 font-normal">ББ</th>
-            <th className="text-right py-px pl-1 font-normal">Бр</th>
+          <tr key={soldier.num} className="border-b border-neutral-200">
+            <td className="py-px pr-1">
+              <GitHubPagesImage
+                src={soldier.image || squad.image || '/images/placeholder.png'}
+                alt={`Боец ${soldier.num}`}
+                width={34}
+                height={46}
+                unoptimized
+                className="w-[8mm] h-[11mm] object-cover object-top border border-neutral-400"
+              />
+            </td>
+            <td className="text-left py-px pr-1">{soldier.num ?? ''}</td>
+            <td className="text-right py-px px-1">{soldier.rank}</td>
+            <td className="text-right py-px px-1">{soldier.speed}</td>
+            <td className="text-right py-px px-1">{soldier.range}</td>
+            <td className="text-right py-px px-1">{soldier.power}</td>
+            <td className="text-right py-px px-1">{soldier.melee}</td>
+            <td className="text-right py-px pl-1">{soldier.armor}</td>
           </tr>
-        </thead>
-        <tbody>
-          {squad.soldiers.map((soldier) => (
-            <tr key={soldier.num} className="border-b border-neutral-200">
-              <td className="text-left py-px pr-1">{soldier.num ?? ''}</td>
-              <td className="text-right py-px px-1">{soldier.rank}</td>
-              <td className="text-right py-px px-1">{soldier.speed}</td>
-              <td className="text-right py-px px-1">{soldier.range}</td>
-              <td className="text-right py-px px-1">{soldier.power}</td>
-              <td className="text-right py-px px-1">{soldier.melee}</td>
-              <td className="text-right py-px pl-1">{soldier.armor}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+        ))}
+      </tbody>
+    </table>
   );
 }
 
