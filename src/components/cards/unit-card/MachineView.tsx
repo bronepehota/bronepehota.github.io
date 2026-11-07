@@ -6,6 +6,7 @@ import { PilotModal } from './machine-view/PilotModal';
 import { ArmyUnit, Machine, DurabilityZone, PilotInfo } from '@/lib/types';
 import { Flame, Sword, Wrench } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getMachineFireRate } from '@/lib/unit-utils';
 
 export interface MachineViewProps {
   unit: ArmyUnit;
@@ -32,6 +33,8 @@ export interface MachineViewProps {
   onShowImage?: () => void;
   onNavigateToUnit?: (unitInstanceId: string) => void;
   rulesVersion?: string;
+  /** БЕТА «лёгкие 2 выстрела»: машины с 1 выстрелом стреляют дважды за ход. */
+  lightShotsActive?: boolean;
   onMelee?: () => void;
   onRam?: () => void;
   isCaptured?: boolean;
@@ -63,6 +66,7 @@ export function MachineView({
   onShowImage,
   onNavigateToUnit,
   rulesVersion,
+  lightShotsActive = false,
   onMelee,
   onRam,
   isCaptured,
@@ -70,6 +74,9 @@ export function MachineView({
 }: MachineViewProps) {
   const machine = unit.data as Machine;
   const [pilotModalOpen, setPilotModalOpen] = useState(false);
+
+  // Эффективная скорострельность: БЕТА «лёгкие 2 выстрела» (Star System)
+  const fireRate = getMachineFireRate(machine, lightShotsActive);
 
   // Get pilot info from unit
   const pilotInfo: PilotInfo | null = unit.pilotInfo || null;
@@ -176,7 +183,7 @@ export function MachineView({
         <MachineWeaponsList
           weapons={machine.weapons}
           weaponShots={weaponShots}
-          fireRate={machine.fire_rate}
+          fireRate={fireRate}
           totalShotsUsed={unit.machineShotsUsed || 0}
           currentAmmo={unit.currentAmmo || 0}
           maxAmmo={machine.ammo_max}
@@ -194,7 +201,7 @@ export function MachineView({
         currentAmmo={unit.currentAmmo || 0}
         maxAmmo={machine.ammo_max}
         shotsUsed={unit.machineShotsUsed || 0}
-        fireRate={machine.fire_rate}
+        fireRate={fireRate}
         weapons={machine.weapons}
         weaponAmmo={unit.weaponAmmo}
         onUpdateAmmo={updateAmmo}

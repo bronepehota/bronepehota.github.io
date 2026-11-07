@@ -389,3 +389,15 @@ export function recalculateArmyCost(
 ): number {
   return units.reduce((sum, unit) => sum + getUnitEffectiveCost(unit, options.machineDiscountActive), 0);
 }
+
+/**
+ * Effective shots-per-turn of a machine under the Star System beta rule
+ * «лёгкие ×2 выстрела»: машины с одним выстрелом стреляют дважды за ход.
+ * Машины с 2+ выстрелами не меняются; без флага — базовое значение.
+ *
+ * Как и скидка стоимости, применяется НА ЧТЕНИИ (гейт стрельбы и пипсы
+ * MachineView) — хранилище и шаблонные данные остаются каноничными.
+ */
+export function getMachineFireRate(machine: Pick<Machine, 'fire_rate'>, doubledActive: boolean): number {
+  return doubledActive && machine.fire_rate === 1 ? 2 : machine.fire_rate;
+}

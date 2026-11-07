@@ -119,6 +119,15 @@ export default function ArmyBuilder({
     return false;
   });
 
+  // Light shots ×2 (Star System beta) - persisted in localStorage
+  const [lightShotsEnabled, setLightShotsEnabled] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.LIGHT_SHOTS_ENABLED);
+      return saved !== null ? saved === 'true' : false; // Default to disabled
+    }
+    return false;
+  });
+
   // Source selection state - persisted in localStorage
   const [selectedSource, setSelectedSource] = useState<SourceID>(() => {
     if (typeof window !== 'undefined') {
@@ -337,6 +346,8 @@ export default function ArmyBuilder({
                 onHeightBonusEnabledChange={setHeightBonusEnabled}
                 machineDiscountEnabled={machineDiscountEnabled}
                 onMachineDiscountEnabledChange={setMachineDiscountEnabled}
+                lightShotsEnabled={lightShotsEnabled}
+                onLightShotsEnabledChange={setLightShotsEnabled}
                 strictPilotRankEnabled={strictPilotRankEnabled}
                 onStrictPilotRankEnabledChange={onStrictPilotRankEnabledChange}
                 distanceInputUnit={distanceInputUnit}

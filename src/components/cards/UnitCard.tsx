@@ -103,6 +103,7 @@ export default function UnitCard({
     showDetailsModal,
     showPilotModal,
     rulesVersion,
+    lightShotsEnabled,
     pilotSurvivalTest,
     setShowImage,
     setShowDetailsModal,
@@ -201,6 +202,9 @@ export default function UnitCard({
 
   // Check if per-weapon ammo system should be used (only for community_star_system rules)
   const usePerWeaponAmmo = rulesVersion === 'community_star_system';
+
+  // БЕТА «лёгкие 2 выстрела» — только для правил Star System
+  const lightShotsActive = lightShotsEnabled && rulesVersion === 'community_star_system';
 
   const isSquad = unit.type === 'squad';
   const data = unit.data;
@@ -870,6 +874,7 @@ export default function UnitCard({
             zone={machineStats!.zone}
             speed={machineStats!.speed}
             maxSpeed={machineStats!.maxSpeed}
+            lightShotsActive={lightShotsActive}
             updateDurability={machineStats!.updateDurability}
             updateAmmo={(delta) => {
               const max = (data as Machine).ammo_max;
