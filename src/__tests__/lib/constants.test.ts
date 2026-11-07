@@ -114,7 +114,8 @@ describe('constants', () => {
       expect(LOCAL_STORAGE_KEYS.WAKE_LOCK_ENABLED).toBe('bronepehota_wake_lock_enabled');
       expect(LOCAL_STORAGE_KEYS.MACHINE_DISCOUNT_ENABLED).toBe('bronepehota_machine_discount_enabled');
       expect(LOCAL_STORAGE_KEYS.LIGHT_SHOTS_ENABLED).toBe('bronepehota_light_shots_enabled');
-      expect(Object.keys(LOCAL_STORAGE_KEYS)).toHaveLength(20);
+      expect(LOCAL_STORAGE_KEYS.PRINT_COLUMNS).toBe('bronepehota_print_columns');
+      expect(Object.keys(LOCAL_STORAGE_KEYS)).toHaveLength(21);
     });
   });
 

@@ -102,9 +102,25 @@ button, a, input, select, textarea {
    мелкие чипы остаются чипами (WCAG 2.5.8 допускает inline-исключения). */
 
 /* Print styles */
+@page {
+  size: A4 portrait;
+  margin: 10mm;
+}
+
 @media print {
   .no-print {
     display: none !important;
+  }
+
+  /* Печатный арм-лист: цвет не полагается ни на что (ч/б печать),
+     фоны не печатать лишним тонером */
+  html, body {
+    background: #fff !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }
 
