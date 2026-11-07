@@ -42,6 +42,7 @@ export const LOCAL_STORAGE_KEYS = {
   SURPRISE_ATTACK_ENABLED: 'bronepehota_surprise_attack_enabled',
   HEIGHT_BONUS_ENABLED: 'bronepehota_height_bonus_enabled',
   MACHINE_DISCOUNT_ENABLED: 'bronepehota_machine_discount_enabled',
+  LIGHT_SHOTS_ENABLED: 'bronepehota_light_shots_enabled',
   STRICT_PILOT_RANK_ENABLED: 'bronepehota_strict_pilot_rank_enabled',
   DISTANCE_INPUT_UNIT: 'bronepehota_distance_input_unit',
   STEP_TO_CM_FACTOR: 'bronepehota_step_to_cm_factor',

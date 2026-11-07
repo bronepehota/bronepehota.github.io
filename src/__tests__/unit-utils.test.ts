@@ -9,6 +9,7 @@ import {
   formatCountBadge,
   checkSquadUniformStats,
   getMachineCost,
+  getMachineFireRate,
   recalculateArmyCost
 } from '../lib/unit-utils';
 
@@ -404,5 +405,23 @@ describe('Machine cost — Star System beta discount (-30%)', () => {
     it('handles empty army', () => {
       expect(recalculateArmyCost([], { machineDiscountActive: true })).toBe(0);
     });
+  });
+});
+
+describe('getMachineFireRate — БЕТА «лёгкие ×2 выстрела» (Star System)', () => {
+  const makeM = (fire_rate: number) => ({ ...({ id: 'm', name: 'M', faction: 'polaris', cost: 200, rank: 2, fire_rate, ammo_max: 10, durability_max: 10, speed_sectors: [], weapons: [] } as Machine) });
+
+  it('doubles fire_rate 1 → 2 when active', () => {
+    expect(getMachineFireRate(makeM(1), true)).toBe(2);
+  });
+
+  it('leaves machines with 2+ shots unchanged', () => {
+    expect(getMachineFireRate(makeM(2), true)).toBe(2);
+    expect(getMachineFireRate(makeM(3), true)).toBe(3);
+  });
+
+  it('returns base fire_rate when inactive', () => {
+    expect(getMachineFireRate(makeM(1), false)).toBe(1);
+    expect(getMachineFireRate(makeM(2), false)).toBe(2);
   });
 });

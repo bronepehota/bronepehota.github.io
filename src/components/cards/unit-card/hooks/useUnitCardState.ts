@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ArmyUnit, RulesVersionID } from '@/lib/types';
 import { getDefaultRulesVersion, isValidRulesVersion } from '@/lib/rules-registry';
+import { getLightShotsEnabled } from '@/components/toggles/LightShotsToggle';
 
 /**
  * Pilot survival test result
@@ -19,6 +20,7 @@ export interface UnitCardState {
   showDetailsModal: boolean;
   showPilotModal: boolean;
   rulesVersion: RulesVersionID;
+  lightShotsEnabled: boolean;
   pilotSurvivalTest: PilotSurvivalTest | null;
   setShowImage: (value: boolean) => void;
   setShowDetailsModal: (value: boolean) => void;
@@ -39,6 +41,9 @@ export function useUnitCardState(_unit: ArmyUnit): UnitCardState {
   const [showPilotModal, setShowPilotModal] = useState(false);
   const [rulesVersion, setRulesVersion] = useState<RulesVersionID>(getDefaultRulesVersion());
   const [pilotSurvivalTest, setPilotSurvivalTest] = useState<PilotSurvivalTest | null>(null);
+  // БЕТА «лёгкие 2 выстрела» — читается один раз на монте карточки; флаг
+  // меняется только на шаге правил, до начала боя, так что этого достаточно.
+  const [lightShotsEnabled] = useState<boolean>(() => getLightShotsEnabled());
 
   // Load rules version from localStorage (validate — a stale value would break rules lookups)
   useEffect(() => {
@@ -53,6 +58,7 @@ export function useUnitCardState(_unit: ArmyUnit): UnitCardState {
     showDetailsModal,
     showPilotModal,
     rulesVersion,
+    lightShotsEnabled,
     pilotSurvivalTest,
     setShowImage,
     setShowDetailsModal,
