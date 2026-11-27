@@ -949,7 +949,7 @@ export default function GameSession({
           data-testid="unit-dock"
           className={cn(
             "relative z-50 shrink-0 bg-slate-900 border-t-2",
-            "border-slate-700/70 shadow-[0_-8px_24px_rgba(0,0,0,0.45)]",
+            "border-slate-600 shadow-[0_-8px_24px_rgba(0,0,0,0.45)]",
             // индикатор-бар iPhone/жестовая навигация не наезжает на кнопки
             "[padding-bottom:env(safe-area-inset-bottom)]"
           )}
@@ -1022,7 +1022,7 @@ export default function GameSession({
                       data-testid="dock-armor-badge"
                       className={cn(
                         'flex items-center justify-center gap-0.5 rounded-lg min-h-[40px] min-w-[44px] max-w-[72px] px-1 transition-colors shrink-0',
-                        isActive ? 'border border-emerald-500/40 shadow-[inset_0_0_8px_rgba(16,185,129,0.06)]' : 'border border-slate-700/40 bg-slate-800/60'
+                        isActive ? 'border border-emerald-500/40 shadow-[inset_0_0_8px_rgba(16,185,129,0.06)]' : 'border border-slate-600/60 bg-slate-800'
                       )}
                     >
                       <Shield className="w-4 h-4 shrink-0 text-yellow-400" />
@@ -1030,7 +1030,7 @@ export default function GameSession({
                         {squadUniformStats.commonArmor}
                       </span>
                       {bonus && (
-                        <span className="text-[9px] font-mono font-extrabold text-emerald-400/90 leading-none translate-y-[-1px]">
+                        <span className="text-[9px] font-mono font-extrabold text-emerald-300 leading-none translate-y-[-1px]">
                           {bonus}
                         </span>
                       )}
@@ -1048,7 +1048,7 @@ export default function GameSession({
                       className={cn(
                         // 88px: «5 (25см)» + чип xN не должен обрезаться на 320px
                         'flex items-center justify-center gap-0.5 rounded-lg min-h-[40px] min-w-[44px] max-w-[88px] px-1 transition-colors shrink-0',
-                        isActive ? 'border border-emerald-500/40 shadow-[inset_0_0_8px_rgba(16,185,129,0.06)]' : 'border border-slate-700/40 bg-slate-800/60'
+                        isActive ? 'border border-emerald-500/40 shadow-[inset_0_0_8px_rgba(16,185,129,0.06)]' : 'border border-slate-600/60 bg-slate-800'
                       )}
                     >
                       <Footprints className="w-4 h-4 shrink-0 text-cyan-400" />
@@ -1073,7 +1073,7 @@ export default function GameSession({
                         </>
                       )}
                       {bonus && (
-                        <span className="text-[9px] font-mono font-extrabold text-emerald-400/90 leading-none translate-y-[-1px]">
+                        <span className="text-[9px] font-mono font-extrabold text-emerald-300 leading-none translate-y-[-1px]">
                           {bonus}
                         </span>
                       )}
@@ -1137,8 +1137,11 @@ export default function GameSession({
                   );
                 })()}
 
-                {/* Spacer */}
-                <div className="flex-1 min-w-0" />
+                {/* Кнопочный кластер прижат вправо ml-auto (не распоркой):
+                    auto-маржин не участвует в line-breaking flex-wrap —
+                    при активных бафах (+1 на бейдже, «5 (25см)» + xN) строка
+                    раньше вылезала на 2.7px и ⋮ уезжал на вторую строку
+                    (репорт 2026-11-27) */}
 
                 {/* Navigator button — the primary unit switcher (playtest:
                     the tiny-icon strip was unreadable). N/M = units that
@@ -1149,7 +1152,7 @@ export default function GameSession({
                   aria-label={`Открыть список юнитов, завершено ${finishedCount} из ${totalUnits}`}
                   title="Список юнитов"
                   className={cn(
-                    "shrink-0 min-h-[44px] px-2 flex items-center justify-center gap-1.5 rounded-sm border",
+                    "shrink-0 min-h-[44px] px-2 ml-auto flex items-center justify-center gap-1.5 rounded-sm border",
                     "font-mono text-[10px] font-black uppercase tracking-wider transition-all hover:scale-[1.02] active:scale-95",
                     "border-slate-700/50 bg-slate-800/60 text-slate-300 hover:bg-slate-700/60 hover:text-slate-100"
                   )}
@@ -1186,7 +1189,7 @@ export default function GameSession({
                         title={isDone ? "Отменить завершение" : "Завершить ход"}
                         aria-label={isDone ? "Отменить завершение хода взвода" : "Завершить ход взвода"}
                         className={cn(
-                          "shrink-0 min-h-[44px] px-3 flex items-center justify-center gap-1.5 rounded-sm border",
+                          "shrink-0 min-h-[44px] px-2 flex items-center justify-center gap-1.5 rounded-sm border",
                           "font-mono text-xs font-black uppercase tracking-wider transition-all hover:scale-[1.02] active:scale-95",
                           isDead
                             ? "bg-slate-900/50 border-slate-800/50 opacity-40 cursor-not-allowed"

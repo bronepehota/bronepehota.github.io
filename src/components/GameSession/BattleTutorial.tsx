@@ -188,18 +188,19 @@ export function BattleTutorial({ demoImageUrl, onFinish }: BattleTutorialProps) 
               </span>
             </div>
 
-            {/* Нажатия — только статы и ГОТОВ; убит — свайп (кнопки «череп»
-                больше нет: свайп вправо — единственный путь убить/оживить) */}
+            {/* Нажатия — статы (выстрел/ББ), фото (действия) и ГОТОВ; убит —
+                свайп (кнопки «череп» больше нет: свайп вправо — единственный
+                путь убить/оживить) */}
             <div className="flex items-center gap-3 rounded-sm border border-slate-700/50 bg-slate-800/40 p-3">
               <span className="flex h-10 w-10 items-center justify-center rounded-sm border border-slate-700/50 bg-slate-800/60 shrink-0">
                 <MousePointerClick className="h-4 w-4 text-slate-300" />
               </span>
               <p className="text-[12px] leading-relaxed text-slate-300">
-                <span className="font-mono font-bold text-slate-100">Статы бойца</span> — выстрел
-                и действия; чип <span className="font-mono font-bold text-slate-100">ГОТОВ</span> на
-                фото — завершить ход (долгое нажатие — отмена);{' '}
-                <span className="font-mono font-bold text-slate-100">убит — свайп вправо</span>{' '}
-                (повторный — оживляет).
+                <span className="font-mono font-bold text-slate-100">Свайп влево</span> —
+                готов (повторный — отмена), <span className="font-mono font-bold text-slate-100">вправо</span> —
+                убит (повторный — оживляет); <span className="font-mono font-bold text-slate-100">тап по
+                фото</span> — все действия: граната, эффекты, готов/убит и просмотр во весь
+                экран.
               </p>
             </div>
 
@@ -210,10 +211,11 @@ export function BattleTutorial({ demoImageUrl, onFinish }: BattleTutorialProps) 
                 <Target className="h-4 w-4 text-amber-300" />
               </span>
               <p className="text-[12px] leading-relaxed text-slate-300">
-                <span className="font-mono font-bold text-slate-100">Выстрел:</span> нажми статы
-                бойца → выбери действие (выстрел / ближний бой / граната) → дистанция и броня
-                цели → бросок → <span className="font-mono font-bold text-slate-100">ПРИНЯТЬ</span>.
-                Промах — тоже результат: отметь его так же.
+                <span className="font-mono font-bold text-slate-100">Выстрел:</span> тап по
+                дальности или мощности → дистанция и броня цели → бросок →{' '}
+                <span className="font-mono font-bold text-slate-100">ПРИНЯТЬ</span>. Ближний
+                бой — тап по ББ. Граната и эффекты — тап по фото. Промах — тоже
+                результат: отметь его так же.
               </p>
             </div>
 

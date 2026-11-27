@@ -1,15 +1,19 @@
 import { test, expect } from '@playwright/test';
-import { setupGameSessionWithSquad, setupGameSessionWithMachine, clearStorage, waitForBattleDock } from './helpers/setup';
+import { setupGameSessionWithSquad, setupGameSessionWithMachine, clearStorage, waitForBattleDock, swipeSoldierCard } from './helpers/setup';
 
 /**
  * Squad photo fill (плейтест 2026-09-18: «фото мелкие, кто есть кто не
- * различить; снизу пусто»). Контракт раскладки (2026-09-20: док — окно
- * В ПОТОКЕ, контент физически не может зайти под панель):
+ * различить; снизу пусто»). Контракт раскладки:
+ * - (2026-09-20) док — окно В ПОТОКЕ, контент физически не может зайти
+ *   под панель; (2026-11-27) оболочка /app — fixed inset-0, док всегда в
+ *   видимой области любого браузера;
  * - короткий взвод → колонка растягивается (min-h-full), строки делят
- *   остаток, фото растут (кап min(224px,40vw) на обёртке — единый на всех
- *   вьюпортах: правая колонка-«череп» убрана, статы на 320px достаточно
- *   широкие для длинных кубов; аспект 3:4);
- * - полный взвод (6) → остатка нет, фото на полу (~85px), скролл работает;
+ *   остаток, фото растут (кап min(224px,40vw) на обёртке; аспект 3:4);
+ * - полный взвод (6) → ПОМЕЩАЕТСЯ без скролла на 667-экранах (2026-11-27:
+ *   угловая стопка ✦/⋯ заменена строкой модификаций, пол фото 85.33→72 —
+ *   карточка 82px, 6×82+промежутки = 520 ≤ 570);
+ * - переполнение физически возможно только на низких экранах (≤617 dvh):
+ *   320×568 — скролл, фото на полу 72px;
  * - граница окон: низ скролл-области = верх дока (никаких paddingBottom-резервов).
  * DOM-замеры (getBoundingClientRect/computed), не скриншоты.
  */
@@ -88,30 +92,79 @@ test.describe('Squad photo fill in battle view', () => {
     expect(m.dockBottom).toBeLessThanOrEqual(m.vh);
   });
 
-  test('full squad (6): photos stay at the floor and the area scrolls', async ({ page }) => {
+  test('full squad (6): fits without scroll at 667 — photos above the 72px floor', async ({ page }) => {
+    await setupGameSessionWithSquad(page, {});
+    await waitForBattleDock(page);
+
+    // 6 бойцов влезают: внутреннего скролла нет (2026-11-27: карточка 82px,
+    // 6×82+промежутки = 520 ≤ 570 окна)
+    const scroll = page.getByTestId('squad-scroll');
+    expect(await scroll.evaluate((el) => el.scrollHeight <= el.clientHeight + 1)).toBe(true);
+
+    // Строки делят остаток: фото ~80px — выше пола 72px, но ниже старого пола
+    const h = await page.getByTestId('soldier-photo').first()
+      .evaluate((el) => el.getBoundingClientRect().height);
+    expect(h).toBeGreaterThanOrEqual(71);
+    expect(h).toBeLessThanOrEqual(100);
+  });
+
+  test('full squad (6) on a 320x568 phone: physically overflows — scrolls, photos at the floor', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 568 });
     await setupGameSessionWithSquad(page, {});
     await waitForBattleDock(page);
 
     const scroll = page.getByTestId('squad-scroll');
     expect(await scroll.evaluate((el) => el.scrollHeight > el.clientHeight)).toBe(true);
 
-    // Пол не уменьшился: ~85.33px (допуск на паддинги карточки/округление)
+    // Пол: 72px (допуск на паддинги карточки/округление)
     const h = await page.getByTestId('soldier-photo').first()
       .evaluate((el) => el.getBoundingClientRect().height);
-    expect(h).toBeGreaterThanOrEqual(84);
-    expect(h).toBeLessThanOrEqual(100);
+    expect(h).toBeGreaterThanOrEqual(70);
+    expect(h).toBeLessThanOrEqual(76);
   });
 
-  // Полноэкранный просмотр фото (плейтест 2026-09-19). С 2026-09-20 док —
-  // окно в потоке, оверлей z-100 накрывает его целиком: фото использует
-  // всю высоту экрана, тап в область дока закрывает просмотр.
+  // 2026-11-27: убитые — компактная «строка потерь» 48px; их место отдаётся
+  // живым рядам (fill-фича растягивает фото живых сильнее)
+  test('dead rows collapse to 48px — live photos grow', async ({ page }) => {
+    await setupGameSessionWithSquad(page, {});
+    await waitForBattleDock(page);
+
+    // убить бойцов 1 и 2 (свайп вправо — toggle)
+    await swipeSoldierCard(page, 1, 'right');
+    await swipeSoldierCard(page, 2, 'right');
+
+    const m = await page.evaluate(() => {
+      const rows = Array.from(document.querySelectorAll('[data-testid^="squad-row-"]'));
+      const photos = Array.from(document.querySelectorAll('[data-testid="soldier-photo"]'));
+      const cards = Array.from(document.querySelectorAll('[data-testid="soldier-card"]'));
+      return {
+        deadRowHeights: rows
+          .map((r, i) => ({ i, h: r.getBoundingClientRect().height, dead: cards[i]?.getAttribute('data-soldier-dead') }))
+          .filter(x => x.dead === 'true').map(x => x.h),
+        alivePhotoH: +photos[0].getBoundingClientRect().height.toFixed(1),
+        deadCardH: +cards[1].getBoundingClientRect().height.toFixed(1),
+      };
+    });
+    // мёртвый ряд ≈ 48px (допуск на border/rounding)
+    for (const h of m.deadRowHeights) expect(h).toBeGreaterThanOrEqual(46);
+    for (const h of m.deadRowHeights) expect(h).toBeLessThanOrEqual(52);
+    // живые выросли против равномерного ~80px
+    expect(m.alivePhotoH).toBeGreaterThan(85);
+  });
+
+  // Полноэкранный просмотр фото (плейтест 2026-09-19). С 2026-11-27 тап по
+  // фото живого бойца открывает лист действий — фуллскрин из его строки
+  // «Во весь экран». С 2026-09-20 док — окно в потоке, оверлей z-100
+  // накрывает его целиком: фото использует всю высоту экрана, тап в область
+  // дока закрывает просмотр.
   test('fullscreen фото бойца накрывает док и использует всю высоту', async ({ page }) => {
     await setupGameSessionWithSquad(page, {});
     await waitForBattleDock(page);
 
-    // Тап в верхний левый угол фото: центр перекрыт хитом-зоной чипа «ГОТОВ»
-    // (after:-left-4 after:-top-6 расширяет кнопку за её видимый угол)
+    // Тап в верхний левый угол фото → лист действий
     await page.getByTestId('soldier-photo').first().click({ position: { x: 8, y: 8 } });
+    await page.getByTestId('soldier-action-sheet').waitFor({ state: 'visible' });
+    await page.getByTestId('sheet-action-fullscreen').click();
     const overlay = page.getByTestId('soldier-image-overlay');
     await expect(overlay).toBeVisible();
 

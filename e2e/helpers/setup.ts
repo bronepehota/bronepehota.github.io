@@ -369,12 +369,14 @@ export async function openMeleeModal(page: Page, soldierIndex = 0) {
   await expect(page.getByTestId('bottom-sheet-combat-modal')).toBeVisible();
 }
 
-/** ⋯ — экран выбора действия (ACTION_SELECT): граната, захват и т.д. */
-export async function openActionMenu(page: Page, soldierIndex = 0) {
-  const btn = page.getByTestId('soldier-card').nth(soldierIndex).getByTestId('action-menu-button');
-  await expect(btn).toBeVisible({ timeout: TIMEOUTS.load });
-  await btn.click();
-  await expect(page.getByTestId('bottom-sheet-combat-modal')).toBeVisible();
+/** Лист действий бойца (2026-11-27: ⋯ на карточке убран): тап по фото
+ *  живого бойца (верхний левый угол — мимо хит-зоны чипа «ГОТОВ») →
+ *  bottom-sheet с гранатой/эффектами/захватом/фуллскрином. */
+export async function openSoldierSheet(page: Page, soldierIndex = 0) {
+  const photo = page.getByTestId('soldier-card').nth(soldierIndex).getByTestId('soldier-photo');
+  await expect(photo).toBeVisible({ timeout: TIMEOUTS.load });
+  await photo.click({ position: { x: 8, y: 8 } });
+  await page.getByTestId('soldier-action-sheet').waitFor({ state: 'visible', timeout: TIMEOUTS.load });
 }
 
 /** Живых N/M — ♥-чип на фото юнита в навигаторе (плейтест 2026-10-15:

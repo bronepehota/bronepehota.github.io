@@ -26,6 +26,9 @@ describe('SquadView', () => {
     updateUnit: jest.fn(),
     onSoldierAction: jest.fn(),
     setShowSoldierImage: jest.fn(),
+    // строка модификаций рендерится только с обработчиком — как в бою
+    // (GameSession всегда передаёт onSoldierModifierClick)
+    onSoldierModifierClick: jest.fn(),
     distanceInputUnit: 'steps' as const,
     stepToCmFactor: 5,
     allUnits: [],
@@ -47,11 +50,13 @@ describe('SquadView', () => {
     expect(row.className).toContain('snap-start');
     expect(row.className).toContain('flex-1');
 
-    // Пол роста фото = прежний размер: ширина не ниже 64px, высота — строкой
+    // Пол роста фото: 72px (2026-11-27: минимум строки диктуют статы,
+    // пол фото снижен 85.33→72, чтобы 6 бойцов влезали без скролла)
     const photo = container.querySelector('[data-testid="soldier-photo"]');
     expect(photo).toBeInTheDocument();
     expect(photo!.className).toContain('h-full');
-    expect(photo!.className).toContain('min-w-16');
+    expect(photo!.className).toContain('min-w-12');
+    expect(photo!.className).toContain('min-h-[72px]');
     expect(photo!.className).toContain('aspect-[3/4]');
 
     // SoldierCard отрендерен (статусная полоса)

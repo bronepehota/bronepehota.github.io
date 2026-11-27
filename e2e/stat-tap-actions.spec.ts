@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { setupGameSessionWithSquad, waitForBattleDock, openActionMenu } from './helpers/setup';
+import { setupGameSessionWithSquad, waitForBattleDock, openSoldierSheet } from './helpers/setup';
 
 /**
  * Редизайн карточки бойца в бою (плейтест 2026-10-15):
@@ -29,23 +29,25 @@ test.describe('Карточка бойца: тап по стату = прямо�
     await expect(page.getByRole('button', { name: 'АТАКОВАТЬ' })).toBeVisible({ timeout: 3000 });
   });
 
-  test('⋯ в углу открывает меню всех действий (выстрел/ББ/граната)', async ({ page }) => {
-    await openActionMenu(page, 0);
+  test('тап по фото открывает лист действий (граната/эффекты/фуллскрин)', async ({ page }) => {
+    await openSoldierSheet(page, 0);
 
-    const modal = page.getByTestId('bottom-sheet-combat-modal');
-    await expect(modal.getByRole('button', { name: /выстрел/i })).toBeVisible({ timeout: 3000 });
-    await expect(modal.getByRole('button', { name: /ближний бой/i })).toBeVisible();
-    await expect(modal.getByRole('button', { name: /граната/i })).toBeVisible();
+    const sheet = page.getByTestId('soldier-action-sheet');
+    await expect(sheet.getByTestId('sheet-action-grenade')).toBeVisible({ timeout: 3000 });
+    await expect(sheet.getByTestId('sheet-action-effects')).toBeVisible();
+    await expect(sheet.getByTestId('sheet-action-fullscreen')).toBeVisible();
+    // ⋯ на карточке больше нет
+    await expect(page.getByTestId('action-menu-button')).toHaveCount(0);
   });
 
-  test('кнопки выбора действия высокие (≥56px) — удобно попадать с телефона', async ({ page }) => {
-    await openActionMenu(page, 0);
+  test('строки листа действий высокие (≥48px) — удобно попадать с телефона', async ({ page }) => {
+    await openSoldierSheet(page, 0);
 
-    const shot = page.getByTestId('bottom-sheet-combat-modal').getByRole('button', { name: /ближний бой/i });
-    await expect(shot).toBeVisible({ timeout: 3000 });
-    const box = await shot.boundingBox();
+    const grenade = page.getByTestId('sheet-action-grenade');
+    await expect(grenade).toBeVisible({ timeout: 3000 });
+    const box = await grenade.boundingBox();
     expect(box).toBeTruthy();
-    expect(box!.height).toBeGreaterThanOrEqual(56);
+    expect(box!.height).toBeGreaterThanOrEqual(48);
   });
 
   test('кнопка пуска (ВЫСТРЕЛИТЬ) крупная — под мобильник', async ({ page }) => {

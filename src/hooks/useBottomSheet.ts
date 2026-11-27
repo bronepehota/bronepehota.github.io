@@ -9,7 +9,7 @@ interface UseBottomSheetOptions {
 }
 
 interface UseBottomSheetReturn {
-  sheetRef: React.RefObject<HTMLDivElement>;
+  sheetRef: React.MutableRefObject<HTMLDivElement | null>;
   dragY: number;
   isDragging: boolean;
   touchHandlers: {

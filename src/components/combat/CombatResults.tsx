@@ -690,23 +690,27 @@ export function CombatResults({
         />
       )}
 
-      {/* Action Buttons */}
-      <div className="flex gap-2 md:gap-3 pt-4">
-        <button
-          onClick={() => onApply(markAsDone || undefined)}
-          className={cn(
-            // Мобильная эргономика: телефон лежит на столе, финализирующая
-            // кнопка должна попадаться пальцу (плейтест: «мелковата»)
-            "flex-1 px-3 md:px-6 py-3 md:py-3 rounded-lg font-mono text-base font-bold uppercase tracking-wider border-2 transition-all min-h-[56px]",
-            (isShot || isGrenade) && result.hitResult?.success
-              ? "bg-emerald-600 hover:bg-emerald-500 border-emerald-500 text-white"
-              : isMelee && result.meleeResult?.winner === 'attacker'
-              ? "bg-emerald-600 hover:bg-emerald-500 border-emerald-500 text-white"
-              : "bg-blue-600 hover:bg-blue-500 border-blue-500 text-white"
-          )}
-        >
-          ПРИНЯТЬ
-        </button>
+      {/* Action Buttons — липкий низ скроллера (2026-11-27: на низких webview
+          ~480px ПРИНЯТЬ уходила за сгиб; тот же приём, что у кубик-строки
+          гранаты) */}
+      <div className="sticky bottom-0 z-10 -mx-2 md:-mx-3 mt-3 px-2 md:px-3 pt-3 pb-1 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent">
+        <div className="flex gap-2 md:gap-3">
+          <button
+            onClick={() => onApply(markAsDone || undefined)}
+            className={cn(
+              // Мобильная эргономика: телефон лежит на столе, финализирующая
+              // кнопка должна попадаться пальцу (плейтест: «мелковата»)
+              "flex-1 px-3 md:px-6 py-3 md:py-3 rounded-lg font-mono text-base font-bold uppercase tracking-wider border-2 transition-all min-h-[56px]",
+              (isShot || isGrenade) && result.hitResult?.success
+                ? "bg-emerald-600 hover:bg-emerald-500 border-emerald-500 text-white"
+                : isMelee && result.meleeResult?.winner === 'attacker'
+                ? "bg-emerald-600 hover:bg-emerald-500 border-emerald-500 text-white"
+                : "bg-blue-600 hover:bg-blue-500 border-blue-500 text-white"
+            )}
+          >
+            ПРИНЯТЬ
+          </button>
+        </div>
       </div>
     </div>
   );

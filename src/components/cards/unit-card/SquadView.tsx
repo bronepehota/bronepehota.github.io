@@ -1,11 +1,14 @@
 import { ArmyUnit, Squad } from '@/lib/types';
+import { cn } from '@/lib/utils';
 import SoldierCard from '../SoldierCard';
 
 interface SquadViewProps {
   unit: ArmyUnit;
   updateUnit: (instanceId: string, updateFn: (currentUnit: ArmyUnit) => ArmyUnit) => void;
-  onSoldierAction: (soldierIndex: number, action?: 'shot' | 'melee') => void;
-  setShowSoldierImage: (idx: number | null) => void;
+  onSoldierAction: (soldierIndex: number, action: 'shot' | 'melee') => void;
+  /** Тап по фото бойца: живой → лист действий, мёртвый/паникующий → зум.
+   *  null в цепочку не приходит (закрытие оверлея — в UnitCard напрямую). */
+  setShowSoldierImage: (idx: number) => void;
   distanceInputUnit: 'steps' | 'cm';
   stepToCmFactor: number;
   allUnits?: ArmyUnit[];
@@ -38,18 +41,30 @@ export function SquadView({
 
   return (
     <div data-testid="squad-list" className="flex flex-col min-h-full gap-1 md:gap-1.5 snap-y snap-mandatory">
-      {data.soldiers.map((s, idx) => (
-        // overflow-x-clip: сдвинутая свайпом карточка (translateX до 96px)
-        // раздувает scrollable-область скролл-предка → горизонтальный
-        // скролл-бар внизу + дёргание раскладки на его появлении (плейтест
-        // 2026-10-15). Клип на ближайшей границе — сдвиг никогда не выходит
-        // за строку.
-        <div key={`soldier-snap-${unit.instanceId}-${idx}`} className="snap-start snap-always flex-1 flex overflow-x-clip">
-          <SoldierCard
-            key={`soldier-${unit.instanceId}-${idx}-${s.num}`}
-            squad={data}
-            unit={unit}
-            soldierIndex={idx}
+      {data.soldiers.map((s, idx) => {
+        // Мёртвый ряд — фиксированные 48px («строка потерь»): место отдаётся
+        // живым рядам (fill-фича растягивает их фото). Оживление — свайп
+        // вправо или лист по фото; 48px ≥ 44 тач-минимума.
+        const isDead = unit.deadSoldiers?.includes(idx) || false;
+        return (
+          // overflow-x-clip: сдвинутая свайпом карточка (translateX до 96px)
+          // раздувает scrollable-область скролл-предка → горизонтальный
+          // скролл-бар внизу + дёргание раскладки на его появлении (плейтест
+          // 2026-10-15). Клип на ближайшей границе — сдвиг никогда не выходит
+          // за строку.
+          <div
+            key={`soldier-snap-${unit.instanceId}-${idx}`}
+            data-testid={`squad-row-${idx}`}
+            className={cn(
+              'snap-start snap-always flex overflow-x-clip',
+              isDead ? 'flex-none h-12' : 'flex-1'
+            )}
+          >
+            <SoldierCard
+              key={`soldier-${unit.instanceId}-${idx}-${s.num}`}
+              squad={data}
+              unit={unit}
+              soldierIndex={idx}
             allUnits={allUnits}
             updateUnit={updateUnit}
             onSoldierAction={onSoldierAction}
@@ -64,8 +79,9 @@ export function SquadView({
             hideArmor={hideArmor}
             hideSpeed={hideSpeed}
           />
-        </div>
-      ))}
+          </div>
+        );
+      })}
     </div>
   );
 }

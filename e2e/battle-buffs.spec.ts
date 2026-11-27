@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { clearStorage, dismissIntroIfShown } from './helpers/setup';
+import { clearStorage, dismissIntroIfShown, openSoldierSheet } from './helpers/setup';
 
 /**
  * E2E tests for bonuses branch changes:
@@ -52,6 +52,16 @@ test.describe('Editor promo link on source selection', () => {
 // ────────────────────────────────────────────────────────────
 // Test Group 2: Buffs available in battle (SoldierEffectsModal)
 // ────────────────────────────────────────────────────────────
+
+// 2026-11-27: угловой кнопки эффектов на карточке больше нет — строка
+// модификаций рендерится только когда есть что показать, а у сида (отряд
+// без бафов) её нет. Путь открытия модала: тап по фото → лист действий
+// бойца → строка «Эффекты».
+async function openEffectsModalViaMenu(page: import('@playwright/test').Page) {
+  await openSoldierSheet(page);
+  await page.getByTestId('sheet-action-effects').click();
+  await page.getByTestId('effects-modal').waitFor({ state: 'visible' });
+}
 
 test.describe('Battle buffs availability', () => {
   test.beforeEach(async ({ page }) => {
@@ -107,26 +117,18 @@ test.describe('Battle buffs availability', () => {
     await expect(gameSession.first()).toBeVisible({ timeout: 5000 });
   });
 
-  test('should show modifier indicator on soldier cards', async ({ page }) => {
-    // Find modifier indicators — they have role="button" with various aria-labels
-    const indicator = page.locator(
-      '[role="button"][aria-label*="доступно"], ' +
-      '[role="button"][aria-label="Добавить эффект"], ' +
-      '[role="button"][aria-label*="баффов"]'
-    ).first();
+  test('should show modifier path on soldier cards: photo tap → sheet with Эффекты', async ({ page }) => {
+    // Чистый отряд (без бафов/свойств): строки модификаций на карточках нет —
+    // путь добавления первого эффекта: тап по фото → лист действий
+    await expect(page.getByTestId('modifier-indicator')).toHaveCount(0);
+    await expect(page.getByTestId('action-menu-button')).toHaveCount(0);
 
-    // May need to scroll or expand unit first
-    await expect(indicator).toBeVisible({ timeout: 10000 });
+    await openSoldierSheet(page);
+    await expect(page.getByTestId('sheet-action-effects')).toBeVisible();
   });
 
-  test('should open effects modal when modifier indicator clicked', async ({ page }) => {
-    // Click any modifier indicator
-    const indicator = page.locator(
-      '[role="button"][aria-label*="доступно"], ' +
-      '[role="button"][aria-label="Добавить эффект"], ' +
-      '[role="button"][aria-label*="баффов"]'
-    ).first();
-    await indicator.click();
+  test('should open effects modal from the ⋯ action menu', async ({ page }) => {
+    await openEffectsModalViaMenu(page);
 
     // Modal should open
     const modal = page.getByTestId('effects-modal');
@@ -138,12 +140,7 @@ test.describe('Battle buffs availability', () => {
 
   test('should show buff and debuff action buttons in effects modal', async ({ page }) => {
     // Open modal
-    const indicator = page.locator(
-      '[role="button"][aria-label*="доступно"], ' +
-      '[role="button"][aria-label="Добавить эффект"], ' +
-      '[role="button"][aria-label*="баффов"]'
-    ).first();
-    await indicator.click();
+    await openEffectsModalViaMenu(page);
 
     const modal = page.getByTestId('effects-modal');
     await expect(modal).toBeVisible();
@@ -157,12 +154,7 @@ test.describe('Battle buffs availability', () => {
 
   test('should show no buffs available for squad without assigned buffs', async ({ page }) => {
     // Open modal
-    const indicator = page.locator(
-      '[role="button"][aria-label*="доступно"], ' +
-      '[role="button"][aria-label="Добавить эффект"], ' +
-      '[role="button"][aria-label*="баффов"]'
-    ).first();
-    await indicator.click();
+    await openEffectsModalViaMenu(page);
 
     const modal = page.getByTestId('effects-modal');
     await expect(modal).toBeVisible();
@@ -178,12 +170,7 @@ test.describe('Battle buffs availability', () => {
 
   test('should open debuff catalog and show available debuffs', async ({ page }) => {
     // Open modal
-    const indicator = page.locator(
-      '[role="button"][aria-label*="доступно"], ' +
-      '[role="button"][aria-label="Добавить эффект"], ' +
-      '[role="button"][aria-label*="баффов"]'
-    ).first();
-    await indicator.click();
+    await openEffectsModalViaMenu(page);
 
     const modal = page.getByTestId('effects-modal');
     await expect(modal).toBeVisible();
@@ -199,12 +186,7 @@ test.describe('Battle buffs availability', () => {
 
   test('should close modal with X button', async ({ page }) => {
     // Open modal
-    const indicator = page.locator(
-      '[role="button"][aria-label*="доступно"], ' +
-      '[role="button"][aria-label="Добавить эффект"], ' +
-      '[role="button"][aria-label*="баффов"]'
-    ).first();
-    await indicator.click();
+    await openEffectsModalViaMenu(page);
 
     const modal = page.getByTestId('effects-modal');
     await expect(modal).toBeVisible();

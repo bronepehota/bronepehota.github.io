@@ -32,11 +32,11 @@ describe('BattleTutorial', () => {
     expect(screen.getByText('← свайп: готов')).toBeInTheDocument();
     expect(screen.getByText('убит: свайп →')).toBeInTheDocument();
     expect(screen.getByText('список: панель ↑')).toBeInTheDocument();
-    // ...и нажатий: выстрелы, ГОТОВ; убит — только свайп вправо
-    // (кнопки «череп» нет — свайп единственный путь убить/оживить)
-    expect(screen.getByText(/Статы бойца/)).toBeInTheDocument();
-    expect(screen.getByText(/ГОТОВ/)).toBeInTheDocument();
-    expect(screen.getByText(/убит — свайп вправо/)).toBeInTheDocument();
+    // ...и нажатий: свайпы (готов/убит), тап по фото = все действия
+    // (2026-11-27: чип «ГОТОВ» с фото убран, лист действий — консоль бойца)
+    expect(screen.getByText(/Свайп влево/)).toBeInTheDocument();
+    expect(screen.getAllByText(/тап по\s*фото/).length).toBeGreaterThan(0);
+    expect(screen.getByText(/граната, эффекты, готов\/убит/)).toBeInTheDocument();
     // цикл выстрела (плейтест: «про то как стрелять и делать действия»)
     expect(screen.getByText(/Выстрел:/)).toBeInTheDocument();
     expect(screen.getByText(/ПРИНЯТЬ/)).toBeInTheDocument();

@@ -72,7 +72,7 @@ test.describe('Battle tutorial', () => {
 
     await dragDemo(page, 'right');
     await expect(tutorial).toContainText('ШПАРГАЛКА БОЯ');
-    await expect(tutorial).toContainText('Статы бойца');
+    await expect(tutorial).toContainText('Свайп влево');
 
     await page.getByTestId('battle-tutorial-finish').click();
     await expect(tutorial).not.toBeVisible();
@@ -81,9 +81,10 @@ test.describe('Battle tutorial', () => {
     const flag = await page.evaluate(() => localStorage.getItem('bronepehota_battle_tutorial_done'));
     expect(flag).toBe('1');
 
-    // Реальный взвод не затронут жестами туториала
-    await expect(page.getByTestId('soldier-done-button').nth(0)).toHaveAttribute('aria-pressed', 'false');
-    await expect(page.getByTestId('soldier-done-button').nth(0)).toHaveAttribute('aria-label', 'Завершить ход бойца');
+    // Реальный взвод не затронут жестами туториала (2026-11-27: состояния
+    // читаются data-атрибутами карточки — чипа «ГОТОВ» на фото больше нет)
+    await expect(page.getByTestId('soldier-card').nth(0)).toHaveAttribute('data-soldier-done', 'false');
+    await expect(page.getByTestId('soldier-card').nth(0)).toHaveAttribute('data-soldier-dead', 'false');
     // Кнопки «череп» нет вообще — убить можно только свайпом вправо
     await expect(page.getByTestId('soldier-kill-button')).toHaveCount(0);
 

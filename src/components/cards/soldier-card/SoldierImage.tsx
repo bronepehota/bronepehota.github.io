@@ -23,11 +23,17 @@ export function SoldierImage({
   onImageClick,
 }: SoldierImageProps) {
   return (
-    <div data-testid="soldier-photo" className="relative aspect-[3/4] h-full min-w-16 md:min-w-20 min-h-[85.33px] md:min-h-[106.67px] rounded-sm overflow-hidden flex-shrink-0 bg-slate-900 cursor-pointer shadow-md">
+    <div
+      data-testid="soldier-photo"
+      onClick={onImageClick}
+      className="relative aspect-[3/4] h-full min-w-12 md:min-w-16 min-h-[72px] md:min-h-[96px] rounded-sm overflow-hidden flex-shrink-0 bg-slate-900 cursor-pointer shadow-md"
+    >
       {/* absolute: img не должен вносить min-content высоту (натуральные 300×400
           раздували строку до капа в переполненном режиме) — размер бокса
-          диктуют только h-full/min-w/min-h/aspect обёртки-строки */}
-      <div onClick={onImageClick} className="absolute inset-0 overflow-hidden">
+          диктуют только h-full/min-w/min-h/aspect обёртки-строки.
+          onClick на ВНЕШНЕЙ коробке: оверлеи (череп/паника) — siblings
+          поверх внутреннего div и перехватывали клик на корню. */}
+      <div className="absolute inset-0 overflow-hidden">
         <Image
           src={imageUrl}
           alt={`Солдат ${soldierIndex + 1}`}
@@ -53,8 +59,8 @@ export function SoldierImage({
           bordered chip was too heavy over the photo). Same construction as
           the ГОТОВ chip in the opposite corner: px-1 py-0.5 leading-4. */}
       <div className="absolute top-0 right-0 z-10">
-        <div className="flex items-center h-5 px-1 bg-slate-950/30 rounded-bl-sm">
-          <span className="font-mono text-[10px] font-bold text-white/70">
+        <div className="flex items-center h-5 px-1 bg-slate-950/50 rounded-bl-sm">
+          <span className="font-mono text-[10px] font-bold text-white/80">
             #{soldierIndex + 1}
           </span>
         </div>

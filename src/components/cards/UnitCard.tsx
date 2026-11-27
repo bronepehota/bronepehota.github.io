@@ -20,7 +20,9 @@ import { checkPanicTrigger } from '@/lib/panic-logic';
 import { EnrichedUnit, getEnrichedUnit } from '@/lib/encyclopedia-utils';
 import { resolveMachineFromSource } from '@/lib/machine-resolver';
 import { CaptureCandidate } from '@/lib/capture-catalog';
+import { getCaptureCandidates } from '@/lib/capture-catalog';
 import { CaptureModal } from '../modals/CaptureModal';
+import { SoldierActionSheet } from './soldier-card/SoldierActionSheet';
 import { SquadView } from './unit-card/SquadView';
 import { MachineView } from './unit-card/MachineView';
 import { useUnitCardState } from './unit-card/hooks/useUnitCardState';
@@ -112,6 +114,9 @@ export default function UnitCard({
   } = useUnitCardState(unit);
 
   const [showSoldierImage, setShowSoldierImage] = useState<number | null>(null);
+  // Лист действий бойца (тап по фото живого бойца; мёртвым/паникующим —
+  // прямой зум). 2026-11-27: заменил угловой ⋯ на карточке.
+  const [actionSheetIdx, setActionSheetIdx] = useState<number | null>(null);
   const [selectedWeaponInfo, setSelectedWeaponInfo] = useState<{ weapon: Weapon; weaponIdx: number } | null>(null);
   const [showPanicModal, setShowPanicModal] = useState(false);
   const [enrichedUnit, setEnrichedUnit] = useState<EnrichedUnit | null>(null);
@@ -275,16 +280,40 @@ export default function UnitCard({
   // Handle combat actions. Без action — экран выбора (⋯ в углу карточки);
   // с action — прямой пуск из тапа по стату: валидное действие идёт сразу
   // в ПАРАМЕТРЫ, невалидное (стрелок без дальности и т.п.) — в меню.
-  const _handleSoldierAction = useCallback((soldierIndex: number, action?: 'shot' | 'melee') => {
-    if (!action) {
-      combatController.startCombat(unit, soldierIndex);
-      return;
-    }
+  const _handleSoldierAction = useCallback((soldierIndex: number, action: 'shot' | 'melee') => {
     const valid = action === 'shot'
       ? canSoldierShoot(unit, soldierIndex)
       : canSoldierMelee(unit, soldierIndex);
     combatController.startCombat(unit, soldierIndex, undefined, valid ? action : undefined);
   }, [unit, combatController]);
+
+  // Тап по фото: лист действий — полная консоль бойца (граната/эффекты/
+  // захват/фуллскрин/готов/убит — строки зависят от состояния)
+  const handleSoldierPhotoTap = useCallback((idx: number) => {
+    setActionSheetIdx(idx);
+  }, []);
+
+  // toggle готов/убит из листа — та же логика, что у свайпов карточки
+  const handleSheetToggleDone = useCallback((idx: number) => {
+    updateUnit(unit.instanceId, (currentUnit: ArmyUnit) => {
+      const newActions = [...(currentUnit.actionsUsed || [])];
+      const currentDone = newActions[idx]?.done || false;
+      newActions[idx] = currentDone
+        ? { moved: false, shot: false, melee: false, done: false }
+        : { ...newActions[idx], done: true };
+      return { ...currentUnit, actionsUsed: newActions };
+    });
+  }, [unit.instanceId, updateUnit]);
+
+  const handleSheetToggleDead = useCallback((idx: number) => {
+    updateUnit(unit.instanceId, (currentUnit: ArmyUnit) => {
+      const currentDead = currentUnit.deadSoldiers || [];
+      const newDead = currentDead.includes(idx)
+        ? currentDead.filter(i => i !== idx)
+        : [...currentDead, idx];
+      return { ...currentUnit, deadSoldiers: newDead };
+    });
+  }, [unit.instanceId, updateUnit]);
 
   const handleVehicleAttack = (weaponIndex: number) => {
     combatController.startCombat(unit, undefined, weaponIndex, 'shot');
@@ -385,17 +414,26 @@ export default function UnitCard({
   // Intercept combat action selection — 'capture' opens CaptureModal instead of
   // entering the combat flow. The soldier index must be captured BEFORE
   // cancelCombat() (which resets combatController.state).
+  // 'modifiers' — по тому же канону: закрывает боевую модалку и открывает
+  // модал эффектов бойца (строка «МОДИФИКАЦИИ» в меню ⋯).
   const handleSelectAction = useCallback(
     (action: CombatActionType) => {
       if (action === 'capture') {
         setCaptureSoldierIdx(combatController.state.soldierIndex ?? null);
         setShowCaptureModal(true);
         combatController.cancelCombat();
+      } else if (action === 'modifiers') {
+        const si = combatController.state.soldierIndex ?? null;
+        combatController.cancelCombat();
+        if (si !== null && onSoldierModifierClick) {
+          const squadData = unit.data as Squad;
+          onSoldierModifierClick(unit.instanceId, si, `#${squadData.soldiers[si]?.num || si + 1}`);
+        }
       } else {
         combatController.selectAction(action);
       }
     },
-    [combatController]
+    [combatController, onSoldierModifierClick, unit]
   );
 
   // Handle pilot survival test - start the modal flow
@@ -701,6 +739,49 @@ export default function UnitCard({
         />
       )}
 
+      {/* Лист действий бойца (тап по фото): граната → боевая модалка в фазе
+          гранаты, эффекты → модал эффектов, захват → CaptureModal,
+          «Во весь экран» → прежний оверлей. Захват — только когда есть
+          кандидаты и боец не пилот (как в ActionSelector). */}
+      {actionSheetIdx !== null && isSquad && (
+        <SoldierActionSheet
+          isOpen
+          onClose={() => setActionSheetIdx(null)}
+          soldierState={
+            unit.deadSoldiers?.includes(actionSheetIdx) ? 'dead'
+            : unit.panicState?.some(p => p.soldierIndex === actionSheetIdx) ? 'panic'
+            : unit.actionsUsed?.[actionSheetIdx]?.done ? 'done'
+            : 'active'
+          }
+          soldierLabel={`#${(unit.data as Squad).soldiers[actionSheetIdx]?.num || actionSheetIdx + 1}`}
+          squadName={data.name}
+          imageUrl={getSoldierImage(actionSheetIdx)}
+          actions={{
+            onFullscreen: () => setShowSoldierImage(actionSheetIdx),
+            grenade: isSquad && !unit.grenadesUsed ? {
+              onClick: () => combatController.startCombat(unit, actionSheetIdx, undefined, 'grenade'),
+            } : undefined,
+            onEffects: onSoldierModifierClick
+              ? () => onSoldierModifierClick(
+                  unit.instanceId,
+                  actionSheetIdx,
+                  `#${(unit.data as Squad).soldiers[actionSheetIdx]?.num || actionSheetIdx + 1}`
+                )
+              : undefined,
+            onCapture: (unit.data as Squad).soldiers[actionSheetIdx]?.isPilot
+              ? undefined
+              : getCaptureCandidates().length > 0
+                ? () => {
+                    setCaptureSoldierIdx(actionSheetIdx);
+                    setShowCaptureModal(true);
+                  }
+                : undefined,
+            onToggleDone: () => handleSheetToggleDone(actionSheetIdx),
+            onToggleDead: () => handleSheetToggleDead(actionSheetIdx),
+          }}
+        />
+      )}
+
       {/* #168: Capture Modal — only squads can capture; captureSoldierIdx gates render. */}
       {showCaptureModal && captureSoldierIdx !== null && isSquad && (
         <CaptureModal
@@ -848,7 +929,11 @@ export default function UnitCard({
         data-testid={isSquad ? 'squad-scroll' : undefined}
         className={cn(
           "px-1 md:px-2 py-1 md:py-2 relative z-10 min-h-0",
-          isSquad ? "overflow-y-auto flex-1" : "pb-2 overflow-hidden"
+          // custom-scrollbar: тонкая 6px полоса вместо классических 15px —
+          // при переполнении (6 бойцов на низких экранах) карточки не
+          // теряют ширину (репорт 2026-11-27: «скролл, солдатам места
+          // не хватает»)
+          isSquad ? "overflow-y-auto flex-1 custom-scrollbar" : "pb-2 overflow-hidden"
         )}
       >
         {isSquad ? (
@@ -856,7 +941,7 @@ export default function UnitCard({
             unit={unit}
             updateUnit={updateUnit}
             onSoldierAction={_handleSoldierAction}
-            setShowSoldierImage={setShowSoldierImage}
+            setShowSoldierImage={handleSoldierPhotoTap}
             distanceInputUnit={distanceInputUnit}
             stepToCmFactor={stepToCmFactor}
             allUnits={allUnits}

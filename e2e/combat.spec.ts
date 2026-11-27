@@ -18,12 +18,12 @@ test.describe('Combat Mechanics', () => {
     // The squad is focused by default (unit 0)
     await expect(page.getByTestId('dock-info-bar')).toBeVisible({ timeout: 5000 });
 
-    // Вход в бой: статовые кнопки-действия (тап по стату) и ⋯ меню в углу
+    // Вход в бой: статовые кнопки-действия (тап по стату); действия бойца —
+    // тап по фото (лист действий, 2026-11-27)
     const card = page.getByTestId('soldier-card').first();
     const hasStatAction = await card.getByTestId('stat-badge-range').count() > 0;
-    const hasActionMenu = await card.getByTestId('action-menu-button').count() > 0;
     const hasModal = await page.getByTestId('bottom-sheet-combat-modal').count() > 0;
-    expect(hasStatAction || hasActionMenu || hasModal).toBeTruthy();
+    expect(hasStatAction || hasModal).toBeTruthy();
   });
 
   test('should execute initiative roll', async ({ page }) => {
