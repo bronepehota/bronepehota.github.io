@@ -243,13 +243,21 @@ export default function Home() {
 
   return (
     <CombatTargetProvider>
-      {/* h-screen — фолбэк; инлайновый 100dvh перекрывает его в браузерах с
-          поддержкой: 100vh на телефоне = «большой» вьюпорт (с шапкой), окно
-          боя выше видимой области на высоту URL-бара — нижняя строка дока
-          уходит под край (плейтест 2026-09-20). dvh дышит вместе с шапкой. */}
+      {/* fixed inset-0 — окно боя прибито к ВИДИМОЙ области в любом браузере.
+          Прежняя связка h-screen(100vh, фолбэк) + инлайновый 100dvh ломалась
+          на WebView без dvh (старые VK/мессенджер-браузеры, iOS < 15.4):
+          инлайн-декларация с неподдерживаемым значением отбрасывается
+          парсером, работал фолбэк 100vh = «большой» вьюпорт — оболочка
+          выходила выше экрана на высоту панели браузера, нижняя строка дока
+          (бейджи/кнопки) уходила под край и требовала скролла СТРАНИЦЫ
+          (репорт 2026-11-27: «видно только название юнита, под ним — под
+          скроллом»). Высота из top+bottom не зависит от vh/dvh вообще.
+          Свайп-схлопывание панели браузера (окно растёт) сохраняется:
+          fixed следует за layout-вьюпортом, а body{min-height:100vh}
+          оставляет странице запас на этот свайп. print:static — печать
+          арм-листа из потока. */}
       <main
-        className="h-screen flex flex-col bg-slate-900 text-slate-100 overflow-hidden print:h-auto print:overflow-visible print:bg-white print:text-black"
-        style={{ height: '100dvh' }}
+        className="fixed inset-0 flex flex-col bg-slate-900 text-slate-100 overflow-hidden print:static print:h-auto print:overflow-visible print:bg-white print:text-black"
       >
         {/* Scrollable wrapper containing both header and content */}
         <div className="flex-1 overflow-auto min-h-0">

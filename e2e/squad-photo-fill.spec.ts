@@ -52,6 +52,42 @@ test.describe('Squad photo fill in battle view', () => {
     expect(m.lastBottom).toBeLessThanOrEqual(m.dockTop + 1.5);
   });
 
+  // Репорт 2026-11-27 («видно только название юнита снизу, под ним — под
+  // скроллом»): на WebView без dvh фолбэк h-screen(100vh) делал оболочку
+  // выше видимой области на высоту панели браузера — нижняя строка дока
+  // (бейджи/кнопки) уходила под край, требовался скролл СТРАНИЦЫ.
+  // Механизм-инвариант: оболочка position:fixed, прибита top+bottom к
+  // видимой области — высота не зависит от vh/dvh ни в одном браузере.
+  // Headless vh==dvh, поэтому проверяем механизм (computed position + пин),
+  // а не визуальный дефект — он воспроизводится только на реальных WebView.
+  test('окно боя прибито к видимой области (fixed inset-0) — док целиком на экране', async ({ page }) => {
+    await setupGameSessionWithSquad(page, { soldierCount: 2 });
+    await waitForBattleDock(page);
+
+    const m = await page.evaluate(() => {
+      const main = document.querySelector('main')!;
+      const cs = getComputedStyle(main);
+      const r = main.getBoundingClientRect();
+      const dock = document.querySelector('[data-testid="unit-dock"]')!.getBoundingClientRect();
+      return {
+        position: cs.position,
+        heightDecl: cs.height,
+        top: r.top,
+        bottom: r.bottom,
+        vh: window.innerHeight,
+        dockTop: dock.top,
+        dockBottom: dock.bottom,
+      };
+    });
+    expect(m.position).toBe('fixed');
+    expect(m.top).toBe(0);
+    // прибит и к низу: высота оболочки = видимой области, а не константе vh
+    expect(m.bottom).toBeCloseTo(m.vh, 0);
+    // док целиком в пределах экрана — «нижняя линия» доступна без скролла
+    expect(m.dockTop).toBeGreaterThanOrEqual(0);
+    expect(m.dockBottom).toBeLessThanOrEqual(m.vh);
+  });
+
   test('full squad (6): photos stay at the floor and the area scrolls', async ({ page }) => {
     await setupGameSessionWithSquad(page, {});
     await waitForBattleDock(page);
