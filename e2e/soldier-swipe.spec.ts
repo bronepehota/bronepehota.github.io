@@ -5,9 +5,8 @@ import { setupGameSessionWithSquad, clearStorage, swipeSoldierCard, expectAliveI
  * Свайпы по карточке бойца (плейтест 2026-09-18):
  * влево — «готов» (done), вправо — «убит» (dead).
  * Мышь Playwright генерирует pointer-события — тот же путь, что палец.
- * Мёртвый боец: чип «УБИТ» на фото (soldier-done-button aria-label
- * «Боец убит») — кнопки «череп» больше нет, свайп вправо единственный
- * путь убить/оживить.
+ * Состояния читаются data-атрибутами карточки (2026-11-27: чип «ГОТОВ»
+ * с фото убран — готов/убит живут в свайпах и листе действий по фото).
  */
 test.describe('Soldier card swipes', () => {
   test.use({ viewport: { width: 375, height: 667 } });
@@ -19,26 +18,25 @@ test.describe('Soldier card swipes', () => {
 
   test('свайп влево — боец готов (done)', async ({ page }) => {
     await swipeSoldierCard(page, 0, 'left');
-    await expect(page.getByTestId('soldier-done-button').nth(0))
-      .toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByTestId('soldier-card').nth(0))
+      .toHaveAttribute('data-soldier-done', 'true');
   });
 
   test('свайп вправо — боец убит (dead)', async ({ page }) => {
     await swipeSoldierCard(page, 1, 'right');
-    const doneChip = page.getByTestId('soldier-done-button').nth(1);
-    await expect(doneChip).toHaveAttribute('aria-label', 'Боец убит');
-    await expect(doneChip).toContainText('УБИТ');
+    await expect(page.getByTestId('soldier-card').nth(1))
+      .toHaveAttribute('data-soldier-dead', 'true');
     // Живых в доке стало меньше
     await expectAliveInNavigator(page, 'swipe-unit-1', '5/6');
   });
 
   test('повторный свайп вправо оживляет (toggle)', async ({ page }) => {
     await swipeSoldierCard(page, 1, 'right');
-    await expect(page.getByTestId('soldier-done-button').nth(1))
-      .toHaveAttribute('aria-label', 'Боец убит');
+    await expect(page.getByTestId('soldier-card').nth(1))
+      .toHaveAttribute('data-soldier-dead', 'true');
     await swipeSoldierCard(page, 1, 'right');
-    await expect(page.getByTestId('soldier-done-button').nth(1))
-      .toHaveAttribute('aria-label', 'Завершить ход бойца');
+    await expect(page.getByTestId('soldier-card').nth(1))
+      .toHaveAttribute('data-soldier-dead', 'false');
     await expectAliveInNavigator(page, 'swipe-unit-1', '6/6');
   });
 
@@ -52,10 +50,8 @@ test.describe('Soldier card swipes', () => {
     await page.mouse.move(startX - 25, y, { steps: 4 }); // < порога 56px
     await page.mouse.up();
 
-    await expect(page.getByTestId('soldier-done-button').nth(0))
-      .toHaveAttribute('aria-pressed', 'false');
-    await expect(page.getByTestId('soldier-done-button').nth(0))
-      .toHaveAttribute('aria-label', 'Завершить ход бойца');
+    await expect(page.getByTestId('soldier-card').nth(0))
+      .toHaveAttribute('data-soldier-done', 'false');
   });
 });
 
@@ -126,19 +122,16 @@ test.describe('Soldier card swipes — touch (CDP)', () => {
 
   test('свайп влево по статам (тач) — боец готов, модалка боя не открылась', async ({ page }) => {
     await touchSwipeOnStats(page, 0, 'left');
-    const doneChip = page.getByTestId('soldier-done-button').nth(0);
-    await expect(doneChip).toHaveAttribute('aria-pressed', 'true');
-    // Чип в состоянии done: подпись меняется на «завершён»
-    await expect(doneChip)
-      .toHaveAttribute('aria-label', 'Боевых действий завершён. Долгое нажатие для отмены.');
+    await expect(page.getByTestId('soldier-card').nth(0))
+      .toHaveAttribute('data-soldier-done', 'true');
     // Хвостовой клик после жеста гасится — модалку боя он не открывает
     await expect(page.getByTestId('bottom-sheet-combat-modal')).not.toBeVisible();
   });
 
   test('свайп вправо по статам (тач) — боец убит', async ({ page }) => {
     await touchSwipeOnStats(page, 1, 'right');
-    await expect(page.getByTestId('soldier-done-button').nth(1))
-      .toHaveAttribute('aria-label', 'Боец убит');
+    await expect(page.getByTestId('soldier-card').nth(1))
+      .toHaveAttribute('data-soldier-dead', 'true');
     await expectAliveInNavigator(page, 'swipe-unit-1', '5/6');
   });
 

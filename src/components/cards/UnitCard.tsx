@@ -287,18 +287,33 @@ export default function UnitCard({
     combatController.startCombat(unit, soldierIndex, undefined, valid ? action : undefined);
   }, [unit, combatController]);
 
-  // Тап по фото: живой боец → лист действий (граната/эффекты/захват/фуллскрин),
-  // мёртвый/паникующий → прямой полноразмерный просмотр (действий нет —
-  // паникующий не действует, §10 правил)
+  // Тап по фото: лист действий — полная консоль бойца (граната/эффекты/
+  // захват/фуллскрин/готов/убит — строки зависят от состояния)
   const handleSoldierPhotoTap = useCallback((idx: number) => {
-    const isDead = unit.deadSoldiers?.includes(idx) || false;
-    const isInPanic = unit.panicState?.some(p => p.soldierIndex === idx) || false;
-    if (isDead || isInPanic) {
-      setShowSoldierImage(idx);
-      return;
-    }
     setActionSheetIdx(idx);
-  }, [unit]);
+  }, []);
+
+  // toggle готов/убит из листа — та же логика, что у свайпов карточки
+  const handleSheetToggleDone = useCallback((idx: number) => {
+    updateUnit(unit.instanceId, (currentUnit: ArmyUnit) => {
+      const newActions = [...(currentUnit.actionsUsed || [])];
+      const currentDone = newActions[idx]?.done || false;
+      newActions[idx] = currentDone
+        ? { moved: false, shot: false, melee: false, done: false }
+        : { ...newActions[idx], done: true };
+      return { ...currentUnit, actionsUsed: newActions };
+    });
+  }, [unit.instanceId, updateUnit]);
+
+  const handleSheetToggleDead = useCallback((idx: number) => {
+    updateUnit(unit.instanceId, (currentUnit: ArmyUnit) => {
+      const currentDead = currentUnit.deadSoldiers || [];
+      const newDead = currentDead.includes(idx)
+        ? currentDead.filter(i => i !== idx)
+        : [...currentDead, idx];
+      return { ...currentUnit, deadSoldiers: newDead };
+    });
+  }, [unit.instanceId, updateUnit]);
 
   const handleVehicleAttack = (weaponIndex: number) => {
     combatController.startCombat(unit, undefined, weaponIndex, 'shot');
@@ -732,6 +747,12 @@ export default function UnitCard({
         <SoldierActionSheet
           isOpen
           onClose={() => setActionSheetIdx(null)}
+          soldierState={
+            unit.deadSoldiers?.includes(actionSheetIdx) ? 'dead'
+            : unit.panicState?.some(p => p.soldierIndex === actionSheetIdx) ? 'panic'
+            : unit.actionsUsed?.[actionSheetIdx]?.done ? 'done'
+            : 'active'
+          }
           soldierLabel={`#${(unit.data as Squad).soldiers[actionSheetIdx]?.num || actionSheetIdx + 1}`}
           squadName={data.name}
           imageUrl={getSoldierImage(actionSheetIdx)}
@@ -755,6 +776,8 @@ export default function UnitCard({
                     setShowCaptureModal(true);
                   }
                 : undefined,
+            onToggleDone: () => handleSheetToggleDone(actionSheetIdx),
+            onToggleDead: () => handleSheetToggleDead(actionSheetIdx),
           }}
         />
       )}

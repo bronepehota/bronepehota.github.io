@@ -1,10 +1,10 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { SoldierActionSheet } from '@/components/cards/soldier-card/SoldierActionSheet';
 
 /**
- * Лист действий бойца (2026-11-27: ⋯ на карточке убран, действия — тап по
- * фото). Строки контекстные: граната — пока доступна, захват — когда есть
- * кандидаты, эффекты/фуллскрин — всегда.
+ * Лист действий бойца — полная консоль состояния (2026-11-27: чип «ГОТОВ»
+ * с фото убран, готов/убит переехали в лист; убой — двухтаповое
+ * подтверждение против случайного тапа).
  */
 const baseProps = {
   isOpen: true,
@@ -17,68 +17,122 @@ const baseProps = {
     grenade: { onClick: jest.fn() },
     onEffects: jest.fn(),
     onCapture: jest.fn(),
+    onToggleDone: jest.fn(),
+    onToggleDead: jest.fn(),
   },
 };
 
-describe('SoldierActionSheet — контекстные строки действий', () => {
-  it('показывает все четыре строки: фуллскрин, граната, эффекты, захват', () => {
-    render(<SoldierActionSheet {...baseProps} />);
+describe('SoldierActionSheet — контекстные строки по состоянию', () => {
+  it('активный: полный набор — фуллскрин/граната/эффекты/захват/готов/убит', () => {
+    render(<SoldierActionSheet {...baseProps} soldierState="active" />);
 
     expect(screen.getByTestId('sheet-action-fullscreen')).toBeInTheDocument();
     expect(screen.getByTestId('sheet-action-grenade')).toBeInTheDocument();
     expect(screen.getByTestId('sheet-action-effects')).toBeInTheDocument();
     expect(screen.getByTestId('sheet-action-capture')).toBeInTheDocument();
+    expect(screen.getByTestId('sheet-action-done')).toHaveTextContent('Готов');
+    expect(screen.getByTestId('sheet-action-kill')).toHaveTextContent('Убит');
   });
 
-  it('граната недоступна (брошена) — строки нет', () => {
-    render(
-      <SoldierActionSheet
-        {...baseProps}
-        actions={{ ...baseProps.actions, grenade: undefined }}
-      />
-    );
+  it('готов: строка становится «Снять готов»', () => {
+    render(<SoldierActionSheet {...baseProps} soldierState="done" />);
 
+    expect(screen.getByTestId('sheet-action-done')).toHaveTextContent('Снять готов');
+    expect(screen.getByTestId('sheet-action-kill')).toBeInTheDocument();
+  });
+
+  it('мёртвый: «Оживить», без гранаты/готова/захвата', () => {
+    render(<SoldierActionSheet {...baseProps} soldierState="dead" />);
+
+    expect(screen.getByTestId('sheet-action-revive')).toHaveTextContent('Оживить');
+    expect(screen.queryByTestId('sheet-action-grenade')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('sheet-action-done')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('sheet-action-kill')).not.toBeInTheDocument();
+    expect(screen.getByTestId('sheet-action-fullscreen')).toBeInTheDocument();
+  });
+
+  it('паника: без готова, убит доступен (§10 — убить в панике можно)', () => {
+    render(<SoldierActionSheet {...baseProps} soldierState="panic" />);
+
+    expect(screen.queryByTestId('sheet-action-done')).not.toBeInTheDocument();
+    expect(screen.getByTestId('sheet-action-kill')).toBeInTheDocument();
     expect(screen.queryByTestId('sheet-action-grenade')).not.toBeInTheDocument();
   });
+});
 
-  it('захват не показывается без обработчика (нет кандидатов)', () => {
-    render(
-      <SoldierActionSheet
-        {...baseProps}
-        actions={{ ...baseProps.actions, onCapture: undefined }}
-      />
-    );
+describe('SoldierActionSheet — двухтаповое подтверждение убийства', () => {
+  it('первый тап НЕ убивает — вооружает строку («Точно убит?»)', () => {
+    render(<SoldierActionSheet {...baseProps} soldierState="active" />);
 
-    expect(screen.queryByTestId('sheet-action-capture')).not.toBeInTheDocument();
+    const kill = screen.getByTestId('sheet-action-kill');
+    fireEvent.click(kill);
+    expect(baseProps.actions.onToggleDead).not.toHaveBeenCalled();
+    expect(screen.getByTestId('sheet-action-kill')).toHaveTextContent('Точно убит?');
   });
 
-  it('тап по строке: действие + закрытие листа', () => {
+  it('второй тап подтверждает: toggle-убийство + закрытие листа', () => {
     const onClose = jest.fn();
-    const grenade = { onClick: jest.fn() };
+    const onToggleDead = jest.fn();
     render(
       <SoldierActionSheet
         {...baseProps}
         onClose={onClose}
-        actions={{ ...baseProps.actions, grenade }}
+        actions={{ ...baseProps.actions, onToggleDead }}
+        soldierState="active"
       />
     );
 
-    fireEvent.click(screen.getByTestId('sheet-action-grenade'));
-    expect(grenade.onClick).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByTestId('sheet-action-kill'));
+    fireEvent.click(screen.getByTestId('sheet-action-kill'));
+    expect(onToggleDead).toHaveBeenCalledTimes(1);
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('закрыт (isOpen=false) — не рендерится', () => {
-    render(<SoldierActionSheet {...baseProps} isOpen={false} />);
+  it('автосброс через 3с — второй поздний тап снова требует подтверждения', () => {
+    jest.useFakeTimers();
+    const onToggleDead = jest.fn();
+    render(
+      <SoldierActionSheet
+        {...baseProps}
+        actions={{ ...baseProps.actions, onToggleDead }}
+        soldierState="active"
+      />
+    );
 
-    expect(screen.queryByTestId('soldier-action-sheet')).not.toBeInTheDocument();
+    const kill = screen.getByTestId('sheet-action-kill');
+    fireEvent.click(kill);
+    act(() => { jest.advanceTimersByTime(3100); });
+    expect(screen.getByTestId('sheet-action-kill')).toHaveTextContent(/^Убит/);
+    fireEvent.click(kill);
+    expect(onToggleDead).not.toHaveBeenCalled();
+    jest.useRealTimers();
   });
 
-  it('строки ≥44px — тач-минимум (мобильный первый)', () => {
-    render(<SoldierActionSheet {...baseProps} />);
+  it('готов — одинарный тап без подтверждения', () => {
+    const onToggleDone = jest.fn();
+    render(
+      <SoldierActionSheet
+        {...baseProps}
+        actions={{ ...baseProps.actions, onToggleDone }}
+        soldierState="active"
+      />
+    );
 
-    for (const key of ['fullscreen', 'grenade', 'effects', 'capture']) {
-      expect(screen.getByTestId(`sheet-action-${key}`)).toHaveClass('min-h-[48px]');
-    }
+    fireEvent.click(screen.getByTestId('sheet-action-done'));
+    expect(onToggleDone).toHaveBeenCalledTimes(1);
+  });
+
+  it('оживление мёртвого — одинарный тап', () => {
+    const onToggleDead = jest.fn();
+    render(
+      <SoldierActionSheet
+        {...baseProps}
+        actions={{ ...baseProps.actions, onToggleDead }}
+        soldierState="dead"
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('sheet-action-revive'));
+    expect(onToggleDead).toHaveBeenCalledTimes(1);
   });
 });

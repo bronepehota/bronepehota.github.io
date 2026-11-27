@@ -25,11 +25,16 @@ test.describe('Kill in panic (#167)', () => {
     const indicatorInCard = page.getByTestId('soldier-card').first().getByTestId('panic-indicator');
     await expect(indicatorInCard).toBeVisible({ timeout: 5000 });
 
-    // DONE stays hidden for a panicking soldier
-    const panickingDone = page.locator(
-      '[data-testid="soldier-done-button"][data-soldier-index="0"]'
-    );
-    await expect(panickingDone).toHaveCount(0);
+    // 2026-11-27: чипа «ГОТОВ» на фото нет ни у кого; у паникующего в листе
+    // действий нет строки «Готов» (паникующий не действует, §10)
+    await page.getByTestId('soldier-card').first().getByTestId('soldier-photo').click({ position: { x: 8, y: 8 } });
+    const sheet = page.getByTestId('soldier-action-sheet');
+    await expect(sheet).toBeVisible({ timeout: 5000 });
+    await expect(sheet.getByTestId('sheet-action-done')).toHaveCount(0);
+    // …но убить паникующего можно — строка «Убит» на месте
+    await expect(sheet.getByTestId('sheet-action-kill')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(sheet).not.toBeVisible();
 
     // Killing the panicking soldier works — right swipe (the only kill path)
     await swipeSoldierCard(page, 0, 'right');

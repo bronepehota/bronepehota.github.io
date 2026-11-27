@@ -196,13 +196,11 @@ export function BattleTutorial({ demoImageUrl, onFinish }: BattleTutorialProps) 
                 <MousePointerClick className="h-4 w-4 text-slate-300" />
               </span>
               <p className="text-[12px] leading-relaxed text-slate-300">
-                <span className="font-mono font-bold text-slate-100">Статы бойца</span> — выстрел
-                и ближний бой; <span className="font-mono font-bold text-slate-100">тап по
-                фото</span> — граната, эффекты и просмотр во весь экран; чип{' '}
-                <span className="font-mono font-bold text-slate-100">ГОТОВ</span> на фото —
-                завершить ход (долгое нажатие — отмена);{' '}
-                <span className="font-mono font-bold text-slate-100">убит — свайп вправо</span>{' '}
-                (повторный — оживляет).
+                <span className="font-mono font-bold text-slate-100">Свайп влево</span> —
+                готов (повторный — отмена), <span className="font-mono font-bold text-slate-100">вправо</span> —
+                убит (повторный — оживляет); <span className="font-mono font-bold text-slate-100">тап по
+                фото</span> — все действия: граната, эффекты, готов/убит и просмотр во весь
+                экран.
               </p>
             </div>
 

@@ -1,24 +1,32 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-import { Expand, Bomb, Sparkles, Flag, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Expand, Bomb, Sparkles, Flag, X, CheckCircle2, Skull, HeartPulse } from 'lucide-react';
 import { GitHubPagesImage as Image } from '@/components/GitHubPagesImage';
 import { cn } from '@/lib/utils';
+
+export type SoldierSheetState = 'active' | 'done' | 'dead' | 'panic';
 
 export interface SoldierSheetActions {
   /** «Во весь экран» — полноразмерный просмотр фото */
   onFullscreen: () => void;
   /** «Граната» — только пока доступна (раз за бой на взвод) */
-  grenade?: { onClick: () => void; disabled?: boolean };
+  grenade?: { onClick: () => void };
   /** «Эффекты» — модал бафов/дебафов/свойств */
   onEffects?: () => void;
   /** «Захват» — только когда есть кандидаты (миссии с техникой) */
   onCapture?: () => void;
+  /** Готов / Снять готов — тап (не разрушающее действие); idx уже привязан */
+  onToggleDone?: () => void;
+  /** Убит / Оживить — toggle; для убийства — двухтаповое подтверждение */
+  onToggleDead?: () => void;
 }
 
 interface SoldierActionSheetProps {
   isOpen: boolean;
   onClose: () => void;
+  /** active | done | dead | panic — от него зависят строки состояния */
+  soldierState: SoldierSheetState;
   soldierLabel: string;
   squadName: string;
   imageUrl?: string;
@@ -26,16 +34,20 @@ interface SoldierActionSheetProps {
 }
 
 /**
- * Лист действий бойца (2026-11-27: ⋯ в углу карточки убран — угол отдан
- * статам). Открывается тапом по фото живого бойца: фото — самая большая
- * тач-цель карточки (≥44×44 на любом вьюпорте). Строки ведут напрямик:
- * граната → боевая модалка в фазе гранаты, эффекты → модал эффектов,
- * захват → модал захвата, «во весь экран» → прежний фуллскрин-оверлей.
- * Закрытие: тап по фону, свайп вниз за ручку, Esc.
+ * Лист действий бойца — тап по фото (самая большая тач-цель карточки).
+ * Центрированная модалка с крупным фото; строки контекстны состоянию:
+ * готов/убит/оживить — прямо из листа (2026-11-27: чип «ГОТОВ» с фото
+ * убран — свайпы остались главным путём, лист — полная консоль).
+ *
+ * УБИТ — двухтаповое подтверждение: первый тап «вооружает» строку (красная,
+ * пульсирует), второй подтверждает; автосброс 3с. Случайный одиночный тап
+ * ничего не делает — убой слишком разрушителен для одного нажатия.
+ * Закрытие: тап по фону, X, Esc.
  */
 export function SoldierActionSheet({
   isOpen,
   onClose,
+  soldierState,
   soldierLabel,
   squadName,
   imageUrl,
@@ -43,9 +55,17 @@ export function SoldierActionSheet({
 }: SoldierActionSheetProps) {
   // | null в generic'е: useRef(null) без него даёт readonly RefObject
   const panelRef = useRef<HTMLDivElement | null>(null);
+  const [killArmed, setKillArmed] = useState(false);
+
+  // автосброс «вооружённого» убоя
+  useEffect(() => {
+    if (!killArmed) return;
+    const t = setTimeout(() => setKillArmed(false), 3000);
+    return () => clearTimeout(t);
+  }, [killArmed]);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) { setKillArmed(false); return; }
     const prev = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     panelRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
@@ -68,6 +88,7 @@ export function SoldierActionSheet({
     tone: string;
     onClick?: () => void;
     disabled?: boolean;
+    testid: string;
   }> = [
     {
       key: 'fullscreen',
@@ -76,31 +97,70 @@ export function SoldierActionSheet({
       icon: <Expand className="w-5 h-5" />,
       tone: 'text-slate-300 border-slate-700/50 bg-slate-800/50',
       onClick: actions.onFullscreen,
+      testid: 'sheet-action-fullscreen',
     },
-    ...(actions.grenade ? [{
+    ...(actions.grenade && soldierState === 'active' ? [{
       key: 'grenade',
       label: 'Граната',
       hint: '1D20 на площадь • раз за бой',
       icon: <Bomb className="w-5 h-5" />,
       tone: 'text-emerald-400 border-emerald-600/50 bg-emerald-950/30',
       onClick: actions.grenade.onClick,
-      disabled: actions.grenade.disabled,
+      testid: 'sheet-action-grenade',
     }] : []),
-    ...(actions.onEffects ? [{
+    ...(actions.onEffects && soldierState !== 'dead' ? [{
       key: 'effects',
       label: 'Эффекты',
       hint: 'Бафы • дебафы • спец-свойства',
       icon: <Sparkles className="w-5 h-5" />,
       tone: 'text-purple-400 border-purple-600/50 bg-purple-950/30',
       onClick: actions.onEffects,
+      testid: 'sheet-action-effects',
     }] : []),
-    ...(actions.onCapture ? [{
+    ...(actions.onCapture && soldierState === 'active' ? [{
       key: 'capture',
       label: 'Захват',
       hint: 'Захватить технику',
       icon: <Flag className="w-5 h-5" />,
       tone: 'text-fuchsia-400 border-fuchsia-600/50 bg-fuchsia-950/30',
       onClick: actions.onCapture,
+      testid: 'sheet-action-capture',
+    }] : []),
+    // Готов / Снять готов — активному и готовому; паникующему нельзя (§10)
+    ...(actions.onToggleDone && (soldierState === 'active' || soldierState === 'done') ? [{
+      key: 'done',
+      label: soldierState === 'done' ? 'Снять готов' : 'Готов',
+      hint: soldierState === 'done' ? 'Вернуть бойцу ход' : 'Ход завершён',
+      icon: <CheckCircle2 className="w-5 h-5" />,
+      tone: soldierState === 'done'
+        ? 'text-slate-300 border-slate-700/50 bg-slate-800/50'
+        : 'text-cyan-300 border-cyan-600/50 bg-cyan-950/30',
+      onClick: actions.onToggleDone,
+      testid: 'sheet-action-done',
+    }] : []),
+    // Убит / Оживить. Убийство — с подтверждением; паникующего убить МОЖНО
+    // (§10 — «можно быть уничтоженным»), оживить мёртвого — toggle
+    ...(actions.onToggleDead ? [{
+      key: 'kill',
+      label: killArmed ? 'Точно убит? Нажмите ещё раз' : soldierState === 'dead' ? 'Оживить' : 'Убит',
+      hint: soldierState === 'dead' ? 'Вернуть в строй' : killArmed ? 'Подтверждение' : 'Свайп вправо — то же',
+      icon: soldierState === 'dead' ? <HeartPulse className="w-5 h-5" /> : <Skull className="w-5 h-5" />,
+      tone: soldierState === 'dead'
+        ? 'text-rose-300 border-rose-600/50 bg-rose-950/30'
+        : killArmed
+          ? 'bg-red-700 border-red-500 text-white animate-pulse'
+          : 'text-red-400 border-red-700/50 bg-red-950/30',
+      onClick: soldierState === 'dead'
+        ? actions.onToggleDead
+        : () => {
+            if (killArmed) {
+              actions.onToggleDead?.();
+              onClose();
+            } else {
+              setKillArmed(true);
+            }
+          },
+      testid: soldierState === 'dead' ? 'sheet-action-revive' : 'sheet-action-kill',
     }] : []),
   ];
 
@@ -162,8 +222,8 @@ export function SoldierActionSheet({
             <button
               key={row.key}
               type="button"
-              data-testid={`sheet-action-${row.key}`}
-              onClick={row.disabled ? undefined : () => { row.onClick?.(); onClose(); }}
+              data-testid={row.testid}
+              onClick={row.disabled ? undefined : () => { row.onClick?.(); if (row.key !== 'kill') onClose(); }}
               disabled={row.disabled}
               className={cn(
                 'w-full min-h-[48px] flex items-center gap-3 rounded-md border px-3 text-left transition-all select-none',

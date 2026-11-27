@@ -1,10 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef, useMemo, memo } from 'react';
+import { useState, useEffect, useMemo, memo } from 'react';
 import { SoldierActions } from './soldier-card/SoldierActions';
 import { SoldierStats } from './soldier-card/SoldierStats';
 import { SoldierImage } from './soldier-card/SoldierImage';
-import { SoldierDoneButton } from './soldier-card/SoldierDoneButton';
 import StatusStripe, { type SoldierState } from './soldier-card/StatusStripe';
 import { useCardSwipe } from '@/hooks/useCardSwipe';
 import { cn } from '@/lib/utils';
@@ -50,11 +49,6 @@ function SoldierCard({
   hideSpeed = false,
 }: SoldierCardProps) {
   const [isMounted, setIsMounted] = useState(false);
-  const [isLongPressing, setIsLongPressing] = useState(false);
-  const [longPressProgress, setLongPressProgress] = useState(0);
-  const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const longPressProgressRef = useRef<NodeJS.Timeout | null>(null);
-  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -72,66 +66,6 @@ function SoldierCard({
     if (isDone) return 'done';
     return 'active';
   };
-
-  const startLongPress = (callback: () => void) => {
-    // Don't show progress bar immediately - wait 100ms first
-    const progressDelay = 100;
-
-    // Start the long-press timer (600ms for cancel)
-    longPressTimerRef.current = setTimeout(() => {
-      callback();
-      setIsLongPressing(false);
-      setLongPressProgress(1);
-      if (longPressProgressRef.current) {
-        clearInterval(longPressProgressRef.current);
-      }
-    }, 600);
-
-    // Show progress bar only after 100ms of holding
-    longPressProgressRef.current = setTimeout(() => {
-      setIsLongPressing(true);
-      setLongPressProgress(0);
-
-      // Start progress animation
-      let progress = progressDelay / 600; // Start at 100/600 = ~17%
-      const progressInterval = setInterval(() => {
-        progress += 0.05;
-        if (progress >= 1) {
-          progress = 1;
-          clearInterval(progressInterval);
-        }
-        setLongPressProgress(progress);
-      }, 30);
-
-      // Store interval ID for cleanup
-      progressIntervalRef.current = progressInterval;
-    }, progressDelay);
-  };
-
-  const cancelLongPress = () => {
-    if (longPressTimerRef.current) {
-      clearTimeout(longPressTimerRef.current);
-      longPressTimerRef.current = null;
-    }
-    if (longPressProgressRef.current) {
-      clearTimeout(longPressProgressRef.current);
-      if (progressIntervalRef.current) {
-        clearInterval(progressIntervalRef.current);
-        progressIntervalRef.current = null;
-      }
-      longPressProgressRef.current = null;
-    }
-    setIsLongPressing(false);
-    setLongPressProgress(0);
-  };
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
-      if (longPressProgressRef.current) clearInterval(longPressProgressRef.current);
-    };
-  }, []);
 
   const handleToggleAction = () => {
     // Use explicit instanceId to avoid updating all units
@@ -252,6 +186,8 @@ function SoldierCard({
     <div
       data-testid="soldier-card"
       data-soldier-index={soldierIndex}
+      data-soldier-done={isDone ? 'true' : 'false'}
+      data-soldier-dead={isDead ? 'true' : 'false'}
       {...swipe.handlers}
       style={swipe.style}
       className={cn(
@@ -264,16 +200,6 @@ function SoldierCard({
       {/* Status stripe */}
       <StatusStripe state={getStripeState()} />
 
-      {/* Progress bar during long-press */}
-      {isLongPressing && (
-        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-slate-800 z-20">
-          <div
-            className="h-full bg-gradient-to-r from-emerald-500 to-emerald-600 transition-all duration-75"
-            style={{ width: `${longPressProgress * 100}%` }}
-          />
-        </div>
-      )}
-
       {/* Tech corners for pilot */}
       {isPilot && !isDead && (
         <>
@@ -282,15 +208,11 @@ function SoldierCard({
         </>
       )}
 
-      {/* Soldier image (left side) with the «Готов» button overlaid bottom-left.
-          Hidden for pilots (nav button replaces actions) and panic (no DONE). */}
-      {/* self-stretch + кап: фото растёт с высотой строки (взвод заполняет
-          экран, пол — прежний размер). Потолок min(224px, 40vw) единый на
-          всех вьюпортах: после удаления кнопки «череп» (правая колонка
-          ~44px ушла статам) ячейка на 320px выросла до ~59px и длинные
-          кубы (D12+2, 1D20+2) влезают без узкого 34vw-кэпа (замер
-          320/375/390 — переполнений нет). Кап на обёртке, не на фото:
-          чип «ГОТОВ» остаётся у низа фото. */}
+      {/* Soldier image (left side) — тап открывает лист действий бойца
+          (готов/убит/граната/эффекты/фуллскрин). Чип «ГОТОВ» на фото убран
+          (2026-11-27): свайп влево — тот же toggle, лист — полная консоль.
+          self-stretch + кап: фото растёт с высотой строки (взвод заполняет
+          экран). Потолок min(224px, 40vw) единый на всех вьюпортах. */}
       <div className="relative shrink-0 self-stretch max-h-[min(224px,40vw)]">
         <SoldierImage
           imageUrl={getSoldierImage(soldierIndex)}
@@ -301,18 +223,6 @@ function SoldierCard({
           isPilot={isPilot}
           onImageClick={() => setShowSoldierImage(soldierIndex)}
         />
-        {!(soldier.isPilot && soldier.pilotOfInstanceId && onNavigateToUnit) && !isInPanic && (
-          <SoldierDoneButton
-            isDone={isDone}
-            isDead={isDead}
-            soldierIndex={soldierIndex}
-            onToggleDone={handleToggleAction}
-            onStartLongPress={startLongPress}
-            onEndLongPress={cancelLongPress}
-            isLongPressing={isLongPressing}
-            className="absolute bottom-0 right-0 z-10"
-          />
-        )}
       </div>
 
       {/* Stats: тап по дальности/мощности = сразу выстрел, по ББ = сразу

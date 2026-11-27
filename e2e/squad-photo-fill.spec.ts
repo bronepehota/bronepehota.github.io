@@ -132,7 +132,7 @@ test.describe('Squad photo fill in battle view', () => {
     await setupGameSessionWithSquad(page, {});
     await waitForBattleDock(page);
 
-    // Тап в верхний левый угол фото (мимо хит-зоны чипа «ГОТОВ») → лист
+    // Тап в верхний левый угол фото → лист действий
     await page.getByTestId('soldier-photo').first().click({ position: { x: 8, y: 8 } });
     await page.getByTestId('soldier-action-sheet').waitFor({ state: 'visible' });
     await page.getByTestId('sheet-action-fullscreen').click();
