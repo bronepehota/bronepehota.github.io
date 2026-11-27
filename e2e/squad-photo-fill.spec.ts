@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { setupGameSessionWithSquad, setupGameSessionWithMachine, clearStorage, waitForBattleDock } from './helpers/setup';
+import { setupGameSessionWithSquad, setupGameSessionWithMachine, clearStorage, waitForBattleDock, swipeSoldierCard } from './helpers/setup';
 
 /**
  * Squad photo fill (плейтест 2026-09-18: «фото мелкие, кто есть кто не
@@ -121,6 +121,35 @@ test.describe('Squad photo fill in battle view', () => {
       .evaluate((el) => el.getBoundingClientRect().height);
     expect(h).toBeGreaterThanOrEqual(70);
     expect(h).toBeLessThanOrEqual(76);
+  });
+
+  // 2026-11-27: убитые — компактная «строка потерь» 48px; их место отдаётся
+  // живым рядам (fill-фича растягивает фото живых сильнее)
+  test('dead rows collapse to 48px — live photos grow', async ({ page }) => {
+    await setupGameSessionWithSquad(page, {});
+    await waitForBattleDock(page);
+
+    // убить бойцов 1 и 2 (свайп вправо — toggle)
+    await swipeSoldierCard(page, 1, 'right');
+    await swipeSoldierCard(page, 2, 'right');
+
+    const m = await page.evaluate(() => {
+      const rows = Array.from(document.querySelectorAll('[data-testid^="squad-row-"]'));
+      const photos = Array.from(document.querySelectorAll('[data-testid="soldier-photo"]'));
+      const cards = Array.from(document.querySelectorAll('[data-testid="soldier-card"]'));
+      return {
+        deadRowHeights: rows
+          .map((r, i) => ({ i, h: r.getBoundingClientRect().height, dead: cards[i]?.getAttribute('data-soldier-dead') }))
+          .filter(x => x.dead === 'true').map(x => x.h),
+        alivePhotoH: +photos[0].getBoundingClientRect().height.toFixed(1),
+        deadCardH: +cards[1].getBoundingClientRect().height.toFixed(1),
+      };
+    });
+    // мёртвый ряд ≈ 48px (допуск на border/rounding)
+    for (const h of m.deadRowHeights) expect(h).toBeGreaterThanOrEqual(46);
+    for (const h of m.deadRowHeights) expect(h).toBeLessThanOrEqual(52);
+    // живые выросли против равномерного ~80px
+    expect(m.alivePhotoH).toBeGreaterThan(85);
   });
 
   // Полноэкранный просмотр фото (плейтест 2026-09-19). С 2026-11-27 тап по

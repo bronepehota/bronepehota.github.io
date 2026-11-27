@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useEffect, useMemo, memo } from 'react';
+import { Skull } from 'lucide-react';
 import { SoldierActions } from './soldier-card/SoldierActions';
 import { SoldierStats } from './soldier-card/SoldierStats';
 import { SoldierImage } from './soldier-card/SoldierImage';
+import { GitHubPagesImage as Image } from '../GitHubPagesImage';
 import StatusStripe, { type SoldierState } from './soldier-card/StatusStripe';
 import { useCardSwipe } from '@/hooks/useCardSwipe';
 import { cn } from '@/lib/utils';
@@ -181,6 +183,55 @@ function SoldierCard({
 
     return { buffCount: allBuffIds.size, debuffCount: debuffs.length, soldierModifiers: soldierMods, staticAbilities, availableBuffCount: available, statBonuses };
   }, [unit, _allUnits, soldierIndex, squad, soldier, sourceId, currentTurn]);
+
+  // Мёртвый — компактная «строка потерь» (ряд зафиксирован на 48px в
+  // SquadView): мини-фото с черепом + «#N · УБИТ», без стат-грида — его
+  // место отдаётся живым рядам. Оживление: свайп вправо или тап по фото
+  // (лист → «Оживить»). Ссылка на текущий ArmyUnit не нужна — только
+  // диспетчер updateUnit.
+  if (isDead) {
+    return (
+      <div
+        data-testid="soldier-card"
+        data-soldier-index={soldierIndex}
+        data-soldier-done="false"
+        data-soldier-dead="true"
+        {...swipe.handlers}
+        style={swipe.style}
+        className="relative w-full h-full p-1 rounded-sm border border-slate-800 bg-slate-950/80 grayscale opacity-60 flex items-center gap-1.5 overflow-hidden touch-pan-y select-none"
+      >
+        <div
+          onClick={() => setShowSoldierImage(soldierIndex)}
+          className="relative h-full aspect-[3/4] rounded-sm overflow-hidden bg-slate-900 shrink-0 cursor-pointer"
+          title="Действия бойца"
+        >
+          <Image
+            src={getSoldierImage(soldierIndex)}
+            alt={`Солдат ${soldierIndex + 1}`}
+            width={60}
+            height={80}
+            className="w-full h-full object-cover"
+            style={{ objectPosition: '50% 15%' }}
+            unoptimized
+          />
+          <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+            <Skull className="w-4 h-4 text-red-500" strokeWidth={2.5} />
+          </div>
+        </div>
+        <div className="min-w-0 flex-1 font-mono">
+          <span className="text-[12px] font-bold uppercase tracking-wider text-slate-400 truncate block">
+            #{soldier.num || soldierIndex + 1} · УБИТ
+          </span>
+          {soldier.isPilot && (
+            <span className="text-[9px] font-mono font-bold text-cyan-400/70 uppercase tracking-wider">
+              ПИЛОТ
+            </span>
+          )}
+        </div>
+        <Skull className="w-4 h-4 text-slate-600 shrink-0 mr-1" aria-hidden="true" />
+      </div>
+    );
+  }
 
   return (
     <div
