@@ -3,7 +3,6 @@
 import { useEffect, useRef } from 'react';
 import { Expand, Bomb, Sparkles, Flag, X } from 'lucide-react';
 import { GitHubPagesImage as Image } from '@/components/GitHubPagesImage';
-import { useBottomSheet } from '@/hooks/useBottomSheet';
 import { cn } from '@/lib/utils';
 
 export interface SoldierSheetActions {
@@ -42,7 +41,6 @@ export function SoldierActionSheet({
   imageUrl,
   actions,
 }: SoldierActionSheetProps) {
-  const { sheetRef, dragY, isDragging, touchHandlers } = useBottomSheet({ onClose, isEnabled: isOpen });
   // | null в generic'е: useRef(null) без него даёт readonly RefObject
   const panelRef = useRef<HTMLDivElement | null>(null);
 
@@ -109,37 +107,25 @@ export function SoldierActionSheet({
   return (
     <div
       data-testid="soldier-action-sheet"
-      className="fixed inset-0 z-[95] flex items-end justify-center bg-slate-950/70 animate-in fade-in duration-150"
+      className="fixed inset-0 z-[95] flex items-center justify-center p-4 bg-slate-950/70 animate-in fade-in duration-150"
       onClick={onClose}
     >
       <div
-        ref={(el) => {
-          // один ref на два потребителя: useBottomSheet мерит ручку,
-          // panelRef — фокус при открытии
-          sheetRef.current = el;
-          panelRef.current = el;
-        }}
+        ref={panelRef}
         tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-label={`Действия: ${soldierLabel}`}
         onClick={(e) => e.stopPropagation()}
-        style={{ transform: dragY > 0 ? `translateY(${dragY}px)` : undefined }}
         className={cn(
-          'relative w-full max-w-md mx-auto rounded-t-lg border-t-2 border-slate-700 bg-slate-900',
-          'px-3 pt-1 pb-[max(12px,env(safe-area-inset-bottom))] outline-none',
-          'shadow-[0_-12px_32px_rgba(0,0,0,0.5)] animate-in slide-in-from-bottom-4 duration-200',
-          isDragging && 'transition-none select-none'
+          'relative w-full max-w-md mx-auto rounded-lg border border-slate-700 bg-slate-900',
+          'p-3 outline-none',
+          'shadow-[0_16px_48px_rgba(0,0,0,0.6)] animate-in fade-in zoom-in-95 duration-150'
         )}
       >
-        {/* Ручка свайпа вниз */}
-        <div className="flex justify-center py-1.5" {...touchHandlers}>
-          <div className="w-10 h-1 rounded-full bg-slate-600" aria-hidden="true" />
-        </div>
-
-        {/* Шапка: фото + кто это */}
-        <div className="flex items-center gap-2.5 pb-2 border-b border-slate-800">
-          <div className="relative w-11 aspect-[3/4] rounded-sm overflow-hidden bg-slate-800 shrink-0">
+        {/* Шапка: крупное фото + кто это */}
+        <div className="flex items-center gap-3 pb-2 border-b border-slate-800">
+          <div className="relative w-20 aspect-[3/4] rounded-md overflow-hidden bg-slate-800 shrink-0">
             {imageUrl ? (
               <Image
                 src={imageUrl}
@@ -151,14 +137,14 @@ export function SoldierActionSheet({
                 unoptimized
               />
             ) : (
-              <span className="flex h-full items-center justify-center font-mono text-[9px] text-slate-500">БОЕЦ</span>
+              <span className="flex h-full items-center justify-center font-mono text-[10px] text-slate-500">БОЕЦ</span>
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <div className="font-mono text-sm font-bold uppercase tracking-wider text-slate-100 truncate">
+            <div className="font-mono text-base font-bold uppercase tracking-wider text-slate-100 truncate">
               {soldierLabel}
             </div>
-            <div className="font-mono text-[10px] text-slate-400 truncate">{squadName}</div>
+            <div className="font-mono text-[11px] text-slate-400 truncate">{squadName}</div>
           </div>
           <button
             type="button"
