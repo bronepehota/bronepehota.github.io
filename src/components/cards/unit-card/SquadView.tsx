@@ -4,8 +4,10 @@ import SoldierCard from '../SoldierCard';
 interface SquadViewProps {
   unit: ArmyUnit;
   updateUnit: (instanceId: string, updateFn: (currentUnit: ArmyUnit) => ArmyUnit) => void;
-  onSoldierAction: (soldierIndex: number, action?: 'shot' | 'melee') => void;
-  setShowSoldierImage: (idx: number | null) => void;
+  onSoldierAction: (soldierIndex: number, action: 'shot' | 'melee') => void;
+  /** Тап по фото бойца: живой → лист действий, мёртвый/паникующий → зум.
+   *  null в цепочку не приходит (закрытие оверлея — в UnitCard напрямую). */
+  setShowSoldierImage: (idx: number) => void;
   distanceInputUnit: 'steps' | 'cm';
   stepToCmFactor: number;
   allUnits?: ArmyUnit[];

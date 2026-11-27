@@ -21,9 +21,11 @@ import { setupGameSessionWithSquad, clearStorage } from './helpers/setup';
  * expanded navigator).
  */
 test.describe('Squad scroll in battle view', () => {
-  // Mobile-first: a small portrait viewport guarantees the 6-soldier squad
-  // overflows the area above the bottom dock.
-  test.use({ viewport: { width: 375, height: 667 } });
+  // 2026-11-27: 6 бойцов теперь ПОМЕЩАЮТСЯ на 375×667 (карточка 82px —
+  // строка модификаций вместо угловой стопки, пол фото 72px). Физическое
+  // переполнение осталось только на низких экранах (окно ≤ ~520px контента):
+  // 320×568 — окно 471px, 6 карточек = 520px → скролл.
+  test.use({ viewport: { width: 320, height: 568 } });
 
   test.beforeEach(async ({ page }) => {
     // setupGameSessionWithSquad creates a single 6-soldier squad by default,

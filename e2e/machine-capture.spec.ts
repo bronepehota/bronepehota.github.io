@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { clearStorage, openActionMenu } from './helpers/setup';
+import { clearStorage, openSoldierSheet } from './helpers/setup';
 
 /**
  * #168 — Machine capture E2E.
@@ -171,14 +171,11 @@ test.describe('Machine capture (#168)', () => {
     // The squad is units[0] — focused by default; the dock info bar is up.
     await expect(page.getByTestId('dock-info-bar')).toBeVisible({ timeout: 5000 });
 
-    // Open the combat modal via the first soldier's action button.
-    // ⋯ — меню всех действий, там «ЗАХВАТ»
-    await openActionMenu(page);
+    // Лист действий бойца (тап по фото) — «Захват»
+    await openSoldierSheet(page);
 
-    // Select the «ЗАХВАТ» action.
-    const captureAction = page.getByRole('button', { name: /захват/i }).first();
-    await expect(captureAction).toBeVisible({ timeout: 3000 });
-    await captureAction.click();
+    // «Захват» из листа → CaptureModal напрямую
+    await page.getByTestId('sheet-action-capture').click();
 
     // CaptureModal opens. Header is visible.
     const captureModal = page.locator('h2:has-text("Захват техники")');

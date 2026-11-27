@@ -123,16 +123,19 @@ test.describe('Squad photo fill in battle view', () => {
     expect(h).toBeLessThanOrEqual(76);
   });
 
-  // Полноэкранный просмотр фото (плейтест 2026-09-19). С 2026-09-20 док —
-  // окно в потоке, оверлей z-100 накрывает его целиком: фото использует
-  // всю высоту экрана, тап в область дока закрывает просмотр.
+  // Полноэкранный просмотр фото (плейтест 2026-09-19). С 2026-11-27 тап по
+  // фото живого бойца открывает лист действий — фуллскрин из его строки
+  // «Во весь экран». С 2026-09-20 док — окно в потоке, оверлей z-100
+  // накрывает его целиком: фото использует всю высоту экрана, тап в область
+  // дока закрывает просмотр.
   test('fullscreen фото бойца накрывает док и использует всю высоту', async ({ page }) => {
     await setupGameSessionWithSquad(page, {});
     await waitForBattleDock(page);
 
-    // Тап в верхний левый угол фото: центр перекрыт хитом-зоной чипа «ГОТОВ»
-    // (after:-left-4 after:-top-6 расширяет кнопку за её видимый угол)
+    // Тап в верхний левый угол фото (мимо хит-зоны чипа «ГОТОВ») → лист
     await page.getByTestId('soldier-photo').first().click({ position: { x: 8, y: 8 } });
+    await page.getByTestId('soldier-action-sheet').waitFor({ state: 'visible' });
+    await page.getByTestId('sheet-action-fullscreen').click();
     const overlay = page.getByTestId('soldier-image-overlay');
     await expect(overlay).toBeVisible();
 

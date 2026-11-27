@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { setupGameSessionWithSquad, clearStorage, openActionMenu } from './helpers/setup';
+import { setupGameSessionWithSquad, clearStorage, openSoldierSheet } from './helpers/setup';
 
 /**
  * #165 + blast-rework — grenade target log stays compact for many targets:
@@ -23,15 +23,12 @@ test.describe('Grenade target list (#165)', () => {
     // The squad is focused by default (unit 0) — the action button is up
     await expect(page.getByTestId('dock-info-bar')).toBeVisible({ timeout: 5000 });
 
-    // Open combat modal via action button
-    // ⋯ — меню всех действий, там «ГРАНАТА»
-    await openActionMenu(page);
+    // Лист действий бойца (тап по фото) — «Граната»
+    await openSoldierSheet(page);
 
-    // Select grenade action (скоуп в модал: за ним остались ⋯-кнопки бойцов
-    // с «граната» в aria-метке)
-    const grenadeButton = page.getByTestId('bottom-sheet-combat-modal').getByRole('button', { name: /граната/i });
-    await expect(grenadeButton).toBeVisible({ timeout: 3000 });
-    await grenadeButton.click();
+    // Граната из листа → боевая модалка сразу в фазе гранаты (скоуп в модал:
+    // за ним остались ⋯-кнопки бойцов с «граната» в aria-метке)
+    await page.getByTestId('sheet-action-grenade').click();
 
     // PARAMETERS phase: throw grenade (distance roll)
     const throwButton = page.getByRole('button', { name: /бросить/i });

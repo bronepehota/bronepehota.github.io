@@ -153,13 +153,16 @@ export function BottomSheetCombatModal({
     <div
       ref={focusRef}
       data-testid="bottom-sheet-combat-modal"
-      className="fixed inset-0 z-[100] bg-slate-950/95 backdrop-blur-sm flex items-center justify-center p-2 md:p-4"
+      className="fixed inset-0 z-[100] bg-slate-950/95 backdrop-blur-sm flex items-end md:items-center justify-center p-2 md:p-4"
     >
       <div
         ref={sheetRef}
         {...touchHandlers}
         className={cn(
-          "w-full max-w-[600px] combat-glass combat-border-glow border-2 shadow-2xl max-h-[90vh] overflow-hidden flex flex-col relative",
+          // items-end на мобиле: панель прижата к низу (bottom-sheet) и на
+          // низких экранах берёт максимум высоты — 2026-11-27: «боевая
+          // система при маленьком экране не помещается»
+          "w-full max-w-[600px] combat-glass combat-border-glow border-2 shadow-2xl max-h-[calc(100dvh-1rem)] overflow-hidden flex flex-col relative",
           actionColors.border
         )}
       >
@@ -186,6 +189,7 @@ export function BottomSheetCombatModal({
             {canGoBack && (
               <button
                 onClick={onGoBack}
+                aria-label="Назад к выбору действия"
                 className="p-2 hover:bg-slate-800/80 rounded-sm transition-all min-w-[44px] min-h-[44px] flex items-center justify-center border border-slate-700 hover:border-slate-600 active:scale-95"
               >
                 <ChevronLeft className="w-5 h-5 text-slate-400" />
@@ -361,42 +365,6 @@ export function BottomSheetCombatModal({
                   </button>
                 )}
               </div>
-
-              {/* Execute button — full width, own row */}
-              <button
-                onClick={onExecuteAction}
-                className={cn(
-                  // Под мобильник (плейтест 2026-10-15): пуск — главное действие
-                  // модала, палец должен попадать уверенно
-                  "relative w-full font-mono text-base font-bold uppercase tracking-wider border-2 transition-all min-h-[60px] mt-2",
-                  "hover:scale-[1.01] active:scale-95 overflow-hidden shimmer-effect",
-                  "shadow-lg",
-                  actionColors.button
-                )}
-                style={{ textShadow: '0 0 10px rgba(255,255,255,0.3)' }}
-              >
-                <div className={cn("absolute top-0 left-0 w-2 h-2 border-l-2 border-t-2 opacity-40", actionColors.accent)} />
-                <div className={cn("absolute top-0 right-0 w-2 h-2 border-r-2 border-t-2 opacity-40", actionColors.accent)} />
-                <div className={cn("absolute bottom-0 left-0 w-2 h-2 border-l-2 border-b-2 opacity-40", actionColors.accent)} />
-                <div className={cn("absolute bottom-0 right-0 w-2 h-2 border-r-2 border-b-2 opacity-40", actionColors.accent)} />
-                <div className="absolute inset-0 shadow-inner pointer-events-none" />
-                <div className="relative flex items-center justify-center gap-2 px-2 md:px-6 py-2">
-                  <span>
-                    {state.actionType === 'shot' ? 'ВЫСТРЕЛИТЬ' :
-                     state.actionType === 'melee' ? 'АТАКОВАТЬ' : 'БРОСИТЬ'}
-                  </span>
-                  {/* Active modifiers subtitle (always visible) */}
-                  {(state.parameters.isSurpriseAttack || state.parameters.isAimedShot || state.parameters.isHeightBonus) && (
-                    <span className="text-[10px] opacity-80">
-                      {[
-                        state.parameters.isSurpriseAttack && 'с тыла',
-                        state.parameters.isAimedShot && 'прицельный',
-                        state.parameters.isHeightBonus && 'с высоты',
-                      ].filter(Boolean).join(' + ')}
-                    </span>
-                  )}
-                </div>
-              </button>
             </div>
           )}
 
@@ -414,6 +382,48 @@ export function BottomSheetCombatModal({
             />
           )}
         </div>
+
+        {/* Пуск — постоянный футер панели (2026-11-27: кнопка была внутри
+            скроллера и на низких экранах (320×568) уходила за сгиб — боевые
+            действия требовали скролла). Всегда видна и нажимаема. */}
+        {state.phase === 'PARAMETERS' && (
+          <div className="shrink-0 px-2 md:px-3 pb-2 md:pb-3 pt-1 border-t border-slate-800/70">
+            <button
+              onClick={onExecuteAction}
+              className={cn(
+                // Под мобильник (плейтест 2026-10-15): пуск — главное действие
+                // модала, палец должен попадать уверенно
+                "relative w-full font-mono text-base font-bold uppercase tracking-wider border-2 transition-all min-h-[60px]",
+                "hover:scale-[1.01] active:scale-95 overflow-hidden shimmer-effect",
+                "shadow-lg",
+                actionColors.button
+              )}
+              style={{ textShadow: '0 0 10px rgba(255,255,255,0.3)' }}
+            >
+              <div className={cn("absolute top-0 left-0 w-2 h-2 border-l-2 border-t-2 opacity-40", actionColors.accent)} />
+              <div className={cn("absolute top-0 right-0 w-2 h-2 border-r-2 border-t-2 opacity-40", actionColors.accent)} />
+              <div className={cn("absolute bottom-0 left-0 w-2 h-2 border-l-2 border-b-2 opacity-40", actionColors.accent)} />
+              <div className={cn("absolute bottom-0 right-0 w-2 h-2 border-r-2 border-b-2 opacity-40", actionColors.accent)} />
+              <div className="absolute inset-0 shadow-inner pointer-events-none" />
+              <div className="relative flex items-center justify-center gap-2 px-2 md:px-6 py-2">
+                <span>
+                  {state.actionType === 'shot' ? 'ВЫСТРЕЛИТЬ' :
+                   state.actionType === 'melee' ? 'АТАКОВАТЬ' : 'БРОСИТЬ'}
+                </span>
+                {/* Active modifiers subtitle (always visible) */}
+                {(state.parameters.isSurpriseAttack || state.parameters.isAimedShot || state.parameters.isHeightBonus) && (
+                  <span className="text-[10px] opacity-80">
+                    {[
+                      state.parameters.isSurpriseAttack && 'с тыла',
+                      state.parameters.isAimedShot && 'прицельный',
+                      state.parameters.isHeightBonus && 'с высоты',
+                    ].filter(Boolean).join(' + ')}
+                  </span>
+                )}
+              </div>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

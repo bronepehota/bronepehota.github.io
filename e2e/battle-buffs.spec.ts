@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { clearStorage, dismissIntroIfShown } from './helpers/setup';
+import { clearStorage, dismissIntroIfShown, openSoldierSheet } from './helpers/setup';
 
 /**
  * E2E tests for bonuses branch changes:
@@ -55,11 +55,11 @@ test.describe('Editor promo link on source selection', () => {
 
 // 2026-11-27: угловой кнопки эффектов на карточке больше нет — строка
 // модификаций рендерится только когда есть что показать, а у сида (отряд
-// без бафов) её нет. Путь открытия модала: ⋯ на карточке → «МОДИФИКАЦИИ»
-// в меню действий → перехват открывает модал эффектов.
+// без бафов) её нет. Путь открытия модала: тап по фото → лист действий
+// бойца → строка «Эффекты».
 async function openEffectsModalViaMenu(page: import('@playwright/test').Page) {
-  await page.getByTestId('action-menu-button').first().click();
-  await page.getByRole('button', { name: /МОДИФИКАЦИИ/ }).click();
+  await openSoldierSheet(page);
+  await page.getByTestId('sheet-action-effects').click();
   await page.getByTestId('effects-modal').waitFor({ state: 'visible' });
 }
 
@@ -117,14 +117,14 @@ test.describe('Battle buffs availability', () => {
     await expect(gameSession.first()).toBeVisible({ timeout: 5000 });
   });
 
-  test('should show modifier path on soldier cards: ⋯ menu with МОДИФИКАЦИИ', async ({ page }) => {
+  test('should show modifier path on soldier cards: photo tap → sheet with Эффекты', async ({ page }) => {
     // Чистый отряд (без бафов/свойств): строки модификаций на карточках нет —
-    // путь добавления первого эффекта живёт в меню ⋯
+    // путь добавления первого эффекта: тап по фото → лист действий
     await expect(page.getByTestId('modifier-indicator')).toHaveCount(0);
-    await expect(page.getByTestId('action-menu-button').first()).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId('action-menu-button')).toHaveCount(0);
 
-    await page.getByTestId('action-menu-button').first().click();
-    await expect(page.getByRole('button', { name: /МОДИФИКАЦИИ/ })).toBeVisible();
+    await openSoldierSheet(page);
+    await expect(page.getByTestId('sheet-action-effects')).toBeVisible();
   });
 
   test('should open effects modal from the ⋯ action menu', async ({ page }) => {

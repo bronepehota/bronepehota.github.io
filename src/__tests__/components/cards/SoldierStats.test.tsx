@@ -74,21 +74,16 @@ describe('SoldierStats — тап по стату = прямое действи�
   });
 });
 
-describe('SoldierStats — угловая кнопка ⋯ (меню действий)', () => {
-  it('⋯ открывает меню действий', () => {
-    const onOpenActionMenu = jest.fn();
-    render(<SoldierStats soldier={soldier} onStatAction={jest.fn()} onOpenActionMenu={onOpenActionMenu} />);
-
-    const menu = screen.getByTestId('action-menu-button');
-    expect(menu).toHaveAttribute('aria-label', 'Все действия: граната, захват');
-    fireEvent.click(menu);
-    expect(onOpenActionMenu).toHaveBeenCalled();
-  });
-
-  it('без обработчиков (превью редактора) — статы не кнопки, угла нет', () => {
-    render(<SoldierStats soldier={soldier} />);
+describe('SoldierStats — угла ⋯ больше нет (2026-11-27)', () => {
+  it('кнопки меню действий на карточке нет — действия живут в листе по тапу на фото', () => {
+    render(<SoldierStats soldier={soldier} onStatAction={jest.fn()} />);
 
     expect(screen.queryByTestId('action-menu-button')).not.toBeInTheDocument();
+  });
+
+  it('без обработчиков (превью редактора) — статы не кнопки', () => {
+    render(<SoldierStats soldier={soldier} />);
+
     expect(screen.getByTestId('stat-badge-range').tagName).not.toBe('BUTTON');
   });
 });

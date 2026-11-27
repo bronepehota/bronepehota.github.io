@@ -1,6 +1,6 @@
 'use client';
 
-import { Shield, Footprints, Target, Flame, Sword, Sparkles, MoreHorizontal } from 'lucide-react';
+import { Shield, Footprints, Target, Flame, Sword, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Soldier } from '@/lib/types';
 import type { SoldierModifier, BuffDefinition } from '@/lib/modifier-types';
@@ -25,8 +25,6 @@ interface SoldierStatsProps {
    *  (мимо экрана выбора действия). Без пропа статы — просто отображение
    *  (превью редактора). */
   onStatAction?: (action: 'shot' | 'melee') => void;
-  /** ⋯ в углу — меню всех действий (граната, захват) */
-  onOpenActionMenu?: () => void;
   buffCount?: number;
   debuffCount?: number;
   soldierModifiers?: SoldierModifier[];
@@ -252,7 +250,6 @@ export function SoldierStats({
   stepToCmFactor = 5,
   disabled = false,
   onStatAction,
-  onOpenActionMenu,
   buffCount,
   debuffCount,
   soldierModifiers = [],
@@ -277,9 +274,6 @@ export function SoldierStats({
   };
 
   const showArmorSpeed = !hideArmor || !hideSpeed;
-  // Угловая колонка ⋯ — только в бою (меню действий). Превью редактора —
-  // чистая сетка 3 колонки.
-  const hasMenu = !!onOpenActionMenu;
   const totalCount = (buffCount ?? 0) + (debuffCount ?? 0);
   const hasStripContent =
     soldierModifiers.length > 0 ||
@@ -291,20 +285,18 @@ export function SoldierStats({
   // (строка + крупные клетки = лишняя высота; у карточки со строкой клетки
   // сжимаются до тач-минимума 44px — суммарно ровно те же 82px карточки)
   const tall = !showArmorSpeed && !hasStrip;
-  // Явное размещение по колонкам/рядам (hasMenu): автораскладка клала
-  // дальность в узкую 4-ю колонку у неоднородных отрядов (броня/скорость
-  // со своими значениями) — ломала бейджи. Классы литералами — Tailwind
-  // JIT не видит шаблонных строк.
-  const place = (col: 1 | 2 | 3, row: 1 | 2) =>
-    hasMenu ? { className: PLACE_CLASSES[col][row] } : undefined;
+  // Явное размещение: автораскладка у неоднородных отрядов (броня/скорость
+  // со своими значениями) клала дальность в 3-ю колонку рядом со скоростью.
+  // Классы литералами — Tailwind JIT не видит шаблонных строк.
+  const place = (col: 1 | 2 | 3, row: 1 | 2) => ({ className: PLACE_CLASSES[col][row] });
 
   return (
     <div
       className={cn(
-        // Клетки + узкая угловая колонка (44px): статы занимают всю ширину
-        // карточки, ⋯ живёт в углу (плейтест 2026-10-15)
-        'grid gap-1 p-1 rounded-lg select-none',
-        hasMenu ? 'grid-cols-[1fr_1fr_1fr_auto]' : 'grid-cols-3',
+        // 2026-11-27: угловой ⋯ убран (действия — тап по фото, лист
+        // действий) — бейджи во всю ширину карточки, длинные кубы получают
+        // +44px ширины
+        'grid grid-cols-3 gap-1 p-1 rounded-lg select-none',
         className
       )}
     >
@@ -376,28 +368,9 @@ export function SoldierStats({
         {...place(3, showArmorSpeed ? 2 : 1)}
       />
 
-      {/* Угол: ⋯ меню действий (выстрел/ББ/граната/захват/модификации) —
-          единственная угловая кнопка, тянется на высоту ряда статов */}
-      {hasMenu && (
-        <button
-          type="button"
-          data-testid="action-menu-button"
-          onClick={disabled ? undefined : (e) => { e.stopPropagation(); onOpenActionMenu(); }}
-          disabled={disabled}
-          aria-label="Все действия: граната, захват"
-          className={cn(
-            'min-w-[44px] rounded-lg bg-slate-800/60 border border-slate-700/50 text-slate-400 flex items-center justify-center transition-all select-none',
-            showArmorSpeed ? 'col-start-4 row-start-2' : 'col-start-4 row-start-1',
-            !disabled && 'cursor-pointer hover:bg-slate-700/30 hover:border-slate-600/60 active:scale-[0.97]',
-            disabled && 'opacity-30 cursor-not-allowed'
-          )}
-        >
-          <MoreHorizontal className="w-4 h-4" />
-        </button>
-      )}
-
       {/* Строка модификаций ПОД статами: эффекты/свойства/счётчик — видна
-          только когда есть что показать; тап открывает модал эффектов */}
+          только когда есть что показать; тап открывает модал эффектов.
+          Граната/захват/фуллскрин — тап по фото (лист действий). */}
       {hasStrip && (
         <ModifierStrip
           buffCount={buffCount ?? 0}
