@@ -1137,8 +1137,11 @@ export default function GameSession({
                   );
                 })()}
 
-                {/* Spacer */}
-                <div className="flex-1 min-w-0" />
+                {/* Кнопочный кластер прижат вправо ml-auto (не распоркой):
+                    auto-маржин не участвует в line-breaking flex-wrap —
+                    при активных бафах (+1 на бейдже, «5 (25см)» + xN) строка
+                    раньше вылезала на 2.7px и ⋮ уезжал на вторую строку
+                    (репорт 2026-11-27) */}
 
                 {/* Navigator button — the primary unit switcher (playtest:
                     the tiny-icon strip was unreadable). N/M = units that
@@ -1149,7 +1152,7 @@ export default function GameSession({
                   aria-label={`Открыть список юнитов, завершено ${finishedCount} из ${totalUnits}`}
                   title="Список юнитов"
                   className={cn(
-                    "shrink-0 min-h-[44px] px-2 flex items-center justify-center gap-1.5 rounded-sm border",
+                    "shrink-0 min-h-[44px] px-2 ml-auto flex items-center justify-center gap-1.5 rounded-sm border",
                     "font-mono text-[10px] font-black uppercase tracking-wider transition-all hover:scale-[1.02] active:scale-95",
                     "border-slate-700/50 bg-slate-800/60 text-slate-300 hover:bg-slate-700/60 hover:text-slate-100"
                   )}
@@ -1186,7 +1189,7 @@ export default function GameSession({
                         title={isDone ? "Отменить завершение" : "Завершить ход"}
                         aria-label={isDone ? "Отменить завершение хода взвода" : "Завершить ход взвода"}
                         className={cn(
-                          "shrink-0 min-h-[44px] px-3 flex items-center justify-center gap-1.5 rounded-sm border",
+                          "shrink-0 min-h-[44px] px-2 flex items-center justify-center gap-1.5 rounded-sm border",
                           "font-mono text-xs font-black uppercase tracking-wider transition-all hover:scale-[1.02] active:scale-95",
                           isDead
                             ? "bg-slate-900/50 border-slate-800/50 opacity-40 cursor-not-allowed"
