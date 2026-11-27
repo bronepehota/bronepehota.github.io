@@ -385,17 +385,26 @@ export default function UnitCard({
   // Intercept combat action selection — 'capture' opens CaptureModal instead of
   // entering the combat flow. The soldier index must be captured BEFORE
   // cancelCombat() (which resets combatController.state).
+  // 'modifiers' — по тому же канону: закрывает боевую модалку и открывает
+  // модал эффектов бойца (строка «МОДИФИКАЦИИ» в меню ⋯).
   const handleSelectAction = useCallback(
     (action: CombatActionType) => {
       if (action === 'capture') {
         setCaptureSoldierIdx(combatController.state.soldierIndex ?? null);
         setShowCaptureModal(true);
         combatController.cancelCombat();
+      } else if (action === 'modifiers') {
+        const si = combatController.state.soldierIndex ?? null;
+        combatController.cancelCombat();
+        if (si !== null && onSoldierModifierClick) {
+          const squadData = unit.data as Squad;
+          onSoldierModifierClick(unit.instanceId, si, `#${squadData.soldiers[si]?.num || si + 1}`);
+        }
       } else {
         combatController.selectAction(action);
       }
     },
-    [combatController]
+    [combatController, onSoldierModifierClick, unit]
   );
 
   // Handle pilot survival test - start the modal flow

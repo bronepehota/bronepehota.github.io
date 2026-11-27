@@ -56,7 +56,14 @@ function statValueFit(v: string): { cls: string; icon: boolean | 'wide'; pad?: s
   return { cls: 'text-[12px] min-[400px]:text-[14px]', icon: false, pad: 'px-0' };
 }
 
-function StatBadge({ icon: Icon, value, color, bonus, disabled, statKey, onClick, ariaLabel, tall }: {
+// Явное размещение бейджей в сетке статов (литеральные классы для JIT)
+const PLACE_CLASSES = {
+  1: { 1: 'col-start-1 row-start-1', 2: 'col-start-1 row-start-2' },
+  2: { 1: 'col-start-2 row-start-1', 2: 'col-start-2 row-start-2' },
+  3: { 1: 'col-start-3 row-start-1', 2: 'col-start-3 row-start-2' },
+} as const;
+
+function StatBadge({ icon: Icon, value, color, bonus, disabled, statKey, onClick, ariaLabel, tall, className }: {
   icon: React.ElementType;
   value: string | React.ReactNode;
   color: string;
@@ -68,6 +75,8 @@ function StatBadge({ icon: Icon, value, color, bonus, disabled, statKey, onClick
   ariaLabel?: string;
   /** Крупная клетка (типовой отряд — единственный ряд статов) */
   tall?: boolean;
+  /** Явное место в сетке (col-start-N row-start-N) */
+  className?: string;
 }) {
   const isDebuff = bonus?.startsWith('-');
   const isActive = !!bonus;
@@ -75,9 +84,10 @@ function StatBadge({ icon: Icon, value, color, bonus, disabled, statKey, onClick
 
   const shell = cn(
     // min-w-0: сетка сжимает бейджи на 320px, а не выталкивает колонку ✓/⋯
-    'relative flex flex-row items-center justify-center gap-0.5 rounded-lg bg-slate-800/60 min-w-0 flex-1 transition-colors',
+    'relative flex flex-row items-center justify-center gap-0.5 rounded-lg bg-slate-800/60 min-w-0 transition-colors',
     tall ? 'min-h-[64px]' : 'min-h-[44px]',
     fit?.pad ?? 'px-1',
+    className,
     isActive
       ? isDebuff
         ? 'border border-red-500/40 shadow-[inset_0_0_8px_rgba(239,68,68,0.06)]'
@@ -139,12 +149,15 @@ function StatBadge({ icon: Icon, value, color, bonus, disabled, statKey, onClick
 }
 
 /**
- * Угловая стопка (правый верхний угол сетки статов): ✦ модификаторы/
- * спец-свойства сверху, ⋯ меню действий снизу. Компактный аналог прежней
- * широкой кнопки модификаторов (плейтест: «занимает слишком много места»).
- * aria-метки сохранены от ModifierIndicator — e2e баффов на них опираются.
+ * Строка модификаций под статами (2026-11-27): активные эффекты и
+ * спец-свойства — тонкая (16px) строка на всю ширину ПОД бейджами, видна
+ * только когда есть что показать. Обычная карточка строки не имеет, а
+ * карточка СО строкой сжимает бейджи 64→44 — высота обоих вариантов
+ * одинаковая (82px), скролл не возвращается даже когда модификации у всех
+ * шести бойцов. aria-метки сохранены от прежней угловой кнопки — e2e
+ * баффов и свойств на них опираются.
  */
-function RailModifierButton({
+function ModifierStrip({
   buffCount, debuffCount, soldierModifiers, staticAbilities, availableCount, onClick, disabled,
 }: {
   buffCount: number;
@@ -159,7 +172,7 @@ function RailModifierButton({
 
   const abilityNames = staticAbilities.map(b => (
     <span key={`static-${b.id}`} title={`${b.name}: ${b.description}${b.oneTimeUse ? ' (раз за бой)' : ' (постоянная)'}`}
-      className="text-[9px] font-mono font-medium leading-none text-emerald-500/80">
+      className="text-[10px] font-mono font-medium leading-none text-emerald-400/90">
       {b.name}
     </span>
   ));
@@ -168,14 +181,14 @@ function RailModifierButton({
     <ModifierIcon key={mod.id} name={mod.icon} size={12} className={getEffectStyles(mod.id).icon} />
   ));
 
-  let ariaLabel = 'Добавить эффект';
-  let shellCls = 'border border-dashed border-slate-700/40 text-slate-600 hover:border-slate-600/60';
-  let body: React.ReactNode = <Sparkles className="w-3.5 h-3.5" />;
+  let ariaLabel: string;
+  let shellCls: string;
+  let body: React.ReactNode;
 
   if (soldierModifiers.length > 0) {
     ariaLabel = `${soldierModifiers.length} модификаторов на солдата`;
-    shellCls = 'border border-slate-700/50 text-slate-300 hover:border-slate-600/60';
-    body = <span className="flex flex-col items-center gap-0.5">{abilityNames}{modIcons}</span>;
+    shellCls = 'border border-slate-700/50 text-slate-300';
+    body = <span className="flex items-center gap-1 min-w-0">{abilityNames}{modIcons}</span>;
   } else if (totalCount > 0) {
     const hasBuffs = buffCount > 0;
     const hasDebuffs = debuffCount > 0;
@@ -186,26 +199,24 @@ function RailModifierButton({
         ? 'border-red-700/50 bg-red-950/20 text-red-400'
         : 'border-emerald-700/50 bg-emerald-950/20 text-emerald-400';
     body = (
-      <span className="flex flex-col items-center gap-0.5">
-        <span className="flex items-center gap-0.5">
-          <Sparkles className="w-3 h-3 shrink-0" />
-          <span className="text-[13px] font-mono font-black leading-none">{totalCount}</span>
-        </span>
+      <span className="flex items-center gap-1 min-w-0">
+        <Sparkles className="w-3 h-3 shrink-0" />
+        <span className="text-[11px] font-mono font-black leading-none">{totalCount}</span>
         {abilityNames}
       </span>
     );
   } else if (staticAbilities.length > 0) {
     ariaLabel = `Спец-свойства: ${staticAbilities.map(b => b.name).join(', ')}`;
-    shellCls = 'border border-emerald-900/50 text-slate-300 hover:border-slate-600/60';
-    body = <span className="flex flex-col items-center gap-0.5">{abilityNames}</span>;
-  } else if (availableCount && availableCount > 0) {
-    // «Доступно N» — возможность, не событие: тихий пунктир, янтарь в иконке
+    shellCls = 'border border-emerald-900/50 text-slate-300';
+    body = <span className="flex items-center gap-1 min-w-0">{abilityNames}</span>;
+  } else {
+    // «Доступно N» — возможность, не событие: тихий пунктир, янтарь
     ariaLabel = `${availableCount} эффектов доступно`;
-    shellCls = 'border border-dashed border-slate-700/40 text-slate-400 hover:border-amber-600/50';
+    shellCls = 'border border-dashed border-slate-700/40 text-slate-400';
     body = (
-      <span className="flex items-center gap-0.5">
+      <span className="flex items-center gap-1 min-w-0">
         <Sparkles className="w-3 h-3 text-amber-400/70 shrink-0" />
-        <span className="text-[10px] font-mono font-bold leading-none">{availableCount}</span>
+        <span className="text-[10px] font-mono font-bold leading-none">Доступно {availableCount}</span>
       </span>
     );
   }
@@ -220,9 +231,12 @@ function RailModifierButton({
       disabled={disabled}
       aria-label={ariaLabel}
       className={cn(
-        'min-w-[44px] min-h-[44px] rounded-lg bg-slate-800/60 flex items-center justify-center px-1 py-1 transition-all select-none',
+        'relative col-span-full min-h-4 rounded-md flex items-center gap-1 px-1.5 transition-all select-none',
+        // after: хит-зона выше видимой строки (16px < 44px тач-минимума):
+        // +8px вверх/вниз — в пустые поля бейджей, ценность тапа не теряется
+        'after:absolute after:inset-y-[-8px] after:inset-x-0 after:content-[""]',
         shellCls,
-        !disabled && 'cursor-pointer hover:bg-slate-700/30 active:scale-[0.97]',
+        !disabled && 'cursor-pointer active:scale-[0.99]',
         disabled && 'opacity-30 cursor-not-allowed'
       )}
     >
@@ -263,15 +277,34 @@ export function SoldierStats({
   };
 
   const showArmorSpeed = !hideArmor || !hideSpeed;
-  const hasRail = !!(onStatAction || onOpenActionMenu || onModifierClick);
+  // Угловая колонка ⋯ — только в бою (меню действий). Превью редактора —
+  // чистая сетка 3 колонки.
+  const hasMenu = !!onOpenActionMenu;
+  const totalCount = (buffCount ?? 0) + (debuffCount ?? 0);
+  const hasStripContent =
+    soldierModifiers.length > 0 ||
+    totalCount > 0 ||
+    staticAbilities.length > 0 ||
+    (availableBuffCount ?? 0) > 0;
+  const hasStrip = !!onModifierClick && hasStripContent;
+  // Крупные клетки — когда ряд статов единственный И нет строки модификаций
+  // (строка + крупные клетки = лишняя высота; у карточки со строкой клетки
+  // сжимаются до тач-минимума 44px — суммарно ровно те же 82px карточки)
+  const tall = !showArmorSpeed && !hasStrip;
+  // Явное размещение по колонкам/рядам (hasMenu): автораскладка клала
+  // дальность в узкую 4-ю колонку у неоднородных отрядов (броня/скорость
+  // со своими значениями) — ломала бейджи. Классы литералами — Tailwind
+  // JIT не видит шаблонных строк.
+  const place = (col: 1 | 2 | 3, row: 1 | 2) =>
+    hasMenu ? { className: PLACE_CLASSES[col][row] } : undefined;
 
   return (
     <div
       className={cn(
         // Клетки + узкая угловая колонка (44px): статы занимают всю ширину
-        // карточки, спец-кнопки живут в углу (плейтест 2026-10-15)
+        // карточки, ⋯ живёт в углу (плейтест 2026-10-15)
         'grid gap-1 p-1 rounded-lg select-none',
-        hasRail ? 'grid-cols-[1fr_1fr_1fr_auto]' : 'grid-cols-3',
+        hasMenu ? 'grid-cols-[1fr_1fr_1fr_auto]' : 'grid-cols-3',
         className
       )}
     >
@@ -285,6 +318,7 @@ export function SoldierStats({
             color="text-yellow-400"
             bonus={formatBonus(statBonuses?.armorBonus)}
             statKey="armor"
+            {...place(1, 1)}
           />
           <StatBadge
             icon={Footprints}
@@ -298,8 +332,8 @@ export function SoldierStats({
             color="text-cyan-400"
             bonus={formatMultiplier(statBonuses?.speedMultiplier)}
             statKey="speed"
+            {...place(2, 1)}
           />
-          {hasRail ? <div aria-hidden="true" /> : null}
         </>
       )}
 
@@ -314,7 +348,8 @@ export function SoldierStats({
         statKey="range"
         onClick={onStatAction ? () => onStatAction('shot') : undefined}
         ariaLabel={noRange ? undefined : `Выстрел: дальность ${soldier.range}`}
-        tall={!showArmorSpeed}
+        tall={tall}
+        {...place(1, showArmorSpeed ? 2 : 1)}
       />
       <StatBadge
         icon={Flame}
@@ -325,7 +360,8 @@ export function SoldierStats({
         statKey="power"
         onClick={onStatAction ? () => onStatAction('shot') : undefined}
         ariaLabel={noPower ? undefined : `Выстрел: мощность ${soldier.power}`}
-        tall={!showArmorSpeed}
+        tall={tall}
+        {...place(2, showArmorSpeed ? 2 : 1)}
       />
       <StatBadge
         icon={Sword}
@@ -336,39 +372,42 @@ export function SoldierStats({
         statKey="melee"
         onClick={onStatAction ? () => onStatAction('melee') : undefined}
         ariaLabel={`Ближний бой: ${soldier.melee}`}
-        tall={!showArmorSpeed}
+        tall={tall}
+        {...place(3, showArmorSpeed ? 2 : 1)}
       />
 
-      {/* Угловая стопка: ✦ модификаторы (вся прежняя семантика кнопки
-          эффектов) + ⋯ меню действий (граната, захват) */}
-      {hasRail && (
-        <div className="flex flex-col gap-1 row-span-2">
-          <RailModifierButton
-            buffCount={buffCount ?? 0}
-            debuffCount={debuffCount ?? 0}
-            soldierModifiers={soldierModifiers}
-            staticAbilities={staticAbilities}
-            availableCount={availableBuffCount}
-            onClick={onModifierClick}
-            disabled={disabled}
-          />
-          {onOpenActionMenu && (
-            <button
-              type="button"
-              data-testid="action-menu-button"
-              onClick={disabled ? undefined : (e) => { e.stopPropagation(); onOpenActionMenu(); }}
-              disabled={disabled}
-              aria-label="Все действия: граната, захват"
-              className={cn(
-                'min-w-[44px] min-h-[44px] rounded-lg bg-slate-800/60 border border-slate-700/50 text-slate-400 flex items-center justify-center transition-all select-none',
-                !disabled && 'cursor-pointer hover:bg-slate-700/30 hover:border-slate-600/60 active:scale-[0.97]',
-                disabled && 'opacity-30 cursor-not-allowed'
-              )}
-            >
-              <MoreHorizontal className="w-4 h-4" />
-            </button>
+      {/* Угол: ⋯ меню действий (выстрел/ББ/граната/захват/модификации) —
+          единственная угловая кнопка, тянется на высоту ряда статов */}
+      {hasMenu && (
+        <button
+          type="button"
+          data-testid="action-menu-button"
+          onClick={disabled ? undefined : (e) => { e.stopPropagation(); onOpenActionMenu(); }}
+          disabled={disabled}
+          aria-label="Все действия: граната, захват"
+          className={cn(
+            'min-w-[44px] rounded-lg bg-slate-800/60 border border-slate-700/50 text-slate-400 flex items-center justify-center transition-all select-none',
+            showArmorSpeed ? 'col-start-4 row-start-2' : 'col-start-4 row-start-1',
+            !disabled && 'cursor-pointer hover:bg-slate-700/30 hover:border-slate-600/60 active:scale-[0.97]',
+            disabled && 'opacity-30 cursor-not-allowed'
           )}
-        </div>
+        >
+          <MoreHorizontal className="w-4 h-4" />
+        </button>
+      )}
+
+      {/* Строка модификаций ПОД статами: эффекты/свойства/счётчик — видна
+          только когда есть что показать; тап открывает модал эффектов */}
+      {hasStrip && (
+        <ModifierStrip
+          buffCount={buffCount ?? 0}
+          debuffCount={debuffCount ?? 0}
+          soldierModifiers={soldierModifiers}
+          staticAbilities={staticAbilities}
+          availableCount={availableBuffCount}
+          onClick={onModifierClick}
+          disabled={disabled}
+        />
       )}
     </div>
   );

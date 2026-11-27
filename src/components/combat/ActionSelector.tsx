@@ -2,7 +2,7 @@
 
 import { CombatActionType } from '@/lib/combat-types';
 import { ArmyUnit, Squad, Machine } from '@/lib/types';
-import { Target, Sword, Bomb, Flag } from 'lucide-react';
+import { Target, Sword, Bomb, Flag, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getCaptureCandidates } from '@/lib/capture-catalog';
 
@@ -51,6 +51,13 @@ const getActionStyle = (actionType: CombatActionType) => {
       bg: 'bg-fuchsia-950/30',
       hover: 'hover:bg-fuchsia-950/50 hover:border-fuchsia-500/60',
       shadow: 'shadow-fuchsia-900/20',
+    },
+    modifiers: {
+      primary: 'text-purple-400',
+      border: 'border-purple-600/50',
+      bg: 'bg-purple-950/30',
+      hover: 'hover:bg-purple-950/50 hover:border-purple-500/60',
+      shadow: 'shadow-purple-900/20',
     },
   };
   return styles[actionType];
@@ -158,13 +165,25 @@ export function ActionSelector({
       icon: <Flag className="w-6 h-6" />,
       hidden: !canCapture,
     },
+    {
+      // Не боевой экшен: UnitCard перехватывает и открывает модал эффектов
+      // (бафы/дебафы/спец-свойства бойца). Только отряды: у техники и в
+      // калькуляторе модификаций на бойца нет.
+      type: 'modifiers',
+      label: 'МОДИФИКАЦИИ',
+      description: 'Бафы • дебафы • спец-свойства',
+      icon: <Sparkles className="w-6 h-6" />,
+      hidden: !unit || unit.type !== 'squad'
+        || soldierIndex === null || soldierIndex === undefined,
+    },
   ];
 
   // Filter out hidden actions
   const visibleActions = actions.filter(a => !a.hidden);
 
-  // If only one action is available, auto-select it
-  if (visibleActions.length === 1 && !visibleActions[0].disabled) {
+  // If only one action is available, auto-select it ('modifiers' — не
+  // авто-действие: открытие модала эффектов вместо ожидаемого боя — сюрприз)
+  if (visibleActions.length === 1 && !visibleActions[0].disabled && visibleActions[0].type !== 'modifiers') {
     onSelect(visibleActions[0].type);
   }
 

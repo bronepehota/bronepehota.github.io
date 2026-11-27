@@ -16,8 +16,10 @@ export type CombatPhase =
 
 /**
  * Combat action types
+ * 'modifiers' — не боевой экшен: перехватывается в UnitCard.handleSelectAction
+ * (как 'capture') — открывает модал эффектов бойца, в боевой поток не входит.
  */
-export type CombatActionType = 'shot' | 'melee' | 'grenade' | 'ram' | 'capture';
+export type CombatActionType = 'shot' | 'melee' | 'grenade' | 'ram' | 'capture' | 'modifiers';
 
 /**
  * Unit type for combat
