@@ -192,8 +192,11 @@ function SoldierCard({
       style={swipe.style}
       className={cn(
         "relative p-1 md:p-1.5 rounded-sm border flex items-center gap-1.5 md:gap-2 transition-all overflow-hidden flex-1 touch-pan-y",
+        // Контраст с расстояния (2026-11-27): рамка slate-600/70 вместо
+        // slate-700/50 и плотнее заливка — карточка читается как блок, а не
+        // сливается с фоном
         isDead ? "bg-slate-950/80 border-slate-800 opacity-40 grayscale" :
-        isDone ? "bg-slate-900/40 border-slate-700/50 opacity-90" : "bg-slate-800/30 border-slate-700/50",
+        isDone ? "bg-slate-900/50 border-slate-600/70 opacity-90" : "bg-slate-800/50 border-slate-600/70",
         isPilot && !isDead ? "border-cyan-700/40" : ""
       )}
     >

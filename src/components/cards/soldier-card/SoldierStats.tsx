@@ -82,15 +82,16 @@ function StatBadge({ icon: Icon, value, color, bonus, disabled, statKey, onClick
 
   const shell = cn(
     // min-w-0: сетка сжимает бейджи на 320px, а не выталкивает колонку ✓/⋯
-    'relative flex flex-row items-center justify-center gap-0.5 rounded-lg bg-slate-800/60 min-w-0 transition-colors',
+    // Контраст с расстояния: сплошная заливка бейджа + рамка на ступень ярче
+    'relative flex flex-row items-center justify-center gap-0.5 rounded-lg bg-slate-800 min-w-0 transition-colors',
     tall ? 'min-h-[64px]' : 'min-h-[44px]',
     fit?.pad ?? 'px-1',
     className,
     isActive
       ? isDebuff
-        ? 'border border-red-500/40 shadow-[inset_0_0_8px_rgba(239,68,68,0.06)]'
-        : 'border border-emerald-500/40 shadow-[inset_0_0_8px_rgba(16,185,129,0.06)]'
-      : 'border border-slate-700/40',
+        ? 'border border-red-500/60 shadow-[inset_0_0_8px_rgba(239,68,68,0.1)]'
+        : 'border border-emerald-500/60 shadow-[inset_0_0_8px_rgba(16,185,129,0.1)]'
+      : 'border border-slate-600/60',
     disabled && 'opacity-30'
   );
 
@@ -110,7 +111,7 @@ function StatBadge({ icon: Icon, value, color, bonus, disabled, statKey, onClick
       {bonus && (
         <span className={cn(
           'text-[9px] font-mono font-extrabold leading-none translate-y-[-1px]',
-          isDebuff ? 'text-red-400/90' : 'text-emerald-400/90'
+          isDebuff ? 'text-red-300' : 'text-emerald-300'
         )}>{bonus}</span>
       )}
     </>
@@ -170,7 +171,7 @@ function ModifierStrip({
 
   const abilityNames = staticAbilities.map(b => (
     <span key={`static-${b.id}`} title={`${b.name}: ${b.description}${b.oneTimeUse ? ' (раз за бой)' : ' (постоянная)'}`}
-      className="text-[10px] font-mono font-medium leading-none text-emerald-400/90">
+      className="text-[10px] font-mono font-medium leading-none text-emerald-300">
       {b.name}
     </span>
   ));
@@ -210,7 +211,7 @@ function ModifierStrip({
   } else {
     // «Доступно N» — возможность, не событие: тихий пунктир, янтарь
     ariaLabel = `${availableCount} эффектов доступно`;
-    shellCls = 'border border-dashed border-slate-700/40 text-slate-400';
+    shellCls = 'border border-dashed border-slate-600/60 text-slate-300';
     body = (
       <span className="flex items-center gap-1 min-w-0">
         <Sparkles className="w-3 h-3 text-amber-400/70 shrink-0" />

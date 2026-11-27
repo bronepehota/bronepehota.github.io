@@ -59,8 +59,8 @@ export function SoldierImage({
           bordered chip was too heavy over the photo). Same construction as
           the ГОТОВ chip in the opposite corner: px-1 py-0.5 leading-4. */}
       <div className="absolute top-0 right-0 z-10">
-        <div className="flex items-center h-5 px-1 bg-slate-950/30 rounded-bl-sm">
-          <span className="font-mono text-[10px] font-bold text-white/70">
+        <div className="flex items-center h-5 px-1 bg-slate-950/50 rounded-bl-sm">
+          <span className="font-mono text-[10px] font-bold text-white/80">
             #{soldierIndex + 1}
           </span>
         </div>
